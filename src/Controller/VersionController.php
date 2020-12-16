@@ -267,36 +267,33 @@ class VersionController extends Controller
 	    $img_expose_2 = $sv->imageProperties('img_expose_2', $version);
 	    $img_expose_3 = $sv->imageProperties('img_expose_3', $version);
 
-	    /*
-	    if( $img_expose_1 == null )
-	        $sj->debugMessage(__METHOD__.':'.__LINE__ ." img_expose1 null");
-	    else
-	        $sj->debugMessage(__METHOD__.':'.__LINE__ . " img_expose1 non null");
-	    */
-
 	    $img_justif_renou_1 = $sv->imageProperties('img_justif_renou_1', $version);
 	    $img_justif_renou_2 = $sv->imageProperties('img_justif_renou_2', $version);
 	    $img_justif_renou_3 = $sv->imageProperties('img_justif_renou_3', $version);
 
-
+		$toomuch = $sv->is_demande_toomuch($version->getAttrHeures(),$version->getDemHeures());
+	    
 	    $html4pdf =  $this->render('version/pdf.html.twig',
 		[
-            'toomuch' => $sv->is_demande_toomuch($version->getAttrHeures(),$version->getDemHeures()),
-            'projet'  => $projet,
-            'version' => $version,
-            'session' => $session,
-            'img_expose_1' => $img_expose_1,
-            'img_expose_2' => $img_expose_2,
-            'img_expose_3' => $img_expose_3,
+            'toomuch'            => $toomuch,
+			'projet'             => $projet,
+            'version_form'       => null,
+            'version'            => $version,
+            'session'            => $session,
+            'menu'               => null,
+            'img_expose_1'       => $img_expose_1,
+            'img_expose_2'       => $img_expose_2,
+            'img_expose_3'       => $img_expose_3,
             'img_justif_renou_1' => $img_justif_renou_1,
             'img_justif_renou_2' => $img_justif_renou_2,
             'img_justif_renou_3' => $img_justif_renou_3,
+            'conso_cpu'          => $sp->getConsoRessource($projet,'cpu',$version->getAnneeSession()),
+            'conso_gpu'          => $sp->getConsoRessource($projet,'gpu',$version->getAnneeSession()),
+            'rapport_1'          => null,
+            'rapport'            => null,
+            'toomuch'            => $toomuch
 		]);
 		
-	    //return $html4pdf;
-	    //$html4pdf->prepare($request);
-	    //$pdf = App::getPDF($html4pdf);
-	    //$pdf = App::getPDF($html4pdf->getContent());
 	    $pdf = $spdf->getOutputFromHtml($html4pdf->getContent());
 
 	    return Functions::pdf( $pdf );

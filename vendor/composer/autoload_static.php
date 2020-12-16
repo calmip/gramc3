@@ -122,6 +122,11 @@ class ComposerStaticInitbb59d321825206f6aafc7e97feca8eab
             'Laminas\\EventManager\\' => 21,
             'Laminas\\Code\\' => 13,
         ),
+        'K' => 
+        array (
+            'Knp\\Snappy\\' => 11,
+            'Knp\\Bundle\\SnappyBundle\\' => 24,
+        ),
         'E' => 
         array (
             'Egulias\\EmailValidator\\' => 23,
@@ -472,6 +477,14 @@ class ComposerStaticInitbb59d321825206f6aafc7e97feca8eab
         'Laminas\\Code\\' => 
         array (
             0 => __DIR__ . '/..' . '/laminas/laminas-code/src',
+        ),
+        'Knp\\Snappy\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/knplabs/knp-snappy/src/Knp/Snappy',
+        ),
+        'Knp\\Bundle\\SnappyBundle\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/knplabs/knp-snappy-bundle/src',
         ),
         'Egulias\\EmailValidator\\' => 
         array (

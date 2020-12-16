@@ -78,7 +78,7 @@ class ServiceJournal
         $journal = new Journal();
         $journal->setStamp( new \DateTime() );
 
-        if( $token->getUser() instanceof Individu )
+        if( $token != null && $token->getUser() instanceof Individu )
 		{
             $journal->setIdIndividu( $token->getUser()->getId() );
             $journal->setIndividu  ( $token->getUser() );
