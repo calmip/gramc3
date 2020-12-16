@@ -39,6 +39,8 @@ use App\PropositionExperts\PropositionExpertsType2;
 
 use App\GramcServices\Workflow\Projet\ProjetWorkflow;
 
+use Psr\Log\LoggerInterface;
+
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -717,11 +719,10 @@ class VersionController extends Controller
      * @Method({"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
-    public function avantEnvoyerAction(Version $version,  Request $request)
+    public function avantEnvoyerAction(Version $version,  Request $request, LoggerInterface $lg)
     {
 		$sm = $this->get('app.gramc.ServiceMenus');
 		$sj = $this->get('app.gramc.ServiceJournal');
-		$lg = $this->get('logger');
 		$ff = $this->get('form.factory');
 		$em = $this->getdoctrine()->getManager();
 
@@ -779,11 +780,10 @@ class VersionController extends Controller
      * @Method("GET")
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
-    public function envoyerAction(Version $version,  Request $request)
+    public function envoyerAction(Version $version,  Request $request, LoggerInterface $lg)
     {
 		$sm = $this->get('app.gramc.ServiceMenus');
 		$sj = $this->get('app.gramc.ServiceJournal');
-		$lg = $this->get('logger');
 		$em = $this->getdoctrine()->getManager();
 
 		$this->MenuACL( $sm->envoyer_expert($version), " Impossible d'envoyer la version " . $version->getIdVersion() . " à l'expert", __METHOD__, __LINE__ );

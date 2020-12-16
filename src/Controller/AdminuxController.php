@@ -24,6 +24,8 @@
 
 namespace App\Controller;
 
+use Psr\Log\LoggerInterface;
+
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
@@ -145,9 +147,8 @@ class AdminuxController extends Controller
      * @Method({"POST"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
-	public function setloginnameAction(Request $request, $idProjet, $idIndividu, $loginname)
+	public function setloginnameAction(Request $request, $idProjet, $idIndividu, $loginname, LoggerInterface $lg)
 	{
-		$lg = $this->get('logger');
 		$em = $this->getdoctrine()->getManager();
 
 		if ( $this->getParameter('noconso')==true )

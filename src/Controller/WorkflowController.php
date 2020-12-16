@@ -30,6 +30,8 @@ use App\Entity\Session;
 use App\Entity\CollaborateurVersion;
 use App\Entity\Thematique;
 
+use Psr\Log\LoggerInterface;
+
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
@@ -67,9 +69,8 @@ class WorkflowController extends Controller
      * @Route("/", name="workflow_index")
      * Method({"GET", "POST"})
      */
-    public function indexAction(Request $request)
+    public function indexAction(Request $request, LoggerInterface $lg)
     {
-		$lg = $this->get('logger');
 		$ff = $this->get('form.factory');
 		$em = $this->getdoctrine()->getManager();
 
@@ -166,10 +167,9 @@ class WorkflowController extends Controller
      * @Route("/{id}/modify", name="worklow_modifier_session")
      * @Method({"GET", "POST"})
      */
-    public function modifySessionAction(Request $request, Session $session)
+    public function modifySessionAction(Request $request, Session $session, LoggerInterface $lg)
     {
 		$sj = $this->get('app.gramc.ServiceJournal');
-		$lg = $this->get('logger');
 		$ff = $this->get('form.factory');
 		$em = $this->getdoctrine()->getManager();
 
@@ -252,13 +252,12 @@ class WorkflowController extends Controller
      * @Route("/{id}/signal", name="workflow_signal_projet")
      * @Method({"GET", "POST"})
      */
-    public function signalProjetAction(Request $request, Projet $projet)
+    public function signalProjetAction(Request $request, Projet $projet, LoggerInterface $lg)
     {
 	    //$projetWorkflow    =   new VersionWorkflow();
 	    //return new Response($projetWorkflow);
 	
 		$sj = $this->get('app.gramc.ServiceJournal');
-		$lg = $this->get('logger');
 		$ff = $this->get('form.factory');
 		$em = $this->getdoctrine()->getManager();
 
@@ -438,15 +437,12 @@ class WorkflowController extends Controller
      * @Route("/{id}/reset", name="workflow_reset_version")
      * @Method({"GET", "POST"})
      */
-    public function resetVersionAction(Request $request, Version $version)
+    public function resetVersionAction(Request $request, Version $version, LoggerInterface $lg)
     {
-		$lg = $this->get('logger');
 		$em = $this->getdoctrine()->getManager();
 
 	    $version->setEtatVersion( Etat::EDITION_DEMANDE );
 	    Functions::sauvegarder( $version, $em, $lg );
 	    return $this->redirectToRoute('workflow_signal_projet', [ 'id' => $version->getProjet()->getIdProjet() ]);
     }
-
-
 }

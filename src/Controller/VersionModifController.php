@@ -37,6 +37,8 @@ use App\GramcServices\ServiceJournal;
 
 use App\Workflow\Projet\ProjetWorkflow;
 
+use Psr\Log\LoggerInterface;
+
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -90,7 +92,7 @@ class VersionModifController extends Controller
      * @Method({"GET", "POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
-    public function modifierAction(Request $request, Version $version, $renouvellement = false )
+    public function modifierAction(Request $request, Version $version, $renouvellement = false, LoggerInterface $lg )
     {
 		$sm = $this->get('app.gramc.ServiceMenus');
 		$sv = $this->get('app.gramc.ServiceVersions');
@@ -209,11 +211,11 @@ class VersionModifController extends Controller
 		// DES FORMULAIRES QUI DEPENDENT DU TYPE DE PROJET
 		if( $version->getProjet()->getTypeProjet()===Projet::PROJET_TEST )
 		{
-			return $this->modifierType2($request, $version, $renouvellement, $image_forms, $collaborateur_form);
+			return $this->modifierType2($request, $version, $renouvellement, $image_forms, $collaborateur_form, $lg);
 		}
 		else
 		{
-			return $this->modifierType1($request, $version, $renouvellement, $image_forms, $collaborateur_form);
+			return $this->modifierType1($request, $version, $renouvellement, $image_forms, $collaborateur_form, $lg);
 		}
     }
 
@@ -226,10 +228,9 @@ class VersionModifController extends Controller
      *          $collaborateurs_form (formulaire des collaborateurs)
      *
      */
-	private function modifierType1(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form)
+	private function modifierType1(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form, LoggerInterface $lg)
     {
 		$sj = $this->get('app.gramc.ServiceJournal');
-		$lg = $this->get('logger');
 		$em = $this->getDoctrine()->getManager();
 		
 		// formulaire principal
@@ -542,9 +543,8 @@ class VersionModifController extends Controller
      *          $collaborateurs_form (formulaire des collaborateurs)
      *
      */
-    private function modifierType2(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form)
+    private function modifierType2(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form, LoggerInterface $lg)
     {
-		$lg = $this->get('logger');
 		$sj = $this->get('app.gramc.ServiceJournal');
 		$em = $this->getDoctrine()->getManager();
 
@@ -635,10 +635,9 @@ class VersionModifController extends Controller
      *          $collaborateurs_form (formulaire des collaborateurs)
      *
      */
-	private function modifierType3(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form)
+	private function modifierType3(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form, LoggerInterface $lg)
     {
 		$sj = $this->get('app.gramc.ServiceJournal');
-		$lg = $this->get('logger');
 		$em = $this->getDoctrine()->getManager();
 
 		// formulaire principal
@@ -1391,12 +1390,11 @@ class VersionModifController extends Controller
      * @Security("is_granted('ROLE_DEMANDEUR')")
      * @Method({"GET", "POST"})
      */
-    public function renouvellementAction(Request $request, Version $version)
+    public function renouvellementAction(Request $request, Version $version, LoggerInterface $lg)
     {
 		$sm = $this->get('app.gramc.ServiceMenus');
 		$sv = $this->get('app.gramc.ServiceVersions');
 		$sj = $this->get('app.gramc.ServiceJournal');
-		$lg = $this->get('logger');
 		$em = $this->getDoctrine()->getManager();
 		
 	    // ACL

@@ -24,6 +24,8 @@
 
 namespace App\Controller;
 
+use Psr\Log\LoggerInterface;
+
 use App\Entity\Rallonge;
 use App\Entity\Session;
 use App\Entity\Version;
@@ -110,13 +112,12 @@ class RallongeController extends Controller
 	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
-    public function creationAction(Request $request, Projet $projet)
+    public function creationAction(Request $request, Projet $projet, LoggerInterface $lg)
     {
 		$sm = $this->get('app.gramc.ServiceMenus');
 		$ss = $this->get('app.gramc.ServiceSessions');
 		$sj = $this->get('app.gramc.ServiceJournal');
 		$sp = $this->get('app.gramc.ServiceProjets');
-		$lg = $this->get('logger');
 		$em = $this->getDoctrine()->getManager();
 		
 	    // ACL
@@ -414,11 +415,10 @@ class RallongeController extends Controller
      * @Security("is_granted('ROLE_PRESIDENT')")
      * @Method({"GET", "POST"})
      */
-    public function avantFinaliserAction(Request $request, Rallonge $rallonge)
+    public function avantFinaliserAction(Request $request, Rallonge $rallonge, LoggerInterface $lg)
     {
 		$ss = $this->get('app.gramc.ServiceSessions');
 		$sj = $this->get('app.gramc.ServiceJournal');
-		$lg = $this->get('logger');
 		$em = $this->getdoctrine()->getManager();
 		
 	    $erreurs = [];

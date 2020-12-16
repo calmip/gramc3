@@ -110,6 +110,8 @@ class ServiceNotifications
     // Bas niveau: Envoi du message
     private function sendRawMessage( $subject, $body, $users = null )
     {
+		// Notifiations désactivées pour l'instant - Swift_Message n'existe plus !
+		return;
         $message = \Swift_Message::newInstance()
                     ->setSubject( $subject )
                     ->setFrom( $this->mailfrom )

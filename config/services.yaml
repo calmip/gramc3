@@ -93,7 +93,13 @@ parameters:
 services:
      _defaults:
           public: true
+#          autowire: true
+#          autoconfigure: true
           
+     App\Controller\:
+       resource: '../src/Controller/*'
+       tags: [controller.service_arguments]
+
 #    service_name:
 #        class: App\Directory\ClassName
 #        arguments: ["@another_service_name", "plain_value", "%parameter_name%"]

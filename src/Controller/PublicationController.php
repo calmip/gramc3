@@ -29,6 +29,8 @@ use App\Entity\Projet;
 //use App\App;
 use App\Utils\Functions;
 
+use Psr\Log\LoggerInterface;
+
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
@@ -71,10 +73,9 @@ class PublicationController extends Controller
      * @Route("/{id}/gerer",name="gerer_publications" )
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
-    public function gererAction(Projet $projet, Request $request)
+    public function gererAction(Projet $projet, Request $request, LoggerInterface $lg)
     {
 		$em = $this->getDoctrine()->getManager();
-		$lg = $this->get('logger');
 		
         $publication    = new Publication();
         $form = $this->createForm('App\Form\PublicationType', $publication);
@@ -276,10 +277,9 @@ class PublicationController extends Controller
      * @Security("is_granted('ROLE_DEMANDEUR')") 
      * @Method({"GET", "POST"})
      */
-    public function modifyAction(Request $request, Publication $publication, Projet $projet)
+    public function modifyAction(Request $request, Publication $publication, Projet $projet, LoggerInterface $lg)
     {
 		$sj = $this->get('app.gramc.ServiceJournal');
-		$lg = $this->get('logger');
 		$em = $this->getdoctrine()->getManager();
 
         $editForm = $this->createForm('App\Form\PublicationType', $publication);
@@ -335,12 +335,11 @@ class PublicationController extends Controller
      * @Route("/{id}/{projet}/supprimer", name="supprimer_publication")
      * @Method({ "GET","DELETE"})
      */
-    public function supprimerAction(Request $request, Publication $publication, Projet $projet)
+    public function supprimerAction(Request $request, Publication $publication, Projet $projet, LoggerInterface $lg)
     {
 		$ac = $this->get('security.authorization_checker');
 		$token = $this->get('security.token_storage')->getToken();
 		$sj = $this->get('app.gramc.ServiceJournal');
-		$lg = $this->get('logger');
 		$em = $this->getdoctrine()->getManager();
 
         // ACL

@@ -37,6 +37,8 @@ use App\Entity\CompteActivation;
 use App\Entity\Journal;
 use App\Entity\Compta;
 
+use Psr\Log\LoggerInterface;
+
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
@@ -535,9 +537,8 @@ class ProjetController extends Controller
      * @Route("/{id}/fwd", name="fwd_version")
      * @Method({"GET","POST"})
      */
-    public function fwdAction(Version $version, Request $request)
+    public function fwdAction(Version $version, Request $request, LoggerInterface $lg)
     {
-		$lg = $this->get('logger');
 		$em = $this->getDoctrine()->getManager();
         if( $request->isMethod('POST') )
 		{
@@ -1484,10 +1485,6 @@ class ProjetController extends Controller
 
         $db_conso = $em->getRepository(Compta::class)->consoTotale( $annee, $ressource );
 
-		//foreach ($db_conso as $item) {
-		//	$msg = print_r($item,true);
-		//	$this->get('logger')->warning($msg);
-		//}
 		$debut = new \DateTime( $annee . '-01-01');
 		$fin   = new \DateTime( $annee . '-12-31');
 

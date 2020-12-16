@@ -24,6 +24,8 @@
 
 namespace App\Controller;
 
+use Psr\Log\LoggerInterface;
+
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -548,7 +550,7 @@ class GramcSessionController extends Controller
      /**
      * @Route("/nouveau_compte",name="nouveau_compte")
      */
-    public function nouveau_compteAction(Request $request)
+    public function nouveau_compteAction(Request $request, LoggerInterface $lg)
     {
 		$sj = $this->get('app.gramc.ServiceJournal');
 		$ff = $this->get('form.factory');
@@ -557,7 +559,7 @@ class GramcSessionController extends Controller
         if( ! $request->getSession()->has('eppn') )
                     { // une tentative de piratage
                     $sj->warningMessage(__FILE__ . ":" . __LINE__ . " No eppn pour le nouveau_compte");
-                     $this->get('logger')->warning("No eppn at nouveau_compte", [ 'request' => $this->getRequest() ] );
+                     $lg->warning("No eppn at nouveau_compte", [ 'request' => $this->getRequest() ] );
                     // return new Response(' no eppn ' );
                     return $this->redirectToRoute('accueil');
                     }
@@ -603,7 +605,7 @@ class GramcSessionController extends Controller
     /**
      * @Route("/nouveau_profil",name="nouveau_profil")
      */
-    public function nouveau_profilAction(Request $request)
+    public function nouveau_profilAction(Request $request, LoggerInterface $lg)
     {
 		$sn = $this->get('app.gramc.ServiceNotifications');
 		$sj = $this->get('app.gramc.ServiceJournal');
@@ -620,7 +622,7 @@ class GramcSessionController extends Controller
 		if( ! $request->getSession()->has('email')  )
 	                    { // une tentative de piratage
                     $sj->warningMessage(__FILE__ . ":" . __LINE__ . " Pas d'email pour le nouveau profil");
-                     $this->get('logger')->warning("No email at nouveau_profil",
+                     $lg->warning("No email at nouveau_profil",
                             array('request' => $event->getRequest()) );
                     return $this->redirectToRoute('accueil');
                     }
