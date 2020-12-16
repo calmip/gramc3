@@ -1,0 +1,41 @@
+{% extends 'default/base.html.twig' %}
+
+{% form_theme form _self %} 
+
+{% block choice_widget_expanded %}
+    <div {{ block('widget_container_attributes') }}>
+    {% for child in form %}
+        
+        {{- form_widget(child) -}}
+        {{- form_label(child, null, {translation_domain: choice_translation_domain}) -}}
+       </br>
+    {% endfor %}
+    </div>
+{% endblock choice_widget_expanded %}
+
+
+{% block body %}
+<section>
+
+    <h2>Expert  {{ individu }}</h2>
+
+    <div class="gauche">
+	    {{ form_start(form) }}
+		<h3 class="center"> Thématiques</h3>
+		<p><em>Cocher une ou plusieurs cases pour associer cet expert aux thématiques correspondantes.</em></p>
+	    <fieldset>{{ form_widget(form.thematique) }}</fieldset>
+
+		<h3 class="center"> Rattachements</h3>
+		<p><em>Cocher une ou plusieurs cases pour associer cet expert aux rattachements correspondants.</em></p>
+	    <fieldset>{{ form_widget(form.rattachement) }}</fieldset>
+
+	    {{ form_widget(form.submit) }}{{ form_widget(form.reset) }}
+	    {{ form_end(form) }}
+    </div>
+
+</section>
+
+<hr class="retour" />
+
+<a class="lien_actif center" href="{{ path( 'individu_gerer' ) }}" title="Retour aux utilisateurs">Retour aux utilisateurs</a>
+{% endblock body %}

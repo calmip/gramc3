@@ -1,0 +1,41 @@
+{% extends 'default/base.html.twig' %}
+    {% import "default/macros.html.twig" as gramcmacros %}
+
+{% block body %}
+<section>
+    <h1>Thématiques</h1>
+
+    <div class="message warning">Les projets sont associés à des <strong>thématiques scientifiques</strong>. A chaque thématique correspond 
+    <strong>un ou plusieurs experts</strong>. La liste des experts associés à chaque thématique est utilisée lors de l'attribution automatique d'un expert.
+    Attention le rattachement est également utilisé, et <strong>l'expert associé au rattachement prend la priorité sur l'expert de la thématique.</strong>
+    </div>
+
+    {{ gramcmacros.menu(menu) }}
+
+    <table id="general" >
+    <thead>
+    <tr>
+		{% if is_granted('ROLE_ADMIN') %}<th colspan="2">&nbsp;</th>{% endif %}<th>Libellé</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for thema in thematiques %}
+        <tr>
+			{% if is_granted('ROLE_ADMIN') %}
+            <td>
+                <a class="suppression" href="{{ path('supprimer_thematique',{'id' : thema.idThematique }) }}" title="Supprimer">
+                <img class="bouton_poussoir" src="{{ gramcmacros.img_supprimer() }}" alt="Supprimer" /></a>
+            </td>
+            <td>
+                <a class="modification" href="{{ path('modifier_thematique',{'id' : thema.idThematique }) }}" title="Modifier le libellé">
+                <img class="bouton_poussoir" src="{{ gramcmacros.img_modifier() }}" alt="Modifier" /></a>
+            </td>
+            {% endif %}
+            <td>{{ thema.libelleThematique }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+</section>
+
+{% endblock body  %}

@@ -1,0 +1,27 @@
+{% extends 'default/base.html.twig' %}
+
+{% block body %}
+
+<section>
+
+    <h2>Téléverser votre rapport d'activité pour l'année {{ annee }}</h2>
+
+    <div class="message warning">Le fichier doit être:
+       <ul>
+		   <li><strong>un pdf</strong> de taille <strong>inférieure à 10 Mo</strong></li>
+		   <li>et de <strong>moins de {{max_page_nb}} pages</strong></li>
+	   </ul>
+    </div>
+    {{ form_start( form ) }}
+    {{ form_label( form.rapport, "Votre rapport d'activité : " ) }}{{ form_widget( form.rapport ) }}<br>
+    <input name="submit" value="Envoyer" type="submit">
+    {{ form_end( form ) }}
+
+   <nav>
+        <ul>
+            <li><a class="lien_actif" href="{{ path('consulter_version', { 'id' : projet, 'version' : version } ) }}" title="">Retourner au projet</a></li>
+        </ul>
+    </nav>
+</section>
+
+{% endblock %}

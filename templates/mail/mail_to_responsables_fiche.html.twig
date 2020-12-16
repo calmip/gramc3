@@ -1,0 +1,46 @@
+{% extends 'default/base.html.twig' %}
+
+{% import "default/macros.html.twig" as gramcmacros %}
+
+
+{# ######################################################################### #}
+
+{% block body %}
+<h2>Responsables de projets sans fiche projet - session {{session}}</h2>
+
+<section>
+{% if sent == false %}
+    <div class="message info">Le message sera envoyé aux responsables des projets que vous avez sélectionnés </div>
+
+    <p>{{ form_start(form) }}</p>
+
+    <table><tbody>
+    {% for responsable in responsables %}
+	<tr>
+		<td>{{ form_widget(responsable.selform ) }}</td>
+	    <td>{{ responsable.responsable.prenom }}</td>
+	    <td>{{ responsable.responsable.nom }}</td>
+	    <td>{{ responsable.responsable.mail }}</td>
+	    <td>
+		{% for projet in responsable.projets %}
+		{{ projet }}
+		{% endfor %}
+	    </td>
+	</tr>
+    {% endfor %}
+    </tbody></table>
+
+	<div class="center">
+	<p>
+    {{ form_widget( form)}}
+    {{ form_end(form) }}
+    </p>
+	</div>
+	
+{% else %}
+
+    <div class="message info">{{ nb_msg }} messages envoyés</div>
+
+{% endif %}
+</section>
+{% endblock body %}

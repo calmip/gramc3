@@ -1,0 +1,15 @@
+Bonjour
+
+Merci d'expertiser (si possible rapidement) la ou les demandes de rallonge:
+
+{% for rallonge in object %}
+   - n° {{ rallonge }} (resp {{ rallonge.version.responsable |raw }})
+{% endfor %}
+
+Retrouver la liste des expertises demandées: {{ absolute_url(path('expertise_liste')) }}
+
+Nous vous rappelons que votre réponse (nombre d'heures accordées) pourra être modifiée
+par le président du Comité d'Attributions, en fonction des disponibilités du supercalculateur.
+
+Merci pour votre participation,
+- gramc -

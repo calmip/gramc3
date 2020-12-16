@@ -1,0 +1,30 @@
+{# app/Resources/views/default/message.html.twig #}
+
+{% block message %}
+
+{% if  infos.getLibelleEtatSessionCourante.getIdEtat == 'CREE_ATTENTE' %}
+                La prochaine session d'attribution sera ouverte le <strong>{{ infos.prochaine_session }}</strong>
+                
+{% elseif  infos.getLibelleEtatSessionCourante.getIdEtat ==  'EDITION_DEMANDE' %}
+            
+                {% if infos.cette_session()['jours'] == 0 %}
+                    vous avez encore <strong>JUSQU'A CE SOIR</strong> pour envoyer votre projet pour expertise
+                    
+                {% elseif infos.cette_session()['jours'] > 0 %}
+                    vous avez jusqu'au <strong>{{ infos.cette_session()['fin_sess'] }}  </strong> pour envoyer votre projet pour expertise
+                    
+                {% else %}
+                    ATTENTION, la date de fin de session est dépassée
+                        {% if infos.cette_session()['jours'] == -1 %}
+                            <strong>d'un jour</strong>
+                       {% else %}
+                            <strong>de {{ - infos.cette_session()['jours'] }} jours</strong>
+                        {% endif %}
+                                
+                {% endif %}
+                
+            {% else %}
+            Prochaine session d'attribution: <strong>{{  infos.prochaine_session_saison() }}</strong>
+{% endif %}
+
+{% endblock message %}

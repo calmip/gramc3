@@ -1,0 +1,70 @@
+{% extends 'default/base.html.twig' %}
+
+
+{% block body %}
+
+<section>
+    <h2>Téléversement générique</h2>
+    <div class="message warning"><h2>ATTENTION</h2><p><strong>Risque d'écrasement d'un fichier existant !</strong></p><p>Le fichier doit être <strong>un pdf de taille inférieure à 1 Mo</strong></p></div>
+
+    {% if not erreurs == null %}
+        <div class="message erreur">
+        {% for erreur in erreurs %}
+        <p>ERREUR: {{ erreur }}</p>
+        {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if not resultat == null %}
+        <div class="message info">
+        {% for res in resultat %}
+        <p>INFO: {{ res }}</p>
+        {% endfor %}
+        </div>
+    {% endif %}
+
+
+{{ form_start( form  )  }}
+
+<table>
+<tr><td class="center" ><label><strong>projet </strong></label></td><td>{{ form_widget( form.projet ) }}</td></tr>
+<tr><td class="center" ><label> <strong>Type de document </strong></td><td>{{ form_widget( form.type ) }}</td></tr>
+<tr><td class="center" ><label><strong>Session (def {{def_sess}})</strong><br /><small>Pour une fiche projet</small> </td><td></label>{{ form_widget( form.session ) }}</td></tr>
+<tr><td class="center" ><label> <strong>Année (def {{def_annee}})</strong><br /><small>Pour un rapport d'activité</small></label></td><td>{{ form_widget( form.annee) }}</td></tr>
+<tr><td class="center" ><label><strong>Fichier à téléverser</strong></td><td>{{ form_widget( form.file) }}</td></tr>
+<tr><td colspan="2"><input name="submit" value="Téléverser" type="submit"></td></tr></table>
+{{ form_end(form) }}
+
+<hr />
+
+<h2>Modifier l'attribution de la version</h2>
+
+{% if not erreurs1 == null %}
+	<div class="message erreur">
+	{% for erreur in erreurs1 %}
+	<p>ERREUR: {{ erreur }}</p>
+	{% endfor %}
+	</div>
+{% endif %}
+
+{{ form_start(form1) }}
+<table>
+<tr><td class="center" ><label><strong>version </strong></label></td><td>{{ form_widget( form1.version ) }}</td></tr>
+<tr><td class="center" ><label> <strong>Attribution </strong></td><td>{{ form_widget( form1.attrHeures ) }}</td></tr>
+<tr><td class="center" ><label> <strong>Attribution <br /><small>pour l'été</small> </strong></td><td>{{ form_widget( form1.attrHeuresEte ) }}</td></tr>
+<tr><td colspan="2"><input name="submit" value="Entrer" type="submit"></td></tr></table>
+
+{{ form_end(form1) }}
+
+
+<nav>
+    <ul>
+        <li>
+            <a class="lien_actif" href="{{  path('admin_accueil') }}" title="">Retourner à la page d'admin</a>
+        </li>
+    </ul>
+</nav>
+
+</section>
+
+{% endblock body %}

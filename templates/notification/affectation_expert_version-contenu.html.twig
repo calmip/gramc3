@@ -1,0 +1,11 @@
+Bonjour
+
+Merci d'expertiser (si possible rapidement) la ou les demandes d'attributions pour le(s) projet(s):
+{% for version in object %}
+   - n° {{ version.projet }} (resp {{ version.responsable |raw }})
+{% endfor %}
+
+Retrouver la liste des expertises demandées: {{ absolute_url(path('expertise_liste')) }}
+
+Merci pour votre participation,
+- gramc -

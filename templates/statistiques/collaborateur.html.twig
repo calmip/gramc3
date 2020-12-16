@@ -1,0 +1,268 @@
+{% extends 'default/base.html.twig' %}
+{% import "default/macros.html.twig" as gramcmacros %}
+
+{% block menu %}
+{{ gramcmacros.menu(menu) }}
+<nav><ul><a class="lien_actif" href="{{ path('statistiques',{'annee': annee}) }}" title="Statistiques">Retour aux statistiques</a></ul></nav>
+{% endblock menu %}
+
+{% block myjavascripts %}
+<script type="text/javascript" src="{{ asset('js/projet.js') }}" ></script>
+{% endblock myjavascripts %}
+
+
+
+{% block body %}
+
+<section>
+
+<h1>Répartition des collaborateurs - année {{ annee }}</h1>
+
+{{ form_start(form) }}
+{{ form_widget(form.annee) }}{{ form_widget(form.submit) }}
+{{ form_end(form) }}
+
+<br />
+
+<table>
+    <thead>
+         <tr>
+        <th>Statut</th>
+        <th>Nombre de collaborateurs</th>
+        <th>Pourcentage de collaborateurs</th>
+    </tr>
+    </thead>
+    <tbody>
+        {% for item in statuts %}
+        {% if ( item.count > 0 ) %}
+        <tr>
+            <td>{% if (item.statut == null) %}Sans statut{% else %}{{ item.statut }}{% endif %}</td>
+            <td>{{ item.count }}</td>
+             <td>{{ item.percent |number_format(2, ',', ' ')}} %</td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+        <tr>
+            <td>Changements de statut</td>
+            <td>{{ countChangementStatut }}</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Total</td>
+            <td>{{ statuts_total }}</td>
+            <td>100 %</td>
+        </tr>
+    </tbody>
+</table>
+
+
+<table>
+    <thead>
+         <tr>
+        <th>Laboratoire</th>
+        <th>Nombre de collaborateurs</th>
+        <th>Pourcentage de collaborateurs</th>
+    </tr>
+    </thead>
+    <tbody>
+        {% for item in laboratoires %}
+        {% if ( item.count > 0 ) %}
+        <tr>
+            <td>{% if(  item.laboratoire.acroLabo == null ) %}Sans laboratoire{% else %}{{ item.laboratoire.acroLabo }}{% endif %}</td>
+            <td>{{ item['count'] }}</td>
+            <td>{{ item.percent |number_format(2, ',', ' ')}} %</td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+        <tr>
+            <td>Changements de laboratoire</td>
+            <td>{{ countChangementLaboratoire }}</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Total</td>
+            <td>{{ laboratoires_total }}</td>
+            <td>100 %</td>
+        </tr>
+    </tbody>
+</table>
+
+<table>
+    <thead>
+         <tr>
+        <th>Établissement</th>
+        <th>Nombre de collaborateurs</th>
+        <th>Pourcentage de collaborateurs</th>
+    </tr>
+    </thead>
+    <tbody>
+        {% for item in etablissements %}
+        {% if ( item.count > 0 ) %}
+        <tr>
+            <td>{% if ( item.etablissement == null ) %}Sans établissement{% else %}{{ item.etablissement }}{% endif %}</td>
+            <td>{{ item['count'] }}</td>
+            <td>{{ item.percent |number_format(2, ',', ' ')}} %</td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+        <tr>
+            <td>Changements d'établissement</td>
+            <td>{{ countChangementEtablissement }}</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Total</td>
+            <td>{{ etablissements_total }}</td>
+            <td>100 %</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>Anomalies détectées - année {{ annee }}</h2>
+
+{% if( individusIncomplets != []) %}
+<table>
+    <thead>
+         <tr>
+            <th colspan="6">Utilisateurs incomplètement renseignés</th>
+         </tr>
+         <tr>
+			<th>Version</th>
+            <th>Personne</th>
+            <th>Courriel</th>
+            <th>Laboratoire</th>
+            <th>Etablissement</th>
+            <th>Statut</th>
+         </tr>
+    </thead>
+    <tbody>
+    {% for item in individusIncomplets %}
+        <tr>
+            <td>{{ item.version }}</td>
+            <td>{{ item.collaborateur }}</td>
+            <td>{{item.collaborateur.mail}}</td>
+            <td>{% if (item.labo==null) %} <strong>null</strong>{% else %} {{item.labo.acrolabo}} {%endif%}
+            <td>{% if (item.etab==null) %} <strong>null</strong>{% else %} {{item.etab}} {%endif%}
+            <td>{% if (item.statut==null) %} <strong>null</strong>{% else %} {{item.statut}} {%endif%}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+{% if( anomaliesStatut != [] ) %}
+<table>
+    <thead>
+         <tr>
+            <th colspan="6">Anomalies dans le statut des utilisateurs</th>
+         </tr>
+         <tr>
+            <th>Personne</th>
+            <th>Courriel</th>
+            <th>version 1</th>
+            <th>version 2</th>
+            <th>statut 1</th>
+            <th>statut 2</th>
+         </tr>
+    </thead>
+    <tbody>
+    {% for item in anomaliesStatut %}
+        <tr>
+            <td>{{ item.individu }}</td>
+            <td>{{item.individu.mail}}</td>
+            <td>{{ item.version1 }}</td>
+            <td>{{ item.version2 }}</td>
+            <td>{{ item.statut1 }}</td>
+            <td>{{ item.statut2 }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+{% if( anomaliesLaboratoire != [] ) %}
+<table>
+    <thead>
+         <tr>
+            <th colspan="6">Anomalies dans le laboratoire des utilisateurs</th>
+         </tr>
+         <tr>
+            <th>Personne</th>
+            <th>Courriel</th>
+            <th>version 1</th>
+            <th>version 2</th>
+            <th>laboratoire 1</th>
+            <th>laboratoire 2</th>
+         </tr>
+    </thead>
+    <tbody>
+    {% for item in anomaliesLaboratoire %}
+        <tr>
+            <td>{{ item.individu }}</td>
+            <td>{{item.individu.mail}}</td>
+            <td>{{ item.version1 }}</td>
+            <td>{{ item.version2 }}</td>
+            <td>{{ item.laboratoire1.acrolabo }}</td>
+            <td>{{ item.laboratoire2.acrolabo }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+{% if( anomaliesEtablissement != [] ) %}
+<table>
+    <thead>
+         <tr>
+            <th colspan="5">Anomalies dans l'établissement des utilisateurs</th>
+         </tr>
+         <tr>
+            <th>Personne</th>
+            <th>Courriel</th>
+            <th>version 1</th>
+            <th>version 2</th>
+            <th>établissement 1</th>
+            <th>établissement 2</th>
+         </tr>
+    </thead>
+    <tbody>
+    {% for item in anomaliesEtablissement %}
+        <tr>
+            <td>{{ item.individu }}</td>
+            <td>{{item.individu.mail}}</td>
+            <td>{{ item.version1 }}</td>
+            <td>{{ item.version2 }}</td>
+            <td>{{ item.etablissement1 }}</td>
+            <td>{{ item.etablissement2 }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+<table>
+    <tbody>
+        <tr>
+            <td>
+                <img class="figure" src="data:image/png;base64, {{ image_statuts }}"  title="cliquez pour afficher la figure en taille réelle" >
+            </td>
+            <td>
+                <img class="figure" src="data:image/png;base64, {{ image_laboratoires }}"   title="cliquez pour afficher la figure en taille réelle">
+            </td>
+            <td>
+                <img class="figure" src="data:image/png;base64, {{ image_etablissements }}"   title="cliquez pour afficher la figure en taille réelle">
+            </td>
+        </tr>
+        <tr>
+            <td>Nombre de collaborateurs par statut</td>
+            <td>Nombre de collaborateurs par laboratoire</td>
+            <td>Nombre de collaborateurs par établissement</td>
+        <tr>
+    </tbody>
+</table>
+<div id="dialog"></div>
+
+
+</section>
+
+{% endblock %}
