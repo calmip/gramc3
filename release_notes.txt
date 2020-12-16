@@ -1,0 +1,167 @@
+v 2.6.0
+-------
+    - Ajout de la notion de rattachement
+    - Amélioration de l'écran d'affectation des experts
+    - Amélioration de l'écran d'expertise
+    - Possibilité de générer des données de facturation sur certains projets
+
+v 2.5.8
+-------
+    - Bug - Les projets tests à expertiser de la session A n'apparaissaient pas en session B 
+    
+v 2.5.7
+-------
+    - Bug - dans l'API REST
+
+v 2.5.6
+-------
+    - Changement de nom d'un état pour les projets tests
+
+v 2.5.5
+-------
+    - Bug dans le workflow lors d'une attribution "zéro heures" en session B
+
+v 2.5.4
+-------
+    - Modif d'un message d'erreur concernant les expertises (devient un warning)
+    
+v 2.5.3
+-------
+    - Refonte du bilan de session pour la session B
+    - Bug - génération de projets par année en CSV
+    - Petites améliorations de l'affichage projets/session (concerne uniquement la session B)
+
+v 2.5.2
+-------
+    - Bug d'affichage dans l'écran d'affectation des experts 
+    - Bug dans le calcul de la règle 3 si projet non renouvelé en session A
+
+v 2.5.1
+-------
+	- Page Données plus claire (séparation demandes de stockage et de partage)
+
+v 2.5.0
+-------
+	- Mise au propre du code des workflows
+	- Réécriture des pages attribution et factorisation du code correspondant 
+
+v 2.4.9 - 27 jan 2020
+---------------------
+	- Bug sur la page demandeurs
+
+v 2.4.8 - 21 Jan 2020
+---------------------
+	- Publications et Données téléchargeables en CSV
+	- Changement d'adresse du DPD CNRS
+	- Améliorations et divers bugs dans l'écran admin/Données
+
+v 2.4.7 - 16 Jan 2020
+---------------------
+	- Ajout de l'écran admin Publications par année
+	- Journal: ne montrer par défaut que les messages du jour
+	- BUG: Affichage des projets tests: la réponse à la question GPU n'était pas affichée
+
+v 2.4.6 - 7 Jan 2020
+--------------------
+	- BUG - Refonte du système de métaetats des projets, l'affichage était insuffisant lorsque la session devient active
+
+v 2.4.5 - 3 Jan 2020
+--------------------
+	- BUG - Suppression de l'affichage de dernière modification si la personne responsable de la 
+	  modif ne fait pas partie des collaborateurs (experts, admins)
+	  
+v 2.4.3 - 16 Déc 2019
+---------------------
+    - Demande des experts: rappel du nom du labo et du responsable en haut de la page d'expertise
+
+v 2.4.2 - 12 Dec 2019
+---------------------
+	- BUG: Possibilité d'envoyer des projets alors que la session était en expertise !
+
+v 2.4.1 - 4 Dec 2019
+--------------------
+	- Correction de divers bugs d'affichage
+
+v 2.4.0 - 1er Dec 2019
+----------------------
+	- Introduction de l'écran "valorisation des données"
+	- Bilan de session: réécriture correcte pour les sessions de type 'A'
+	- infos sur la valorisation des données et l'occupation disque
+
+v 2.3.2 - 21 Nov 2019
+---------------------
+    - BUG - Trois colonnes de trop dans l'écran des projets par session
+
+v 2.3.1 - 12 Nov 2019
+---------------------
+    - BUG - Le champ 'cgu' de Version n'était pas remis à zéro lors d'un renouvellement
+
+v 2.3.0 - 5 Nov 2019
+--------------------
+    - Certains contrôleurs et certaines vues peuvent avoir plusieurs variantes selon le mésocentre
+    - Refonte de l'écran d'affectation des experts
+    - Possibilité d'avoir plusieurs experts pour un même projet
+    - Ecran "Données" séparé du formulaire principal et accessible en-dehors des sessions
+    - Trois sortes de projets:
+      - Type 1 (ne peuvent être créés que lors des sessions d'attribution)
+      - Type 2 (projets-tests)
+      - Type 3 (peuvent être créés au fil de l'eau, mais renouvelés seulement lors des sessions d'attribution)
+    - Les experts peuvent en fin d'année entrer un "commentaire général", qui pourra être repris dans le rapport d'activité de l'unité
+    - Refonte des graphiques de consommation, peuvent maintenant afficher les infos de stockage
+    - Un paramètre permet de s'affranchir de toutes données de consommation
+    - En mode dev, la liste des IP autorisées se trouve dans un fichier (plus simple à maintenir)
+    - Role OBServateur, voit les mêmes chose que Admin mais ne reçoit pas les mails et ne peut faire de modifications
+    - Rôle Admin système, pour les admins système du supercalculateur
+    - Ajout des fonctions d'API REST users/Get et version/Get
+    - Mise à jour de la documentation
+
+v 2.2.7 - 26 Août 2019
+---------------------
+    - Remise en service des pénalités d'Automne qui avaient disparu suite à la mise en service de la nouvelle table compta
+
+v 2.2.7 - 6 Août 2019
+---------------------
+    - Data fixture pour tenir compte du changement d'eppn de l'INPT
+
+v 2.2.6 - 1 Juillet 2019
+---------------------
+    - Bugs d'affichage des projets (mauvais affichaged des heures d'été)
+
+v 2.2.5 - 3 Juin 2019
+---------------------
+    - BUG introduit par 2.2.4 dans l'écran de projets par année
+    - Page consulter.twig.html = Mention "heures gpu normalisées"
+
+v 2.2.4 - 30 Mai 2019
+---------------------
+    - BUG dans écran de projets par année (mélange entre sessions A et B)
+
+v 2.2.3 - 27 Mai 2019
+-------
+    - BUG Projets par année: Consolidation des heures de conso résultat faux
+
+v 2.2.2 - 27 Mai 2019
+-------
+    - BUG Bilan de session en csv plantage
+    - BUG Affichage des graphiques de conosmmation mélange avec données de stockage
+    - Bilan de session -> conso gpu
+
+v 2.2.1 - 22 Mai 2019
+-------
+    - Projets par année -> Une colonne gpu permet d'accéder à la consommation gpu projet par projet
+    - Projets par année -> Des boutons en bas à gauche permettent d'accéder à la conso globale de tous les projets, en cpu et en gpu
+    - Consultation des projets -> Infos sur gpus
+    - Expertise -> Les experts ont accès à la liste des publications
+    - Correction de bug -> On peut afficher la conso d'un projet non démarré sans avoir de message d'erreur
+
+v 2.2.0 - 30 Avril 2019
+-------
+    - Refonte des graphiques de consommation: la résolution est à présent journalière, on affiche cpu + gpu
+
+v 2.1.0 - 16 Avril 2019
+-------
+    - Refonte des workflows
+    - Nettoyage du code
+    - Commit initial dans le nouveau dépôt et sur github
+    - Introduction de la table compta et de nouvelles données de comptabilité (heures cpu, heures gpu)
+
