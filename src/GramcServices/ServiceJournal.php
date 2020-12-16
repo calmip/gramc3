@@ -28,7 +28,7 @@ namespace App\GramcServices;
 use App\Entity\Journal;
 
 use Doctrine\ORM\EntityManager;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\UsageTrackingTokenStorage;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Bridge\Monolog\Logger;
@@ -45,7 +45,7 @@ class ServiceJournal
 	public function __construct(RequestStack $rs, 
 								Session $ss, 
 								Logger $log, 
-								UsageTrackingTokenStorage $tok, 
+								TokenStorageInterface $tok, 
 								AuthorizationChecker $ac, 
 								EntityManager $em)
 	{
@@ -92,13 +92,14 @@ class ServiceJournal
         $journal->setGramcSessId( $ss->getId() );
 
 		if ($rs instanceof  RequestStack
-			&& $rs->getMasterRequest() instanceof  Request 
+		//	&& $rs->getMasterRequest() instanceof  Request 
 			&& $rs->getMasterRequest()->getClientIp() != null)
 			{
 		        $ip = $rs->getMasterRequest()->getClientIp();
 			}
 		    else
 		    {
+				//$ip = $rs->getMasterRequest()->getClientIp();
 		        $ip = '127.127.127.127'; // pour le debug seulement
 			}
 
