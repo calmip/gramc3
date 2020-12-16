@@ -23,6 +23,9 @@
 
 namespace App\GramcServices\GramcGraf;
 
+include_once (__DIR__.'/../../../jpgraph/JpGraph.php');
+use App\GramcServices\ServiceJournal;
+
 abstract class GramcGraf
 {
 	protected $ressources_conso_group;

@@ -23,12 +23,8 @@
 
 namespace App\GramcServices\GramcGraf;
 
-// TODO - HOULALA !!!!
-////require_once ('/data/gramc/src/JpGraph/JpGraph.php');
-
-use App\Utils\Functions;
 use JpGraph\JpGraph;
-
+use App\Utils\Functions;
 
 class Calcul extends GramcGraf
 {
