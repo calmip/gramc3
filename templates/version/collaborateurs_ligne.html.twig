@@ -1,6 +1,6 @@
 {# {{ form_start(form) }} #}
 
-{% spaceless %}
+{% apply spaceless %}
     <tr>
     {% for item in form %}
         <td class="collection-tbody-new">
@@ -9,7 +9,7 @@
         </td>
     {% endfor %}
     </tr>
-{% endspaceless %}
+{% endapply %}
 
 {#  {{ form_end(form) }} #}
 

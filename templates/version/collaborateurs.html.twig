@@ -20,7 +20,7 @@
 #}
 
 {% block collection_widget %}
-    {% spaceless %}
+    {% apply spaceless %}
     <div class="collection">
     {% if prototype is defined %}
             {# block('collection_item_widget') ne peut être appelé qu'une seule fois autrement il y aura des problèmes #}
@@ -81,13 +81,13 @@
         </div>
     </div>
 
-    {% endspaceless %}
+    {% endapply %}
 {% endblock collection_widget %}
 
 {# ######################################################################### #}
 
 {% block collection_item_widget %}
-{% spaceless %}
+{% apply spaceless %}
     <tr>
     {% set fieldNum = 1 %}
     {% for row in prototype %}
@@ -102,7 +102,7 @@
         {% set fieldNum = fieldNum + 1 %}
     {% endfor %}
     </tr>
-{% endspaceless %}
+{% endapply %}
 {% endblock collection_item_widget %}
 
 {# ######################################################################### #}
