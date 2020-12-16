@@ -36,7 +36,7 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * Etablissement controller.
  * 
- * @Security("has_role('ROLE_ADMIN')") 
+ * @Security("is_granted('ROLE_ADMIN')") 
  * @Route("etablissement")
  */
 class EtablissementController extends Controller

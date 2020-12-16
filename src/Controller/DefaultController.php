@@ -51,7 +51,7 @@ class DefaultController extends Controller
 {
     /**
      * @Route("/symfony", name="homepage")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function indexAction(Request $request)
     {
@@ -66,7 +66,7 @@ class DefaultController extends Controller
 
     /**
      * @Route("/test", name="test")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function testAction(Request $request)
     {
@@ -101,7 +101,7 @@ class DefaultController extends Controller
 
     /**
      * @Route("/twig", name="twig")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function twigAction(Request $request)
     {
@@ -125,7 +125,7 @@ class DefaultController extends Controller
 
   /**
      * @Route("/test_projet", name="test_projet")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     //public function test_projetAction(Request $request)
     //{
@@ -138,7 +138,7 @@ class DefaultController extends Controller
      * ça fait quoi ça ? (manu)
      * 
      * @Route("/count", name="count")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function countAction(Request $request)
     {
@@ -174,7 +174,7 @@ class DefaultController extends Controller
 
     /**
      * @Route("/test_params/{id1}/{id2}", name="test_params")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function test_paramsAction(Request $request)
     {
@@ -183,7 +183,7 @@ class DefaultController extends Controller
 
 	/**
      * @Route("/test_session", name="test_session")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function test_sessionAction(Request $request)
     {
@@ -193,7 +193,7 @@ class DefaultController extends Controller
 
    /**
      * @Route("/test_form", name="test_session")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function test_formAction(Request $request)
     {

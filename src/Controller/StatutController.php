@@ -36,7 +36,7 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * Statut controller.
  *
- * @Security("has_role('ROLE_ADMIN')") 
+ * @Security("is_granted('ROLE_ADMIN')") 
  * @Route("statut")
  */
 class StatutController extends Controller

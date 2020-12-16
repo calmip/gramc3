@@ -69,7 +69,7 @@ class IndividuController extends Controller
      * Supprimer utilisateur
      *
      * @Route("/{id}/supprimer", name="supprimer_utilisateur")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function supprimerUtilisateurAction(Request $request, Individu $individu)
@@ -84,7 +84,7 @@ class IndividuController extends Controller
      * Remplacer utilisateur: on a demandé la suppression d'un utilisateur qui a des projets, expertises etc
      *
      * @Route("/{id}/remplacer", name="remplacer_utilisateur")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
     public function remplacerUtilisateurAction(Request $request, Individu $individu )
@@ -216,7 +216,7 @@ class IndividuController extends Controller
      * Deletes a individu entity (CRUD)
      *
      * @Route("/{id}/delete", name="individu_delete")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method("DELETE")
      */
     public function deleteAction(Request $request, Individu $individu)
@@ -238,7 +238,7 @@ class IndividuController extends Controller
      * Lists all individu entities.
      *
      * @Route("/", name="individu_index")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function indexAction()
@@ -256,7 +256,7 @@ class IndividuController extends Controller
      * Creates a new individu entity.
      *
      * @Route("/new", name="individu_new")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
     public function newAction(Request $request)
@@ -283,7 +283,7 @@ class IndividuController extends Controller
      * Finds and displays a individu entity.
      *
      * @Route("/{id}/show", name="individu_show")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function showAction(Individu $individu)
@@ -300,7 +300,7 @@ class IndividuController extends Controller
      * Displays a form to edit an existing individu entity.
      *
      * @Route("/{id}/edit", name="individu_edit")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
     public function editAction(Request $request, Individu $individu)
@@ -346,7 +346,7 @@ class IndividuController extends Controller
      * Modifier profil
      *
      * @Route("/{id}/modifier_profil", name="modifier_profil")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function modifierProfilAction(Request $request, Individu $individu)
@@ -363,7 +363,7 @@ class IndividuController extends Controller
      * Displays a form to edit an existing individu entity.
      *
      * @Route("/{id}/modify", name="individu_modify")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
     public function modifyAction(Request $request, Individu $individu)
@@ -390,7 +390,7 @@ class IndividuController extends Controller
      * Ajouter un utilisateur
      *
      * @Route("/ajouter", name="individu_ajouter")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
     public function ajouterAction(Request $request)
@@ -420,7 +420,7 @@ class IndividuController extends Controller
      * Devenir Admin
      *
      * @Route("/{id}/devenir_admin", name="devenir_admin")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function devenirAdminAction(Request $request, Individu $individu)
@@ -442,7 +442,7 @@ class IndividuController extends Controller
      * Cesser d'être Admin
      *
      * @Route("/{id}/plus_admin", name="plus_admin")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function plusAdminAction(Request $request, Individu $individu)
@@ -462,7 +462,7 @@ class IndividuController extends Controller
      * Devenir Obs
      *
      * @Route("/{id}/devenir_obs", name="devenir_obs")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function devenirObsAction(Request $request, Individu $individu)
@@ -483,7 +483,7 @@ class IndividuController extends Controller
      * Cesser d'être Obs
      *
      * @Route("/{id}/plus_obs", name="plus_obs")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function plusObsAction(Request $request, Individu $individu)
@@ -503,7 +503,7 @@ class IndividuController extends Controller
      * Devenir Sysadmin
      *
      * @Route("/{id}/devenir_sysadmin", name="devenir_sysadmin")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function devenirSysadminAction(Request $request, Individu $individu)
@@ -523,7 +523,7 @@ class IndividuController extends Controller
      * Cesser d'être Sysadmin
      *
      * @Route("/{id}/plus_sysadmin", name="plus_sysadmin")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function plusSysadminAction(Request $request, Individu $individu)
@@ -543,7 +543,7 @@ class IndividuController extends Controller
      * Devenir President
      *
      * @Route("/{id}/devenir_president", name="devenir_president")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function devenirPresidentAction(Request $request, Individu $individu)
@@ -563,7 +563,7 @@ class IndividuController extends Controller
      * Cesser d'être President
      *
      * @Route("/{id}/plus_president", name="plus_president")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function plusPresidentAction(Request $request, Individu $individu)
@@ -583,7 +583,7 @@ class IndividuController extends Controller
      * Devenir Expert
      *
      * @Route("/{id}/devenir_expert", name="devenir_expert")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function devenirExpertAction(Request $request, Individu $individu)
@@ -603,7 +603,7 @@ class IndividuController extends Controller
      * Cesser d'être Expert
      *
      * @Route("/{id}/plus_expert", name="plus_expert")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function plusExpertAction(Request $request, Individu $individu)
@@ -626,7 +626,7 @@ class IndividuController extends Controller
      * Activer
      *
      * @Route("/{id}/activer", name="activer_utilisateur")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function activerAction(Request $request, Individu $individu)
@@ -646,7 +646,7 @@ class IndividuController extends Controller
      * Desactiver utilisateur
      *
      * @Route("/{id}/desactiver", name="desactiver_utilisateur")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function desactiverAction(Request $request, Individu $individu)
@@ -672,7 +672,7 @@ class IndividuController extends Controller
      * Sudo (l'admin change d'identité)
      *
      * @Route("/{id}/sudo", name="sudo")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function sudoAction(Request $request, Individu $individu)
@@ -696,7 +696,7 @@ class IndividuController extends Controller
      * Affecter l'utilisateur à une ou des thematiques
      *
      * @Route("/{id}/thematique", name="choisir_thematique")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
     public function thematiqueAction(Request $request, Individu $individu)
@@ -760,7 +760,7 @@ class IndividuController extends Controller
      * Autocomplete: en lien avec l'autocomplete de jquery
      *
      * @Route("/mail_autocomplete", name="mail_autocomplete")
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      * @Method({"POST","GET"})
      */
     public function mailAutocompleteAction(Request $request)
@@ -828,7 +828,7 @@ class IndividuController extends Controller
      *
      * @Route("/gerer", name="individu_gerer")
      * @Route("/liste")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method({"GET","POST"})
      */
     public function gererAction(Request $request)

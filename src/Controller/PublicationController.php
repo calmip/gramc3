@@ -46,7 +46,7 @@ use Symfony\Component\HttpFoundation\Response;
  * Publication controller.
  *
  * @Route("publication")
- * @Security("has_role('ROLE_ADMIN')")
+ * @Security("is_granted('ROLE_ADMIN')")
  */
 class PublicationController extends Controller
 {
@@ -69,7 +69,7 @@ class PublicationController extends Controller
     
     /**
      * @Route("/{id}/gerer",name="gerer_publications" )
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function gererAction(Projet $projet, Request $request)
     {
@@ -133,7 +133,7 @@ class PublicationController extends Controller
 
     /**
      * @Route("/{id}/consulter",name="consulter_publications" )
-     * @Security("has_role('ROLE_EXPERT')")
+     * @Security("is_granted('ROLE_EXPERT')")
      */
     public function consulterAction(Projet $projet, Request $request)
     {
@@ -148,7 +148,7 @@ class PublicationController extends Controller
 
     /**
      * @Route("/annee",name="publication_annee" )
-     * @Security("has_role('ROLE_OBS') or has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      * @Method({"GET", "POST"})
      */
     public function AnneeAction(Request $request)
@@ -169,7 +169,7 @@ class PublicationController extends Controller
 
     /**
      * @Route("/{annee}/annee_csv",name="publication_annee_csv" )
-     * @Security("has_role('ROLE_OBS') or has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      * @Method({"GET", "POST"})
      */
     public function AnneeCsvAction($annee)
@@ -273,7 +273,7 @@ class PublicationController extends Controller
      * Displays a form to edit an existing publication entity.
      *
      * @Route("/{id}/{projet}/modify", name="modifier_publication")
-     * @Security("has_role('ROLE_DEMANDEUR')") 
+     * @Security("is_granted('ROLE_DEMANDEUR')") 
      * @Method({"GET", "POST"})
      */
     public function modifyAction(Request $request, Publication $publication, Projet $projet)
@@ -309,7 +309,7 @@ class PublicationController extends Controller
     /**
      * Deletes a publication entity.
      *
-     * @Security("has_role('ROLE_ADMIN')") 
+     * @Security("is_granted('ROLE_ADMIN')") 
      * @Route("/{id}", name="publication_delete")
      * @Method("DELETE")
      */
@@ -331,7 +331,7 @@ class PublicationController extends Controller
     /**
      * Deletes a publication entity.
      * 
-     * @Security("has_role('ROLE_DEMANDEUR')") 
+     * @Security("is_granted('ROLE_DEMANDEUR')") 
      * @Route("/{id}/{projet}/supprimer", name="supprimer_publication")
      * @Method({ "GET","DELETE"})
      */
@@ -384,7 +384,7 @@ class PublicationController extends Controller
      * Autocomplete publication
      *
      * @Route("/autocomplete", name="publication_autocomplete")
-     * @Security("has_role('ROLE_DEMANDEUR')") 
+     * @Security("is_granted('ROLE_DEMANDEUR')") 
      * @Method({"POST","GET"})
      */
     public function autocompleteAction(Request $request)

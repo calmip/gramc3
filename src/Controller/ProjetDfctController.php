@@ -53,7 +53,7 @@ use Symfony\Component\Form\Extension\Core\Type\DateType;
 /**
  * ProjetFctController rassemble les controleurs dédiés au bouton "Euro" (données de facturation)
  *
- * @Security("has_role('ROLE_OBS')")
+ * @Security("is_granted('ROLE_OBS')")
  * @Route("projet")
  */
  // Tous ces controleurs sont exécutés au moins par OBS, certains par ADMIN seulement

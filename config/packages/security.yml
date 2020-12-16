@@ -31,7 +31,6 @@ security:
             switch_user: true
             anonymous: ~
             provider: gramc_provider
-            logout_on_user_change: true
         secured:
             pattern:    ^/login/connexion
             context: global_security_context
@@ -41,12 +40,10 @@ security:
             remote_user:
                  provider : gramc_provider
                  user:  REDIRECT_REMOTE_USER
-            logout_on_user_change: true
         consoupload:
             pattern:   ^/adminux
             http_basic:
                   provider: in_memory
-            logout_on_user_change: true
 
         main:
             pattern:    ^/
@@ -54,7 +51,6 @@ security:
             user_checker: app.user_checker
             switch_user: true
             provider: gramc_provider
-            logout_on_user_change: true
             #security: false
             #provider: gramc_provider
             #switch_user: true

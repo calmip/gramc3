@@ -78,7 +78,7 @@ class CommentaireExpertController extends Controller
     * Modification d'un commentaire par l'utilisateur connecté
     *
     * @Route("/{id}/modif", name="commentaireexpert_modify")
-    * @Security("has_role('ROLE_EXPERT')")
+    * @Security("is_granted('ROLE_EXPERT')")
     * @Method({"GET", "POST"})
     ************************/
     public function modifyAction(Request $request, CommentaireExpert $commentaireExpert)
@@ -205,7 +205,7 @@ class CommentaireExpertController extends Controller
     * existe, et sinon le crée. Ensuite redirige vers le contrôleur de modification
     *
     * @Route("/{annee}/cree-ou-modif", name="cree_ou_modif")
-    * @Security("has_role('ROLE_EXPERT')")
+    * @Security("is_granted('ROLE_EXPERT')")
     * @Method({"GET", "POST"})
     **********/
     public function creeOuModifAction(Request $request, $annee)
@@ -232,7 +232,7 @@ class CommentaireExpertController extends Controller
     * Liste tous les commentaires des experts pour une année
     *
     * @Route("/{annee}/liste", name="commentaireexpert_liste")
-    * @Security("has_role('ROLE_OBS')")
+    * @Security("is_granted('ROLE_OBS')")
     * @Method({"GET", "POST"})
     **********/
     public function listeAction(Request $request, $annee)

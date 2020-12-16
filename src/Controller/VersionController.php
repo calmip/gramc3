@@ -84,7 +84,7 @@ class VersionController extends Controller
      *
      * @Route("/", name="version_index")
      * @Method("GET")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      */
     public function indexAction()
     {
@@ -102,7 +102,7 @@ class VersionController extends Controller
      *
      * @Route("/new", name="version_new")
      * @Method({"GET", "POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function newAction(Request $request)
     {
@@ -128,7 +128,7 @@ class VersionController extends Controller
      * Supprimer version
      *
      * @Route("/{id}/avant_supprimer/{rtn}", name="version_avant_supprimer", defaults= {"rtn" = "X" })
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      * @Method("GET")
      *
      */
@@ -155,7 +155,7 @@ class VersionController extends Controller
      * Supprimer version
      *
      * @Route("/{id}/supprimer/{rtn}", defaults= {"rtn" = "X" }, name="version_supprimer" )
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      * @Method("GET")
      *
      */
@@ -231,7 +231,7 @@ class VersionController extends Controller
      *
      * @Route("/{id}/show", name="version_show")
      * @Method("GET")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function showAction(Version $version)
     {
@@ -247,7 +247,7 @@ class VersionController extends Controller
      * Affiche au format pdf
      *
      * @Route("/{id}/pdf", name="version_pdf")
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      * @Method("GET")
      */
     public function pdfAction(Version $version, Request $request)
@@ -303,7 +303,7 @@ class VersionController extends Controller
      * Finds and displays a version entity.
      *
      * @Route("/{id}/fiche_pdf", name="version_fiche_pdf")
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      * @Method("GET")
      */
     public function fichePdfAction(Version $version, Request $request)
@@ -345,7 +345,7 @@ class VersionController extends Controller
      *
      * @Route("/{id}/televersement_fiche", name="version_televersement_fiche")
      * @Method({"POST","GET"})
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function televersementFicheAction(Request $request, Version $version)
     {
@@ -458,7 +458,7 @@ class VersionController extends Controller
      *
      * @Route("/{id}/edit", name="version_edit")
      * @Method({"GET", "POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function editAction(Request $request, Version $version)
     {
@@ -484,7 +484,7 @@ class VersionController extends Controller
      *
      * @Route("/{id}", name="version_delete")
      * @Method("DELETE")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
 /*    public function deleteAction(Request $request, Version $version)
     {
@@ -504,7 +504,7 @@ class VersionController extends Controller
      * Creates a form to delete a version entity.
      *
      * @param Version $version The version entity
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @return \Symfony\Component\Form\Form The form
      */
     private function createDeleteForm(Version $version)
@@ -522,7 +522,7 @@ class VersionController extends Controller
      *
      * @Route("/{id}/responsable", name="changer_responsable")
      * @Method({"GET", "POST"})
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function changerResponsableAction(Version $version, Request $request)
     {
@@ -633,7 +633,7 @@ class VersionController extends Controller
      *
      * @Route("/{id}/version/{penal}/penalite", name="penal_version")
      * @Method({"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function penalAction(Version $idversion, $penal)
     {
@@ -664,7 +664,7 @@ class VersionController extends Controller
      *
      * @Route("/{id}/avant_modifier", name="version_avant_modifier")
      * @Method({"GET", "POST"})
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function avant_modifierAction(Request $request, Version $version )
     {
@@ -715,7 +715,7 @@ class VersionController extends Controller
      *
      * @Route("/{id}/avant_envoyer", name="avant_envoyer_expert")
      * @Method({"GET","POST"})
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function avantEnvoyerAction(Version $version,  Request $request)
     {
@@ -777,7 +777,7 @@ class VersionController extends Controller
      *
      * @Route("/{id}/envoyer", name="envoyer_expert")
      * @Method("GET")
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function envoyerAction(Version $version,  Request $request)
     {
@@ -845,7 +845,7 @@ class VersionController extends Controller
      *
      * @Route("/televersement", name="televersement_generique")
      * @Method({"POST","GET"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function televersementGeneriqueAction(Request $request)
     {
@@ -1077,7 +1077,7 @@ class VersionController extends Controller
      *
      * @Route("/{id}/rapport", name="televerser_rapport")
      * @Method("POST")
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function televerserRapportPrecedentAction(Version $version, Request $request)
     {
@@ -1101,7 +1101,7 @@ class VersionController extends Controller
      *
      * @Route("/{id}/rapport_annee/{annee}", defaults={"annee"=0}, name="televerser_rapport_annee")
      * @Method({"GET", "POST"})
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function televerserRapportAction(Version $version, Request $request, $annee )
     {

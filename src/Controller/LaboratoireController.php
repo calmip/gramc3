@@ -45,7 +45,7 @@ class LaboratoireController extends Controller
      * Lists all laboratoire entities.
      *
      * @Route("/", name="laboratoire_index")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function indexAction()
@@ -59,7 +59,7 @@ class LaboratoireController extends Controller
 
     /**
      * @Route("/gerer",name="gerer_laboratoires" )
-     * @Security("has_role('ROLE_OBS')")
+     * @Security("is_granted('ROLE_OBS')")
      */
     public function gererAction()
 	{
@@ -82,7 +82,7 @@ class LaboratoireController extends Controller
      *
      * @Route("/new", name="laboratoire_new")
      * @Route("/ajouter", name="ajouter_laboratoire")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
     public function newAction(Request $request)
@@ -117,7 +117,7 @@ class LaboratoireController extends Controller
      * Finds and displays a laboratoire entity.
      *
      * @Route("/{id}/show", name="laboratoire_show")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function showAction(Laboratoire $laboratoire)
@@ -134,7 +134,7 @@ class LaboratoireController extends Controller
      * Displays a form to edit an existing laboratoire entity.
      *
      * @Route("/{id}/edit", name="laboratoire_edit")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
     public function editAction(Request $request, Laboratoire $laboratoire)
@@ -160,7 +160,7 @@ class LaboratoireController extends Controller
      * Displays a form to edit an existing laboratoire entity.
      *
      * @Route("/{id}/modify", name="modifier_laboratoire")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
     public function modifyAction(Request $request, Laboratoire $laboratoire)
@@ -193,7 +193,7 @@ class LaboratoireController extends Controller
      * Deletes a laboratoire entity.
      *
      * @Route("/{id}/supprimer", name="supprimer_laboratoire")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function supprimerAction(Request $request, Laboratoire $laboratoire)
@@ -208,7 +208,7 @@ class LaboratoireController extends Controller
      * Deletes a laboratoire entity.
      *
      * @Route("/{id}/delete", name="laboratoire_delete")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method("DELETE")
      */
     public function deleteAction(Request $request, Laboratoire $laboratoire)

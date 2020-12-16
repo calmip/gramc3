@@ -35,7 +35,7 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * Template controller.
  *
- * @Security("has_role('ROLE_ADMIN')")
+ * @Security("is_granted('ROLE_ADMIN')")
  * @Route("templates")
  */
 class TemplatesController extends Controller

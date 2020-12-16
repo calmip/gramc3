@@ -52,7 +52,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
  * Session controller.
  *
  * @Route("session")
- * @Security("has_role('ROLE_ADMIN')")
+ * @Security("is_granted('ROLE_ADMIN')")
  */
 class SessionController extends Controller
 {
@@ -60,7 +60,7 @@ class SessionController extends Controller
     /**
      * Lists all session entities.
      *
-     * @security("has_role('ROLE_ADMIN')")
+     * @security("is_granted('ROLE_ADMIN')")
      * @Route("/", name="session_index")
      * @Method("GET")
      */
@@ -77,7 +77,7 @@ class SessionController extends Controller
     /**
      * Lists all session entities.
      *
-     * @Security("has_role('ROLE_ADMIN') or has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_PRESIDENT')")
      * @Route("/gerer", name="gerer_sessions")
      * @Method("GET")
      */
@@ -164,7 +164,7 @@ class SessionController extends Controller
 
     /**
      *
-     * @security("has_role('ROLE_ADMIN')")
+     * @security("is_granted('ROLE_ADMIN')")
      * @Route("/{id}/modify", name="modifier_session")
      * @Method({"GET", "POST"})
      */
@@ -334,7 +334,7 @@ class SessionController extends Controller
 
     /**
      *
-     * @Security("has_role('ROLE_ADMIN') or has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_PRESIDENT')")
      * @Route("/envoyer_expertises", name="envoyer_expertises")
      * @Method("GET")
      */
@@ -607,7 +607,7 @@ class SessionController extends Controller
     /**
      *
      * @Route("/bilan_annuel", name="bilan_annuel")
-     * @Security("has_role('ROLE_OBS')")
+     * @Security("is_granted('ROLE_OBS')")
      * @Method({"GET","POST"})
      */
     public function bilanAnnuelAction(Request $request)
@@ -713,7 +713,7 @@ class SessionController extends Controller
 
     /**
      *
-     * @Security("has_role('ROLE_OBS')")
+     * @Security("is_granted('ROLE_OBS')")
      * @Route("/{annee}/bilan_annuel_csv", name="bilan_annuel_csv")
      * @Method("GET")
      *
@@ -836,7 +836,7 @@ class SessionController extends Controller
 
     /**
      *
-     * @Security("has_role('ROLE_OBS')")
+     * @Security("is_granted('ROLE_OBS')")
      * @Route("/{annee}/bilan_annuel_labo_csv", name="bilan_annuel_labo_csv")
      * @Method("GET")
      *

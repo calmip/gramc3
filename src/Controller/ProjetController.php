@@ -84,7 +84,7 @@ class ProjetController extends Controller
      *
      * @Route("/", name="projet_index")
      * @Method("GET")
-	 * @Security("has_role('ROLE_OBS')")
+	 * @Security("is_granted('ROLE_OBS')")
      */
     public function indexAction()
     {
@@ -100,7 +100,7 @@ class ProjetController extends Controller
     /**
      * Delete old data.
      *
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Route("/old", name="projet_nettoyer")
      * @Method({"GET","POST"})
      */
@@ -341,7 +341,7 @@ class ProjetController extends Controller
      *
      * @Route("/{id}/session_csv", name="projet_session_csv")
      * @Method({"GET","POST"})
-	 * @Security("has_role('ROLE_OBS')")
+	 * @Security("is_granted('ROLE_OBS')")
      */
     public function sessionCSVAction(Session $session)
     {
@@ -407,7 +407,7 @@ class ProjetController extends Controller
      *
      * @Route("/tous_csv", name="projet_tous_csv")
      * @Method({"GET","POST"})
-	 * @Security("has_role('ROLE_OBS')")
+	 * @Security("is_granted('ROLE_OBS')")
      */
     public function tousCSVAction()
     {
@@ -464,7 +464,7 @@ class ProjetController extends Controller
     /**
      * fermer un projet
      *
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Route("/{id}/fermer", name="fermer_projet")
      * @Method({"GET","POST"})
      */
@@ -492,7 +492,7 @@ class ProjetController extends Controller
     /**
      * back une version
      *
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Route("/{id}/back", name="back_version")
      * @Method({"GET","POST"})
      */
@@ -531,7 +531,7 @@ class ProjetController extends Controller
      * L'admin a cliqué sur le bouton Forward pour envoyer une version à l'expert
      * à la place du responsable
      *
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Route("/{id}/fwd", name="fwd_version")
      * @Method({"GET","POST"})
      */
@@ -572,7 +572,7 @@ class ProjetController extends Controller
      *
      * @Route("/session", name="projet_session")
      * @Method({"GET","POST"})
-	 * @Security("has_role('ROLE_OBS')")
+	 * @Security("is_granted('ROLE_OBS')")
      */
     public function sessionAction(Request $request)
     {
@@ -793,7 +793,7 @@ class ProjetController extends Controller
      *
      * Param : $annee
      *
-     * @Security("has_role('ROLE_OBS')")
+     * @Security("is_granted('ROLE_OBS')")
      * @Route("/{annee}/resumes", name="projet_resumes")
      * @Method({"GET","POST"})
      *
@@ -868,7 +868,7 @@ class ProjetController extends Controller
      *
      * @Route("/annee", name="projet_annee")
      * @Method({"GET","POST"})
-	 * @Security("has_role('ROLE_OBS')")
+	 * @Security("is_granted('ROLE_OBS')")
      */
 
     public function anneeAction(Request $request)
@@ -919,7 +919,7 @@ class ProjetController extends Controller
      *
      * @Route("/donnees", name="projet_donnees")
      * @Method({"GET","POST"})
-	 * @Security("has_role('ROLE_OBS')")
+	 * @Security("is_granted('ROLE_OBS')")
      */
 
     public function donneesAction(Request $request)
@@ -944,7 +944,7 @@ class ProjetController extends Controller
      *
      * @Route("{annee}/donnees_csv", name="projet_donnees_csv")
      * @Method({"GET","POST"})
-	 * @Security("has_role('ROLE_OBS')")
+	 * @Security("is_granted('ROLE_OBS')")
      */
     public function donneesCSVAction($annee)
     {
@@ -1025,7 +1025,7 @@ class ProjetController extends Controller
      *
      * @Route("/{annee}/annee_csv", name="projet_annee_csv")
      * @Method({"GET","POST"})
-	 * @Security("has_role('ROLE_OBS')")
+	 * @Security("is_granted('ROLE_OBS')")
      */
     public function anneeCSVAction($annee)
     {
@@ -1090,7 +1090,7 @@ class ProjetController extends Controller
 
     /**
      * download rapport
-     * @Security("has_role('ROLE_DEMANDEUR') or has_role('ROLE_OBS')")
+     * @Security("is_granted('ROLE_DEMANDEUR') or is_granted('ROLE_OBS')")
      * @Route("/{id}/rapport/{annee}", defaults={"annee"=0}, name="rapport")
      * @Method("GET")
      */
@@ -1127,7 +1127,7 @@ class ProjetController extends Controller
      * download signature
      *
      * @Route("/{id}/signature", name="signature")
-     * @Security("has_role('ROLE_OBS')")
+     * @Security("is_granted('ROLE_OBS')")
      * @Method("GET")
      */
     public function signatureAction(Version $version, Request $request)
@@ -1141,7 +1141,7 @@ class ProjetController extends Controller
      *
      * @Route("/tous", name="projet_tous")
      * @Method("GET")
-	 * @Security("has_role('ROLE_OBS')")
+	 * @Security("is_granted('ROLE_OBS')")
      */
     public function tousAction()
     {
@@ -1201,7 +1201,7 @@ class ProjetController extends Controller
     /**
      * Lists all projet entities.
      *
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Route("/gerer", name="gerer_projets")
      * @Method("GET")
      */
@@ -1217,7 +1217,7 @@ class ProjetController extends Controller
 
     /**
      * Creates a new projet entity.
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Route("/new", name="projet_new")
      * @Method({"GET", "POST"})
      */
@@ -1246,7 +1246,7 @@ class ProjetController extends Controller
      *
      * @Route("/avant_nouveau/{type}", name="avant_nouveau_projet")
      * @Method({"GET", "POST"})
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      *
      */
     public function avantNouveauAction(Request $request,$type)
@@ -1275,7 +1275,7 @@ class ProjetController extends Controller
      *
      * @Route("/nouveau/{type}", name="nouveau_projet")
      * @Method({"GET", "POST"})
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      *
      */
     public function nouveauAction(Request $request, $type)
@@ -1366,7 +1366,7 @@ class ProjetController extends Controller
      *
      * @Route("/{id}/conso/{annee}", name="projet_conso")
      * @Method("GET")
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      */
 
     public function consoAction(Projet $projet, $annee = null)
@@ -1398,7 +1398,7 @@ class ProjetController extends Controller
      *
      * @Route("/{id}/{utype}/{ress_id}/{annee}/conso_ressource", name="projet_conso_ressource")
      * @Method("GET")
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      */
 
     public function consoRessourceAction(Projet $projet, $utype='group', $ress_id, $annee = null)
@@ -1470,7 +1470,7 @@ class ProjetController extends Controller
      *
      * @Route("/{ressource/{ressource}/tousconso/{annee}/{mois}", name="tous_projets_conso")
      * @Method("GET")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
 
     public function consoTousAction($ressource,$annee,$mois=false)
@@ -1518,7 +1518,7 @@ class ProjetController extends Controller
      * @Route("/accueil", name="projet_accueil")
      * @Route("/accueil/", name="projet_accueil1")
      * @Method("GET")
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function accueilAction()
     {
@@ -1614,7 +1614,7 @@ class ProjetController extends Controller
      * @Route("/{id}/consulter", name="consulter_projet")
      * @Route("/{id}/consulter/{version}", name="consulter_version")
      * @Method({"GET","POST"})
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function consulterAction(Projet $projet, Version $version = null,  Request $request)
     {
@@ -1874,7 +1874,7 @@ class ProjetController extends Controller
      *
      * @Route("/modele", name="telecharger_modele")
      * @Method("GET")
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function telechargerModeleAction()
     {
@@ -1887,7 +1887,7 @@ class ProjetController extends Controller
      * @Route("/{id}", name="projet_show")
      * @Route("/{id}/show", name="consulter_show_projet")
      * @Method("GET")
-	 * @Security("has_role('ROLE_OBS')")
+	 * @Security("is_granted('ROLE_OBS')")
 	 */
     public function showAction(Projet $projet)
     {
@@ -1902,7 +1902,7 @@ class ProjetController extends Controller
     /**
      * Displays a form to edit an existing projet entity.
      *
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Route("/{id}/edit", name="projet_edit")
      * @Method({"GET", "POST"})
      */
@@ -1928,7 +1928,7 @@ class ProjetController extends Controller
     /**
      * Deletes a projet entity.
      *
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Route("/{id}", name="projet_delete")
      * @Method("DELETE")
      */
@@ -1950,7 +1950,7 @@ class ProjetController extends Controller
      * Creates a form to delete a projet entity.
      *
      * @param Projet $projet The projet entity
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @return \Symfony\Component\Form\Form The form
      */
     private function createDeleteForm(Projet $projet)

@@ -64,7 +64,7 @@ class AdminuxController extends Controller
      * type      = user ou group unix
      * @Route("/compta_update_batch", name="compta_update_batch")
      * @Method({"PUT"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
      public function UpdateComptaBatchAction(Request $request)
      {
@@ -143,7 +143,7 @@ class AdminuxController extends Controller
      *
      * @Route("/users/setloginname/{idProjet}/projet/{idIndividu}/individu/{loginname}/loginname", name="set_loginname")
      * @Method({"POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
 	public function setloginnameAction(Request $request, $idProjet, $idIndividu, $loginname)
 	{
@@ -188,7 +188,7 @@ class AdminuxController extends Controller
 	 * get versions non terminées
 	 *
 	 * @Route("/version/get", name="get_version")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
 	 * Exemples de données POST (fmt json):
 	 * 			   ''
 	 *             ou
@@ -351,7 +351,7 @@ class AdminuxController extends Controller
 	 * get users
 	 *
 	 * @Route("/users/get", name="get_users")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
 	 *
 	 * Exemples de données POST (fmt json):
 	 * 			   ''
@@ -506,7 +506,7 @@ class AdminuxController extends Controller
      *
      * @Route("/getloginnames/{idProjet}/projet", name="get_loginnames")
      * @Method({"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
 	public function getloginnamesAction($idProjet)
 	{
@@ -564,7 +564,7 @@ class AdminuxController extends Controller
      *
      * @Route("/quota_check", name="quota_check")
      * @Method({"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
      public function quotaCheckAction(Request $request)
      {

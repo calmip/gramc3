@@ -88,7 +88,7 @@ class VersionModifController extends Controller
      *
      * @Route("/{id}/modifier", name="modifier_version")
      * @Method({"GET", "POST"})
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function modifierAction(Request $request, Version $version, $renouvellement = false )
     {
@@ -1048,7 +1048,7 @@ class VersionModifController extends Controller
      *
      * @Route("/{id}/collaborateurs", name="modifier_collaborateurs")
      * @Method({"GET", "POST"})
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function modifierCollaborateursAction(Version $version, Request $request)
     {
@@ -1306,7 +1306,7 @@ class VersionModifController extends Controller
      * Demande de partage stockage ou partage des données
      *
      * @Route("/{id}/donnees", name="donnees")
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      * @Method({"GET", "POST"})
      */
     public function donneesAction(Request $request, Version $version)
@@ -1388,7 +1388,7 @@ class VersionModifController extends Controller
      * Displays a form to edit an existing version entity.
      *
      * @Route("/{id}/renouveler", name="renouveler_version")
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      * @Method({"GET", "POST"})
      */
     public function renouvellementAction(Request $request, Version $version)

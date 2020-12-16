@@ -45,7 +45,7 @@ class ThematiqueController extends Controller
     /**
      * Lists all thematique entities.
      *
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Route("/", name="thematique_index")
      * @Method("GET")
      */
@@ -62,7 +62,7 @@ class ThematiqueController extends Controller
 
     /**
      * @Route("/gerer",name="gerer_thematiques" )
-     * @Security("has_role('ROLE_OBS')")
+     * @Security("is_granted('ROLE_OBS')")
      */
     public function gererAction()
 	{
@@ -85,7 +85,7 @@ class ThematiqueController extends Controller
      *
      * @Route("/new", name="thematique_new")
      * @Route("/ajouter", name="ajouter_thematique")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
     public function newAction(Request $request)
@@ -124,7 +124,7 @@ class ThematiqueController extends Controller
      * Deletes a thematique entity.
      *
      * @Route("/{id}/supprimer", name="supprimer_thematique")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function supprimerAction(Request $request, Thematique $thematique)
@@ -139,7 +139,7 @@ class ThematiqueController extends Controller
      * Displays a form to edit an existing laboratoire entity.
      *
      * @Route("/{id}/modify", name="modifier_thematique")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
     public function modifyAction(Request $request, Thematique $thematique)
@@ -174,7 +174,7 @@ class ThematiqueController extends Controller
      * Finds and displays a thematique entity.
      *
      * @Route("/{id}", name="thematique_show")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function showAction(Thematique $thematique)
@@ -191,7 +191,7 @@ class ThematiqueController extends Controller
      * Displays a form to edit an existing thematique entity.
      *
      * @Route("/{id}/edit", name="thematique_edit")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
     public function editAction(Request $request, Thematique $thematique)
@@ -217,7 +217,7 @@ class ThematiqueController extends Controller
      * Deletes a thematique entity.
      *
      * @Route("/{id}", name="thematique_delete")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method("DELETE")
      */
     public function deleteAction(Request $request, Thematique $thematique)

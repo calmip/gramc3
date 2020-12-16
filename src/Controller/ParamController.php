@@ -43,7 +43,7 @@ use Symfony\Component\Form\Extension\Core\Type\DateType;
 
 /**
  * Param controller.
- * @Security("has_role('ROLE_ADMIN')")
+ * @Security("is_granted('ROLE_ADMIN')")
  * @Route("param")
  */
 class ParamController extends Controller

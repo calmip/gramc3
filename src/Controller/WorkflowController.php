@@ -56,7 +56,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 /**
  * Workflow controller pour faire des tests.
- * @Security("has_role('ROLE_ADMIN')")
+ * @Security("is_granted('ROLE_ADMIN')")
  * @Route("workflow")
  */
 class WorkflowController extends Controller

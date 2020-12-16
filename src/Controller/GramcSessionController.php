@@ -71,7 +71,7 @@ class GramcSessionController extends Controller
 {
     /**
      * @Route("/admin/accueil",name="admin_accueil")
-     * @Security("has_role('ROLE_OBS') or has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
     **/
 
     public function adminAccueilAction()
@@ -150,7 +150,7 @@ class GramcSessionController extends Controller
 
     /**
      * @Route("/president", name="president_accueil" )
-     * @Security("has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_PRESIDENT')")
      */
     public function presidentAccueilAction()
 	{
@@ -205,7 +205,7 @@ class GramcSessionController extends Controller
 
     /**
     * @Route("/profil",name="profil")
-    * @Security("has_role('ROLE_DEMANDEUR')") 
+    * @Security("is_granted('ROLE_DEMANDEUR')") 
 
     **/
     public function profilAction(Request $request)
@@ -741,7 +741,7 @@ class GramcSessionController extends Controller
 
     /**
      * @Route("/connexions", name="connexions")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function connexionsAction(Request $request)
     {
@@ -755,7 +755,7 @@ class GramcSessionController extends Controller
 	/**
 	 * @Route("/phpinfo", name="phpinfo")
 	 * @Method({"GET"})
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      *********************************************/
      public function infoAction(Request $request)
      {
@@ -771,7 +771,7 @@ class GramcSessionController extends Controller
 
     /**
      * @Route("/md5")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      **/
 
     public function md5Action()
@@ -783,7 +783,7 @@ class GramcSessionController extends Controller
 
     /**
      * @Route("/uri")
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      **/
 
     public function uri(Request $request)
@@ -797,7 +797,7 @@ class GramcSessionController extends Controller
 
     /**
      * @Route("/test_workflow")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * TODO - A réécrire
      **/
 

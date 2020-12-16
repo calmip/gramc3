@@ -42,13 +42,13 @@ use JpGraph\JpGraph;
  * Statistiques controller.
  *
  * @Route("statistiques")
- * @Security("has_role('ROLE_OBS') or has_role('ROLE_PRESIDENT')")
+ * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
  */
 class StatistiquesController extends Controller
 {
     /**
      * @Route("/symfony", name="homepage")
-     * @Security("has_role('ROLE_OBS') or has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      * @Method({"GET","POST"})
      */
     public function homepageAction(Request $request)
@@ -64,7 +64,7 @@ class StatistiquesController extends Controller
 
    /**
      * @Route("/{annee}", name="statistiques")
-     * @Security("has_role('ROLE_OBS') or has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
     public function indexAction(Request $request,$annee=null)
     {
@@ -182,7 +182,7 @@ class StatistiquesController extends Controller
 
     /**
      * @Route("/{annee}/repartition", name="statistiques_repartition")
-     * @Security("has_role('ROLE_OBS') or has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
     public function repartitionAction(Request $request, $annee)
     {
@@ -258,7 +258,7 @@ class StatistiquesController extends Controller
 
     /**
      * @Route("/{annee}/collaborateur", name="statistiques_collaborateur")
-     * @Security("has_role('ROLE_OBS') or has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
     public function collaborateurAction(Request $request, $annee)
     {
@@ -548,7 +548,7 @@ class StatistiquesController extends Controller
 	
     /**
      * @Route("/{annee}/laboratoire", name="statistiques_laboratoire")
-     * @Security("has_role('ROLE_OBS') or has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
     public function laboratoireAction(Request $request, $annee)
     {
@@ -557,7 +557,7 @@ class StatistiquesController extends Controller
 
     /**
      * @Route("/{annee}/etablissement", name="statistiques_etablissement")
-     * @Security("has_role('ROLE_OBS')")
+     * @Security("is_granted('ROLE_OBS')")
      */
     public function etablissementAction(Request $request, $annee)
     {
@@ -566,7 +566,7 @@ class StatistiquesController extends Controller
 
     /**
      * @Route("/{annee}/thematique", name="statistiques_thematique")
-     * @Security("has_role('ROLE_OBS') or has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
     public function thematiqueAction(Request $request, $annee)
     {
@@ -575,7 +575,7 @@ class StatistiquesController extends Controller
 
     /**
      * @Route("/{annee}/metathematique", name="statistiques_metathematique")
-     * @Security("has_role('ROLE_OBS') or has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
     public function metathematiqueAction(Request $request, $annee)
     {
@@ -605,7 +605,7 @@ class StatistiquesController extends Controller
 
     /**
      * @Route("/{annee}/metathematique_csv", name="statistiques_métathématique_csv")
-     * @Security("has_role('ROLE_OBS') or has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
     public function metathematiqueCSVAction(Request $request, $annee)
     {
@@ -614,7 +614,7 @@ class StatistiquesController extends Controller
 
     /**
      * @Route("/{annee}/thematique_csv", name="statistiques_thématique_csv")
-     * @Security("has_role('ROLE_OBS') or has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
     public function thematiqueCSVAction(Request $request, $annee)
     {
@@ -623,7 +623,7 @@ class StatistiquesController extends Controller
 
     /**
      * @Route("/{annee}/laboratoire_csv", name="statistiques_laboratoire_csv")
-     * @Security("has_role('ROLE_OBS') or has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
     public function laboratoireCSVAction(Request $request, $annee)
     {
@@ -632,7 +632,7 @@ class StatistiquesController extends Controller
 
     /**
      * @Route("/{annee}/etablissement_csv", name="statistiques_établissement_csv")
-     * @Security("has_role('ROLE_OBS') or has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
     public function etablissementCSVAction(Request $request, $annee)
     {

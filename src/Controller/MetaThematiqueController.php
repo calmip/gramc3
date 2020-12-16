@@ -46,7 +46,7 @@ class MetaThematiqueController extends Controller
     /**
      * Lists all metaThematique entities.
      *
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Route("/", name="metathematique_index")
      * @Method("GET")
      */
@@ -63,7 +63,7 @@ class MetaThematiqueController extends Controller
 
     /**
      * @Route("/gerer",name="gerer_metaThematiques" )
-     * @Security("has_role('ROLE_OBS')")
+     * @Security("is_granted('ROLE_OBS')")
      */
     public function gererAction()
 	{
@@ -84,7 +84,7 @@ class MetaThematiqueController extends Controller
      *
      * @Route("/new", name="metathematique_new")
      * @Route("/ajouter", name="ajouter_metaThematique")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
     public function newAction(Request $request)
@@ -118,7 +118,7 @@ class MetaThematiqueController extends Controller
      * Deletes a thematique entity.
      *
      * @Route("/{id}/supprimer", name="supprimer_metaThematique")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function supprimerAction(Request $request, MetaThematique $thematique)
@@ -133,7 +133,7 @@ class MetaThematiqueController extends Controller
      * Displays a form to edit an existing laboratoire entity.
      *
      * @Route("/{id}/modify", name="modifier_metaThematique")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
     public function modifyAction(Request $request, MetaThematique $thematique)
@@ -166,7 +166,7 @@ class MetaThematiqueController extends Controller
      * Finds and displays a metaThematique entity.
      *
      * @Route("/{id}", name="metathematique_show")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function showAction(MetaThematique $metaThematique)
@@ -183,7 +183,7 @@ class MetaThematiqueController extends Controller
      * Displays a form to edit an existing metaThematique entity.
      *
      * @Route("/{id}/edit", name="metathematique_edit")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
     public function editAction(Request $request, MetaThematique $metaThematique)
@@ -209,7 +209,7 @@ class MetaThematiqueController extends Controller
      * Deletes a metaThematique entity.
      *
      * @Route("/{id}", name="metathematique_delete")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method("DELETE")
      */
     public function deleteAction(Request $request, MetaThematique $metaThematique)

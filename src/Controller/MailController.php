@@ -56,14 +56,14 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
  * Mail controller.
  *
  * @Route("mail")
- * @Security("has_role('ROLE_ADMIN')")
+ * @Security("is_granted('ROLE_ADMIN')")
  */
 class MailController extends Controller
 {
 
     /**
      * @Route("/{id}/mail_to_responsables_fiche",name="mail_to_responsables_fiche")
-     * @Security("has_role('ROLE_ADMIN') or has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_PRESIDENT')")
      * @Method({"GET", "POST"})
     **/
 
@@ -170,7 +170,7 @@ class MailController extends Controller
 
     /**
      * @Route("/{id}/mail_to_responsables",name="mail_to_responsables")
-     * @Security("has_role('ROLE_ADMIN') or has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_PRESIDENT')")
      * @Method({"GET", "POST"})
     **/
     public function mailToResponsablesAction(Request $request, Session $session)

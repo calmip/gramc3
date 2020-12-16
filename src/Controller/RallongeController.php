@@ -62,7 +62,7 @@ class RallongeController extends Controller
      * Lists all rallonge entities.
      *
      * @Route("/", name="rallonge_index")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function indexAction()
@@ -80,7 +80,7 @@ class RallongeController extends Controller
      * Creates a new rallonge entity.
      *
      * @Route("/new", name="rallonge_new")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
     public function newAction(Request $request)
@@ -107,7 +107,7 @@ class RallongeController extends Controller
      * Creates a new rallonge entity.
      *
      * @Route("/{id}/creation", name="rallonge_creation")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function creationAction(Request $request, Projet $projet)
@@ -155,7 +155,7 @@ class RallongeController extends Controller
      * Finds and displays a rallonge entity.
      *
      * @Route("/{id}/show", name="rallonge_show")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function showAction(Rallonge $rallonge)
@@ -172,7 +172,7 @@ class RallongeController extends Controller
      * Displays a form to edit an existing rallonge entity.
      *
      * @Route("/{id}/edit", name="rallonge_edit")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
     public function editAction(Request $request, Rallonge $rallonge)
@@ -198,7 +198,7 @@ class RallongeController extends Controller
      * Displays a form to edit an existing rallonge entity.
      *
      * @Route("/{id}/consulter", name="rallonge_consulter")
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      * @Method("GET")
      */
     public function consulterAction(Request $request, Rallonge $rallonge)
@@ -237,7 +237,7 @@ class RallongeController extends Controller
      * Displays a form to edit an existing rallonge entity.
      *
      * @Route("/{id}/modifier", name="rallonge_modifier")
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      * @Method({"GET", "POST"})
      */
     public function modifierAction(Request $request, Rallonge $rallonge)
@@ -306,7 +306,7 @@ class RallongeController extends Controller
      * Displays a form to edit an existing rallonge entity.
      *
      * @Route("/{id}/expertiser", name="rallonge_expertiser")
-     * @Security("has_role('ROLE_EXPERT')")
+     * @Security("is_granted('ROLE_EXPERT')")
      * @Method({"GET", "POST"})
      */
     public function expertiserAction(Request $request, Rallonge $rallonge)
@@ -411,7 +411,7 @@ class RallongeController extends Controller
      * Displays a form to edit an existing rallonge entity.
      *
      * @Route("/{id}/avant_finaliser", name="avant_rallonge_finaliser")
-     * @Security("has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_PRESIDENT')")
      * @Method({"GET", "POST"})
      */
     public function avantFinaliserAction(Request $request, Rallonge $rallonge)
@@ -490,7 +490,7 @@ class RallongeController extends Controller
      * Displays a form to edit an existing rallonge entity.
      *
      * @Route("/{id}/avant_envoyer_president", name="avant_rallonge_envoyer_president")
-     * @Security("has_role('ROLE_EXPERT')")
+     * @Security("is_granted('ROLE_EXPERT')")
      * @Method("GET")
      */
     public function avantEnvoyerPresidentAction(Request $request, Rallonge $rallonge)
@@ -529,7 +529,7 @@ class RallongeController extends Controller
      * Displays a form to edit an existing rallonge entity.
      *
      * @Route("/{id}/avant_envoyer", name="avant_rallonge_envoyer")
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      * @Method("GET")
      */
     public function avantEnvoyerAction(Request $request, Rallonge $rallonge)
@@ -564,7 +564,7 @@ class RallongeController extends Controller
      * Displays a form to edit an existing rallonge entity.
      *
      * @Route("/{id}/envoyer", name="rallonge_envoyer")
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      * @Method("GET")
      */
     public function envoyerAction(Request $request, Rallonge $rallonge)
@@ -617,7 +617,7 @@ class RallongeController extends Controller
      * Displays a form to edit an existing rallonge entity.
      *
      * @Route("/{id}/finaliser", name="rallonge_finaliser")
-     * @Security("has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_PRESIDENT')")
      * @Method("GET")
      */
     public function finaliserAction(Request $request, Rallonge $rallonge)
@@ -669,7 +669,7 @@ class RallongeController extends Controller
      * Displays a form to edit an existing rallonge entity.
      *
      * @Route("/{id}/envoyer_president", name="rallonge_envoyer_president")
-     * @Security("has_role('ROLE_EXPERT')")
+     * @Security("is_granted('ROLE_EXPERT')")
      * @Method("GET")
      */
     public function envoyerPresidentAction(Request $request, Rallonge $rallonge)
@@ -729,7 +729,7 @@ class RallongeController extends Controller
      *
      * @Route("/affectation", name="rallonge_affectation")
      * @Method({"GET", "POST"})
-     * @Security("has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_PRESIDENT')")
      */
     public function affectationAction(Request $request)
     {
@@ -862,7 +862,7 @@ class RallongeController extends Controller
      * Deletes a rallonge entity.
      *
      * @Route("/{id}", name="rallonge_delete")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("is_granted('ROLE_ADMIN')")
      * @Method("DELETE")
      */
     public function deleteAction(Request $request, Rallonge $rallonge)

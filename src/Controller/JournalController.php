@@ -39,7 +39,7 @@ use App\Form\SelectJournalType;
  * Journal controller.
  *
  * @Route("journal")
- * @Security("has_role('ROLE_ADMIN')")
+ * @Security("is_granted('ROLE_ADMIN')")
  */
 class JournalController extends Controller
 {

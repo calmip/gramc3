@@ -76,7 +76,7 @@ class ExpertiseController extends Controller
      *
      * @Route("/affectation_test", name="affectation_test")
      * @Method({"GET", "POST"})
-     * @Security("has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_PRESIDENT')")
      */
     public function affectationTestAction(Request $request)
     {
@@ -140,7 +140,7 @@ class ExpertiseController extends Controller
      *
      * @Route("/affectation", name="affectation")
      * @Method({"GET", "POST"})
-     * @Security("has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_PRESIDENT')")
      */
     public function affectationAction(Request $request)
     {
@@ -221,7 +221,7 @@ class ExpertiseController extends Controller
      *
      * @Route("/", name="expertise_index")
      * @Method("GET")
-     * @Security("has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_PRESIDENT')")
      */
     public function indexAction()
     {
@@ -250,7 +250,7 @@ class ExpertiseController extends Controller
 	 *
 	 * @Route("/liste", name="expertise_liste")
 	 * @Method("GET")
-	 * @Security("has_role('ROLE_EXPERT')")
+	 * @Security("is_granted('ROLE_EXPERT')")
 	 */
     public function listeAction()
     {
@@ -456,7 +456,7 @@ class ExpertiseController extends Controller
      *
      * @Route("/new", name="expertise_new")
      * @Method({"GET", "POST"})
-     * @Security("has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_PRESIDENT')")
      */
     public function newAction(Request $request)
     {
@@ -483,7 +483,7 @@ class ExpertiseController extends Controller
      *
      * @Route("/{id}", name="expertise_show")
      * @Method("GET")
-     * @Security("has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_PRESIDENT')")
      */
     public function showAction(Expertise $expertise)
     {
@@ -500,7 +500,7 @@ class ExpertiseController extends Controller
      *
      * @Route("/{id}/edit", name="expertise_edit")
      * @Method({"GET", "POST"})
-     * @Security("has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_PRESIDENT')")
      */
     public function editAction(Request $request, Expertise $expertise)
     {
@@ -534,7 +534,7 @@ class ExpertiseController extends Controller
      *
      * @Route("/{id}/modifier", name="expertise_modifier")
      * @Method({"GET", "POST"})
-     * @Security("has_role('ROLE_EXPERT')")
+     * @Security("is_granted('ROLE_EXPERT')")
      */
     public function modifierAction(Request $request, Expertise $expertise)
     {
@@ -810,7 +810,7 @@ class ExpertiseController extends Controller
      *
      * @Route("/{id}/valider", name="expertise_validation")
      * @Method({"GET","POST"})
-     * @Security("has_role('ROLE_EXPERT')")
+     * @Security("is_granted('ROLE_EXPERT')")
      */
     public function validationAction(Request $request, Expertise $expertise)
     {
@@ -918,7 +918,7 @@ class ExpertiseController extends Controller
      *
      * @Route("/{id}", name="expertise_delete")
      * @Method("DELETE")
-     * @Security("has_role('ROLE_PRESIDENT')")
+     * @Security("is_granted('ROLE_PRESIDENT')")
      */
     public function deleteAction(Request $request, Expertise $expertise)
     {

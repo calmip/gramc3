@@ -44,7 +44,7 @@ class RattachementController extends Controller
 {
    /**
      * @Route("/gerer",name="gerer_rattachements" )
-     * @Security("has_role('ROLE_OBS')")
+     * @Security("is_granted('ROLE_OBS')")
      */
     public function gererAction()
 	{
@@ -66,7 +66,7 @@ class RattachementController extends Controller
      * Creates a new rattachement entity.
      *
      * @Route("/ajouter", name="ajouter_rattachement")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
     public function newAction(Request $request)
@@ -104,7 +104,7 @@ class RattachementController extends Controller
      * Displays a form to edit an existing rattachement entity.
      *
      * @Route("/{id}/modify", name="modifier_rattachement")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
     public function modifyAction(Request $request, Rattachement $rattachement)
@@ -140,7 +140,7 @@ class RattachementController extends Controller
      * Deletes a rattachement entity.
      *
      * @Route("/{id}/supprimer", name="supprimer_rattachement")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function supprimerAction(Request $request, Rattachement $rattachement)
