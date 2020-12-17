@@ -166,7 +166,7 @@ class VersionController extends Controller
 	    $em = $this->getDoctrine()->getManager();
 		$sm = $this->get('app.gramc.ServiceMenus');
 		$sj = $this->get('app.gramc.ServiceJournal');
-		$sp = $this->get('app.gramc.ServiceProjets');
+		//$sp = $this->get('app.gramc.ServiceProjets');
 
 	    // ACL
 	    if( $sm->modifier_version($version)['ok'] == false )
@@ -212,10 +212,6 @@ class VersionController extends Controller
 	            $em->remove( $projet );
 	            $em->flush();
             }
-	        elseif( $projet != null )
-	        {
-	            $sp->calculDerniereVersion($projet);
-			}
         }
 
 	    //return $this->redirectToRoute( 'projet_accueil' );

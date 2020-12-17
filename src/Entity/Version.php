@@ -583,15 +583,6 @@ class Version implements Demande
      */
     private $fctStamp;
 
-    /**
-    * @ ORM\PostPersist
-    */
-    public function setDerniereVersion()
-    {
-    if( $this->projet   !=  null )
-        $this->projet->calculDerniereVersion();
-    }
-
 
     /**
     * @ORM\PostUpdate
@@ -599,32 +590,42 @@ class Version implements Demande
     public function setVersionActive()
     // on ne sait pas si cela marche parce que l'on ne s'en sert pas
     {
-    if( $this->etatVersion == Etat::ACTIF && $this->projet   !=  null )
+	    if( $this->etatVersion == Etat::ACTIF && $this->projet != null )
         {
             $this->projet->setVersionActive( $this);
-            //App::getManager()->flush();
         }
     }
 
     /**
     * convertir la table codeLangage en checkbox
-    * @ORM\PreUpdate
     */
-    public function convertCodeLanguage()
+    private function convertCodeLanguage()
     {
-    $codeLangage = $this->getCodeLangage();
-    if( $codeLangage !=  null )
+	    $codeLangage = $this->getCodeLangage();
+	    if( $codeLangage !=  null )
         {
-        if( preg_match('/Fortran/',$codeLangage) )    $this->setCodeFor( true );
-        if( preg_match('/C,/',$codeLangage)  )        $this->setCodeC( true );
-        if( preg_match('/C++/',$codeLangage)  )       $this->setCodeCpp( true );
-        if( preg_match('/Autre/',$codeLangage) )      $this->setCodeAutre( true );
-        // Supprimé par MANU car il peut y avoir là d'autres langages (python, R, etc)
-        // Tant pis s'il y a redondance entre codeC etc. et codeLangage
-        //$this->setCodeLangage(null);
+	        if( preg_match('/Fortran/',$codeLangage) )    $this->setCodeFor( true );
+	        if( preg_match('/C,/',$codeLangage)  )        $this->setCodeC( true );
+	        if( preg_match('/C++/',$codeLangage)  )       $this->setCodeCpp( true );
+	        if( preg_match('/Autre/',$codeLangage) )      $this->setCodeAutre( true );
         }
     }
 
+    /**
+    * @ORM\PrePersist
+    */
+    public function prePersist()
+    {
+		$this->convertCodeLanguage();
+	}
+
+    /**
+    * @ORM\PreUpdate
+    */
+    public function preUpdate()
+    {
+		$this->convertCodeLanguage();
+	}
 
     /**
      * @var \Doctrine\Common\Collections\Collection

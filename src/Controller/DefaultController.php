@@ -74,9 +74,9 @@ class DefaultController extends Controller
     $projet = $em->getRepository(Projet::class)->findOneBy(['idProjet' => 'P1440']);
     //return new Response( count( $projet->getVersion() ) );
     //return new Response( gettype($projet->calculDerniereVersion()  ));
-    return new Response( $projet->derniereVersion()->getSession() );
-    return new Response( $projet->calculDerniereVersion()->getSession() );
-    return new Response( $projet->getVersionDerniere()->getSession() );
+    //return new Response( $projet->derniereVersion()->getSession() );
+    //return new Response( $projet->calculDerniereVersion()->getSession() );
+    //return new Response( $projet->getVersionDerniere()->getSession() );
 
 
 

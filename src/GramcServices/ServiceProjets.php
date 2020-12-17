@@ -1171,13 +1171,11 @@ class ServiceProjets
 	}
 	
      /**
-     * calculDerniereVersion
+     * calculVersionDerniere
      *
-     * TODO - Revoir calculDerniereVersion calculVersionDernierer etc. it is the BORDEL
-     * 
      * @return \App\Entity\Version
      */
-    public function calculDerniereVersion(Projet $projet)
+    public function calculVersionDerniere(Projet $projet)
     {
         if( $projet->getVersion() == null ) return null;
 
@@ -1200,19 +1198,18 @@ class ServiceProjets
         $projet->setVersionDerniere($result);
         $em = $this->em;
         $em->persist($projet);
-        $em->flush();
+        //$em->flush();
         
         return $result;
     }
+    public function calculDerniereVersion(Projet $projet) { return $this->calculVersionDerniere($projet); }
 
     /**
-     * versionActive
+     * calculVersionActive
      * 
-     * TODO - Revoir aussi ces fonctions versionActive
-     *
      * @return \App\Entity\Version
      */
-    public function versionActive(Projet $projet)
+    public function calculVersionActive(Projet $projet)
     {
         $em            = $this->em;
         $versionActive = $projet->getVersionActive();
@@ -1223,8 +1220,8 @@ class ServiceProjets
 			if ($versionActive != null)
 			{
 	            $projet->setVersionActive( null );
-	            $em->persist($this);
-	            $em->flush();
+	            $em->persist($projet);
+	           // $em->flush();
 			}
 			return null;
 		}
@@ -1255,10 +1252,10 @@ class ServiceProjets
         if( $versionActive != $result ) // seulement s'il y a un changement
 		{
             $projet->setVersionActive( $result );
-            $em->persist($result);
-            $em->flush();
+            $em->persist($projet);
+            //$em->flush();
 		}
         return $result;
     }
-
+	public function versionActive(Projet $projet) { return $this->calculVersionActive($projet); }
 }

@@ -2,8 +2,8 @@
 
 namespace App\DataFixtures\ORM;
 
-use Doctrine\Common\DataFixtures\FixtureInterface;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Bundle\FixturesBundle\ORMFixtureInterface;
+use Doctrine\Persistence\ObjectManager;
 
 use App\Entity\Version;
 use App\Entity\Rattachement;
@@ -12,7 +12,7 @@ use App\Entity\MetaThematique;
 use App\Entity\Individu;
 
 /* ANITI et ONERA ne sont plus des thématiques, ce sont des "rattachements" */
-class Rattachements  implements FixtureInterface
+class Rattachements  implements ORMFixtureInterface
 {
 	public function load(ObjectManager $em)
 	{

@@ -480,59 +480,16 @@ class Projet
     }
 
      /**
-     * derniereVersion
+     * derniereVersion - Alias de getVersionDerniere()
+     *                   TODO - A supprimer !
      *
      * @return \App\Entity\Version
      */
     public function derniereVersion()
     {
-        // si la clé étrangère est correcte return cette clé sinon on la calcule
-        $derniereVersion    =   $this->getVersionDerniere();
-        if( $derniereVersion != null )
-            return $derniereVersion;
-        else
-            return $this->calculDerniereVersion();
-
+		return $this->getVersionDerniere();
     }
     
-    /**
-     * calculDerniereVersion
-     *
-     * MEME CODE que la fonction de même nom de ServiceProjets
-     * SAUF QUE on n'ECRIT PAS dans la bse de données parce que
-     * ON N'A PAS ACCES à l'EntityManager
-     * TODO - Refondre tout ce merdier ASAP !
-     * 
-     * @return \App\Entity\Version
-     */
-    private function calculDerniereVersion()
-    {
-        if( $this->getVersion() == null ) return null;
-
-        $iterator = $this->getVersion()->getIterator();
-        $iterator->uasort(function ($a, $b)
-            {
-                if( $a->getSession() == null )
-                    return true;
-                elseif( $b->getSession() == null )
-                    return false;
-                else
-                    return strcmp($a->getSession()->getIdSession(), $b->getSession()->getIdSession());
-            } );
-        $sortedVersions =  iterator_to_array($iterator) ;
-
-        $result = end( $sortedVersions );
-        if( ! $result instanceof Version ) 
-        {
-			return null;
-		}
-		else
-		{
-			return $result;
-		}
-    }
-
-
 	/****************
 	 * Retourne true si $individu collabore à au moins une version du projet
 	 ******************************************/

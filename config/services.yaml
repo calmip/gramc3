@@ -105,9 +105,9 @@ services:
 #        class: App\Directory\ClassName
 #        arguments: ["@another_service_name", "plain_value", "%parameter_name%"]
      # A JETER
-     app.init_controller:
-       class: App\Controller\InitController
-       arguments: ["@doctrine.orm.entity_manager","@kernel"]
+     #app.init_controller:
+     #  class: App\Controller\InitController
+     #  arguments: ["@doctrine.orm.entity_manager","@kernel"]
        
      # Informations générales (bas de page, haut de page)
      app.gramc.ServiceInfos:
@@ -117,9 +117,13 @@ services:
      # cf https://stackoverflow.com/questions/47613979/symfony-3-4-0-could-not-find-any-fixture-services-to-load
      # makes classes in src/AppBundle/DataFixtures available to be used as services
      # and have a tag that allows actions to type-hint services
-     #App\DataFixtures\:
-     # resource: '../../src/AppBundle/DataFixtures'
-     # tags: ['doctrine.fixture.orm']
+     App\DataFixtures\:
+         resource: '../src/DataFixtures'
+         tags: ['doctrine.fixture.orm']
+         
+     App\DataFixtures\ORM\ProjetsVersionDerniereActive:
+         arguments: ["@app.gramc.ServiceProjets"]
+         tags: ['doctrine.fixture.orm']
 
 #     app.gramc.fixture:
 #      class: App\DataFixtures\ORM\Essais
@@ -149,6 +153,20 @@ services:
             - # these are the options required to define the entity listener
               name: 'doctrine.orm.entity_listener'
               event: 'preUpdate'
+              entity: 'App\Entity\Version'
+
+     App\EventListener\ProjetDerniereVersion:
+        arguments: ["@app.gramc.ServiceProjets", "@doctrine.orm.entity_manager"]
+        tags:
+            - # these are the options required to define the entity listener
+              name: 'doctrine.orm.entity_listener'
+              event: 'postPersist'
+              entity: 'App\Entity\Version'
+            - name: 'doctrine.orm.entity_listener'
+              event: 'postRemove'
+              entity: 'App\Entity\Version'
+            - name: 'doctrine.orm.entity_listener'
+              event: 'postUpdate'
               entity: 'App\Entity\Version'
 
      # SERVICES GRAMC
