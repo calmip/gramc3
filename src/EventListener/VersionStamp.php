@@ -52,6 +52,7 @@ class VersionStamp
     // the entity instance and the lifecycle event
     public function preUpdate(Version $version, LifecycleEventArgs $event): void
     {
+		if ($this->tok == null) return;
 		$user = $this->tok->getUser();
 		if ($version->isCollaborateur($user))
 		{

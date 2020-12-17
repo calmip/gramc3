@@ -38,4 +38,5 @@ altermeso
 app/config/adresses.txt
 
 .env*
+adminer\.php
 

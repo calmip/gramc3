@@ -38,7 +38,7 @@ class Rattachements  implements ORMFixtureInterface
 		
 		echo "Table Rattachement remplie\n";
 
-		// Modifier la tables versions
+		// Modifier la table versions
 		// Les versions de thématique ANITI et ONERA sont modifiées comme suit:
 		// ANITI:
 		//    - Thématique   => 7 (Informatique, automatique)

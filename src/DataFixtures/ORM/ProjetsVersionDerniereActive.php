@@ -22,7 +22,7 @@ class ProjetsVersionDerniereActive  implements ORMFixtureInterface
 	}
 	
 	public function load(ObjectManager $em)
-	{
+	{return;
 		$projets = $em->getRepository(Projet::class)->findAll();
 		foreach ($projets as $projet)
 		{

@@ -64,7 +64,7 @@ class ProjetDerniereVersion
     {
 		$projet = $version->getProjet();
 		$projet->setVersionActive( $version);
-		$em->persist($projet);
-		$em->flush();
+		$this->em->persist($projet);
+		//$em->flush();
     }
 }
