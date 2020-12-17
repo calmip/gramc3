@@ -95,7 +95,8 @@ services:
           public: true
 #          autowire: true
 #          autoconfigure: true
-          
+     
+     # Tous les controleurs sont des services, ils peuvent utiliser la dependency injection     
      App\Controller\:
        resource: '../src/Controller/*'
        tags: [controller.service_arguments]
@@ -140,6 +141,15 @@ services:
         arguments: ["%kernel.debug%", '@router','@logger',"@app.gramc.ServiceJournal",'@session',"@doctrine.orm.entity_manager"]
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
+
+     # Evenements Doctrine lorsqu'on met à jour une version
+     App\EventListener\VersionStamp:
+        arguments: ["@security.token_storage"]
+        tags:
+            - # these are the options required to define the entity listener
+              name: 'doctrine.orm.entity_listener'
+              event: 'preUpdate'
+              entity: 'App\Entity\Version'
 
      # SERVICES GRAMC
      #app.gramc_date:

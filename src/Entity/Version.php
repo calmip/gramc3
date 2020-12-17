@@ -583,16 +583,6 @@ class Version implements Demande
      */
     private $fctStamp;
 
-
-    /**
-    * @ ORM\PrePersist
-    */
-    public function setInitialMajStamp()
-    {
-        $this->majStamp = new \DateTime();
-        $this->majInd   = App::getUser();
-    }
-
     /**
     * @ ORM\PostPersist
     */
@@ -602,19 +592,6 @@ class Version implements Demande
         $this->projet->calculDerniereVersion();
     }
 
-    /**
-    * @ ORM\PreUpdate
-    */
-    public function setUpdateMajStamp()
-    {
-		// On renseigne le stamp de mise à jour SSI la personne connectée est un collaborateur
-		// Sinon (admin, expert, ... rien ne se passe !
-		if ($this->isCollaborateur(App::getUser()))
-		{
-            $this->majStamp = new \DateTime();
-            $this->majInd   = App::getUser();
-		}
-    }
 
     /**
     * @ORM\PostUpdate
