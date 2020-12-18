@@ -35,10 +35,15 @@ use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 
 use App\Utils\Functions;
-use App\Utils\GramcDate;
+use App\GramcServices\GramcDate;
 
 class PublicationType extends AbstractType
 {
+	public function __construct (GramcDate $grdt)
+	{
+		$this -> grdt = $grdt;
+	}
+
     /**
      * {@inheritdoc}
      */
@@ -51,7 +56,7 @@ class PublicationType extends AbstractType
             ->add('idPubli',  IntegerType::class , ['required'  =>  false, ])
             ->add('annee',      ChoiceType::class,
                 [
-                'choices'         => Functions::choicesYear( new \DateTime('2000-01-01'), new GramcDate(), 0 ),                
+                'choices'         => Functions::choicesYear( new \DateTime('2000-01-01'), $this->grdt, 0 ),                
                 ]
                 );
             

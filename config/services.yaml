@@ -320,3 +320,7 @@ services:
         arguments: [ "%max_page_nb%", "@app.gramc.ServiceJournal" ]
         tags: ["validator.constraint_validator" ]
         
+     app.gramc.publicationtype:
+        class: App\Form\PublicationType
+        arguments: ["@app.gramc.date"]
+        tags: ["form.type"]

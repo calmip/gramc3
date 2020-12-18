@@ -349,7 +349,7 @@ class ProjetController extends Controller
     {
 		$em = $this->getDoctrine()->getManager();
 		$sp = $this->get('app.gramc.ServiceProjets');
-		$sv = $this->get('app.gramc.ServiceVersion');
+		$sv = $this->get('app.gramc.ServiceVersions');
 	    $sortie = 'Projets de la session ' . $session->getId() . "\n";
 	    $ligne  =   [
 	                'Nouveau',

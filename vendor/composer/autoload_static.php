@@ -33,6 +33,7 @@ class ComposerStaticInitbb59d321825206f6aafc7e97feca8eab
         'T' => 
         array (
             'Twig\\Extra\\TwigExtraBundle\\' => 27,
+            'Twig\\Extensions\\' => 16,
             'Twig\\' => 5,
         ),
         'S' => 
@@ -175,6 +176,10 @@ class ComposerStaticInitbb59d321825206f6aafc7e97feca8eab
         'Twig\\Extra\\TwigExtraBundle\\' => 
         array (
             0 => __DIR__ . '/..' . '/twig/extra-bundle/src',
+        ),
+        'Twig\\Extensions\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/twig/extensions/src',
         ),
         'Twig\\' => 
         array (
@@ -568,6 +573,20 @@ class ComposerStaticInitbb59d321825206f6aafc7e97feca8eab
         ),
     );
 
+    public static $prefixesPsr0 = array (
+        'T' => 
+        array (
+            'Twig_Extensions_' => 
+            array (
+                0 => __DIR__ . '/..' . '/twig/extensions/lib',
+            ),
+            'Twig_' => 
+            array (
+                0 => __DIR__ . '/..' . '/twig/twig/lib',
+            ),
+        ),
+    );
+
     public static $classMap = array (
         'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'Collator' => __DIR__ . '/..' . '/symfony/intl/Resources/stubs/Collator.php',
@@ -587,6 +606,7 @@ class ComposerStaticInitbb59d321825206f6aafc7e97feca8eab
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInitbb59d321825206f6aafc7e97feca8eab::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInitbb59d321825206f6aafc7e97feca8eab::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitbb59d321825206f6aafc7e97feca8eab::$prefixesPsr0;
             $loader->classMap = ComposerStaticInitbb59d321825206f6aafc7e97feca8eab::$classMap;
 
         }, null, ClassLoader::class);

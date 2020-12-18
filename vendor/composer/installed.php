@@ -1077,6 +1077,15 @@
       ),
       'reference' => '7531361cf38e4816821b4a12a42542b3c6143ad1',
     ),
+    'twig/extensions' => 
+    array (
+      'pretty_version' => 'v1.5.4',
+      'version' => '1.5.4.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '57873c8b0c1be51caa47df2cdb824490beb16202',
+    ),
     'twig/extra-bundle' => 
     array (
       'pretty_version' => 'v3.1.1',
@@ -1088,12 +1097,12 @@
     ),
     'twig/twig' => 
     array (
-      'pretty_version' => 'v3.1.1',
-      'version' => '3.1.1.0',
+      'pretty_version' => 'v2.14.1',
+      'version' => '2.14.1.0',
       'aliases' => 
       array (
       ),
-      'reference' => 'b02fa41f3783a2616eccef7b92fbc2343ffed737',
+      'reference' => '5eb9ac5dfdd20c3f59495c22841adc5da980d312',
     ),
     'webimpress/safe-writer' => 
     array (

@@ -48,7 +48,6 @@ use Symfony\Component\HttpFoundation\Response;
  * Publication controller.
  *
  * @Route("publication")
- * @Security("is_granted('ROLE_ADMIN')")
  */
 class PublicationController extends Controller
 {
@@ -57,6 +56,7 @@ class PublicationController extends Controller
      *
      * @Route("/", name="publication_index")
      * @Method("GET")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function indexAction()
     {
@@ -206,6 +206,7 @@ class PublicationController extends Controller
      *
      * @Route("/new", name="publication_new")
      * @Method({"GET", "POST"})
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function newAction(Request $request)
     {
@@ -233,6 +234,7 @@ class PublicationController extends Controller
      *
      * @Route("/{id}/show", name="publication_show")
      * @Method("GET")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function showAction(Publication $publication)
     {
@@ -249,6 +251,7 @@ class PublicationController extends Controller
      *
      * @Route("/{id}/edit", name="publication_edit")
      * @Method({"GET", "POST"})
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function editAction(Request $request, Publication $publication)
     {
@@ -367,6 +370,7 @@ class PublicationController extends Controller
      * Creates a form to delete a publication entity.
      *
      * @param Publication $publication The publication entity
+     * @Security("is_granted('ROLE_ADMIN')")
      *
      * @return \Symfony\Component\Form\Form The form
      */
