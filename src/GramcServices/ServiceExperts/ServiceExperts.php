@@ -247,11 +247,11 @@ class ServiceExperts
 			// La demande est-elle sélectionnée ? - Si non on ignore
 			$selform = $this->getSelForm($demande);
 			$selform->handleRequest($request);
-			if ($selform->getData()['sel']==false)
+			if ($selform->getData() == null || $selform->getData()['sel']==false)
 			{
 	            continue;
 			}
-
+			
 			// traitement du formulaire d'affectation
 			$forms   = $this->getExpertForms($demande);
 
@@ -285,6 +285,7 @@ class ServiceExperts
 				continue;
 			}
 		}
+
 		if ($form_buttons->get('sub2')->isClicked())
 		{
 			$this->notifierExperts();

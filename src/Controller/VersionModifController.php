@@ -1414,7 +1414,7 @@ class VersionModifController extends Controller
 		$sm = $this->get('app.gramc.ServiceMenus');
 		$sv = $this->get('app.gramc.ServiceVersions');
 		$sj = $this->get('app.gramc.ServiceJournal');
-		$projet_workflow = $this->get('app.gramc.ProjetWorkFlow');
+		$projet_workflow = $this->get('app.gramc.ProjetWorkflow');
 		$em = $this->getDoctrine()->getManager();
 		
 	    // ACL

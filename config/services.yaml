@@ -30,7 +30,7 @@ parameters:
     max_fig_height: 400
     max_page_nb: 5
     noconso: false
-    max_rall: 3
+    max_rall: 4
     prj_prefix:
         1: P
         2: T
@@ -324,4 +324,9 @@ services:
      app.gramc.publicationtype:
         class: App\Form\PublicationType
         arguments: ["@app.gramc.date"]
+        tags: ["form.type"]
+
+     app.gramc.sessiontype:
+        class: App\Form\SessionType
+        arguments: ["@app.gramc.date","@doctrine.orm.entity_manager"]
         tags: ["form.type"]

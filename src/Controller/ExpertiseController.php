@@ -81,6 +81,7 @@ class ExpertiseController extends Controller
     public function affectationTestAction(Request $request)
     {
 		$ss = $this->get('app.gramc.ServiceSessions');
+		$sp = $this->get('app.gramc.ServiceProjets');
 		$se = $this->get('app.gramc.ServiceExperts');
 		$em = $this->getDoctrine()->getManager();
 		
@@ -116,12 +117,25 @@ class ExpertiseController extends Controller
 		$stats       = $affectationExperts->getStats();
 		$stats['nouveau'] = null;
 		$attHeures   = $affectationExperts->getAttHeures();
+
+        foreach( $versions as $version )
+        {
+			$id_version                  = $version->getIdVersion();
+			$projet                      = $version->getProjet();
+			$version_suppl               = [];
+			$version_suppl['metaetat']   = $sp->getMetaEtat($projet);
+			$version_suppl['consocalcul']= $sp->getConsoCalculVersion($version);
+			$version_suppl['isnouvelle'] = true;
+
+			$versions_suppl[$id_version] = $version_suppl;
+		}
 		
 		$titre = "Affectation des experts aux projets tests de l'année 20$annee"; 
         return $this->render('expertise/affectation.html.twig', 
             [
             'titre'         => $titre,
             'versions'      => $versions,
+            'versions_suppl'=> $versions_suppl,
             'forms'         => $forms,
             'sessionForm'   => null,
             'thematiques'   => null,
@@ -567,14 +581,14 @@ class ExpertiseController extends Controller
         $anneeCour  = 2000 +$session->getAnneeSession();
         $anneePrec  = $anneeCour - 1;
 
-		// Version est-elle nouvelle ?
-		$isnouvelle = $sv->isNouvelle($version);
-		
         // Le comportement diffère suivant le type de projet
         $version = $expertise->getVersion();
         if( $version == null )
             $sj->throwException(__METHOD__ . ":" . __LINE__ . "  " . $expertise . " n'a pas de version !" );
 
+		// Version est-elle nouvelle ?
+		$isnouvelle = $sv->isNouvelle($version);
+		
 		// $session_edition -> Si false, on autorise le bouton Envoyer
 		//                  -> Si true, on n'autorise pas
 		$msg_explain = '';

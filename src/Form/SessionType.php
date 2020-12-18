@@ -41,13 +41,19 @@ use App\Entity\Journal;
 use App\Entity\Individu;
 
 use App\Utils\Functions;
-use App\Utils\GramcDate;
 use App\Utils\Etat;
-//use App\App;
+use App\GramcServices\GramcDate;
 
+use Doctrine\ORM\EntityManager;
 
 class SessionType extends AbstractType
 {
+	public function __construct (GramcDate $grdt, EntityManager $em)
+	{
+		$this -> grdt = $grdt;
+		$this -> em   = $em;
+	}
+
     /**
      * {@inheritdoc}
      */
@@ -68,13 +74,13 @@ class SessionType extends AbstractType
                     [
                     //'data'          => $options['from'], // valeur par défaut
                     'label'         => 'Date de début des saisies:',
-                    'years'         => Functions::years( new \DateTime(), new GramcDate() ),
+                    'years'         => Functions::years( new \DateTime(), $this->grdt->getNew() ),
                     ])
             ->add('dateFinSession', DateType::class,
                     [
                     //'data'          => $options['from'], // valeur par défaut
                     'label'         => 'Date de fin des saisies:',
-                    'years'         => Functions::years( new \DateTime(), new GramcDate() ),
+                    'years'         => Functions::years( new \DateTime(), $this->grdt->getNew() ),
                     ])
             ->add('hParAnnee', IntegerType::class,
                     [
@@ -87,7 +93,7 @@ class SessionType extends AbstractType
                     'class' => 'App:Individu',
                     'required'  =>  false,
                     'label'     => 'Président:',
-                    'choices' =>  $this->getRepository(Individu::class)->findBy(['expert' => true]),
+                    'choices' =>  $this->em->getRepository(Individu::class)->findBy(['expert' => true]),
                 ]);
 
          if(  $options['all'] == true )

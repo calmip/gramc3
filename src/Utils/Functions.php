@@ -105,22 +105,6 @@ class Functions
     }
 
     /*
-     * générer la bonne exception si on est authentifié ou pas
-     *
-    */
-
-    //public static function createException( $text = null )
-    //{
-        //if( $text != null ) static::warningMessage($text);
-
-        //if( App::isGranted( 'IS_AUTHENTICATED_FULLY' ) )
-            //throw new AccessDeniedHttpException();
-        //else
-            //throw new InsufficientAuthenticationException();
-    //}
-
-
-    /*
      *
      * sauvegarder un objet avec un traitement des exceptions
      *
@@ -363,6 +347,8 @@ class Functions
 	 {
 	    $connexions = [];
  	    $dir = session_save_path();
+        $sj->debugMessage(__METHOD__ . ':' . __LINE__ . "session directory = " . $dir );
+
 	    $scan = scandir( $dir );
 	
 	    $save = $_SESSION;

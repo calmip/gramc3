@@ -70,7 +70,7 @@ class ServiceExpertsRallonge extends ServiceExperts
 		// Nom du formulaire
 		$nom = 'expert'.$rallonge->getId();
 
-	    $choice = new ExpertChoiceLoader($em, $exclus);
+	    $choice = new ExpertChoiceLoader($this->em, $exclus);
 
 		// Important de passer par un tableau pour garder la même valeur de retour pour tous les getExpertForms()
 		// cf AffectationExperts::getExpertForms

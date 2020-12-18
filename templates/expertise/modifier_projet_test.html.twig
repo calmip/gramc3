@@ -61,14 +61,6 @@
         <a href="{{ path('consulter_projet', { 'id' : expertise.version.projet.idProjet } ) }}" target="_blank">
         <img class="bouton_poussoir" src="{{ asset('icones/consulter64.png') }}" title="Consulter le projet" alt="Consulter le projet" />
         </a>
-        {% if ( version.hasRapport  and not ( isNouvelle ) ) %}
-        <a href="{{ path('rapport', { 'id' : version.idVersion }) }}"  target="_blank">
-            <img class="bouton_poussoir" src="{{ asset('icones/pdf64.png') }}" alt="pdf" title="Rapport d'activité {{version.anneeRapport}}" />
-        </a>
-        {%  endif %}
-        <a href="{{ path('consulter_publications', { 'id' : version.projet }) }}"  target="_blank" >
-            <img class="bouton_poussoir" src="{{ asset('icones/publis.png') }}" alt="Publications" title="Publications associées au projet version.idProjet" />
-        </a>
     </div>
 
    {{ form_start(edit_form) }}
