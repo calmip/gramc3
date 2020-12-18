@@ -53,6 +53,7 @@ use App\GramcServices\Workflow\Session\SessionWorkflow;
 # TODO - Pas bien beau à modifier !
 use App\Controller\VersionModifController;
 
+use Symfony\Component\Validator\Validator\TraceableValidator;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\UsageTrackingTokenStorage;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
@@ -66,6 +67,7 @@ class ServiceMenus
 								ServiceJournal $sj, 
 								SessionWorkflow $sw, 
 								GramcDate $grdt, 
+								TraceableValidator $sval,
 								ServiceSessions $ss, 
 								UsageTrackingTokenStorage $tok,
 								AuthorizationChecker $ac,
@@ -77,6 +79,7 @@ class ServiceMenus
 		$this->sj   = $sj;
 		$this->sw   = $sw;
 		$this->grdt = $grdt;
+		$this->sval = $sval;
 		$this->ss   = $ss;
 		$this->token= $tok->getToken();
 		$this->ac   = $ac;
@@ -1180,7 +1183,7 @@ class ServiceMenus
             $menu['raison'] = "Le responsable du projet n'a pas demandé de renouvellement";
         elseif( $etatSession != Etat::EDITION_DEMANDE && $isProjetTest == false )
             $menu['raison'] = "Nous ne sommes pas en période de demandes de ressources";
-        elseif( VersionModifController::versionValidate( $version, $this->sj, $this->em ) != [] )
+        elseif( VersionModifController::versionValidate( $version, $this->sj, $this->em, $this->sval ) != [] )
 		{
 			//$this->sj->debugMessage(__METHOD__ . ' '.$version->getIdVersion() . ' ' . print_r(VersionModifController::versionValidate( $version ), true));
 

@@ -245,6 +245,7 @@ class RallongeController extends Controller
     {
 		$sm = $this->get('app.gramc.ServiceMenus');
 		$sj = $this->get('app.gramc.ServiceJournal');
+		$sval = $this->get('validator');
 		$em = $this->getDoctrine()->getManager();
 		
         // ACL
@@ -276,7 +277,7 @@ class RallongeController extends Controller
         $editForm->handleRequest($request);
         if ($editForm->isSubmitted()  )
 		{
-            $erreurs = Functions::dataError( $em, $rallonge);
+            $erreurs = Functions::dataError( $sval, $rallonge);
             $em->flush();
 
             if( $editForm->get('fermer')->isClicked() )
@@ -315,6 +316,7 @@ class RallongeController extends Controller
 		$sm = $this->get('app.gramc.ServiceMenus');
 		$ss = $this->get('app.gramc.ServiceSessions');
 		$sj = $this->get('app.gramc.ServiceJournal');
+		$sval = $this->get('validator');
 		$em = $this->getDoctrine()->getManager();
 		
 	    // ACL
@@ -354,7 +356,7 @@ class RallongeController extends Controller
 		// Boutons ENREGISTRER, FERMER ou ENVOYER
 	    if ($editForm->isSubmitted()  )
 		{
-            $erreurs = Functions::dataError( $em, $rallonge, ['expertise'] );
+            $erreurs = Functions::dataError( $sval, $rallonge, ['expertise'] );
             $em->flush();
 
 			// Bouton FERMER
@@ -419,6 +421,7 @@ class RallongeController extends Controller
     {
 		$ss = $this->get('app.gramc.ServiceSessions');
 		$sj = $this->get('app.gramc.ServiceJournal');
+		$sval = $this->get('validator');
 		$em = $this->getdoctrine()->getManager();
 		
 	    $erreurs = [];
@@ -443,7 +446,7 @@ class RallongeController extends Controller
 	    if ($editForm->isSubmitted()  )
 		{
             $rallonge->setValidation( $validation ); //  tout cela juste à cause de validation disabled
-            $erreurs = Functions::dataError( $em, $rallonge, ['president'] );
+            $erreurs = Functions::dataError( $sval, $rallonge, ['president'] );
 
             Functions::sauvegarder( $rallonge, $em, $lg );
 
@@ -497,6 +500,7 @@ class RallongeController extends Controller
     {
 		$sm = $this->get('app.gramc.ServiceMenus');
 		$sj = $this->get('app.gramc.ServiceJournal');
+		$sval = $this->get('validator');
 
         // ACL
         if( $sm->rallonge_expertiser($rallonge)['ok'] == false )
@@ -512,7 +516,7 @@ class RallongeController extends Controller
         else
             $sj->throwException(__METHOD__ . ":" . __LINE__ . " rallonge " . $rallonge . " n'est pas associée à une version !");
 
-        $erreurs = Functions::dataError( $em, $rallonge, ['expertise'] );
+        $erreurs = Functions::dataError( $sval, $rallonge, ['expertise'] );
 
         return $this->render('rallonge/avant_envoyer_president.html.twig',
             [
@@ -536,6 +540,7 @@ class RallongeController extends Controller
     {
 		$sm = $this->get('app.gramc.ServiceMenus');
 		$sj = $this->get('app.gramc.ServiceJournal');
+		$sval = $this->get('validator');
 
         // ACL
         if( $sm->rallonge_envoyer($rallonge)['ok'] == false )
@@ -550,7 +555,7 @@ class RallongeController extends Controller
         else
             $sj->throwException(__METHOD__ . ":" . __LINE__ . " rallonge " . $rallonge . " n'est pas associée à une version !");
 
-        $erreurs = Functions::dataError( $em, $rallonge);
+        $erreurs = Functions::dataError( $sval, $rallonge);
         return $this->render('rallonge/avant_envoyer.html.twig',
             [
             'rallonge'  => $rallonge,
@@ -571,13 +576,14 @@ class RallongeController extends Controller
     {
 		$sm = $this->get('app.gramc.ServiceMenus');
 		$sj = $this->get('app.gramc.ServiceJournal');
+		$sval = $this->get('validator');
 
         // ACL
         if( $sm->rallonge_envoyer($rallonge)['ok'] == false )
             $sj->throwException(__METHOD__ . " impossible de modifier la rallonge " . $rallonge->getIdRallonge().
                 " parce que : " . $sm->rallonge_envoyer($rallonge)['raison'] );
 
-        $erreurs = Functions::dataError( $em, $rallonge);
+        $erreurs = Functions::dataError( $sval, $rallonge);
         $workflow = $this->get('app.gramc.RallongeWorkflow');
 
         if( $erreurs != null )
@@ -623,8 +629,9 @@ class RallongeController extends Controller
     public function finaliserAction(Request $request, Rallonge $rallonge)
     {
 		$sj = $this->get('app.gramc.ServiceJournal');
+		$sval = $this->get('validator');
 
-        $erreurs = Functions::dataError( $em, $rallonge);
+        $erreurs = Functions::dataError( $sval, $rallonge);
         $workflow = $this->get('app.gramc.RallongeWorkflow');
 
         if( $erreurs != null )
@@ -676,13 +683,14 @@ class RallongeController extends Controller
     {
 		$sm = $this->get('app.gramc.ServiceMenus');
 		$sj = $this->get('app.gramc.ServiceJournal');
+		$sval = $this->get('validator');
 
        // ACL
         if( $sm->rallonge_expertiser($rallonge)['ok'] == false )
             $sj->throwException(__METHOD__ . " impossible d'envoyer la demande " . $rallonge->getIdRallonge().
                 " au président parce que : " . $sm->rallonge_expertiser($rallonge)['raison'] );
 
-        $erreurs = Functions::dataError( $em, $rallonge, ['expertise'] );
+        $erreurs = Functions::dataError( $sval, $rallonge, ['expertise'] );
         $workflow = $this->get('app.gramc.RallongeWorkflow');
 
         if( $erreurs != null )

@@ -48,6 +48,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\Validator\Validator\TraceableValidator;
 
 //use App\App;
 use App\Utils\Functions;
@@ -230,8 +231,9 @@ class VersionModifController extends Controller
      */
 	private function modifierType1(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form, LoggerInterface $lg)
     {
-		$sj = $this->get('app.gramc.ServiceJournal');
-		$em = $this->getDoctrine()->getManager();
+		$sj   = $this->get('app.gramc.ServiceJournal');
+		$sval = $this->get('validator');
+		$em   = $this->getDoctrine()->getManager();
 		
 		// formulaire principal
         $form = $this->createFormBuilder($version);
@@ -293,7 +295,7 @@ class VersionModifController extends Controller
             'imageJust2'    =>   $this->image('img_justif_renou_2',$version),
             'imageJust3'    =>   $this->image('img_justif_renou_3',$version),
             'collaborateur_form' => $collaborateur_form->createView(),
-            'todo'          => static::versionValidate($version, $sj, $em),
+            'todo'          => static::versionValidate($version, $sj, $em, $sval),
             'renouvellement'    => $renouvellement,
             ]);
 	}
@@ -546,6 +548,7 @@ class VersionModifController extends Controller
     private function modifierType2(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form, LoggerInterface $lg)
     {
 		$sj = $this->get('app.gramc.ServiceJournal');
+		$sval = $this->get('validator');
 		$em = $this->getDoctrine()->getManager();
 
 		if( $this->container->hasParameter('heures_projet_test' ) )
@@ -621,7 +624,7 @@ class VersionModifController extends Controller
 			'form'      => $form->createView(),
 			'version'   => $version,
 			'collaborateur_form' => $collaborateur_form->createView(),
-			'todo'      => static::versionValidate($version, $sj, $em),
+			'todo'      => static::versionValidate($version, $sj, $em, $sval),
 			]);
 
 	}
@@ -638,6 +641,7 @@ class VersionModifController extends Controller
 	private function modifierType3(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form, LoggerInterface $lg)
     {
 		$sj = $this->get('app.gramc.ServiceJournal');
+		$sval = $this->get('validator');
 		$em = $this->getDoctrine()->getManager();
 
 		// formulaire principal
@@ -851,7 +855,7 @@ class VersionModifController extends Controller
             'imageJust2'    =>   $this->image('img_justif_renou_2',$version),
             'imageJust3'    =>   $this->image('img_justif_renou_3',$version),
             'collaborateur_form' => $collaborateur_form->createView(),
-            'todo'          => static::versionValidate($version, $sj, $em),
+            'todo'          => static::versionValidate($version, $sj, $em, $sval),
             'renouvellement'    => $renouvellement,
             ]);
 	}
@@ -980,10 +984,11 @@ class VersionModifController extends Controller
     {
 		$sj = $this->get('app.gramc.ServiceJournal');
 		$em = $this->getDoctrine()->getManager();		
-
+		$sval= $this->get('validator');
+		
 		return $this
 			   ->get('form.factory')
-			   ->createNamedBuilder('form_projet', FormType::class, [ 'individus' => $this->prepareCollaborateurs($version, $sj, $em) ])
+			   ->createNamedBuilder('form_projet', FormType::class, [ 'individus' => self::prepareCollaborateurs($version, $sj, $sval) ])
 			   ->add('individus', CollectionType::class, [
 				   'entry_type'     =>  IndividuFormType::class,
 				   'label'          =>  false,
@@ -1001,27 +1006,23 @@ class VersionModifController extends Controller
     /**
     * préparation de la liste des collaborateurs
     * 
-    * params = $version
-    * $sj, $em
+    * params = $version, $sj, $sval
     * 
-    * TODO - Pas fameux encore une fonction statique --> dans un service ?
+    * TODO - Une fonction statique horreur !
     * 
-    * return = Un tableau de IndividuForm
-    *************************************************************/
-    private function prepareCollaborateurs(Version $version, ServiceJournal $sj, EntityManager $em)
+    * return = Un tableau d'objets de type IndividuForm (cf Util\IndividuForm)
+    *          Le responsable est dans la cellule 0 du tableau 
+    * 
+    *****************************************************************************/
+    private static function prepareCollaborateurs(Version $version, ServiceJournal $sj, TraceableValidator $sval)
     {
-		//$sj = $this->get('app.gramc.ServiceJournal');
-		//$em = $this->getDoctrine()->getManager();		
-
 	    if( $version == null ) $sj->throwException('VersionController:modifierCollaborateurs : version null');
 	
-	    // préparation de la liste des responsables potentiels
-	
-	    $dataR  =   [];
-	    $dataNR =   [];
+	    $dataR  =   [];    // Le responsable est seul dans ce tableau
+	    $dataNR =   [];    // Les autres collaborateurs
 	    foreach( $version->getCollaborateurVersion() as $item )
 		{
-			$collaborateur   =  $item->getCollaborateur();
+			$collaborateur = $item->getCollaborateur();
 			if( $collaborateur == null )
 			{
 				$sj->errorMessage("VersionController:modifierCollaborateurs : collaborateur null pour CollaborateurVersion ".
@@ -1030,7 +1031,7 @@ class VersionModifController extends Controller
 			}
 			else
 			{
-				$individuForm = new IndividuForm( $collaborateur );
+				$individuForm = new IndividuForm($collaborateur);
 				$individuForm->setLogin( $item->getLogin() );
 				$individuForm->setResponsable( $item->getResponsable() );
 				if( $individuForm->getResponsable() == true )
@@ -1039,6 +1040,8 @@ class VersionModifController extends Controller
 					$dataNR[] = $individuForm;
 			}
 		}
+		
+		// On merge les deux, afin de revoyer un seul tableau, le responsable en premier
 	    return array_merge($dataR, $dataNR);
     }
 
@@ -1053,6 +1056,7 @@ class VersionModifController extends Controller
     {
 		$sm = $this->get('app.gramc.ServiceMenus');
 		$sj = $this->get('app.gramc.ServiceJournal');
+		$sval= $this->get('validator');
 		$em = $this->getDoctrine()->getManager();
 
 
@@ -1067,10 +1071,11 @@ class VersionModifController extends Controller
 			return $this->redirectToRoute($modifier_version_menu['name'],['id' => $version, '_fragment' => 'liste_des_collaborateurs'] );
 		}
 
+
 	    $collaborateur_form = $this
            ->get('form.factory')
            ->createNamedBuilder('form_projet', FormType::class, [
-	           'individus' => self::prepareCollaborateurs($version,$sj,$em) 
+	           'individus' => self::prepareCollaborateurs($version,$sj,$sval) 
            ])
            ->add('individus', CollectionType::class, [
                'entry_type'     =>  IndividuFormType::class,
@@ -1178,9 +1183,10 @@ class VersionModifController extends Controller
 	 ****************************************************************/
     private function handleIndividuForms($individu_forms, Version $version)
     {
-		$em = $this->getDoctrine()->getManager();
-		$sv = $this->get('app.gramc.ServiceVersions');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$em   = $this->getDoctrine()->getManager();
+		$sv   = $this->get('app.gramc.ServiceVersions');
+		$sj   = $this->get('app.gramc.ServiceJournal');
+		$sval = $this->get('validator');
 		
 	    foreach($individu_forms as $individu_form)
 		{
@@ -1190,40 +1196,58 @@ class VersionModifController extends Controller
 			if( $id != null )
 			{
 				$individu = $em->getRepository(Individu::class)->find( $id );
-				// TODO - Je ne comprends pas l'implication de ces messages
-				// if( $individu_form->getMail()  == null )
-				//    $sj->warningMessage(__METHOD__ . ':' . __LINE__ . " $id: le mail du formulaire est null !");
-				// else
-				//	$sj->errorMessage(__METHOD__ . ':' . __LINE__ . " $id: le mail du formulaire= " . $individu_form->getMail());
+				// Toujours null, donc plein de messages idiots dans le journal, puisque par ailleur ça marche !
+				// TODO y comprendre quelque chose !
+				//if( $individu_form->getMail() == null ) 
+				//{
+				//	echo $sj->warningMessage($individu_form);
+				//	$sj->warningMessage(__METHOD__ . ':' . __LINE__ . " Utilisateur $individu: Pas de mail dans le firmulaire: zarbi !");
+				//}
 			}
 			
-			// On a renseigné le mail de l'utilisateur: on recherche l'utilisateur !
+			// On a renseigné le mail de l'utilisateur mais on n'a pas encore l'id: on recherche l'utilisateur !
 			// Si $utilisateur == null, il faudra le créer (voir plus loin)
 			elseif( $individu_form->getMail() != null )
 			{
 				$individu = $em->getRepository(Individu::class)->findOneBy( [ 'mail' =>  $individu_form->getMail() ]);
-				if ( $individu!=null) $sj->debugMessage(__METHOD__ . ':' . __LINE__ . ' mail=' . $individu_form->getMail() . ' correspond à individu ' . $individu);
-				else                  $sj->debugMessage(__METHOD__ . ':' . __LINE__ . ' mail=' . $individu_form->getMail() . ' individu pas trouvé');
+				if ( $individu!=null)
+				{
+					$sj->debugMessage(__METHOD__ . ':' . __LINE__ . ' mail=' . $individu_form->getMail() . ' => trouvé ' . $individu);
+				}
+				else 
+				{ 
+	                $sj->debugMessage(__METHOD__ . ':' . __LINE__ . ' mail=' . $individu_form->getMail() . ' => Individu à créer !');
+				}
 			}
 			
 			// Pas de mail -> pas d'utilisateur !
 			else
 			{
-				//$sj->errorMessage(__METHOD__ . ':' . __LINE__ . ' mail et id sont nulls en même temps !');
 				$individu = null;
 			}
 
 			// Cas d'erreur qui ne devraient jamais se produire
 			if( $individu == null && $id != null )
-					$sj->errorMessage(__METHOD__ . ':' . __LINE__ .' idIndividu ' . $id . 'du formulaire ne correspond pas à un utilisateur');
+			{
+				$sj->errorMessage(__METHOD__ . ':' . __LINE__ .' idIndividu ' . $id . 'du formulaire ne correspond pas à un utilisateur');
+			}
 			elseif( is_array( $individu_form ) )
+			{
+				// TODO je ne vois pas le rapport
 				$sj->errorMessage(__METHOD__ . ':' . __LINE__ .' individu_form est array ' . Functions::show( $individu_form) );
+			}
 			elseif( is_array( $individu ) )
+			{
+				// TODO pareil un peu nawak
 				$sj->errorMessage(__METHOD__ . ':' . __LINE__ .' individu est array ' . Functions::show( $individu) );
+			}
 			elseif( $individu != null && $individu_form->getMail() != null && $individu_form->getMail() != $individu->getMail() )
+			{
 				$sj->errorMessage(__METHOD__ . ':' . __LINE__ ." l'adresse mails de l'utilisateur " .
 					$individu . ' est incorrecte dans le formulaire :' . $individu_form->getMail() . ' != ' . $individu->getMail());
+			}
 			
+			// --------------> Maintenant des cas réalistes !
 			// Suppression d'un collaborateur
 			elseif( $individu != null && $individu_form->getDelete() == true )
 			{
@@ -1235,10 +1259,11 @@ class VersionModifController extends Controller
 			// L'individu existe déjà
 			elseif( $individu != null )
 			{
-				$individu = $individu_form->modifyIndividu( $individu );
+				// On modifie l'individu
+				$individu = $individu_form->modifyIndividu( $individu, $sj );
 				$em->persist($individu);
 
-				// Nouveau collaborateur
+				// Il devient collaborateur
 				if( ! $version->isCollaborateur( $individu ) )
 				{
 					$sj->infoMessage(__METHOD__ . ':' . __LINE__ .' individu ' .
@@ -1250,7 +1275,7 @@ class VersionModifController extends Controller
 					//$em->flush();
 				}
 				
-				// modification d'un login
+				// modification d'un login et du labo du projet
 				else
 				{
 					$sj->debugMessage(__METHOD__ . ':' . __LINE__ .' individu ' .
@@ -1264,13 +1289,12 @@ class VersionModifController extends Controller
 				
 			}
 			
-			// Nouvel utilisateur (adresse mail pas trouvée)
+			// Le formulaire correspond à un nouvel utilisateur (adresse mail pas trouvée)
 			elseif( $individu_form->getMail() != null && $individu_form->getDelete() == false )
 			{
 				// Création d'un individu à partir du formulaire
-				$individu = $individu_form->nouvelIndividu($em);
-				
-				// Pas d'individu créé si la validation est négative
+				// Renvoie null si la validation est négative
+				$individu = $individu_form->nouvelIndividu($sval);
 				if ($individu != null)
 				{
 					$collaborateurVersion   =   new CollaborateurVersion( $individu );
@@ -1293,11 +1317,6 @@ class VersionModifController extends Controller
 			{
 				$sj->debugMessage(__METHOD__ . ':' . __LINE__ . ' nouvel utilisateur vide ignoré');
 			}
-			
-			//if( $individu != null )
-			//{
-			//	$individu_form->setMail( $individu->getMail() );
-            //}
 		}
     }
 
@@ -1502,9 +1521,8 @@ class VersionModifController extends Controller
      * 
      *  TODO - Cette fonction statique ce n'est pas fameux
      **/
-    public static function versionValidate(Version $version, ServiceJournal $sj, EntityManager $em)
+    public static function versionValidate(Version $version, ServiceJournal $sj, EntityManager $em, TraceableValidator $sval)
     {
-		
 	    $todo   =   [];
 	    if( $version->getPrjTitre() == null ) $todo[] = 'prj_titre';
 	    if( $version->getDemHeures() == null ) $todo[] = 'dem_heures';
@@ -1572,7 +1590,7 @@ class VersionModifController extends Controller
             }
         }
 
-	    if( ! static::validateIndividuForms( self::prepareCollaborateurs($version, $sj, $em), true  )) $todo[] = 'collabs';
+	    if( ! static::validateIndividuForms( self::prepareCollaborateurs($version, $sj, $sval), true  )) $todo[] = 'collabs';
 
 	    return $todo;
     }

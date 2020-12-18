@@ -250,6 +250,7 @@ services:
                      "@app.gramc.ServiceJournal",
                      "@app.gramc.SessionWorkflow", 
                      "@app.gramc.date", 
+                     "@validator",
                      "@app.gramc.ServiceSessions",
                      "@security.token_storage",
                      "@security.authorization_checker",

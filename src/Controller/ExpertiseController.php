@@ -542,6 +542,7 @@ class ExpertiseController extends Controller
 		$sv = $this->get('app.gramc.ServiceVersions');
 		$sj = $this->get('app.gramc.ServiceJournal');
 		$ac = $this->get('security.authorization_checker');
+		$sval = $this->get('validator');
 		$token = $this->get('security.token_storage')->getToken();
 		$em = $this->getDoctrine()->getManager();
 		
@@ -703,7 +704,7 @@ class ExpertiseController extends Controller
         $erreurs = [];
         if ($editForm->isSubmitted() /* && $editForm->isValid()*/ )
         {
-            $erreurs = Functions::dataError( $em, $expertise);
+            $erreurs = Functions::dataError( $sval, $expertise);
             $validation = $expertise->getValidation();
             if( $validation != 1 )
 			{

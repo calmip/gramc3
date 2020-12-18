@@ -47,6 +47,8 @@ use App\GramcServices\ServiceJournal;
 
 use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\Validator\Validator\TraceableValidator;
+
 
 use Doctrine\ORM\ORMException;
 use Doctrine\DBAL\DBALException;
@@ -292,11 +294,10 @@ class Functions
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public static function dataError( EntityManager $em, $data, $groups = ['Default'] )
+    public static function dataError( TraceableValidator $sval, $data, $groups = ['Default'] )
     {
-	    $validator = $em->getContainer()->get('validator');
 	    if( is_string( $groups ) ) $groups = [$groups];
-	    $violations = $validator->validate($data, null, $groups);
+	    $violations = $sval->validate($data, null, $groups);
 
 	    $erreurs = [];
 	    foreach( $violations as $violation )

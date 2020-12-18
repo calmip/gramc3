@@ -30,6 +30,8 @@ use     App\Entity\Laboratoire;
 use     App\Entity\Individu;
 use     App\Utils\Functions;
 
+use Symfony\Component\Validator\Validator\TraceableValidator;
+
 use App\GramcServices\ServiceJournal;
 use Doctrine\ORM\EntityManager;
 
@@ -50,26 +52,25 @@ class IndividuForm
 
     public function __construct(Individu $individu = null)
     {
-		////$this->sj          = $sj;
         $this->delete      = false;
         $this->responsable = false;
         if( $individu != null )
 		{
-            $this->mail             =   $individu->getMail();
-            $this->prenom           =   $individu->getPrenom();
-            $this->nom              =   $individu->getNom();
-            $this->statut           =   $individu->getStatut();
-            $this->laboratoire      =   $individu->getLabo();
-            $this->etablissement    =   $individu->getEtab();
-            $this->id               =   $individu->getId();
+            $this->mail          = $individu->getMail();
+            $this->prenom        = $individu->getPrenom();
+            $this->nom           = $individu->getNom();
+            $this->statut        = $individu->getStatut();
+            $this->laboratoire   = $individu->getLabo();
+            $this->etablissement = $individu->getEtab();
+            $this->id            = $individu->getId();
 		}
     }
 
     public function __toString()
     {
 	    $output = '';
-	    if( $this->getDelete() == true ) $output .= 'delete:'; else $output .= 'undelete:';
-	    if( $this->getResponsable() == true ) $output .= 'responsable:'; else $output .= 'collaborateur:';
+	    if( $this->getDelete() == true ) $output .= 'TO DELETE:';
+	    if( $this->getResponsable() == true ) $output .= 'RESPONSABLE:';
 	    $output .= $this->getMail() . ':' .  $this->getPrenom() . ':' . $this->getNom() . ':'. $this->getStatut() .':';
 	    $output .= $this->getLaboratoire() . ':' . $this->getEtablissement() . ':' . $this->getId();
 	    return $output;
@@ -112,7 +113,7 @@ class IndividuForm
 	 * Si les données ne sont pas validées, on ne crée pas l'individu et on renvoie null
 	 * Si les données sont valides, l'individu est créé et renvoyé
 	 *****************************************************************/
-    public function nouvelIndividu(EntityManager $em)
+    public function nouvelIndividu(TraceableValidator $sval)
     {
 	    $individu = new Individu();
 	    $individu->setMail( $this->getMail() );
@@ -124,7 +125,7 @@ class IndividuForm
 	    $individu->setStatut( $this->getStatut() );
 
 		// Validation
-		$erreurs = Functions::dataError( $em, $individu );
+		$erreurs = Functions::dataError( $sval, $individu );
 		if (count($erreurs) > 0)
 		{
 			////$this->sj->debugMessage(__METHOD__ . ':' . __LINE__ . ' ERREURS = '. print_r($erreurs,true));
@@ -133,9 +134,8 @@ class IndividuForm
 	    return $individu;
     }
 
-    public function modifyIndividu( Individu $individu )
+    public function modifyIndividu( Individu $individu, ServiceJournal $sj )
     {
-		/*
 	    if( $individu != null )
 		{
 	        //$individu->setMail( $this->getMail() );  // mail n'est pas transmis
@@ -143,44 +143,39 @@ class IndividuForm
 	        
 	        if( $individu->getNom() != $this->getNom() )
             {
-	            ////$this->sj->warningMessage("Le nom de l'individu " .$individu . " id(" . $individu->getIdIndividu() . ") a été modifié de " . 
-	            $individu->getNom() . " vers " . $this->getNom() );
+	            $sj->warningMessage("Le nom de l'individu " .$individu . " id(" . $individu->getIdIndividu() . ") a été modifié de " . 
+						            $individu->getNom() . " vers " . $this->getNom() );
 	            $individu->setNom( $this->getNom() );
             }
 	
 	        if( $individu->getPrenom() != $this->getPrenom() )
             {
-	            ////$this->sj->warningMessage("Le prénom de l'individu " .$individu . " id(" . $individu->getIdIndividu() . ") a été modifié de " . 
-	            $individu->getPrenom() . " vers " . $this->getPrenom() );
+	            $sj->warningMessage("Le prénom de l'individu " .$individu . " id(" . $individu->getIdIndividu() . ") a été modifié de " . 
+						            $individu->getPrenom() . " vers " . $this->getPrenom() );
 	            $individu->setPrenom( $this->getPrenom() );
             }
 	
 	        if( $individu->getLabo() != $this->getLaboratoire() )
             {
-	            ////$this->sj->warningMessage("Le laboratoire de l'individu " .$individu . " id(" . $individu->getIdIndividu() . ") a été modifié de " . 
-	            $individu->getLabo() . " vers " . $this->getLaboratoire() );
+	            $sj->warningMessage("Le laboratoire de l'individu " .$individu . " id(" . $individu->getIdIndividu() . ") a été modifié de " . 
+						            $individu->getLabo() . " vers " . $this->getLaboratoire() );
 	            $individu->setLabo( $this->getLaboratoire() );
             }
 	
 	        if( $individu->getEtab() != $this->getEtablissement() )
             {
-	            ////$this->sj->warningMessage("L'établissement de l'individu " .$individu . " id(" . $individu->getIdIndividu() . ") a été modifié de " . 
-	            $individu->getEtab() . " vers " . $this->getEtablissement() );
+	            $sj->warningMessage("L'établissement de l'individu " .$individu . " id(" . $individu->getIdIndividu() . ") a été modifié de " . 
+						            $individu->getEtab() . " vers " . $this->getEtablissement() );
 	            $individu->setEtab( $this->getEtablissement() );
             }
 	
 	        if( $individu->getStatut() != $this->getStatut() )
             {
-	            ////$this->sj->warningMessage("Le statut de l'individu " .$individu . " id(" . $individu->getIdIndividu() . ") a été modifié de " . 
-	            $individu->getStatut() . " vers " . $this->getStatut() );
+	            $sj->warningMessage("Le statut de l'individu " .$individu . " id(" . $individu->getIdIndividu() . ") a été modifié de " . 
+						            $individu->getStatut() . " vers " . $this->getStatut() );
 	            $individu->setStatut( $this->getStatut() );
             }
         }
-	    else
-	    {
-	        ////$this->sj->errorMessage('IndividuForm:synchronizeIndividu: Individu null !');
-		}
-        */
 	    return $individu;
     }
 }
