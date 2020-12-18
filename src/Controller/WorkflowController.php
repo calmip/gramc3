@@ -46,9 +46,9 @@ use App\Utils\Functions;
 use App\Utils\Menu;
 use App\Utils\Etat;
 use App\Utils\Signal;
-use App\Workflow\Projet\ProjetWorkflow;
-use App\Workflow\Version\VersionWorkflow;
-use App\Workflow\Session\SessionWorkflow;
+use App\GramcServices\Workflow\Projet\ProjetWorkflow;
+use App\GramcServices\Workflow\Version\VersionWorkflow;
+use App\GramcServices\Workflow\Session\SessionWorkflow;
 //use App\Utils\GramcDate;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -109,7 +109,8 @@ class WorkflowController extends Controller
                 {
                 $signal = $signal_forms[$session->getIdSession()]->getData()['signal'];
 
-                $sessionWorkflow    =   new SessionWorkflow($session);
+                //$sessionWorkflow    =   new SessionWorkflow($session);
+                $sessionWorkflow    =   $this->get('gramc.SessionWorkflow');
                 $rtn = $sessionWorkflow->execute( $signal, $session );
                 if ( $rtn == true )
                     $sj->debugMessage('WorkflowController : signal ' . Signal::getLibelle( $signal ). " a été appliqué avec succès sur " . $session);
@@ -197,7 +198,8 @@ class WorkflowController extends Controller
             {
             $signal = $session_form->getData()['signal'];
 
-            $sessionWorkflow    =   new SessionWorkflow();
+            //$sessionWorkflow    =   new SessionWorkflow();
+            $sessionWorkflow    =   $this->get('app.gramc.SessionWorkflow');
             $rtn = $sessionWorkflow->execute( $signal, $session );
             if ( $rtn == true )
                 $sj->debugMessage('WorkflowController : signal ' . Signal::getLibelle( $signal ). " a été appliqué avec succès");
@@ -254,9 +256,6 @@ class WorkflowController extends Controller
      */
     public function signalProjetAction(Request $request, Projet $projet, LoggerInterface $lg)
     {
-	    //$projetWorkflow    =   new VersionWorkflow();
-	    //return new Response($projetWorkflow);
-	
 		$sj = $this->get('app.gramc.ServiceJournal');
 		$ff = $this->get('form.factory');
 		$em = $this->getdoctrine()->getManager();
@@ -328,7 +327,8 @@ class WorkflowController extends Controller
         $signal = $signal_form->getData()['signal'];
 
 
-        $projetWorkflow    =   new ProjetWorkflow();
+        //$projetWorkflow    =   new ProjetWorkflow();
+        $projetWorkflow    =   $this->get('app.gramc.ProjetWorkflow');
         $rtn = $projetWorkflow->execute( $signal, $projet );
         if ( $rtn == true )
             $sj->debugMessage('WorkflowController : signal ' . Signal::getLibelle( $signal ). " a été appliqué avec succès sur le projet " . $projet);

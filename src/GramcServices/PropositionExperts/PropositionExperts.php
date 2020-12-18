@@ -27,11 +27,13 @@ use App\Utils\Functions;
 use App\Entity\Version;
 use App\Entity\Projet;
 use App\Entity\Expertise;
+use App\Entity\Individu;
+
 use App\PropositionExperts\PropositionExpertsType1;
 use App\PropositionExperts\PropositionExpertsType2;
 
 use App\GramcServices\ServiceJournal;
-use App\GramcServices\ServiceExperts;
+use App\GramcServices\ServiceExperts\ServiceExperts;
 use Doctrine\ORM\EntityManager;
 
 
@@ -152,7 +154,7 @@ abstract class PropositionExperts
 	        elseif( ! $expert->isExpert() )
             {
 	            $this->sj->errorMessage(__METHOD__  .  ":" . __LINE__ . " " .  $expert . " est proposé comme expert mais n'est pas un expert !");
-	            $this->noThematique( $expert );
+	            $this->se->noThematique( $expert );
 	            $this->em->flush();
             }
 		}

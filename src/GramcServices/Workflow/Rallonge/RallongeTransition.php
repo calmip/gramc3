@@ -30,7 +30,7 @@ use App\Utils\Functions;
 use App\Utils\Etat;
 use App\Utils\Signal;
 use App\Entity\Rallonge;
-use App\Workflow\Rallonge\RallongeWorkflow;
+use App\GramcServices\Workflow\Rallonge\RallongeWorkflow;
 
 
 class RallongeTransition extends Transition

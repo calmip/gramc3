@@ -50,7 +50,7 @@ class SessionTransition extends Transition
 		{
 			// Propagation vers les versions
 			$versions = $this->em->getRepository(Version::class)->findBy( ['session' => $session] );
-			$workflow = new VersionWorkflow();
+			$workflow = new VersionWorkflow($this->sn, $this->sj, $this->em);
 			if( $versions == null && Transition::DEBUG)
 			{
 				$this->sj->debugMessage(__METHOD__ . ':' . __LINE__ . " aucune version pour la session " . $session );
@@ -101,7 +101,7 @@ class SessionTransition extends Transition
 		{
 			if (Transition::DEBUG) $this->sj->debugMessage( __FILE__ . ":" . __LINE__ . " propagation du signal ".$this->getSignal()." à ".count($versions)." versions");
 	
-			$workflow = new VersionWorkflow();
+			$workflow = new VersionWorkflow($this->sn, $this->sj, $this->em);
 	
 			// Propage le signal à toutes les versions qui dépendent de la session
 			foreach( $versions as $version )

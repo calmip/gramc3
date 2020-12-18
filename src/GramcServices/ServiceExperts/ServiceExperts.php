@@ -27,6 +27,7 @@ namespace App\GramcServices\ServiceExperts;
 
 use App\Entity\Projet;
 use App\Entity\Version;
+use App\Entity\Individu;
 use App\Entity\CollaborateurVersion;
 use App\Interfaces\Demande;
 
@@ -120,14 +121,14 @@ class ServiceExperts
 	    {
 			$individu->removeThematique( $thematique );
 		}
-		$em->persist($individu);
+		$this->em->persist($individu);
 		
 	    $all_thematiques = $this->em->getRepository(Thematique::class)->findAll();
 
 	    foreach($all_thematiques as $thematique ) 
 	    {
 			$thematique->removeExpert($individu);
-			$em->persist($thematique);
+			$this->em->persist($thematique);
 		}
     }
  

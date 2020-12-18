@@ -21,7 +21,7 @@
  *            Nicolas Renon - Université Paul Sabatier - CALMIP
  **/
 
-namespace App\PropositionExperts;
+namespace App\GramcServices\PropositionExperts;
 
 //use App\App;
 use App\Entity\Version;

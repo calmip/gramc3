@@ -38,7 +38,7 @@ use App\Utils\Etat;
 use App\Utils\Signal;
 use App\Entity\Projet;
 use App\Entity\Version;
-use App\Workflow\Version\VersionWorkflow;
+use App\GramcServices\Workflow\Version\VersionWorkflow;
 
 class DoubleProjetTransition extends ProjetTransition
 {
@@ -92,7 +92,7 @@ class DoubleProjetTransition extends ProjetTransition
 			return $rtn;
 		}
 	                
-        $workflow = new VersionWorkflow();
+        $workflow = new VersionWorkflow($this->sn, $this->sj, $this->em);
         foreach( $projet->getVersion() as $version )
 		{
             if( $session->getEtatSession() == Etat::ACTIF )

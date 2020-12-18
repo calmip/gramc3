@@ -33,7 +33,7 @@ use App\Utils\Signal;
 
 use App\Entity\Projet;
 use App\Entity\Version;
-use App\Workflow\Version\VersionWorkflow;
+use App\GramcServices\Workflow\Version\VersionWorkflow;
 
 
 
@@ -53,7 +53,7 @@ class ProjetTransition extends Transition
         $rtn    =   true;
 		if (Transition::FAST == false && $this->getPropageSignal())
 		{
-			$versionWorkflow    =    new VersionWorkflow();
+			$versionWorkflow = new VersionWorkflow($this->sn, $this->sj, $this->em);
 			foreach( $projet->getVersion() as $version )
 			{
 				if( $version->getEtatVersion() != Etat::TERMINE && $version->getEtatVersion() != Etat::ANNULE )
@@ -87,7 +87,7 @@ class ProjetTransition extends Transition
 		$rtn = true;
 		if ($this->getPropageSignal())
 		{
-	        $versionWorkflow    =    new VersionWorkflow();
+	        $versionWorkflow = new VersionWorkflow($this->sn, $this->sj, $this->em);
 	        foreach( $projet->getVersion() as $version )
 	        {
 	            if( $version->getEtatVersion() != Etat::TERMINE && $version->getEtatVersion() != Etat::ANNULE )

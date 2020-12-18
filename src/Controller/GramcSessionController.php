@@ -803,33 +803,33 @@ class GramcSessionController extends Controller
      * TODO - A réécrire
      **/
 
-    public function workflow(Request $request)
-    {
-        $session_workflow = new \App\Workflow\SessionWorkflow();
-        $session = new \App\Entity\Session();
-        $session->setEtatSession(\App\Utils\ETAT::ACTIF);
+    //public function workflow(Request $request)
+    //{
+        //$session_workflow = new \App\Workflow\SessionWorkflow();
+        //$session = new \App\Entity\Session();
+        //$session->setEtatSession(\App\Utils\ETAT::ACTIF);
 
-        $projet_workflow = new \App\Workflow\ProjetWorkflow();
-        echo $projet_workflow;
-        echo '*******************************************************************' ."\n";
-
-
-        $version_workflow = new \App\Workflow\VersionWorkflow();
-        echo $version_workflow;
-        echo '*******************************************************************' ."\n";
-
-        $projet_workflow = new \App\Workflow\ProjetWorkflow();
-        echo $projet_workflow;
-        echo '*******************************************************************' ."\n";
-
-        $session_workflow = new \App\Workflow\SessionWorkflow();
-        echo $session_workflow;
-        echo '*******************************************************************' ."\n";
+        //$projet_workflow = new \App\Workflow\ProjetWorkflow();
+        //echo $projet_workflow;
+        //echo '*******************************************************************' ."\n";
 
 
+        //$version_workflow = new \App\Workflow\VersionWorkflow();
+        //echo $version_workflow;
+        //echo '*******************************************************************' ."\n";
 
-        if( $session_workflow->canExecute(\App\Utils\Signal::CLK_SESS_DEB, $session ) ) echo ' true '; else echo ' false ';
-        if( $session_workflow->canExecute(\App\Utils\Signal::CLK_SESS_FIN, $session ) ) echo ' true '; else echo ' false ';
-        return new Response();
-    }
+        //$projet_workflow = new \App\Workflow\ProjetWorkflow();
+        //echo $projet_workflow;
+        //echo '*******************************************************************' ."\n";
+
+        //$session_workflow = new \App\Workflow\SessionWorkflow();
+        //echo $session_workflow;
+        //echo '*******************************************************************' ."\n";
+
+
+
+        //if( $session_workflow->canExecute(\App\Utils\Signal::CLK_SESS_DEB, $session ) ) echo ' true '; else echo ' false ';
+        //if( $session_workflow->canExecute(\App\Utils\Signal::CLK_SESS_FIN, $session ) ) echo ' true '; else echo ' false ';
+        //return new Response();
+    //}
 }

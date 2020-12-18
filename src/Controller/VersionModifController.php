@@ -35,7 +35,7 @@ use App\Entity\Rattachement;
 
 use App\GramcServices\ServiceJournal;
 
-use App\Workflow\Projet\ProjetWorkflow;
+use App\GramcServices\Workflow\Projet\ProjetWorkflow;
 
 use Psr\Log\LoggerInterface;
 
@@ -1414,6 +1414,7 @@ class VersionModifController extends Controller
 		$sm = $this->get('app.gramc.ServiceMenus');
 		$sv = $this->get('app.gramc.ServiceVersions');
 		$sj = $this->get('app.gramc.ServiceJournal');
+		$projet_workflow = $this->get('app.gramc.ProjetWorkFlow');
 		$em = $this->getDoctrine()->getManager();
 		
 	    // ACL
@@ -1479,8 +1480,8 @@ class VersionModifController extends Controller
 				}
 
                 $projet->setVersionDerniere( $new_version );
-                $projetWorkflow = new ProjetWorkflow();
-                $projetWorkflow->execute( Signal::CLK_DEMANDE, $projet );
+                $projet_workflow->execute( Signal::CLK_DEMANDE, $projet );
+                
                 $em->persist( $projet );
                 $em->flush();
 
