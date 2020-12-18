@@ -121,16 +121,18 @@ class ProjetController extends Controller
 
     $all_projets = $em->getRepository(Projet::class)->findAll();
     foreach( $all_projets as $projet )
-        {
+	{
         $derniereVersion    =  $projet->derniereVersion();
         if(  $derniereVersion == null )
-            {
+		{
             $mauvais_projets[$projet->getIdProjet()]    =   $projet;
-            }
+		}
         else
+        {
             $annee = $projet->derniereVersion()->getAnneeSession();
+		}
         $list[$annee][] = $projet;
-        }
+	}
     foreach( $list as $annee => $projets )
         {
         static::$count[$annee]  =   count($projets);
@@ -222,8 +224,8 @@ class ProjetController extends Controller
         foreach( $list[$annee] as $projet )
 		{
             $em->persist( $projet );
-            $projet->setVersionDerniere( null );
-            $projet->setVersionActive( null );
+            //$projet->setVersionDerniere( null );
+            //$projet->setVersionActive( null );
             $em->flush();
 
             // effacer des documents
@@ -1331,7 +1333,7 @@ class ProjetController extends Controller
         $version    =   new Version();
         $version->setIdVersion( $session->getIdSession() . $projet->getIdProjet() );
         $version->setProjet( $projet );
-        $projet->setVersionDerniere($version);
+        //$projet->setVersionDerniere($version);
         $version->setSession( $session );
         $sv->setLaboResponsable($version, $token->getUser());
         //return new Response( Functions::show( $version ) );
@@ -1352,10 +1354,10 @@ class ProjetController extends Controller
         $em->persist( $collaborateurVersion );
         $em->flush();
 
-        if( $version instanceof Version )
-            $projet->setVersionDerniere( $version );
-        else
-            return new Response( Functions::show( $version ) );
+        //if( $version instanceof Version )
+        //    $projet->setVersionDerniere( $version );
+        //else
+        //    return new Response( Functions::show( $version ) );
 
         return $this->redirectToRoute('modifier_version',[ 'id' => $version->getIdVersion() ] );
 
