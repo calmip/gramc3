@@ -295,7 +295,7 @@
             <td>
                 <a href="{{ path('consulter_version', { 'id': version.projet.idProjet, 'version': version.idVersion }) }}" title="Consulter le projet">
                 <img src="{{ asset('icones/consulter.png') }}" alt="Consulter" /></a>
-                {% if( version.projet.derniereVersion.isEdited ) %}
+                {% if( version.projet.derniereVersion != null and version.projet.derniereVersion.isEdited ) %}
                    <a href="{{ path('version_avant_supprimer',
                    { 'id': version.projet.derniereVersion.idVersion, 'rtn' : 'projet_session' })}}" title="Supprimer le projet {{ version.projet.idProjet }}">
                    <img class="bouton_poussoir" src="{{ asset('icones/poubelle16.png') }}" alt="Supprimer" /></a>

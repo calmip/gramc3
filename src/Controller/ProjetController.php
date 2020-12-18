@@ -121,16 +121,18 @@ class ProjetController extends Controller
 
     $all_projets = $em->getRepository(Projet::class)->findAll();
     foreach( $all_projets as $projet )
-        {
+	{
         $derniereVersion    =  $projet->derniereVersion();
         if(  $derniereVersion == null )
-            {
+		{
             $mauvais_projets[$projet->getIdProjet()]    =   $projet;
-            }
+		}
         else
+        {
             $annee = $projet->derniereVersion()->getAnneeSession();
+		}
         $list[$annee][] = $projet;
-        }
+	}
     foreach( $list as $annee => $projets )
         {
         static::$count[$annee]  =   count($projets);
@@ -222,8 +224,8 @@ class ProjetController extends Controller
         foreach( $list[$annee] as $projet )
 		{
             $em->persist( $projet );
-            $projet->setVersionDerniere( null );
-            $projet->setVersionActive( null );
+            //$projet->setVersionDerniere( null );
+            //$projet->setVersionActive( null );
             $em->flush();
 
             // effacer des documents
@@ -1295,7 +1297,7 @@ class ProjetController extends Controller
 		// + contournement d'un problème lié à Doctrine
         $sss->remove('SessionCourante'); // remove cache
 
-        // NOTE - Pour ce controlleur, on identifie les types par un chiffre (voir Entity/Projet.php)
+        // NOTE - Pour ce controleur, on identifie les types par un chiffre (voir Entity/Projet.php)
         $m = $sm->nouveau_projet("$type");
         if ($m == null || $m['ok']==false)
         {
@@ -1311,10 +1313,10 @@ class ProjetController extends Controller
 			return $this->redirectToRoute('accueil');
 		}
 
-		$annee    = $sd->showYear();
+		// Création du projet
+		$annee    = $session->getAnneeSession();
         $projet   = new Projet($type);
         $projet->setIdProjet($sp->NextProjetId($annee,$type));
-        
         switch ($type)
         {
 			case Projet::PROJET_SESS:
@@ -1328,34 +1330,34 @@ class ProjetController extends Controller
 	           $sj->throwException(__METHOD__ . ":" . __LINE__ . " mauvais type de projet " . Functions::show( $type) );
 		}
 
+		// Création de la première (et dernière) version
         $version    =   new Version();
         $version->setIdVersion( $session->getIdSession() . $projet->getIdProjet() );
         $version->setProjet( $projet );
-        $projet->setVersionDerniere($version);
         $version->setSession( $session );
         $sv->setLaboResponsable($version, $token->getUser());
         //return new Response( Functions::show( $version ) );
-
         if( $type == Projet::PROJET_SESS )
             $version->setEtatVersion(Etat::EDITION_DEMANDE);
         else
             $version->setEtatVersion(Etat::EDITION_TEST);
 
-        //return new Response( Functions::show( $version ) );
+		// Définition de $version en tant que versionDerniere du projet
+		// PAS BESOIN CAR C'EST FAIT DANS L'EVENTLISTENER !
+		// (pour la cohérence de la BD)
+		////$projet->setVersionDerniere($version);
+		
+		// Affectation de l'utilisateur connecté en tant que responsable
         $moi = $token->getUser();
-        $collaborateurVersion   =   new CollaborateurVersion( $moi );
+        $collaborateurVersion = new CollaborateurVersion( $moi );
         $collaborateurVersion->setVersion( $version );
         $collaborateurVersion->setResponsable( true );
 
+		// Sauvegarde des données
         $em->persist( $projet );
         $em->persist( $version );
         $em->persist( $collaborateurVersion );
         $em->flush();
-
-        if( $version instanceof Version )
-            $projet->setVersionDerniere( $version );
-        else
-            return new Response( Functions::show( $version ) );
 
         return $this->redirectToRoute('modifier_version',[ 'id' => $version->getIdVersion() ] );
 
@@ -1619,8 +1621,14 @@ class ProjetController extends Controller
 		$sj = $this->get('app.gramc.ServiceJournal');
 
         // choix de la version
-        if( $version == null )
-            $version =  $projet->derniereVersion();
+        if( $version == null ) 
+        {
+            $version =  $projet->getVersionDerniere();
+            if ( $version == null)
+            {
+				$sj->throwException(__METHOD__ . ':' . __LINE__ .' Projet ' . $projet . ': la dernière version est nulle !');
+			}
+		}
         else
             $projet =   $version->getProjet(); // nous devons être sûrs que le projet corresponde à la version
 

@@ -1172,14 +1172,23 @@ class ServiceProjets
 	
      /**
      * calculVersionDerniere
+     * 
+     * NOTE - la B.D. doit être cohérente, c-à-d que s'il y a des flush à faire, ils doivent 
+     *        être faits en entrant dans cette fonction
+     *        Inversement, cette fonction refait le flush du projet afin de garder la cohérence
+     *        TODO - Est-ce bien certain ? Cette fonction est appelée uniquement à partir de l'EventListener...
      *
      * @return \App\Entity\Version
      */
     public function calculVersionDerniere(Projet $projet)
     {
+		//$this->sj->debugMessage( __FILE__ . ":" . __LINE__ . " coucou1");
         if( $projet->getVersion() == null ) return null;
 
         $iterator = $projet->getVersion()->getIterator();
+		//$cnt = count(iterator_to_array($iterator));
+		//$this->sj->debugMessage( __FILE__ . ":" . __LINE__ . " coucou1.1 " . $cnt);
+
         $iterator->uasort(function ($a, $b)
             {
                 if( $a->getSession() == null )
@@ -1189,20 +1198,23 @@ class ServiceProjets
                 else
                     return strcmp($a->getSession()->getIdSession(), $b->getSession()->getIdSession());
             } );
+            
         $sortedVersions =  iterator_to_array($iterator) ;
-
+		//$this->sj->debugMessage( __FILE__ . ":" . __LINE__ . " coucou2");
         $result = end( $sortedVersions );
+		//$this->sj->debugMessage( __FILE__ . ":" . __LINE__ . " coucou3 ".$result);
+
         if( ! $result instanceof Version ) return null;
 
         // update BD
         $projet->setVersionDerniere($result);
         $em = $this->em;
         $em->persist($projet);
-        //$em->flush();
+        $em->flush();
         
         return $result;
     }
-    public function calculDerniereVersion(Projet $projet) { return $this->calculVersionDerniere($projet); }
+    //public function calculDerniereVersion(Projet $projet) { return $this->calculVersionDerniere($projet); }
 
     /**
      * calculVersionActive

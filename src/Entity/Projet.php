@@ -90,7 +90,7 @@ class Projet
     /**
      * @var \App\Entity\Version
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Version")
+     * @ORM\OneToOne(targetEntity="App\Entity\Version")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="id_verder", referencedColumnName="id_version", onDelete="SET NULL", nullable=true )
      * })

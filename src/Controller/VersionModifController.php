@@ -1479,7 +1479,8 @@ class VersionModifController extends Controller
                     $em->persist( $newCollaborateurVersion );
 				}
 
-                $projet->setVersionDerniere( $new_version );
+				//On ne fait rien car ce sera fait dans l'EventListener !
+                // $projet->setVersionDerniere( $new_version );
                 $projet_workflow->execute( Signal::CLK_DEMANDE, $projet );
                 
                 $em->persist( $projet );

@@ -196,7 +196,6 @@ class VersionController extends Controller
 	        foreach( $expertises as $expertise)
 	            $em->remove( $expertise );
 
-	        $em->remove( $version );
 	        $em->flush();
         }
 
@@ -205,6 +204,16 @@ class VersionController extends Controller
 	    else
         {
 	        $projet = $em->getRepository(Projet::class)->findOneBy(['idProjet' => $idProjet]);
+	        
+	        // On met le champ version derniere a NULL
+	        $projet->setVersionDerniere(null);
+	        $em -> persist($projet);
+	        $em->flush();
+	        
+	        // On supprime la version
+	        // Du coup la versionDerniere est mise à jour par l'EventListener
+	        $em->remove($version);
+	        $em->flush();
 	        
 	        // Si pas d'autre version, on supprime le projet
 	        if( $projet != null && $projet->getVersion() != null && count( $projet->getVersion() ) == 0 )

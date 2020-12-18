@@ -53,18 +53,23 @@ class ProjetDerniereVersion
     public function postPersist(Version $version, LifecycleEventArgs $event): void
     {
 		$projet = $version->getProjet();
-		$this->sp->calculDerniereVersion($projet);
+		$this->sp->calculVersionDerniere($projet);
+		$this->em->persist($projet);
+		$this->em->flush();
     }
     public function postRemove(Version $version, LifecycleEventArgs $event): void
     {
 		$projet = $version->getProjet();
-		$this->sp->calculDerniereVersion($projet);
+		$this->sp->calculVersionDerniere($projet);
+		$this->em->persist($projet);
+		$this->em->flush();		// ne marche pas si on ne met pas flush ici
+
     }
     public function postUpdate(Version $version, LifecycleEventArgs $event): void
     {
 		$projet = $version->getProjet();
-		$projet->setVersionActive( $version);
+		$this->sp->calculVersionDerniere( $projet);
 		$this->em->persist($projet);
-		//$em->flush();
+		$this->em->flush();
     }
 }
