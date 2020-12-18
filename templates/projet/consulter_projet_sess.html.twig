@@ -18,7 +18,7 @@
 {{ form_widget(version_form.version) }}{{ form_widget(version_form.submit) }}
 {{ form_end(version_form) }}
 
-{% if not is_granted('ROLE_ADMIN') and version.isCollaborateur() %}
+{% if not is_granted('ROLE_ADMIN')  %}
 <div class="message info">
     <h2>Liste de choses à faire pour la session {{ session }}</h2>
     <ol>

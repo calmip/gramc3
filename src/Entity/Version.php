@@ -2854,7 +2854,7 @@ class Version implements Demande
     // Individu est-il collaborateur ? Responsable ? Expert ?
     //
 
-    public function isCollaborateur(Individu $individu=null)
+    public function isCollaborateur(Individu $individu)
     {
         if( $individu == null ) return false;
 
