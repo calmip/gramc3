@@ -591,6 +591,11 @@ class VersionController extends Controller
 		{
 			$ancien_responsable  = $version->getResponsable();
             $nouveau_responsable = $change_form->getData()['responsable'];
+            if ($nouveau_responsable == null)
+            {
+				return $this->redirectToRoute('consulter_version',['id' => $idProjet, 'version' => $version->getId()]);
+			}
+			
             if ($ancien_responsable != $nouveau_responsable)
             {
 	            $sv->changerResponsable($version,$nouveau_responsable);
