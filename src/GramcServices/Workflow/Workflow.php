@@ -28,6 +28,7 @@ use App\Utils\Functions;
 use App\Utils\Etat;
 use App\GramcServices\ServiceNotifications;
 use App\GramcServices\ServiceJournal;
+use App\GramcServices\ServiceSessions;
 
 use Doctrine\ORM\EntityManager;
 
@@ -51,11 +52,13 @@ abstract class Workflow
 	protected $em = null;
 	protected $sn = null;
 	protected $sj = null;
+	protected $ss = null;
 	
-    public function __construct(ServiceNotifications $sn, ServiceJournal $sj, EntityManager $em)
+    public function __construct(ServiceNotifications $sn, ServiceJournal $sj, ServiceSessions $ss, EntityManager $em)
     {
 		$this->sn                 = $sn;
 		$this->sj                 = $sj;
+		$this->ss                 = $ss;
 		$this->em                 = $em;
         $this->workflowIdentifier = get_class($this);
     }
@@ -99,7 +102,7 @@ abstract class Workflow
         
         foreach ($transition_array as $t)
         {
-			$t->setServices($this->sn, $this->sj, $this->em);
+			$t->setServices($this->sn, $this->sj, $this->ss, $this->em);
 		}
         return $this;
     }

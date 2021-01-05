@@ -92,7 +92,7 @@ class ServiceJournal
         $journal->setGramcSessId( $ss->getId() );
 
 		if ($rs instanceof  RequestStack
-		//	&& $rs->getMasterRequest() instanceof  Request 
+			&& $rs->getMasterRequest() instanceof  Request 
 			&& $rs->getMasterRequest()->getClientIp() != null)
 			{
 		        $ip = $rs->getMasterRequest()->getClientIp();

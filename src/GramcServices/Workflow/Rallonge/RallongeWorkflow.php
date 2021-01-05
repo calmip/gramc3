@@ -27,6 +27,7 @@ namespace App\GramcServices\Workflow\Rallonge;
 use App\GramcServices\Workflow\Workflow;
 use App\GramcServices\Workflow\Transition;
 use App\GramcServices\ServiceJournal;
+use App\GramcServices\ServiceSessions;
 
 use App\Utils\Etat;
 use App\Utils\Signal;
@@ -40,10 +41,10 @@ class RallongeWorkflow extends Workflow
     protected $states             = [];
     protected $workflowIdentifier = null;
 
-    public function __construct(ServiceNotifications $sn, ServiceJournal $sj, EntityManager $em)
+    public function __construct(ServiceNotifications $sn, ServiceJournal $sj, ServiceSessions $ss, EntityManager $em)
     {
         if( $this->workflowIdentifier != null ) return;
-        parent::__construct($sn, $sj, $em);
+        parent::__construct($sn, $sj, $ss, $em);
 
         $this
             ->addState( Etat::CREE_ATTENTE ,

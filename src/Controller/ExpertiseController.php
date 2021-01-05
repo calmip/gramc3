@@ -865,7 +865,7 @@ class ExpertiseController extends Controller
 	            return $this->redirectToRoute('expertise_modifier', [ 'id' => $expertise->getId() ] );
 
 			// Bouton Confirmer
-			// Si projet au fil de l'eau mais qu'on n'est pas président, on n'envoit pas de signal
+			// Si projet au fil de l'eau mais qu'on n'est pas président, on n'envoie pas de signal
 			// Dans tous les autres cas on envoie un signal CLK_VAL_EXP_XXX
 			//
 			$type_projet = $expertise->getVersion()->getProjet()->getTypeProjet();

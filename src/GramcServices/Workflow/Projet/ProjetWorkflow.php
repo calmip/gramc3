@@ -26,6 +26,7 @@ namespace App\GramcServices\Workflow\Projet;
 
 use App\GramcServices\Workflow\Workflow;
 use App\GramcServices\ServiceJournal;
+use App\GramcServices\ServiceSessions;
 
 use App\Utils\Etat;
 use App\Utils\Signal;
@@ -37,10 +38,10 @@ use Doctrine\ORM\EntityManager;
 class ProjetWorkflow extends Workflow
 {
 
-    public function __construct(ServiceNotifications $sn, ServiceJournal $sj, EntityManager $em)
+    public function __construct(ServiceNotifications $sn, ServiceJournal $sj, ServiceSessions $ss, EntityManager $em)
     {
         $this->workflowIdentifier   = get_class($this);
-        parent::__construct($sn, $sj, $em);
+        parent::__construct($sn, $sj, $ss, $em);
         
         $this
             ->addState( Etat::RENOUVELABLE,

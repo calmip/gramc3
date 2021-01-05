@@ -23,12 +23,14 @@
  **/
 
 namespace App\GramcServices\Workflow;
+
 use App\Utils\Functions;
 use App\Utils\Etat;
 use App\Utils\Signal;
 
 use App\GramcServices\ServiceNotifications;
 use App\GramcServices\ServiceJournal;
+use App\GramcServices\ServiceSessions;
 use Doctrine\ORM\EntityManager;
 
 
@@ -61,8 +63,10 @@ abstract class Transition
     private $mail            = [];
     
     // TODO - Les services devraient être des variables de classe !
-    protected $sn            = null;  
-    protected $em            = null;  
+    protected $sn = null;  
+    protected $sj = null;
+    protected $ss = null;
+    protected $em = null;  
 
 	/*********************************************
 	 * Le constructeur commun à toutes les classes dérivées
@@ -81,10 +85,11 @@ abstract class Transition
 	 * cf. la méthode addState de Workflow !
 	 * 
 	 *******************************************************************/
-	 public function setServices( ServiceNotifications $sn, ServiceJournal $sj, EntityManager $em )
+	 public function setServices( ServiceNotifications $sn, ServiceJournal $sj, ServiceSessions $ss, EntityManager $em )
 	 {
 		 $this->sn = $sn;
 		 $this->sj = $sj;
+		 $this->ss = $ss;
 		 $this->em = $em; 
 	 }
 	 

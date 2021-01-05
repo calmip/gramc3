@@ -80,7 +80,7 @@ class DoubleProjetTransition extends ProjetTransition
 		// NOTE - DoubleProjetTransition ne doit être employée QUE avec le signal CLK_VAL_EXP_OK
         // Si la session COURANTE est active, l'expert est en retard: il expertise le projet APRES l'activation de la session
         // Dans ce cas, après CLK_VAL_EXP_OK, on envoie aux versions le signal CLK_SESS_DEB        
-		$session = Functions::getSessionCourante();
+		$session = $this->ss->getSessionCourante();
 		if( $session == null )
 		{
 			$this->sj->errorMessage("DoubleProjetTransition : session courante nulle");
@@ -92,7 +92,7 @@ class DoubleProjetTransition extends ProjetTransition
 			return $rtn;
 		}
 	                
-        $workflow = new VersionWorkflow($this->sn, $this->sj, $this->em);
+        $workflow = new VersionWorkflow($this->sn, $this->sj, $this->ss, $this->em);
         foreach( $projet->getVersion() as $version )
 		{
             if( $session->getEtatSession() == Etat::ACTIF )

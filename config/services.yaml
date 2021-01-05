@@ -284,16 +284,16 @@ services:
      # Workflow
      app.gramc.RallongeWorkflow:
         class: App\GramcServices\Workflow\Rallonge\RallongeWorkflow
-        arguments: [ "@app.gramc.ServiceNotifications","@app.gramc.ServiceJournal","@doctrine.orm.entity_manager"]
+        arguments: [ "@app.gramc.ServiceNotifications","@app.gramc.ServiceJournal","@app.gramc.ServiceSessions","@doctrine.orm.entity_manager"]
      app.gramc.VersionWorkflow:
         class: App\GramcServices\Workflow\Version\VersionWorkflow
-        arguments: [ "@app.gramc.ServiceNotifications","@app.gramc.ServiceJournal","@doctrine.orm.entity_manager"]
+        arguments: [ "@app.gramc.ServiceNotifications","@app.gramc.ServiceJournal","@app.gramc.ServiceSessions","@doctrine.orm.entity_manager"]
      app.gramc.ProjetWorkflow:
         class: App\GramcServices\Workflow\Projet\ProjetWorkflow
-        arguments: [ "@app.gramc.ServiceNotifications","@app.gramc.ServiceJournal","@doctrine.orm.entity_manager"]
+        arguments: [ "@app.gramc.ServiceNotifications","@app.gramc.ServiceJournal","@app.gramc.ServiceSessions","@doctrine.orm.entity_manager"]
      app.gramc.SessionWorkflow:
         class: App\GramcServices\Workflow\Session\SessionWorkflow
-        arguments: [ "@app.gramc.ServiceNotifications","@app.gramc.ServiceJournal","@doctrine.orm.entity_manager"]
+        arguments: [ "@app.gramc.ServiceNotifications","@app.gramc.ServiceJournal","@app.gramc.ServiceSessions","@doctrine.orm.entity_manager"]
         
      # Journal
      app.gramc.ServiceJournal:

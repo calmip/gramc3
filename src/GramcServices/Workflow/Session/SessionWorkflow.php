@@ -27,6 +27,7 @@ namespace App\GramcServices\Workflow\Session;
 use App\GramcServices\Workflow\Workflow;
 use App\GramcServices\Workflow\NoTransition;
 use App\GramcServices\ServiceJournal;
+use App\GramcServices\ServiceSessions;
 
 use App\Utils\Etat;
 use App\Utils\Signal;
@@ -43,9 +44,9 @@ use Doctrine\ORM\EntityManager;
  ************************************************************************/
 class SessionWorkflow extends Workflow
 {
-    public function __construct(ServiceNotifications $sn, ServiceJournal $sj, EntityManager $em)
+    public function __construct(ServiceNotifications $sn, ServiceJournal $sj, ServiceSessions $ss, EntityManager $em)
     {
-        parent::__construct($sn, $sj, $em);
+        parent::__construct($sn, $sj, $ss, $em);
 
         $this
             ->addState( Etat::CREE_ATTENTE,

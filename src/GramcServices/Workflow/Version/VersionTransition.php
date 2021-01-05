@@ -53,7 +53,7 @@ class VersionTransition extends Transition
 			$rallonges = $version->getRallonge();
 			if( $rallonges != null )
 			{
-				$workflow = new RallongeWorkflow($this->sn, $this->sj, $this->em);
+				$workflow = new RallongeWorkflow($this->sn, $this->sj, $this->ss, $this->em);
 				foreach( $rallonges as $rallonge )
 				{
 					$rtn = $rtn && $workflow->canExecute( $this->getSignal(), $rallonge );
@@ -84,7 +84,7 @@ class VersionTransition extends Transition
 
 			if (count($rallonges) > 0)
 			{
-                $workflow = new RallongeWorkflow($this->sn, $this->sj, $this->em);
+                $workflow = new RallongeWorkflow($this->sn, $this->sj, $this->ss, $this->em);
 
 				// Propage le signal à toutes les rallonges qui dépendent de cette version
                 foreach( $rallonges as $rallonge )
@@ -99,7 +99,7 @@ class VersionTransition extends Transition
 		if ($this->getPropageSignal())
 		{
 			$projet = $version->getProjet();
-			$workflow = new ProjetWorkflow($this->sn, $this->sj, $this->em);
+			$workflow = new ProjetWorkflow($this->sn, $this->sj, $this->ss, $this->em);
 			$output   = $workflow->execute( $this->getSignal(), $projet);
 			$rtn = Functions::merge_return( $rtn, $output);
 		}
