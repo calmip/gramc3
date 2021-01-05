@@ -1334,6 +1334,8 @@ class ProjetController extends Controller
         $version    =   new Version();
         $version->setIdVersion( $session->getIdSession() . $projet->getIdProjet() );
         $version->setProjet( $projet );
+
+        //$projet->setVersionDerniere($version);
         $version->setSession( $session );
         $sv->setLaboResponsable($version, $token->getUser());
         //return new Response( Functions::show( $version ) );
