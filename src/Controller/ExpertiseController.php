@@ -554,6 +554,7 @@ class ExpertiseController extends Controller
     {
 		$ss = $this->get('app.gramc.ServiceSessions');
 		$sv = $this->get('app.gramc.ServiceVersions');
+		$sp = $this->get('app.gramc.ServiceProjets');
 		$sj = $this->get('app.gramc.ServiceJournal');
 		$ac = $this->get('security.authorization_checker');
 		$sval = $this->get('validator');
@@ -592,7 +593,8 @@ class ExpertiseController extends Controller
 		// $session_edition -> Si false, on autorise le bouton Envoyer
 		//                  -> Si true, on n'autorise pas
 		$msg_explain = '';
-        $projet_type = $version->getProjet()->getTypeProjet();
+		$projet      = $version->getProjet();
+        $projet_type = $projet->getTypeProjet();
         $etat_session= $session -> getEtatSession();
 
 		// Projets au fil de l'eau avec plusieurs expertises:
@@ -799,6 +801,10 @@ class ExpertiseController extends Controller
 			$prev = null;
 			$next = null;
 		}
+		
+		// Rapport d'activité
+	    $rapport = $sp -> getRapport($projet, $version->getAnneeSession());
+
         return $this->render($twig,
 		[
             'isnouvelle'        => $isnouvelle,
@@ -814,7 +820,8 @@ class ExpertiseController extends Controller
             'erreurs'           => $erreurs,
             'toomuch'           => $toomuch,
             'prev'              => $prev,
-            'next'              => $next
+            'next'              => $next, 
+            'rapport'           => $rapport
 		]);
     }
 

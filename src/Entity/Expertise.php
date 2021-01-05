@@ -67,7 +67,7 @@ class Expertise
      *
      * Expertise qui sera connue du comité d'attribution uniquement
      *
-     * @ORM\Column(name="commentaire_interne", type="text", length=65535, nullable=false)
+     * @ORM\Column(name="commentaire_interne", type="text", length=65535, nullable=true)
      * @Assert\NotBlank(message="Vous n'avez pas rempli le commentaire pour le comité")
      */
     private $commentaireInterne = "";
@@ -77,7 +77,7 @@ class Expertise
      *
      * Expertise qui sera connue du porteur de projet
      *
-     * @ORM\Column(name="commentaire_externe", type="text", length=65535, nullable=false)
+     * @ORM\Column(name="commentaire_externe", type="text", length=65535, nullable=true)
      * @Assert\NotBlank(message="Vous n'avez pas rempli le commentaire pour le responsable")
      */
     private $commentaireExterne = "";

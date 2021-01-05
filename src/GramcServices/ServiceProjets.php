@@ -999,7 +999,7 @@ class ServiceProjets
     }
     
     /************************************************
-     * Renvoie le chemin vers le rapport d'activité
+     * Renvoie le chemin vers le rapport d'activité s'il existe, null s'il n'y a pas de RA
      *
      * Si $annee==null, calcule l'année précédente l'année de la session
      * (OK pour sessions de type A !)

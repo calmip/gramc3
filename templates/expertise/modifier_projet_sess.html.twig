@@ -68,7 +68,7 @@
         <a href="{{ path('consulter_projet', { 'id' : expertise.version.projet.idProjet } ) }}" target="_blank">
         <img class="bouton_poussoir" src="{{ asset('icones/consulter64.png') }}" title="Consulter le projet" alt="Consulter le projet" />
         </a>
-        {% if ( version.hasRapport  and not ( isNouvelle ) ) %}
+        {% if ( rapport != null ) %}
         <a href="{{ path('rapport', { 'id' : version.idVersion }) }}"  target="_blank">
             <img class="bouton_poussoir" src="{{ asset('icones/pdf64.png') }}" alt="pdf" title="Rapport d'activité {{version.anneeRapport}}" />
         </a>
@@ -78,7 +78,7 @@
         </a>
 
 		{% if noconso==false %}
-	        {% if not isNouvelle %}
+	        {% if not isnouvelle %}
 	            <img id="bconso_1" class="bouton_poussoir conso" src="{{ asset('icones/conso64.png') }}"
 	            alt="Consommation {{anneePrec}}" title="consommation {{anneePrec}}"
 	            data-href="{{ absolute_url(path('projet_conso', { 'id': expertise.version.projet.idProjet, 'annee' : anneePrec })) }}"/>
