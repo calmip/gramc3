@@ -48,6 +48,11 @@ p.centrage {
 	display: none;
 }
 
+/* Une image à droite */
+img.right {
+	float: right;
+}
+
 /* Permet de casser le float:left */
 hr.retour {
 	visibility: hidden;
