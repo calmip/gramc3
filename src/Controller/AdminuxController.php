@@ -209,11 +209,21 @@ class AdminuxController extends Controller
      * @Route("/users/setpassword/{idProjet}/projet/{idIndividu}/individu/{password}/password", name="set_password")
      * @Method({"POST"})
      * @Security("is_granted('ROLE_ADMIN')")
+
+     * Positionne le mot de passe du user demandé dans la version active ou EN_ATTENTE du projet demandé
+     * TODO - Pas clair tout ça: ACTIVE ou EN ATTENTE ?
      */
+
+    // exemple: curl --insecure --netrc -X POST https://.../adminux/users/setloginname/P1234/projet/6543/individu/azerty/password
 	public function setpasswordAction(Request $request, $idProjet, $idIndividu, $password, LoggerInterface $lg)
 	{
 		$em = $this->getdoctrine()->getManager();
-
+		
+		# Calcul de la date d'expiration
+		$pwd_duree = $this->getParameter('pwd_duree');  // Le nombre de jours avant expirtion du mot de passe
+		$grdt      = $this->get('app.gramc.date');
+		$passexpir = $grdt->getNew()->add(new \DateInterval($pwd_duree));
+		
 		if ( $this->getParameter('noconso')==true )
 		{
 			throw new AccessDeniedException("Accès interdit (paramètre noconso)");
@@ -239,7 +249,8 @@ class AdminuxController extends Controller
 	                $collaborateur  =  $collaborateurVersion->getCollaborateur() ;
 	                if( $collaborateur != null && $collaborateur->isEqualTo( $individu ) )
 					{
-	                    $collaborateurVersion->setLoginname( $loginname );
+	                    $collaborateurVersion->setPassword( $password );
+	                    $collaborateurVersion->setPassexpir( $passexpir );
 	                    Functions::sauvegarder( $collaborateurVersion, $em, $lg );
 	                    return new Response(json_encode('OK'));
 					}
