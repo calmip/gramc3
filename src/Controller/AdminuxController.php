@@ -140,14 +140,71 @@ class AdminuxController extends Controller
 
     ///////////////////////////////////////////////////////////////////////////////
 
-   /**
+    /**
      * set loginname
      *
      * @Route("/users/setloginname/{idProjet}/projet/{idIndividu}/individu/{loginname}/loginname", name="set_loginname")
      * @Method({"POST"})
      * @Security("is_granted('ROLE_ADMIN')")
+     * 
+     * Positionne le loginname du user demandé dans la VERSION ACTIVE du projet demandé
+     * 
      */
+     
+     // exemple: curl --insecure --netrc -X POST https://.../adminux/users/setloginname/P1234/projet/6543/individu/toto/loginname
 	public function setloginnameAction(Request $request, $idProjet, $idIndividu, $loginname, LoggerInterface $lg)
+	{
+		$em = $this->getdoctrine()->getManager();
+
+		if ( $this->getParameter('noconso')==true )
+		{
+			throw new AccessDeniedException("Accès interdit (paramètre noconso)");
+		}
+
+	    $error = [];
+	    $projet      = $em->getRepository(Projet::class)->find($idProjet);
+	    if( $projet == null )
+	    {
+	       $error[]    =   'No Projet ' . $idProjet;
+		}
+		
+	    $individu = $em->getRepository(Individu::class)->find($idIndividu);
+	    if( $individu == null )
+	    {
+	        $error[]    =   'No Individu ' . $idIndividu;
+		}
+		
+	    if ( $error != [] )
+	    {
+	        return new Response( json_encode( ['KO' => $error ]) );
+		}
+		
+		$version = $projet -> getVersionActive();
+	
+		foreach( $version->getCollaborateurVersion() as $cv )
+		{
+			if ($cv->getLogin())
+			{
+				$collaborateur  =  $cv->getCollaborateur() ;
+				if( $collaborateur != null && $collaborateur->isEqualTo( $individu ) )
+				{
+					$cv->setLoginname( $loginname );
+					Functions::sauvegarder( $cv, $em, $lg );
+					return new Response(json_encode('OK'));
+				}
+			}
+		}
+		return new Response(json_encode( ['KO' => "Collaborateur $individu pas trouve (version $version), ou pas de login demande" ]));
+     }
+
+   /**
+     * set password
+     *
+     * @Route("/users/setpassword/{idProjet}/projet/{idIndividu}/individu/{password}/password", name="set_password")
+     * @Method({"POST"})
+     * @Security("is_granted('ROLE_ADMIN')")
+     */
+	public function setpasswordAction(Request $request, $idProjet, $idIndividu, $password, LoggerInterface $lg)
 	{
 		$em = $this->getdoctrine()->getManager();
 
@@ -375,14 +432,17 @@ class AdminuxController extends Controller
 	 * On renvoie pour chaque projet, ou pour un projet donné, la liste des collaborateurs qui doivent avoir un login
 	 *
 	 * Données renvoyées (fmt json):
-	 * 				mail		toto@exemple.fr
-	 * 				idIndividu	75
-	 * 				nom			Toto
-	 * 				prenom		Ernest
-	 * 			    idProjet	P01234
-	 * 				login		toto
-	 * 			    idProjet	P56789
-	 * 				login		titi
+	 * 
+	 *             "toto@exemple.fr" : {
+	 *                  "idIndividu": 75,
+	 *                  "nom" : "Toto",
+	 * 				    "prenom" : "Ernest",
+	 *                  "projets" : {
+	 * 			           "P01234" : "toto",
+	 *                     "P56789" : "etoto"
+	 *                  }
+	 *              },
+	 *             "titi@exemple.fr": ...
 	 *
 	 * @Method({"POST"})
 	 *
