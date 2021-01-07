@@ -147,7 +147,8 @@ class AdminuxController extends Controller
      * @Method({"POST"})
      * @Security("is_granted('ROLE_ADMIN')")
      * 
-     * Positionne le loginname du user demandé dans la VERSION ACTIVE du projet demandé
+     * Positionne le loginname du user demandé dans la version active ou EN_ATTENTE du projet demandé
+     * TODO - Pas clair tout ça: ACTIVE ou EN ATTENTE ?
      * 
      */
      
@@ -179,22 +180,27 @@ class AdminuxController extends Controller
 	        return new Response( json_encode( ['KO' => $error ]) );
 		}
 		
-		$version = $projet -> getVersionActive();
-	
-		foreach( $version->getCollaborateurVersion() as $cv )
-		{
-			if ($cv->getLogin())
+	    $versions = $projet->getVersion();
+	    foreach( $versions as $version )
+	    {
+	        if( $version->getEtatVersion() == Etat::ACTIF             || 
+	            $version->getEtatVersion() == Etat::ACTIF_TEST        ||
+	            $version->getEtatVersion() == Etat::EN_ATTENTE        
+	          )
 			{
-				$collaborateur  =  $cv->getCollaborateur() ;
-				if( $collaborateur != null && $collaborateur->isEqualTo( $individu ) )
+	            foreach( $version->getCollaborateurVersion() as $collaborateurVersion )
 				{
-					$cv->setLoginname( $loginname );
-					Functions::sauvegarder( $cv, $em, $lg );
-					return new Response(json_encode('OK'));
+	                $collaborateur  =  $collaborateurVersion->getCollaborateur() ;
+	                if( $collaborateur != null && $collaborateur->isEqualTo( $individu ) )
+					{
+	                    $collaborateurVersion->setLoginname( $loginname );
+	                    Functions::sauvegarder( $collaborateurVersion );
+	                    return new Response(json_encode('OK'));
+					}
 				}
 			}
 		}
-		return new Response(json_encode( ['KO' => "Collaborateur $individu pas trouve (version $version), ou pas de login demande" ]));
+		return new Response(json_encode( ['KO' => 'No user found' ]));
      }
 
    /**
