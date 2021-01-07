@@ -35,6 +35,13 @@ html, body {
     display: inline;
 }
 
+/* Une mention au centre généralement en <em> */
+p.centrage {
+       text-align: center;
+       width: 70%;
+       margin: 1em auto;
+}
+
 /* Un truc qu'on ne voit pas à moins que javascript ne nous le montre !
    Actuellement utilisé seulement par formulaire_projet.php/.js */
 .invisible_if_no_js {

@@ -926,7 +926,7 @@ class ServiceMenus
     {
 		$user = $this->token->getUser();
 		
-        $menu['name']  = 'modifier_collaborateurs';
+        $menu['name']  = 'avant_modifier_collaborateurs';
         $menu['param'] = $version->getIdVersion();
         $menu['lien']  = "Collaborateurs";
 
