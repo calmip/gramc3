@@ -1482,9 +1482,10 @@ class ProjetController extends Controller
 			$dessin_heures->resetConso($struct_data);
 	        $image_conso     = $dessin_heures->createImage($struct_data)[0];
 		}
+		// Génération du graphe de conso stockage
 		elseif ($ressource['type'] == 'stockage')
 		{
-			$db_work     = $compta_repo->consoResPrj( $projet, $ressource, $annee );
+			$db_work     = $compta_repo->consoStockage( $conso_loginname, $ressource, $annee, $ntype );
 			$dessin_work = $this -> get('app.gramc.graf_stockage');
 	        $struct_data = $dessin_work->createStructuredData($debut,$fin,$db_work,$ressource['unite']);
 	        $image_conso = $dessin_work->createImage($struct_data, $ressource)[0];

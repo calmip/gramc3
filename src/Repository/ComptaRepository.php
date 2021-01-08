@@ -16,7 +16,6 @@ class ComptaRepository extends \Doctrine\ORM\EntityRepository
 
 	/* -------- FONCTIONS DE HAUT NIVEAU -------- */
 	
-    public function conso($loginname, $annee, $type=2)
     /* 
      * Renvoie les données de conso d'un projet ou d'un utilisateur sur une année
      * Par défaut, on s'intéresse aux lignes de type 2, c'est-à-dire "group"
@@ -27,6 +26,7 @@ class ComptaRepository extends \Doctrine\ORM\EntityRepository
      * On ne s'intéresse qu'aux ressources de type calcul, c-à-d cpu, gpu
      * 
      */
+    public function conso($loginname, $annee, $type=2)
     {
         $debut = new \DateTime( $annee . '-01-01');
         $fin   = new \DateTime( $annee . '-12-31');
@@ -57,13 +57,38 @@ class ComptaRepository extends \Doctrine\ORM\EntityRepository
         return $db_data;
     }
 
-    public function consoDateInt(Projet $projet, \DateTime $date)
+	
+    /* 
+     * Renvoie les données de conso stockage d'un projet ou d'un utilisateur sur une année
+     * Par défaut, on s'intéresse aux lignes de type 2, c'est-à-dire "group"
+     * Dans ce cas $loginname est le id_projet
+     * $type=1 permet de s'intéresser aux données de type 1 (user)
+     * Dans ce cas $loginname est le nom de login
+     * 
+     * On ne s'intéresse qu'aux ressources de type stockage
+     * 
+     */
+    public function consoStockage($loginname, $ressource, $annee, $type=2)
+    {
+		if ($type==2)
+		{
+			return $this->consoResPrj($loginname, $ressource, $annee);
+		}
+		if ($type==1)
+		{
+			return $this->consoResPrjUser($loginname, $ressource, $annee);
+		}
+		// TODO - Une exception ?
+		return null;
+	}
+
     /* Renvoie les données de conso d'un projet à une date donnée
      * On ne s'intéresse qu'aux lignes de type 2, c'est-à-dire "group"
      * On ne s'intéresse qu'aux ressources de type calcul, c-à-d cpu, gpu
      * Les données de type 1 (user) sont ignorées
      * Renvoie un int
      */
+    public function consoDateInt(Projet $projet, \DateTime $date)
     {
 		$conso_cpu = $this->consoResPrjDate($projet, ['ress' => 'cpu'], $date);
 		////echo('<pre>'.$projet."###".$date->format('Y-m-d').'</pre>');
@@ -90,10 +115,10 @@ class ComptaRepository extends \Doctrine\ORM\EntityRepository
 		return $cpu + $gpu;
 	}
 
-    public function consoTotale($annee,$ressource)
     /* Renvoie les données de conso de la somme de tous les types 2 de la ressource spécifiée
      * Se limite aux projets P* et T* (exclusion des projets E*)
      */
+    public function consoTotale($annee,$ressource)
     {
 		$annee = intval($annee);
 		$nannee= $annee + 1;
@@ -126,14 +151,14 @@ class ComptaRepository extends \Doctrine\ORM\EntityRepository
     /******************
     * Retourne les données de compta pour un projet, une ressource, une année
     *
-    *      params: $projet
+    *      params: $id_projet
     *              $ressource Un tableau décrivant une ressource (cf. parameters.yml)
     *              $annee     Une annee
     *
     *      Retourne: Un tableau d'objets Compta
     *
     *********************/
-    public function consoResPrj(Projet $projet, $ressource, $annee)
+    private function consoResPrj($id_projet, $ressource, $annee)
     {
         $debut = new \DateTime( $annee . '-01-01');
         $fin   = new \DateTime( $annee . '-12-31');
@@ -148,7 +173,7 @@ class ComptaRepository extends \Doctrine\ORM\EntityRepository
             AND   c.date <= :fin
             ORDER BY c.date ASC'
         )
-        ->setParameter ('projet', strtolower($projet->getIdProjet() ) )
+        ->setParameter ('projet', strtolower($id_projet))
         ->setParameter ('debut',$debut)
         ->setParameter ('res', $ressource['ress'])
         ->setParameter ('fin',$fin)
@@ -168,7 +193,7 @@ class ComptaRepository extends \Doctrine\ORM\EntityRepository
     *      Retourne: objet Compta
     *
     *********************/
-    public function consoResPrjDate(Projet $projet, $ressource, \Datetime $date)
+    private function consoResPrjDate(Projet $projet, $ressource, \Datetime $date)
     {
 		////echo('<pre>#'.strtolower($projet->getIdProjet())."#".$date->format('Y-m-d')."#".$ressource['ress']."#</pre>");
 		//echo('<pre>#--->'.$projet->getIdProjet()."#".print_r($ressource)."#".$date->format('Y-m-d').'</pre>');
@@ -191,8 +216,8 @@ class ComptaRepository extends \Doctrine\ORM\EntityRepository
         return $db_data;
 	}
 
-    /* Renvoie les données de compta pour un projet OU un user, une ressource, une année */
-    public function consoResPrjUser(Projet $projet, $user, $ressource, $annee)
+    /* Renvoie les données de compta pour un user (loginname), une ressource, une année */
+    private function consoResPrjUser($user, $ressource, $annee)
     {
         $debut = new \DateTime( $annee . '-01-01');
         $fin   = new \DateTime( $annee . '-12-31');
@@ -200,16 +225,16 @@ class ComptaRepository extends \Doctrine\ORM\EntityRepository
         $db_data = $this->getEntityManager()->createQuery(
             'SELECT c
             FROM App:Compta c
-            WHERE ((c.loginname = :projet AND c.type=2) OR (c.loginname = :login AND c.type=1))
-            AND     c.ressource = :res
+            WHERE c.loginname = :loginname
+            AND c.type=1
+            AND c.ressource = :res
             AND c.date >= :debut
             AND c.date <= :fin
             ORDER BY c.date ASC'
         )
-        ->setParameter ('loginname', $user )
-        ->setParameter ('projet', strtolower($projet->getIdProjet() ) )
+        ->setParameter ('loginname', strtolower($user))
         ->setParameter ('debut',$debut)
-        ->setParameter ('res', $ressource['nom'])
+        ->setParameter ('res', $ressource['ress'])
         ->setParameter ('fin',$fin)
         ->getResult();
 
