@@ -27,19 +27,15 @@ namespace App\Controller;
 use Psr\Log\LoggerInterface;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-//use Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
-//use App\App;
 use App\Utils\Functions;
-//use App\Utils\GramcDate;
 use App\Utils\Etat;
 
 use App\Entity\Projet;
@@ -64,8 +60,7 @@ class AdminuxController extends Controller
      * format date, loginname, ressource, type, consommation, quota
      * ressource = cpu, gpu, home, etc.
      * type      = user ou group unix
-     * @Route("/compta_update_batch", name="compta_update_batch")
-     * @Method({"PUT"})
+     * @Route("/compta_update_batch", name="compta_update_batch", methods={"PUT"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
      public function UpdateComptaBatchAction(Request $request)
@@ -143,12 +138,10 @@ class AdminuxController extends Controller
     /**
      * set loginname
      *
-     * @Route("/users/setloginname/{idProjet}/projet/{idIndividu}/individu/{loginname}/loginname", name="set_loginname")
-     * @Method({"POST"})
+     * @Route("/users/setloginname/{idProjet}/projet/{idIndividu}/individu/{loginname}/loginname", name="set_loginname", methods={"POST"})
      * @Security("is_granted('ROLE_ADMIN')")
      * 
      * Positionne le loginname du user demandé dans la version active ou EN_ATTENTE du projet demandé
-     * TODO - Pas clair tout ça: ACTIVE ou EN ATTENTE ?
      * 
      */
      
@@ -206,12 +199,10 @@ class AdminuxController extends Controller
    /**
      * set password
      *
-     * @Route("/users/setpassword/{idProjet}/projet/{idIndividu}/individu/{password}/password", name="set_password")
-     * @Method({"POST"})
+     * @Route("/users/setpassword/{idProjet}/projet/{idIndividu}/individu/{password}/password", name="set_password", methods={"POST"})
      * @Security("is_granted('ROLE_ADMIN')")
 
      * Positionne le mot de passe du user demandé dans la version active ou EN_ATTENTE du projet demandé
-     * TODO - Pas clair tout ça: ACTIVE ou EN ATTENTE ?
      */
 
     // exemple: curl --insecure --netrc -X POST https://.../adminux/users/setloginname/P1234/projet/6543/individu/azerty/password
@@ -262,7 +253,7 @@ class AdminuxController extends Controller
 	/**
 	 * get versions non terminées
 	 *
-	 * @Route("/version/get", name="get_version")
+	 * @Route("/version/get", name="get_version", methods={"POST"})
 	 * @Security("is_granted('ROLE_ADMIN')")
 	 * Exemples de données POST (fmt json):
 	 * 			   ''
@@ -291,8 +282,6 @@ class AdminuxController extends Controller
 	 * 				attrHeures	Heures cpu attribuées
 	 * 				quota		Quota sur la machine
 	 * 				gpfs		sondVolDonnPerm stockage permanent demandé (pas d'attribution pour le stockage)
-	 *
-	 * @Method({"POST"})
 	 *
 	 */
 	 public function versionGetAction(Request $request)
@@ -425,7 +414,7 @@ class AdminuxController extends Controller
 	/**
 	 * get users
 	 *
-	 * @Route("/users/get", name="get_users")
+	 * @Route("/users/get", name="get_users", methods={"POST"})
 	 * @Security("is_granted('ROLE_ADMIN')")
 	 *
 	 * Exemples de données POST (fmt json):
@@ -461,7 +450,6 @@ class AdminuxController extends Controller
 	 *              },
 	 *             "titi@exemple.fr": ...
 	 *
-	 * @Method({"POST"})
 	 *
 	 */
 
@@ -582,8 +570,7 @@ class AdminuxController extends Controller
     /**
      * set loginname
      *
-     * @Route("/getloginnames/{idProjet}/projet", name="get_loginnames")
-     * @Method({"GET"})
+     * @Route("/getloginnames/{idProjet}/projet", name="get_loginnames", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
 	public function getloginnamesAction($idProjet)
@@ -640,8 +627,7 @@ class AdminuxController extends Controller
     /**
      * Vérifie la base de données, et envoie un mail si l'attribution d'un projet est différente du quota
      *
-     * @Route("/quota_check", name="quota_check")
-     * @Method({"GET"})
+     * @Route("/quota_check", name="quota_check", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
      public function quotaCheckAction(Request $request)
@@ -680,8 +666,7 @@ class AdminuxController extends Controller
     /**
      * Vérifie la base de données, et supprime les mots de passe temporaires "expirés"
      * 
-     * @Route("/pwd_correct", name="pwd_correct")
-     * @Method({"GET"})
+     * @Route("/pwd_correct", name="pwd_correct", methods={"GET"})
      * 
      * curl --insecure --netrc -X GET   https://gramc3-local.mylaptop/adminux/pwd_correct
      * 
