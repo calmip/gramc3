@@ -34,6 +34,7 @@ parameters:
     prj_prefix:
         1: P
         2: T
+
     ressources_conso_group:
         1:
             type: calcul
@@ -45,11 +46,7 @@ parameters:
             ress: work_space
             nom: 'Espace work'
             unite: Tio
-        3:
-            type: stockage
-            ress: home_space
-            nom: Home
-            unite: Gio
+
     ressources_conso_user:
         1:
             type: calcul
@@ -58,15 +55,10 @@ parameters:
             unite: h
         2:
             type: stockage
-            ress: work_space
-            nom: 'Espace work'
-            unite: Tio
-        3:
-            type: stockage
             ress: home_space
             nom: Home
             unite: Gio
-        4:
+        3:
             type: stockage
             ress: tmpdir_space
             nom: tmpdir

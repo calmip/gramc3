@@ -1,13 +1,30 @@
-<h1>Consommations </h1>
 
-<ul>
-	{% if type=='group' %}
+{% for t in types %}
+	{% if t=='group' %}
+		<h2>{{ titres[t] }}</h2>
+		<ul>
 		{% for k,r in ressources_conso_group %}
 			<li>
 				<img class="bouton_poussoir conso" src="{{ asset('icones/conso16.png') }}"
 	                 alt="Consommation - {{projet}} - {{annee}} - {{r.nom}}"
-	                 data-href="{{ absolute_url(path('projet_conso_ressource', { 'id': projet.idProjet, 'ress_id' : k, 'utype': 'group', 'annee' : annee }))}}" /> {{ projet }} ({{ annee }}) - {{ r.nom }}
+	                 data-href="{{ absolute_url(path('projet_conso_ressource', { 'id': projet.idProjet, 'loginname': loginname, 'ress_id' : k, 'utype': t, 'annee' : annee }))}}" /> 
+	                 {{ projet }} ({{ annee }}) - {{ r.nom }}
 	        </li>
 		{% endfor %}
+		</ul>
 	{% endif %}
-</ul>
+	{% if t=='user' and loginname != 'nologin' %}
+		<h2>{{ titres[t] }}</h2>
+		<ul>
+		{% for k,r in ressources_conso_user %}
+			<li>
+				<img class="bouton_poussoir conso" src="{{ asset('icones/conso16.png') }}"
+	                 alt="Consommation - {{loginname}} - {{annee}} - {{r.nom}}"
+	                 data-href="{{ absolute_url(path('projet_conso_ressource', { 'id': projet.idProjet, 'loginname': loginname, 'ress_id' : k, 'utype': t, 'annee' : annee }))}}" /> 
+	                 {{ loginname }} ({{ annee }}) - {{ r.nom }}
+	        </li>
+		{% endfor %}
+		</ul>
+	{% endif %}
+{% endfor %}
+

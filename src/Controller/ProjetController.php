@@ -48,7 +48,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
-//use App\App;
+use Symfony\Component\Config\Definition\Exception\Exception;
 use App\Utils\Functions;
 use App\Utils\Etat;
 use App\Utils\Signal;
@@ -1367,14 +1367,15 @@ class ProjetController extends Controller
 
     /**
      * Affichage graphique de la consommation d'un projet
-     *     Affiche un menu permettant de choisir quelle consommation on veut voir afficher
+     *    Affiche un menu permettant de choisir quelle consommation on veut voir afficher
+     * 
      *
-     * @Route("/{id}/conso/{annee}", name="projet_conso")
+     * @Route("/{id}/conso/{annee}/annee/{loginname}/loginname", name="projet_conso", defaults={"loginname" = "nologin"})
      * @Method("GET")
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
 
-    public function consoAction(Projet $projet, $annee = null)
+    public function consoAction(Projet $projet, $loginname = null, $annee = null)
     {
 		$sp = $this->get('app.gramc.ServiceProjets');
 		$sj = $this->get('app.gramc.ServiceJournal');
@@ -1393,7 +1394,14 @@ class ProjetController extends Controller
             $annee = '20' . substr( $version->getIdVersion(), 0, 2 );
         }
 
-        return $this->render('projet/conso_menu.html.twig', ['projet'=>$projet, 'annee'=>$annee, 'type'=>'group']);
+        return $this->render('projet/conso_menu.html.twig', 
+							['projet'=>$projet, 
+							 'annee'=>$annee,
+							 'loginname'=>$loginname, 
+							 'types'=>['group','user'],
+							 'titres'=>['group' => 'Les consos du projet',
+										'user' => 'Mes consommations']
+							 ]);
 	}
 
     /**
@@ -1401,12 +1409,14 @@ class ProjetController extends Controller
      *
      *      utype = type d'utilisateur - user ou group !
      *
-     * @Route("/{id}/{utype}/{ress_id}/{annee}/conso_ressource", name="projet_conso_ressource")
+     * @Route("/{id}/projet/{utype}/utype/{ress_id}/ress_id/{loginname}/loginname/{annee}/annee/conso_ressource", 
+     *         defaults={"loginname" = "nologin"},
+     *         name="projet_conso_ressource")
      * @Method("GET")
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
 
-    public function consoRessourceAction(Projet $projet, $utype='group', $ress_id, $annee = null)
+    public function consoRessourceAction(Projet $projet, $utype, $ress_id, $loginname, $annee)
     {
 		$em = $this->getDoctrine()->getManager();
 		$sp = $this->get('app.gramc.ServiceProjets');
@@ -1415,7 +1425,7 @@ class ProjetController extends Controller
 
 		$dessin_heures = $this -> get('app.gramc.graf_calcul');
 		$compta_repo   = $em->getRepository(Compta::class);
-		$projet_id     = strtolower($projet->getIdProjet());
+		$id_projet     = strtolower($projet->getIdProjet());
 
         // Seuls les collaborateurs du projet ont accès à la consommation
         if( ! $sp->projetACL( $projet ) )
@@ -1424,12 +1434,22 @@ class ProjetController extends Controller
 		}
 
         // Verification du paramètre $utype
-        if ($utype != 'group' && $utype != 'user')
+        if ($utype == 'user')
+        {
+			$ntype = 1;
+		}
+		elseif ($utype == 'group')
+		{
+			$ntype = 2;
+		}
+		else
         {
 			$sj->throwException(__METHOD__ . ':' . __LINE__ .' problème avec utype '.$utype);
 		}
 
         // Si année non spécifiée on prend l'année la plus récente du projet
+        
+		$version = null;
         if( $annee == null )
         {
             $version    =   $projet->derniereVersion();
@@ -1442,18 +1462,30 @@ class ProjetController extends Controller
 		$ressource = $this->getParameter('ressources_conso_'.$utype)[$ress_id];
 		//$sj->debugMessage(__METHOD__.':'.__LINE__. " projet $projet - $utype - ressource = ".print_r($ressource,true));
 
+		// Détermination de loginname: soit le nom du projet soit le nom de login de l'utilisateur connecté
+		if ($utype === 'group')
+		{
+			$conso_loginname = $id_projet;
+		}
+		else
+		{
+			$conso_loginname = $loginname;
+		}
+
 		// Génération du graphe de conso heures cpu et heures gpu
 		// Note - type ici n'a rien à voir avec le paramètre $utype
 		if ($ressource['type'] == 'calcul')
 		{
-	        $db_conso      = $compta_repo->conso( $projet, $annee );
+			$id_projet     = $projet->getIdProjet();
+	        $db_conso      = $compta_repo->conso( $conso_loginname, $annee, $ntype );
 			$struct_data   = $dessin_heures->createStructuredData($debut,$fin,$db_conso);
 			$dessin_heures->resetConso($struct_data);
 	        $image_conso     = $dessin_heures->createImage($struct_data)[0];
 		}
+		// Génération du graphe de conso stockage
 		elseif ($ressource['type'] == 'stockage')
 		{
-			$db_work     = $compta_repo->consoResPrj( $projet, $ressource, $annee );
+			$db_work     = $compta_repo->consoStockage( $conso_loginname, $ressource, $annee, $ntype );
 			$dessin_work = $this -> get('app.gramc.graf_stockage');
 	        $struct_data = $dessin_work->createStructuredData($debut,$fin,$db_work,$ressource['unite']);
 	        $image_conso = $dessin_work->createImage($struct_data, $ressource)[0];
@@ -1551,7 +1583,7 @@ class ProjetController extends Controller
 	            $rallonges = $versionActive ->getRallonge();
 	            $cpt_rall  = count($rallonges->toArray());
 	            $cv        = $coll_ver->findOneBy(['version' => $versionActive, 'collaborateur' => $individu]);
-	            $login     = $cv->getLoginname();
+	            $login     = $cv->getLoginname()==null ? 'nologin' : $cv->getLoginname();
 	            $passwd    = $cv->getPassword();
 	            $pwd_expir = $cv->getPassexpir();
 	        }
@@ -1559,7 +1591,7 @@ class ProjetController extends Controller
 	        {
 	            $rallonges = null;
 	            $cpt_rall  = 0;
-	            $login     = null;
+	            $login     = 'nologin';
 	            $passwd    = null;
 	            $pwd_expir = null;
 			}
@@ -1588,7 +1620,7 @@ class ProjetController extends Controller
 	            $rallonges = $versionActive ->getRallonge();
 	            $cpt_rall  = count($rallonges->toArray());
 	            $cv        = $coll_ver->findOneBy(['version' => $versionActive, 'collaborateur' => $individu]);
-	            $login     = $cv->getLoginname();
+	            $login     = $cv->getLoginname()==null ? 'nologin' : $cv->getLoginname();
 	            $passwd    = $cv->getPassword();
 	            $pwd_expir = $cv->getPassexpir();
 			}
@@ -1596,7 +1628,7 @@ class ProjetController extends Controller
 	        {
 	            $rallonges = null;
 				$cpt_rall  = 0;
-	            $login     = null;
+	            $login     = 'nologin';
 	            $passwd    = null;
 	            $pwd_expir = null;
 			}
@@ -1639,8 +1671,11 @@ class ProjetController extends Controller
      */
     public function consulterAction(Projet $projet, Version $version = null,  Request $request)
     {
+		$em = $this->getDoctrine()->getManager();
 		$sp = $this->get('app.gramc.ServiceProjets');
 		$sj = $this->get('app.gramc.ServiceJournal');
+		$coll_vers_repo= $em->getRepository(CollaborateurVersion::class);
+		$token = $this->get('security.token_storage')->getToken();
 
         // choix de la version
         if( $version == null ) 
@@ -1654,26 +1689,43 @@ class ProjetController extends Controller
         else
             $projet =   $version->getProjet(); // nous devons être sûrs que le projet corresponde à la version
 
-         if( ! $sp->projetACL( $projet ) )
+        if( ! $sp->projetACL( $projet ) )
             $sj->throwException(__METHOD__ . ':' . __LINE__ .' problème avec ACL');
+
+		// Calcul du loginname, pour affichage de la conso
+		$loginname = null;
+		$cv = $coll_vers_repo->findOneBy( ['version' => $version, 'collaborateur' => $token->getUser()] );
+		if ($cv != null)
+		{
+			$loginname = $cv -> getLoginname() == null ? 'nologin' : $cv -> getLoginname();
+		}
+		else
+		{
+			$loginname = 'nologin';
+		}
+
+//			if ($loginname == 'nologin')
+//			{
+//				$sj->throwException(__METHOD__ . ':' . __LINE__ ." Projet $projet Année $annee Pas d'utilisateurs !");
+//			}
 
 		// LA SUITE DEPEND DU TYPE DE PROJET !
 		$type = $projet->getTypeProjet();
 		switch ($type)
 		{
 			case Projet::PROJET_SESS:
-				return $this->consulterType1($projet, $version, $request);
+				return $this->consulterType1($projet, $version, $loginname, $request);
 			case Projet::PROJET_TEST:
-				return $this->consulterType2($projet, $version, $request);
+				return $this->consulterType2($projet, $version, $loginname, $request);
 			case Projet::PROJET_FIL:
-				return $this->consulterType3($projet, $version, $request);
+				return $this->consulterType3($projet, $version, $loginname, $request);
 			default:
 				$sj->errorMessage(__METHOD__ . " Type de projet inconnu: $type");
 		}
     }
 
 	// Consulter les projets de type 1 (projets PROJET_SESS)
-    private function consulterType1(Projet $projet, Version $version, Request $request)
+    private function consulterType1(Projet $projet, Version $version, $loginname, Request $request)
     {
 		$sm = $this->get('app.gramc.ServiceMenus');
 		$sp = $this->get('app.gramc.ServiceProjets');
@@ -1687,10 +1739,10 @@ class ProjetController extends Controller
 	        ->add('version',   EntityType::class,
 	                [
 	                'multiple' => false,
-	                'class' => 'App:Version',
-	                'required'  =>  true,
-	                'label'     => '',
-	                'choices' =>  $projet->getVersion(),
+	                'class'    => 'App:Version',
+	                'required' =>  true,
+	                'label'    => '',
+	                'choices'  =>  $projet->getVersion(),
 	                'choice_label' => function($version){ return $version->getSession(); }
 	                ])
 	    ->add('submit', SubmitType::class, ['label' => 'Changer'])
@@ -1761,6 +1813,7 @@ class ProjetController extends Controller
 	    return $this->render('projet/consulter_projet_sess.html.twig',
             [
 	            'projet'             => $projet,
+	            'loginname'          => $loginname,
 	            'version_form'       => $session_form->createView(),
 	            'version'            => $version,
 	            'session'            => $session,
@@ -1781,7 +1834,7 @@ class ProjetController extends Controller
 	}
 
 	// Consulter les projets de type 2 (projets test)
-	private function consulterType2 (Projet $projet, Version $version, Request $request)
+	private function consulterType2 (Projet $projet, Version $version, $loginname, Request $request)
 	{
 		$sm = $this->get('app.gramc.ServiceMenus');
 		$sp = $this->get('app.gramc.ServiceProjets');
@@ -1807,7 +1860,7 @@ class ProjetController extends Controller
 	}
 
 	// Consulter les projets de type 3 (projets PROJET_FIL)
-    private function consulterType3(Projet $projet, Version $version, Request $request)
+    private function consulterType3(Projet $projet, Version $version, $loginname, Request $request)
     {
 		$sm = $this->get('app.gramc.ServiceMenus');
 		$sv = $this->get('app.gramc.ServiceVersions');

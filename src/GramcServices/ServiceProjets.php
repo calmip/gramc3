@@ -1069,6 +1069,9 @@ class ServiceProjets
             return  0;
     }
     
+    /*
+     * Renvoie un tableau contenant la ou les versions de l'année passée en paramètres
+     */
 	public function getVersionsAnnee(Projet $projet, $annee)
     {
 	    $subAnnee   = substr( strval($annee), -2 );

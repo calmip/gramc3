@@ -78,7 +78,6 @@ class ProjetDfctController extends Controller
 		$dfct   = $this->get('app.gramc_DonneesFacturation');
 		$emises = $dfct->getNbEmises($projet, $annee);
 		$version= $dfct->getVersion($projet, $annee);
-
 		$menu   = [];
 	    $menu[] = $sm->projet_annee();
 
@@ -114,8 +113,9 @@ class ProjetDfctController extends Controller
 		$conso_periode = $dfct->getConsoPeriode($projet,$debut_periode,$fin_periode);
 		//if ($conso_periode == -1) $conso_periode = 'N/A';
 		
+		$id_projet     = $projet->getIdProjet();
 		$compta_repo   = $em -> getRepository(Compta::class);
-        $db_conso      = $compta_repo->conso( $projet, $annee );
+        $db_conso      = $compta_repo->conso( $id_projet, $annee );
 
 		// conso  sur la période
 		$struct_data   = $dessin_heures->createStructuredData($debut_periode,$fin_periode,$db_conso);
@@ -217,8 +217,9 @@ class ProjetDfctController extends Controller
 		
 		$conso    = $dfct->getConsoPeriode($projet, $debut_periode, $fin_periode);
 		
+		$id_projet     = $projet->getIdProjet();
 		$compta_repo   = $em -> getRepository(Compta::class);
-        $db_conso      = $compta_repo->conso( $projet, $annee );
+        $db_conso      = $compta_repo->conso( $id_projet, $annee );
 		$dessin_heures = $this -> get('app.gramc.graf_calcul');
 
 		// conso  sur la période
