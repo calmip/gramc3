@@ -676,5 +676,54 @@ class AdminuxController extends Controller
 
         return $this->render('consommation/conso_update_batch.html.twig');
     }
-}
+    
+    /**
+     * Vérifie la base de données, et supprime les mots de passe temporaires "expirés"
+     * 
+     * @Route("/pwd_correct", name="pwd_correct")
+     * @Method({"GET"})
+     * 
+     * curl --insecure --netrc -X GET   https://gramc3-local.mylaptop/adminux/pwd_correct
+     * 
+     */
+     public function pwdExpirAction(Request $request, LoggerInterface $lg)
+     {
+		$em = $this->getdoctrine()->getManager();
+		
+		if ( $this->getParameter('noconso')==true )
+		{
+			throw new AccessDeniedException("Accès interdit (paramètre noconso)");
+		}
+	    $coll_ver_repo = $em->getRepository(CollaborateurVersion::class);
+	    $coll_ver = $coll_ver_repo->getCvPasswd();
+	    
+	    $sd = $this->get('app.gramc.date');
 
+	    $output = [];
+	    //~ foreach ($coll_ver as $cv)
+	    //~ {
+			//~ $o = [];
+			//~ $o['password'] = $cv->getPassword();
+			//~ $o['passexpir']= $cv->getPassexpir();
+			//~ $o['version']  = $cv->getVersion()->getIdVersion();
+			//~ if ($cv->getPassexpir()>$sd)
+			//~ {
+				//~ $o['expiration']=false;
+			//~ }
+			//~ else
+			//~ {
+				//~ $o['expiration']=true;
+			//~ }
+			//~ $output[] = $o;
+		//~ }
+		foreach ($coll_ver as $cv)
+		{
+			if ($cv->getPassexpir() < $sd)
+			{
+				$cv->setPassexpir(NULL)->setPassword(NULL);
+				Functions::sauvegarder( $cv, $em, $lg );
+			}
+		}
+		return new Response (json_encode("OK"));
+	}
+}

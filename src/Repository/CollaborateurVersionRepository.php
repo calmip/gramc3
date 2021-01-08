@@ -73,4 +73,14 @@ class CollaborateurVersionRepository extends \Doctrine\ORM\EntityRepository
 
         return $collaborateurs;
     }
+    
+    /*
+     * Renvoie les cv qui ont un mot de passe 
+     */
+    public function getCvPasswd()
+    {
+		$em = $this->getEntityManager();
+		$coll_ver = $em->createQuery('SELECT cv FROM App:CollaborateurVersion cv WHERE cv.password IS NOT NULL')->getResult();
+		return $coll_ver;
+	}
 }
