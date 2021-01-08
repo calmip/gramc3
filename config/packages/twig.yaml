@@ -20,6 +20,7 @@ twig:
        prj_prefix: '%prj_prefix%'
        max_expertises_nb: '%max_expertises_nb%'
        ressources_conso_group: '%ressources_conso_group%'
+       ressources_conso_user: '%ressources_conso_user%'
        max_page_nb: '%max_page_nb%'
 
 

@@ -25,7 +25,7 @@
 		<td rowspan="{{ item.cpt_rall + 1 }}">
 			<img id="bconso_{{ item.projet.idProjet }}"  class="bouton_poussoir conso" src="{{ asset('icones/courbe.png') }}"
 			title="Evolution de la consommation" alt="Evolution de la consommation"
-			data-href="{{ absolute_url(path('projet_conso', { 'id': item.projet.idProjet, 'annee' : item.projet.derniereVersion.getFullAnnee() })) }}"/>
+			data-href="{{ absolute_url(path('projet_conso', { 'id': item.projet.idProjet, 'loginname': item.login, 'annee' : item.projet.derniereVersion.getFullAnnee() })) }}"/>
 		</td>
 		<input id="conso_{{ item.projet.idProjet }}" value="{{ item.conso |number_format(1)}}" type="hidden">
 		{% endif %}

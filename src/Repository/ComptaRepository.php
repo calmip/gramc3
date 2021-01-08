@@ -16,29 +16,40 @@ class ComptaRepository extends \Doctrine\ORM\EntityRepository
 
 	/* -------- FONCTIONS DE HAUT NIVEAU -------- */
 	
-    public function conso($id_projet, $annee)
-    /* Renvoie les données de conso d'un projet sur une année
-     * On ne s'intéresse qu'aux lignes de type 2, c'est-à-dire "group"
+    public function conso($loginname, $annee, $type=2)
+    /* 
+     * Renvoie les données de conso d'un projet ou d'un utilisateur sur une année
+     * Par défaut, on s'intéresse aux lignes de type 2, c'est-à-dire "group"
+     * Dans ce cas $loginname est le id_projet
+     * $type=1 permet de s'intéresser aux données de type 1 (user)
+     * Dans ce cas $loginname est le nom de login
+     * 
      * On ne s'intéresse qu'aux ressources de type calcul, c-à-d cpu, gpu
-     * Les données de type 1 (user) sont ignorées
+     * 
      */
     {
         $debut = new \DateTime( $annee . '-01-01');
         $fin   = new \DateTime( $annee . '-12-31');
 
+		if ($type != 1 && $type != 2)
+		{
+			throw new \Exception("ERREUR - Fonction conso: type vaut $type, devrait être 1 ou 2");
+		}
+		
         $db_data = $this->getEntityManager()->createQuery(
             'SELECT c
             FROM App:Compta c
             WHERE c.loginname = :loginname
             AND (c.ressource = \'cpu\' OR c.ressource=\'gpu\')
-            AND c.type = 2
+            AND c.type = :type
             AND c.date >= :debut
             AND c.date <= :fin
             ORDER BY c.date ASC'
         )
-        ->setParameter('loginname', lcfirst($id_projet) )
+        ->setParameter('loginname', strtolower($loginname) )
         ->setParameter('debut',$debut)
         ->setParameter('fin',$fin)
+        ->setParameter('type',strval($type))
         ->getResult();
 
         if( $db_data == null || empty( $db_data ) ) return null;
