@@ -1532,6 +1532,7 @@ class ProjetController extends Controller
 	    $id_individu         = $individu->getIdIndividu();
 
 	    $projetRepository    = $em->getRepository(Projet::class);
+	    $coll_ver            = $em->getRepository(CollaborateurVersion::class);
 
 	    $list_projets_collab = $projetRepository-> getProjetsCollab($id_individu, false, true);
 	    $list_projets_resp   = $projetRepository-> getProjetsCollab($id_individu, true, false);
@@ -1549,11 +1550,18 @@ class ProjetController extends Controller
 	        {
 	            $rallonges = $versionActive ->getRallonge();
 	            $cpt_rall  = count($rallonges->toArray());
+	            $cv        = $coll_ver->findOneBy(['version' => $versionActive, 'collaborateur' => $individu]);
+	            $login     = $cv->getLoginname();
+	            $passwd    = $cv->getPassword();
+	            $pwd_expir = $cv->getPassexpir();
 	        }
 	        else
 	        {
 	            $rallonges = null;
 	            $cpt_rall  = 0;
+	            $login     = null;
+	            $passwd    = null;
+	            $pwd_expir = null;
 			}
 	            
 	        $projets_resp[]   =
@@ -1562,7 +1570,10 @@ class ProjetController extends Controller
 	            'conso'     => $sp->getConsoCalculP($projet),
 	            'rallonges' => $rallonges,
 	            'cpt_rall'  => $cpt_rall,
-	            'meta_etat' => $sp->getMetaEtat($projet)
+	            'meta_etat' => $sp->getMetaEtat($projet),
+	            'login'     => $login,
+	            'passwd'    => $passwd,
+	            'pwd_expir' => $pwd_expir
             ];
 		}
 
@@ -1576,12 +1587,18 @@ class ProjetController extends Controller
 	        {
 	            $rallonges = $versionActive ->getRallonge();
 	            $cpt_rall  = count($rallonges->toArray());
+	            $cv        = $coll_ver->findOneBy(['version' => $versionActive, 'collaborateur' => $individu]);
+	            $login     = $cv->getLoginname();
+	            $passwd    = $cv->getPassword();
+	            $pwd_expir = $cv->getPassexpir();
 			}
 	        else
 	        {
 	            $rallonges = null;
 				$cpt_rall  = 0;
-
+	            $login     = null;
+	            $passwd    = null;
+	            $pwd_expir = null;
 			}
 	        $projets_collab[]   =
 	            [
@@ -1589,7 +1606,10 @@ class ProjetController extends Controller
 	            'conso'     => $sp->getConsoCalculP($projet),
 	            'rallonges' => $rallonges,
 	            'cpt_rall'  => $cpt_rall,
-				'meta_etat' => $sp->getMetaEtat($projet)
+				'meta_etat' => $sp->getMetaEtat($projet),
+	            'login'     => $login,
+	            'passwd'    => $passwd,
+	            'pwd_expir' => $pwd_expir
 	            ];
 		}
 

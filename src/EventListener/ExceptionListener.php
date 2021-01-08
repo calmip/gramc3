@@ -80,15 +80,18 @@ class ExceptionListener
 
     public function onKernelException(GetResponseForExceptionEvent $event)
     {
-		//return;
+
         $server = $event->getRequest()->server;
         $exception = $event->getException();
  
-        /*
-        $response =  new Response( get_class($exception) );
-        $event->setResponse($response);
-        return;
-        */
+        
+		// S'il y a une erreur sur la page d'accueil, décommenter ci-dessous
+		// pour avoir des détails sur l'erreur
+		// Mais en général, laisser commenté sinon grosses emmerdes en perspective !!!
+        //$response =  new Response( '<pre>' . $exception . '</pre>');
+        //$event->setResponse($response);
+        //return;
+        
  
         // nous captons des erreurs de la page d'accueil
         if( $event->getRequest()->getPathInfo() == '/' )

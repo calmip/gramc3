@@ -27,19 +27,15 @@ namespace App\Controller;
 use Psr\Log\LoggerInterface;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-//use Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
-//use App\App;
 use App\Utils\Functions;
-//use App\Utils\GramcDate;
 use App\Utils\Etat;
 
 use App\Entity\Projet;
@@ -64,8 +60,7 @@ class AdminuxController extends Controller
      * format date, loginname, ressource, type, consommation, quota
      * ressource = cpu, gpu, home, etc.
      * type      = user ou group unix
-     * @Route("/compta_update_batch", name="compta_update_batch")
-     * @Method({"PUT"})
+     * @Route("/compta_update_batch", name="compta_update_batch", methods={"PUT"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
      public function UpdateComptaBatchAction(Request $request)
@@ -140,17 +135,86 @@ class AdminuxController extends Controller
 
     ///////////////////////////////////////////////////////////////////////////////
 
-   /**
+    /**
      * set loginname
      *
-     * @Route("/users/setloginname/{idProjet}/projet/{idIndividu}/individu/{loginname}/loginname", name="set_loginname")
-     * @Method({"POST"})
+     * @Route("/users/setloginname/{idProjet}/projet/{idIndividu}/individu/{loginname}/loginname", name="set_loginname", methods={"POST"})
      * @Security("is_granted('ROLE_ADMIN')")
+     * 
+     * Positionne le loginname du user demandé dans la version active ou EN_ATTENTE du projet demandé
+     * 
      */
+     
+     // exemple: curl --insecure --netrc -X POST https://.../adminux/users/setloginname/P1234/projet/6543/individu/toto/loginname
 	public function setloginnameAction(Request $request, $idProjet, $idIndividu, $loginname, LoggerInterface $lg)
 	{
 		$em = $this->getdoctrine()->getManager();
 
+		if ( $this->getParameter('noconso')==true )
+		{
+			throw new AccessDeniedException("Accès interdit (paramètre noconso)");
+		}
+
+	    $error = [];
+	    $projet      = $em->getRepository(Projet::class)->find($idProjet);
+	    if( $projet == null )
+	    {
+	       $error[]    =   'No Projet ' . $idProjet;
+		}
+		
+	    $individu = $em->getRepository(Individu::class)->find($idIndividu);
+	    if( $individu == null )
+	    {
+	        $error[]    =   'No Individu ' . $idIndividu;
+		}
+		
+	    if ( $error != [] )
+	    {
+	        return new Response( json_encode( ['KO' => $error ]) );
+		}
+		
+	    $versions = $projet->getVersion();
+	    foreach( $versions as $version )
+	    {
+	        if( $version->getEtatVersion() == Etat::ACTIF             || 
+	            $version->getEtatVersion() == Etat::ACTIF_TEST        ||
+	            $version->getEtatVersion() == Etat::EN_ATTENTE        
+	          )
+			{
+	            foreach( $version->getCollaborateurVersion() as $collaborateurVersion )
+				{
+	                $collaborateur  =  $collaborateurVersion->getCollaborateur() ;
+	                if( $collaborateur != null && $collaborateur->isEqualTo( $individu ) )
+					{
+	                    $collaborateurVersion->setLoginname( $loginname );
+	                    Functions::sauvegarder( $collaborateurVersion );
+	                    return new Response(json_encode('OK'));
+					}
+				}
+			}
+		}
+		return new Response(json_encode( ['KO' => 'No user found' ]));
+     }
+
+   /**
+     * set password
+     *
+     * @Route("/users/setpassword/{idProjet}/projet/{idIndividu}/individu/{password}/password", name="set_password", methods={"POST"})
+     * @Security("is_granted('ROLE_ADMIN')")
+
+     * Positionne le mot de passe du user demandé dans la version active ou EN_ATTENTE du projet demandé
+     */
+
+    // exemple: curl --insecure --netrc -X POST https://.../adminux/users/setloginname/P1234/projet/6543/individu/azerty/password
+	public function setpasswordAction(Request $request, $idProjet, $idIndividu, $password, LoggerInterface $lg)
+	{
+		$em = $this->getdoctrine()->getManager();
+		
+		# Calcul de la date d'expiration
+		$pwd_duree = $this->getParameter('pwd_duree');  // Le nombre de jours avant expirtion du mot de passe
+		$grdt      = $this->get('app.gramc.date');
+		$passexpir = $grdt->getNew()->add(new \DateInterval($pwd_duree));
+		
 		if ( $this->getParameter('noconso')==true )
 		{
 			throw new AccessDeniedException("Accès interdit (paramètre noconso)");
@@ -176,7 +240,8 @@ class AdminuxController extends Controller
 	                $collaborateur  =  $collaborateurVersion->getCollaborateur() ;
 	                if( $collaborateur != null && $collaborateur->isEqualTo( $individu ) )
 					{
-	                    $collaborateurVersion->setLoginname( $loginname );
+	                    $collaborateurVersion->setPassword( $password );
+	                    $collaborateurVersion->setPassexpir( $passexpir );
 	                    Functions::sauvegarder( $collaborateurVersion, $em, $lg );
 	                    return new Response(json_encode('OK'));
 					}
@@ -188,7 +253,7 @@ class AdminuxController extends Controller
 	/**
 	 * get versions non terminées
 	 *
-	 * @Route("/version/get", name="get_version")
+	 * @Route("/version/get", name="get_version", methods={"POST"})
 	 * @Security("is_granted('ROLE_ADMIN')")
 	 * Exemples de données POST (fmt json):
 	 * 			   ''
@@ -217,8 +282,6 @@ class AdminuxController extends Controller
 	 * 				attrHeures	Heures cpu attribuées
 	 * 				quota		Quota sur la machine
 	 * 				gpfs		sondVolDonnPerm stockage permanent demandé (pas d'attribution pour le stockage)
-	 *
-	 * @Method({"POST"})
 	 *
 	 */
 	 public function versionGetAction(Request $request)
@@ -351,7 +414,7 @@ class AdminuxController extends Controller
 	/**
 	 * get users
 	 *
-	 * @Route("/users/get", name="get_users")
+	 * @Route("/users/get", name="get_users", methods={"POST"})
 	 * @Security("is_granted('ROLE_ADMIN')")
 	 *
 	 * Exemples de données POST (fmt json):
@@ -375,16 +438,18 @@ class AdminuxController extends Controller
 	 * On renvoie pour chaque projet, ou pour un projet donné, la liste des collaborateurs qui doivent avoir un login
 	 *
 	 * Données renvoyées (fmt json):
-	 * 				mail		toto@exemple.fr
-	 * 				idIndividu	75
-	 * 				nom			Toto
-	 * 				prenom		Ernest
-	 * 			    idProjet	P01234
-	 * 				login		toto
-	 * 			    idProjet	P56789
-	 * 				login		titi
+	 * 
+	 *             "toto@exemple.fr" : {
+	 *                  "idIndividu": 75,
+	 *                  "nom" : "Toto",
+	 * 				    "prenom" : "Ernest",
+	 *                  "projets" : {
+	 * 			           "P01234" : "toto",
+	 *                     "P56789" : "etoto"
+	 *                  }
+	 *              },
+	 *             "titi@exemple.fr": ...
 	 *
-	 * @Method({"POST"})
 	 *
 	 */
 
@@ -505,8 +570,7 @@ class AdminuxController extends Controller
     /**
      * set loginname
      *
-     * @Route("/getloginnames/{idProjet}/projet", name="get_loginnames")
-     * @Method({"GET"})
+     * @Route("/getloginnames/{idProjet}/projet", name="get_loginnames", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
 	public function getloginnamesAction($idProjet)
@@ -563,8 +627,7 @@ class AdminuxController extends Controller
     /**
      * Vérifie la base de données, et envoie un mail si l'attribution d'un projet est différente du quota
      *
-     * @Route("/quota_check", name="quota_check")
-     * @Method({"GET"})
+     * @Route("/quota_check", name="quota_check", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
      public function quotaCheckAction(Request $request)
@@ -599,5 +662,53 @@ class AdminuxController extends Controller
 
         return $this->render('consommation/conso_update_batch.html.twig');
     }
-}
+    
+    /**
+     * Vérifie la base de données, et supprime les mots de passe temporaires "expirés"
+     * 
+     * @Route("/pwd_correct", name="pwd_correct", methods={"GET"})
+     * 
+     * curl --insecure --netrc -X GET   https://gramc3-local.mylaptop/adminux/pwd_correct
+     * 
+     */
+     public function pwdExpirAction(Request $request, LoggerInterface $lg)
+     {
+		$em = $this->getdoctrine()->getManager();
+		
+		if ( $this->getParameter('noconso')==true )
+		{
+			throw new AccessDeniedException("Accès interdit (paramètre noconso)");
+		}
+	    $coll_ver_repo = $em->getRepository(CollaborateurVersion::class);
+	    $coll_ver = $coll_ver_repo->getCvPasswd();
+	    
+	    $sd = $this->get('app.gramc.date');
 
+	    $output = [];
+	    //~ foreach ($coll_ver as $cv)
+	    //~ {
+			//~ $o = [];
+			//~ $o['password'] = $cv->getPassword();
+			//~ $o['passexpir']= $cv->getPassexpir();
+			//~ $o['version']  = $cv->getVersion()->getIdVersion();
+			//~ if ($cv->getPassexpir()>$sd)
+			//~ {
+				//~ $o['expiration']=false;
+			//~ }
+			//~ else
+			//~ {
+				//~ $o['expiration']=true;
+			//~ }
+			//~ $output[] = $o;
+		//~ }
+		foreach ($coll_ver as $cv)
+		{
+			if ($cv->getPassexpir() < $sd)
+			{
+				$cv->setPassexpir(NULL)->setPassword(NULL);
+				Functions::sauvegarder( $cv, $em, $lg );
+			}
+		}
+		return new Response (json_encode("OK"));
+	}
+}

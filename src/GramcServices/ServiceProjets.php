@@ -150,9 +150,11 @@ class ServiceProjets
             else
                 return 'ACCEPTE'; // Projet ou rallonge accepté par le comité d'attribution
         }
-        elseif ( $etat_version ==  Etat::EN_ATTENTE        ) return 'ACCEPTE';
-        elseif ( $etat_version ==  Etat::TERMINE           ) return 'STANDBY';
-        elseif ( $veract       == null                     ) return 'STANDBY';
+        
+		elseif ( $etat_version == Etat::ACTIF_TEST ) return 'ACCEPTE'; // projet-test non renouvelable
+		elseif ( $etat_version == Etat::EN_ATTENTE ) return 'ACCEPTE';
+        elseif ( $etat_version == Etat::TERMINE    ) return 'STANDBY';
+        elseif ( $veract       == null             ) return 'STANDBY';
 	}
 	
    /**

@@ -82,6 +82,7 @@ parameters:
     mailadmin: admin.calmip@univ-toulouse.fr
     mailfrom: ne-pas-repondre@calmip.univ-toulouse.fr
     old_journal: 5
+    pwd_duree: P30D
     maildevt: devt1@exemple.com
     IDPprod:
         CNRS: 'https://janus.cnrs.fr/idp'

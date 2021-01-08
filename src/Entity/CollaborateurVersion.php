@@ -56,6 +56,20 @@ class CollaborateurVersion
     private $loginname;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="password", type="string", nullable=true,length=50 )
+     */
+    private $password;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="pass_expiration", type="datetime", nullable=true)
+     */
+    private $passexpir;
+
+    /**
      * @var \App\Entity\Projet
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Statut")
@@ -217,7 +231,53 @@ class CollaborateurVersion
         return $this->loginname;
     }
 
+    /**
+     * Set password
+     *
+     * @param string $password
+     *
+     * @return CollaborateurVersion
+     */
+    public function setPassword($password)
+    {
+        $this->password = $password;
 
+        return $this;
+    }
+
+    /**
+     * Get password
+     *
+     * @return string
+     */
+    public function getPassword()
+    {
+        return $this->password;
+    }
+
+    /**
+     * Set passexpir
+     *
+     * @param \DateTime $passexpir
+     *
+     * @return CollaborateurVersion
+     */
+    public function setPassexpir($passexpir)
+    {
+        $this->passexpir = $passexpir;
+
+        return $this;
+    }
+
+    /**
+     * Get passexpir
+     *
+     * @return \DateTime
+     */
+    public function getPassexpir()
+    {
+        return $this->passexpir;
+    }
 
     /**
      * Get id
