@@ -16,7 +16,7 @@ class ComptaRepository extends \Doctrine\ORM\EntityRepository
 
 	/* -------- FONCTIONS DE HAUT NIVEAU -------- */
 	
-    public function conso(Projet $projet, $annee)
+    public function conso($id_projet, $annee)
     /* Renvoie les données de conso d'un projet sur une année
      * On ne s'intéresse qu'aux lignes de type 2, c'est-à-dire "group"
      * On ne s'intéresse qu'aux ressources de type calcul, c-à-d cpu, gpu
@@ -36,7 +36,7 @@ class ComptaRepository extends \Doctrine\ORM\EntityRepository
             AND c.date <= :fin
             ORDER BY c.date ASC'
         )
-        ->setParameter('loginname', lcfirst($projet->getIdProjet() ) )
+        ->setParameter('loginname', lcfirst($id_projet) )
         ->setParameter('debut',$debut)
         ->setParameter('fin',$fin)
         ->getResult();

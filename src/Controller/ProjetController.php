@@ -1393,7 +1393,13 @@ class ProjetController extends Controller
             $annee = '20' . substr( $version->getIdVersion(), 0, 2 );
         }
 
-        return $this->render('projet/conso_menu.html.twig', ['projet'=>$projet, 'annee'=>$annee, 'type'=>'group']);
+        return $this->render('projet/conso_menu.html.twig', 
+							['projet'=>$projet, 
+							 'annee'=>$annee, 
+							 'types'=>['group','user'],
+							 'titres'=>['group' => 'Les consos de mon groupe',
+										'user' => 'Mes consommations']
+							 ]);
 	}
 
     /**
@@ -1406,7 +1412,7 @@ class ProjetController extends Controller
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
 
-    public function consoRessourceAction(Projet $projet, $utype='group', $ress_id, $annee = null)
+    public function consoRessourceAction(Projet $projet, $utype, $ress_id, $annee = null)
     {
 		$em = $this->getDoctrine()->getManager();
 		$sp = $this->get('app.gramc.ServiceProjets');
@@ -1446,7 +1452,8 @@ class ProjetController extends Controller
 		// Note - type ici n'a rien à voir avec le paramètre $utype
 		if ($ressource['type'] == 'calcul')
 		{
-	        $db_conso      = $compta_repo->conso( $projet, $annee );
+			$id_projet     = $projet->getIdProjet();
+	        $db_conso      = $compta_repo->conso( $id_projet, $annee );
 			$struct_data   = $dessin_heures->createStructuredData($debut,$fin,$db_conso);
 			$dessin_heures->resetConso($struct_data);
 	        $image_conso     = $dessin_heures->createImage($struct_data)[0];

@@ -1,13 +1,25 @@
-<h1>Consommations </h1>
 
+{% for t in types %}
+<h2>{{ titres[t] }}</h2>
 <ul>
-	{% if type=='group' %}
+	{% if t=='group' %}
 		{% for k,r in ressources_conso_group %}
 			<li>
 				<img class="bouton_poussoir conso" src="{{ asset('icones/conso16.png') }}"
 	                 alt="Consommation - {{projet}} - {{annee}} - {{r.nom}}"
-	                 data-href="{{ absolute_url(path('projet_conso_ressource', { 'id': projet.idProjet, 'ress_id' : k, 'utype': 'group', 'annee' : annee }))}}" /> {{ projet }} ({{ annee }}) - {{ r.nom }}
+	                 data-href="{{ absolute_url(path('projet_conso_ressource', { 'id': projet.idProjet, 'ress_id' : k, 'utype': t, 'annee' : annee }))}}" /> {{ projet }} ({{ annee }}) - {{ r.nom }}
+	        </li>
+		{% endfor %}
+	{% endif %}
+	{% if t=='user' %}
+		{% for k,r in ressources_conso_user %}
+			<li>
+				<img class="bouton_poussoir conso" src="{{ asset('icones/conso16.png') }}"
+	                 alt="Consommation - {{projet}} - {{annee}} - {{r.nom}}"
+	                 data-href="{{ absolute_url(path('projet_conso_ressource', { 'id': projet.idProjet, 'ress_id' : k, 'utype': t, 'annee' : annee }))}}" /> {{ projet }} ({{ annee }}) - {{ r.nom }}
 	        </li>
 		{% endfor %}
 	{% endif %}
 </ul>
+{% endfor %}
+
