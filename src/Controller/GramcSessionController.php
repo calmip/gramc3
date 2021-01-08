@@ -141,13 +141,54 @@ class GramcSessionController extends Controller
     public function accueilAction()
 	{
 		$sm     = $this->get('app.gramc.ServiceMenus');
+		$ss     = $this->get('app.gramc.ServiceSessions');
+		$session= $ss->getSessionCourante();
+		
+		// Si true, cet utilisateur n'est ni expert ni admin ni président !
+		$seulement_demandeur=true;
+		
 		$menu   = [];
-		$menu[] = $sm->demandeur();
-		$menu[] = $sm->expert();
-		$menu[] = $sm->administrateur();
-		$menu[] = $sm->president();
+		$m = $sm->demandeur();
+		if ($m['ok'] == false)
+		{
+			// Même pas demandeur !
+			$seulement_demandeur = false;
+		}
+		$menu[] = $m;
+		
+		$m = $sm->expert();
+		if ($m['ok'])
+		{
+			$seulement_demandeur = false;
+		}
+		$menu[] = $m;
+		
+		$m = $sm->administrateur();
+		if ($m['ok'])
+		{
+			$seulement_demandeur = false;
+		}
+		$menu[] = $m;
+		
+		$m = $sm->president();
+		if ($m['ok'])
+		{
+			$seulement_demandeur = false;
+		}
+		$menu[] = $m;
 		$menu[] = $sm->aide();
-        return $this->render('default/accueil.html.twig', ['menu' => $menu, 'projet_test' => $sm->nouveau_projet_test()['ok'] ]);
+
+		if ($seulement_demandeur)
+		{
+			return $this->redirectToRoute('projet_accueil');
+		}
+		else
+		{
+	        return $this->render('default/accueil.html.twig', 
+								['menu' => $menu, 
+								 'projet_test' => $sm->nouveau_projet_test()['ok'],
+								 'session' => $session ]);
+		}
 	}
 
     /**
