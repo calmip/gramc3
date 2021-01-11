@@ -43,6 +43,7 @@ use App\Entity\Version;
 use App\Entity\Session;
 use App\Entity\Individu;
 use App\Entity\CollaborateurVersion;
+use App\Entity\User;
 use App\Entity\Compta;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -199,56 +200,50 @@ class AdminuxController extends Controller
    /**
      * set password
      *
-     * @Route("/users/setpassword/{idProjet}/projet/{idIndividu}/individu/{password}/password", name="set_password", methods={"POST"})
+     * @Route("/users/setpassword/{loginname}/loginname/{password}/password", name="set_password", methods={"POST"})
      * @Security("is_granted('ROLE_ADMIN')")
 
-     * Positionne le mot de passe du user demandé dans la version active ou EN_ATTENTE du projet demandé
+     * Positionne le mot de passe du user demandé, à condition que ce user existe dans la table collaborateurVersion
      */
 
-    // exemple: curl --insecure --netrc -X POST https://.../adminux/users/setloginname/P1234/projet/6543/individu/azerty/password
-	public function setpasswordAction(Request $request, $idProjet, $idIndividu, $password, LoggerInterface $lg)
+    // exemple: curl --insecure --netrc -X POST https://.../adminux/users/setpassword/toto/loginname/azerty/password
+	public function setpasswordAction(Request $request, $loginname, $password, LoggerInterface $lg)
 	{
 		$em = $this->getdoctrine()->getManager();
-		
-		# Calcul de la date d'expiration
-		$pwd_duree = $this->getParameter('pwd_duree');  // Le nombre de jours avant expirtion du mot de passe
-		$grdt      = $this->get('app.gramc.date');
-		$passexpir = $grdt->getNew()->add(new \DateInterval($pwd_duree));
 		
 		if ( $this->getParameter('noconso')==true )
 		{
 			throw new AccessDeniedException("Accès interdit (paramètre noconso)");
 		}
-	    $error = [];
-	    $projet      = $em->getRepository(Projet::class)->find($idProjet);
-	    if( $projet == null )
-	       $error[]    =   'No Projet ' . $idProjet;
 
-	    $individu = $em->getRepository(Individu::class)->find($idIndividu);
-	    if( $individu == null )
-	        $error[]    =   'No Individu ' . $idIndividu;
-
-	    if ( $error != [] )
-	        return new Response( json_encode( ['KO' => $error ]) );
-
-	    $versions = $projet->getVersion();
-	    foreach( $versions as $version )
-	        if( $version->getEtatVersion() == Etat::ACTIF || $version->getEtatVersion() == Etat::ACTIF_TEST)
+		# Calcul de la date d'expiration
+		$pwd_duree = $this->getParameter('pwd_duree');  // Le nombre de jours avant expiration du mot de passe
+		$grdt      = $this->get('app.gramc.date');
+		$passexpir = $grdt->getNew()->add(new \DateInterval($pwd_duree));
+		
+		# Vérifie que ce loginname est connu
+		$cv   = $em->getRepository(User::class)->isLoginname($loginname);
+		if ($cv==false)
+		{
+			return new Response(json_encode( ['KO' => 'No user found in any projet' ]));
+		}
+		
+		# Modifier le mot de passe ou créer un nouveau "user" avec le mot de passe
+		else
+		{
+			$user = $em->getRepository(User::class)->findOneBy(['loginname' => $loginname]);
+			if ($user==null)
 			{
-	            foreach( $version->getCollaborateurVersion() as $collaborateurVersion )
-				{
-	                $collaborateur  =  $collaborateurVersion->getCollaborateur() ;
-	                if( $collaborateur != null && $collaborateur->isEqualTo( $individu ) )
-					{
-	                    $collaborateurVersion->setPassword( $password );
-	                    $collaborateurVersion->setPassexpir( $passexpir );
-	                    Functions::sauvegarder( $collaborateurVersion, $em, $lg );
-	                    return new Response(json_encode('OK'));
-					}
-				}
+				$user = new User();
+				$user->setLoginname($loginname);
 			}
-			return new Response(json_encode( ['KO' => 'No user found' ]));
-     }
+
+			$user->setPassword($password);
+			$user->setPassexpir($passexpir);
+			Functions::sauvegarder( $user, $em, $lg );
+			return new Response(json_encode('OK'));
+		}
+	}
 
 	/**
 	 * get versions non terminées
@@ -679,36 +674,18 @@ class AdminuxController extends Controller
 		{
 			throw new AccessDeniedException("Accès interdit (paramètre noconso)");
 		}
-	    $coll_ver_repo = $em->getRepository(CollaborateurVersion::class);
-	    $coll_ver = $coll_ver_repo->getCvPasswd();
-	    
-	    $sd = $this->get('app.gramc.date');
-
-	    $output = [];
-	    //~ foreach ($coll_ver as $cv)
-	    //~ {
-			//~ $o = [];
-			//~ $o['password'] = $cv->getPassword();
-			//~ $o['passexpir']= $cv->getPassexpir();
-			//~ $o['version']  = $cv->getVersion()->getIdVersion();
-			//~ if ($cv->getPassexpir()>$sd)
-			//~ {
-				//~ $o['expiration']=false;
-			//~ }
-			//~ else
-			//~ {
-				//~ $o['expiration']=true;
-			//~ }
-			//~ $output[] = $o;
-		//~ }
-		foreach ($coll_ver as $cv)
+		
+	    $sd    = $this->get('app.gramc.date');
+		$users = $em->getRepository(User::class)->findAll();
+		foreach ($users as $user)
 		{
-			if ($cv->getPassexpir() < $sd)
+			if ($user->getPassexpir() < $sd)
 			{
-				$cv->setPassexpir(NULL)->setPassword(NULL);
-				Functions::sauvegarder( $cv, $em, $lg );
+				$em -> remove($user);
 			}
 		}
+		$em->flush();
+
 		return new Response (json_encode("OK"));
 	}
 }
