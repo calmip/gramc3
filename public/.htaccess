@@ -17,7 +17,6 @@ DirectoryIndex index.php
     Options -MultiViews
 </IfModule>
 
-PLOPLO bouh
 <IfModule mod_rewrite.c>
     RewriteEngine On
 

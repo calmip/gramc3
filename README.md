@@ -18,17 +18,20 @@ php
 ~~~~
 Sur DEBIAN buster:
 
-- Installer apache/php è.2 comme expliqué ici: https://sys-admin.fr/installation-php-7-2-sur-debian/
-- apt-get install apache2 libapache2-mod-php php-intl php-cli php-common php-intl php-json php-opcache php-readline php-xml 
+- Installer apache/php 7.2 comme expliqué ici: https://sys-admin.fr/installation-php-7-2-sur-debian/
+- apt-get install apache2 libapache2-mod-php php-intl php-cli php-common php-intl php-json php-opcache php-readline php-xml  php7.2-mysql
 - apt-get install mariadb-client mariadb-server
-- apt-get install imagemagick
+- apt-get install imagemagick zip unzip
 - Installer `wkhtmltopd` depuis https://wkhtmltopdf.org (disponible en .deb)
 ~~~~
 
 configuration apache2:
 ----
 ~~~~
-a2enmod rewrite
+a2enmod rewrite ssl
+
+
+
 <Location url-de-gramc>
    Options None
    <IfModule mod_rewrite.c>
