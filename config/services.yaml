@@ -298,7 +298,12 @@ services:
      # Journal
      app.gramc.ServiceJournal:
         class: App\GramcServices\ServiceJournal
-        arguments: [ "@request_stack","@session","@logger","@security.token_storage","@security.authorization_checker","@doctrine.orm.entity_manager"]
+        arguments: [ "@request_stack",
+                     "@session",
+                     "@logger",
+                     "@security.helper",
+                     "@security.authorization_checker",
+                     "@doctrine.orm.entity_manager"]
 
      # Formulaires, validateurs
      app.gramc.thematiquetype:

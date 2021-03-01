@@ -107,8 +107,7 @@ class UserChecker implements UserCheckerInterface
 				$this->sj->debugMessage('UserChecker : checkPostAuth : User ' . 
 				                         $user->getPrenom() . ' ' . 
 				                         $user->getNom() . " est connecté en SUDO par " .
-				                         $this->token->getUser()->getPrenom() . ' ' . 
-				                         $this->token->getUser() ->getNom());
+				                         $this->token->getUser());
 				$this->sess->set('real_user', $this->token->getUser() );
 				$this->sess->set('sudo_url', Request::createFromGlobals()->headers->get('referer') );
 				//$this->sj->debugMessage(__METHOD__ . " sudo_url set to : " . App::getSession()->get('sudo_url') );
