@@ -84,11 +84,13 @@ parameters:
     old_journal: 5
     maildevt: devt1@exemple.com
     IDPprod:
-        CNRS: 'https://janus.cnrs.fr/idp'
-        'Université de Toulouse 3 Paul Sabatier': 'https://shibboleth.ups-tlse.fr/idp/shibboleth'
+#        CNRS: 'https://janus.cnrs.fr/idp'
+#        'Université de Toulouse 3 Paul Sabatier': 'https://shibboleth.ups-tlse.fr/idp/shibboleth'
         'Comptes CRU': 'urn:mace:cru.fr:federation:sac'
-        'INPT - Institut National Polytechnique de Toulouse': 'https://idp.inp-toulouse.fr/idp/shibboleth'
+#        'INPT - Institut National Polytechnique de Toulouse': 'https://idp.inp-toulouse.fr/idp/shibboleth'
         AUTRE: WAYF
+
+#'Comptes CRU': 'urn:mace:cru.fr:federation:sac'
 
 services:
      _defaults:

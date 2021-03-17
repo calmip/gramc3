@@ -109,7 +109,6 @@ class SessionType extends AbstractType
                                             'TERMINE'               =>  Etat::TERMINE,
                                             ],
                         'label'             => 'Etat',
-                        'choices_as_values' => true, // cette option devra être supprimée à partir de symfony 3
                     ])
                     ->add('idSession');
 

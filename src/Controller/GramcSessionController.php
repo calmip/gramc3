@@ -404,8 +404,7 @@ class GramcSessionController extends Controller
 		$form = Functions::createFormBuilder($ff)
 	            ->add('data', ChoiceType::class,
                 [
-                 'choices' => $this->getParameter('IDPprod'),
-                 'choices_as_values' => true
+                 'choices' => $this->getParameter('IDPprod')
                  ]
                  )
             ->add('connect', SubmitType::class, ['label' => 'Connexion'] )
@@ -420,6 +419,7 @@ class GramcSessionController extends Controller
             //$url    .=   $this->generateUrl('connexionshiblogin');
             //$url    .= '/gramce-milos/login';
             $url    .= $this->generateUrl('connexionshiblogin');
+            
             //$url = $this->generateUrl('connexionshib', [] , UrlGeneratorInterface::ABSOLUTE_URL);
             //$url = $url .  $this->generateUrl('accueil', [] , UrlGeneratorInterface::ABSOLUTE_URL);
 
@@ -478,6 +478,7 @@ class GramcSessionController extends Controller
             return $this->redirectToRoute('index');
         */
         $individu = $this->get('security.token_storage')->getToken()->getUser(); // OK si l'authentification remote_user de symfony
+        //$sj->debugMessage("coucou ".$individu." REMOTE USER = ".getenv('REMOTE_USER'));
 
         //
         // utilisé si on n'utilise pas l'authentification remote_user de symfony
@@ -519,10 +520,11 @@ class GramcSessionController extends Controller
 
 				$token = new UsernamePasswordToken($individu, null, 'main', $individu->getRoles() );
 				$session = $request->getSession();
-				$this->get('security.context')->setToken($token);
+
+				$this->get('security.token_storage')->setToken($token);
 				$session->set('_security_main', serialize($token));
 
-				$userChecker->checkPostAuth($user);
+				$userChecker->checkPostAuth($individu);
 				//return new Response("<pre> manual login ".print_r($_SESSION,true)."</pre>");
 
 			} //  if( $server->has('REMOTE_USER') )
