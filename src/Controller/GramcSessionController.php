@@ -58,6 +58,8 @@ use Symfony\Component\Form\Extension\Core\Type\ResetType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
+use Symfony\Component\Mailer\Mailer;
+
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 function redirection_externe($url)
@@ -458,8 +460,6 @@ class GramcSessionController extends Controller
 
 
     /**
-     * @Route("/public/auth/connexion" )
-     * @Route("/role/public/login.php")
      * @Route("/login/connexion", name="connexionshiblogin")
      * @Route("/connexion")
      */
@@ -478,7 +478,7 @@ class GramcSessionController extends Controller
             return $this->redirectToRoute('index');
         */
         $individu = $this->get('security.token_storage')->getToken()->getUser(); // OK si l'authentification remote_user de symfony
-        //$sj->debugMessage("coucou ".$individu." REMOTE USER = ".getenv('REMOTE_USER'));
+        $sj->debugMessage("coucou ".$individu." REMOTE USER = ".getenv('REMOTE_USER'));
 
         //
         // utilisé si on n'utilise pas l'authentification remote_user de symfony
@@ -681,6 +681,7 @@ class GramcSessionController extends Controller
     private function mail_activation($individu)
     {
 		$sj = $this->get('app.gramc.ServiceJournal');
+		$sn = $this->get('app.gramc.ServiceNotifications');
 
 		$key = md5( random_int(1,10000000000) . microtime() );
 		$compteactivation = new Compteactivation();
@@ -694,16 +695,10 @@ class GramcSessionController extends Controller
 
 		$session = new Session();
 
-		$template = $this->get('twig')->createTemplate('click on <a href="{{ url(\'activation\') }}/{{key}}">Activation</a> {{ url(\'activation\') }}/{{key}}');
-		$body = $template->render(array('key' => $key));
-
-		$message = \Swift_Message::newInstance()
-			->setSubject('Activation GRAMC')
-			->setFrom( $this->container->getParameter('mailfrom') )
-			->setTo( $session->get('email')  )
-			->setBody($body,'text/html');
-		$this->get('mailer')->send($message);
-		$sj->infoMessage(__METHOD__ .':' . __LINE__ . ' Activation GRAMC  pour ' .  $session->get('email').  ' envoyé  : ' . $body  );
+		$twig_sujet   = $this->get('twig')->createTemplate('Activation de votre comptre Gramc');
+		$twig_contenu = $this->get('twig')->createTemplate("Bonjour\nPour activer votre compte sur gramc, merci de visiter cette url:\n {{ url('activation') }}/{{ key }} \nL'équipe CALMIP");
+		$sn -> sendMessage(  $twig_sujet, $twig_contenu, [ 'key' => $key ], [$session->get('email')]);
+		$sj->infoMessage(__METHOD__ .':' . __LINE__ . ' Activation GRAMC  pour ' .  $session->get('email').  ' envoyé (key=' . $key .')' );
      }
 
      /**

@@ -308,6 +308,11 @@ services:
                      "@doctrine.orm.entity_manager"]
 
      # Formulaires, validateurs
+     app.gramc.individutype:
+        class: App\Form\IndividuType
+        arguments: ["@doctrine.orm.entity_manager"]
+        tags: ["form.type"]
+
      app.gramc.thematiquetype:
         class: App\Form\ThematiqueType
         arguments: ["@doctrine.orm.entity_manager"]
