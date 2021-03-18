@@ -99,7 +99,7 @@ class ServiceJournal
 		}
 	    else
 	    {
-			$ip = $rs->getMasterRequest()->getClientIp();
+			$ip = '0.0.0.0';
 		}
 
         $journal->setIp( $ip );

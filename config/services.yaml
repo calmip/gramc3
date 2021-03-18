@@ -342,3 +342,9 @@ services:
         class: App\Form\SessionType
         arguments: ["@app.gramc.date","@doctrine.orm.entity_manager"]
         tags: ["form.type"]
+
+     # Commandes
+     app.gramc.sendamail:
+        class: App\Command\Sendamail
+        arguments: ["@twig","@app.gramc.ServiceNotifications"]
+        tags: ["console.command"]

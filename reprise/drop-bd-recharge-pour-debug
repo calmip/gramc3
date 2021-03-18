@@ -1,0 +1,7 @@
+#! /bin/bash
+
+source ../.env
+export DATABASE_URL
+
+php drop-bd-recharge-pour-debug.php $*
+
