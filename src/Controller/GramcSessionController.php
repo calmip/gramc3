@@ -479,7 +479,7 @@ class GramcSessionController extends Controller
         */
         $individu = $this->get('security.token_storage')->getToken()->getUser(); // OK si l'authentification remote_user de symfony
         $sj->debugMessage("coucou ".$individu." REMOTE USER = ".getenv('REMOTE_USER'));
-
+//$individu = null;
         //
         // utilisé si on n'utilise pas l'authentification remote_user de symfony
         //

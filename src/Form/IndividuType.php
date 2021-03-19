@@ -45,11 +45,11 @@ use App\Entity\Thematique;
 
 //use App\App;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 class IndividuType extends AbstractType
 {
-	public function __construct (EntityManager $em)
+	public function __construct (EntityManagerInterface $em)
 	{
 		$this -> em = $em;
 	}

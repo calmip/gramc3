@@ -95,8 +95,8 @@ parameters:
 services:
      _defaults:
           public: true
-#          autowire: true
-#          autoconfigure: true
+          autowire: true
+          autoconfigure: true
      
      # Tous les controleurs sont des services, ils peuvent utiliser la dependency injection     
      App\Controller\:
@@ -114,7 +114,8 @@ services:
      # Informations générales (bas de page, haut de page)
      app.gramc.ServiceInfos:
        class: App\GramcServices\ServiceInfos
-       arguments: ["@app.gramc.date","@doctrine.orm.entity_manager"]
+       #arguments: ["@app.gramc.date","@doctrine.orm.entity_manager"]
+     App\GramcServices\ServiceInfos: '@app.gramc.ServiceInfos'
        
      # cf https://stackoverflow.com/questions/47613979/symfony-3-4-0-could-not-find-any-fixture-services-to-load
      # makes classes in src/AppBundle/DataFixtures available to be used as services
@@ -124,7 +125,7 @@ services:
          tags: ['doctrine.fixture.orm']
          
      App\DataFixtures\ORM\ProjetsVersionDerniereActive:
-         arguments: ["@app.gramc.ServiceProjets"]
+       #  arguments: ["@app.gramc.ServiceProjets"]
          tags: ['doctrine.fixture.orm']
 
 #     app.gramc.fixture:
@@ -133,24 +134,30 @@ services:
 
      app.gramc_user_provider:
        class: App\Security\User\GramcUserProvider
-       arguments: ["@doctrine.orm.entity_manager"]
+       #arguments: ["@doctrine.orm.entity_manager"]
+     App\Security\User\GramcUserProvider: '@app.gramc_user_provider'
        
      app.user_checker:
        class: App\Security\User\UserChecker
-       arguments: ["@security.authorization_checker","@security.token_storage","@session","@app.gramc.ServiceJournal","@doctrine.orm.entity_manager"]
-
+       #arguments: ["@security.authorization_checker","@security.token_storage","@session","@app.gramc.ServiceJournal","@doctrine.orm.entity_manager"]
+     App\Security\User\UserChecker: '@app.user_checker'
+       
      app.test_user_provider:
        class: App\Security\User\TestUserProvider
+     App\Security\User\TestUserProvider: '@app.test_user_provider'
 
      app.exception_listener:
         class: App\EventListener\ExceptionListener
-        arguments: ["%kernel.debug%", '@router','@logger',"@app.gramc.ServiceJournal",'@session',"@doctrine.orm.entity_manager"]
+        #arguments: ["%kernel.debug%", '@router','@logger',"@app.gramc.ServiceJournal",'@session',"@doctrine.orm.entity_manager"]
+        # TODO savoir le type de router
+        arguments: ["%kernel.debug%", '@router' ]
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
+     App\EventListener\ExceptionListener: '@app.exception_listener'
 
      # Evenements Doctrine lorsqu'on met à jour une version
      App\EventListener\VersionStamp:
-        arguments: ["@security.token_storage"]
+#        arguments: ["@security.token_storage"]
         tags:
             - # these are the options required to define the entity listener
               name: 'doctrine.orm.entity_listener'
@@ -158,7 +165,7 @@ services:
               entity: 'App\Entity\Version'
 
      App\EventListener\ProjetDerniereVersion:
-        arguments: ["@app.gramc.ServiceProjets", "@doctrine.orm.entity_manager"]
+#        arguments: ["@app.gramc.ServiceProjets", "@doctrine.orm.entity_manager"]
         tags:
             - # these are the options required to define the entity listener
               name: 'doctrine.orm.entity_listener'
@@ -179,7 +186,8 @@ services:
      # Paramètres dans la base de données
      app.gramc.param:
         class: App\GramcServices\ServiceParam
-        arguments: ["@doctrine.orm.entity_manager"]
+#        arguments: ["@doctrine.orm.entity_manager"]
+     App\GramcServices\ServiceParam: '@app.gramc.param'
         
      # GramcDateTime et GramcDate
      #app.gramc.datetime:
@@ -188,37 +196,51 @@ services:
 
      app.gramc.date:
         class: App\GramcServices\GramcDate
+#        arguments: ["%recup_printemps_d%","%recup_printemps_f%",
+#                    "%recup_automne_d%",  "%recup_automne_f%",
+#                    "@app.gramc.param", "@doctrine.orm.entity_manager"]
         arguments: ["%recup_printemps_d%","%recup_printemps_f%",
-                    "%recup_automne_d%",  "%recup_automne_f%",
-                    "@app.gramc.param", "@doctrine.orm.entity_manager"]
+                    "%recup_automne_d%",  "%recup_automne_f%"]
+     App\GramcServices\GramcDate: '@app.gramc.date'
 
      # A VIRER ASAP   
-     app.initialize:
-        class: App\Utils\AppBundleInitialize
-        arguments: ['@kernel']
+     #app.initialize:
+     #   class: App\Utils\AppBundleInitialize
+     #   arguments: ['@kernel']
 
      # Données de facturation 
      app.gramc_DonneesFacturation:
         class: App\GramcServices\DonneesFacturation
-        arguments: ["%dfct_directory%","@app.gramc.ServiceProjets","@app.gramc.ServiceJournal","@doctrine.orm.entity_manager"]
+        #arguments: ["%dfct_directory%","@app.gramc.ServiceProjets","@app.gramc.ServiceJournal","@doctrine.orm.entity_manager"]
+        arguments: ["%dfct_directory%"]
+     App\GramcServices\DonneesFacturation: '@app.gramc_DonneesFacturation'
      
      # Graphiques de consommation
      app.gramc.graf_calcul:
         class: App\GramcServices\GramcGraf\Calcul
-        arguments: ['ressources_conso_group','ressources_conso_user',"@app.gramc.ServiceJournal"]
+#        arguments: ['ressources_conso_group','ressources_conso_user',"@app.gramc.ServiceJournal"]
+        arguments: ['ressources_conso_group','ressources_conso_user' ]
+     App\GramcServices\GramcGraf\Calcul: '@app.gramc.graf_calcul'
      
      app.gramc.graf_stockage:
         class: App\GramcServices\GramcGraf\Stockage
-        arguments: ['ressources_conso_group','ressources_conso_user',"@app.gramc.ServiceJournal"]
+#        arguments: ['ressources_conso_group','ressources_conso_user',"@app.gramc.ServiceJournal"]
+        arguments: ['ressources_conso_group','ressources_conso_user' ]
+     App\GramcServices\GramcGraf\Stockage: '@app.gramc.graf_stockage'
 
      app.gramc.graf_calcultous:
         class: App\GramcServices\GramcGraf\CalculTous
-        arguments: ['ressources_conso_group','ressources_conso_user',"@app.gramc.ServiceJournal"]
+        #arguments: ['ressources_conso_group','ressources_conso_user',"@app.gramc.ServiceJournal"]
+        arguments: ['ressources_conso_group','ressources_conso_user' ]
+
+     App\GramcServices\GramcGraf\CalculTous: '@app.gramc.graf_calcultous'
      
      # Sessions
      app.gramc.ServiceSessions:
         class: App\GramcServices\ServiceSessions
-        arguments: ['recup_attrib_seuil','recup_conso_seuil','recup_attrib_quant',"@app.gramc.date","@form.factory","@doctrine.orm.entity_manager"]
+        #arguments: ['recup_attrib_seuil','recup_conso_seuil','recup_attrib_quant',"@app.gramc.date","@form.factory","@doctrine.orm.entity_manager"]
+        arguments: ['recup_attrib_seuil','recup_conso_seuil','recup_attrib_quant']
+     App\GramcServices\ServiceSessions: '@app.gramc.ServiceSessions'
  
      # Projets
      app.gramc.ServiceProjets:
@@ -228,123 +250,154 @@ services:
                     "%signature_directory%",
                     "%rapport_directory%",
                     "%fig_directory%",
-                    "%dfct_directory%",
-                    "@app.gramc.date",
-                    "@app.gramc.ServiceVersions",
-                    "@app.gramc.ServiceSessions",
-                    "@app.gramc.ServiceJournal",
-                    "@logger", 
-                    "@security.authorization_checker",
-                    "@security.token_storage",
-                    "@doctrine.orm.entity_manager"]
+                    "%dfct_directory%"]
+        #            "@app.gramc.date",
+        #            "@app.gramc.ServiceVersions",
+        #            "@app.gramc.ServiceSessions",
+        #            "@app.gramc.ServiceJournal",
+        #            "@logger", 
+        #            "@security.authorization_checker",
+        #            "@security.token_storage",
+        #            "@doctrine.orm.entity_manager"]
+     App\GramcServices\ServiceProjets: '@app.gramc.ServiceProjets'
      
      # Versions
      app.gramc.ServiceVersions:
         class: App\GramcServices\ServiceVersions
-        arguments: [ '%attrib_seuil_a%', "%prj_prefix%", "%fig_directory%", "%signature_directory%", "@app.gramc.ServiceJournal", "@doctrine.orm.entity_manager"]
-        
+        #arguments: [ '%attrib_seuil_a%', "%prj_prefix%", "%fig_directory%", "%signature_directory%", "@app.gramc.ServiceJournal", "@doctrine.orm.entity_manager"]
+        arguments: [ '%attrib_seuil_a%', "%prj_prefix%", "%fig_directory%", "%signature_directory%" ]
+     App\GramcServices\ServiceVersions: '@app.gramc.ServiceVersions'
+
      # Menus
      app.gramc.ServiceMenus:
         class: App\GramcServices\ServiceMenus
-        arguments: [ "%max_rall%",
-                     "@app.gramc.ServiceVersions",
-                     "@app.gramc.ServiceProjets",
-                     "@app.gramc.ServiceJournal",
-                     "@app.gramc.SessionWorkflow", 
-                     "@app.gramc.date", 
-                     "@validator",
-                     "@app.gramc.ServiceSessions",
-                     "@security.token_storage",
-                     "@security.authorization_checker",
-                     "@doctrine.orm.entity_manager" ]
-        
+        arguments: [ "%max_rall%" ]
+        #             "@app.gramc.ServiceVersions",
+        #             "@app.gramc.ServiceProjets",
+        #             "@app.gramc.ServiceJournal",
+        #             "@app.gramc.SessionWorkflow", 
+        #             "@app.gramc.date", 
+        #             "@validator",
+        #             "@app.gramc.ServiceSessions",
+        #             "@security.token_storage",
+        #             "@security.authorization_checker",
+        #             "@doctrine.orm.entity_manager" ]
+     #App\GramcServices\ServiceMenus: '@app.gramc.ServiceMenus'  
+
      # Notifications
      app.gramc.ServiceNotifications:
         class: App\GramcServices\ServiceNotifications
-        arguments: [ "%mailfrom%",
-                     "@twig",
-                     "@security.token_storage",
-                     "@mailer",
-                     "@app.gramc.ServiceJournal",
-                     "@doctrine.orm.entity_manager"]
+        arguments: [ "%mailfrom%" ]
+        #             "@twig",
+        #             "@security.token_storage",
+        #             "@mailer",
+        #             "@app.gramc.ServiceJournal",
+        #             "@doctrine.orm.entity_manager"]
+     App\GramcServices\ServiceNotifications: '@app.gramc.ServiceNotifications'
 
      # Experts
      app.gramc.ServiceExperts:
         class: App\GramcServices\ServiceExperts\ServiceExperts
-        arguments: [ "%max_expertises_nb%", "@form.factory", "@app.gramc.ServiceNotifications", "@app.gramc.ServiceJournal", "@doctrine.orm.entity_manager"]
+        #arguments: [ "%max_expertises_nb%", "@form.factory", "@app.gramc.ServiceNotifications", "@app.gramc.ServiceJournal", "@doctrine.orm.entity_manager"]
+        arguments: [ "%max_expertises_nb%" ]
+     App\GramcServices\ServiceExperts\ServiceExperts: '@app.gramc.ServiceExperts'
+        
      app.gramc.ServiceExpertsRallonge:
         class: App\GramcServices\ServiceExperts\ServiceExpertsRallonge
-        arguments: [ "%max_expertises_nb%", "@form.factory", "@app.gramc.ServiceNotifications", "@app.gramc.ServiceJournal", "@doctrine.orm.entity_manager"]
-
+        #arguments: [ "%max_expertises_nb%", "@form.factory", "@app.gramc.ServiceNotifications", "@app.gramc.ServiceJournal", "@doctrine.orm.entity_manager"]
+        arguments: [ "%max_expertises_nb%" ]
+     App\GramcServices\ServiceExperts\ServiceExpertsRallonge: '@app.gramc.ServiceExpertsRallonge'
+        
      app.gramc.PropExperts1:
         class: App\GramcServices\PropositionExperts\PropositionExpertsType1
-        arguments: [ "@app.gramc.ServiceExperts", "@app.gramc.ServiceJournal", "@doctrine.orm.entity_manager"]
+        #arguments: [ "@app.gramc.ServiceExperts", "@app.gramc.ServiceJournal", "@doctrine.orm.entity_manager"]
+     App\GramcServices\PropositionExperts\PropositionExpertsType1: '@app.gramc.PropExperts1'
+        
      app.gramc.PropExperts2:
         class: App\GramcServices\PropositionExperts\PropositionExpertsType2
-        arguments: [ "@app.gramc.ServiceExperts", "@app.gramc.ServiceJournal", "@doctrine.orm.entity_manager"]
+        #arguments: [ "@app.gramc.ServiceExperts", "@app.gramc.ServiceJournal", "@doctrine.orm.entity_manager"]
+     App\GramcServices\PropositionExperts\PropositionExpertsType2: '@app.gramc.PropExperts2'
         
      # Workflow
      app.gramc.RallongeWorkflow:
         class: App\GramcServices\Workflow\Rallonge\RallongeWorkflow
-        arguments: [ "@app.gramc.ServiceNotifications","@app.gramc.ServiceJournal","@app.gramc.ServiceSessions","@doctrine.orm.entity_manager"]
+        #arguments: [ "@app.gramc.ServiceNotifications","@app.gramc.ServiceJournal","@app.gramc.ServiceSessions","@doctrine.orm.entity_manager"]
+     App\GramcServices\Workflow\Rallonge\RallongeWorkflow: '@app.gramc.RallongeWorkflow'
+
      app.gramc.VersionWorkflow:
         class: App\GramcServices\Workflow\Version\VersionWorkflow
-        arguments: [ "@app.gramc.ServiceNotifications","@app.gramc.ServiceJournal","@app.gramc.ServiceSessions","@doctrine.orm.entity_manager"]
+        #arguments: [ "@app.gramc.ServiceNotifications","@app.gramc.ServiceJournal","@app.gramc.ServiceSessions","@doctrine.orm.entity_manager"]
+     App\GramcServices\Workflow\Version\VersionWorkflow: '@app.gramc.VersionWorkflow'
+        
      app.gramc.ProjetWorkflow:
         class: App\GramcServices\Workflow\Projet\ProjetWorkflow
-        arguments: [ "@app.gramc.ServiceNotifications","@app.gramc.ServiceJournal","@app.gramc.ServiceSessions","@doctrine.orm.entity_manager"]
+        #arguments: [ "@app.gramc.ServiceNotifications","@app.gramc.ServiceJournal","@app.gramc.ServiceSessions","@doctrine.orm.entity_manager"]
+     App\GramcServices\Workflow\Projet\ProjetWorkflow: '@app.gramc.ProjetWorkflow'
+        
      app.gramc.SessionWorkflow:
         class: App\GramcServices\Workflow\Session\SessionWorkflow
-        arguments: [ "@app.gramc.ServiceNotifications","@app.gramc.ServiceJournal","@app.gramc.ServiceSessions","@doctrine.orm.entity_manager"]
+        #arguments: [ "@app.gramc.ServiceNotifications","@app.gramc.ServiceJournal","@app.gramc.ServiceSessions","@doctrine.orm.entity_manager"]
+     App\GramcServices\Workflow\Session\SessionWorkflow: '@app.gramc.SessionWorkflow'
         
      # Journal
      app.gramc.ServiceJournal:
         class: App\GramcServices\ServiceJournal
-        arguments: [ "@request_stack",
-                     "@session",
-                     "@logger",
-                     "@security.helper",
-                     "@security.authorization_checker",
-                     "@doctrine.orm.entity_manager"]
+        #arguments: [ "@request_stack",
+        #             "@session",
+        #             "@logger",
+        #             "@security.helper",
+        #             "@security.authorization_checker",
+        #             "@doctrine.orm.entity_manager"]
+     App\GramcServices\ServiceJournal: '@app.gramc.ServiceJournal'
 
      # Formulaires, validateurs
      app.gramc.individutype:
         class: App\Form\IndividuType
-        arguments: ["@doctrine.orm.entity_manager"]
+        #arguments: ["@doctrine.orm.entity_manager"]
         tags: ["form.type"]
+     App\Form\IndividuType: '@app.gramc.individutype'
 
      app.gramc.thematiquetype:
         class: App\Form\ThematiqueType
-        arguments: ["@doctrine.orm.entity_manager"]
+        #arguments: ["@doctrine.orm.entity_manager"]
         tags: ["form.type"]
+     App\Form\ThematiqueType: '@app.gramc.thematiquetype'
 
      app.gramc.metathematiquetype:
         class: App\Form\MetaThematiqueType
-        arguments: ["@doctrine.orm.entity_manager"]
+        #arguments: ["@doctrine.orm.entity_manager"]
         tags: ["form.type"]
+     App\Form\MetaThematiqueType: '@app.gramc.metathematiquetype'
 
      app.gramc.rattachementtype:
         class: App\Form\RattachementType
-        arguments: ["@doctrine.orm.entity_manager"]
+        #arguments: ["@doctrine.orm.entity_manager"]
         tags: ["form.type"]
+     App\Form\RattachementType: '@app.gramc.rattachementtype'
 
      app.gramc.pagesnumbervalidator:
         class: App\Validator\Constraints\PagesNumberValidator
-        arguments: [ "%max_page_nb%", "@app.gramc.ServiceJournal" ]
+        #arguments: [ "%max_page_nb%", "@app.gramc.ServiceJournal" ]
+        arguments: [ "%max_page_nb%" ]
         tags: ["validator.constraint_validator" ]
+     App\Validator\Constraints\PagesNumberValidator: '@app.gramc.pagesnumbervalidator'
         
      app.gramc.publicationtype:
         class: App\Form\PublicationType
-        arguments: ["@app.gramc.date"]
+        #arguments: ["@app.gramc.date"]
         tags: ["form.type"]
-
+     App\Form\PublicationType: '@app.gramc.publicationtype'
+        
      app.gramc.sessiontype:
         class: App\Form\SessionType
-        arguments: ["@app.gramc.date","@doctrine.orm.entity_manager"]
+        #arguments: ["@app.gramc.date","@doctrine.orm.entity_manager"]
         tags: ["form.type"]
+     App\Form\SessionType: '@app.gramc.sessiontype'
 
      # Commandes
      app.gramc.sendamail:
         class: App\Command\Sendamail
-        arguments: ["@twig","@app.gramc.ServiceNotifications"]
+        #arguments: ["@twig","@app.gramc.ServiceNotifications"]
         tags: ["console.command"]
+     App\Command\Sendamail: '@app.gramc.sendamail'
+        

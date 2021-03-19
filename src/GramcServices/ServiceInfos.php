@@ -31,7 +31,7 @@ use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 use App\GramcServices\GramcDate;
 
@@ -61,7 +61,7 @@ class ServiceInfos
     private $id_session_courante;
     private $grdte;
 
-    public function __construct(GramcDate $gramc_date, EntityManager $em)
+    public function __construct(GramcDate $gramc_date, EntityManagerInterface $em)
     {
 //        $this->kernel = $kernel;
         $this->em    = $em;

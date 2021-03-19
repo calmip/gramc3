@@ -30,7 +30,7 @@ use App\GramcServices\ServiceNotifications;
 use App\GramcServices\ServiceJournal;
 use App\GramcServices\ServiceSessions;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 
 /***********************************************************************************************
@@ -54,7 +54,7 @@ abstract class Workflow
 	protected $sj = null;
 	protected $ss = null;
 	
-    public function __construct(ServiceNotifications $sn, ServiceJournal $sj, ServiceSessions $ss, EntityManager $em)
+    public function __construct(ServiceNotifications $sn, ServiceJournal $sj, ServiceSessions $ss, EntityManagerInterface $em)
     {
 		$this->sn                 = $sn;
 		$this->sj                 = $sj;

@@ -48,9 +48,10 @@ use Doctrine\DBAL\DBALException;
 
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
-use Symfony\Bridge\Monolog\Logger;
+//use Symfony\Bridge\Monolog\Logger;
+use Psr\Log\LoggerInterface;
 
 use App\Exception\UserException;
 //use App\App;
@@ -59,7 +60,7 @@ use App\Exception\UserException;
 use App\Entity\Individu;
 use App\Utils\Functions;
 use App\GramcServices\ServiceJournal;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 
 class ExceptionListener 
@@ -68,7 +69,8 @@ class ExceptionListener
     private $logger;
     private $session;
 
-    public function __construct($kernel_debug,$router,Logger $logger, ServiceJournal $sj, Session $session,EntityManager $em)
+	// TODO - c'est quoi router ?
+    public function __construct($kernel_debug,$router,LoggerInterface $logger, ServiceJournal $sj, SessionInterface $session,EntityManagerInterface $em)
     { 
 		$this->kernel_debug = $kernel_debug;
         $this->router = $router;
@@ -209,7 +211,7 @@ class ExceptionListener
 		}
         // pas de rôle pour le moment
         // Pourquoi on est passé de InsufficientAuthenticationException à HttpException entre Symf 3.2 et 3.4 ?
-        // elseif( $exception instanceof InsufficientAuthenticationException )
+        //elseif( $exception instanceof InsufficientAuthenticationException )
         elseif( $exception instanceof HttpException )
 		{
 			$event->getRequest()->getSession()->set('url', $event->getRequest()->getUri() );

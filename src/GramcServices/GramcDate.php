@@ -23,7 +23,7 @@
 
 namespace App\GramcServices;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 
 /* Ce service est utilisé pour afficher la date avec un décalage 
@@ -46,7 +46,7 @@ class GramcDate extends GramcDateTime
 
 
     public function __construct ($rpd, $rpf, $rad, $raf,
-							     ServiceParam $sp, EntityManager $em)
+							     ServiceParam $sp, EntityManagerInterface $em)
     {
         parent::__construct($sp, $em);
         $this->recup_printemps_d = $rpd;

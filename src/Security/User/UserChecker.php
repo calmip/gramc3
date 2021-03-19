@@ -34,6 +34,7 @@ use Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundE
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 use Symfony\Component\Security\Core\Authentication\Token\Storage\UsageTrackingTokenStorage;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 use App\Exception\UserException;
 use Symfony\Component\HttpFoundation\Request;
@@ -49,11 +50,11 @@ use App\GramcServices\ServiceJournal;
 
 class UserChecker implements UserCheckerInterface
 {
-	public function __construct(\Symfony\Component\Security\Core\Authorization\AuthorizationChecker $secu_auto_chk,
-								UsageTrackingTokenStorage $token,
-								\Symfony\Component\HttpFoundation\Session\Session $sess,
+	public function __construct(\Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface $secu_auto_chk,
+								TokenStorageInterface $token,
+								\Symfony\Component\HttpFoundation\Session\SessionInterface $sess,
 								ServiceJournal $sj,
-								\Doctrine\ORM\EntityManager $em)
+								\Doctrine\ORM\EntityManagerInterface $em)
 	{
 		$this->secu_auto_chk = $secu_auto_chk;
 		$this->token         = $token->getToken();

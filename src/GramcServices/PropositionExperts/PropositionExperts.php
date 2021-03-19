@@ -34,7 +34,7 @@ use App\PropositionExperts\PropositionExpertsType2;
 
 use App\GramcServices\ServiceJournal;
 use App\GramcServices\ServiceExperts\ServiceExperts;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 
 /***********************************************************************************************
@@ -49,7 +49,7 @@ abstract class PropositionExperts
 	protected $sj;
 	protected $em;
 	
-	public function __construct( ServiceExperts $se, ServiceJournal $sj, EntityManager $em)
+	public function __construct( ServiceExperts $se, ServiceJournal $sj, EntityManagerInterface $em)
 	{
 		$this -> se = $se;
 		$this -> sj = $sj;

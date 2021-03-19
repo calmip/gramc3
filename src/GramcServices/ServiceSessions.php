@@ -25,23 +25,24 @@ namespace App\GramcServices;
 
 use App\Entity\Session;
 use App\Utils\Functions;
+use App\GramcServices\GramcDate;
 //use App\App;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilder;
-use Symfony\Component\Form\FormFactory;
+use Symfony\Component\Form\FormFactoryInterface;
 
 class ServiceSessions 
 {
 	public function __construct($recup_attrib_seuil,
 	                            $recup_conso_seuil,
 	                            $recup_attrib_quant,
-	                            $grdt,
-	                            FormFactory $ff,
-	                            EntityManager $em)
+	                            GramcDate $grdt,
+	                            FormFactoryInterface $ff,
+	                            EntityManagerInterface $em)
 	{
 		$this->recup_attrib_seuil = $recup_attrib_seuil;
 	    $this->recup_conso_seuil  = $recup_conso_seuil;
