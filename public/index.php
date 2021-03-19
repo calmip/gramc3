@@ -40,6 +40,11 @@ if (isset($_SERVER['HTTP_CLIENT_IP'])
 
 $kernel = new Kernel($_SERVER['APP_ENV'], (bool) $_SERVER['APP_DEBUG']);
 $request = Request::createFromGlobals();
+
+// Nous sommes derrière un reverseproxy, commentez la ligne si ce n'est pas le cas
+// cf. https://symfony.com/doc/4.4/deployment/proxies.html
+Request::setTrustedProxies(['10.0.0.0/8'],Request::HEADER_X_FORWARDED_ALL);
+
 $response = $kernel->handle($request);
 $response->send();
 $kernel->terminate($request, $response);
