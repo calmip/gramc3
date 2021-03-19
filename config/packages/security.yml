@@ -26,20 +26,21 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
             switch_user: true
-        activation:
-            pattern:    ^/login/activation
-            switch_user: true
-            anonymous: ~
-            provider: gramc_provider
-        secured:
-            pattern:    ^/login/connexion
-            context: global_security_context
-            user_checker: app.user_checker
-            switch_user: true
-            provider: gramc_provider
-            remote_user:
-                 provider : gramc_provider
-                 user:  REDIRECT_REMOTE_USER
+        #activation:
+        #    pattern:    ^/login/activation
+        #    switch_user: true
+        #    anonymous: ~
+        #    provider: gramc_provider
+        #secured:
+        #    pattern:    ^/login/connexion.SUPPR
+        #    context: global_security_context
+        #    user_checker: app.user_checker
+        #    switch_user: true
+        #    provider: gramc_provider
+        #    remote_user:
+        #         provider : gramc_provider
+        #    #     user:  REDIRECT_REMOTE_USER
+
         consoupload:
             pattern:   ^/adminux
             http_basic:
@@ -52,15 +53,13 @@ security:
             switch_user: true
             provider: gramc_provider
             #security: false
-            #provider: gramc_provider
-            #switch_user: true
             anonymous: ~
-            #remote_user:
-            #    provider: gramc_provider
-            #    user: REMOTE_USER
-            #logout:
-            #    path:   /deconnexion
-            #    target: /deconnected
+            remote_user:
+                provider: gramc_provider
+                #user: REMOTE_USER
+            logout:
+                path:   /deconnexion
+                target: /deconnected
 
         # activate different ways to authenticate
         ############ logout_on_user_change: true
