@@ -17,6 +17,7 @@ src/cache/*
 
 /app/config/parameters.yml
 /app/config/parameters.*.yml
+services.yaml
 /build/
 /phpunit.xml
 /var/*

@@ -3,12 +3,12 @@
 parameters:
 #    parameter_name: value
 
-    password_consoupload: MOTDEPASSE
+    password_consoupload: MOT DE PASSE
     mailer_transport: smtp
     mailer_host: 127.0.0.1
     mailer_user: null
     mailer_password: null
-    secret: ThisTokenIsNotSoSecretChangeIt
+    secret: UN SECRET BIEN LONG ==============================
     mesoc: CALMIP
     mesoc_web: 'https://www.calmip.univ-toulouse.fr'
     mesoc_cgu: 'https://www.calmip.univ-toulouse.fr/cgu'
@@ -83,14 +83,14 @@ parameters:
     mailfrom: ne-pas-repondre@calmip.univ-toulouse.fr
     old_journal: 5
     maildevt: devt1@exemple.com
+
+    # Les IDP les plus importants - Sur la fédération de dev on se limite aux comptes CRU on sait qu'ils fonctionnent
     IDPprod:
 #        CNRS: 'https://janus.cnrs.fr/idp'
 #        'Université de Toulouse 3 Paul Sabatier': 'https://shibboleth.ups-tlse.fr/idp/shibboleth'
         'Comptes CRU': 'urn:mace:cru.fr:federation:sac'
 #        'INPT - Institut National Polytechnique de Toulouse': 'https://idp.inp-toulouse.fr/idp/shibboleth'
         AUTRE: WAYF
-
-#'Comptes CRU': 'urn:mace:cru.fr:federation:sac'
 
 services:
      _defaults:
