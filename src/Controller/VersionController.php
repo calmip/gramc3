@@ -136,8 +136,8 @@ class VersionController extends Controller
      */
     public function avantSupprimerAction(Version $version, $rtn)
     {
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sm = $this->get('App\GramcServices\ServiceMenus');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 
 	    // ACL
 	    if( $sm->modifier_version($version)['ok'] == false )
@@ -164,9 +164,9 @@ class VersionController extends Controller
     public function supprimerAction(Version $version, $rtn )
     {
 	    $em = $this->getDoctrine()->getManager();
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$sj = $this->get('app.gramc.ServiceJournal');
-		//$sp = $this->get('app.gramc.ServiceProjets');
+		$sm = $this->get('App\GramcServices\ServiceMenus');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
+		//$sp = $this->get('App\GramcServices\ServiceProjets');
 
 	    // ACL
 	    if( $sm->modifier_version($version)['ok'] == false )
@@ -259,9 +259,9 @@ class VersionController extends Controller
      */
     public function pdfAction(Version $version, Request $request)
     {
-		$sv = $this->get('app.gramc.ServiceVersions');
-		$sp = $this->get('app.gramc.ServiceProjets');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sv = $this->get('App\GramcServices\ServiceVersions');
+		$sp = $this->get('App\GramcServices\ServiceProjets');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$spdf = $this->get('knp_snappy.pdf');
 
 	    $projet = $version->getProjet();
@@ -315,8 +315,8 @@ class VersionController extends Controller
      */
     public function fichePdfAction(Version $version, Request $request)
     {
-		$sm     = $this->get('app.gramc.ServiceMenus');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sm     = $this->get('App\GramcServices\ServiceMenus');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$spdf = $this->get('knp_snappy.pdf');
 
 	    $projet =  $version->getProjet();
@@ -357,8 +357,8 @@ class VersionController extends Controller
     public function televersementFicheAction(Request $request, Version $version)
     {
 		$em = $this->getDoctrine()->getManager();
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sm = $this->get('App\GramcServices\ServiceMenus');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 
 	    // ACL
 	    if( $sm->televersement_fiche($version)['ok'] == false )
@@ -533,10 +533,10 @@ class VersionController extends Controller
      */
     public function changerResponsableAction(Version $version, Request $request)
     {
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$sn = $this->get('app.gramc.ServiceNotifications');
-		$sj = $this->get('app.gramc.ServiceJournal');
-		$sv = $this->get('app.gramc.ServiceVersions');
+		$sm = $this->get('App\GramcServices\ServiceMenus');
+		$sn = $this->get('App\GramcServices\ServiceNotifications');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
+		$sv = $this->get('App\GramcServices\ServiceVersions');
 		$ff = $this->get('form.factory');
 		$sss= $this->get('session');
 		$token = $this->get('security.token_storage')->getToken();
@@ -680,8 +680,8 @@ class VersionController extends Controller
      */
     public function avant_modifierAction(Request $request, Version $version )
     {
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sm = $this->get('App\GramcServices\ServiceMenus');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 
 
 	    // ACL
@@ -704,7 +704,7 @@ class VersionController extends Controller
 
     private function MenuACL( $menu, $message = "", $method = "", $line = "")
     {
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 
 	    if( $menu['ok'] == false )
         {
@@ -731,8 +731,8 @@ class VersionController extends Controller
      */
     public function avantEnvoyerAction(Version $version,  Request $request, LoggerInterface $lg)
     {
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sm = $this->get('App\GramcServices\ServiceMenus');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$ff = $this->get('form.factory');
 		$em = $this->getdoctrine()->getManager();
 
@@ -792,8 +792,8 @@ class VersionController extends Controller
      */
     public function envoyerAction(Version $version,  Request $request, LoggerInterface $lg)
     {
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sm = $this->get('App\GramcServices\ServiceMenus');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$em = $this->getdoctrine()->getManager();
 
 		$this->MenuACL( $sm->envoyer_expert($version), " Impossible d'envoyer la version " . $version->getIdVersion() . " à l'expert", __METHOD__, __LINE__ );
@@ -820,11 +820,11 @@ class VersionController extends Controller
 		    // Attention, l'algorithme de proposition des experts dépend du type de projet
 		    if ($projet -> getTypeProjet() == Projet::PROJET_TEST || $projet->getTypeProjet() == Projet::PROJET_FIL)
 			{
-				$prop_expert = $this->get('app.gramc.PropExperts2');
+				$prop_expert = $this->get('App\GramcServices\PropositionExperts\PropositionExpertsType2');
 			}
 			else
 			{
-				$prop_expert = $this->get('app.gramc.PropExperts1');
+				$prop_expert = $this->get('App\GramcServices\PropositionExperts\PropositionExpertsType1');
 			}
 		    //$prop_expert = PropositionExperts::factory($em,$version);
 		    $expert      = $prop_expert->getProposition($version);
@@ -835,7 +835,7 @@ class VersionController extends Controller
 		    Functions::sauvegarder( $expertise, $em, $lg );
         }
 
-		$projetWorkflow = $this->get('app.gramc.ProjetWorkflow');
+		$projetWorkflow = $this->get('App\GramcServices\Workflow\Projet\ProjetWorkflow');
 		$rtn = $projetWorkflow->execute( Signal::CLK_VAL_DEM, $projet );
 	
 		//$sj->debugMessage(__METHOD__ .  ":" . __LINE__ . " Le projet " . $projet . " est dans l'état " . Etat::getLibelle( $projet->getObjectState() )
@@ -860,10 +860,10 @@ class VersionController extends Controller
     public function televersementGeneriqueAction(Request $request)
     {
 		$em = $this->getDoctrine()->getManager();
-		$sd = $this->get('app.gramc.date');
-		$ss = $this->get('app.gramc.ServiceSessions');
-		$sp = $this->get('app.gramc.ServiceProjets');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sd = $this->get('App\GramcServices\GramcDate');
+		$ss = $this->get('App\GramcServices\ServiceSessions');
+		$sp = $this->get('App\GramcServices\ServiceProjets');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 
 	    $format_fichier = new \Symfony\Component\Validator\Constraints\File(
 		[
@@ -1091,8 +1091,8 @@ class VersionController extends Controller
      */
     public function televerserRapportPrecedentAction(Version $version, Request $request)
     {
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sm = $this->get('App\GramcServices\ServiceMenus');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 
 	    // ACL
 	    //$sj->debugMessage(__METHOD__ . ':' . __LINE__ . " form data = " . Functions::show( $request->request->get('rapport') ) );
@@ -1115,8 +1115,8 @@ class VersionController extends Controller
      */
     public function televerserRapportAction(Version $version, Request $request, $annee )
     {
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sm = $this->get('App\GramcServices\ServiceMenus');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 
 	    // ACL
 	    if( $sm->televerser_rapport_annee($version)['ok'] == false )
@@ -1159,7 +1159,7 @@ class VersionController extends Controller
     private function handleRapport(Request $request, Version $version, $annee = null )
     {
         $em = $this->getDoctrine()->getManager();
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 
 		$format_fichier = new \Symfony\Component\Validator\Constraints\File(
 			[

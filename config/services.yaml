@@ -85,17 +85,24 @@ parameters:
         'INPT - Institut National Polytechnique de Toulouse': 'https://idp.inp-toulouse.fr/idp/shibboleth'
         AUTRE: WAYF
 
+# NOTE - Il faudra modifier tous les controleurs pour remplacer le 'get' par des injections de dépendance
+#        Lorsque ce sera fait on pourra mettre public: False
 services:
     _defaults:
         public: true
         autowire: true
         autoconfigure: true
+
+    #    service_name:
+    #        class: App\Directory\ClassName
+    #        arguments: ["@another_service_name", "plain_value", "%parameter_name%"]
      
     # Tous les controleurs sont des services, ils peuvent utiliser la dependency injection
     App\Controller\:
         resource: '../src/Controller/*'
         tags: [controller.service_arguments]
 
+    # La plupart des services gramc sont dans le répertoire GramcServices
     App\GramcServices\:
         resource: '../src/GramcServices/*'
         exclude: '../src/GramcServices/Workflow/*'
@@ -106,9 +113,15 @@ services:
     app.user_checker:
         class: App\Security\User\UserChecker
 
-    #    service_name:
-    #        class: App\Directory\ClassName
-    #        arguments: ["@another_service_name", "plain_value", "%parameter_name%"]
+    # Workflows
+    # Seuls certains objets définis dans le répertoire Workflows sont des services
+    App\GramcServices\Workflow\Rallonge\RallongeWorkflow:
+    
+    App\GramcServices\Workflow\Version\VersionWorkflow:
+
+    App\GramcServices\Workflow\Projet\ProjetWorkflow:
+
+    App\GramcServices\Workflow\Session\SessionWorkflow:
        
     # cf https://stackoverflow.com/questions/47613979/symfony-3-4-0-could-not-find-any-fixture-services-to-load
     # makes classes in src/AppBundle/DataFixtures available to be used as services
@@ -205,13 +218,3 @@ services:
 
     App\Form\SessionType:
         tags: ["form.type"]
-
-    # Workflows
-    App\GramcServices\Workflow\Rallonge\RallongeWorkflow:
-    
-    App\GramcServices\Workflow\Version\VersionWorkflow:
-
-    App\GramcServices\Workflow\Projet\ProjetWorkflow:
-
-    App\GramcServices\Workflow\Session\SessionWorkflow:
-    

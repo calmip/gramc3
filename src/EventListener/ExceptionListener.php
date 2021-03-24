@@ -81,7 +81,7 @@ class ExceptionListener
 
     public function onKernelException(GetResponseForExceptionEvent $event)
     {
-return;
+
         $server = $event->getRequest()->server;
         $exception = $event->getException();
  

@@ -80,9 +80,9 @@ class ExpertiseController extends Controller
      */
     public function affectationTestAction(Request $request)
     {
-		$ss = $this->get('app.gramc.ServiceSessions');
-		$sp = $this->get('app.gramc.ServiceProjets');
-		$se = $this->get('app.gramc.ServiceExperts');
+		$ss = $this->get('App\GramcServices\ServiceSessions');
+		$sp = $this->get('App\GramcServices\ServiceProjets');
+		$se = $this->get('App\GramcServices\ServiceExperts');
 		$em = $this->getDoctrine()->getManager();
 		
 	    $session  = $ss->getSessionCourante();
@@ -158,11 +158,11 @@ class ExpertiseController extends Controller
      */
     public function affectationAction(Request $request)
     {
-		$ss = $this->get('app.gramc.ServiceSessions');
-		$sp = $this->get('app.gramc.ServiceProjets');
-		$sv = $this->get('app.gramc.ServiceVersions');
+		$ss = $this->get('App\GramcServices\ServiceSessions');
+		$sp = $this->get('App\GramcServices\ServiceProjets');
+		$sv = $this->get('App\GramcServices\ServiceVersions');
 		$em = $this->getDoctrine()->getManager();
-		$affectationExperts = $this->get('app.gramc.ServiceExperts');
+		$affectationExperts = $this->get('App\GramcServices\ServiceExperts');
 		
 		$session      = $ss->getSessionCourante();
         $session_data = $ss->selectSession($this->createFormBuilder(['session'=>$session]),$request); // formulaire
@@ -268,10 +268,10 @@ class ExpertiseController extends Controller
 	 */
     public function listeAction()
     {
-		$sd  = $this->get('app.gramc.date');
-		$ss  = $this->get('app.gramc.ServiceSessions');
-		$sp  = $this->get('app.gramc.ServiceProjets');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sd  = $this->get('App\GramcServices\GramcDate');
+		$ss  = $this->get('App\GramcServices\ServiceSessions');
+		$sp  = $this->get('App\GramcServices\ServiceProjets');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$token = $this->get('security.token_storage')->getToken();
         $em  = $this->getDoctrine()->getManager();
         
@@ -552,10 +552,10 @@ class ExpertiseController extends Controller
      */
     public function modifierAction(Request $request, Expertise $expertise)
     {
-		$ss = $this->get('app.gramc.ServiceSessions');
-		$sv = $this->get('app.gramc.ServiceVersions');
-		$sp = $this->get('app.gramc.ServiceProjets');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$ss = $this->get('App\GramcServices\ServiceSessions');
+		$sv = $this->get('App\GramcServices\ServiceVersions');
+		$sp = $this->get('App\GramcServices\ServiceProjets');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$ac = $this->get('security.authorization_checker');
 		$sval = $this->get('validator');
 		$token = $this->get('security.token_storage')->getToken();
@@ -836,8 +836,8 @@ class ExpertiseController extends Controller
      */
     public function validationAction(Request $request, Expertise $expertise)
     {
-		$sn = $this->get('app.gramc.ServiceNotifications');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sn = $this->get('App\GramcServices\ServiceNotifications');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$ac = $this->get('security.authorization_checker');
 		$em = $this->getDoctrine()->getManager();
 		$token = $this->get('security.token_storage')->getToken();
@@ -882,7 +882,7 @@ class ExpertiseController extends Controller
 		        elseif( $validation == 2 )  $signal = Signal::CLK_VAL_EXP_CONT;
 		        elseif( $validation == 0 )  $signal = Signal::CLK_VAL_EXP_KO;
 
-		        $workflow = $this->get('app.gramc.ProjetWorkflow');
+		        $workflow = $this->get('App\GramcServices\Workflow\Projet\ProjetWorkflow');
 		        $rtn      = $workflow->execute( $signal, $expertise->getVersion()->getProjet() );
 		        if( $rtn != true )
 		            $sj->errorMessage(__METHOD__ . ":" . __LINE__ . " Transition avec " .  Signal::getLibelle( $signal )

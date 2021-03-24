@@ -154,7 +154,7 @@ class PublicationController extends Controller
      */
     public function AnneeAction(Request $request)
     {
-		$ss    = $this->get('app.gramc.ServiceSession');
+		$ss    = $this->get('App\GramcServices\ServiceSessions');
 		$data  = $ss->selectAnnee($request); // formulaire
         $annee = $data['annee'];
         $em    = $this->getDoctrine()->getManager();
@@ -282,7 +282,7 @@ class PublicationController extends Controller
      */
     public function modifyAction(Request $request, Publication $publication, Projet $projet, LoggerInterface $lg)
     {
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$em = $this->getdoctrine()->getManager();
 
         $editForm = $this->createForm('App\Form\PublicationType', $publication);
@@ -342,7 +342,7 @@ class PublicationController extends Controller
     {
 		$ac = $this->get('security.authorization_checker');
 		$token = $this->get('security.token_storage')->getToken();
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$em = $this->getdoctrine()->getManager();
 
         // ACL
@@ -392,7 +392,7 @@ class PublicationController extends Controller
      */
     public function autocompleteAction(Request $request)
     {
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$em = $this->getDoctrine()->getManager();
 		
         $sj->debugMessage('autocompleteAction ' .  print_r($_POST, true) );

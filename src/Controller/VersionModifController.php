@@ -95,9 +95,9 @@ class VersionModifController extends Controller
      */
     public function modifierAction(Request $request, Version $version, $renouvellement = false, LoggerInterface $lg )
     {
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$sv = $this->get('app.gramc.ServiceVersions');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sm = $this->get('App\GramcServices\ServiceMenus');
+		$sv = $this->get('App\GramcServices\ServiceVersions');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$twig = $this->get('twig');
 
 		
@@ -231,7 +231,7 @@ class VersionModifController extends Controller
      */
 	private function modifierType1(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form, LoggerInterface $lg)
     {
-		$sj   = $this->get('app.gramc.ServiceJournal');
+		$sj   = $this->get('App\GramcServices\ServiceJournal');
 		$sval = $this->get('validator');
 		$em   = $this->getDoctrine()->getManager();
 		
@@ -547,7 +547,7 @@ class VersionModifController extends Controller
      */
     private function modifierType2(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form, LoggerInterface $lg)
     {
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$sval = $this->get('validator');
 		$em = $this->getDoctrine()->getManager();
 
@@ -640,7 +640,7 @@ class VersionModifController extends Controller
      */
 	private function modifierType3(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form, LoggerInterface $lg)
     {
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$sval = $this->get('validator');
 		$em = $this->getDoctrine()->getManager();
 
@@ -880,8 +880,8 @@ class VersionModifController extends Controller
 
     private function image_handle( $form, Version $version, $request)
     {
-		$sv = $this->get('app.gramc.ServiceVersions');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sv = $this->get('App\GramcServices\ServiceVersions');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$em = $this->getDoctrine()->getManager();
 
 	    $form->handleRequest($request);
@@ -953,7 +953,7 @@ class VersionModifController extends Controller
 
     private function image($filename, Version $version)
     {
-		$sv = $this->get('app.gramc.ServiceVersions');
+		$sv = $this->get('App\GramcServices\ServiceVersions');
 	    $full_filename  = $sv->imagePath( $filename, $version);
 
 	    if( file_exists( $full_filename ) && is_file( $full_filename ) )
@@ -982,7 +982,7 @@ class VersionModifController extends Controller
 	///////////////////////////////////////////////////////////
     private function getCollaborateurForm(Version $version)
     {
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$em = $this->getDoctrine()->getManager();		
 		$sval= $this->get('validator');
 		
@@ -1055,7 +1055,7 @@ class VersionModifController extends Controller
      */
 	public function avantModifierCollaborateursAction(Version $version, Request $request)
 	{
-		$sm = $this->get('app.gramc.ServiceMenus');
+		$sm = $this->get('App\GramcServices\ServiceMenus');
 
 		/* Si le bouton modifier est actif, il faut demander de quelle version il s'agit ! */
         $modifier_version_menu = $sm->modifier_version( $version );
@@ -1097,8 +1097,8 @@ class VersionModifController extends Controller
      */
     public function modifierCollaborateursAction(Version $version, Request $request)
     {
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sm = $this->get('App\GramcServices\ServiceMenus');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$sval= $this->get('validator');
 		$em = $this->getDoctrine()->getManager();
 
@@ -1227,8 +1227,8 @@ class VersionModifController extends Controller
     private function handleIndividuForms($individu_forms, Version $version)
     {
 		$em   = $this->getDoctrine()->getManager();
-		$sv   = $this->get('app.gramc.ServiceVersions');
-		$sj   = $this->get('app.gramc.ServiceJournal');
+		$sv   = $this->get('App\GramcServices\ServiceVersions');
+		$sj   = $this->get('App\GramcServices\ServiceJournal');
 		$sval = $this->get('validator');
 		
 	    foreach($individu_forms as $individu_form)
@@ -1372,8 +1372,8 @@ class VersionModifController extends Controller
      */
     public function donneesAction(Request $request, Version $version)
     {
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sm = $this->get('App\GramcServices\ServiceMenus');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 
 		if( $sm->donnees($version)['ok'] == false )
 		{
@@ -1454,10 +1454,10 @@ class VersionModifController extends Controller
      */
     public function renouvellementAction(Request $request, Version $version, LoggerInterface $lg)
     {
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$sv = $this->get('app.gramc.ServiceVersions');
-		$sj = $this->get('app.gramc.ServiceJournal');
-		$projet_workflow = $this->get('app.gramc.ProjetWorkflow');
+		$sm = $this->get('App\GramcServices\ServiceMenus');
+		$sv = $this->get('App\GramcServices\ServiceVersions');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
+		$projet_workflow = $this->get('App\GramcServices\Workflow\Projet\ProjetWorkflow');
 		$em = $this->getDoctrine()->getManager();
 		
 	    // ACL

@@ -218,7 +218,7 @@ class AdminuxController extends Controller
 
 		# Calcul de la date d'expiration
 		$pwd_duree = $this->getParameter('pwd_duree');  // Le nombre de jours avant expiration du mot de passe
-		$grdt      = $this->get('app.gramc.date');
+		$grdt      = $this->get('App\GramcServices\GramcDate');
 		$passexpir = $grdt->getNew()->add(new \DateInterval($pwd_duree));
 		
 		# Vérifie que ce loginname est connu
@@ -282,7 +282,7 @@ class AdminuxController extends Controller
 	 public function versionGetAction(Request $request)
 	 {
 		$em = $this->getDoctrine()->getManager();
-		$sp = $this->get('app.gramc.ServiceProjets');
+		$sp = $this->get('App\GramcServices\ServiceProjets');
 		$versions = [];
 
 		$content  = json_decode($request->getContent(),true);
@@ -627,8 +627,8 @@ class AdminuxController extends Controller
      */
      public function quotaCheckAction(Request $request)
      {
- 		$sd = $this->get('app.gramc.date');
-		$sn = $this->get('app.gramc.ServiceNotifications');
+ 		$sd = $this->get('App\GramcServices\GramcDate');
+		$sn = $this->get('App\GramcServices\ServiceNotifications');
 
 		if ( $this->getParameter('noconso')==true )
 		{
@@ -636,7 +636,7 @@ class AdminuxController extends Controller
 		}
 
         $annee_courante = $sd->showYear();
-		$sp      = $this->get('app.gramc.ServiceProjets');
+		$sp      = $this->get('App\GramcServices\ServiceProjets');
         $projets = $sp->projetsParAnnee($annee_courante)[0];
 
         // projets à problème
@@ -675,7 +675,7 @@ class AdminuxController extends Controller
 			throw new AccessDeniedException("Accès interdit (paramètre noconso)");
 		}
 		
-	    $sd    = $this->get('app.gramc.date');
+	    $sd    = $this->get('App\GramcServices\GramcDate');
 		$users = $em->getRepository(User::class)->findAll();
 		foreach ($users as $user)
 		{

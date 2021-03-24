@@ -78,7 +78,7 @@ class GramcSessionController extends Controller
 
     public function adminAccueilAction()
     {
-		$sm      = $this->get('app.gramc.ServiceMenus');
+		$sm      = $this->get('App\GramcServices\ServiceMenus');
         $menu1[] = $sm->individu_gerer();
 
         $menu2[] = $sm->gerer_sessions();
@@ -140,8 +140,8 @@ class GramcSessionController extends Controller
      */
     public function accueilAction()
 	{
-		$sm     = $this->get('app.gramc.ServiceMenus');
-		$ss     = $this->get('app.gramc.ServiceSessions');
+		$sm     = $this->get('App\GramcServices\ServiceMenus');
+		$ss     = $this->get('App\GramcServices\ServiceSessions');
 		$session= $ss->getSessionCourante();
 		
 		// Si true, cet utilisateur n'est ni expert ni admin ni président !
@@ -197,7 +197,7 @@ class GramcSessionController extends Controller
      */
     public function presidentAccueilAction()
 	{
- 		$sm     = $this->get('app.gramc.ServiceMenus');
+ 		$sm     = $this->get('App\GramcServices\ServiceMenus');
         $menu[] = $sm->affectation();
         $menu[] = $sm->commSess();
 	    $menu[] = $sm->affectation_rallonges();
@@ -210,7 +210,7 @@ class GramcSessionController extends Controller
      **/
     public function deconnexionAction(Request $request)
     {
-		$sj    = $this->get('app.gramc.ServiceJournal');
+		$sj    = $this->get('App\GramcServices\ServiceJournal');
 		$ac    = $this->get('security.authorization_checker');
 		$token = $this->get('security.token_storage')->getToken();
 		$ss    = $this->get('session');
@@ -253,7 +253,7 @@ class GramcSessionController extends Controller
     **/
     public function profilAction(Request $request)
     {
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 
         $individu = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -302,7 +302,7 @@ class GramcSessionController extends Controller
      **/
     public function connectiondbgAction(Request $request)
     {
-		$sj         = $this->get('app.gramc.ServiceJournal');
+		$sj         = $this->get('App\GramcServices\ServiceJournal');
 		$token      = $this->get('security.token_storage')->getToken();
 		$em         = $this->getDoctrine()->getManager();
 		$repository = $em->getRepository(Individu::class);
@@ -381,8 +381,8 @@ class GramcSessionController extends Controller
     public function activationAction(Request $request,$key)
     {
 		$em = $this->getDoctrine()->getManager();
-		$sn = $this->get('app.gramc.ServiceNotifications');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sn = $this->get('App\GramcServices\ServiceNotifications');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 
 		$server = $request->server;
 		if(  $server->has('REMOTE_USER') || $server->has('REDIRECT_REMOTE_USER') )
@@ -439,7 +439,7 @@ class GramcSessionController extends Controller
 
     public function loginAction(Request $request)
     {
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$ff = $this->get('form.factory');
 
 		$form = Functions::createFormBuilder($ff)
@@ -506,7 +506,7 @@ class GramcSessionController extends Controller
      */
     public function auth_connexionAction(Request $request)
 	{
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$ac = $this->get('security.authorization_checker');
 
         $sj->infoMessage("shiblogin d'un utilisateur");
@@ -593,7 +593,7 @@ class GramcSessionController extends Controller
      */
     public function nouveau_compteAction(Request $request, LoggerInterface $lg)
     {
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$ff = $this->get('form.factory');
 
         // vérifier si eppn est disponible dans $session
@@ -648,8 +648,8 @@ class GramcSessionController extends Controller
      */
     public function nouveau_profilAction(Request $request, LoggerInterface $lg)
     {
-		$sn = $this->get('app.gramc.ServiceNotifications');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sn = $this->get('App\GramcServices\ServiceNotifications');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$em = $this->getDoctrine()->getManager();
 		
 	    // vérifier si eppn est disponible dans $session
@@ -719,7 +719,7 @@ class GramcSessionController extends Controller
 
     private function mail_activation($individu)
     {
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 
 		$key = md5( random_int(1,10000000000) . microtime() );
 		$compteactivation = new Compteactivation();
@@ -789,7 +789,7 @@ class GramcSessionController extends Controller
     public function connexionsAction(Request $request)
     {
 		$em = $this->getDoctrine()->getManager();
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 
 		$connexions = Functions::getConnexions($em, $sj);
 	    return $this->render('default/connexions.html.twig', [ 'connexions' => $connexions ] );

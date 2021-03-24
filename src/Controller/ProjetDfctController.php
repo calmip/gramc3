@@ -71,11 +71,11 @@ class ProjetDfctController extends Controller
 
 	public function dfctlisteAction(Projet $projet, $annee,  Request $request)
 	{
-		$dessin_heures = $this -> get('app.gramc.graf_calcul');
-		$sm     = $this->get('app.gramc.ServiceMenus');
-		$sd     = $this->get('app.gramc.date');
+		$dessin_heures = $this -> get('App\GramcServices\GramcGraf\Calcul');
+		$sm     = $this->get('App\GramcServices\ServiceMenus');
+		$sd     = $this->get('App\GramcServices\GramcDate');
 		$em     = $this->getDoctrine()->getManager();
-		$dfct   = $this->get('app.gramc_DonneesFacturation');
+		$dfct   = $this->get('App\GramcServices\DonneesFacturation');
 		$emises = $dfct->getNbEmises($projet, $annee);
 		$version= $dfct->getVersion($projet, $annee);
 		$menu   = [];
@@ -165,8 +165,8 @@ class ProjetDfctController extends Controller
 	
 	public function downloaddfctAction(Projet $projet, $annee, $nb, Request $request)
 	{
-		$dfct     = $this->get('app.gramc_DonneesFacturation');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$dfct     = $this->get('App\GramcServices\DonneesFacturation');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 
 		$filename = $dfct->getPath($projet, $annee, $nb);
 		if ($filename == '')
@@ -191,7 +191,7 @@ class ProjetDfctController extends Controller
     {
 		$em     = $this->getDoctrine()->getManager();
 		$annee  = $fin_periode->format('Y');
-		$dfct   = $this->get('app.gramc_DonneesFacturation');
+		$dfct   = $this->get('App\GramcServices\DonneesFacturation');
 		$emises = $dfct->getNbEmises($projet, $annee);
 		$numero = count($emises) + 1;
 		$version= $dfct->getVersion($projet, $annee);
@@ -220,7 +220,7 @@ class ProjetDfctController extends Controller
 		$id_projet     = $projet->getIdProjet();
 		$compta_repo   = $em -> getRepository(Compta::class);
         $db_conso      = $compta_repo->conso( $id_projet, $annee );
-		$dessin_heures = $this -> get('app.gramc.graf_calcul');
+		$dessin_heures = $this -> get('App\GramcServices\GramcGraf\Calcul');
 
 		// conso  sur la période
 		$struct_data   = $dessin_heures->createStructuredData($debut_periode,$fin_periode,$db_conso);
