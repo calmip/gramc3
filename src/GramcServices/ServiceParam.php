@@ -25,7 +25,7 @@ namespace App\GramcServices;
 
 //use Doctrine\ORM\EntityRepository;
 use App\Entity\Param;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 /* Ce service est utilisé pour renvoyer les paramètres stocqués dans la table Param
  * Ces paramètres peuvent être modifiés par l'interface graphique, ce qui n'est pas le cas 
@@ -34,7 +34,7 @@ use Doctrine\ORM\EntityManager;
  */
 class ServiceParam 
 {
-	public function __construct(EntityManager $em)
+	public function __construct(EntityManagerInterface $em)
 	{
 		$this->em             = $em;
 	}

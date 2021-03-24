@@ -50,14 +50,14 @@ use App\Utils\Signal;
 use App\Utils\Functions;
 use App\GramcServices\Workflow\Session\SessionWorkflow;
 
-# TODO - Pas bien beau à modifier !
+// TODO - Pas bien beau à modifier !
 use App\Controller\VersionModifController;
 
-use Symfony\Component\Validator\Validator\TraceableValidator;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\UsageTrackingTokenStorage;
-use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
-use Doctrine\ORM\EntityManager;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+//use Symfony\Component\Security\Core\Authentication\Token\Storage\UsageTrackingTokenStorage;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 class ServiceMenus 
 {
@@ -67,11 +67,11 @@ class ServiceMenus
 								ServiceJournal $sj, 
 								SessionWorkflow $sw, 
 								GramcDate $grdt, 
-								TraceableValidator $sval,
+								ValidatorInterface $sval,
 								ServiceSessions $ss, 
-								UsageTrackingTokenStorage $tok,
-								AuthorizationChecker $ac,
-								EntityManager $em)
+								TokenStorageInterface $tok,
+								AuthorizationCheckerInterface $ac,
+								EntityManagerInterface $em)
 	{
 		$this->max_rall = $max_rall;
 		$this->sp   = $sp;

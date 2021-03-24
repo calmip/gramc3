@@ -27,10 +27,10 @@ use App\Entity\Individu;
 use App\Utils\Functions;
 
 use App\GramcServices\ServiceJournal;
-use Doctrine\ORM\EntityManager;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\UsageTrackingTokenStorage;
-use Symfony\Component\Mailer\Mailer;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+//use Symfony\Component\Security\Core\Authentication\Token\Storage\UsageTrackingTokenStorage;
+use Symfony\Component\Mailer\MailerInterface;
 
 /********************
  * Ce service est utilisé pour envoyer des notifications par mail aux utilisateurs
@@ -38,7 +38,11 @@ use Symfony\Component\Mailer\Mailer;
 
 class ServiceNotifications
 {
-	public function __construct( $mailfrom, \Twig\Environment $twig, UsageTrackingTokenStorage $tok, Mailer $mailer, ServiceJournal $sj, EntityManager $em)
+	public function __construct( $mailfrom, \Twig\Environment $twig, 
+	                             TokenStorageInterface $tok, 
+	                             MailerInterface $mailer, 
+	                             ServiceJournal $sj, 
+	                             EntityManagerInterface $em)
 	{
 		$this->mailfrom = $mailfrom;
 		$this->twig     = $twig;

@@ -34,14 +34,14 @@ use App\Utils\Signal;
 use App\GramcServices\Workflow\NoTransition;
 
 use App\GramcServices\ServiceNotifications;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 class RallongeWorkflow extends Workflow
 {
     protected $states             = [];
     protected $workflowIdentifier = null;
 
-    public function __construct(ServiceNotifications $sn, ServiceJournal $sj, ServiceSessions $ss, EntityManager $em)
+    public function __construct(ServiceNotifications $sn, ServiceJournal $sj, ServiceSessions $ss, EntityManagerInterface $em)
     {
         if( $this->workflowIdentifier != null ) return;
         parent::__construct($sn, $sj, $ss, $em);

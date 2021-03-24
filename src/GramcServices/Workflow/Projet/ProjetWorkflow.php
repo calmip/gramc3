@@ -33,12 +33,12 @@ use App\Utils\Signal;
 use App\GramcServices\Workflow\NoTransition;
 
 use App\GramcServices\ServiceNotifications;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 class ProjetWorkflow extends Workflow
 {
 
-    public function __construct(ServiceNotifications $sn, ServiceJournal $sj, ServiceSessions $ss, EntityManager $em)
+    public function __construct(ServiceNotifications $sn, ServiceJournal $sj, ServiceSessions $ss, EntityManagerInterface $em)
     {
         $this->workflowIdentifier   = get_class($this);
         parent::__construct($sn, $sj, $ss, $em);

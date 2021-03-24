@@ -27,12 +27,13 @@ namespace App\GramcServices;
 //use App\Utils\Functions;
 use App\Entity\Journal;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Bridge\Monolog\Logger;
-use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+//use Symfony\Bridge\Monolog\Logger;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /********************
@@ -43,11 +44,11 @@ class ServiceJournal
 {
 	// request_stack, session,logger, security.token_storage,doc
 	public function __construct(RequestStack $rs, 
-								Session $ss, 
-								Logger $log, 
+								SessionInterface $ss, 
+								LoggerInterface $log, 
 								TokenStorageInterface $tok, 
-								AuthorizationChecker $ac, 
-								EntityManager $em)
+								AuthorizationCheckerInterface $ac, 
+								EntityManagerInterface $em)
 	{
 		$this->rs    = $rs;
 		$this->ss    = $ss;

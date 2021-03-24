@@ -37,7 +37,7 @@ use App\Entity\Projet;
 use App\Entity\Compta;
 
 //use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 //use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 //use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -75,7 +75,7 @@ class DonneesFacturation
 	private $dfct_directory;
 	private $em;
 	
-	public function __construct($dfct_directory, ServiceProjets $sp, ServiceJournal $sj, EntityManager $em)
+	public function __construct($dfct_directory, ServiceProjets $sp, ServiceJournal $sj, EntityManagerInterface $em)
 	{
 		$this->dfct_directory = $dfct_directory;
 		$this->sp             = $sp;

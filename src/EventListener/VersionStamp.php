@@ -38,12 +38,12 @@ namespace App\EventListener;
 
 use App\Entity\Version;
 
-use Symfony\Component\Security\Core\Authentication\Token\Storage\UsageTrackingTokenStorage;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 
 class VersionStamp
 {
-	public function __construct(UsageTrackingTokenStorage $tok)
+	public function __construct(TokenStorageInterface $tok)
 	{
 		$this->tok = $tok->getToken();
 	}

@@ -40,9 +40,11 @@ use App\Entity\CompteActivation;
 
 use App\Utils\Functions;
 
-use Symfony\Bridge\Monolog\Logger;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\UsageTrackingTokenStorage;
-use Doctrine\ORM\EntityManager;
+//use Symfony\Bridge\Monolog\Logger;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 class ServiceProjets
 {
@@ -56,10 +58,10 @@ class ServiceProjets
 								ServiceVersions $sv, 
 								ServiceSessions $ss, 
 								ServiceJournal $sj,
-								Logger $log,
-								\Symfony\Component\Security\Core\Authorization\AuthorizationChecker $sac,
-								UsageTrackingTokenStorage $tok,
-								EntityManager $em)
+								LoggerInterface $log,
+								AuthorizationCheckerInterface $sac,
+								TokenStorageInterface $tok,
+								EntityManagerInterface $em)
 	{
 		$this->prj_prefix             = $prj_prefix;
 		$this->ressources_conso_group = $ressources_conso_group;
