@@ -32,14 +32,14 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 class GramcUserProvider  implements UserProviderInterface
 {
 
     private $em;
     
-    public function __construct(EntityManager $em)
+    public function __construct(EntityManagerInterface $em)
     {
         $this->em = $em;
     }
@@ -47,7 +47,6 @@ class GramcUserProvider  implements UserProviderInterface
 
     public function loadUserByUsername($username)
     {
-        //$repository = $this->doctrine->getRepository('App:Individu');
         $repository = $this->em->getRepository(Sso::class);
         if( $sso = $repository->findOneByEppn($username) )
            return $sso->getIndividu();
@@ -75,6 +74,6 @@ class GramcUserProvider  implements UserProviderInterface
 
     public function supportsClass($class)
     {
-        return $class === 'App\Entity\Individu';
+		return preg_match( '/App\\\Entity\\\Individu$/', $class) === 1;
     }
 }

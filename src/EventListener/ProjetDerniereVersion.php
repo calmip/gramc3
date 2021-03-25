@@ -40,11 +40,11 @@ use App\Entity\Version;
 use App\GramcServices\ServiceProjets;
 
 use Doctrine\Persistence\Event\LifecycleEventArgs;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 class ProjetDerniereVersion
 {
-	public function __construct(ServiceProjets $sp, EntityManager $em)
+	public function __construct(ServiceProjets $sp, EntityManagerInterface $em)
 	{
 		$this->sp = $sp;
 		$this->em = $em;
@@ -60,7 +60,7 @@ class ProjetDerniereVersion
     public function postRemove(Version $version, LifecycleEventArgs $event): void
     {
 		$projet = $version->getProjet();
-		$this->sp->calculDerniereVersion($projet);
+		$this->sp->calculVersionDerniere($projet);
 		$this->em->persist($projet);
 		$this->em->flush();		// ne marche pas si on ne met pas flush ici
 

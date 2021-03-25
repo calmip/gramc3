@@ -44,11 +44,11 @@ use App\Utils\Functions;
 use App\Utils\Etat;
 use App\GramcServices\GramcDate;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 class SessionType extends AbstractType
 {
-	public function __construct (GramcDate $grdt, EntityManager $em)
+	public function __construct (GramcDate $grdt, EntityManagerInterface $em)
 	{
 		$this -> grdt = $grdt;
 		$this -> em   = $em;
@@ -109,7 +109,6 @@ class SessionType extends AbstractType
                                             'TERMINE'               =>  Etat::TERMINE,
                                             ],
                         'label'             => 'Etat',
-                        'choices_as_values' => true, // cette option devra être supprimée à partir de symfony 3
                     ])
                     ->add('idSession');
 

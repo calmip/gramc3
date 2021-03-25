@@ -34,6 +34,7 @@ use Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundE
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 use Symfony\Component\Security\Core\Authentication\Token\Storage\UsageTrackingTokenStorage;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 use App\Exception\UserException;
 use Symfony\Component\HttpFoundation\Request;
@@ -49,11 +50,11 @@ use App\GramcServices\ServiceJournal;
 
 class UserChecker implements UserCheckerInterface
 {
-	public function __construct(\Symfony\Component\Security\Core\Authorization\AuthorizationChecker $secu_auto_chk,
-								UsageTrackingTokenStorage $token,
-								\Symfony\Component\HttpFoundation\Session\Session $sess,
+	public function __construct(\Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface $secu_auto_chk,
+								TokenStorageInterface $token,
+								\Symfony\Component\HttpFoundation\Session\SessionInterface $sess,
 								ServiceJournal $sj,
-								\Doctrine\ORM\EntityManager $em)
+								\Doctrine\ORM\EntityManagerInterface $em)
 	{
 		$this->secu_auto_chk = $secu_auto_chk;
 		$this->token         = $token->getToken();
@@ -107,8 +108,7 @@ class UserChecker implements UserCheckerInterface
 				$this->sj->debugMessage('UserChecker : checkPostAuth : User ' . 
 				                         $user->getPrenom() . ' ' . 
 				                         $user->getNom() . " est connecté en SUDO par " .
-				                         $this->token->getUser()->getPrenom() . ' ' . 
-				                         $this->token->getUser() ->getNom());
+				                         $this->token->getUser());
 				$this->sess->set('real_user', $this->token->getUser() );
 				$this->sess->set('sudo_url', Request::createFromGlobals()->headers->get('referer') );
 				//$this->sj->debugMessage(__METHOD__ . " sudo_url set to : " . App::getSession()->get('sudo_url') );

@@ -31,11 +31,11 @@ use App\Entity\Individu;
 use App\Utils\GramcDate;
 use App\Utils\Functions;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 class ServiceVersions
 {
-	public function __construct($attrib_seuil_a, $prj_prefix, $fig_directory, $signature_directory, ServiceJournal $sj, EntityManager $em)
+	public function __construct($attrib_seuil_a, $prj_prefix, $fig_directory, $signature_directory, ServiceJournal $sj, EntityManagerInterface $em)
 	{
 		$this->attrib_seuil_a      = intval($attrib_seuil_a);
 		$this->prj_prefix          = $prj_prefix;

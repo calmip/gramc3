@@ -45,9 +45,15 @@ use App\Entity\Thematique;
 
 //use App\App;
 
+use Doctrine\ORM\EntityManagerInterface;
 
 class IndividuType extends AbstractType
 {
+	public function __construct (EntityManagerInterface $em)
+	{
+		$this -> em = $em;
+	}
+
     /**
      * {@inheritdoc}
      */
@@ -93,7 +99,7 @@ class IndividuType extends AbstractType
                     'class' => 'App:Statut',
                     'multiple' => false,
                     'required'  => false,
-                    'choices'   => $this->getRepository(Statut::class)->findBy(['permanent' => true ]),
+                    'choices'   => $this->em->getRepository(Statut::class)->findBy(['permanent' => true ]),
                     'attr' => ['style' => 'width:20em'],
                     ]);
         else

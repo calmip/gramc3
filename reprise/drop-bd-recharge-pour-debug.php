@@ -34,14 +34,19 @@ efface_bd();
 echo "recrée la BD et remplit à partir de ".$file_name."\n";
 restore_database($file_name);
 
-echo "modif adresses mail\n";
-modif_mail();
+# On ne modifie plus les adresses mail car symfony enverra tout à l'utilisateur
+# marqué dans le paramètre recipients, fichier config/packages/dev/mailer.yaml
+# echo "modif adresses mail\n";
+# modif_mail();
 
 echo "Appelle bin/console de Symfony\n";
 console_update();
 
 echo "Appelle bin/console fixtures de Symfony\n";
 fixtures();
+
+echo "Appelle /bin/console app:send-a-mail toto@exemple.fr, vérifiez que vous l'avez bien reçu !";
+envoie_mail_de_controle();
 
 echo "That's REALLY all Folks\n";
 
@@ -50,20 +55,24 @@ echo "That's REALLY all Folks\n";
  * Initialise certaines constantes a partir de parameters.yml
  *************************************************************/
  function init() {
-    //$f_params = '../app/config/parameters.yml';
-    //$params= yaml_parse_file($f_params);
 
-    define('DATABASE_HOST', "127.0.0.1");
-    define('DATABASE_USER', "gramc3");
-    define('DATABASE_PASSWORD', "azerty123");
-    define('DATABASE_NAME', "gramc3");
+	$db_url = parse_url(getenv('DATABASE_URL'));
+	
+	if (!isset($db_url["scheme"]) || $db_url['scheme'] != "mysql")
+	{
+		echo "ERREUR - scheme doit être mysql - DATABASE_URL=".getenv('DATABASE_URL')."\n";
+		exit;
+	}
+	
+	# On suppose que la DATABASE_URL est correcte !
+    define('DATABASE_HOST', $db_url['host']);
+    define('DATABASE_USER', $db_url['user']);
+    define('DATABASE_PASSWORD', $db_url['pass']);
+    define('DATABASE_NAME', explode ('/',$db_url['path'])[1]);
     define('MAIL_DEVT', "devt1@exemple.com");
      
-    //define('DATABASE_HOST', $params['parameters']['database_host']);
-    //define('DATABASE_USER', $params['parameters']['database_user']);
-    //define('DATABASE_PASSWORD', $params['parameters']['database_password']);
-    //define('DATABASE_NAME', $params['parameters']['database_name']);
-    //define('MAIL_DEVT', $params['parameters']['maildevt']);
+    //echo DATABASE_HOST." ".DATABASE_USER." ".DATABASE_PASSWORD." ".DATABASE_NAME."\n";
+    //exit;
  }
 
 
@@ -99,6 +108,15 @@ function fixtures()
     passthru($cmd);
 }
 
+/**********
+ * Appeller bin/console pour envoyer un mail de controle
+ *
+ **************/
+function envoie_mail_de_controle()
+{
+    $cmd = 'cd ..;bin/console app:send-a-mail toto@exemple.fr';
+    passthru($cmd);
+}
 
 /**********
  * @brief Remplir la BD à partir du fichier créé précédemment par mysqldump

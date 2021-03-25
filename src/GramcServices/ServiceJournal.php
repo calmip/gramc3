@@ -27,12 +27,13 @@ namespace App\GramcServices;
 //use App\Utils\Functions;
 use App\Entity\Journal;
 
-use Doctrine\ORM\EntityManager;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Security\Core\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Bridge\Monolog\Logger;
-use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+//use Symfony\Bridge\Monolog\Logger;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /********************
@@ -41,18 +42,18 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class ServiceJournal
 {
-	// request_stack, session,logger, security.token_storage,doc
+	// request_stack, session,logger, security.helper, doc
 	public function __construct(RequestStack $rs, 
-								Session $ss, 
-								Logger $log, 
-								TokenStorageInterface $tok, 
-								AuthorizationChecker $ac, 
-								EntityManager $em)
+								SessionInterface $ss, 
+								LoggerInterface $log, 
+								Security $secu,
+								AuthorizationCheckerInterface $ac, 
+								EntityManagerInterface $em)
 	{
 		$this->rs    = $rs;
 		$this->ss    = $ss;
 		$this->log   = $log;
-		$this->token = $tok->getToken();
+		$this->secu  = $secu;
 		$this->ac    = $ac;
 		$this->em    = $em;
 	}
@@ -72,36 +73,34 @@ class ServiceJournal
 		$rs    = $this->rs;
 		$ss    = $this->ss;
 		$log   = $this->log;
-		$token = $this->token;
+		$secu  = $this->secu;
 		$em    = $this->em;
 
         $journal = new Journal();
         $journal->setStamp( new \DateTime() );
 
-        if( $token != null && $token->getUser() instanceof Individu )
+		if ($secu->getUser() != null)
 		{
-            $journal->setIdIndividu( $token->getUser()->getId() );
-            $journal->setIndividu  ( $token->getUser() );
+			$journal->setIndividu  ( $secu->getUser() );
+			$journal->setIdIndividu( $secu->getUser()->getId() );
 		}
-        else
+		else
 		{
             $journal->setIdIndividu( null );
             $journal->setIndividu( null );
 		}
-
+			
         $journal->setGramcSessId( $ss->getId() );
 
-		if ($rs instanceof  RequestStack
-			&& $rs->getMasterRequest() instanceof  Request 
+		if ($rs->getMasterRequest() != null
 			&& $rs->getMasterRequest()->getClientIp() != null)
-			{
-		        $ip = $rs->getMasterRequest()->getClientIp();
-			}
-		    else
-		    {
-				//$ip = $rs->getMasterRequest()->getClientIp();
-		        $ip = '127.127.127.127'; // pour le debug seulement
-			}
+		{
+	        $ip = $rs->getMasterRequest()->getClientIp();
+		}
+	    else
+	    {
+			$ip = '0.0.0.0';
+		}
 
         $journal->setIp( $ip );
         $journal->setMessage( substr($message,0,300) );

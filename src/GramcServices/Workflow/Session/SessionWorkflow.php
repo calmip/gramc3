@@ -34,7 +34,7 @@ use App\Utils\Signal;
 use App\Entity\Session;
 
 use App\GramcServices\ServiceNotifications;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 
 /*********************
@@ -44,7 +44,7 @@ use Doctrine\ORM\EntityManager;
  ************************************************************************/
 class SessionWorkflow extends Workflow
 {
-    public function __construct(ServiceNotifications $sn, ServiceJournal $sj, ServiceSessions $ss, EntityManager $em)
+    public function __construct(ServiceNotifications $sn, ServiceJournal $sj, ServiceSessions $ss, EntityManagerInterface $em)
     {
         parent::__construct($sn, $sj, $ss, $em);
 

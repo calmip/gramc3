@@ -27,10 +27,11 @@ use App\Entity\Individu;
 use App\Utils\Functions;
 
 use App\GramcServices\ServiceJournal;
-use Doctrine\ORM\EntityManager;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\UsageTrackingTokenStorage;
-use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 
 /********************
  * Ce service est utilisé pour envoyer des notifications par mail aux utilisateurs
@@ -38,7 +39,7 @@ use Symfony\Component\Mailer\Mailer;
 
 class ServiceNotifications
 {
-	public function __construct( $mailfrom, \Twig\Environment $twig, UsageTrackingTokenStorage $tok, Mailer $mailer, ServiceJournal $sj, EntityManager $em)
+	public function __construct( $mailfrom, \Twig\Environment $twig, TokenStorageInterface $tok, MailerInterface $mailer, ServiceJournal $sj, EntityManagerInterface $em)
 	{
 		$this->mailfrom = $mailfrom;
 		$this->twig     = $twig;
@@ -111,11 +112,16 @@ class ServiceNotifications
     private function sendRawMessage( $subject, $body, $users = null )
     {
 		// Notifiations désactivées pour l'instant - Swift_Message n'existe plus !
-		return;
-        $message = \Swift_Message::newInstance()
-                    ->setSubject( $subject )
-                    ->setFrom( $this->mailfrom )
-                    ->setBody($body ,'text/plain');
+		//return;
+        //$message = \Swift_Message::newInstance()
+        //            ->setSubject( $subject )
+        //            ->setFrom( $this->mailfrom )
+        //            ->setBody($body ,'text/plain');
+        
+        $message = new Email();
+        $message -> subject($subject);
+        $message -> text($body);
+        $message -> from($this->mailfrom);
 
         if( $users != null )
 		{
@@ -140,14 +146,20 @@ class ServiceNotifications
                 $warning = false;
 
             $mails = array_unique( array_merge( $mails, $this->usersToMail( $real_users, $warning ) ) );
-            foreach( $mails as $mail )   $message->addTo( $mail);
+
+			// Ajouter un destinataire
+            foreach( $mails as $mail )
+            {
+				//$message->addTo( $mail);
+				$message -> addTo ($mail);
+			}
 
             // Ecrire une ligne dans le journal et dans les logs
             $to = '';
             if ( $message->getTo() != null )
 			{
-                $arrayTo = array_keys( $message->getTo() );
-                foreach( $arrayTo as $item ) $to = $to . ' ' . $item;
+                $arrayTo = array_values( $message->getTo() );
+                foreach( $arrayTo as $item ) $to = $to . ' ' . $item->toString();
 			}
 
             // debug

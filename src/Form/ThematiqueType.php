@@ -39,12 +39,12 @@ use App\Entity\Individu;
 //use App\App;
 use App\Utils\Functions;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 class ThematiqueType extends AbstractType
 {
 
-	public function __construct (EntityManager $em)
+	public function __construct (EntityManagerInterface $em)
 	{
 		$this -> em = $em;
 	}

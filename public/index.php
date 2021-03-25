@@ -32,14 +32,19 @@ if ($adresses_ip === false)
 // Si on est derrière un proxy il convient de commenter la ligne HTTP_X_FORWARDED_FOR !
 if (isset($_SERVER['HTTP_CLIENT_IP'])
 //    || isset($_SERVER['HTTP_X_FORWARDED_FOR'])
-    || !(in_array(@$_SERVER['REMOTE_ADDR'], $adresses_ip) || php_sapi_name() === 'cli-server')
+    || !(in_array(@$_SERVER['HTTP_X_REAL_IP'], $adresses_ip) || php_sapi_name() === 'cli-server')
 ) {
 	header('HTTP/1.0 403 Forbidden');
-    exit('You are not allowed to access this file. Check '.basename(__FILE__).' for more information. Your address is '.@$_SERVER['REMOTE_ADDR']);
-}
+    exit('You are not allowed to access this file. Check '.basename(__FILE__).' for more information. Your address is '.@$_SERVER['HTTP_X_REAL_IP']);
+  }
 
 $kernel = new Kernel($_SERVER['APP_ENV'], (bool) $_SERVER['APP_DEBUG']);
 $request = Request::createFromGlobals();
+
+// Nous sommes derrière un reverseproxy, commentez la ligne si ce n'est pas le cas
+// cf. https://symfony.com/doc/4.4/deployment/proxies.html
+Request::setTrustedProxies(['10.0.0.0/8'],Request::HEADER_X_FORWARDED_ALL);
+
 $response = $kernel->handle($request);
 $response->send();
 $kernel->terminate($request, $response);

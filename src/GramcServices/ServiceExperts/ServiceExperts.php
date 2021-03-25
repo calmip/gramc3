@@ -40,7 +40,7 @@ use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\FormFactory;
+use Symfony\Component\Form\FormFactoryInterface;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -55,7 +55,7 @@ use App\Utils\Functions;
 
 use App\GramcServices\ServiceJournal;
 use App\GramcServices\ServiceNotifications;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 /****************************************
  * ExpertsService: cette classe encapsule les algorithmes utilisés par les pages d'affectation
@@ -69,7 +69,7 @@ class ServiceExperts
 	protected $sj;
 	protected $em;
 
-	function __construct ($max_expertises_nb, FormFactory $ff, ServiceNotifications $sn, ServiceJournal $sj, EntityManager $em)
+	function __construct ($max_expertises_nb, FormFactoryInterface $ff, ServiceNotifications $sn, ServiceJournal $sj, EntityManagerInterface $em)
 	{
 		$this->max_expertises_nb = $max_expertises_nb;
 		$this->formFactory       = $ff;
