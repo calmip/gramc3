@@ -1596,8 +1596,8 @@ class ProjetController extends Controller
             $u     = $user_repo->findOneBy(['loginname' => $login]);
             if ($u==null)
             {
-				$passwd = null;
-				$expir  = null;
+				$passwd    = null;
+				$pwd_expir = null;
 			}
 			else
 			{

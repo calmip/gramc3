@@ -75,16 +75,16 @@ class ServiceJournal
 		$rs    = $this->rs;
 		$ss    = $this->ss;
 		$log   = $this->log;
-		$secu  = $this->secu;
+		$token = $this->token;
 		$em    = $this->em;
 
         $journal = new Journal();
         $journal->setStamp( new \DateTime() );
 
-		if ($secu->getUser() != null)
+		if ($token != null && $token->getUser() != null)
 		{
-			$journal->setIndividu  ( $secu->getUser() );
-			$journal->setIdIndividu( $secu->getUser()->getId() );
+			$journal->setIndividu  ( $token->getUser() );
+			$journal->setIdIndividu( $token->getUser()->getId() );
 		}
 		else
 		{
