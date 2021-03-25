@@ -282,7 +282,6 @@ class VersionController extends Controller
 	    
 	    $html4pdf =  $this->render('version/pdf.html.twig',
 		[
-            'toomuch'            => $toomuch,
 			'projet'             => $projet,
             'version_form'       => null,
             'version'            => $version,
@@ -300,7 +299,7 @@ class VersionController extends Controller
             'rapport'            => null,
             'toomuch'            => $toomuch
 		]);
-		
+	
 	    $pdf = $spdf->getOutputFromHtml($html4pdf->getContent());
 
 	    return Functions::pdf( $pdf );
