@@ -170,7 +170,7 @@ class WorkflowController extends Controller
      */
     public function modifySessionAction(Request $request, Session $session, LoggerInterface $lg)
     {
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$ff = $this->get('form.factory');
 		$em = $this->getdoctrine()->getManager();
 
@@ -199,7 +199,7 @@ class WorkflowController extends Controller
             $signal = $session_form->getData()['signal'];
 
             //$sessionWorkflow    =   new SessionWorkflow();
-            $sessionWorkflow    =   $this->get('app.gramc.SessionWorkflow');
+            $sessionWorkflow    =   $this->get('App\GramcServices\Workflow\Session\SessionWorkflow');
             $rtn = $sessionWorkflow->execute( $signal, $session );
             if ( $rtn == true )
                 $sj->debugMessage('WorkflowController : signal ' . Signal::getLibelle( $signal ). " a été appliqué avec succès");
@@ -256,7 +256,7 @@ class WorkflowController extends Controller
      */
     public function signalProjetAction(Request $request, Projet $projet, LoggerInterface $lg)
     {
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$ff = $this->get('form.factory');
 		$em = $this->getdoctrine()->getManager();
 
@@ -328,7 +328,7 @@ class WorkflowController extends Controller
 
 
         //$projetWorkflow    =   new ProjetWorkflow();
-        $projetWorkflow    =   $this->get('app.gramc.ProjetWorkflow');
+        $projetWorkflow    =   $this->get('App\GramcServices\Workflow\Projet\ProjetWorkflow');
         $rtn = $projetWorkflow->execute( $signal, $projet );
         if ( $rtn == true )
             $sj->debugMessage('WorkflowController : signal ' . Signal::getLibelle( $signal ). " a été appliqué avec succès sur le projet " . $projet);

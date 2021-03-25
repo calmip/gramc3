@@ -68,9 +68,9 @@ class StatistiquesController extends Controller
      */
     public function indexAction(Request $request,$annee=null)
     {
-		$sm      = $this->get('app.gramc.ServiceMenus');
-		$ss      = $this->get('app.gramc.ServiceSessions');
-		$sp      = $this->get('app.gramc.ServiceProjets');
+		$sm      = $this->get('App\GramcServices\ServiceMenus');
+		$ss      = $this->get('App\GramcServices\ServiceSessions');
+		$sp      = $this->get('App\GramcServices\ServiceProjets');
 		$em      = $this->getDoctrine()->getManager();
 		$prj_rep = $em->getRepository(Projet::class);
 		$ver_rep = $em->getRepository(Version::class);
@@ -152,7 +152,7 @@ class StatistiquesController extends Controller
 
 		// debug
         //$db_conso = $em->getRepository(Compta::class)->consoTotale( $annee, 'cpu' );
-        //$dessin_heures = $this->get('app.gramc.graf_calcultous');
+        //$dessin_heures = $this->get('App\GramcServices\GramcGraf\Calcultous');
  		//$debut = new \DateTime( $annee . '-01-01');
  		//$nannee= $annee + 1;
 		//$fin   = new \DateTime( $nannee . '-01-02');
@@ -186,9 +186,9 @@ class StatistiquesController extends Controller
      */
     public function repartitionAction(Request $request, $annee)
     {
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$ss = $this->get('app.gramc.ServiceSessions');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sm = $this->get('App\GramcServices\ServiceMenus');
+		$ss = $this->get('App\GramcServices\ServiceSessions');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$em = $this->getDoctrine()->getManager();
 		
 	    $data = $ss->selectAnnee($request, $annee);
@@ -262,8 +262,8 @@ class StatistiquesController extends Controller
      */
     public function collaborateurAction(Request $request, $annee)
     {
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$ss = $this->get('app.gramc.ServiceSessions');
+		$sm = $this->get('App\GramcServices\ServiceMenus');
+		$ss = $this->get('App\GramcServices\ServiceSessions');
 		$em = $this->getDoctrine()->getManager();
 		
 	    $data = $ss->selectAnnee($request, $annee);
@@ -513,8 +513,8 @@ class StatistiquesController extends Controller
 	/* Cette fonction est appelée par laboratoireAction, etablissementAction etc. */
 	private function parCritere(Request $request, $annee, $critere, $titre)
 	{
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$ss = $this->get('app.gramc.ServiceSessions');
+		$sm = $this->get('App\GramcServices\ServiceMenus');
+		$ss = $this->get('App\GramcServices\ServiceSessions');
 
 	    $data = $ss->selectAnnee($request, $annee);
 	    $annee= $data['annee'];
@@ -648,7 +648,7 @@ class StatistiquesController extends Controller
 	 */
     private function statistiques( $annee, $critere, $titre = "Titre" )
     {
-		$sp          = $this->get('app.gramc.ServiceProjets');
+		$sp          = $this->get('App\GramcServices\ServiceProjets');
 		$stats       = $sp->projetsParCritere($annee, $critere);
 		$acros       = $stats[0];
 		$num_projets = $stats[1];

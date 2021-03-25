@@ -24,7 +24,7 @@
 namespace App\GramcServices;
 
 //use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 /* Ce service est utilisé pour afficher la date + heure avec un décalage 
  * éventuellement stoqué dans la table Params
@@ -46,7 +46,7 @@ use Doctrine\ORM\EntityManager;
 class GramcDateTime extends \DateTime
 {
 
-	public function __construct (ServiceParam $sp, EntityManager $em)
+	public function __construct (ServiceParam $sp, EntityManagerInterface $em)
     {
 		$this->sp = $sp;
 		$this->em = $em;

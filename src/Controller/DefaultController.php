@@ -90,7 +90,7 @@ class DefaultController extends Controller
      */
     public function twigAction(Request $request)
     {
-		$sn = $this->get('app.gramc.ServiceNotifications');
+		$sn = $this->get('App\GramcServices\ServiceNotifications');
 		$em = $this->getDoctrine()->getManager();
 		
 	    $users    = [ 'a@x', 'b@x' ];
@@ -128,8 +128,8 @@ class DefaultController extends Controller
     public function countAction(Request $request)
     {
 		
-		$sp = $this->get('app.gramc.ServiceProjets');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sp = $this->get('App\GramcServices\ServiceProjets');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$em = $this->getDoctrine()->getManager();
 		
         $projets = $em->getRepository(Projet::class)->heuresProjetsAnnee($annee, Functions::TOUS);
@@ -172,7 +172,7 @@ class DefaultController extends Controller
      */
     public function test_sessionAction(Request $request)
     {
-		$ss = $this->get('app.gramc.ServiceSessions');
+		$ss = $this->get('App\GramcServices\ServiceSessions');
 		return new Response( var_dump( $ss->getSessionCourante() ) );
     }
 

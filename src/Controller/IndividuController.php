@@ -90,7 +90,7 @@ class IndividuController extends Controller
     public function remplacerUtilisateurAction(Request $request, Individu $individu )
     {
         $em = $this->getDoctrine()->getManager();
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 
         $form = $this
             ->get('form.factory')
@@ -609,7 +609,7 @@ class IndividuController extends Controller
     public function plusExpertAction(Request $request, Individu $individu)
     {
         $em = $this->getDoctrine()->getManager();
-        $se = $this->get('app.gramc.ServiceExperts');
+        $se = $this->get('App\GramcServices\ServiceExperts');
 
         $individu->setExpert(false);
         $em->persist($individu);
@@ -677,7 +677,7 @@ class IndividuController extends Controller
      */
     public function sudoAction(Request $request, Individu $individu)
     {
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$ac = $this->get('security.authorization_checker');
 
 	    if( ! $ac->isGranted('ROLE_PREVIOUS_ADMIN') )
@@ -765,7 +765,7 @@ class IndividuController extends Controller
      */
     public function mailAutocompleteAction(Request $request)
     {
-		$sj   = $this->get('app.gramc.ServiceJournal');
+		$sj   = $this->get('App\GramcServices\ServiceJournal');
 		$em   = $this->getDoctrine()->getManager();
         $form = $this
             ->get('form.factory')

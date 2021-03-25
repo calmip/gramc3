@@ -71,8 +71,8 @@ class MailController extends Controller
     {
 
         $em = $this->getDoctrine()->getManager();
-		$sn = $this->get('app.gramc.ServiceNotifications');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sn = $this->get('App\GramcServices\ServiceNotifications');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$ff = $this->get('form.factory');
 
 		$nb_msg = 0;
@@ -137,7 +137,7 @@ class MailController extends Controller
      ************************************************************/
     private function getResponsablesFiche(Session $session)
     {
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$em = $this->getDoctrine()->getManager();        $responsables = [];
 
         $all_versions = $em->getRepository(Version::class)->findBy(['session' => $session, 'prjFicheVal' => false] );
@@ -176,8 +176,8 @@ class MailController extends Controller
     public function mailToResponsablesAction(Request $request, Session $session)
     {
         $em = $this->getDoctrine()->getManager();
-		$sn = $this->get('app.gramc.ServiceNotifications');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sn = $this->get('App\GramcServices\ServiceNotifications');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$ff = $this->get('form.factory');
 
 		$nb_msg = 0;
@@ -242,8 +242,8 @@ class MailController extends Controller
      ************************************************************/
     private function getResponsables(Session $session)
     {
-		$sp = $this->get('app.gramc.ServiceProjets');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sp = $this->get('App\GramcServices\ServiceProjets');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$em = $this->getDoctrine()->getManager();
 		
 	    $type_session = $session->getLibelleTypeSession();

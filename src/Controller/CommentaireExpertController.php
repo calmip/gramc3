@@ -83,7 +83,7 @@ class CommentaireExpertController extends Controller
     ************************/
     public function modifyAction(Request $request, CommentaireExpert $commentaireExpert)
     {
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$token = $this->get('security.token_storage')->getToken();
 
 		// Chaque expert ne peut accéder qu'à son commentaire à lui

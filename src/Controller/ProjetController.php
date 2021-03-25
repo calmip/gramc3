@@ -109,9 +109,9 @@ class ProjetController extends Controller
      */
     public function oldAction(Request $request)
     {
-		$sd = $this->get('app.gramc.date');
-		$sj = $this->get('app.gramc.ServiceJournal');
-		$sp = $this->get('app.gramc.ServiceProjets');
+		$sd = $this->get('App\GramcServices\GramcDate');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
+		$sp = $this->get('App\GramcServices\ServiceProjets');
 		$ff = $this->get('form.factory');
 		$em = $this->getDoctrine()->getManager();
 		
@@ -351,8 +351,8 @@ class ProjetController extends Controller
     public function sessionCSVAction(Session $session)
     {
 		$em = $this->getDoctrine()->getManager();
-		$sp = $this->get('app.gramc.ServiceProjets');
-		$sv = $this->get('app.gramc.ServiceVersions');
+		$sp = $this->get('App\GramcServices\ServiceProjets');
+		$sv = $this->get('App\GramcServices\ServiceVersions');
 	    $sortie = 'Projets de la session ' . $session->getId() . "\n";
 	    $ligne  =   [
 	                'Nouveau',
@@ -416,7 +416,7 @@ class ProjetController extends Controller
      */
     public function tousCSVAction()
     {
-		$sd = $this->get('app.gramc.date');
+		$sd = $this->get('App\GramcServices\GramcDate');
 		$em = $this->getDoctrine()->getManager();
 		
         $entetes =
@@ -481,7 +481,7 @@ class ProjetController extends Controller
 
             if( $confirmation == 'OUI' )
 			{
-                $workflow = $this->get('app.gramc.ProjetWorkflow');
+                $workflow = $this->get('App\GramcServices\Workflow\Projet\ProjetWorkflow');
                 if( $Workflow->canExecute( Signal::CLK_FERM, $projet) )
                      $Workflow->execute( Signal::CLK_FERM, $projet);
 			}
@@ -509,7 +509,7 @@ class ProjetController extends Controller
 
             if( $confirmation == 'OUI' )
 			{
-		        $workflow = $this->get('app.gramc.ProjetWorkflow');
+		        $workflow = $this->get('App\GramcServices\Workflow\Projet\ProjetWorkflow');
                 if( $workflow->canExecute( Signal::CLK_ARR, $version->getProjet() ) )
                 {
                      $workflow->execute( Signal::CLK_ARR, $version->getProjet());
@@ -549,7 +549,7 @@ class ProjetController extends Controller
 
             if( $confirmation == 'OUI' )
 		    {
-				$workflow = $this->get('app.gramc.ProjetWorkflow');
+				$workflow = $this->get('App\GramcServices\Workflow\Projet\ProjetWorkflow');
                 if( $workflow->canExecute( Signal::CLK_VAL_DEM, $version->getProjet() ) )
                 {
 				    $workflow->execute( Signal::CLK_VAL_DEM, $version->getProjet());
@@ -581,9 +581,9 @@ class ProjetController extends Controller
     public function sessionAction(Request $request)
     {
 		$em             = $this->getDoctrine()->getManager();
-		$ss             = $this->get('app.gramc.ServiceSessions');
-        $sp             = $this->get('app.gramc.ServiceProjets');
-        $sv             = $this->get('app.gramc.ServiceVersions');
+		$ss             = $this->get('App\GramcServices\ServiceSessions');
+        $sp             = $this->get('App\GramcServices\ServiceProjets');
+        $sv             = $this->get('App\GramcServices\ServiceVersions');
 		
 		$session        = $ss->getSessionCourante();
         $data           = $ss->selectSession($this->createFormBuilder(['session'=>$session]),$request); // formulaire
@@ -804,8 +804,8 @@ class ProjetController extends Controller
      */
     public function resumesAction($annee)
     {
-		$sp    = $this->get('app.gramc.ServiceProjets');
-		$sj    = $this->get('app.gramc.ServiceJournal');
+		$sp    = $this->get('App\GramcServices\ServiceProjets');
+		$sj    = $this->get('App\GramcServices\ServiceJournal');
 		
         $paa   = $sp->projetsParAnnee($annee);
         $prjs  = $paa[0];
@@ -877,15 +877,15 @@ class ProjetController extends Controller
 
     public function anneeAction(Request $request)
     {
-		$sd = $this->get('app.gramc.date');
-		$ss = $this->get('app.gramc.ServiceSessions');
+		$sd = $this->get('App\GramcServices\GramcDate');
+		$ss = $this->get('App\GramcServices\ServiceSessions');
         $data  = $ss->selectAnnee($request); // formulaire
         $annee = $data['annee'];
 
         $isRecupPrintemps = $sd->isRecupPrintemps($annee);
         $isRecupAutomne   = $sd->isRecupAutomne($annee);
 
-		$sp      = $this->get('app.gramc.ServiceProjets');
+		$sp      = $this->get('App\GramcServices\ServiceProjets');
         $paa     = $sp->projetsParAnnee($annee,$isRecupPrintemps, $isRecupAutomne);
         $projets = $paa[0];
         $total   = $paa[1];
@@ -928,8 +928,8 @@ class ProjetController extends Controller
 
     public function donneesAction(Request $request)
     {
-		$ss    = $this->get('app.gramc.ServiceSessions');
-		$sp    = $this->get('app.gramc.ServiceProjets');
+		$ss    = $this->get('App\GramcServices\ServiceSessions');
+		$sp    = $this->get('App\GramcServices\ServiceProjets');
         $data  = $ss->selectAnnee($request); // formulaire
         $annee = $data['annee'];
 
@@ -952,7 +952,7 @@ class ProjetController extends Controller
      */
     public function donneesCSVAction($annee)
     {
-		$sp                  = $this->get('app.gramc.ServiceProjets');
+		$sp                  = $this->get('App\GramcServices\ServiceProjets');
 		list($projets,$total)= $sp->donneesParProjet($annee);
 
         $header  = [
@@ -1033,7 +1033,7 @@ class ProjetController extends Controller
      */
     public function anneeCSVAction($annee)
     {
-		$sp      = $this->get('app.gramc.ServiceProjets');
+		$sp      = $this->get('App\GramcServices\ServiceProjets');
         $paa     = $sp->projetsParAnnee($annee);
         $projets = $paa[0];
         $total   = $paa[1];
@@ -1100,8 +1100,8 @@ class ProjetController extends Controller
      */
     public function rapportAction(Version $version, Request $request, $annee )
     {
-		$sp = $this->get('app.gramc.ServiceProjets');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sp = $this->get('App\GramcServices\ServiceProjets');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		
         if( ! $sp->projetACL( $version->getProjet() ) )
             $sj->throwException(__METHOD__ . ':' . __LINE__ .' problème avec ACL');
@@ -1136,7 +1136,7 @@ class ProjetController extends Controller
      */
     public function signatureAction(Version $version, Request $request)
     {
-        $sv = $this->get('app.gramc.ServiceVersions');
+        $sv = $this->get('App\GramcServices\ServiceVersions');
 	    return Functions::pdf( $sv->getSigne($version) );
     }
 
@@ -1151,7 +1151,7 @@ class ProjetController extends Controller
     {
 		$em      = $this->getDoctrine()->getManager();
         $projets = $em->getRepository(Projet::class)->findAll();
-        $sp      = $this->get('app.gramc.ServiceProjets');
+        $sp      = $this->get('App\GramcServices\ServiceProjets');
 
 		foreach (['termine','standby','accepte','refuse','edition','expertise','nonrenouvele'] as $e)
 		{
@@ -1255,8 +1255,8 @@ class ProjetController extends Controller
      */
     public function avantNouveauAction(Request $request,$type)
     {
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sm = $this->get('App\GramcServices\ServiceMenus');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$token = $this->get('security.token_storage')->getToken();
 
         if( $sm->nouveau_projet($type)['ok'] == false )
@@ -1284,13 +1284,13 @@ class ProjetController extends Controller
      */
     public function nouveauAction(Request $request, $type)
     {
-		$sd = $this->get('app.gramc.date');
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$ss = $this->get('app.gramc.ServiceSessions');
+		$sd = $this->get('App\GramcServices\GramcDate');
+		$sm = $this->get('App\GramcServices\ServiceMenus');
+		$ss = $this->get('App\GramcServices\ServiceSessions');
 		$sss= $this->get('session');
-		$sp = $this->get('app.gramc.ServiceProjets');
-		$sv = $this->get('app.gramc.ServiceVersions');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sp = $this->get('App\GramcServices\ServiceProjets');
+		$sv = $this->get('App\GramcServices\ServiceVersions');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$token = $this->get('security.token_storage')->getToken();
 		$em = $this->getDoctrine()->getManager();
 		
@@ -1378,8 +1378,8 @@ class ProjetController extends Controller
 
     public function consoAction(Projet $projet, $loginname = null, $annee = null)
     {
-		$sp = $this->get('app.gramc.ServiceProjets');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sp = $this->get('App\GramcServices\ServiceProjets');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 
 
         // Seuls les collaborateurs du projet ont accès à la consommation
@@ -1420,11 +1420,11 @@ class ProjetController extends Controller
     public function consoRessourceAction(Projet $projet, $utype, $ress_id, $loginname, $annee)
     {
 		$em = $this->getDoctrine()->getManager();
-		$sp = $this->get('app.gramc.ServiceProjets');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sp = $this->get('App\GramcServices\ServiceProjets');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 
 
-		$dessin_heures = $this -> get('app.gramc.graf_calcul');
+		$dessin_heures = $this -> get('App\GramcServices\GramcGraf\Calcul');
 		$compta_repo   = $em->getRepository(Compta::class);
 		$id_projet     = strtolower($projet->getIdProjet());
 
@@ -1487,7 +1487,7 @@ class ProjetController extends Controller
 		elseif ($ressource['type'] == 'stockage')
 		{
 			$db_work     = $compta_repo->consoStockage( $conso_loginname, $ressource, $annee, $ntype );
-			$dessin_work = $this -> get('app.gramc.graf_stockage');
+			$dessin_work = $this -> get('App\GramcServices\GramcGraf\Stockage');
 	        $struct_data = $dessin_work->createStructuredData($debut,$fin,$db_work,$ressource['unite']);
 	        $image_conso = $dessin_work->createImage($struct_data, $ressource)[0];
 		}
@@ -1525,7 +1525,7 @@ class ProjetController extends Controller
 		$debut = new \DateTime( $annee . '-01-01');
 		$fin   = new \DateTime( $annee . '-12-31');
 
-        $dessin_heures = $this->get('app.gramc.graf_calcultous');
+        $dessin_heures = $this->get('App\GramcServices\GramcGraf\Calcultous');
 
         if ($mois == true)
         {
@@ -1556,9 +1556,9 @@ class ProjetController extends Controller
      */
     public function accueilAction()
     {
-		$sm                  = $this->get('app.gramc.ServiceMenus');
-		$ss                  = $this->get('app.gramc.ServiceSessions');
-		$sp					 = $this->get('app.gramc.ServiceProjets');
+		$sm                  = $this->get('App\GramcServices\ServiceMenus');
+		$ss                  = $this->get('App\GramcServices\ServiceSessions');
+		$sp					 = $this->get('App\GramcServices\ServiceProjets');
 		$token               = $this->get('security.token_storage')->getToken();
 		$em                  = $this->getDoctrine()->getManager();
 	    $individu            = $token->getUser();
@@ -1735,8 +1735,8 @@ class ProjetController extends Controller
     public function consulterAction(Projet $projet, Version $version = null,  Request $request)
     {
 		$em = $this->getDoctrine()->getManager();
-		$sp = $this->get('app.gramc.ServiceProjets');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sp = $this->get('App\GramcServices\ServiceProjets');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$coll_vers_repo= $em->getRepository(CollaborateurVersion::class);
 		$token = $this->get('security.token_storage')->getToken();
 
@@ -1790,11 +1790,11 @@ class ProjetController extends Controller
 	// Consulter les projets de type 1 (projets PROJET_SESS)
     private function consulterType1(Projet $projet, Version $version, $loginname, Request $request)
     {
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$sp = $this->get('app.gramc.ServiceProjets');
+		$sm = $this->get('App\GramcServices\ServiceMenus');
+		$sp = $this->get('App\GramcServices\ServiceProjets');
 		$ac = $this->get('security.authorization_checker');
-		$sv = $this->get('app.gramc.ServiceVersions');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sv = $this->get('App\GramcServices\ServiceVersions');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$ff = $this->get('form.factory');
 
 
@@ -1899,8 +1899,8 @@ class ProjetController extends Controller
 	// Consulter les projets de type 2 (projets test)
 	private function consulterType2 (Projet $projet, Version $version, $loginname, Request $request)
 	{
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$sp = $this->get('app.gramc.ServiceProjets');
+		$sm = $this->get('App\GramcServices\ServiceMenus');
+		$sp = $this->get('App\GramcServices\ServiceProjets');
 		$ac = $this->get('security.authorization_checker');
 
         if( $ac->isGranted('ROLE_ADMIN'))
@@ -1925,10 +1925,10 @@ class ProjetController extends Controller
 	// Consulter les projets de type 3 (projets PROJET_FIL)
     private function consulterType3(Projet $projet, Version $version, $loginname, Request $request)
     {
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$sv = $this->get('app.gramc.ServiceVersions');
-		$sp = $this->get('app.gramc.ServiceProjets');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sm = $this->get('App\GramcServices\ServiceMenus');
+		$sv = $this->get('App\GramcServices\ServiceVersions');
+		$sp = $this->get('App\GramcServices\ServiceProjets');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 		$ac = $this->get('security.authorization_checker');
 		$ff = $this->get('form.factory');
 

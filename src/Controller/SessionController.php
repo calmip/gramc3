@@ -83,8 +83,8 @@ class SessionController extends Controller
      */
     public function gererAction()
     {
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sm = $this->get('App\GramcServices\ServiceMenus');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 
 	    if( $sm->gerer_sessions()['ok'] == false )
 	        $sj->throwException(__METHOD__ . ':' . __LINE__ . " Ecran interdit " . 
@@ -132,8 +132,8 @@ class SessionController extends Controller
      */
     public function ajouterAction(Request $request)
     {
-		$sd = $this->get('app.gramc.date');
-		$ss = $this->get('app.gramc.ServiceSessions');
+		$sd = $this->get('App\GramcServices\GramcDate');
+		$ss = $this->get('App\GramcServices\ServiceSessions');
 		$em = $this->getDoctrine()->getManager();
         $info = static::prochain_session_info($sd);
         $session = $em->getRepository(Session::class)->find($info['id']);
@@ -170,9 +170,9 @@ class SessionController extends Controller
      */
     public function modifyAction(Request $request, Session $session)
     {
-		$sd = $this->get('app.gramc.date');
+		$sd = $this->get('App\GramcServices\GramcDate');
 		$em = $this->getDoctrine()->getManager();
-		//$ss = $this->get('app.gramc.ServiceSessions');
+		//$ss = $this->get('App\GramcServices\ServiceSessions');
         //$ss->clearCache();
 		//App::getSession()->remove('SessionCourante');
         $this->get('session')->remove('SessionCourante');
@@ -212,14 +212,14 @@ class SessionController extends Controller
      */
     public function terminerSaisieAction(Request $request)
     {
-		$ss = $this->get('app.gramc.ServiceSessions');
+		$ss = $this->get('App\GramcServices\ServiceSessions');
 		$em = $this->getDoctrine()->getManager();
 		
         //App::getSession()->remove('SessionCourante'); // remove cache
 		$this->get('session')->remove('SessionCourante');
 
         $session_courante = $ss->getSessionCourante();
-        $workflow = $this->get('app.gramc.SessionWorkflow');
+        $workflow = $this->get('App\GramcServices\Workflow\Session\SessionWorkflow');
 
         if( $workflow->canExecute( Signal::DAT_FIN_DEM, $session_courante) )
 		{
@@ -243,8 +243,8 @@ class SessionController extends Controller
      */
     public function avantActiverAction($rtn,$ctrl)
     {
-		$ss         = $this->get('app.gramc.ServiceSessions');
-		$sj         = $this->get('app.gramc.ServiceJournal');
+		$ss         = $this->get('App\GramcServices\ServiceSessions');
+		$sj         = $this->get('App\GramcServices\ServiceJournal');
 		$em         = $this->getDoctrine()->getManager();
 
 		$session    = $ss->getSessionCourante();
@@ -267,9 +267,9 @@ class SessionController extends Controller
     public function activerAction(Request $request)
     {
 		$em = $this->getDoctrine()->getManager();
-		$sd = $this->get('app.gramc.date');
-		$ss = $this->get('app.gramc.ServiceSessions');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sd = $this->get('App\GramcServices\GramcDate');
+		$ss = $this->get('App\GramcServices\ServiceSessions');
+		$sj = $this->get('App\GramcServices\ServiceJournal');
 
 		// Suppression du cache, du coup toutes les personnes connectées seront virées
         //App::getSession()->remove('SessionCourante'); // remove cache
@@ -283,7 +283,7 @@ class SessionController extends Controller
 		$ok = false;
         $mois = $sd->format('m');
 
-        $workflow = $this->get('app.gramc.SessionWorkflow');
+        $workflow = $this->get('App\GramcServices\Workflow\Session\SessionWorkflow');
         
         // On active une session A
         if( $mois == 1 ||  $mois == 12 )
@@ -340,12 +340,12 @@ class SessionController extends Controller
      */
     public function envoyerExpertisesAction(Request $request)
     {
-		$ss = $this->get('app.gramc.ServiceSessions');
+		$ss = $this->get('App\GramcServices\ServiceSessions');
 		$em = $this->getDoctrine()->getManager();
 		
         $this->get('session')->remove('SessionCourante');
         $session_courante = $ss->getSessionCourante();
-        $workflow = $this->get('app.gramc.SessionWorkflow');
+        $workflow = $this->get('App\GramcServices\Workflow\Session\SessionWorkflow');
 
         if( $workflow->canExecute( Signal::CLK_ATTR_PRS, $session_courante) )
 		{
@@ -369,7 +369,7 @@ class SessionController extends Controller
      */
     public function demarrerSaisieAction(Request $request)
     {
-		$ss = $this->get('app.gramc.ServiceSessions');
+		$ss = $this->get('App\GramcServices\ServiceSessions');
 		$em = $this->getDoctrine()->getManager();
 		
         //App::getSession()->remove('SessionCourante'); // remove cache
@@ -377,7 +377,7 @@ class SessionController extends Controller
 
         $session_courante       = $ss->getSessionCourante();
         //return new Response( $session_courante->getIdSession() );
-        $workflow = $this->get('app.gramc.SessionWorkflow');
+        $workflow = $this->get('App\GramcServices\Workflow\Session\SessionWorkflow');
 
         if( $workflow->canExecute( Signal::DAT_DEB_DEM, $session_courante) )
 		{
@@ -443,7 +443,7 @@ class SessionController extends Controller
      */
     public function consulterAction(Session $session)
     {
-		$sm = $this->get('app.gramc.ServiceMenus');
+		$sm = $this->get('App\GramcServices\ServiceMenus');
         $menu = [ $sm->gerer_sessions() ];
 
         return $this->render('session/consulter.html.twig', array(
@@ -485,15 +485,15 @@ class SessionController extends Controller
      */
     public function commentairesAction(Request $request)
     {
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$ss = $this->get('app.gramc.ServiceSessions');
+		$sm = $this->get('App\GramcServices\ServiceMenus');
+		$ss = $this->get('App\GramcServices\ServiceSessions');
 
         //App::getSession()->remove('SessionCourante'); // remove cache
         $this->get('session')->remove('SessionCourante');
 
         $session_courante      = $ss->getSessionCourante();
         $etat_session_courante = $session_courante->getEtatSession();
-        $workflow              = $this->get('app.gramc.SessionWorkflow');
+        $workflow              = $this->get('App\GramcServices\Workflow\Session\SessionWorkflow');
 
         $editForm = $this->createForm('App\Form\SessionType', $session_courante, [ 'commentaire' => true ] );
         $editForm->handleRequest($request);
@@ -582,8 +582,8 @@ class SessionController extends Controller
     public function bilanAction(Request $request)
     {
 		$em      = $this->getDoctrine()->getManager();
-		$ss      = $this->get('app.gramc.ServiceSessions');
-		$sp      = $this->get('app.gramc.ServiceProjets');
+		$ss      = $this->get('App\GramcServices\ServiceSessions');
+		$sp      = $this->get('App\GramcServices\ServiceProjets');
 		$session = $ss->getSessionCourante();
         $data    = $ss->selectSession($this->createFormBuilder(['session'=>$session]),$request); // formulaire
         $session = $data['session']!=null?$data['session']:$session;
@@ -612,7 +612,7 @@ class SessionController extends Controller
      */
     public function bilanAnnuelAction(Request $request)
     {
-		$ss   = $this->get('app.gramc.ServiceSessions');
+		$ss   = $this->get('App\GramcServices\ServiceSessions');
         $data = $ss->selectAnnee($request);
 		$avec_commentaires = $this->container->hasParameter('commentaires_experts_d');
         return $this->render('session/bilanannuel.html.twig',
@@ -638,7 +638,7 @@ class SessionController extends Controller
      */
     public function questionnaireCsvAction(Request $request,Session $session)
     {
-		$sp = $this->get('app.gramc.ServiceProjets');
+		$sp = $this->get('App\GramcServices\ServiceProjets');
 		$em = $this->getDoctrine()->getManager();
 		
 	    $entetes =  [
@@ -720,8 +720,8 @@ class SessionController extends Controller
      */
     public function bilanAnnuelCsvAction(Request $request, $annee)
     {
-		$sd      = $this->get('app.gramc.date');
-		$sp      = $this->get('app.gramc.ServiceProjets');
+		$sd      = $this->get('App\GramcServices\GramcDate');
+		$sp      = $this->get('App\GramcServices\ServiceProjets');
 		$em = $this->getDoctrine()->getManager();
 		
         $entetes = ['Projet','Thématique','Titre','Responsable','Quota'];
@@ -846,7 +846,7 @@ class SessionController extends Controller
         $entetes = ['Laboratoire','Nombre de projets','Heures demandées','Heures attribuées','Heure consommées','projets'];
         $sortie  = join("\t",$entetes) . "\n";
 
-		$sp            = $this->get('app.gramc.ServiceProjets');
+		$sp            = $this->get('App\GramcServices\ServiceProjets');
         $stats         = $sp->projetsParCritere($annee, 'getAcroLaboratoire');
 		$acros         = $stats[0];
 		$num_projets   = $stats[1];
@@ -881,9 +881,9 @@ class SessionController extends Controller
     public function bilanCsvAction(Request $request,Session $session)
     {
 		$em                 = $this->getDoctrine()->getManager();
-		$ss                 = $this->get('app.gramc.ServiceSessions');
-		$grdt               = $this->get('app.gramc.date');
-		$sp                 = $this->get('app.gramc.ServiceProjets');
+		$ss                 = $this->get('App\GramcServices\ServiceSessions');
+		$grdt               = $this->get('App\GramcServices\GramcDate');
+		$sp                 = $this->get('App\GramcServices\ServiceProjets');
 		$ressources_conso_group = $this->getParameter('ressources_conso_group');
         $type_session       = $session->getLibelleTypeSession(); // A ou B
         $id_session         = $session->getIdSession();

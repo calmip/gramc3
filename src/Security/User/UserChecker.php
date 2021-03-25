@@ -32,14 +32,15 @@ use Symfony\Component\Security\Core\Exception\DisabledException;
 use Symfony\Component\Security\Core\Exception\LockedException;
 use Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundException;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
-
-use Symfony\Component\Security\Core\Authentication\Token\Storage\UsageTrackingTokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 use App\Exception\UserException;
 use Symfony\Component\HttpFoundation\Request;
 
+use Doctrine\ORM\EntityManagerInterface;
 
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Core\User\UserCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -50,11 +51,11 @@ use App\GramcServices\ServiceJournal;
 
 class UserChecker implements UserCheckerInterface
 {
-	public function __construct(\Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface $secu_auto_chk,
+	public function __construct(AuthorizationCheckerInterface $secu_auto_chk,
 								TokenStorageInterface $token,
-								\Symfony\Component\HttpFoundation\Session\SessionInterface $sess,
+								SessionInterface $sess,
 								ServiceJournal $sj,
-								\Doctrine\ORM\EntityManagerInterface $em)
+								EntityManagerInterface $em)
 	{
 		$this->secu_auto_chk = $secu_auto_chk;
 		$this->token         = $token->getToken();
