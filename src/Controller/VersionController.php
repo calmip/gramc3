@@ -33,11 +33,16 @@ use App\Entity\CollaborateurVersion;
 use App\Entity\RapportActivite;
 use App\Entity\Expertise;
 
-use App\PropositionExperts\PropositionExperts;
-use App\PropositionExperts\PropositionExpertsType1;
-use App\PropositionExperts\PropositionExpertsType2;
-
 use App\GramcServices\Workflow\Projet\ProjetWorkflow;
+use App\GramcServices\ServiceMenus;
+use App\GramcServices\ServiceJournal;
+use App\GramcServices\ServiceNotifications;
+use App\GramcServices\ServiceProjets;
+use App\GramcServices\ServiceSessions;
+use App\GramcServices\ServiceVersions;
+use App\GramcServices\PropositionExperts\PropositionExpertsType1;
+use App\GramcServices\PropositionExperts\PropositionExpertsType2;
+use App\GramcServices\GramcDate;
 
 use Psr\Log\LoggerInterface;
 
@@ -51,11 +56,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\File\File;
 
-//use App\App;
 use App\Utils\Functions;
 use App\Utils\Etat;
 use App\Utils\Signal;
-//use App\Utils\GramcDate;
 use App\Utils\IndividuForm;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -69,10 +72,14 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-
+use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Form\IndividuFormType;
 use App\Validator\Constraints\PagesNumber;
 
+use Knp\Snappy\Pdf;
 
 /**
  * Version controller.
@@ -81,6 +88,56 @@ use App\Validator\Constraints\PagesNumber;
  */
 class VersionController extends Controller
 {
+	private $sn;
+	private $sj;
+	private $sm;
+	private $sp;
+	private $ss;
+	private $pe1;
+	private $pe2;
+	private $sd;
+	private $sv;
+	private $pw;
+	private $ff;
+	private $vl;
+	private $tok;
+	private $sss;
+	private $pdf;
+	
+	
+	public function __construct (ServiceNotifications $sn,
+								 ServiceJournal $sj,
+								 ServiceMenus $sm,
+								 ServiceProjets $sp,
+								 ServiceSessions $ss,
+								 PropositionExpertsType1 $pe1,
+								 PropositionExpertsType2 $pe2,
+								 GramcDate $sd,
+								 ServiceVersions $sv,
+								 ProjetWorkflow $pw,
+								 FormFactoryInterface $ff,
+								 ValidatorInterface $vl,
+								 TokenStorageInterface $tok,
+								 SessionInterface $sss,
+								 Pdf $pdf
+								 )
+	{
+		$this->sn  = $sn;
+		$this->sj  = $sj;
+		$this->sm  = $sm;
+		$this->sp  = $sp;
+		$this->ss  = $ss;
+		$this->pe1 = $pe1;
+		$this->pe2 = $pe2;
+		$this->sd  = $sd;
+		$this->sv  = $sv;
+		$this->ff  = $ff;
+		$this->vl  = $vl;
+		$this->tok = $tok;
+		$this->sss = $sss;
+		$this->pdf = $pdf;
+	}
+	
     /**
      * Lists all version entities.
      *
@@ -136,8 +193,8 @@ class VersionController extends Controller
      */
     public function avantSupprimerAction(Version $version, $rtn)
     {
-		$sm = $this->get('App\GramcServices\ServiceMenus');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
+		$sm = $this->sm;
+		$sj = $this->$sj;
 
 	    // ACL
 	    if( $sm->modifier_version($version)['ok'] == false )
@@ -164,9 +221,8 @@ class VersionController extends Controller
     public function supprimerAction(Version $version, $rtn )
     {
 	    $em = $this->getDoctrine()->getManager();
-		$sm = $this->get('App\GramcServices\ServiceMenus');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
-		//$sp = $this->get('App\GramcServices\ServiceProjets');
+		$sm = $this->sm;
+		$sj = $this->sj;
 
 	    // ACL
 	    if( $sm->modifier_version($version)['ok'] == false )
@@ -259,10 +315,10 @@ class VersionController extends Controller
      */
     public function pdfAction(Version $version, Request $request)
     {
-		$sv = $this->get('App\GramcServices\ServiceVersions');
-		$sp = $this->get('App\GramcServices\ServiceProjets');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
-		$spdf = $this->get('knp_snappy.pdf');
+		$sv = $this->sv;
+		$sp = $this->sp;
+		$sj = $this->sj;
+		$spdf = $this->pdf;
 
 	    $projet = $version->getProjet();
 	    if( ! $sp->projetACL( $projet ) )
@@ -315,9 +371,9 @@ class VersionController extends Controller
      */
     public function fichePdfAction(Version $version, Request $request)
     {
-		$sm     = $this->get('App\GramcServices\ServiceMenus');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
-		$spdf = $this->get('knp_snappy.pdf');
+		$sm   = $this->sm;
+		$sj   = $this->sj;
+		$spdf = $this->pdf;
 
 	    $projet =  $version->getProjet();
 	
@@ -357,8 +413,8 @@ class VersionController extends Controller
     public function televersementFicheAction(Request $request, Version $version)
     {
 		$em = $this->getDoctrine()->getManager();
-		$sm = $this->get('App\GramcServices\ServiceMenus');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
+		$sm = $this->sm;
+		$sj = $this->sj;
 
 	    // ACL
 	    if( $sm->televersement_fiche($version)['ok'] == false )
@@ -374,16 +430,15 @@ class VersionController extends Controller
 	                'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
 	                ]);
 	
-	     $form = $this
-	           ->get('form.factory')
-	           ->createNamedBuilder( 'upload', FormType::class, [], ['csrf_protection' => false ] )
-	           ->add('file', FileType::class,
-	                [
-	                'required'          =>  true,
-	                'label'             => "",
-	                'constraints'       => [$format_fichier , new PagesNumber() ]
-	                ])
-	           ->getForm();
+	     $form = $this->ff
+		           ->createNamedBuilder( 'upload', FormType::class, [], ['csrf_protection' => false ] )
+		           ->add('file', FileType::class,
+		                [
+		                'required'          =>  true,
+		                'label'             => "",
+		                'constraints'       => [$format_fichier , new PagesNumber() ]
+		                ])
+		           ->getForm();
 	
 	    $erreurs  = [];
 	    $resultat = [];
@@ -398,7 +453,7 @@ class VersionController extends Controller
             $tempFilename = $data['file'];
             if( ! empty( $tempFilename  ) && $tempFilename != "" )
 			{
-			$validator  = $this->get('validator');
+			$validator  = $this->vl;
 			$violations = $validator->validate( $tempFilename, [ $format_fichier, new PagesNumber() ] );
 			foreach( $violations as $violation )    $erreurs[]  =   $violation->getMessage();
 			}
@@ -533,13 +588,13 @@ class VersionController extends Controller
      */
     public function changerResponsableAction(Version $version, Request $request)
     {
-		$sm = $this->get('App\GramcServices\ServiceMenus');
-		$sn = $this->get('App\GramcServices\ServiceNotifications');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
-		$sv = $this->get('App\GramcServices\ServiceVersions');
-		$ff = $this->get('form.factory');
-		$sss= $this->get('session');
-		$token = $this->get('security.token_storage')->getToken();
+		$sm = $this->sm;
+		$sn = $this->sn;
+		$sj = $this->sj;
+		$sv = $this->sv;
+		$ff = $this->ff;
+		$sss= $this->sss;
+		$token = $this->tok->getToken();
 
 		// Si changement d'état de la session alors que je suis connecté !
 		$sss->remove('SessionCourante'); // remove cache
@@ -680,8 +735,8 @@ class VersionController extends Controller
      */
     public function avant_modifierAction(Request $request, Version $version )
     {
-		$sm = $this->get('App\GramcServices\ServiceMenus');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
+		$sm = $this->sm;
+		$sj = $this->sj;
 
 
 	    // ACL
@@ -704,7 +759,7 @@ class VersionController extends Controller
 
     private function MenuACL( $menu, $message = "", $method = "", $line = "")
     {
-		$sj = $this->get('App\GramcServices\ServiceJournal');
+		$sj = $this->sj;
 
 	    if( $menu['ok'] == false )
         {
@@ -731,9 +786,9 @@ class VersionController extends Controller
      */
     public function avantEnvoyerAction(Version $version,  Request $request, LoggerInterface $lg)
     {
-		$sm = $this->get('App\GramcServices\ServiceMenus');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
-		$ff = $this->get('form.factory');
+		$sm = $this->sm;
+		$sj = $this->sj;
+		$ff = $this->ff;
 		$em = $this->getdoctrine()->getManager();
 
 	    $this->MenuACL( $sm->envoyer_expert($version), "Impossible d'envoyer la version " . $version->getIdVersion() . " à l'expert", __METHOD__, __LINE__ );
@@ -792,8 +847,8 @@ class VersionController extends Controller
      */
     public function envoyerAction(Version $version,  Request $request, LoggerInterface $lg)
     {
-		$sm = $this->get('App\GramcServices\ServiceMenus');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
+		$sm = $this->sm;
+		$sj = $this->sj;
 		$em = $this->getdoctrine()->getManager();
 
 		$this->MenuACL( $sm->envoyer_expert($version), " Impossible d'envoyer la version " . $version->getIdVersion() . " à l'expert", __METHOD__, __LINE__ );
@@ -820,11 +875,11 @@ class VersionController extends Controller
 		    // Attention, l'algorithme de proposition des experts dépend du type de projet
 		    if ($projet -> getTypeProjet() == Projet::PROJET_TEST || $projet->getTypeProjet() == Projet::PROJET_FIL)
 			{
-				$prop_expert = $this->get('App\GramcServices\PropositionExperts\PropositionExpertsType2');
+				$prop_expert = $this->pe2;
 			}
 			else
 			{
-				$prop_expert = $this->get('App\GramcServices\PropositionExperts\PropositionExpertsType1');
+				$prop_expert = $this->pe1;
 			}
 		    //$prop_expert = PropositionExperts::factory($em,$version);
 		    $expert      = $prop_expert->getProposition($version);
@@ -835,7 +890,7 @@ class VersionController extends Controller
 		    Functions::sauvegarder( $expertise, $em, $lg );
         }
 
-		$projetWorkflow = $this->get('App\GramcServices\Workflow\Projet\ProjetWorkflow');
+		$projetWorkflow = $this->pw;
 		$rtn = $projetWorkflow->execute( Signal::CLK_VAL_DEM, $projet );
 	
 		//$sj->debugMessage(__METHOD__ .  ":" . __LINE__ . " Le projet " . $projet . " est dans l'état " . Etat::getLibelle( $projet->getObjectState() )
@@ -860,10 +915,10 @@ class VersionController extends Controller
     public function televersementGeneriqueAction(Request $request)
     {
 		$em = $this->getDoctrine()->getManager();
-		$sd = $this->get('App\GramcServices\GramcDate');
-		$ss = $this->get('App\GramcServices\ServiceSessions');
-		$sp = $this->get('App\GramcServices\ServiceProjets');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
+		$sd = $this->sd;
+		$ss = $this->ss;
+		$sp = $this->sp;
+		$sj = $this->sj;
 
 	    $format_fichier = new \Symfony\Component\Validator\Constraints\File(
 		[
@@ -878,7 +933,7 @@ class VersionController extends Controller
 		$def_sess  = $ss->getSessionCourante()->getIdSession();
 
         $form = $this
-		   ->get('form.factory')
+		   ->ff
 		   ->createNamedBuilder( 'upload', FormType::class, [], ['csrf_protection' => false ] )
 		   ->add('projet',  TextType::class, [ 'label'=> "", 'required' => false, 'attr' => ['placeholder' => 'P12345']] )
 		   ->add('session', TextType::class, [ 'label'=> "", 'required' => false, 'attr' => ['placeholder' => $def_sess]] )
@@ -937,7 +992,7 @@ class VersionController extends Controller
 	            $tempFilename = $data['file'];
 	            if( ! empty( $tempFilename  ) && $tempFilename != "" )
                 {
-	                $validator = $this->get('validator');
+	                $validator = $this->vl;
 	                $violations = $validator->validate( $tempFilename, [ $format_fichier, new PagesNumber() ] );
 	                foreach( $violations as $violation )    $erreurs[]  =   $violation->getMessage();
                 }
@@ -999,8 +1054,7 @@ class VersionController extends Controller
 			}
 		}
 
-	    $form1 = $this
-			->get('form.factory')
+	    $form1 = $this->ff
 			->createBuilder()
 			->add('version', TextType::class, [
 					'label' => "Numéro de version",'required' => true, 'attr' => ['placeholder' => $def_sess.'P12345']])
@@ -1091,8 +1145,8 @@ class VersionController extends Controller
      */
     public function televerserRapportPrecedentAction(Version $version, Request $request)
     {
-		$sm = $this->get('App\GramcServices\ServiceMenus');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
+		$sm = $this->sm;
+		$sj = $this->sj;
 
 	    // ACL
 	    //$sj->debugMessage(__METHOD__ . ':' . __LINE__ . " form data = " . Functions::show( $request->request->get('rapport') ) );
@@ -1115,8 +1169,8 @@ class VersionController extends Controller
      */
     public function televerserRapportAction(Version $version, Request $request, $annee )
     {
-		$sm = $this->get('App\GramcServices\ServiceMenus');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
+		$sm = $this->sm;
+		$sj = $this->sj;
 
 	    // ACL
 	    if( $sm->televerser_rapport_annee($version)['ok'] == false )
@@ -1159,7 +1213,7 @@ class VersionController extends Controller
     private function handleRapport(Request $request, Version $version, $annee = null )
     {
         $em = $this->getDoctrine()->getManager();
-		$sj = $this->get('App\GramcServices\ServiceJournal');
+		$sj = $this->sj;
 
 		$format_fichier = new \Symfony\Component\Validator\Constraints\File(
 			[
@@ -1170,8 +1224,7 @@ class VersionController extends Controller
 			'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
 			]);
 
-		$form = $this
-			->get('form.factory')
+		$form = $this->ff
 			->createNamedBuilder( 'rapport', FormType::class, [], ['csrf_protection' => false ] )
 			->add('rapport', FileType::class,
 				[
