@@ -20,6 +20,9 @@ Sur DEBIAN buster:
 - apt-get install apache2 libapache2-mod-php php-intl php-cli php-common php-intl php-json php-opcache php-readline php-xml  php7.4-mysql php7.4-gd
 - apt-get install mariadb-client mariadb-server
 - apt-get install imagemagick zip unzip
+
+Pour convertir des pages html en pdf:
+- apt-get install xfonts-75dpi xfonts-base xfonts-utils x11-common libfontenc1 xfonts-encodings
 - Installer `wkhtmltopd` depuis https://wkhtmltopdf.org (disponible en .deb)
 ~~~~
 
