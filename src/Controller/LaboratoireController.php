@@ -30,9 +30,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
-
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\HttpFoundation\Request;
-//use App\App;
 
 /**
  * Laboratoire controller.
@@ -41,6 +40,14 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class LaboratoireController extends Controller
 {
+	
+	private $ac;
+		
+	public function __construct (AuthorizationCheckerInterface $ac)
+	{
+		$this->ac  = $ac;
+	}
+
     /**
      * Lists all laboratoire entities.
      *
@@ -63,7 +70,7 @@ class LaboratoireController extends Controller
      */
     public function gererAction()
 	{
-		$ac = $this->get('security.authorization_checker');
+		$ac = $this->ac;
 		$em = $this->getDoctrine()->getManager();
 		
 		// Si on n'est pas admin on n'a pas accès au menu

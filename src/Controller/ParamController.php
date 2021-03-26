@@ -38,8 +38,7 @@ use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
-
-//use App\App;
+use Symfony\Component\Form\FormFactoryInterface;
 
 /**
  * Param controller.
@@ -48,6 +47,13 @@ use Symfony\Component\Form\Extension\Core\Type\DateType;
  */
 class ParamController extends Controller
 {
+	private $ff;
+	
+	public function __construct (FormFactoryInterface $ff)
+	{
+		$this->ff  = $ff;
+	}
+	
     /**
      * Lists all param entities.
      *
@@ -140,8 +146,8 @@ class ParamController extends Controller
      */
     public function avancerAction(Request $request)
     {
-		$em  = $this->getDoctrine()->getManager();
-		$ff = $this->get('form.factory');
+		$em = $this->getDoctrine()->getManager();
+		$ff = $this->ff;
  
         $now = $em->getRepository(Param::class)->findOneBy(['cle' => 'now']);
         if( $now == null )

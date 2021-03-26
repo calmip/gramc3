@@ -37,6 +37,12 @@ use App\Entity\Projet;
 use App\Entity\Version;
 use App\Entity\Individu;
 
+use App\GramcServices\ServiceMenus;
+use App\GramcServices\ServiceJournal;
+use App\GramcServices\ServiceNotifications;
+use App\GramcServices\ServiceProjets;
+use App\GramcServices\ServiceSessions;
+
 use App\Utils\Functions;
 
 use libphonenumber\PhoneNumberUtil;
@@ -44,11 +50,35 @@ use libphonenumber\NumberParseException;
 
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormFactoryInterface;
 
 use JpGraph\JpGraph;
 
 class DefaultController extends Controller
 {
+	private $sn;
+	private $sj;
+	private $sm;
+	private $sp;
+	private $ss;
+	private $ff;
+	
+	public function __construct (ServiceNotifications $sn,
+								 ServiceJournal $sj,
+								 ServiceMenus $sm,
+								 ServiceProjets $sp,
+								 ServiceSessions $ss,
+								 FormFactoryInterface $ff
+								 )
+	{
+		$this->sn = $sn;
+		$this->sj = $sj;
+		$this->sm = $sm;
+		$this->sp = $sp;
+		$this->ss = $ss;
+		$this->ff = $ff;
+	}
+
    /**
      * @Route("/test", name="test")
      * @Security("is_granted('ROLE_ADMIN')")
@@ -62,10 +92,6 @@ class DefaultController extends Controller
     //return new Response( $projet->derniereVersion()->getSession() );
     //return new Response( $projet->calculDerniereVersion()->getSession() );
     //return new Response( $projet->getVersionDerniere()->getSession() );
-
-
-
-
 
     $query = $em->createQuery('SELECT partial u.{idIndividu,nom} AS individu, partial s.{eppn} AS sso, count(s) AS score FROM App\Entity\Individu u JOIN u.sso s GROUP BY u');
     $result = $query->getResult();
@@ -90,7 +116,7 @@ class DefaultController extends Controller
      */
     public function twigAction(Request $request)
     {
-		$sn = $this->get('App\GramcServices\ServiceNotifications');
+		$sn = $this->sn;
 		$em = $this->getDoctrine()->getManager();
 		
 	    $users    = [ 'a@x', 'b@x' ];
@@ -128,8 +154,8 @@ class DefaultController extends Controller
     public function countAction(Request $request)
     {
 		
-		$sp = $this->get('App\GramcServices\ServiceProjets');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
+		$sp = $this->sp;
+		$sj = $this->sj;
 		$em = $this->getDoctrine()->getManager();
 		
         $projets = $em->getRepository(Projet::class)->heuresProjetsAnnee($annee, Functions::TOUS);
@@ -172,7 +198,7 @@ class DefaultController extends Controller
      */
     public function test_sessionAction(Request $request)
     {
-		$ss = $this->get('App\GramcServices\ServiceSessions');
+		$ss = $this->ss;
 		return new Response( var_dump( $ss->getSessionCourante() ) );
     }
 
@@ -182,12 +208,11 @@ class DefaultController extends Controller
      */
     public function test_formAction(Request $request)
     {
-        $form = $this
-           ->get('form.factory')
-           ->createNamedBuilder('image_form', FormType::class, [])
-           ->add('image', TextType::class, [ 'required'       =>  false,] )
-           ->add('number', TextType::class, ['required'       =>  false,] )
-           ->getForm();
+        $form = $this->ff
+		           ->createNamedBuilder('image_form', FormType::class, [])
+		           ->add('image', TextType::class, [ 'required'       =>  false,] )
+		           ->add('number', TextType::class, ['required'       =>  false,] )
+		           ->getForm();
 
         $form->handleRequest($request);
 

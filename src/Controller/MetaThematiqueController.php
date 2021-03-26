@@ -25,16 +25,15 @@
 namespace App\Controller;
 
 use App\Entity\MetaThematique;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use App\Entity\Thematique;
 
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-//use App\App;
-use App\Entity\Thematique;
 
 /**
  * Metathematique controller.
@@ -43,6 +42,13 @@ use App\Entity\Thematique;
  */
 class MetaThematiqueController extends Controller
 {
+	private $ac;
+		
+	public function __construct (AuthorizationCheckerInterface $ac)
+	{
+		$this->ac  = $ac;
+	}
+
     /**
      * Lists all metaThematique entities.
      *
@@ -67,7 +73,7 @@ class MetaThematiqueController extends Controller
      */
     public function gererAction()
 	{
-		$ac = $this->get('security.authorization_checker');
+		$ac = $this->ac;
 		$em = $this->getDoctrine()->getManager();
 
 		$menu = $ac->isGranted('ROLE_ADMIN')?[ ['ok' => true,'name' => 'ajouter_metaThematique' ,'lien' => 'Ajouter une metathématique','commentaire'=> 'Ajouter une metathématique'] ]: [];

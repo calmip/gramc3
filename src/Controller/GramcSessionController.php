@@ -44,10 +44,20 @@ use App\Entity\Sso;
 use App\Entity\Compteactivation;
 use App\Entity\Journal;
 
-//use App\App;
-use App\Security\User\UserChecker;
 use App\Utils\Functions;
 use App\Utils\IDP;
+
+use App\GramcServices\Workflow\Projet\ProjetWorkflow;
+use App\GramcServices\ServiceMenus;
+use App\GramcServices\ServiceJournal;
+use App\GramcServices\ServiceNotifications;
+use App\GramcServices\ServiceProjets;
+use App\GramcServices\ServiceSessions;
+use App\GramcServices\ServiceVersions;
+use App\GramcServices\PropositionExperts\PropositionExpertsType1;
+use App\GramcServices\PropositionExperts\PropositionExpertsType2;
+use App\GramcServices\GramcDate;
+use App\Security\User\UserChecker;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -58,9 +68,19 @@ use Symfony\Component\Form\Extension\Core\Type\ResetType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+
+
 use Symfony\Component\Mailer\Mailer;
 
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+
+use Twig\Environment;
+
 
 function redirection_externe($url)
 {
@@ -73,6 +93,62 @@ function redirection_externe($url)
 
 class GramcSessionController extends Controller
 {
+	private $sn;
+	private $sj;
+	private $sm;
+	private $sp;
+	private $ss;
+	private $pe1;
+	private $pe2;
+	private $sd;
+	private $sv;
+	private $pw;
+	private $ff;
+	private $vl;
+	private $tok;
+	private $sss;
+	private $uc;
+	private $ac;
+	
+	
+	public function __construct (ServiceNotifications $sn,
+								 ServiceJournal $sj,
+								 ServiceMenus $sm,
+								 ServiceProjets $sp,
+								 ServiceSessions $ss,
+								 PropositionExpertsType1 $pe1,
+								 PropositionExpertsType2 $pe2,
+								 GramcDate $sd,
+								 ServiceVersions $sv,
+								 ProjetWorkflow $pw,
+								 FormFactoryInterface $ff,
+								 ValidatorInterface $vl,
+								 TokenStorageInterface $ts,
+								 SessionInterface $sss,
+								 UserChecker $uc,
+ 								 AuthorizationCheckerInterface $ac,
+ 								 Environment $tw
+								 )
+	{
+		$this->sn  = $sn;
+		$this->sj  = $sj;
+		$this->sm  = $sm;
+		$this->sp  = $sp;
+		$this->ss  = $ss;
+		$this->pe1 = $pe1;
+		$this->pe2 = $pe2;
+		$this->sd  = $sd;
+		$this->sv  = $sv;
+		$this->pw  = $pw;
+		$this->ff  = $ff;
+		$this->vl  = $vl;
+		$this->ts  = $ts;
+		$this->sss = $sss;
+		$this->uc  = $uc;
+		$this->ac  = $ac;
+		$this->tw  = $tw;
+	}
+
     /**
      * @Route("/admin/accueil",name="admin_accueil")
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
@@ -80,7 +156,7 @@ class GramcSessionController extends Controller
 
     public function adminAccueilAction()
     {
-		$sm      = $this->get('App\GramcServices\ServiceMenus');
+		$sm      = $this->sm;
         $menu1[] = $sm->individu_gerer();
 
         $menu2[] = $sm->gerer_sessions();
@@ -142,8 +218,8 @@ class GramcSessionController extends Controller
      */
     public function accueilAction()
 	{
-		$sm     = $this->get('App\GramcServices\ServiceMenus');
-		$ss     = $this->get('App\GramcServices\ServiceSessions');
+		$sm     = $this->sm;
+		$ss     = $this->ss;
 		$session= $ss->getSessionCourante();
 		
 		// Si true, cet utilisateur n'est ni expert ni admin ni président !
@@ -199,7 +275,7 @@ class GramcSessionController extends Controller
      */
     public function presidentAccueilAction()
 	{
- 		$sm     = $this->get('App\GramcServices\ServiceMenus');
+ 		$sm     = $this->sm;
         $menu[] = $sm->affectation();
         $menu[] = $sm->commSess();
 	    $menu[] = $sm->affectation_rallonges();
@@ -212,16 +288,16 @@ class GramcSessionController extends Controller
      **/
     public function deconnexionAction(Request $request)
     {
-		$sj    = $this->get('App\GramcServices\ServiceJournal');
-		$ac    = $this->get('security.authorization_checker');
-		$token = $this->get('security.token_storage')->getToken();
-		$ss    = $this->get('session');
+		$sj    = $this->sj;
+		$ac    = $this->ac;
+		$token = $this->ts->getToken();
+		$sss   = $this->sss;
         if( $ac->isGranted('ROLE_PREVIOUS_ADMIN') )
 		{
-            $sudo_url = $this->get('session')->get('sudo_url');
+            $sudo_url = $sss->get('sudo_url');
             //$userChecker = new UserChecker();
-            $userChecker = $this->get('app.user_checker');
-            $real_user   = $ss->get('real_user' );
+            $userChecker = $this->uc;
+            $real_user   = $sss->get('real_user' );
             $userChecker->checkPostAuth( $real_user );
 
             $sj->infoMessage(__METHOD__ . ":" . __LINE__ . " déconnexion d'un utilisateur en SUDO vers " . $real_user );
@@ -255,9 +331,9 @@ class GramcSessionController extends Controller
     **/
     public function profilAction(Request $request)
     {
-		$sj = $this->get('App\GramcServices\ServiceJournal');
+		$sj = $this->sj;
 
-        $individu = $this->get('security.token_storage')->getToken()->getUser();
+        $individu = $this->ts->getToken()->getUser();
 
         if( $individu == 'anon.' || ! ($individu instanceof Individu)  )
         {
@@ -304,8 +380,8 @@ class GramcSessionController extends Controller
      **/
     public function connectiondbgAction(Request $request)
     {
-		$sj         = $this->get('App\GramcServices\ServiceJournal');
-		$token      = $this->get('security.token_storage')->getToken();
+		$sj         = $this->sj;
+		$token      = $this->ts->getToken();
 		$em         = $this->getDoctrine()->getManager();
 		$repository = $em->getRepository(Individu::class);
 		
@@ -356,11 +432,11 @@ class GramcSessionController extends Controller
             $token = new UsernamePasswordToken($user, null, 'main', $roles );
 
             //$userChecker = new UserChecker();
-            $userChecker = $this->get('app.user_checker');
+            $userChecker = $this->uc;
             $userChecker->checkPreAuth($user);
 
             $session = $request->getSession();
-            $this->get('security.token_storage')->setToken($token);
+            $this->ts->setToken($token);
             $session->set('_security_main', serialize($token));
 
             $userChecker->checkPostAuth($user);
@@ -383,8 +459,8 @@ class GramcSessionController extends Controller
     public function activationAction(Request $request,$key)
     {
 		$em = $this->getDoctrine()->getManager();
-		$sn = $this->get('App\GramcServices\ServiceNotifications');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
+		$sn = $this->sn;
+		$sj = $this->sj;
 
 		$server = $request->server;
 		if(  $server->has('REMOTE_USER') || $server->has('REDIRECT_REMOTE_USER') )
@@ -441,8 +517,8 @@ class GramcSessionController extends Controller
 
     public function loginAction(Request $request)
     {
-		$sj = $this->get('App\GramcServices\ServiceJournal');
-		$ff = $this->get('form.factory');
+		$sj = $this->sj;
+		$ff = $this->ff;
 
 		$form = Functions::createFormBuilder($ff)
 	            ->add('data', ChoiceType::class,
@@ -506,8 +582,8 @@ class GramcSessionController extends Controller
      */
     public function auth_connexionAction(Request $request)
 	{
-		$sj = $this->get('App\GramcServices\ServiceJournal');
-		$ac = $this->get('security.authorization_checker');
+		$sj = $this->sj;
+		$ac = $this->ac;
 
         $sj->infoMessage("shiblogin d'un utilisateur");
 		$em = $this->getDoctrine()->getManager();
@@ -518,7 +594,7 @@ class GramcSessionController extends Controller
         else
             return $this->redirectToRoute('index');
         */
-        $individu = $this->get('security.token_storage')->getToken()->getUser(); // OK si l'authentification remote_user de symfony
+        $individu = $this->ts->getToken()->getUser(); // OK si l'authentification remote_user de symfony
         //$sj->debugMessage("coucou ".$individu." REMOTE USER = ".getenv('REMOTE_USER'));
         //
         // utilisé si on n'utilise pas l'authentification remote_user de symfony
@@ -555,13 +631,13 @@ class GramcSessionController extends Controller
 
 				// authentification manuelle sans remote_user de symfony
 				//$userChecker = new UserChecker();
-	            $userChecker = $this->get('app.user_checker');
+	            $userChecker = $this->uc;
 				$userChecker->checkPreAuth($individu);
 
 				$token = new UsernamePasswordToken($individu, null, 'main', $individu->getRoles() );
 				$session = $request->getSession();
 
-				$this->get('security.token_storage')->setToken($token);
+				$this->ts->setToken($token);
 				$session->set('_security_main', serialize($token));
 
 				$userChecker->checkPostAuth($individu);
@@ -594,8 +670,8 @@ class GramcSessionController extends Controller
      */
     public function nouveau_compteAction(Request $request, LoggerInterface $lg)
     {
-		$sj = $this->get('App\GramcServices\ServiceJournal');
-		$ff = $this->get('form.factory');
+		$sj = $this->sj;
+		$ff = $this->ff;
 
         // vérifier si eppn est disponible dans $session
         if( ! $request->getSession()->has('eppn') )
@@ -649,8 +725,8 @@ class GramcSessionController extends Controller
      */
     public function nouveau_profilAction(Request $request, LoggerInterface $lg)
     {
-		$sn = $this->get('App\GramcServices\ServiceNotifications');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
+		$sn = $this->sn;
+		$sj = $this->sj;
 		$em = $this->getDoctrine()->getManager();
 		
 	    // vérifier si eppn est disponible dans $session
@@ -720,7 +796,7 @@ class GramcSessionController extends Controller
 
     private function mail_activation($individu)
     {
-		$sj = $this->get('App\GramcServices\ServiceJournal');
+		$sj = $this->sj;
 
 		$key = md5( random_int(1,10000000000) . microtime() );
 		$compteactivation = new Compteactivation();
@@ -734,8 +810,8 @@ class GramcSessionController extends Controller
 
 		$session = new Session();
 
-		$twig_sujet   = $this->get('twig')->createTemplate('Activation de votre comptre Gramc');
-		$twig_contenu = $this->get('twig')->createTemplate("Bonjour\nPour activer votre compte sur gramc, merci de visiter cette url:\n {{ url('activation') }}/{{ key }} \nL'équipe CALMIP");
+		$twig_sujet   = $this->tw->createTemplate('Activation de votre comptre Gramc');
+		$twig_contenu = $this->tw->createTemplate("Bonjour\nPour activer votre compte sur gramc, merci de visiter cette url:\n {{ url('activation') }}/{{ key }} \nL'équipe CALMIP");
 		$sn -> sendMessage(  $twig_sujet, $twig_contenu, [ 'key' => $key ], [$session->get('email')]);
 		$sj->infoMessage(__METHOD__ .':' . __LINE__ . ' Activation GRAMC  pour ' .  $session->get('email').  ' envoyé (key=' . $key .')' );
      }
@@ -784,7 +860,7 @@ class GramcSessionController extends Controller
     public function connexionsAction(Request $request)
     {
 		$em = $this->getDoctrine()->getManager();
-		$sj = $this->get('App\GramcServices\ServiceJournal');
+		$sj = $this->sj;
 
 		$connexions = Functions::getConnexions($em, $sj);
 	    return $this->render('default/connexions.html.twig', [ 'connexions' => $connexions ] );

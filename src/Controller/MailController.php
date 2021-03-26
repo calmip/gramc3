@@ -28,11 +28,13 @@ use App\Entity\Sso;
 use App\Entity\Compteactivation;
 use App\Entity\Journal;
 use App\Entity\Projet;
-
 use App\Entity\Version;
 use App\Entity\Session;
 
-//use App\App;
+use App\GramcServices\ServiceJournal;
+use App\GramcServices\ServiceNotifications;
+use App\GramcServices\ServiceProjets;
+
 use App\Utils\Functions;
 use App\Utils\Menu;
 use App\Utils\Etat;
@@ -47,6 +49,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\ResetType;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Form\FormFactoryInterface;
 
 
 
@@ -60,6 +63,23 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
  */
 class MailController extends Controller
 {
+	
+	private $sn;
+	private $sj;
+	private $sp;
+	private $ff;
+	
+	public function __construct (ServiceNotifications $sn,
+								 ServiceJournal $sj,
+								 ServiceProjets $sp,
+								 FormFactoryInterface $ff
+								 )
+	{
+		$this->sn  = $sn;
+		$this->sj  = $sj;
+		$this->sp  = $sp;
+		$this->ff  = $ff;
+	}
 
     /**
      * @Route("/{id}/mail_to_responsables_fiche",name="mail_to_responsables_fiche")

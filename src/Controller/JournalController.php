@@ -30,11 +30,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Form\FormFactoryInterface;
 
 use App\Utils\Functions;
 use App\Entity\Journal;
-//use App\App;
 use App\Form\SelectJournalType;
+
 /**
  * Journal controller.
  *
@@ -43,6 +44,13 @@ use App\Form\SelectJournalType;
  */
 class JournalController extends Controller
 {
+	private $ff;
+	
+	public function __construct (FormFactoryInterface $ff)
+	{
+		$this->ff  = $ff;
+	}
+
     /**
      * Lists all Journal entities.
      *
@@ -187,7 +195,7 @@ class JournalController extends Controller
 
 	private function index(Request $request)
 	{
-		$ff = $this->get('form.factory');
+		$ff = $this->ff;
 		$em = $this->getDoctrine()->getManager();
 		
         // quand on n'a pas de class on doit définir un nom du formulaire pour HTML

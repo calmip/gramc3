@@ -42,15 +42,20 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-//use App\App;
 use App\Utils\Functions;
 use App\Utils\Menu;
 use App\Utils\Etat;
 use App\Utils\Signal;
 use App\AffectationExperts\AffectationExperts;
+
 use App\GramcServices\Workflow\Projet\ProjetWorkflow;
 use App\GramcServices\Workflow\Version\VersionWorkflow;
-//use App\Utils\GramcDate;
+use App\GramcServices\ServiceJournal;
+use App\GramcServices\ServiceNotifications;
+use App\GramcServices\ServiceProjets;
+use App\GramcServices\ServiceSessions;
+use App\GramcServices\ServiceVersions;
+use App\GramcServices\GramcDate;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -60,6 +65,11 @@ use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+
+use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 use App\Form\ChoiceList\ExpertChoiceLoader;
 
@@ -71,6 +81,45 @@ use App\Form\ChoiceList\ExpertChoiceLoader;
 class ExpertiseController extends Controller
 {
 
+		private $sn;
+		private $sj;
+		private $sp;
+		private $ss;
+		private $sd;
+		private $sv;
+		private $pw;
+		private $ff;
+		private $vl;
+		private $tok;
+		private $ac;
+	
+	
+	public function __construct (ServiceNotifications $sn,
+								 ServiceJournal $sj,
+								 ServiceProjets $sp,
+								 ServiceSessions $ss,
+								 GramcDate $sd,
+								 ServiceVersions $sv,
+								 ProjetWorkflow $pw,
+								 FormFactoryInterface $ff,
+								 ValidatorInterface $vl,
+								 TokenStorageInterface $tok,
+								 AuthorizationCheckerInterface $ac
+								 )
+	{
+		$this->sn  = $sn;
+		$this->sj  = $sj;
+		$this->sp  = $sp;
+		$this->ss  = $ss;
+		$this->sd  = $sd;
+		$this->sv  = $sv;
+		$this->pw  = $pw;
+		$this->ff  = $ff;
+		$this->vl  = $vl;
+		$this->tok = $tok->getToken();
+		$this->ac  = $ac;
+	}
+
 	/**
      * Affectation des experts
      *
@@ -80,9 +129,9 @@ class ExpertiseController extends Controller
      */
     public function affectationTestAction(Request $request)
     {
-		$ss = $this->get('App\GramcServices\ServiceSessions');
-		$sp = $this->get('App\GramcServices\ServiceProjets');
-		$se = $this->get('App\GramcServices\ServiceExperts');
+		$ss = $this->ss;
+		$sp = $this->sp;
+		$se = $this->se;
 		$em = $this->getDoctrine()->getManager();
 		
 	    $session  = $ss->getSessionCourante();
@@ -158,11 +207,11 @@ class ExpertiseController extends Controller
      */
     public function affectationAction(Request $request)
     {
-		$ss = $this->get('App\GramcServices\ServiceSessions');
-		$sp = $this->get('App\GramcServices\ServiceProjets');
-		$sv = $this->get('App\GramcServices\ServiceVersions');
+		$ss = $this->ss;
+		$sp = $this->sp;
+		$sv = $this->sv;
 		$em = $this->getDoctrine()->getManager();
-		$affectationExperts = $this->get('App\GramcServices\ServiceExperts');
+		$affectationExperts = $this->se;
 		
 		$session      = $ss->getSessionCourante();
         $session_data = $ss->selectSession($this->createFormBuilder(['session'=>$session]),$request); // formulaire
@@ -268,11 +317,11 @@ class ExpertiseController extends Controller
 	 */
     public function listeAction()
     {
-		$sd  = $this->get('App\GramcServices\GramcDate');
-		$ss  = $this->get('App\GramcServices\ServiceSessions');
-		$sp  = $this->get('App\GramcServices\ServiceProjets');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
-		$token = $this->get('security.token_storage')->getToken();
+		$sd  = $this->sd;
+		$ss  = $this->ss;
+		$sp  = $this->sp;
+		$sj = $this->sj;
+		$token = $this->token;
         $em  = $this->getDoctrine()->getManager();
         
         $moi = $token->getUser();
@@ -552,13 +601,13 @@ class ExpertiseController extends Controller
      */
     public function modifierAction(Request $request, Expertise $expertise)
     {
-		$ss = $this->get('App\GramcServices\ServiceSessions');
-		$sv = $this->get('App\GramcServices\ServiceVersions');
-		$sp = $this->get('App\GramcServices\ServiceProjets');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
-		$ac = $this->get('security.authorization_checker');
-		$sval = $this->get('validator');
-		$token = $this->get('security.token_storage')->getToken();
+		$ss = $this->ss;
+		$sv = $this->sv;
+		$sp = $this->sp;
+		$sj = $this->sj;
+		$ac = $this->ac;
+		$sval = $this->vl;
+		$token = $this->token;
 		$em = $this->getDoctrine()->getManager();
 		
         // ACL
@@ -836,11 +885,11 @@ class ExpertiseController extends Controller
      */
     public function validationAction(Request $request, Expertise $expertise)
     {
-		$sn = $this->get('App\GramcServices\ServiceNotifications');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
-		$ac = $this->get('security.authorization_checker');
+		$sn = $this->sn;
+		$sj = $this->sj;
+		$ac = $this->ac;
 		$em = $this->getDoctrine()->getManager();
-		$token = $this->get('security.token_storage')->getToken();
+		$token = $this->token;
 
 	    // ACL
 	    $moi = $token->getUser();
@@ -882,7 +931,7 @@ class ExpertiseController extends Controller
 		        elseif( $validation == 2 )  $signal = Signal::CLK_VAL_EXP_CONT;
 		        elseif( $validation == 0 )  $signal = Signal::CLK_VAL_EXP_KO;
 
-		        $workflow = $this->get('App\GramcServices\Workflow\Projet\ProjetWorkflow');
+		        $workflow = $this->pw;
 		        $rtn      = $workflow->execute( $signal, $expertise->getVersion()->getProjet() );
 		        if( $rtn != true )
 		            $sj->errorMessage(__METHOD__ . ":" . __LINE__ . " Transition avec " .  Signal::getLibelle( $signal )
