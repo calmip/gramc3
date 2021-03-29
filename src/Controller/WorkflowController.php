@@ -44,7 +44,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Psr\Log\LoggerInterface;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -61,7 +61,7 @@ use Symfony\Component\Form\FormFactoryInterface;
  * @Security("is_granted('ROLE_ADMIN')")
  * @Route("workflow")
  */
-class WorkflowController extends Controller
+class WorkflowController extends AbstractController
 {
 	private $sj;
 	private $pw;

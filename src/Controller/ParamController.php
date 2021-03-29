@@ -27,7 +27,7 @@ namespace App\Controller;
 use App\Entity\Param;
 use App\Utils\Functions;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -45,7 +45,7 @@ use Symfony\Component\Form\FormFactoryInterface;
  * @Security("is_granted('ROLE_ADMIN')")
  * @Route("param")
  */
-class ParamController extends Controller
+class ParamController extends AbstractController
 {
 	private $ff;
 	

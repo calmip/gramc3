@@ -27,7 +27,7 @@ namespace App\Controller;
 use App\Entity\Thematique;
 use App\Entity\Individu;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
@@ -39,7 +39,7 @@ use Symfony\Component\HttpFoundation\Request;
  *
  * @Route("thematique")
  */
-class ThematiqueController extends Controller
+class ThematiqueController extends AbstractController
 {
 	private $ac;
 		

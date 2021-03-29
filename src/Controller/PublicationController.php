@@ -34,7 +34,7 @@ use App\GramcServices\ServiceSessions;
 
 use Psr\Log\LoggerInterface;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -51,7 +51,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
  *
  * @Route("publication")
  */
-class PublicationController extends Controller
+class PublicationController extends AbstractController
 {
 	private $sj;
 	private $ss;

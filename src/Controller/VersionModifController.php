@@ -49,7 +49,7 @@ use App\Validator\Constraints\PagesNumber;
 
 use Psr\Log\LoggerInterface;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -84,7 +84,7 @@ use Twig\Environment;
  *
  * @Route("version")
  */
-class VersionModifController extends Controller
+class VersionModifController extends AbstractController
 {
 	private $sj;
 	private $sm;

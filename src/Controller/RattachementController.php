@@ -27,7 +27,7 @@ namespace App\Controller;
 use App\Entity\Rattachement;
 use App\Entity\Individu;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -39,7 +39,7 @@ use Symfony\Component\HttpFoundation\Request;
  *
  * @Route("rattachement")
  */
-class RattachementController extends Controller
+class RattachementController extends AbstractController
 {
 	private $ac;
 		

@@ -34,7 +34,7 @@ use App\GramcServices\GramcDate;
 use App\GramcServices\GramcGraf\Calcul;
 use App\GramcServices\DonneesFacturation;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -58,7 +58,7 @@ use Knp\Snappy\Pdf;
  // Tous ces controleurs sont exécutés au moins par OBS, certains par ADMIN seulement
  // et d'autres par DEMANDEUR
 
-class ProjetDfctController extends Controller
+class ProjetDfctController extends AbstractController
 {
 		private $sj;
 		private $sm;

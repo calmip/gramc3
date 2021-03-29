@@ -28,7 +28,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -54,7 +54,7 @@ use Symfony\Component\Form\FormFactoryInterface;
 
 use JpGraph\JpGraph;
 
-class DefaultController extends Controller
+class DefaultController extends AbstractController
 {
 	private $sn;
 	private $sj;

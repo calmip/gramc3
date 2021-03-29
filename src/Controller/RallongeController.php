@@ -46,7 +46,7 @@ use App\Utils\Functions;
 use App\AffectationExperts\AffectationExperts;
 use App\AffectationExperts\AffectationExpertsRallonge;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -67,7 +67,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
  * Rallonge controller.
  * @Route("rallonge")
  */
-class RallongeController extends Controller
+class RallongeController extends AbstractController
 {
 	private $sj;
 	private $sm;

@@ -29,7 +29,7 @@ use App\Entity\CommentaireExpert;
 use App\Utils\Functions;
 use App\GramcServices\ServiceJournal;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
@@ -50,7 +50,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
  *
  * @Route("commentaireexpert")
  */
-class CommentaireExpertController extends Controller
+class CommentaireExpertController extends AbstractController
 {
 	private $sj;
 	private $tok;

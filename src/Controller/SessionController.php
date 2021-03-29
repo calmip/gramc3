@@ -41,7 +41,7 @@ use App\Utils\Functions;
 use App\Utils\Etat;
 use App\Utils\Signal;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
@@ -58,7 +58,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
  * @Route("session")
  * @Security("is_granted('ROLE_ADMIN')")
  */
-class SessionController extends Controller
+class SessionController extends AbstractController
 {
 	private $sj;
 	private $sm;

@@ -24,7 +24,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -46,7 +46,7 @@ use JpGraph\JpGraph;
  * @Route("statistiques")
  * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
  */
-class StatistiquesController extends Controller
+class StatistiquesController extends AbstractController
 {
 	private $sj;
 	private $sm;

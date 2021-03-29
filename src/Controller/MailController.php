@@ -15,7 +15,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Storage\PhpBridgeSessionStorage;
@@ -61,7 +61,7 @@ use Symfony\Component\Form\FormFactoryInterface;
  * @Route("mail")
  * @Security("is_granted('ROLE_ADMIN')")
  */
-class MailController extends Controller
+class MailController extends AbstractController
 {
 	
 	private $sn;

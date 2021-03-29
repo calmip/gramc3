@@ -24,7 +24,7 @@
 
 namespace App\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -42,7 +42,7 @@ use App\Form\SelectJournalType;
  * @Route("journal")
  * @Security("is_granted('ROLE_ADMIN')")
  */
-class JournalController extends Controller
+class JournalController extends AbstractController
 {
 	private $ff;
 	

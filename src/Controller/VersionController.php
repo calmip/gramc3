@@ -46,7 +46,7 @@ use App\GramcServices\GramcDate;
 
 use Psr\Log\LoggerInterface;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -86,7 +86,7 @@ use Knp\Snappy\Pdf;
  *
  * @Route("version")
  */
-class VersionController extends Controller
+class VersionController extends AbstractController
 {
 	private $sn;
 	private $sj;

@@ -30,7 +30,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -91,7 +91,7 @@ function redirection_externe($url)
 
 /////////////////////////////////////////////////////
 
-class GramcSessionController extends Controller
+class GramcSessionController extends AbstractController
 {
 	private $sn;
 	private $sj;
@@ -385,7 +385,11 @@ class GramcSessionController extends Controller
 		$em         = $this->getDoctrine()->getManager();
 		$repository = $em->getRepository(Individu::class);
 		
-		if ( ! $this->container->hasParameter('kernel.debug') || $this->getParameter('kernel.debug') == false )
+		// Bizarre...
+		// echo "coucou " . (int) $this->has('kernel.debug');
+		// echo "coucou " . (int) $this->getParameter('kernel.debug');
+		if ( $this->getParameter('kernel.debug') === false )
+		//if ( ! $this->container->hasParameter('kernel.debug') || $this->getParameter('kernel.debug') == false )
 		{
 			$sj->warningMessage(__METHOD__ . ':' . __LINE__ .' tentative de se connecter avec debug en production');
             return $this->redirectToRoute('accueil');

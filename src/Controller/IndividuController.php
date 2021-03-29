@@ -32,7 +32,7 @@ use App\Utils\Functions;
 use App\GramcServices\ServiceJournal;
 use App\GramcServices\ServiceExperts;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -68,7 +68,7 @@ use App\Entity\Version;
  *
  * @Route("individu")
  */
-class IndividuController extends Controller
+class IndividuController extends AbstractController
 {
 	private $sj;
 	private $ff;

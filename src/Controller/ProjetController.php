@@ -53,7 +53,7 @@ use App\GramcServices\GramcGraf\Calcul;
 
 use Psr\Log\LoggerInterface;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -90,7 +90,7 @@ function cmpProj($a,$b) { return intval($a['annee']) < intval($b['annee']); }
  // Tous ces controleurs sont exécutés au moins par OBS, certains par ADMIN seulement
  // et d'autres par DEMANDEUR
 
-class ProjetController extends Controller
+class ProjetController extends AbstractController
 {
 	private $sj;
 	private $sm;

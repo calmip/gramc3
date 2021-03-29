@@ -26,7 +26,7 @@ namespace App\Controller;
 
 use Psr\Log\LoggerInterface;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -60,7 +60,7 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
  *
  * @Route("/adminux")
  */
-class AdminuxController extends Controller
+class AdminuxController extends AbstractController
 {
 	private $sn;
 	private $sj;
