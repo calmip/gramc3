@@ -334,8 +334,14 @@ class VersionController extends Controller
 	    $img_justif_renou_2 = $sv->imageProperties('img_justif_renou_2', $version);
 	    $img_justif_renou_3 = $sv->imageProperties('img_justif_renou_3', $version);
 
-		$toomuch = $sv->is_demande_toomuch($version->getAttrHeures(),$version->getDemHeures());
-	    
+		//$toomuch = $sv->is_demande_toomuch($version->getAttrHeures(),$version->getDemHeures());
+		$toomuch = false;
+	    if ($session->getLibelleTypeSession()=='B' && ! $sv->isNouvelle($version)) {
+	        $version_prec = $version->versionPrecedente();
+	        if ($version_prec->getAnneeSession() == $version->getAnneeSession()) {
+	            $toomuch  = $sv -> is_demande_toomuch($version_prec->getAttrHeures(),$version->getDemHeures());
+	        }
+	    }
 	    $html4pdf =  $this->render('version/pdf.html.twig',
 		[
 			'projet'             => $projet,
@@ -356,8 +362,8 @@ class VersionController extends Controller
             'toomuch'            => $toomuch
 		]);
 	
+	    //file_put_contents("/tmp/output.html", $html4pdf->getContent());
 	    $pdf = $spdf->getOutputFromHtml($html4pdf->getContent());
-
 	    return Functions::pdf( $pdf );
     }
 
