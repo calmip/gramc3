@@ -92,22 +92,21 @@ function cmpProj($a,$b) { return intval($a['annee']) < intval($b['annee']); }
 
 class ProjetController extends Controller
 {
-		private $sj;
-		private $sm;
-		private $sp;
-		private $ss;
-		private $gcl;
-		private $gstk;
-		private $gall;
-		private $sd;
-		private $sv;
-		private $pw;
-		private $ff;
-		private $tok;
-		private $sss;
-		private $tw;
-		private $ac;
-
+	private $sj;
+	private $sm;
+	private $sp;
+	private $ss;
+	private $gcl;
+	private $gstk;
+	private $gall;
+	private $sd;
+	private $sv;
+	private $pw;
+	private $ff;
+	private $tok;
+	private $sss;
+	private $tw;
+	private $ac;
 		
 	public function __construct (ServiceNotifications $sn,
 								 ServiceJournal $sj,

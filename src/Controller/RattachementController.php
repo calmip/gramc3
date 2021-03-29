@@ -25,14 +25,13 @@
 namespace App\Controller;
 
 use App\Entity\Rattachement;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use App\Entity\Individu;
 
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
-
-//use App\App;
-use App\Entity\Individu;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -42,13 +41,20 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class RattachementController extends Controller
 {
+	private $ac;
+		
+	public function __construct (AuthorizationCheckerInterface $ac)
+	{
+		$this->ac  = $ac;
+	}
+	
    /**
      * @Route("/gerer",name="gerer_rattachements" )
      * @Security("is_granted('ROLE_OBS')")
      */
     public function gererAction()
 	{
-		$ac = $this->get('security.authorization_checker');
+		$ac = $this->ac;
 		$em = $this->getDoctrine()->getManager();
 		
 		// Si on n'est pas admin on n'a pas accès au menu
