@@ -410,7 +410,7 @@ class VersionController extends AbstractController
     ///////////////////////////////////////////////////////////////
 
     /**
-     * Téléverser le rapport d'actitivé de l'année précedente
+     * Téléverser le rapport d'activité de l'année précedente
      *
      * @Route("/{id}/televersement_fiche", name="version_televersement_fiche")
      * @Method({"POST","GET"})
@@ -424,21 +424,23 @@ class VersionController extends AbstractController
 
 	    // ACL
 	    if( $sm->televersement_fiche($version)['ok'] == false )
+		{
 	        $sj->throwException(__METHOD__ . ':' . __LINE__ . " impossible de téléverser la fiche du projet " . $projet .
 	            " parce que : " . $sm -> telechargement_fiche($version)['raison'] );
+		}
 	
 	    $format_fichier = new \Symfony\Component\Validator\Constraints\File(
-	                [
-	                'mimeTypes'=> [ 'application/pdf' ],
-	                'mimeTypesMessage'=>' Le fichier doit être un fichier pdf. ',
-	                'maxSize' => "2024k",
-	                'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
-	                'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
-	                ]);
+			[
+				'mimeTypes'=> [ 'application/pdf' ],
+                'mimeTypesMessage'=>' Le fichier doit être un fichier pdf. ',
+                'maxSize' => "2024k",
+                'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
+                'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
+			]);
 	
-	     $form = $this->ff
-		           ->createNamedBuilder( 'upload', FormType::class, [], ['csrf_protection' => false ] )
-		           ->add('file', FileType::class,
+		$form = $this->ff
+					->createNamedBuilder( 'upload', FormType::class, [], ['csrf_protection' => false ] )
+					->add('file', FileType::class,
 		                [
 		                'required'          =>  true,
 		                'label'             => "",
@@ -456,20 +458,24 @@ class VersionController extends AbstractController
 	
 	        if( isset( $data['file'] ) && $data['file'] != null )
             {
-            $tempFilename = $data['file'];
-            if( ! empty( $tempFilename  ) && $tempFilename != "" )
-			{
-			$validator  = $this->vl;
-			$violations = $validator->validate( $tempFilename, [ $format_fichier, new PagesNumber() ] );
-			foreach( $violations as $violation )    $erreurs[]  =   $violation->getMessage();
+	            $tempFilename = $data['file'];
+	            if( ! empty( $tempFilename  ) && $tempFilename != "" )
+				{
+					$validator  = $this->vl;
+					$violations = $validator->validate( $tempFilename, [ $format_fichier, new PagesNumber() ] );
+					foreach( $violations as $violation )    $erreurs[]  =   $violation->getMessage();
+				}
 			}
-		}
-        else
-            $tempFilename = null;
+	        else
+	        {
+	            $tempFilename = null;
+			}
 
 
-        if( is_file( $tempFilename ) && ! is_dir( $tempFilename ) )
+	        if( is_file( $tempFilename ) && ! is_dir( $tempFilename ) )
+	        {
                 $file = new File( $tempFilename );
+			}
             elseif( is_dir( $tempFilename ) )
 			{
                 $sj->errorMessage(__METHOD__ .":" . __LINE__ . " Le nom  " . $tempFilename . " correspond à un répertoire");
@@ -481,42 +487,40 @@ class VersionController extends AbstractController
                 $erreurs[]  =  " Le fichier " . $tempFilename . " n'existe pas";
 			}
 
-        if( $form->isValid() && $erreurs == [] )
-		{
-            $session = $version->getSession();
-            $projet = $version->getProjet();
-            if( $projet != null && $session != null )
+	        if( $form->isValid() && $erreurs == [] )
 			{
-                $filename = $this->getParameter('signature_directory') .'/'.$session->getIdSession() .
-                                "/" . $session->getIdSession() . $projet->getIdProjet() . ".pdf";
-                $file->move( $this->getParameter('signature_directory') .'/'.$session->getIdSession(),
-                                 $session->getIdSession() . $projet->getIdProjet() . ".pdf" );
-
-                // on marque le téléversement de la fiche projet
-                $version->setPrjFicheVal(true);
-                $em->flush();
-                $resultat[] =   " La fiche du projet " . $projet . " pour la session " . $session . " téléversé ";
+	            $session = $version->getSession();
+	            $projet = $version->getProjet();
+	            if( $projet != null && $session != null )
+				{
+	                $filename = $this->getParameter('signature_directory') .'/'.$session->getIdSession() .
+	                                "/" . $session->getIdSession() . $projet->getIdProjet() . ".pdf";
+	                $file->move( $this->getParameter('signature_directory') .'/'.$session->getIdSession(),
+	                                 $session->getIdSession() . $projet->getIdProjet() . ".pdf" );
+	
+	                // on marque le téléversement de la fiche projet
+	                $version->setPrjFicheVal(true);
+	                $em->flush();
+	                $resultat[] =   " La fiche du projet " . $projet . " pour la session " . $session . " a été téléversée ";
                 }
-            else
+	            else
                 {
-                $resultat[] =   " La fiche du projet n'a pas été téléversé";
-                if( $projet == null )
-                    $sj->errorMessage( __METHOD__ . ':'. __LINE__ . " version " . $version . " n'a pas de projet");
-                if( $session == null )
-                    $sj->errorMessage( __METHOD__ . ':' . __LINE__ . " version " . $version . " n'a pas de session");
+	                $resultat[] =   " La fiche du projet n'a pas été téléversée";
+	                if( $projet == null )
+	                    $sj->errorMessage( __METHOD__ . ':'. __LINE__ . " version " . $version . " n'a pas de projet");
+	                if( $session == null )
+	                    $sj->errorMessage( __METHOD__ . ':' . __LINE__ . " version " . $version . " n'a pas de session");
                 }
             }
-
         }
 
-    return $this->render('version/televersement_fiche.html.twig',
+	    return $this->render('version/televersement_fiche.html.twig',
             [
             'version'       =>  $version,
             'form'          =>  $form->createView(),
             'erreurs'       =>  $erreurs,
             'resultat'      =>  $resultat,
             ]);
-
     }
 
 
