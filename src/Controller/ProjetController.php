@@ -1714,7 +1714,7 @@ class ProjetController extends AbstractController
             if ($u==null)
             {
 				$passwd = null;
-				$expir  = null;
+				$pwd_expir  = null;
 			}
 			else
 			{

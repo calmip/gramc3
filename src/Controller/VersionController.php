@@ -131,6 +131,7 @@ class VersionController extends AbstractController
 		$this->pe2 = $pe2;
 		$this->sd  = $sd;
 		$this->sv  = $sv;
+		$this->pw  = $pw;
 		$this->ff  = $ff;
 		$this->vl  = $vl;
 		$this->tok = $tok;

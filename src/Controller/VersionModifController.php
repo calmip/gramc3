@@ -1100,6 +1100,12 @@ class VersionModifController extends AbstractController
 				return $this->redirectToRoute('modifier_version',['id' => $version, '_fragment' => 'liste_des_collaborateurs'] );
 			}
 			
+			// Peut arriver pour l'administrateur car pour lui le bouton modifier est toujours acitf
+			elseif ($veract->getId() == $version->getId())
+			{
+				return $this->redirectToRoute('modifier_version',['id' => $version, '_fragment' => 'liste_des_collaborateurs'] );
+			}
+			
 			// Si version active on demande de préciser quelle version !
 			else
 			{
