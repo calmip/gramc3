@@ -582,7 +582,7 @@ class VersionModifController extends AbstractController
 		$sval = $this->vl;
 		$em = $this->getDoctrine()->getManager();
 
-		if( $this->container->hasParameter('heures_projet_test' ) )
+		if( $this->has('heures_projet_test' ) )
 			$heures_projet_test = $this->getParameter('heures_projet_test' );
 		else
 			$heures_projet_test =  5000;

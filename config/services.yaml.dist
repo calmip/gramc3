@@ -87,11 +87,9 @@ parameters:
 #        'INPT - Institut National Polytechnique de Toulouse': 'https://idp.inp-toulouse.fr/idp/shibboleth'
         AUTRE: WAYF
 
-# NOTE - Il faudra modifier tous les controleurs pour remplacer le 'get' par des injections de dépendance
-#        Lorsque ce sera fait on pourra mettre public: False
 services:
     _defaults:
-        public: true
+        public: false
         autowire: true
         autoconfigure: true
 
@@ -109,23 +107,28 @@ services:
         resource: '../src/GramcServices/*'
         exclude: '../src/GramcServices/Workflow/*'
 
+    # Workflows
+    # Seuls certains objets définis dans le répertoire Workflows sont des services
+    App\GramcServices\Workflow\:
+        resource: '../src/GramcServices/Workflow/*/*Workflow.php'
+        
+    #App\GramcServices\Workflow\Rallonge\RallongeWorkflow:
+    
+    #App\GramcServices\Workflow\Version\VersionWorkflow:
+
+    #App\GramcServices\Workflow\Projet\ProjetWorkflow:
+
+    #App\GramcServices\Workflow\Session\SessionWorkflow:
+       
     app.gramc_user_provider:
         class: App\Security\User\GramcUserProvider
 
     app.user_checker:
         class: App\Security\User\UserChecker
 
-    # Workflows
-    # Seuls certains objets définis dans le répertoire Workflows sont des services
-    App\GramcServices\Workflow\Rallonge\RallongeWorkflow:
+    App\Security\User\UserChecker: '@app.user_checker'
     
-    App\GramcServices\Workflow\Version\VersionWorkflow:
-
-    App\GramcServices\Workflow\Projet\ProjetWorkflow:
-
-    App\GramcServices\Workflow\Session\SessionWorkflow:
-       
-    # cf https://stackoverflow.com/questions/47613979/symfony-3-4-0-could-not-find-any-fixture-services-to-load
+     # cf https://stackoverflow.com/questions/47613979/symfony-3-4-0-could-not-find-any-fixture-services-to-load
     # makes classes in src/AppBundle/DataFixtures available to be used as services
     # and have a tag that allows actions to type-hint services
     App\DataFixtures\:

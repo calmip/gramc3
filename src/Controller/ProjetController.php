@@ -416,7 +416,7 @@ class ProjetController extends AbstractController
     {
 		$em = $this->getDoctrine()->getManager();
 		$sp = $this->sp;
-		$sv = $this->sss;
+		$sv = $this->sv;
 	    $sortie = 'Projets de la session ' . $session->getId() . "\n";
 	    $ligne  =   [
 	                'Nouveau',
@@ -1200,7 +1200,7 @@ class ProjetController extends AbstractController
      */
     public function signatureAction(Version $version, Request $request)
     {
-        $sv = $this->sss;
+        $sv = $this->sv;
 	    return Functions::pdf( $sv->getSigne($version) );
     }
 
@@ -1351,9 +1351,9 @@ class ProjetController extends AbstractController
 		$sd = $this->sd;
 		$sm = $this->sm;
 		$ss = $this->ss;
-		$sss= sss;
+		$sss= $this->sss;
 		$sp = $this->sp;
-		$sv = $this->sss;
+		$sv = $this->sv;
 		$sj = $this->sj;
 		$token = $this->token;
 		$em = $this->getDoctrine()->getManager();
@@ -1440,7 +1440,7 @@ class ProjetController extends AbstractController
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
 
-    public function consoAction(Projet $projet, $loginname = null, $annee = null)
+    public function consoAction(Projet $projet, $loginname="nologin", $annee=null)
     {
 		$sp = $this->sp;
 		$sj = $this->sj;
@@ -1655,20 +1655,28 @@ class ProjetController extends AbstractController
 	            $cpt_rall  = 0;
 			}
 
-            $cv    = $cv_repo->findOneBy(['version' => $versionActive, 'collaborateur' => $individu]);
-            $login = $cv->getLoginname()==null ? 'nologin' : $cv->getLoginname();
-            $u     = $user_repo->findOneBy(['loginname' => $login]);
-            if ($u==null)
-            {
-				$passwd    = null;
-				$pwd_expir = null;
+			if ($versionActive != null)
+			{
+	            $cv    = $cv_repo->findOneBy(['version' => $versionActive, 'collaborateur' => $individu]);
+	            $login = $cv->getLoginname()==null ? 'nologin' : $cv->getLoginname();
+	            $u     = $user_repo->findOneBy(['loginname' => $login]);
+	            if ($u==null)
+	            {
+					$passwd    = null;
+					$pwd_expir = null;
+				}
+				else
+				{
+					$passwd    = $u->getPassword();
+					$pwd_expir = $u->getPassexpir();
+				}
 			}
 			else
 			{
-				$passwd    = $u->getPassword();
-				$pwd_expir = $u->getPassexpir();
+				$login  = 'nologin';
+				$passwd = null;
+				$pwd_expir = null;
 			}
-	            
 	        $projets_resp[]   =
             [
 	            'projet'    => $projet,
@@ -1992,7 +2000,7 @@ class ProjetController extends AbstractController
     private function consulterType3(Projet $projet, Version $version, $loginname, Request $request)
     {
 		$sm = $this->sm;
-		$sv = $this->sss;
+		$sv = $this->sv;
 		$sp = $this->sp;
 		$sj = $this->sj;
 		$ac = $this->ac;
