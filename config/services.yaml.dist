@@ -205,25 +205,14 @@ services:
         arguments: [ "%max_expertises_nb%" ]
 
     # Formulaires, validateurs
-    App\Form\ThematiqueType:
-        tags: ["form.type"]
-
-    App\Form\MetaThematiqueType:
-        tags: ["form.type"]
-
-    App\Form\RattachementType:
+    App\Form\:
+        resource: '../src/Form/*'
         tags: ["form.type"]
 
     App\Validator\Constraints\PagesNumberValidator:
         arguments: [ "%max_page_nb%" ]
         tags: ["validator.constraint_validator" ]
         
-    App\Form\PublicationType:
-        tags: ["form.type"]
-
-    App\Form\SessionType:
-        tags: ["form.type"]
-
     # Commandes
     app.gramc.sendamail:
         class: App\Command\Sendamail
