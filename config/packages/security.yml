@@ -57,9 +57,9 @@ security:
             remote_user:
                 provider: gramc_provider
                 #user: REMOTE_USER
-            logout:
-                path:   /deconnexion
-                target: /deconnected
+            #logout:
+            #    path:   /deconnexion
+            #    target: /deconnected
 
         # activate different ways to authenticate
         ############ logout_on_user_change: true

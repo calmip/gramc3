@@ -291,20 +291,18 @@ class GramcSessionController extends AbstractController
 		$sj    = $this->sj;
 		$ac    = $this->ac;
 		$token = $this->ts->getToken();
-		$sss   = $this->sss;
+		$sss   = $this->sss; 
+
         if( $ac->isGranted('ROLE_PREVIOUS_ADMIN') )
 		{
             $sudo_url = $sss->get('sudo_url');
-            //$userChecker = new UserChecker();
+            //$sj->debugMessage(__METHOD__ . " sudo_url = " . $sudo_url );
             $userChecker = $this->uc;
             $real_user   = $sss->get('real_user' );
             $userChecker->checkPostAuth( $real_user );
-
             $sj->infoMessage(__METHOD__ . ":" . __LINE__ . " déconnexion d'un utilisateur en SUDO vers " . $real_user );
-
-            //$sj->debugMessage(__METHOD__ . " sudo_url = " . $ss->get('sudo_url') );
             return new RedirectResponse(  $sudo_url . '?_switch_user=_exit' );
-            //return $this->redirectToRoute('gramc_gerer_utilisateurs',[ '_switch_user' => '_exit' ]);
+            //return $this->redirectToRoute('accueil',[ '_switch_user' => '_exit' ]);
 		}
         elseif ($ac->isGranted('IS_AUTHENTICATED_FULLY'))
 		{

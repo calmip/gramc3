@@ -53,13 +53,13 @@ class UserChecker implements UserCheckerInterface
 {
 	public function __construct(AuthorizationCheckerInterface $secu_auto_chk,
 								TokenStorageInterface $token,
-								SessionInterface $sess,
+								SessionInterface $sss,
 								ServiceJournal $sj,
 								EntityManagerInterface $em)
 	{
 		$this->secu_auto_chk = $secu_auto_chk;
 		$this->token         = $token->getToken();
-		$this->sess          = $sess;
+		$this->sss           = $sss;
 		$this->sj            = $sj;
 		$this->em            = $em;
 	}
@@ -104,29 +104,29 @@ class UserChecker implements UserCheckerInterface
 
         if( ! $this->secu_auto_chk->isGranted('ROLE_PREVIOUS_ADMIN') )
 		{
-			if( $this->secu_auto_chk->isGranted('ROLE_ALLOWED_TO_SWITCH' ) && $this->sess->has('real_user') )
+			if( $this->secu_auto_chk->isGranted('ROLE_ALLOWED_TO_SWITCH' ) && $this->sss->has('real_user') )
 			{
 				$this->sj->debugMessage('UserChecker : checkPostAuth : User ' . 
 				                         $user->getPrenom() . ' ' . 
 				                         $user->getNom() . " est connecté en SUDO par " .
 				                         $this->token->getUser());
-				$this->sess->set('real_user', $this->token->getUser() );
-				$this->sess->set('sudo_url', Request::createFromGlobals()->headers->get('referer') );
-				//$this->sj->debugMessage(__METHOD__ . " sudo_url set to : " . App::getSession()->get('sudo_url') );
+				$this->sss->set('real_user', $this->token->getUser() );
+				$this->sss->set('sudo_url', Request::createFromGlobals()->headers->get('referer') );
+				//$this->sj->debugMessage(__METHOD__ . " sudo_url set to : " . $this->sss->get('sudo_url') );
 			}
 			else
 			{
-				$this->sess->set('real_user', $user);
-				$this->sess->remove('sudo_url');
+				$this->sss->set('real_user', $user);
+				$this->sss->remove('sudo_url');
 				//$this->sj->debugMessage(__METHOD__ . " sudo_url removed" );
 				//$this->sj->debugMessage('UserChecker : checkPostAuth : User ' . $user->getPrenom() . ' ' . $user->getNom() . " est connecté");
 			}
 		}
 		else
 		{
-			//$this->sj->debugMessage('UserChecker : checkPostAuth : User '. App::getUser() . " redevient ".  $user );
-			$this->sess->remove('sudo_url');
-			//$this->sj->debugMessage(__METHOD__ . " sudo_url removed" );
+			$this->sj->debugMessage('UserChecker : checkPostAuth : User '. $this->token->getUser() . " redevient ".  $user );
+			$this->sss->remove('sudo_url');
+			$this->sj->debugMessage(__METHOD__ . " sudo_url removed" );
 		}
 		return true;
     }
