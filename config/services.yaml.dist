@@ -112,14 +112,6 @@ services:
     App\GramcServices\Workflow\:
         resource: '../src/GramcServices/Workflow/*/*Workflow.php'
         
-    #App\GramcServices\Workflow\Rallonge\RallongeWorkflow:
-    
-    #App\GramcServices\Workflow\Version\VersionWorkflow:
-
-    #App\GramcServices\Workflow\Projet\ProjetWorkflow:
-
-    #App\GramcServices\Workflow\Session\SessionWorkflow:
-       
     app.gramc_user_provider:
         class: App\Security\User\GramcUserProvider
 
@@ -136,7 +128,7 @@ services:
         tags: ['doctrine.fixture.orm']
 
     App\EventListener\ExceptionListener:
-        arguments: ["%kernel.debug%", "@router"]
+        arguments: ["%kernel.debug%"]
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
 
