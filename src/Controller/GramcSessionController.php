@@ -667,6 +667,7 @@ class GramcSessionController extends AbstractController
 	}
 
 
+	// TODO - Il y a du code dupliqué entre nouveau_compte et nouveau_profil !
      /**
      * @Route("/nouveau_compte",name="nouveau_compte")
      */
@@ -677,15 +678,25 @@ class GramcSessionController extends AbstractController
 
         // vérifier si eppn est disponible dans $session
         if( ! $request->getSession()->has('eppn') )
-                    { // une tentative de piratage
-                    $sj->warningMessage(__FILE__ . ":" . __LINE__ . " No eppn pour le nouveau_compte");
-                     $lg->warning("No eppn at nouveau_compte", [ 'request' => $this->getRequest() ] );
-                    // return new Response(' no eppn ' );
-                    return $this->redirectToRoute('accueil');
-                    }
+		{ // une tentative de piratage
+			$sj->warningMessage(__FILE__ . ":" . __LINE__ . " No eppn pour le nouveau_compte");
+			$lg->warning("No eppn at nouveau_compte", [ 'request' => $request ] );
+			// return new Response(' no eppn ' );
+			return $this->redirectToRoute('accueil');
+		}
+
+		// vérifier si email est disponible dans $session
+		if( $request->getSession()->has('email')  )
+		{
+			$email = $request->getSession()->get('email');
+		}
+		else
+		{
+			$email = 'nom@labo.fr';
+		}
 
         $form = Functions::createFormBuilder($ff)
-        ->add('mail', TextType::class , [ 'label' => 'Votre mail :', 'data' => "nom@labo.fr" ])
+        ->add('mail', TextType::class , [ 'label' => 'Votre mail :', 'data' => $email ])
         ->add('save', SubmitType::class,    ['label' => 'Connexion'])
         ->add('reset',ResetType::class,     ['label' => 'Effacer'])
         ->getForm();
@@ -693,7 +704,7 @@ class GramcSessionController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->get('save')->isClicked() && $form->isSubmitted() && $form->isValid() )
-            {
+		{
             $em = $this->getDoctrine()->getManager();
             $repository = $this->getDoctrine()->getRepository('App:Individu');
 
@@ -701,23 +712,23 @@ class GramcSessionController extends AbstractController
             $request->getSession()->set('email',$email );
 
             if( $individu = $repository->findOneBy( ['mail' =>  $email ] ) )
-                { // user existe déjà
-                $this->mail_activation( $individu );
+			{ // user existe déjà
+                $this->mail_activation($request, $individu);
+                
                 return $this->render('default/email_activation.html.twig');
                 //return new Response('<pre> Activation done </pre>');
                 //$this->get('logger')->info("New eppn added : " . $request->getSession()->get('eppn'),
                 //            array('request' => $request) );
                 //return new Response(' user added ' );
                 //return $this->redirectToRoute('accueil');
-                }
+			}
             else
-                {
+			{
 		        // activation du compte à faire
                 return $this->redirectToRoute('nouveau_profil');
-                }
+			}
             return $this->render('default/nouveau_profil.html.twig', [ 'mail' => $email , 'form' => $form2->createView() ]  );
-            }
-
+		}
         return $this->render('default/nouveau_compte.html.twig', array( 'form' => $form->createView())  );
 
     }
@@ -733,27 +744,26 @@ class GramcSessionController extends AbstractController
 		
 	    // vérifier si eppn est disponible dans $session
 	    if( ! $request->getSession()->has('eppn')  )
-                    { // une tentative de piratage
-                    $sj->warningMessage(__FILE__ . ":" . __LINE__ .  "Pas d'eppn pour le nouveau profil");
-                    return $this->redirectToRoute('accueil');
-                    }
+		{ // une tentative de piratage
+			$sj->warningMessage(__FILE__ . ":" . __LINE__ .  "Pas d'eppn pour le nouveau profil");
+			return $this->redirectToRoute('accueil');
+		}
 
 		// vérifier si email est disponible dans $session
 		if( ! $request->getSession()->has('email')  )
-	                    { // une tentative de piratage
-                    $sj->warningMessage(__FILE__ . ":" . __LINE__ . " Pas d'email pour le nouveau profil");
-                     $lg->warning("No email at nouveau_profil",
-                            array('request' => $event->getRequest()) );
-                    return $this->redirectToRoute('accueil');
-                    }
+		{ // une tentative de piratage
+			$sj->warningMessage(__FILE__ . ":" . __LINE__ . " Pas d'email pour le nouveau profil");
+			$lg->warning("No email at nouveau_profil",['request' => $event->getRequest()]);
+			return $this->redirectToRoute('accueil');
+		}
 
 	    $individu = new Individu();
+	    //echo '<pre>';
 	    //var_dump(  $request->getSession() );
+	    //echo '</pre>';
 	    $individu->setMail( $request->getSession()->get('email') );
-	    //echo $individu->getMail();
 	
 	    $form = $this->createForm(IndividuType::class, $individu, [ 'permanent' => true ]);
-	
 	    $form->handleRequest($request);
 	
 	    if ($form->isSubmitted() && $form->isValid())
@@ -763,7 +773,7 @@ class GramcSessionController extends AbstractController
 	        if( $old_individu != null )
 	        {
 	            $sj->noticeMessage(__FILE__ .':' . __LINE__ . " Utilisateur " . $individu->getMail() . " existe déjà");
-	            $this->mail_activation(  $old_individu );
+	            $this->mail_activation($request,$old_individu );
 	            return $this->render('default/email_activation.html.twig');
 	            //$sj->debugMessage(__FILE__ .':' . __LINE__ . ' old_individu = ' . Functions::show($old_individu) );
 	            return new Response('<pre> Impossible de créer cet utilisateur </pre>');
@@ -774,18 +784,7 @@ class GramcSessionController extends AbstractController
 	            $em = $this->getDoctrine()->getManager();
 	            $em->persist($individu);
 	            $em->flush();
-	            $this->mail_activation(  $individu );
-	
-	            /* Envoi d'une notification aux admins dans le cas où il s'agit d'un compte CRU */
-	            $eppn = $request->getSession()->get('eppn');
-	            if (strpos($eppn ,'sac.cru.fr') !== false) {
-	                $dest   = $sn->mailUsers( ['A'] );
-	                $sn->sendMessage( "notification/compte_ouvert_pour_admin-sujet.html.twig",
-	                                  "notification/compte_ouvert_pour_admin-contenu.html.twig",
-	                                  [ 'individu' => $individu, 'eppn' => $eppn ],
-	                                  $dest );
-	            }
-	
+	            $this->mail_activation($request, $individu);
 	            $sj->infoMessage(__METHOD__ .':' . __LINE__ . " Nouvel utilisateur " . $individu->getMail() . " créé");
 	            return $this->render('default/email_activation.html.twig');
 	            //return new Response('<pre> Activation effectuée </pre>');
@@ -794,9 +793,7 @@ class GramcSessionController extends AbstractController
         return $this->render('default/nouveau_profil.html.twig', array( 'email' => $request->getSession()->get('email'), 'form' => $form->createView())  );
     }
 
-//////
-
-    private function mail_activation($individu)
+    private function mail_activation(Request $request, $individu)
     {
 		$sj = $this->sj;
 		$sn = $this->sn;
@@ -811,13 +808,26 @@ class GramcSessionController extends AbstractController
 
 		// envoi de mail
 
-		$session = new Session();
-
+		$session = $request->getSession();
 		$twig_sujet   = $this->tw->createTemplate('Activation de votre comptre Gramc');
 		$twig_contenu = $this->tw->createTemplate("Bonjour\nPour activer votre compte sur gramc, merci de visiter cette url:\n {{ url('activation') }}/{{ key }} \nL'équipe CALMIP");
 		$sn -> sendMessage(  $twig_sujet, $twig_contenu, [ 'key' => $key ], [$session->get('email')]);
 		$sj->infoMessage(__METHOD__ .':' . __LINE__ . ' Activation GRAMC  pour ' .  $session->get('email').  ' envoyé (key=' . $key .')' );
+		
+		/* Envoi d'une notification aux admins dans le cas où il s'agit d'un compte CRU */
+		$eppn = $request->getSession()->get('eppn');
+		//$sj->debugMessage(__FILE__ .':' . __LINE__ . ' coucou ' . $eppn);
+		if (strpos($eppn ,'sac.cru.fr') !== false) 
+		{
+            //$sj->debugMessage(__FILE__ .':' . __LINE__ . ' Demande de COMPTE CRU - '.$eppn);
+			$dest = $sn->mailUsers( ['A'] );
+			$sn->sendMessage( "notification/compte_ouvert_pour_admin-sujet.html.twig",
+							  "notification/compte_ouvert_pour_admin-contenu.html.twig",
+							  [ 'individu' => $individu, 'eppn' => $eppn ],
+							  $dest );
+		}
      }
+
 
      /**
      * @Route("/erreur_login", name="erreur_login")
