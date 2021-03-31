@@ -55,6 +55,7 @@ use App\GramcServices\ServiceNotifications;
 use App\GramcServices\ServiceProjets;
 use App\GramcServices\ServiceSessions;
 use App\GramcServices\ServiceVersions;
+use App\GramcServices\ServiceExperts\ServiceExperts;
 use App\GramcServices\GramcDate;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -90,6 +91,7 @@ class ExpertiseController extends AbstractController
 		private $pw;
 		private $ff;
 		private $vl;
+		private $se;
 		private $tok;
 		private $ac;
 	
@@ -100,6 +102,7 @@ class ExpertiseController extends AbstractController
 								 ServiceSessions $ss,
 								 GramcDate $sd,
 								 ServiceVersions $sv,
+								 ServiceExperts $se,
 								 ProjetWorkflow $pw,
 								 FormFactoryInterface $ff,
 								 ValidatorInterface $vl,
@@ -113,6 +116,7 @@ class ExpertiseController extends AbstractController
 		$this->ss  = $ss;
 		$this->sd  = $sd;
 		$this->sv  = $sv;
+		$this->se  = $se;
 		$this->pw  = $pw;
 		$this->ff  = $ff;
 		$this->vl  = $vl;
@@ -320,11 +324,11 @@ class ExpertiseController extends AbstractController
 		$sd  = $this->sd;
 		$ss  = $this->ss;
 		$sp  = $this->sp;
-		$sj = $this->sj;
-		$token = $this->token;
+		$sj  = $this->sj;
+		$tok = $this->tok;
         $em  = $this->getDoctrine()->getManager();
         
-        $moi = $token->getUser();
+        $moi = $tok->getUser();
         if( is_string( $moi ) ) $sj->throwException();
 
         $mes_thematiques     = $moi->getThematique();
@@ -483,7 +487,7 @@ class ExpertiseController extends AbstractController
 		// On propose aux experts du comité d'attribution (c-a-d ceux qui ont une thématique) d'entrer un commentaire sur l'année écoulée
 		$mes_commentaires_flag = false;
 		$mes_commentaires_maj        = null;
-		if ($this->container->hasParameter('commentaires_experts_d') && count($mes_thematiques)>0)
+		if ($this->has('commentaires_experts_d') && count($mes_thematiques)>0)
 		{
 			$mes_commentaires_flag = true;
 			$mois = $sd->format('m');
@@ -607,11 +611,11 @@ class ExpertiseController extends AbstractController
 		$sj = $this->sj;
 		$ac = $this->ac;
 		$sval = $this->vl;
-		$token = $this->token;
+		$tok = $this->tok;
 		$em = $this->getDoctrine()->getManager();
 		
         // ACL
-        $moi = $token->getUser();
+        $moi = $tok->getUser();
         if( is_string( $moi ) ) $sj->throwException(__METHOD__ . ":" . __LINE__ . " personne connecté");
         elseif( $expertise->getExpert() == null ) $sj->throwException(__METHOD__ . ":" . __LINE__ . " aucun expert pour l'expertise " . $expertise );
         elseif( ! $expertise->getExpert()->isEqualTo( $moi ) ) {
@@ -889,10 +893,10 @@ class ExpertiseController extends AbstractController
 		$sj = $this->sj;
 		$ac = $this->ac;
 		$em = $this->getDoctrine()->getManager();
-		$token = $this->token;
+		$tok = $this->tok;
 
 	    // ACL
-	    $moi = $token->getUser();
+	    $moi = $tok->getUser();
 	    if( is_string( $moi ) ) $sj->throwException(__METHOD__ . ":" . __LINE__ . " personne connecté");
 	    elseif( $expertise->getExpert() == null ) $sj->throwException(__METHOD__ . ":" . __LINE__ . " aucun expert pour l'expertise " . $expertise );
 	    elseif( ! $expertise->getExpert()->isEqualTo( $moi ) )

@@ -799,7 +799,8 @@ class GramcSessionController extends AbstractController
     private function mail_activation($individu)
     {
 		$sj = $this->sj;
-
+		$sn = $this->sn;
+		
 		$key = md5( random_int(1,10000000000) . microtime() );
 		$compteactivation = new Compteactivation();
 		$compteactivation->setIndividu($individu);

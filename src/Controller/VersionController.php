@@ -195,7 +195,7 @@ class VersionController extends AbstractController
     public function avantSupprimerAction(Version $version, $rtn)
     {
 		$sm = $this->sm;
-		$sj = $this->$sj;
+		$sj = $this->sj;
 
 	    // ACL
 	    if( $sm->modifier_version($version)['ok'] == false )
