@@ -46,6 +46,7 @@ use App\GramcServices\ServiceNotifications;
 use App\GramcServices\ServiceProjets;
 use App\GramcServices\ServiceSessions;
 use App\GramcServices\ServiceVersions;
+use App\GramcServices\ServiceExperts\ServiceExperts;
 use App\GramcServices\GramcDate;
 use App\GramcServices\GramcGraf\CalculTous;
 use App\GramcServices\GramcGraf\Stockage;
@@ -101,6 +102,7 @@ class ProjetController extends AbstractController
 	private $gall;
 	private $sd;
 	private $sv;
+	private $se;
 	private $pw;
 	private $ff;
 	private $tok;
@@ -118,6 +120,7 @@ class ProjetController extends AbstractController
 								 CalculTous $gall,
 								 GramcDate $sd,
 								 ServiceVersions $sv,
+								 ServiceExperts $se,
 								 ProjetWorkflow $pw,
  								 FormFactoryInterface $ff,
 								 TokenStorageInterface $tok,
@@ -136,6 +139,7 @@ class ProjetController extends AbstractController
 		$this->gall= $gall;
 		$this->sd  = $sd;
 		$this->sv  = $sv;
+		$this->se  = $se;
 		$this->pw  = $pw;
 		$this->ff  = $ff;
 		$this->token= $tok->getToken();
@@ -606,6 +610,7 @@ class ProjetController extends AbstractController
      */
     public function fwdAction(Version $version, Request $request, LoggerInterface $lg)
     {
+		$se = $this->se;
 		$em = $this->getDoctrine()->getManager();
         if( $request->isMethod('POST') )
 		{
@@ -618,10 +623,8 @@ class ProjetController extends AbstractController
                 {
 				    $workflow->execute( Signal::CLK_VAL_DEM, $version->getProjet());
 		
-				    // On crée une expertise pour ce projet, mais on n'affecte pas d'experts
-				    $expertise  =   new Expertise();
-				    $expertise->setVersion( $version );
-	    		    Functions::sauvegarder( $expertise, $em, $lg );
+					// Crée une nouvelle expertise avec proposition d'experts
+					$se->newExpertiseIfPossible($version);
 				}
 		    }
             return $this->redirectToRoute('projet_session');

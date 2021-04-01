@@ -29,7 +29,21 @@ use App\Entity\Projet;
 use App\Entity\Version;
 use App\Entity\Individu;
 use App\Entity\CollaborateurVersion;
+use App\Entity\Expertise;
 use App\Interfaces\Demande;
+use App\Form\ChoiceList\ExpertChoiceLoader;
+
+use App\Entity\Thematique;
+use App\Entity\Rattachement;
+use App\Utils\Etat;
+use App\Utils\Functions;
+
+use App\GramcServices\ServiceJournal;
+use App\GramcServices\ServiceNotifications;
+use App\GramcServices\PropositionExperts\PropositionExpertsType1;
+use App\GramcServices\PropositionExperts\PropositionExpertsType2;
+
+use Psr\Log\LoggerInterface;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -45,16 +59,6 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-use App\Form\ChoiceList\ExpertChoiceLoader;
-
-use App\Entity\Thematique;
-use App\Entity\Rattachement;
-//use App\App;
-use App\Utils\Etat;
-use App\Utils\Functions;
-
-use App\GramcServices\ServiceJournal;
-use App\GramcServices\ServiceNotifications;
 use Doctrine\ORM\EntityManagerInterface;
 
 /****************************************
@@ -67,14 +71,27 @@ class ServiceExperts
 	protected $formFactory;
 	protected $sn;
 	protected $sj;
+	protected $pe1;
+	protected $pe2;
+	protected $lg;
 	protected $em;
 
-	function __construct ($max_expertises_nb, FormFactoryInterface $ff, ServiceNotifications $sn, ServiceJournal $sj, EntityManagerInterface $em)
+	function __construct($max_expertises_nb, 
+						 FormFactoryInterface $ff,
+						 ServiceNotifications $sn,
+						 ServiceJournal $sj, 
+						 PropositionExpertsType1 $pe1,
+						 PropositionExpertsType2 $pe2,
+						 LoggerInterface $lg,
+						 EntityManagerInterface $em)
 	{
 		$this->max_expertises_nb = $max_expertises_nb;
 		$this->formFactory       = $ff;
 		$this->sn                = $sn;
 		$this->sj                = $sj;
+		$this->pe1               = $pe1;
+		$this->pe2               = $pe2;
+		$this->lg                = $lg;
 		$this->em                = $em;
 
 		$this->notifications     = []; // notifications à envoyer, mises en réserve
@@ -292,6 +309,48 @@ class ServiceExperts
 		}
 	}
 
+	/**
+	 * Si pas déjà fait, crée une expertise et fait une proposition automatique d'experts pour un projet
+	 * param = $version
+	 * 
+	 *********/
+	public function newExpertiseIfPossible(Version $version) : void
+	{
+		$pe1 = $this->pe1;
+		$pe2 = $this->pe2;
+		$lg  = $this->lg;
+		$em  = $this->em;
+		
+		// S'il y a déjà une expertise on ne fait rien
+	    // Sinon on la crée et on appelle le programme d'affectation automatique des experts
+		if( count( $version->getExpertise() ) > 0 )
+        {
+		    $sj->noticeMessage(__METHOD__ . ":" . __LINE__ . " Expertise de la version " . $version . " existe déjà");
+        }
+		else
+        {
+		    $expertise = new Expertise();
+		    $expertise->setVersion( $version );
+	
+		    // Attention, l'algorithme de proposition des experts dépend du type de projet
+		    $projet = $version->getProjet();
+		    if ($projet -> getTypeProjet() == Projet::PROJET_TEST || $projet->getTypeProjet() == Projet::PROJET_FIL)
+			{
+				$prop_expert = $pe2;
+			}
+			else
+			{
+				$prop_expert = $pe1;
+			}
+		    $expert      = $prop_expert->getProposition($version);
+            if ($expert != null)
+            {
+				$expertise->setExpert( $expert );
+		    }
+		    Functions::sauvegarder( $expertise, $em, $lg );
+        }
+	}
+		 
 	/**
 	* Ajoute une expertise à la demande
 	* Si on atteint le paramètre max_expertises_nb, ne fait rien
@@ -695,7 +754,7 @@ class ServiceExperts
 			$params = [ 'object' => $liste_d ];
 			//$this->sj->debugMessage( __METHOD__ . "Envoi d'un message à " . join(',',$dest) . " - " . Functions::show($liste_d) );
 
-			$this->sj->sendMessage ('notification/affectation_expert_version-sujet.html.twig',
+			$this->sn->sendMessage ('notification/affectation_expert_version-sujet.html.twig',
 									'notification/affectation_expert_version-contenu.html.twig',
 									$params,
 									$dest);

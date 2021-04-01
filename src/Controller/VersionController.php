@@ -40,8 +40,7 @@ use App\GramcServices\ServiceNotifications;
 use App\GramcServices\ServiceProjets;
 use App\GramcServices\ServiceSessions;
 use App\GramcServices\ServiceVersions;
-use App\GramcServices\PropositionExperts\PropositionExpertsType1;
-use App\GramcServices\PropositionExperts\PropositionExpertsType2;
+use App\GramcServices\ServiceExperts\ServiceExperts;
 use App\GramcServices\GramcDate;
 
 use Psr\Log\LoggerInterface;
@@ -93,10 +92,9 @@ class VersionController extends AbstractController
 	private $sm;
 	private $sp;
 	private $ss;
-	private $pe1;
-	private $pe2;
 	private $sd;
 	private $sv;
+	private $se;
 	private $pw;
 	private $ff;
 	private $vl;
@@ -110,10 +108,9 @@ class VersionController extends AbstractController
 								 ServiceMenus $sm,
 								 ServiceProjets $sp,
 								 ServiceSessions $ss,
-								 PropositionExpertsType1 $pe1,
-								 PropositionExpertsType2 $pe2,
 								 GramcDate $sd,
 								 ServiceVersions $sv,
+								 ServiceExperts $se,
 								 ProjetWorkflow $pw,
 								 FormFactoryInterface $ff,
 								 ValidatorInterface $vl,
@@ -127,10 +124,9 @@ class VersionController extends AbstractController
 		$this->sm  = $sm;
 		$this->sp  = $sp;
 		$this->ss  = $ss;
-		$this->pe1 = $pe1;
-		$this->pe2 = $pe2;
 		$this->sd  = $sd;
 		$this->sv  = $sv;
+		$this->se  = $se;
 		$this->pw  = $pw;
 		$this->ff  = $ff;
 		$this->vl  = $vl;
@@ -859,6 +855,7 @@ class VersionController extends AbstractController
     {
 		$sm = $this->sm;
 		$sj = $this->sj;
+		$se = $this->se;
 		$em = $this->getdoctrine()->getManager();
 
 		$this->MenuACL( $sm->envoyer_expert($version), " Impossible d'envoyer la version " . $version->getIdVersion() . " à l'expert", __METHOD__, __LINE__ );
@@ -871,35 +868,9 @@ class VersionController extends AbstractController
 		if( $version->getCGU() == false )
 		    $sj->throwException(__METHOD__ .":". __LINE__ ." Pas d'acceptation des CGU " . $projet->getIdProjet());
 	
-	    // S'il y a déjà une expertise on ne fait rien
-	    // Sinon on la crée et on appelle le programme d'affectation automatique des experts
-		if( count( $version->getExpertise() ) > 0 )
-        {
-		    $sj->noticeMessage(__METHOD__ . ":" . __LINE__ . " Expertise de la version " . $version . " existe déjà");
-        }
-		else
-        {
-		    $expertise = new Expertise();
-		    $expertise->setVersion( $version );
-	
-		    // Attention, l'algorithme de proposition des experts dépend du type de projet
-		    if ($projet -> getTypeProjet() == Projet::PROJET_TEST || $projet->getTypeProjet() == Projet::PROJET_FIL)
-			{
-				$prop_expert = $this->pe2;
-			}
-			else
-			{
-				$prop_expert = $this->pe1;
-			}
-		    //$prop_expert = PropositionExperts::factory($em,$version);
-		    $expert      = $prop_expert->getProposition($version);
-            if ($expert != null)
-            {
-				$expertise->setExpert( $expert );
-		    }
-		    Functions::sauvegarder( $expertise, $em, $lg );
-        }
-
+		// Crée une nouvelle expertise avec proposition d'experts
+		$se->newExpertiseIfPossible($version);
+		
 		$projetWorkflow = $this->pw;
 		$rtn = $projetWorkflow->execute( Signal::CLK_VAL_DEM, $projet );
 	
