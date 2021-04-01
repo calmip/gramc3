@@ -36,8 +36,10 @@ services.yaml
 /mesocentres/**/favicon.ico
 
 altermeso
-app/config/adresses.txt
+config/adresses.txt
 
-.env*
+.env.local
 adminer\.php
+
+public/index.php
 
