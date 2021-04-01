@@ -26,31 +26,53 @@ namespace App\Controller;
 
 use App\Entity\Publication;
 use App\Entity\Projet;
-//use App\App;
 use App\Utils\Functions;
+use App\Form\PublicationType;
+
+use App\GramcServices\ServiceJournal;
+use App\GramcServices\ServiceSessions;
 
 use Psr\Log\LoggerInterface;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
-
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-
-use App\Form\PublicationType;
-
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 /**
  * Publication controller.
  *
  * @Route("publication")
  */
-class PublicationController extends Controller
+class PublicationController extends AbstractController
 {
+	private $sj;
+	private $ss;
+	private $ff;
+	private $tok;
+	private $ac;
+		
+	public function __construct (ServiceJournal $sj,
+								 ServiceSessions $ss,
+ 								 FormFactoryInterface $ff,
+								 TokenStorageInterface $tok,
+ 								 AuthorizationCheckerInterface $ac
+								 )
+	{
+		$this->sj  = $sj;
+		$this->ss  = $ss;
+		$this->ff  = $ff;
+		$this->token= $tok->getToken();
+		$this->ac  = $ac;
+	}
+
     /**
      * Lists all publication entities.
      *
@@ -154,7 +176,7 @@ class PublicationController extends Controller
      */
     public function AnneeAction(Request $request)
     {
-		$ss    = $this->get('App\GramcServices\ServiceSessions');
+		$ss    = $this->ss;
 		$data  = $ss->selectAnnee($request); // formulaire
         $annee = $data['annee'];
         $em    = $this->getDoctrine()->getManager();
@@ -282,7 +304,7 @@ class PublicationController extends Controller
      */
     public function modifyAction(Request $request, Publication $publication, Projet $projet, LoggerInterface $lg)
     {
-		$sj = $this->get('App\GramcServices\ServiceJournal');
+		$sj = $this->sj;
 		$em = $this->getdoctrine()->getManager();
 
         $editForm = $this->createForm('App\Form\PublicationType', $publication);
@@ -340,9 +362,9 @@ class PublicationController extends Controller
      */
     public function supprimerAction(Request $request, Publication $publication, Projet $projet, LoggerInterface $lg)
     {
-		$ac = $this->get('security.authorization_checker');
-		$token = $this->get('security.token_storage')->getToken();
-		$sj = $this->get('App\GramcServices\ServiceJournal');
+		$ac = $this->ac;
+		$token = $this->token;
+		$sj = $this->sj;
 		$em = $this->getdoctrine()->getManager();
 
         // ACL
@@ -392,15 +414,14 @@ class PublicationController extends Controller
      */
     public function autocompleteAction(Request $request)
     {
-		$sj = $this->get('App\GramcServices\ServiceJournal');
+		$sj = $this->sj;
 		$em = $this->getDoctrine()->getManager();
 		
         $sj->debugMessage('autocompleteAction ' .  print_r($_POST, true) );
-        $form = $this
-            ->get('form.factory')
-            ->createNamedBuilder('autocomplete_form', FormType::class, [])
-            ->add('refbib', TextType::class, [ 'required' => true, 'csrf_protection' => false] )
-            ->getForm();
+        $form = $this->ff
+		            ->createNamedBuilder('autocomplete_form', FormType::class, [])
+		            ->add('refbib', TextType::class, [ 'required' => true, 'csrf_protection' => false] )
+		            ->getForm();
             
         $form->handleRequest($request);
         

@@ -30,6 +30,7 @@ use App\GramcServices\ServiceJournal;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 
 /********************
  * Ce service est utilisé pour envoyer des notifications par mail aux utilisateurs

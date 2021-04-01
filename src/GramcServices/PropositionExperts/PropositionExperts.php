@@ -33,7 +33,6 @@ use App\PropositionExperts\PropositionExpertsType1;
 use App\PropositionExperts\PropositionExpertsType2;
 
 use App\GramcServices\ServiceJournal;
-use App\GramcServices\ServiceExperts\ServiceExperts;
 use Doctrine\ORM\EntityManagerInterface;
 
 
@@ -45,32 +44,16 @@ use Doctrine\ORM\EntityManagerInterface;
  **********************************************************************/
 abstract class PropositionExperts 
 {
-	protected $se;
 	protected $sj;
 	protected $em;
 	
-	public function __construct( ServiceExperts $se, ServiceJournal $sj, EntityManagerInterface $em)
+	public function __construct( ServiceJournal $sj, EntityManagerInterface $em)
 	{
-		$this -> se = $se;
 		$this -> sj = $sj;
 		$this -> em = $em;
 	}
 	
 	abstract public function getProposition(Version $version);
-
-
-	//static public function factory($em, Version $version)
-	//{
-		//$projet = $version->getProjet();
-		//if ($projet -> getTypeProjet() == Projet::PROJET_TEST || $projet->getTypeProjet() == Projet::PROJET_FIL)
-		//{
-			//return new PropositionExpertsType2($em);
-		//}
-		//else
-		//{
-			//return new PropositionExpertsType1($em);
-		//}
-	//}
 
 	// Cherche un expert acceptable dans les versions précédentes
 	// Retourne $expert, ou null si pas trouvé
@@ -154,8 +137,6 @@ abstract class PropositionExperts
 	        elseif( ! $expert->isExpert() )
             {
 	            $this->sj->errorMessage(__METHOD__  .  ":" . __LINE__ . " " .  $expert . " est proposé comme expert mais n'est pas un expert !");
-	            $this->se->noThematique( $expert );
-	            $this->em->flush();
             }
 		}
 		

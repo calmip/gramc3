@@ -25,30 +25,29 @@ namespace App\Controller;
 
 use App\Entity\Projet;
 use App\Entity\Compta;
+use App\Utils\Functions;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use App\GramcServices\ServiceMenus;
+use App\GramcServices\ServiceJournal;
+use App\GramcServices\ServiceVersions;
+use App\GramcServices\GramcDate;
+use App\GramcServices\GramcGraf\Calcul;
+use App\GramcServices\DonneesFacturation;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 use Symfony\Component\HttpFoundation\Request;
-//use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
-////use App\App;
-use App\Utils\Functions;
-//use App\Utils\Etat;
-//use App\Utils\Signal;
 
-//use App\GramcGraf\Calcul;
-//use App\GramcGraf\CalculTous;
-//use App\GramcGraf\Stockage;
-
-//use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-//use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-//use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
+
+use Knp\Snappy\Pdf;
+
 
 /**
  * ProjetFctController rassemble les controleurs dédiés au bouton "Euro" (données de facturation)
@@ -59,8 +58,34 @@ use Symfony\Component\Form\Extension\Core\Type\DateType;
  // Tous ces controleurs sont exécutés au moins par OBS, certains par ADMIN seulement
  // et d'autres par DEMANDEUR
 
-class ProjetDfctController extends Controller
+class ProjetDfctController extends AbstractController
 {
+		private $sj;
+		private $sm;
+		private $gcl;
+		private $sd;
+		private $sv;
+		private $dfct;
+		private $pdf;
+		
+	public function __construct (ServiceJournal $sj,
+								 ServiceMenus $sm,
+								 Calcul $gcl,
+								 GramcDate $sd,
+								 ServiceVersions $sv,
+								 DonneesFacturation $dfct,
+								 Pdf $pdf
+								 )
+	{
+		$this->sj = $sj;
+		$this->sm = $sm;
+		$this->gcl= $gcl;
+		$this->sd = $sd;
+		$this->sv = $sv;
+		$this->dfct= $dfct;
+ 		$this->pdf = $pdf;
+	}
+	
     /**
      * Appelé quand on clique sur le bouton € dans la page projets par année
      * Affiche les données de facturation actuelles
@@ -71,11 +96,11 @@ class ProjetDfctController extends Controller
 
 	public function dfctlisteAction(Projet $projet, $annee,  Request $request)
 	{
-		$dessin_heures = $this -> get('App\GramcServices\GramcGraf\Calcul');
-		$sm     = $this->get('App\GramcServices\ServiceMenus');
-		$sd     = $this->get('App\GramcServices\GramcDate');
+		$dessin_heures = $this -> gcl;
+		$sm     = $this->sm;
+		$sd     = $this->sd;
 		$em     = $this->getDoctrine()->getManager();
-		$dfct   = $this->get('App\GramcServices\DonneesFacturation');
+		$dfct   = $this->dfct;
 		$emises = $dfct->getNbEmises($projet, $annee);
 		$version= $dfct->getVersion($projet, $annee);
 		$menu   = [];
@@ -165,8 +190,8 @@ class ProjetDfctController extends Controller
 	
 	public function downloaddfctAction(Projet $projet, $annee, $nb, Request $request)
 	{
-		$dfct     = $this->get('App\GramcServices\DonneesFacturation');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
+		$dfct= $this->dfct;
+		$sj  = $this->sj;
 
 		$filename = $dfct->getPath($projet, $annee, $nb);
 		if ($filename == '')
@@ -191,7 +216,7 @@ class ProjetDfctController extends Controller
     {
 		$em     = $this->getDoctrine()->getManager();
 		$annee  = $fin_periode->format('Y');
-		$dfct   = $this->get('App\GramcServices\DonneesFacturation');
+		$dfct   = $this->dfct;
 		$emises = $dfct->getNbEmises($projet, $annee);
 		$numero = count($emises) + 1;
 		$version= $dfct->getVersion($projet, $annee);
@@ -220,7 +245,7 @@ class ProjetDfctController extends Controller
 		$id_projet     = $projet->getIdProjet();
 		$compta_repo   = $em -> getRepository(Compta::class);
         $db_conso      = $compta_repo->conso( $id_projet, $annee );
-		$dessin_heures = $this -> get('App\GramcServices\GramcGraf\Calcul');
+		$dessin_heures = $this -> gcl;
 
 		// conso  sur la période
 		$struct_data   = $dessin_heures->createStructuredData($debut_periode,$fin_periode,$db_conso);
@@ -262,7 +287,7 @@ class ProjetDfctController extends Controller
             );
 
 		//return $html4pdf;
-	    $pdf = $this->get('knp_snappy.pdf')->getOutputFromHtml($html4pdf->getContent());
+	    $pdf = $this->pdf->getOutputFromHtml($html4pdf->getContent());
 
 		// On stoque la date de fin de la période + 1j
 		$stamp = clone $fin_periode;

@@ -25,14 +25,13 @@
 namespace App\Controller;
 
 use App\Entity\Thematique;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use App\Entity\Individu;
 
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
-
-//use App\App;
-use App\Entity\Individu;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -40,8 +39,15 @@ use Symfony\Component\HttpFoundation\Request;
  *
  * @Route("thematique")
  */
-class ThematiqueController extends Controller
+class ThematiqueController extends AbstractController
 {
+	private $ac;
+		
+	public function __construct (AuthorizationCheckerInterface $ac)
+	{
+		$this->ac  = $ac;
+	}
+
     /**
      * Lists all thematique entities.
      *
@@ -66,7 +72,7 @@ class ThematiqueController extends Controller
      */
     public function gererAction()
 	{
-		$ac = $this->get('security.authorization_checker');
+		$ac = $this->ac;
 		$em = $this->getDoctrine()->getManager();
 		
 		// Si on n'est pas admin on n'a pas accès au menu

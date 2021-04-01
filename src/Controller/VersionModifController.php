@@ -49,7 +49,7 @@ use App\Validator\Constraints\PagesNumber;
 
 use Psr\Log\LoggerInterface;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -84,7 +84,7 @@ use Twig\Environment;
  *
  * @Route("version")
  */
-class VersionModifController extends Controller
+class VersionModifController extends AbstractController
 {
 	private $sj;
 	private $sm;
@@ -582,7 +582,7 @@ class VersionModifController extends Controller
 		$sval = $this->vl;
 		$em = $this->getDoctrine()->getManager();
 
-		if( $this->container->hasParameter('heures_projet_test' ) )
+		if( $this->has('heures_projet_test' ) )
 			$heures_projet_test = $this->getParameter('heures_projet_test' );
 		else
 			$heures_projet_test =  5000;
@@ -1096,6 +1096,12 @@ class VersionModifController extends Controller
 			
 			// Si pas de version active (nouveau projet) = pas de problème on redirige sur l'édition en cours
 			if ($veract == null)
+			{
+				return $this->redirectToRoute('modifier_version',['id' => $version, '_fragment' => 'liste_des_collaborateurs'] );
+			}
+			
+			// Peut arriver pour l'administrateur car pour lui le bouton modifier est toujours acitf
+			elseif ($veract->getId() == $version->getId())
 			{
 				return $this->redirectToRoute('modifier_version',['id' => $version, '_fragment' => 'liste_des_collaborateurs'] );
 			}

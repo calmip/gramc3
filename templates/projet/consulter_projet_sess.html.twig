@@ -145,7 +145,7 @@
             <span class="petit">Y compris les rallonges</span>
             </th>
             <td>{{ (version.getDemHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}
-            {% if toomuch %} <img src="{{ asset('icones/attention16.png') }}" alt="Demande trop forte, cf. règles d'attribution" title="Demande trop forte, cf. règles d'attribution" /> {% endif %}
+            {% if toomuch %} <img src="{{ absolute_url(asset('icones/attention16.png')) }}" alt="Demande trop forte, cf. règles d'attribution" title="Demande trop forte, cf. règles d'attribution" /> {% endif %}
             </td>
         </tr>
     </tbody>

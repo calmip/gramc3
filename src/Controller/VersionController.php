@@ -40,13 +40,12 @@ use App\GramcServices\ServiceNotifications;
 use App\GramcServices\ServiceProjets;
 use App\GramcServices\ServiceSessions;
 use App\GramcServices\ServiceVersions;
-use App\GramcServices\PropositionExperts\PropositionExpertsType1;
-use App\GramcServices\PropositionExperts\PropositionExpertsType2;
+use App\GramcServices\ServiceExperts\ServiceExperts;
 use App\GramcServices\GramcDate;
 
 use Psr\Log\LoggerInterface;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -86,17 +85,16 @@ use Knp\Snappy\Pdf;
  *
  * @Route("version")
  */
-class VersionController extends Controller
+class VersionController extends AbstractController
 {
 	private $sn;
 	private $sj;
 	private $sm;
 	private $sp;
 	private $ss;
-	private $pe1;
-	private $pe2;
 	private $sd;
 	private $sv;
+	private $se;
 	private $pw;
 	private $ff;
 	private $vl;
@@ -110,10 +108,9 @@ class VersionController extends Controller
 								 ServiceMenus $sm,
 								 ServiceProjets $sp,
 								 ServiceSessions $ss,
-								 PropositionExpertsType1 $pe1,
-								 PropositionExpertsType2 $pe2,
 								 GramcDate $sd,
 								 ServiceVersions $sv,
+								 ServiceExperts $se,
 								 ProjetWorkflow $pw,
 								 FormFactoryInterface $ff,
 								 ValidatorInterface $vl,
@@ -127,10 +124,10 @@ class VersionController extends Controller
 		$this->sm  = $sm;
 		$this->sp  = $sp;
 		$this->ss  = $ss;
-		$this->pe1 = $pe1;
-		$this->pe2 = $pe2;
 		$this->sd  = $sd;
 		$this->sv  = $sv;
+		$this->se  = $se;
+		$this->pw  = $pw;
 		$this->ff  = $ff;
 		$this->vl  = $vl;
 		$this->tok = $tok;
@@ -194,7 +191,7 @@ class VersionController extends Controller
     public function avantSupprimerAction(Version $version, $rtn)
     {
 		$sm = $this->sm;
-		$sj = $this->$sj;
+		$sj = $this->sj;
 
 	    // ACL
 	    if( $sm->modifier_version($version)['ok'] == false )
@@ -334,8 +331,14 @@ class VersionController extends Controller
 	    $img_justif_renou_2 = $sv->imageProperties('img_justif_renou_2', $version);
 	    $img_justif_renou_3 = $sv->imageProperties('img_justif_renou_3', $version);
 
-		$toomuch = $sv->is_demande_toomuch($version->getAttrHeures(),$version->getDemHeures());
-	    
+		//$toomuch = $sv->is_demande_toomuch($version->getAttrHeures(),$version->getDemHeures());
+		$toomuch = false;
+	    if ($session->getLibelleTypeSession()=='B' && ! $sv->isNouvelle($version)) {
+	        $version_prec = $version->versionPrecedente();
+	        if ($version_prec->getAnneeSession() == $version->getAnneeSession()) {
+	            $toomuch  = $sv -> is_demande_toomuch($version_prec->getAttrHeures(),$version->getDemHeures());
+	        }
+	    }
 	    $html4pdf =  $this->render('version/pdf.html.twig',
 		[
 			'projet'             => $projet,
@@ -356,8 +359,8 @@ class VersionController extends Controller
             'toomuch'            => $toomuch
 		]);
 	
+	    //file_put_contents("/tmp/output.html", $html4pdf->getContent());
 	    $pdf = $spdf->getOutputFromHtml($html4pdf->getContent());
-
 	    return Functions::pdf( $pdf );
     }
 
@@ -403,7 +406,7 @@ class VersionController extends Controller
     ///////////////////////////////////////////////////////////////
 
     /**
-     * Téléverser le rapport d'actitivé de l'année précedente
+     * Téléverser le rapport d'activité de l'année précedente
      *
      * @Route("/{id}/televersement_fiche", name="version_televersement_fiche")
      * @Method({"POST","GET"})
@@ -417,21 +420,23 @@ class VersionController extends Controller
 
 	    // ACL
 	    if( $sm->televersement_fiche($version)['ok'] == false )
+		{
 	        $sj->throwException(__METHOD__ . ':' . __LINE__ . " impossible de téléverser la fiche du projet " . $projet .
 	            " parce que : " . $sm -> telechargement_fiche($version)['raison'] );
+		}
 	
 	    $format_fichier = new \Symfony\Component\Validator\Constraints\File(
-	                [
-	                'mimeTypes'=> [ 'application/pdf' ],
-	                'mimeTypesMessage'=>' Le fichier doit être un fichier pdf. ',
-	                'maxSize' => "2024k",
-	                'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
-	                'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
-	                ]);
+			[
+				'mimeTypes'=> [ 'application/pdf' ],
+                'mimeTypesMessage'=>' Le fichier doit être un fichier pdf. ',
+                'maxSize' => "2024k",
+                'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
+                'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
+			]);
 	
-	     $form = $this->ff
-		           ->createNamedBuilder( 'upload', FormType::class, [], ['csrf_protection' => false ] )
-		           ->add('file', FileType::class,
+		$form = $this->ff
+					->createNamedBuilder( 'upload', FormType::class, [], ['csrf_protection' => false ] )
+					->add('file', FileType::class,
 		                [
 		                'required'          =>  true,
 		                'label'             => "",
@@ -449,20 +454,24 @@ class VersionController extends Controller
 	
 	        if( isset( $data['file'] ) && $data['file'] != null )
             {
-            $tempFilename = $data['file'];
-            if( ! empty( $tempFilename  ) && $tempFilename != "" )
-			{
-			$validator  = $this->vl;
-			$violations = $validator->validate( $tempFilename, [ $format_fichier, new PagesNumber() ] );
-			foreach( $violations as $violation )    $erreurs[]  =   $violation->getMessage();
+	            $tempFilename = $data['file'];
+	            if( ! empty( $tempFilename  ) && $tempFilename != "" )
+				{
+					$validator  = $this->vl;
+					$violations = $validator->validate( $tempFilename, [ $format_fichier, new PagesNumber() ] );
+					foreach( $violations as $violation )    $erreurs[]  =   $violation->getMessage();
+				}
 			}
-		}
-        else
-            $tempFilename = null;
+	        else
+	        {
+	            $tempFilename = null;
+			}
 
 
-        if( is_file( $tempFilename ) && ! is_dir( $tempFilename ) )
+	        if( is_file( $tempFilename ) && ! is_dir( $tempFilename ) )
+	        {
                 $file = new File( $tempFilename );
+			}
             elseif( is_dir( $tempFilename ) )
 			{
                 $sj->errorMessage(__METHOD__ .":" . __LINE__ . " Le nom  " . $tempFilename . " correspond à un répertoire");
@@ -474,42 +483,40 @@ class VersionController extends Controller
                 $erreurs[]  =  " Le fichier " . $tempFilename . " n'existe pas";
 			}
 
-        if( $form->isValid() && $erreurs == [] )
-		{
-            $session = $version->getSession();
-            $projet = $version->getProjet();
-            if( $projet != null && $session != null )
+	        if( $form->isValid() && $erreurs == [] )
 			{
-                $filename = $this->getParameter('signature_directory') .'/'.$session->getIdSession() .
-                                "/" . $session->getIdSession() . $projet->getIdProjet() . ".pdf";
-                $file->move( $this->getParameter('signature_directory') .'/'.$session->getIdSession(),
-                                 $session->getIdSession() . $projet->getIdProjet() . ".pdf" );
-
-                // on marque le téléversement de la fiche projet
-                $version->setPrjFicheVal(true);
-                $em->flush();
-                $resultat[] =   " La fiche du projet " . $projet . " pour la session " . $session . " téléversé ";
+	            $session = $version->getSession();
+	            $projet = $version->getProjet();
+	            if( $projet != null && $session != null )
+				{
+	                $filename = $this->getParameter('signature_directory') .'/'.$session->getIdSession() .
+	                                "/" . $session->getIdSession() . $projet->getIdProjet() . ".pdf";
+	                $file->move( $this->getParameter('signature_directory') .'/'.$session->getIdSession(),
+	                                 $session->getIdSession() . $projet->getIdProjet() . ".pdf" );
+	
+	                // on marque le téléversement de la fiche projet
+	                $version->setPrjFicheVal(true);
+	                $em->flush();
+	                $resultat[] =   " La fiche du projet " . $projet . " pour la session " . $session . " a été téléversée ";
                 }
-            else
+	            else
                 {
-                $resultat[] =   " La fiche du projet n'a pas été téléversé";
-                if( $projet == null )
-                    $sj->errorMessage( __METHOD__ . ':'. __LINE__ . " version " . $version . " n'a pas de projet");
-                if( $session == null )
-                    $sj->errorMessage( __METHOD__ . ':' . __LINE__ . " version " . $version . " n'a pas de session");
+	                $resultat[] =   " La fiche du projet n'a pas été téléversée";
+	                if( $projet == null )
+	                    $sj->errorMessage( __METHOD__ . ':'. __LINE__ . " version " . $version . " n'a pas de projet");
+	                if( $session == null )
+	                    $sj->errorMessage( __METHOD__ . ':' . __LINE__ . " version " . $version . " n'a pas de session");
                 }
             }
-
         }
 
-    return $this->render('version/televersement_fiche.html.twig',
+	    return $this->render('version/televersement_fiche.html.twig',
             [
             'version'       =>  $version,
             'form'          =>  $form->createView(),
             'erreurs'       =>  $erreurs,
             'resultat'      =>  $resultat,
             ]);
-
     }
 
 
@@ -848,6 +855,7 @@ class VersionController extends Controller
     {
 		$sm = $this->sm;
 		$sj = $this->sj;
+		$se = $this->se;
 		$em = $this->getdoctrine()->getManager();
 
 		$this->MenuACL( $sm->envoyer_expert($version), " Impossible d'envoyer la version " . $version->getIdVersion() . " à l'expert", __METHOD__, __LINE__ );
@@ -860,35 +868,9 @@ class VersionController extends Controller
 		if( $version->getCGU() == false )
 		    $sj->throwException(__METHOD__ .":". __LINE__ ." Pas d'acceptation des CGU " . $projet->getIdProjet());
 	
-	    // S'il y a déjà une expertise on ne fait rien
-	    // Sinon on la crée et on appelle le programme d'affectation automatique des experts
-		if( count( $version->getExpertise() ) > 0 )
-        {
-		    $sj->noticeMessage(__METHOD__ . ":" . __LINE__ . " Expertise de la version " . $version . " existe déjà");
-        }
-		else
-        {
-		    $expertise = new Expertise();
-		    $expertise->setVersion( $version );
-	
-		    // Attention, l'algorithme de proposition des experts dépend du type de projet
-		    if ($projet -> getTypeProjet() == Projet::PROJET_TEST || $projet->getTypeProjet() == Projet::PROJET_FIL)
-			{
-				$prop_expert = $this->pe2;
-			}
-			else
-			{
-				$prop_expert = $this->pe1;
-			}
-		    //$prop_expert = PropositionExperts::factory($em,$version);
-		    $expert      = $prop_expert->getProposition($version);
-            if ($expert != null)
-            {
-				$expertise->setExpert( $expert );
-		    }
-		    Functions::sauvegarder( $expertise, $em, $lg );
-        }
-
+		// Crée une nouvelle expertise avec proposition d'experts
+		$se->newExpertiseIfPossible($version);
+		
 		$projetWorkflow = $this->pw;
 		$rtn = $projetWorkflow->execute( Signal::CLK_VAL_DEM, $projet );
 	

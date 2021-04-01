@@ -33,7 +33,20 @@ use App\Entity\Individu;
 use App\Entity\Projet;
 use App\Entity\Thematique;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use App\GramcServices\ServiceJournal;
+use App\GramcServices\ServiceExperts\ServiceExpertsRallonge;
+use App\GramcServices\ServiceMenus;
+use App\GramcServices\ServiceProjets;
+use App\GramcServices\ServiceSessions;
+use App\GramcServices\ServiceVersions;
+use App\GramcServices\Workflow\Rallonge\RallongeWorkflow;
+use App\Utils\Etat;
+use App\Utils\Signal;
+use App\Utils\Functions;
+use App\AffectationExperts\AffectationExperts;
+use App\AffectationExperts\AffectationExpertsRallonge;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -41,12 +54,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-use App\Utils\Etat;
-use App\Utils\Signal;
-use App\Utils\Functions;
-use App\AffectationExperts\AffectationExperts;
-use App\AffectationExperts\AffectationExpertsRallonge;
-
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -58,8 +67,40 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
  * Rallonge controller.
  * @Route("rallonge")
  */
-class RallongeController extends Controller
+class RallongeController extends AbstractController
 {
+	private $sj;
+	private $sm;
+	private $sp;
+	private $ss;
+	private $sr;
+	private $sv;
+	private $rw;
+	private $ff;
+	private $vl;
+		
+	public function __construct (ServiceJournal $sj,
+								 ServiceMenus $sm,
+								 ServiceProjets $sp,
+								 ServiceSessions $ss,
+								 ServiceExpertsRallonge $sr,
+								 ServiceVersions $sv,
+								 RallongeWorkflow $rw,
+ 								 FormFactoryInterface $ff,
+ 								 ValidatorInterface $vl
+								 )
+	{
+		$this->sj = $sj;
+		$this->sm = $sm;
+		$this->sp = $sp;
+		$this->ss = $ss;
+		$this->sr = $sr;
+		$this->sv = $sv;
+		$this->rw = $rw;
+		$this->ff = $ff;
+		$this->vl = $vl;
+	}
+
     /**
      * Lists all rallonge entities.
      *
@@ -114,10 +155,10 @@ class RallongeController extends Controller
      */
     public function creationAction(Request $request, Projet $projet, LoggerInterface $lg)
     {
-		$sm = $this->get('App\GramcServices\ServiceMenus');
-		$ss = $this->get('App\GramcServices\ServiceSessions');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
-		$sp = $this->get('App\GramcServices\ServiceProjets');
+		$sm = $this->sm;
+		$ss = $this->ss;
+		$sj = $this->sj;
+		$sp = $this->sp;
 		$em = $this->getDoctrine()->getManager();
 		
 	    // ACL
@@ -137,7 +178,7 @@ class RallongeController extends Controller
 	    $count   = count ( $version->getRallonge() ) + 1;
 	    $rallonge->setIdRallonge( $version->getIdVersion() . 'R' . $count );
 	
-        $workflow = $this->get('App\GramcServices\Workflow\Rallonge\RallongeWorkflow');
+        $workflow = $this->rw;
 	    $rtn      = $workflow->execute( Signal::CLK_DEMANDE, $rallonge );
 	    if( $rtn == false )
 	        $sj->errorMessage(__METHOD__ . ":" . __LINE__ . " Impossible d'envoyer le signal CLK_DEMANDE à la rallonge " . $rallonge );
@@ -204,9 +245,9 @@ class RallongeController extends Controller
      */
     public function consulterAction(Request $request, Rallonge $rallonge)
     {
-		$sm = $this->get('App\GramcServices\ServiceMenus');
-		$sp = $this->get('App\GramcServices\ServiceProjets');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
+		$sm = $this->sm;
+		$sp = $this->sp;
+		$sj = $this->sj;
 		
 	    $version = $rallonge->getVersion();
 	    if( $version != null )
@@ -243,9 +284,9 @@ class RallongeController extends Controller
      */
     public function modifierAction(Request $request, Rallonge $rallonge)
     {
-		$sm = $this->get('App\GramcServices\ServiceMenus');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
-		$sval = $this->get('validator');
+		$sm = $this->sm;
+		$sj = $this->sj;
+		$sval = $this->vl;
 		$em = $this->getDoctrine()->getManager();
 		
         // ACL
@@ -313,10 +354,10 @@ class RallongeController extends Controller
      */
     public function expertiserAction(Request $request, Rallonge $rallonge)
     {
-		$sm = $this->get('App\GramcServices\ServiceMenus');
-		$ss = $this->get('App\GramcServices\ServiceSessions');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
-		$sval = $this->get('validator');
+		$sm = $this->sm;
+		$ss = $this->ss;
+		$sj = $this->sj;
+		$sval = $this->vl;
 		$em = $this->getDoctrine()->getManager();
 		
 	    // ACL
@@ -419,9 +460,9 @@ class RallongeController extends Controller
      */
     public function avantFinaliserAction(Request $request, Rallonge $rallonge, LoggerInterface $lg)
     {
-		$ss = $this->get('App\GramcServices\ServiceSessions');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
-		$sval = $this->get('validator');
+		$ss = $this->ss;
+		$sj = $this->sj;
+		$sval = $this->vl;
 		$em = $this->getdoctrine()->getManager();
 		
 	    $erreurs = [];
@@ -450,7 +491,7 @@ class RallongeController extends Controller
 
             Functions::sauvegarder( $rallonge, $em, $lg );
 
-	        $workflow = $this->get('App\GramcServices\Workflow\Rallonge\RallongeWorkflow');
+	        $workflow = $this->rw;
             if( ! $workflow->canExecute( Signal::CLK_VAL_PRS, $rallonge ) )
 			{
                 $erreur = "La finalisation de la rallonge " . $rallonge .
@@ -498,9 +539,9 @@ class RallongeController extends Controller
      */
     public function avantEnvoyerPresidentAction(Request $request, Rallonge $rallonge)
     {
-		$sm = $this->get('App\GramcServices\ServiceMenus');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
-		$sval = $this->get('validator');
+		$sm = $this->sm;
+		$sj = $this->sj;
+		$sval = $this->vl;
 
         // ACL
         if( $sm->rallonge_expertiser($rallonge)['ok'] == false )
@@ -538,9 +579,9 @@ class RallongeController extends Controller
      */
     public function avantEnvoyerAction(Request $request, Rallonge $rallonge)
     {
-		$sm = $this->get('App\GramcServices\ServiceMenus');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
-		$sval = $this->get('validator');
+		$sm = $this->sm;
+		$sj = $this->sj;
+		$sval = $this->vl;
 
         // ACL
         if( $sm->rallonge_envoyer($rallonge)['ok'] == false )
@@ -574,9 +615,9 @@ class RallongeController extends Controller
      */
     public function envoyerAction(Request $request, Rallonge $rallonge)
     {
-		$sm = $this->get('App\GramcServices\ServiceMenus');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
-		$sval = $this->get('validator');
+		$sm = $this->sm;
+		$sj = $this->sj;
+		$sval = $this->vl;
 
         // ACL
         if( $sm->rallonge_envoyer($rallonge)['ok'] == false )
@@ -584,7 +625,7 @@ class RallongeController extends Controller
                 " parce que : " . $sm->rallonge_envoyer($rallonge)['raison'] );
 
         $erreurs = Functions::dataError( $sval, $rallonge);
-        $workflow = $this->get('App\GramcServices\Workflow\Rallonge\RallongeWorkflow');
+        $workflow = $this->rw;
 
         if( $erreurs != null )
 		{
@@ -628,11 +669,11 @@ class RallongeController extends Controller
      */
     public function finaliserAction(Request $request, Rallonge $rallonge)
     {
-		$sj = $this->get('App\GramcServices\ServiceJournal');
-		$sval = $this->get('validator');
+		$sj = $this->sj;
+		$sval = $this->vl;
 
         $erreurs = Functions::dataError( $sval, $rallonge);
-        $workflow = $this->get('App\GramcServices\Workflow\Rallonge\RallongeWorkflow');
+        $workflow = $this->rw;
 
         if( $erreurs != null )
 		{
@@ -681,9 +722,9 @@ class RallongeController extends Controller
      */
     public function envoyerPresidentAction(Request $request, Rallonge $rallonge)
     {
-		$sm = $this->get('App\GramcServices\ServiceMenus');
-		$sj = $this->get('App\GramcServices\ServiceJournal');
-		$sval = $this->get('validator');
+		$sm = $this->sm;
+		$sj = $this->sj;
+		$sval = $this->vl;
 
        // ACL
         if( $sm->rallonge_expertiser($rallonge)['ok'] == false )
@@ -691,7 +732,7 @@ class RallongeController extends Controller
                 " au président parce que : " . $sm->rallonge_expertiser($rallonge)['raison'] );
 
         $erreurs = Functions::dataError( $sval, $rallonge, ['expertise'] );
-        $workflow = $this->get('App\GramcServices\Workflow\Rallonge\RallongeWorkflow');
+        $workflow = $this->rw;
 
         if( $erreurs != null )
 		{
@@ -742,9 +783,9 @@ class RallongeController extends Controller
     public function affectationAction(Request $request)
     {
 		$em = $this->getDoctrine()->getManager();
-		$sp = $this->get('App\GramcServices\ServiceProjets');
-	    $sv = $this->get('App\GramcServices\ServiceVersions');
-		$affectationExperts = $this->get('App\GramcServices\ServiceExpertsRallonge');
+		$sp = $this->sp;
+	    $sv = $this->sv;
+		$affectationExperts = $this->sr;
 
 	    $sessions = $em->getRepository(Session::class) ->findBy( ['etatSession' => Etat::ACTIF ] );
 	    if ( isset( $sessions[0] ) )
@@ -765,7 +806,6 @@ class RallongeController extends Controller
 
 	    $all_rallonges = $em -> getRepository(Rallonge::class)->findSessionRallonges($sessions);
 	    
-		//$affectationExperts = new AffectationExpertsRallonge($request, $all_rallonges, $this->get('form.factory'), $this->getDoctrine());
 		$affectationExperts->setDemandes($all_rallonges);
 
 		//

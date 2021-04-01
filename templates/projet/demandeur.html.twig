@@ -14,7 +14,7 @@
 		<td>{{ macros_graphiques.meta_etat_graphique(item.meta_etat) }}</td>
 		<td><a href="{{ path('consulter_projet', { 'id': item.projet.idProjet })}}" title="Ouvrir le projet {{ item.projet.idProjet }}"><img class="bouton_poussoir" src="{{ asset('icones/modifier.png') }}" alt="Modifier" /></a>{% if( item.projet.derniereVersion.isEdited ) %}&nbsp;<a href="{{ path('version_avant_supprimer', { 'id': item.projet.derniereVersion.idVersion })}}" title="Supprimer le projet {{ item.projet.idProjet }}"><img class="bouton_poussoir" src="{{ asset('icones/poubelle16.png') }}" alt="Supprimer" /></a>{% endif %}</td>
 		<td>{{ item.projet.idProjet }}</td>
-		<td rowspan="{{ item.cpt_rall + 1 }}"><tt>{{item.login}}</tt>
+		<td rowspan="{{ item.cpt_rall + 1 }}"><tt>{% if item.login == 'nologin' %} - {% else %} {{item.login}} {% endif %}</tt>
 		{% if item.passwd != null %}<img id="bouton_{{item.projet}}" class="bouton_poussoir right cadenas" src="{{ asset('icones/cadenas.png') }}" alt="Donnez-moi mon mot de passe" title="Donnez-moi mon mot de passe" /></a> {% endif %}</td>
 		<td rowspan="{{ item.cpt_rall + 1 }}">{{ item.projet.titre }}</td>
 		{% if noconso==false %}

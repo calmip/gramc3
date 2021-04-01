@@ -30,6 +30,12 @@
 // src/App/EventListener/ExceptionListener.php
 namespace App\EventListener;
 
+use App\Entity\Individu;
+use App\Utils\Functions;
+use App\GramcServices\ServiceJournal;
+
+use App\Exception\UserException;
+
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
@@ -42,7 +48,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-
+use Symfony\Component\Routing\RouterInterface;
 use Doctrine\ORM\ORMException;
 use Doctrine\DBAL\DBALException;
 
@@ -53,15 +59,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 //use Symfony\Bridge\Monolog\Logger;
 use Psr\Log\LoggerInterface;
 
-use App\Exception\UserException;
-//use App\App;
-
-//use App\Entity\Journal;
-use App\Entity\Individu;
-use App\Utils\Functions;
-use App\GramcServices\ServiceJournal;
 use Doctrine\ORM\EntityManagerInterface;
-
 
 class ExceptionListener 
 {
@@ -69,8 +67,7 @@ class ExceptionListener
     private $logger;
     private $session;
 
-	// TODO - c'est quoi router ?
-    public function __construct($kernel_debug,$router,LoggerInterface $logger, ServiceJournal $sj, SessionInterface $session,EntityManagerInterface $em)
+    public function __construct($kernel_debug,RouterInterface $router,LoggerInterface $logger, ServiceJournal $sj, SessionInterface $session,EntityManagerInterface $em)
     { 
 		$this->kernel_debug = $kernel_debug;
         $this->router = $router;
@@ -82,9 +79,9 @@ class ExceptionListener
 
     public function onKernelException(GetResponseForExceptionEvent $event)
     {
-
         $server = $event->getRequest()->server;
         $exception = $event->getException();
+        //$this->sj->debugMessage(__METHOD__.":".__LINE__." -> ".Functions::show($event));
  
         
 		// S'il y a une erreur sur la page d'accueil, décommenter ci-dessous
@@ -92,8 +89,6 @@ class ExceptionListener
 		// Mais en général, laisser commenté sinon grosses emmerdes en perspective !!!
         //$response =  new Response( '<pre>' . $exception . '</pre>');
         //$event->setResponse($response);
-        //return;
-        
  
         // nous captons des erreurs de la page d'accueil
         if( $event->getRequest()->getPathInfo() == '/' )

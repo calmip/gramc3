@@ -26,7 +26,7 @@ namespace App\Controller;
 
 use Psr\Log\LoggerInterface;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -46,6 +46,13 @@ use App\Entity\CollaborateurVersion;
 use App\Entity\User;
 use App\Entity\Compta;
 
+use App\GramcServices\ServiceNotifications;
+use App\GramcServices\ServiceJournal;
+use App\GramcServices\ServiceProjets;
+use App\GramcServices\ServiceSessions;
+use App\GramcServices\GramcDate;
+use App\GramcServices\ServiceVersions;
+
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 
 /**
@@ -53,8 +60,31 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
  *
  * @Route("/adminux")
  */
-class AdminuxController extends Controller
+class AdminuxController extends AbstractController
 {
+	private $sn;
+	private $sj;
+	private $sp;
+	private $ss;
+	private $sd;
+	private $sv;
+	
+	public function __construct (ServiceNotifications $sn,
+								 ServiceJournal $sj,
+								 ServiceProjets $sp,
+								 ServiceSessions $ss,
+								 GramcDate $sd,
+								 ServiceVersions $sv
+								 )
+	{
+		$this->sn  = $sn;
+		$this->sj  = $sj;
+		$this->sp  = $sp;
+		$this->ss  = $ss;
+		$this->sd  = $sd;
+		$this->sv  = $sv;
+	}
+
     /**
      * Met à jour les données de comptabilité à partir d'un unique fichier csv
      *
@@ -206,7 +236,7 @@ class AdminuxController extends Controller
      * Positionne le mot de passe du user demandé, à condition que ce user existe dans la table collaborateurVersion
      */
 
-    // exemple: curl --insecure --netrc -X POST https://.../adminux/users/setpassword/toto/loginname/azerty/password
+    // exemple: curl --netrc -X POST https://.../adminux/users/setpassword/toto/loginname/azerty/password
 	public function setpasswordAction(Request $request, $loginname, $password, LoggerInterface $lg)
 	{
 		$em = $this->getdoctrine()->getManager();
@@ -218,11 +248,11 @@ class AdminuxController extends Controller
 
 		# Calcul de la date d'expiration
 		$pwd_duree = $this->getParameter('pwd_duree');  // Le nombre de jours avant expiration du mot de passe
-		$grdt      = $this->get('App\GramcServices\GramcDate');
+		$grdt      = $this->sd;
 		$passexpir = $grdt->getNew()->add(new \DateInterval($pwd_duree));
 		
 		# Vérifie que ce loginname est connu
-		$cv   = $em->getRepository(User::class)->isLoginname($loginname);
+		$cv = $em->getRepository(User::class)->isLoginname($loginname);
 		if ($cv==false)
 		{
 			return new Response(json_encode( ['KO' => 'No user found in any projet' ]));
@@ -282,7 +312,7 @@ class AdminuxController extends Controller
 	 public function versionGetAction(Request $request)
 	 {
 		$em = $this->getDoctrine()->getManager();
-		$sp = $this->get('App\GramcServices\ServiceProjets');
+		$sp = $this->sp;
 		$versions = [];
 
 		$content  = json_decode($request->getContent(),true);
@@ -627,8 +657,8 @@ class AdminuxController extends Controller
      */
      public function quotaCheckAction(Request $request)
      {
- 		$sd = $this->get('App\GramcServices\GramcDate');
-		$sn = $this->get('App\GramcServices\ServiceNotifications');
+ 		$sd = $this->sd;
+		$sn = $this->sn;
 
 		if ( $this->getParameter('noconso')==true )
 		{
@@ -636,7 +666,7 @@ class AdminuxController extends Controller
 		}
 
         $annee_courante = $sd->showYear();
-		$sp      = $this->get('App\GramcServices\ServiceProjets');
+		$sp      = $this->sp;
         $projets = $sp->projetsParAnnee($annee_courante)[0];
 
         // projets à problème
@@ -661,12 +691,12 @@ class AdminuxController extends Controller
     /**
      * Vérifie la base de données, et supprime les mots de passe temporaires "expirés"
      * 
-     * @Route("/pwd_correct", name="pwd_correct", methods={"GET"})
+     * @Route("/password_check", name="password_check", methods={"GET"})
      * 
-     * curl --insecure --netrc -X GET   https://gramc3-local.mylaptop/adminux/pwd_correct
+     * curl --netrc -X GET   https://gramc3-local.mylaptop/adminux/password_check
      * 
      */
-     public function pwdExpirAction(Request $request, LoggerInterface $lg)
+     public function passwordCheckAction(Request $request, LoggerInterface $lg)
      {
 		$em = $this->getdoctrine()->getManager();
 		
@@ -675,7 +705,7 @@ class AdminuxController extends Controller
 			throw new AccessDeniedException("Accès interdit (paramètre noconso)");
 		}
 		
-	    $sd    = $this->get('App\GramcServices\GramcDate');
+	    $sd    = $this->sd;
 		$users = $em->getRepository(User::class)->findAll();
 		foreach ($users as $user)
 		{
