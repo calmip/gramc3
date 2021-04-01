@@ -236,7 +236,7 @@ class AdminuxController extends AbstractController
      * Positionne le mot de passe du user demandé, à condition que ce user existe dans la table collaborateurVersion
      */
 
-    // exemple: curl --insecure --netrc -X POST https://.../adminux/users/setpassword/toto/loginname/azerty/password
+    // exemple: curl --netrc -X POST https://.../adminux/users/setpassword/toto/loginname/azerty/password
 	public function setpasswordAction(Request $request, $loginname, $password, LoggerInterface $lg)
 	{
 		$em = $this->getdoctrine()->getManager();
@@ -252,7 +252,7 @@ class AdminuxController extends AbstractController
 		$passexpir = $grdt->getNew()->add(new \DateInterval($pwd_duree));
 		
 		# Vérifie que ce loginname est connu
-		$cv   = $em->getRepository(User::class)->isLoginname($loginname);
+		$cv = $em->getRepository(User::class)->isLoginname($loginname);
 		if ($cv==false)
 		{
 			return new Response(json_encode( ['KO' => 'No user found in any projet' ]));
@@ -691,12 +691,12 @@ class AdminuxController extends AbstractController
     /**
      * Vérifie la base de données, et supprime les mots de passe temporaires "expirés"
      * 
-     * @Route("/pwd_correct", name="pwd_correct", methods={"GET"})
+     * @Route("/password_check", name="password_check", methods={"GET"})
      * 
-     * curl --insecure --netrc -X GET   https://gramc3-local.mylaptop/adminux/pwd_correct
+     * curl --netrc -X GET   https://gramc3-local.mylaptop/adminux/password_check
      * 
      */
-     public function pwdExpirAction(Request $request, LoggerInterface $lg)
+     public function passwordCheckAction(Request $request, LoggerInterface $lg)
      {
 		$em = $this->getdoctrine()->getManager();
 		
