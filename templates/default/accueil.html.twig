@@ -29,7 +29,7 @@ Si vous ne connaissez pas encore {{mesoc}}, vous pouvez demander un <strong>proj
 
 {% else %}
 
-{% if session.etatsession == 2 %}
+{% if session != null and session.etatsession == 2 %}
 <div class="message warning"><h2>Session d'attribution en cours</h2>
 	<p>La session {{ session }} d'attribution de ressources sur le Mésocentre {{ mesoc }} est ouverte, 
 	vous avez jusqu'au <strong>{{ session.datefinsession | date('d-m-y') }}</strong> pour saisir vos demandes.</p>
