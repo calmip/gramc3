@@ -26,13 +26,17 @@
     </tr>
     </tbody></table>
 
-    <table class="projet"><tbody>
+	{% if norattachement == false %}
+    <table class="projet">
+	<tbody>
     <tr>
         <th class="horiz">{{ form_label( form.prjRattachement, "Rattachement du projet" ) }} </th>
         <td>{{ form_widget( form.prjRattachement ) }}</td>
     </tr>
-    </tbody></table>
-
+    </tbody>
+    </table>
+	{% endif %}
+	
     <div class="message warning"><h2>Heures normalisées</h2>
 
 <ul><li>Les heures que vous demandez seront utilisables indifféremment sur des noeuds CPU ou des noeuds avec GPU.</li>

@@ -154,6 +154,18 @@
             }}
         </td>
     </tr>
+    
+   	{% if norattachement == false %}
+    <table class="projet">
+	<tbody>
+    <tr>
+        <th class="horiz">{{ form_label( form.prjRattachement, "Rattachement du projet" ) }} </th>
+        <td>{{ form_widget( form.prjRattachement ) }}</td>
+    </tr>
+    </tbody>
+    </table>
+	{% endif %}
+
     <tr>
         <th class="horiz">{{ form_label( form.prjThematique, "Thématique principale du projet" ) }} </th>
         <td>{{ form_widget( form.prjThematique ) }}</td>
