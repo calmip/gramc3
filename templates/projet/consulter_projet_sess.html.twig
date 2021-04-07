@@ -121,11 +121,13 @@
     </tbody>
 </table>
 
+{% if norattachement == false %}
 <table class="projet">
     <tbody> 
 		<tr><th class="horiz">Rattachement du projet</th><td>{{ version.prjRattachement }}</td></tr>
     </tbody>
 </table>
+{% endif %}
 
 <table class="projet">
     <tbody>

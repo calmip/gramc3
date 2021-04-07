@@ -5,6 +5,16 @@
 parameters:
     # parameter_name: value
 
+    # Parametres de connexion du supercalculateur pour envoyer la consommation
+    password_consoupload: MOT DE PASSE
+    
+    # Paramétrage du système de mail
+    # En lien avec le paramètre MAILER_RECIPIENT de .env.local (seulement en dev)
+    mailer_transport: smtp
+    mailer_host: 127.0.0.1
+    mailer_user: null
+    mailer_password: null
+
     # Identifications diverses du mésocentre et de la documentation
     mesoc: CALMIP
     mesoc_web: 'https://www.calmip.univ-toulouse.fr'
@@ -140,7 +150,6 @@ parameters:
 
     # Pour crypter les cookies
     secret: '%env(APP_SECRET)%'
-
 
 services:
     _defaults:

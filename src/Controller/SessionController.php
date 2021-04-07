@@ -163,31 +163,8 @@ class SessionController extends AbstractController
 		$sd = $this->sd;
 		$ss = $this->ss;
 		$em = $this->getDoctrine()->getManager();
-        $info = static::prochain_session_info($sd);
-        $session = $em->getRepository(Session::class)->find($info['id']);
-
-        if( $session == null )
-        {
-            $hparannee = 0;
-            $sess_act = $ss->getSessionCourante();
-            if ($sess_act != null) {
-                $hparannee=$sess_act->getHParAnnee();
-                $president=$sess_act->getPresident();
-            };
-            $session = new Session();
-            $debut = $sd;
-            $fin   = $sd->getNew();
-            $fin->add( \DateInterval::createFromDateString( '0 months' ));
-            
-            $session->setDateDebutSession( $debut )
-                ->setDateFinSession( $fin )
-                ->setIdSession( $info['id'] )
-                ->setTypeSession( $info['type'] )
-                ->setHParAnnee($hparannee)
-                ->setEtatSession( Etat::CREE_ATTENTE );
-        }
-
-        return $this->modifyAction( $request, $session );
+		$session = $ss->nouvelleSession();
+		return $this->modifyAction( $request, $session );
     }
 
     /**
@@ -550,26 +527,7 @@ class SessionController extends AbstractController
         ;
     }
 
-    private static function prochain_session_info(GramcDate $d)
-    {
-        $annee = $d->format('y');   // 15 pour 2015
-        $mois  = $d->format('m');   // 5 pour mai
-
-        if ($mois<7)
-        {
-            $id_session = $annee.'B';
-            $type       = 1;
-        }
-        else
-        {
-            $id_session = $annee+1 .'A';
-            $type = 0;
-        }
-
-        return [ 'id' => $id_session, 'type' => $type ];
-    }
-
-    ////////////////////////////////////////////////////////////////////
+   ////////////////////////////////////////////////////////////////////
 
     /**
      *

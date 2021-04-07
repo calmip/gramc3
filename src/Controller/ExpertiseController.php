@@ -344,9 +344,12 @@ class ExpertiseController extends AbstractController
 			$id_sessionA= $session->getAnneeSession().'A';
 			$sessionRepository = $em->getRepository(Session::class);
 			$sessionA   = $sessionRepository->findOneBy( ['idSession' => $id_sessionA ] );
-			$expertisesA= $expertiseRepository->findExpertisesByExpert($moi, $sessionA);
-			$expertisesB= $expertises;
-			$expertises = array_merge($expertisesA,$expertisesB);
+			if ($sessionA != null)
+			{
+				$expertisesA= $expertiseRepository->findExpertisesByExpert($moi, $sessionA);
+				$expertisesB= $expertises;
+				$expertises = array_merge($expertisesA,$expertisesB);
+			}
 		}
 		
         $my_expertises  =   [];

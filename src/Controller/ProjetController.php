@@ -695,8 +695,13 @@ class ProjetController extends AbstractController
 
 		// Les rattachements
         $rattachements = $em->getRepository(Rattachement::class)->findAll();
-        if( $rattachements == null ) new Response('Aucun rattachement !');
-
+        if( $rattachements == null )
+        {
+			$rattachements = [];
+		}
+        
+        $statsRattachement = [];
+        $idRattachements   = [];
         foreach( $rattachements as $rattachement )
         {
             $statsRattachement[$rattachement->getLibelleRattachement()]    =   0;
@@ -1712,17 +1717,26 @@ class ProjetController extends AbstractController
 			}
 
             $cv    = $cv_repo->findOneBy(['version' => $versionActive, 'collaborateur' => $individu]);
-            $login = $cv->getLoginname()==null ? 'nologin' : $cv->getLoginname();
-            $u     = $user_repo->findOneBy(['loginname' => $login]);
-            if ($u==null)
+            if ($cv != null)
             {
-				$passwd = null;
-				$pwd_expir  = null;
+	            $login = $cv->getLoginname()==null ? 'nologin' : $cv->getLoginname();
+	            $u     = $user_repo->findOneBy(['loginname' => $login]);
+	            if ($u==null)
+	            {
+					$passwd = null;
+					$pwd_expir  = null;
+				}
+				else
+				{
+					$passwd    = $u->getPassword();
+					$pwd_expir = $u->getPassexpir();
+				}
 			}
 			else
 			{
-				$passwd    = $u->getPassword();
-				$pwd_expir = $u->getPassexpir();
+				$login  = 'nologin';
+				$passwd = null;
+				$pwd_expir = null;
 			}
 
 	        $projets_collab[] =
@@ -1757,19 +1771,27 @@ class ProjetController extends AbstractController
 			}
 
             $cv    = $cv_repo->findOneBy(['version' => $versionActive, 'collaborateur' => $individu]);
-            $login = $cv->getLoginname()==null ? 'nologin' : $cv->getLoginname();
-            $u     = $user_repo->findOneBy(['loginname' => $login]);
-            if ($u==null)
+            if ($cv != null)
             {
-				$passwd = null;
-				$expir  = null;
+	            $login = $cv->getLoginname()==null ? 'nologin' : $cv->getLoginname();
+	            $u     = $user_repo->findOneBy(['loginname' => $login]);
+	            if ($u==null)
+	            {
+					$passwd = null;
+					$expir  = null;
+				}
+				else
+				{
+					$passwd    = $u->getPassword();
+					$pwd_expir = $u->getPassexpir();
+				}
 			}
 			else
 			{
-				$passwd    = $u->getPassword();
-				$pwd_expir = $u->getPassexpir();
+				$login = 'nologin';
+				$passwd= null;
+				$expir = null;
 			}
-
 	        $projets_collab[] =
 	            [
 	            'projet'    => $projet,
@@ -2071,22 +2093,29 @@ class ProjetController extends AbstractController
 	        }
 	    }
 
+	    $rapport_1 = $sp -> getRapport($projet, $version->getAnneeSession() - 1);
+	    $rapport   = $sp -> getRapport($projet, $version->getAnneeSession());
 	    return $this->render('projet/consulter_projet_fil.html.twig',
-	            [
-	            'projet' => $projet,
-	            'version_form'   => $session_form->createView(),
-	            'version'   =>  $version,
-	            'session'   =>  $session,
-	            'menu'      =>  $menu,
-	            'img_expose_1'  =>  $img_expose_1,
-	            'img_expose_2'  =>  $img_expose_2,
-	            'img_expose_3'  =>  $img_expose_3,
-	            'img_justif_renou_1'    =>  $img_justif_renou_1,
-	            'img_justif_renou_2'    =>  $img_justif_renou_2,
-	            'img_justif_renou_3'    =>  $img_justif_renou_3,
-	            'toomuch'               => $toomuch
-	            ]
-	            );
+            [
+	            'projet'             => $projet,
+	            'loginname'          => $loginname,
+	            'version_form'       => $session_form->createView(),
+	            'version'            => $version,
+	            'session'            => $session,
+	            'menu'               => $menu,
+	            'img_expose_1'       => $img_expose_1,
+	            'img_expose_2'       => $img_expose_2,
+	            'img_expose_3'       => $img_expose_3,
+	            'img_justif_renou_1' => $img_justif_renou_1,
+	            'img_justif_renou_2' => $img_justif_renou_2,
+	            'img_justif_renou_3' => $img_justif_renou_3,
+	            'conso_cpu'          => $sp->getConsoRessource($projet,'cpu',$version->getAnneeSession()),
+	            'conso_gpu'          => $sp->getConsoRessource($projet,'gpu',$version->getAnneeSession()),
+	            'rapport_1'          => $rapport_1,
+	            'rapport'            => $rapport,
+	            'toomuch'            => $toomuch
+            ]
+		);
 	}
 
     /**

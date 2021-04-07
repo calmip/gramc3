@@ -25,8 +25,8 @@ namespace App\GramcServices;
 
 use App\Entity\Session;
 use App\Utils\Functions;
+use App\Utils\Etat;
 use App\GramcServices\GramcDate;
-//use App\App;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -80,7 +80,14 @@ class ServiceSessions
 		{
 			$this->initSessionsNonTerm();
 		}
-		return $this->sessions_non_term[0];
+		if ($this->sessions_non_term != null)
+		{
+			return $this->sessions_non_term[0];
+		}
+		else
+		{
+			return null;
+		}
 	}
 	
 	    // form pour choisir une session
@@ -240,4 +247,66 @@ class ServiceSessions
        }
        return $recup_heures;
     }	
+    
+    /**********************************
+     * Crée une nouvelle session... si nécessaire
+     * 
+     * NB - N'appelle pas persist, c'est l'appelant qui devra le faire, 
+     *      si la création est confirmée
+     * 
+     * return $session
+     **********************************/
+    public function nouvelleSession()
+    {
+		$grdt = $this->grdt;
+		$em   = $this->em;
+		
+		$sess_info = $this->nextSessionInfo();
+		$sess_id   = $sess_info['id'];
+		$sess_type = $sess_info['type'];
+        $session   = $em->getRepository(Session::class)->find($sess_id);
+		
+        if( $session == null )
+        {
+            $hparannee = 0;
+            $sess_act = $this->getSessionCourante();
+            if ($sess_act != null) {
+                $hparannee=$sess_act->getHParAnnee();
+                $president=$sess_act->getPresident();
+            };
+            $session = new Session();
+            $debut = $grdt;
+            $fin   = $grdt->getNew();
+            $fin->add( \DateInterval::createFromDateString( '1 months' ));
+            
+            $session->setDateDebutSession( $debut )
+                ->setDateFinSession( $fin )
+                ->setIdSession( $sess_id )
+                ->setTypeSession( $sess_type )
+                ->setHParAnnee($hparannee)
+                ->setEtatSession( Etat::CREE_ATTENTE );
+        }
+		return $session;
+	}
+	
+    private function nextSessionInfo()
+    {
+		$grdt = $this->grdt;
+        $annee = $grdt->format('y');   // 15 pour 2015
+        $mois  = $grdt->format('m');   // 5 pour mai
+
+        if ($mois<7)
+        {
+            $id_session = $annee.'B';
+            $type       = 1;
+        }
+        else
+        {
+            $id_session = $annee+1 .'A';
+            $type       = 0;
+        }
+        return [ 'id' => $id_session, 'type' => $type ];
+    }
+
+ 
 }
