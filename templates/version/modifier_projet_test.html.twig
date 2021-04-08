@@ -95,13 +95,15 @@
     </tr>
     </tbody></table>
 
+	{% if norattachement==false %}
     <table class="projet"><tbody>
 	<tr>
         <th class="horiz">{{ form_label( form.prjRattachement, "Rattachement du projet" ) }} </th>
         <td>{{ form_widget( form.prjRattachement ) }}</td>
     </tr>
     </tbody></table>
-
+	{% endif %}
+	
     <div class="message warning">Les heures sont comptées en heures normalisées</div>
 
     <table class="projet"><tbody>
