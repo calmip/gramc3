@@ -24,26 +24,15 @@
 
 namespace App\GramcServices;
 
-//use App\Entity\Individu;
-//use Symfony\Component\Security\Core\User\UserProviderInterface;
-//use Symfony\Component\Security\Core\User\UserInterface;
+use App\GramcServices\GramcDate;
+use App\Utils\Etat;
+
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
-
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
-use App\GramcServices\GramcDate;
-
-//use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-//use Symfony\Component\DependencyInjection\ContainerBuilder;
-use App\Utils\Etat;
-
-//use App\Utils\GramcDate;
-
-//include_once(dirname(__FILE__).'/../../lib/etat_transition.php');
-
-const VERSION = "3.0.0-Dev";
+const VERSION = "3.0.0";
 
 /*
  * Cette classe garde des informations pouvant être reprises par
@@ -53,7 +42,6 @@ const VERSION = "3.0.0-Dev";
 class ServiceInfos
 {
     private $em;
-//    private $kernel = false;
     private $sessions_non_terminees;
     private $session_courante = null;
     private $etat_session_courante;
@@ -63,7 +51,6 @@ class ServiceInfos
 
     public function __construct(GramcDate $gramc_date, EntityManagerInterface $em)
     {
-//        $this->kernel = $kernel;
         $this->em    = $em;
         $this->grdte = $gramc_date;
         // un bogue obscur de symfony (lié à la console)
@@ -114,58 +101,6 @@ class ServiceInfos
     {
           return str_replace('@',' at ',$mail);
     }
-
-   // just testing
-
-//    public function show()
-//    {
-//        $this->kernel->getContainer()->get('logger');
-//        //if ($this->kernel->getEnvironment() === 'dev' ) return var_dump($this->kernel) ;
-//        if( $this->sessions_non_terminees === null ) return 'NULL';
-//        return $this->libelle_etat_session_courante;
-//        return $this->sessions_non_terminees[0]->getIdSession();
-//    }
-
-/*
-function gramc_date($format) {
-    $date   = new GramcDate();
-
-    if ($this->kernel->getEnvironment() === 'dev')
-        { // symfony dbg
-        if (isset($_SESSION['parametres']))
-            {
-                $decalage = $_SESSION['parametres']['decalage_date'];
-            }
-        elseif( $this->kernel->getContainer()->hasParameter('decalage_date') ) // symfony
-            {
-                $decalage = $this->kernel->getContainer()->getParameter('decalage_date');
-            }
-         else
-            {
-                $decalage = 0;
-            }
-        $datint = new \DateInterval('P'.abs($decalage).'D');
-
-        if ($decalage > 0)
-            {
-                $date->add($datint);
-            }
-        else
-            {
-                $date->sub($datint);
-            }
-    } // if symfony dbg
-
-    if ( $format == 'raw' )
-        {
-            return $date;
-        }
-    else
-        {
-            return $date->format($format);
-        }
-    } // function gramc_date
-*/
 
 	function gramc_date($format)
 	{
