@@ -46,11 +46,13 @@
     </tbody>
 </table>
 
+{% if norattachement == 0 %}
 <table class="projet">
     <tbody>
         <tr><th class="horiz">Rattachement du projet</th><td>{{ version.prjRattachement }}</td></tr>
     </tbody>
 </table>
+{% endif %}
 
 <table class="projet">
     <tbody>
@@ -74,6 +76,7 @@
     </tbody>
 </table>
 
+{% if noconso == 0 %}
 <table class="projet">
 <tbody>
         <tr>
@@ -93,6 +96,7 @@
         </tr>
     </tbody>
 </table>
+{% endif %}
 
 <h4>Laboratoire et responsable du projet</h4>
 <div class="message info">
@@ -121,7 +125,7 @@ Le laboratoire associé au projet est le laboratoire du responsable
 <tbody>
     <tr>
         <th>Login</th>
-		{% if version.etat==5 or version.etat == 23 %}
+		{% if version.etat == 23 %}
 		<th>User</th>
         {% endif %}
         <th>Prénom</th>

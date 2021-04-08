@@ -227,7 +227,7 @@ class BilanSessionA extends BilanSession
 		$totaux["dem_heures_cour"]       += $dem_heure_cour;
 		$totaux["attr_heures_cour"]      += $attr_heure_cour;
 		$totaux["quota"]                 += $quota;
-		$totaux["conso_an"]              += $this->sp->getConsoCalculVersion($version); //( $consommation != null ) ? $consommation->conso(): 0;
+		$totaux["conso_an"]              += $this->sp->getConsoCalculVersion($version);
 		$totaux["conso_gpu"]             += $conso_gpu;
 		$totaux["recuperable"]           += $recuperable;
 

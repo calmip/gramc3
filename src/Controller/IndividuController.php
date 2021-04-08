@@ -27,10 +27,12 @@ namespace App\Controller;
 use App\Entity\Individu;
 use App\Entity\Thematique;
 use App\Entity\Rattachement;
-//use App\App;
 use App\Utils\Functions;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use App\GramcServices\ServiceJournal;
+use App\GramcServices\ServiceExperts;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -46,6 +48,9 @@ use Symfony\Component\Form\Extension\Core\Type\ResetType;
 use App\Form\GererUtilisateurType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+
+use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 // pour remplacer un utilisateur par un autre
 
@@ -63,8 +68,23 @@ use App\Entity\Version;
  *
  * @Route("individu")
  */
-class IndividuController extends Controller
+class IndividuController extends AbstractController
 {
+	private $sj;
+	private $ff;
+	private $ac;
+	
+	
+	public function __construct (ServiceJournal $sj,
+								 FormFactoryInterface $ff,
+ 								 AuthorizationCheckerInterface $ac
+								 )
+	{
+		$this->sj  = $sj;
+		$this->ff  = $ff;
+		$this->ac  = $ac;
+	}
+
     /**
      * Supprimer utilisateur
      *
@@ -90,7 +110,7 @@ class IndividuController extends Controller
     public function remplacerUtilisateurAction(Request $request, Individu $individu )
     {
         $em = $this->getDoctrine()->getManager();
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sj = $this->sj;
 
         $form = $this
             ->get('form.factory')
@@ -609,7 +629,7 @@ class IndividuController extends Controller
     public function plusExpertAction(Request $request, Individu $individu)
     {
         $em = $this->getDoctrine()->getManager();
-        $se = $this->get('app.gramc.ServiceExperts');
+        $se = $this->get('App\GramcServices\ServiceExperts');
 
         $individu->setExpert(false);
         $em->persist($individu);
@@ -677,8 +697,8 @@ class IndividuController extends Controller
      */
     public function sudoAction(Request $request, Individu $individu)
     {
-		$sj = $this->get('app.gramc.ServiceJournal');
-		$ac = $this->get('security.authorization_checker');
+		$sj = $this->sj;
+		$ac = $this->ac;
 
 	    if( ! $ac->isGranted('ROLE_PREVIOUS_ADMIN') )
 		{
@@ -765,7 +785,7 @@ class IndividuController extends Controller
      */
     public function mailAutocompleteAction(Request $request)
     {
-		$sj   = $this->get('app.gramc.ServiceJournal');
+		$sj   = $this->sj;
 		$em   = $this->getDoctrine()->getManager();
         $form = $this
             ->get('form.factory')

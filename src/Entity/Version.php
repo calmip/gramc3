@@ -2836,6 +2836,7 @@ class Version implements Demande
 
         if     ( $etat_version == Etat::ACTIF             ) return 'ACTIF';
         elseif ( $etat_version == Etat::ACTIF_TEST        ) return 'ACTIF';
+        elseif ( $etat_version == Etat::NOUVELLE_VERSION_DEMANDEE ) return 'PRESQUE TERMINE';
         elseif ( $etat_version == Etat::ANNULE            ) return 'ANNULE';
         elseif ( $etat_version == Etat::EDITION_DEMANDE   ) return 'EDITION';
         elseif ( $etat_version == Etat::EDITION_TEST      ) return 'EDITION';

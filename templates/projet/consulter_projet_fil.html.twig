@@ -48,7 +48,7 @@
     </a>
 </div>
 
-{% if ( version.hasRapport   ) %}
+{% if ( rapport_1 != null   ) %}
 <div class="lien-pdf">
     <a href="{{ path('rapport', { 'id' : version.idVersion, 'annee' : version.getAnneeSession() - 1 }) }}">
         <img src="{{ asset('icones/pdf32.png') }}" alt="pdf" title="Rapport d'activité {{ version.getAnneeSession - 1 }}">
@@ -58,7 +58,7 @@
 </div>
 {%  endif %}
 
-{% if ( version.hasRapport( version.getAnneeSession()  ) ) %}
+{% if ( rapport != null ) %}
 <div class="lien-pdf">
     <a href="{{ path('rapport', { 'id' : version.idVersion, 'annee' : version.getAnneeSession() }) }}">
         <img src="{{ asset('icones/pdf32.png') }}" alt="pdf" title="Rapport d'activité {{ version.getAnneeSession  }}">
@@ -99,12 +99,14 @@
 
 {% block body %}
 
+{% if noconso==false %}
 {% set conso_cpu = version.projet.consoressource('cpu',version.anneesession) %}
 {% set conso_gpu = version.projet.consoressource('gpu',version.anneesession) %}
 {% set conso     = conso_cpu[0] + conso_gpu[0] %}
 {% set quota     = conso_cpu[1]                %}
 {% if  quota != 0 %} {% set consop=100.0*conso/quota %}
 {% else           %} {% set consop=0                 %}
+{% endif %}
 {% endif %}
 
 <h3>I - Présentation générale</h3>
@@ -117,12 +119,19 @@
 
 <table class="projet">
     <tbody>
-        <tr><th class="horiz">Le tag du Criann</th><td>{{ version.criannTag }}</td></tr>
         <tr><th class="horiz">Titre</th><td>{{ version.prjTitre }}</td></tr>
         <tr><th class="horiz">Thématique</th><td>{{ version.prjThematique }}</td></tr>
         <tr><th class="horiz">Sous-thématique</th><td>{{ version.prjSousThematique }}</td></tr>
     </tbody>
 </table>
+
+{% if norattachement == false %}
+<table class="projet">
+    <tbody> 
+		<tr><th class="horiz">Rattachement du projet</th><td>{{ version.prjRattachement }}</td></tr>
+    </tbody>
+</table>
+{% endif %}
 
 <table class="projet">
     <tbody>
@@ -141,8 +150,8 @@
             <th class="horiz">Nombre d'heures demandées session {{ session }}<br>
             <span class="petit">Y compris les rallonges</span>
             </th>
-            <td>{{ (version.data.getDemHeuresRallonge + version.data.getDemHeures)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}
-            {% if toomuch %} <img src="{{ asset('icones/attention16.png') }}" alt="Demande trop forte, cf. règles d'attribution" title="Demande trop forte, cf. règles d'attribution" /> {% endif %}
+            <td>{{ (version.getDemHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}
+            {% if toomuch %} <img src="{{ absolute_url(asset('icones/attention16.png')) }}" alt="Demande trop forte, cf. règles d'attribution" title="Demande trop forte, cf. règles d'attribution" /> {% endif %}
             </td>
         </tr>
     </tbody>
@@ -165,8 +174,8 @@
             <th class="horiz">Nombre d'heures attribuées session {{ session }}<br>
             <span class="petit">Y compris les rallonges et les pénalités éventuelles</span>
             </th>
-            <td>{{ (version.data.attrHeuresRallonge + version.data.attrHeures - version.data.penalHeures)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}
-            {% if version.data.attrHeuresEte != 0 %} <span class="attention">(dont {{ version.data.attrHeuresEte |number_format(0, ',', ' ')|replace({' ':'&nbsp;'}) |raw }} heures à utiliser entre le 1er Juillet et le 31 Août)</span> {% endif %}
+            <td>{{ (version.attrHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}
+            {% if version.attrHeuresEte != 0 %} <span class="attention">(dont {{ version.attrHeuresEte |number_format(0, ',', ' ')|replace({' ':'&nbsp;'}) |raw }} heures à utiliser entre le 1er Juillet et le 31 Août)</span> {% endif %}
             </td>
         </tr>
     </tbody>

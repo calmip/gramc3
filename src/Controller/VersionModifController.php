@@ -34,12 +34,22 @@ use App\Entity\RapportActivite;
 use App\Entity\Rattachement;
 
 use App\GramcServices\ServiceJournal;
+use App\GramcServices\ServiceMenus;
+use App\GramcServices\ServiceVersions;
 
 use App\GramcServices\Workflow\Projet\ProjetWorkflow;
 
+use App\Utils\Functions;
+use App\Utils\Etat;
+use App\Utils\Signal;
+use App\Utils\GramcDate;
+use App\Utils\IndividuForm;
+use App\Form\IndividuFormType;
+use App\Validator\Constraints\PagesNumber;
+
 use Psr\Log\LoggerInterface;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -48,14 +58,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\Validator\Validator\TraceableValidator;
-
-//use App\App;
-use App\Utils\Functions;
-use App\Utils\Etat;
-use App\Utils\Signal;
-use App\Utils\GramcDate;
-use App\Utils\IndividuForm;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -68,20 +70,50 @@ use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-
-use App\Form\IndividuFormType;
-use App\Validator\Constraints\PagesNumber;
+use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Validator\Validator\TraceableValidator;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 use Doctrine\ORM\EntityManager;
 
+use Twig\Environment;
 
 /**
  * Version controller.
  *
  * @Route("version")
  */
-class VersionModifController extends Controller
+class VersionModifController extends AbstractController
 {
+	private $sj;
+	private $sm;
+	private $sv;
+	private $pw;
+	private $ff;
+	private $vl;
+	private $sss;
+	private $tw;
+		
+	public function __construct (ServiceJournal $sj,
+								 ServiceMenus $sm,
+								 ServiceVersions $sv,
+								 ProjetWorkflow $pw,
+								 FormFactoryInterface $ff,
+								 ValidatorInterface $vl,
+								 SessionInterface $sss,
+								 Environment $tw
+								 )
+	{
+		$this->sj  = $sj;
+		$this->sm  = $sm;
+		$this->sv  = $sv;
+		$this->pw  = $pw;
+		$this->ff  = $ff;
+		$this->vl  = $vl;
+		$this->sss = $sss;
+		$this->tw = $tw;
+	}
 
     /**
      * Modification d'une version existante
@@ -95,10 +127,10 @@ class VersionModifController extends Controller
      */
     public function modifierAction(Request $request, Version $version, $renouvellement = false, LoggerInterface $lg )
     {
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$sv = $this->get('app.gramc.ServiceVersions');
-		$sj = $this->get('app.gramc.ServiceJournal');
-		$twig = $this->get('twig');
+		$sm = $this->sm;
+		$sv = $this->sv;
+		$sj = $this->sj;
+		$twig = $this->tw;
 
 		
 	    // ACL
@@ -166,11 +198,10 @@ class VersionModifController extends Controller
 	    }
 
 	    // SUPPRESSION DES IMAGES TELEVERSEES
-	    $remove_form = $this
-	       ->get('form.factory')
-	       ->createNamedBuilder('remove_form', FormType::class, [], [ 'csrf_protection' => false ] )
-	       ->add('filename', TextType::class, [ 'required'       =>  false,] )
-	       ->getForm();
+	    $remove_form = $this->ff
+							->createNamedBuilder('remove_form', FormType::class, [], [ 'csrf_protection' => false ] )
+							->add('filename', TextType::class, [ 'required'       =>  false,] )
+							->getForm();
 
 	    $remove_form->handleRequest($request);
 	    if ($remove_form->isSubmitted() &&  $remove_form->isValid() )
@@ -231,8 +262,8 @@ class VersionModifController extends Controller
      */
 	private function modifierType1(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form, LoggerInterface $lg)
     {
-		$sj   = $this->get('app.gramc.ServiceJournal');
-		$sval = $this->get('validator');
+		$sj   = $this->sj;
+		$sval = $this->vl;
 		$em   = $this->getDoctrine()->getManager();
 		
 		// formulaire principal
@@ -547,11 +578,11 @@ class VersionModifController extends Controller
      */
     private function modifierType2(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form, LoggerInterface $lg)
     {
-		$sj = $this->get('app.gramc.ServiceJournal');
-		$sval = $this->get('validator');
+		$sj = $this->sj;
+		$sval = $this->vl;
 		$em = $this->getDoctrine()->getManager();
 
-		if( $this->container->hasParameter('heures_projet_test' ) )
+		if( $this->has('heures_projet_test' ) )
 			$heures_projet_test = $this->getParameter('heures_projet_test' );
 		else
 			$heures_projet_test =  5000;
@@ -640,8 +671,8 @@ class VersionModifController extends Controller
      */
 	private function modifierType3(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form, LoggerInterface $lg)
     {
-		$sj = $this->get('app.gramc.ServiceJournal');
-		$sval = $this->get('validator');
+		$sj = $this->sj;
+		$sval = $this->vl;
 		$em = $this->getDoctrine()->getManager();
 
 		// formulaire principal
@@ -865,7 +896,7 @@ class VersionModifController extends Controller
     private function image_form( $name , $csrf_protection = true )
     {
 	    $format_fichier = $this->imageConstraints();
-	    $form           = $this ->get('form.factory')
+	    $form           = $this ->ff
 							    ->createNamedBuilder( $name, FormType::class, [], ['csrf_protection' => $csrf_protection ] )
 							    ->add('filename', HiddenType::class, [ 'data' => $name,] )
 							    ->add('image', FileType::class, 
@@ -880,8 +911,8 @@ class VersionModifController extends Controller
 
     private function image_handle( $form, Version $version, $request)
     {
-		$sv = $this->get('app.gramc.ServiceVersions');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sv = $this->sv;
+		$sj = $this->sj;
 		$em = $this->getDoctrine()->getManager();
 
 	    $form->handleRequest($request);
@@ -953,7 +984,7 @@ class VersionModifController extends Controller
 
     private function image($filename, Version $version)
     {
-		$sv = $this->get('app.gramc.ServiceVersions');
+		$sv = $this->sv;
 	    $full_filename  = $sv->imagePath( $filename, $version);
 
 	    if( file_exists( $full_filename ) && is_file( $full_filename ) )
@@ -982,25 +1013,24 @@ class VersionModifController extends Controller
 	///////////////////////////////////////////////////////////
     private function getCollaborateurForm(Version $version)
     {
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sj = $this->sj;
 		$em = $this->getDoctrine()->getManager();		
-		$sval= $this->get('validator');
+		$sval= $this->vl;
 		
-		return $this
-			   ->get('form.factory')
-			   ->createNamedBuilder('form_projet', FormType::class, [ 'individus' => self::prepareCollaborateurs($version, $sj, $sval) ])
-			   ->add('individus', CollectionType::class, [
-				   'entry_type'     =>  IndividuFormType::class,
-				   'label'          =>  false,
-				   'allow_add'      =>  true,
-				   'allow_delete'   =>  true,
-				   'prototype'      =>  true,
-				   'required'       =>  true,
-				   'by_reference'   =>  false,
-				   'delete_empty'   =>  true,
-				   'attr'         => ['class' => "profil-horiz",],
-				])
-	            ->getForm();
+		return $this->ff
+				   ->createNamedBuilder('form_projet', FormType::class, [ 'individus' => self::prepareCollaborateurs($version, $sj, $sval) ])
+				   ->add('individus', CollectionType::class, [
+					   'entry_type'     =>  IndividuFormType::class,
+					   'label'          =>  false,
+					   'allow_add'      =>  true,
+					   'allow_delete'   =>  true,
+					   'prototype'      =>  true,
+					   'required'       =>  true,
+					   'by_reference'   =>  false,
+					   'delete_empty'   =>  true,
+					   'attr'         => ['class' => "profil-horiz",],
+					])
+					->getForm();
     }
 
     /**
@@ -1046,6 +1076,55 @@ class VersionModifController extends Controller
     }
 
     /**
+     * Avant de modifier les collaborateurs d'une version.
+     * On demande de quelle version il s'agit !
+     *
+     * @Route("/{id}/avant_collaborateurs", name="avant_modifier_collaborateurs")
+     * @Method({"GET", "POST"})
+     * @Security("has_role('ROLE_DEMANDEUR')")
+     */
+	public function avantModifierCollaborateursAction(Version $version, Request $request)
+	{
+		$sm = $this->sm;
+
+		/* Si le bouton modifier est actif, il faut demander de quelle version il s'agit ! */
+        $modifier_version_menu = $sm->modifier_version( $version );
+		if ($modifier_version_menu['ok'] == true)
+		{
+			$projet = $version->getProjet();
+			$veract = $projet->getVersionActive();
+			
+			// Si pas de version active (nouveau projet) = pas de problème on redirige sur l'édition en cours
+			if ($veract == null)
+			{
+				return $this->redirectToRoute('modifier_version',['id' => $version, '_fragment' => 'liste_des_collaborateurs'] );
+			}
+			
+			// Peut arriver pour l'administrateur car pour lui le bouton modifier est toujours acitf
+			elseif ($veract->getId() == $version->getId())
+			{
+				return $this->redirectToRoute('modifier_version',['id' => $version, '_fragment' => 'liste_des_collaborateurs'] );
+			}
+			
+			// Si version active on demande de préciser quelle version !
+			else
+			{
+		        return $this->render('version/avant_modifier_collaborateurs.html.twig',
+	            [
+		            'veract'  => $veract,
+		            'version' => $version
+	            ]);
+			}
+		}
+		
+		// bouton modifier_version inactif: on modifie les collabs de la version demandée !
+		else
+		{
+			return $this->redirectToRoute('modifier_collaborateurs', ['id' => $version]);
+		}
+	}
+
+    /**
      * Modifier les collaborateurs d'une version.
      *
      * @Route("/{id}/collaborateurs", name="modifier_collaborateurs")
@@ -1054,9 +1133,9 @@ class VersionModifController extends Controller
      */
     public function modifierCollaborateursAction(Version $version, Request $request)
     {
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$sj = $this->get('app.gramc.ServiceJournal');
-		$sval= $this->get('validator');
+		$sm = $this->sm;
+		$sj = $this->sj;
+		$sval= $this->vl;
 		$em = $this->getDoctrine()->getManager();
 
 
@@ -1072,27 +1151,25 @@ class VersionModifController extends Controller
 		}
 
 
-	    $collaborateur_form = $this
-           ->get('form.factory')
-           ->createNamedBuilder('form_projet', FormType::class, [
-	           'individus' => self::prepareCollaborateurs($version,$sj,$sval) 
-           ])
-           ->add('individus', CollectionType::class, [
-               'entry_type'     =>  IndividuFormType::class,
-               'label'          =>  false,
-               'allow_add'      =>  true,
-               'allow_delete'   =>  true,
-               'prototype'      =>  true,
-               'required'       =>  true,
-               'by_reference'   =>  false,
-               'delete_empty'   =>  true,
-               'attr'         => ['class' => "profil-horiz",],
-           ])
-	       //->add('my_test', TextType::class )
-	       ->add('submit', SubmitType::class, [
-	            'label' => 'Sauvegarder',
-           ])
-		   ->getForm();
+	    $collaborateur_form = $this->ff
+						           ->createNamedBuilder('form_projet', FormType::class, [
+							           'individus' => self::prepareCollaborateurs($version,$sj,$sval) 
+						           ])
+						           ->add('individus', CollectionType::class, [
+						               'entry_type'     =>  IndividuFormType::class,
+						               'label'          =>  false,
+						               'allow_add'      =>  true,
+						               'allow_delete'   =>  true,
+						               'prototype'      =>  true,
+						               'required'       =>  true,
+						               'by_reference'   =>  false,
+						               'delete_empty'   =>  true,
+						               'attr'         => ['class' => "profil-horiz",],
+						           ])
+							       ->add('submit', SubmitType::class, [
+							            'label' => 'Sauvegarder',
+						           ])
+								   ->getForm();
 
 	    $collaborateur_form->handleRequest($request);
 
@@ -1184,9 +1261,9 @@ class VersionModifController extends Controller
     private function handleIndividuForms($individu_forms, Version $version)
     {
 		$em   = $this->getDoctrine()->getManager();
-		$sv   = $this->get('app.gramc.ServiceVersions');
-		$sj   = $this->get('app.gramc.ServiceJournal');
-		$sval = $this->get('validator');
+		$sv   = $this->sv;
+		$sj   = $this->sj;
+		$sval = $this->vl;
 		
 	    foreach($individu_forms as $individu_form)
 		{
@@ -1329,8 +1406,8 @@ class VersionModifController extends Controller
      */
     public function donneesAction(Request $request, Version $version)
     {
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sm = $this->sm;
+		$sj = $this->sj;
 
 		if( $sm->donnees($version)['ok'] == false )
 		{
@@ -1411,10 +1488,10 @@ class VersionModifController extends Controller
      */
     public function renouvellementAction(Request $request, Version $version, LoggerInterface $lg)
     {
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$sv = $this->get('app.gramc.ServiceVersions');
-		$sj = $this->get('app.gramc.ServiceJournal');
-		$projet_workflow = $this->get('app.gramc.ProjetWorkflow');
+		$sm = $this->sm;
+		$sv = $this->sv;
+		$sj = $this->sj;
+		$projet_workflow = $this->pw;
 		$em = $this->getDoctrine()->getManager();
 		
 	    // ACL

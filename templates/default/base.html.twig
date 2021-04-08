@@ -100,6 +100,7 @@
         {% if is_granted('ROLE_PRESIDENT') %}
             <a class="a_ariane" href="{{ path('president_accueil') }}">Président</a> |
         {% endif %}
+        <a class="a_ariane" href="{{ path('aide') }}">aide</a>
 
         </div> <!-- fil_ariane -->
 
@@ -139,10 +140,10 @@
                 {% elseif  infos.getLibelleEtatSessionCourante == 'EDITION_DEMANDE'%}
 
                     {% if infos.cette_session()['jours'] == 0 %}
-                    vous avez encore <strong>JUSQU'A CE SOIR</strong> pour envoyer votre projet pour expertise
+                    Vous avez encore <strong>JUSQU'A CE SOIR</strong> pour envoyer votre projet pour expertise
 
                     {% elseif infos.cette_session()['jours'] > 0 %}
-                        vous avez jusqu'au <strong>{{ infos.cette_session()['fin_sess'] }}  </strong> pour envoyer votre projet pour expertise
+                        Vous avez jusqu'au <strong>{{ infos.cette_session()['fin_sess'] }}  </strong> pour envoyer votre projet pour expertise
 
                     {% else %}
                     ATTENTION, la date de fin de session est dépassée

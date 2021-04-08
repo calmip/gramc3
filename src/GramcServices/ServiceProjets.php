@@ -42,11 +42,9 @@ use App\Utils\Functions;
 
 //use Symfony\Bridge\Monolog\Logger;
 use Psr\Log\LoggerInterface;
-
-use Symfony\Component\Security\Core\Authentication\Token\Storage\UsageTrackingTokenStorage;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 class ServiceProjets
 {
@@ -154,9 +152,11 @@ class ServiceProjets
             else
                 return 'ACCEPTE'; // Projet ou rallonge accepté par le comité d'attribution
         }
-        elseif ( $etat_version ==  Etat::EN_ATTENTE        ) return 'ACCEPTE';
-        elseif ( $etat_version ==  Etat::TERMINE           ) return 'STANDBY';
-        elseif ( $veract       == null                     ) return 'STANDBY';
+        
+		elseif ( $etat_version == Etat::ACTIF_TEST ) return 'ACCEPTE'; // projet-test non renouvelable
+		elseif ( $etat_version == Etat::EN_ATTENTE ) return 'ACCEPTE';
+        elseif ( $etat_version == Etat::TERMINE    ) return 'STANDBY';
+        elseif ( $veract       == null             ) return 'STANDBY';
 	}
 	
    /**
@@ -1071,6 +1071,9 @@ class ServiceProjets
             return  0;
     }
     
+    /*
+     * Renvoie un tableau contenant la ou les versions de l'année passée en paramètres
+     */
 	public function getVersionsAnnee(Projet $projet, $annee)
     {
 	    $subAnnee   = substr( strval($annee), -2 );

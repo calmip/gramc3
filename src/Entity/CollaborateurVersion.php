@@ -29,7 +29,13 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * CollaborateurVersion
  *
- * @ORM\Table(name="collaborateurVersion", uniqueConstraints={@ORM\UniqueConstraint(name="id_version_2", columns={"id_version", "id_collaborateur"})}, indexes={@ORM\Index(name="id_coll_labo", columns={"id_coll_labo"}), @ORM\Index(name="id_coll_statut", columns={"id_coll_statut"}), @ORM\Index(name="id_coll_etab", columns={"id_coll_etab"}), @ORM\Index(name="collaborateur_collaborateurprojet_fk", columns={"id_collaborateur"}), @ORM\Index(name="id_version", columns={"id_version"})})
+ * @ORM\Table(name="collaborateurVersion", 
+ *            uniqueConstraints={@ORM\UniqueConstraint(name="id_version_2", columns={"id_version", "id_collaborateur"})}, 
+ *            indexes={@ORM\Index(name="id_coll_labo", columns={"id_coll_labo"}),
+ *                     @ORM\Index(name="id_coll_statut", columns={"id_coll_statut"}),
+ *                     @ORM\Index(name="id_coll_etab", columns={"id_coll_etab"}),
+ *                     @ORM\Index(name="collaborateur_collaborateurprojet_fk", columns={"id_collaborateur"}),
+ *                     @ORM\Index(name="id_version", columns={"id_version"})})
  * @ORM\Entity(repositoryClass="App\Repository\CollaborateurVersionRepository")
  */
 class CollaborateurVersion
@@ -216,8 +222,6 @@ class CollaborateurVersion
     {
         return $this->loginname;
     }
-
-
 
     /**
      * Get id

@@ -132,15 +132,17 @@ class ServiceExpertsRallonge extends ServiceExperts
 	*****/
 	protected function notifierExperts()
 	{
+		$sn            = $this->sn;
 		$notifications = $this->notifications;
+		$sj            = $this->sj;
 		
-		$this->sj->debugMessage( __METHOD__ . count($notifications) . " notifications à envoyer");
+		$sj->debugMessage( __METHOD__ . count($notifications) . " notifications à envoyer");
 
 		foreach ($notifications as $e => $liste_d)
 		{
 			$dest   = [ $e ];
 			$params = [ 'object' => $liste_d ];
-			//$this->sj->debugMessage( __METHOD__ . "Envoi d'un message à " . join(',',$dest) . " - " . $this->sj->show($liste_d) );
+			//$sj->debugMessage( __METHOD__ . "Envoi d'un message à " . join(',',$dest) . " - " . $this->sj->show($liste_d) );
 
 			$sn->sendMessage ('notification/affectation_expert_rallonge-sujet.html.twig',
 							  'notification/affectation_expert_rallonge-contenu.html.twig',

@@ -34,7 +34,7 @@ use App\Entity\Rallonge;
 use App\Entity\Session;
 use App\Entity\CollaborateurVersion;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -42,15 +42,21 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-//use App\App;
 use App\Utils\Functions;
 use App\Utils\Menu;
 use App\Utils\Etat;
 use App\Utils\Signal;
 use App\AffectationExperts\AffectationExperts;
+
 use App\GramcServices\Workflow\Projet\ProjetWorkflow;
 use App\GramcServices\Workflow\Version\VersionWorkflow;
-//use App\Utils\GramcDate;
+use App\GramcServices\ServiceJournal;
+use App\GramcServices\ServiceNotifications;
+use App\GramcServices\ServiceProjets;
+use App\GramcServices\ServiceSessions;
+use App\GramcServices\ServiceVersions;
+use App\GramcServices\ServiceExperts\ServiceExperts;
+use App\GramcServices\GramcDate;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -61,6 +67,11 @@ use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
+use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+
 use App\Form\ChoiceList\ExpertChoiceLoader;
 
 /**
@@ -68,8 +79,50 @@ use App\Form\ChoiceList\ExpertChoiceLoader;
  *
  * @Route("expertise")
  */
-class ExpertiseController extends Controller
+class ExpertiseController extends AbstractController
 {
+
+		private $sn;
+		private $sj;
+		private $sp;
+		private $ss;
+		private $sd;
+		private $sv;
+		private $pw;
+		private $ff;
+		private $vl;
+		private $se;
+		private $tok;
+		private $ac;
+	
+	
+	public function __construct (ServiceNotifications $sn,
+								 ServiceJournal $sj,
+								 ServiceProjets $sp,
+								 ServiceSessions $ss,
+								 GramcDate $sd,
+								 ServiceVersions $sv,
+								 ServiceExperts $se,
+								 ProjetWorkflow $pw,
+								 FormFactoryInterface $ff,
+								 ValidatorInterface $vl,
+								 TokenStorageInterface $tok,
+								 AuthorizationCheckerInterface $ac
+								 )
+	{
+		$this->sn  = $sn;
+		$this->sj  = $sj;
+		$this->sp  = $sp;
+		$this->ss  = $ss;
+		$this->sd  = $sd;
+		$this->sv  = $sv;
+		$this->se  = $se;
+		$this->pw  = $pw;
+		$this->ff  = $ff;
+		$this->vl  = $vl;
+		$this->tok = $tok->getToken();
+		$this->ac  = $ac;
+	}
 
 	/**
      * Affectation des experts
@@ -80,9 +133,9 @@ class ExpertiseController extends Controller
      */
     public function affectationTestAction(Request $request)
     {
-		$ss = $this->get('app.gramc.ServiceSessions');
-		$sp = $this->get('app.gramc.ServiceProjets');
-		$se = $this->get('app.gramc.ServiceExperts');
+		$ss = $this->ss;
+		$sp = $this->sp;
+		$se = $this->se;
 		$em = $this->getDoctrine()->getManager();
 		
 	    $session  = $ss->getSessionCourante();
@@ -158,11 +211,11 @@ class ExpertiseController extends Controller
      */
     public function affectationAction(Request $request)
     {
-		$ss = $this->get('app.gramc.ServiceSessions');
-		$sp = $this->get('app.gramc.ServiceProjets');
-		$sv = $this->get('app.gramc.ServiceVersions');
+		$ss = $this->ss;
+		$sp = $this->sp;
+		$sv = $this->sv;
 		$em = $this->getDoctrine()->getManager();
-		$affectationExperts = $this->get('app.gramc.ServiceExperts');
+		$affectationExperts = $this->se;
 		
 		$session      = $ss->getSessionCourante();
         $session_data = $ss->selectSession($this->createFormBuilder(['session'=>$session]),$request); // formulaire
@@ -268,14 +321,14 @@ class ExpertiseController extends Controller
 	 */
     public function listeAction()
     {
-		$sd  = $this->get('app.gramc.date');
-		$ss  = $this->get('app.gramc.ServiceSessions');
-		$sp  = $this->get('app.gramc.ServiceProjets');
-		$sj = $this->get('app.gramc.ServiceJournal');
-		$token = $this->get('security.token_storage')->getToken();
+		$sd  = $this->sd;
+		$ss  = $this->ss;
+		$sp  = $this->sp;
+		$sj  = $this->sj;
+		$tok = $this->tok;
         $em  = $this->getDoctrine()->getManager();
         
-        $moi = $token->getUser();
+        $moi = $tok->getUser();
         if( is_string( $moi ) ) $sj->throwException();
 
         $mes_thematiques     = $moi->getThematique();
@@ -291,9 +344,12 @@ class ExpertiseController extends Controller
 			$id_sessionA= $session->getAnneeSession().'A';
 			$sessionRepository = $em->getRepository(Session::class);
 			$sessionA   = $sessionRepository->findOneBy( ['idSession' => $id_sessionA ] );
-			$expertisesA= $expertiseRepository->findExpertisesByExpert($moi, $sessionA);
-			$expertisesB= $expertises;
-			$expertises = array_merge($expertisesA,$expertisesB);
+			if ($sessionA != null)
+			{
+				$expertisesA= $expertiseRepository->findExpertisesByExpert($moi, $sessionA);
+				$expertisesB= $expertises;
+				$expertises = array_merge($expertisesA,$expertisesB);
+			}
 		}
 		
         $my_expertises  =   [];
@@ -434,7 +490,7 @@ class ExpertiseController extends Controller
 		// On propose aux experts du comité d'attribution (c-a-d ceux qui ont une thématique) d'entrer un commentaire sur l'année écoulée
 		$mes_commentaires_flag = false;
 		$mes_commentaires_maj        = null;
-		if ($this->container->hasParameter('commentaires_experts_d') && count($mes_thematiques)>0)
+		if ($this->has('commentaires_experts_d') && count($mes_thematiques)>0)
 		{
 			$mes_commentaires_flag = true;
 			$mois = $sd->format('m');
@@ -552,17 +608,17 @@ class ExpertiseController extends Controller
      */
     public function modifierAction(Request $request, Expertise $expertise)
     {
-		$ss = $this->get('app.gramc.ServiceSessions');
-		$sv = $this->get('app.gramc.ServiceVersions');
-		$sp = $this->get('app.gramc.ServiceProjets');
-		$sj = $this->get('app.gramc.ServiceJournal');
-		$ac = $this->get('security.authorization_checker');
-		$sval = $this->get('validator');
-		$token = $this->get('security.token_storage')->getToken();
+		$ss = $this->ss;
+		$sv = $this->sv;
+		$sp = $this->sp;
+		$sj = $this->sj;
+		$ac = $this->ac;
+		$sval = $this->vl;
+		$tok = $this->tok;
 		$em = $this->getDoctrine()->getManager();
 		
         // ACL
-        $moi = $token->getUser();
+        $moi = $tok->getUser();
         if( is_string( $moi ) ) $sj->throwException(__METHOD__ . ":" . __LINE__ . " personne connecté");
         elseif( $expertise->getExpert() == null ) $sj->throwException(__METHOD__ . ":" . __LINE__ . " aucun expert pour l'expertise " . $expertise );
         elseif( ! $expertise->getExpert()->isEqualTo( $moi ) ) {
@@ -836,14 +892,14 @@ class ExpertiseController extends Controller
      */
     public function validationAction(Request $request, Expertise $expertise)
     {
-		$sn = $this->get('app.gramc.ServiceNotifications');
-		$sj = $this->get('app.gramc.ServiceJournal');
-		$ac = $this->get('security.authorization_checker');
+		$sn = $this->sn;
+		$sj = $this->sj;
+		$ac = $this->ac;
 		$em = $this->getDoctrine()->getManager();
-		$token = $this->get('security.token_storage')->getToken();
+		$tok = $this->tok;
 
 	    // ACL
-	    $moi = $token->getUser();
+	    $moi = $tok->getUser();
 	    if( is_string( $moi ) ) $sj->throwException(__METHOD__ . ":" . __LINE__ . " personne connecté");
 	    elseif( $expertise->getExpert() == null ) $sj->throwException(__METHOD__ . ":" . __LINE__ . " aucun expert pour l'expertise " . $expertise );
 	    elseif( ! $expertise->getExpert()->isEqualTo( $moi ) )
@@ -882,7 +938,7 @@ class ExpertiseController extends Controller
 		        elseif( $validation == 2 )  $signal = Signal::CLK_VAL_EXP_CONT;
 		        elseif( $validation == 0 )  $signal = Signal::CLK_VAL_EXP_KO;
 
-		        $workflow = $this->get('app.gramc.ProjetWorkflow');
+		        $workflow = $this->pw;
 		        $rtn      = $workflow->execute( $signal, $expertise->getVersion()->getProjet() );
 		        if( $rtn != true )
 		            $sj->errorMessage(__METHOD__ . ":" . __LINE__ . " Transition avec " .  Signal::getLibelle( $signal )

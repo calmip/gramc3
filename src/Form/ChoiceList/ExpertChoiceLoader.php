@@ -39,7 +39,7 @@ use App\Utils\Functions;
 use App\Entity\Individu;
 use App\Entity\Thematique;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 
 /***
@@ -60,7 +60,7 @@ class ExpertChoiceLoader implements ChoiceLoaderInterface
 
     private $exclus     =   [];
 
-    public function __construct(EntityManager $em, $exclus = [], $only_pres=false)
+    public function __construct(EntityManagerInterface $em, $exclus = [], $only_pres=false)
     {
 	    //Functions::debugMessage(__METHOD__ . "Experts exclus ".Functions::show( $exclus)." seult présidents = $only_pres");
 

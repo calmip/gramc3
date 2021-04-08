@@ -32,14 +32,15 @@ use Symfony\Component\Security\Core\Exception\DisabledException;
 use Symfony\Component\Security\Core\Exception\LockedException;
 use Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundException;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
-
-use Symfony\Component\Security\Core\Authentication\Token\Storage\UsageTrackingTokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 use App\Exception\UserException;
 use Symfony\Component\HttpFoundation\Request;
 
+use Doctrine\ORM\EntityManagerInterface;
 
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Core\User\UserCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -50,15 +51,15 @@ use App\GramcServices\ServiceJournal;
 
 class UserChecker implements UserCheckerInterface
 {
-	public function __construct(\Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface $secu_auto_chk,
+	public function __construct(AuthorizationCheckerInterface $secu_auto_chk,
 								TokenStorageInterface $token,
-								\Symfony\Component\HttpFoundation\Session\SessionInterface $sess,
+								SessionInterface $sss,
 								ServiceJournal $sj,
-								\Doctrine\ORM\EntityManagerInterface $em)
+								EntityManagerInterface $em)
 	{
 		$this->secu_auto_chk = $secu_auto_chk;
 		$this->token         = $token->getToken();
-		$this->sess          = $sess;
+		$this->sss           = $sss;
 		$this->sj            = $sj;
 		$this->em            = $em;
 	}
@@ -103,29 +104,29 @@ class UserChecker implements UserCheckerInterface
 
         if( ! $this->secu_auto_chk->isGranted('ROLE_PREVIOUS_ADMIN') )
 		{
-			if( $this->secu_auto_chk->isGranted('ROLE_ALLOWED_TO_SWITCH' ) && $this->sess->has('real_user') )
+			if( $this->secu_auto_chk->isGranted('ROLE_ALLOWED_TO_SWITCH' ) && $this->sss->has('real_user') )
 			{
 				$this->sj->debugMessage('UserChecker : checkPostAuth : User ' . 
 				                         $user->getPrenom() . ' ' . 
 				                         $user->getNom() . " est connecté en SUDO par " .
 				                         $this->token->getUser());
-				$this->sess->set('real_user', $this->token->getUser() );
-				$this->sess->set('sudo_url', Request::createFromGlobals()->headers->get('referer') );
-				//$this->sj->debugMessage(__METHOD__ . " sudo_url set to : " . App::getSession()->get('sudo_url') );
+				$this->sss->set('real_user', $this->token->getUser() );
+				$this->sss->set('sudo_url', Request::createFromGlobals()->headers->get('referer') );
+				//$this->sj->debugMessage(__METHOD__ . " sudo_url set to : " . $this->sss->get('sudo_url') );
 			}
 			else
 			{
-				$this->sess->set('real_user', $user);
-				$this->sess->remove('sudo_url');
+				$this->sss->set('real_user', $user);
+				$this->sss->remove('sudo_url');
 				//$this->sj->debugMessage(__METHOD__ . " sudo_url removed" );
 				//$this->sj->debugMessage('UserChecker : checkPostAuth : User ' . $user->getPrenom() . ' ' . $user->getNom() . " est connecté");
 			}
 		}
 		else
 		{
-			//$this->sj->debugMessage('UserChecker : checkPostAuth : User '. App::getUser() . " redevient ".  $user );
-			$this->sess->remove('sudo_url');
-			//$this->sj->debugMessage(__METHOD__ . " sudo_url removed" );
+			$this->sj->debugMessage('UserChecker : checkPostAuth : User '. $this->token->getUser() . " redevient ".  $user );
+			$this->sss->remove('sudo_url');
+			$this->sj->debugMessage(__METHOD__ . " sudo_url removed" );
 		}
 		return true;
     }

@@ -2,15 +2,6 @@
 
 namespace App\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-
-//use App\App;
 use App\Entity\Projet;
 use App\Entity\Version;
 use App\Entity\Individu;
@@ -18,11 +9,24 @@ use App\Entity\Session;
 use App\Entity\Laboratoire;
 use App\Entity\Etablissement;
 use App\Entity\Statut;
+use App\GramcServices\ServiceJournal;
+use App\GramcServices\ServiceMenus;
+use App\GramcServices\ServiceProjets;
+use App\GramcServices\ServiceSessions;
+
 
 // Pour debug
 //use App\Entity\Compta;
 
 use App\Utils\Functions;
+
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Symfony\Component\Routing\Annotation\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 use libphonenumber\PhoneNumberUtil;
 use libphonenumber\NumberParseException;
@@ -34,8 +38,6 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Esxtension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
-// TODO HOULALA
-//// require_once ('/data/gramc/src/JpGraph/JpGraph.php');
 use JpGraph\JpGraph;
 
 /**
@@ -44,8 +46,25 @@ use JpGraph\JpGraph;
  * @Route("statistiques")
  * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
  */
-class StatistiquesController extends Controller
+class StatistiquesController extends AbstractController
 {
+	private $sj;
+	private $sm;
+	private $sp;
+	private $ss;
+			
+	public function __construct (ServiceJournal $sj,
+								 ServiceMenus $sm,
+								 ServiceProjets $sp,
+								 ServiceSessions $ss
+								 )
+	{
+		$this->sj = $sj;
+		$this->sm = $sm;
+		$this->sp = $sp;
+		$this->ss = $ss;
+	}
+
     /**
      * @Route("/symfony", name="homepage")
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
@@ -68,9 +87,9 @@ class StatistiquesController extends Controller
      */
     public function indexAction(Request $request,$annee=null)
     {
-		$sm      = $this->get('app.gramc.ServiceMenus');
-		$ss      = $this->get('app.gramc.ServiceSessions');
-		$sp      = $this->get('app.gramc.ServiceProjets');
+		$sm      = $this->sm;
+		$ss      = $this->ss;
+		$sp      = $this->sp;
 		$em      = $this->getDoctrine()->getManager();
 		$prj_rep = $em->getRepository(Projet::class);
 		$ver_rep = $em->getRepository(Version::class);
@@ -152,7 +171,7 @@ class StatistiquesController extends Controller
 
 		// debug
         //$db_conso = $em->getRepository(Compta::class)->consoTotale( $annee, 'cpu' );
-        //$dessin_heures = $this->get('app.gramc.graf_calcultous');
+        //$dessin_heures = $this->get('App\GramcServices\GramcGraf\Calcultous');
  		//$debut = new \DateTime( $annee . '-01-01');
  		//$nannee= $annee + 1;
 		//$fin   = new \DateTime( $nannee . '-01-02');
@@ -186,9 +205,9 @@ class StatistiquesController extends Controller
      */
     public function repartitionAction(Request $request, $annee)
     {
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$ss = $this->get('app.gramc.ServiceSessions');
-		$sj = $this->get('app.gramc.ServiceJournal');
+		$sm = $this->sm;
+		$ss = $this->ss;
+		$sj = $this->sj;
 		$em = $this->getDoctrine()->getManager();
 		
 	    $data = $ss->selectAnnee($request, $annee);
@@ -262,8 +281,8 @@ class StatistiquesController extends Controller
      */
     public function collaborateurAction(Request $request, $annee)
     {
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$ss = $this->get('app.gramc.ServiceSessions');
+		$sm = $this->sm;
+		$ss = $this->ss;
 		$em = $this->getDoctrine()->getManager();
 		
 	    $data = $ss->selectAnnee($request, $annee);
@@ -513,8 +532,8 @@ class StatistiquesController extends Controller
 	/* Cette fonction est appelée par laboratoireAction, etablissementAction etc. */
 	private function parCritere(Request $request, $annee, $critere, $titre)
 	{
-		$sm = $this->get('app.gramc.ServiceMenus');
-		$ss = $this->get('app.gramc.ServiceSessions');
+		$sm = $this->sm;
+		$ss = $this->ss;
 
 	    $data = $ss->selectAnnee($request, $annee);
 	    $annee= $data['annee'];
@@ -648,7 +667,7 @@ class StatistiquesController extends Controller
 	 */
     private function statistiques( $annee, $critere, $titre = "Titre" )
     {
-		$sp          = $this->get('app.gramc.ServiceProjets');
+		$sp          = $this->sp;
 		$stats       = $sp->projetsParCritere($annee, $critere);
 		$acros       = $stats[0];
 		$num_projets = $stats[1];

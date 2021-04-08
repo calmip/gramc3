@@ -88,5 +88,24 @@ $( document ).ready(function() {
 	$( '#dialog-compta' ).hover(function() {
 		$('.conso').on('click',display_conso);
 	});
+	
+	/*********************************************************************************
+	* Lorsqu'on clique sur un bouton de class "cadenas", on ouvre le div correspondant
+	*********************************************************************/
+    $('.cadenas').on('click',function(e) {
+		var div_name = $(this).attr("id");
+		prj = div_name.substring(7);
+		div_name = '#dialog_' + prj
+		//var div_name = " toto";
+
+		$(div_name).dialog({autoOpen: false, modal: false });
+		$(div_name).dialog( "option", "title", "Identifiants pour " + prj );
+		$(div_name).dialog( "option", "height", 'auto' );
+		$(div_name).dialog( "option", "width", '400');
+		$(div_name).dialog('open');
+		$('.dialog-close').on('click',function(){ $( '#dialog-compta' ).dialog('close') });
+		//alert("coucou " + div_name + " " + div_name.startsWith("bouton"));
+	});
+
 });
 

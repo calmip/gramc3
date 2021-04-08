@@ -65,15 +65,15 @@
     </a>
 </div>
 {%  endif %}
-
+{% if noconso == 0 %}
 <div class="lien-pdf">
     <img id="bconso" class="bouton_poussoir conso" src="{{ asset('icones/conso64.png') }}"
         alt="Consommation {{version.getAnneeSession}}" title="Visualiser la consommation {{version.getAnneeSession}}"
-        data-href="{{ absolute_url(path('projet_conso', { 'id': version.projet.idProjet, 'annee' : version.getAnneeSession })) }}"/>
+        data-href="{{ absolute_url(path('projet_conso', { 'id': version.projet.idProjet, 'loginname': loginname, 'annee' : version.getAnneeSession })) }}"/>
 </div>
-
 {# Pour les graphiques de conso #}
 <div id="dialog-compta"></div>
+{% endif %}
 
 {# Pour les figures #}
 <div id="dialog"></div>
@@ -121,11 +121,13 @@
     </tbody>
 </table>
 
+{% if norattachement == false %}
 <table class="projet">
     <tbody> 
 		<tr><th class="horiz">Rattachement du projet</th><td>{{ version.prjRattachement }}</td></tr>
     </tbody>
 </table>
+{% endif %}
 
 <table class="projet">
     <tbody>
@@ -145,7 +147,7 @@
             <span class="petit">Y compris les rallonges</span>
             </th>
             <td>{{ (version.getDemHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}
-            {% if toomuch %} <img src="{{ asset('icones/attention16.png') }}" alt="Demande trop forte, cf. règles d'attribution" title="Demande trop forte, cf. règles d'attribution" /> {% endif %}
+            {% if toomuch %} <img src="{{ absolute_url(asset('icones/attention16.png')) }}" alt="Demande trop forte, cf. règles d'attribution" title="Demande trop forte, cf. règles d'attribution" /> {% endif %}
             </td>
         </tr>
     </tbody>
@@ -175,6 +177,7 @@
     </tbody>
 </table>
 
+{% if noconso == 0 %}
 <table class="projet">
 <tbody>
         <tr>
@@ -200,6 +203,7 @@
         </tr>
     </tbody>
 </table>
+{% endif %}
 
 <h4>Laboratoire et responsable du projet</h4>
 <div class="message info">
@@ -243,7 +247,7 @@ Le laboratoire associé au projet est le laboratoire du responsable
     {% for user in version.CollaborateurVersion %}
     <tr>
         <td>{% if( user.login == true) %}Oui{% else %}Non{% endif %}</td>
-		{% if version.etat==5 or version.etat == 23 %}
+		{% if version.etat==5 or version.etat == 4 %}
         <td>{% if (user.login == true) %}
                {% if user.loginname==null %}
                   <img src="{{ asset('icones/attention16.png') }}" alt="Compte non encore créé" title="compte non encore créé" />

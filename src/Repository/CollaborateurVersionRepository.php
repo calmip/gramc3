@@ -73,4 +73,33 @@ class CollaborateurVersionRepository extends \Doctrine\ORM\EntityRepository
 
         return $collaborateurs;
     }
+    
+    /*
+     * Renvoie les cv qui ont un mot de passe 
+     */
+    public function getCvPasswd()
+    {
+		$em = $this->getEntityManager();
+		$coll_ver = $em->createQuery('SELECT cv FROM App:CollaborateurVersion cv WHERE cv.password IS NOT NULL')->getResult();
+		return $coll_ver;
+	}
+	
+	/*
+	 * Renvoie true/false suivant que loginname est dans la table ou pas
+	 */
+	public function isLoginname($loginname)
+	{
+		$em = $this->getEntityManager();
+		$out= $em->createQuery('SELECT cv FROM App:CollaborateurVersion cv WHERE cv.loginname = :loginname')
+		->setParameter('loginname', $loginname)
+		->getResult();
+		if (count($out)==0)
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
 }

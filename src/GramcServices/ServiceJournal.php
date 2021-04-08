@@ -28,7 +28,8 @@ namespace App\GramcServices;
 use App\Entity\Journal;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Security\Core\Security;
+//use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 //use Symfony\Bridge\Monolog\Logger;
@@ -43,17 +44,18 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 class ServiceJournal
 {
 	// request_stack, session,logger, security.helper, doc
+	// request_stack, session,logger, security.token_storage,doc
 	public function __construct(RequestStack $rs, 
 								SessionInterface $ss, 
 								LoggerInterface $log, 
-								Security $secu,
+								TokenStorageInterface $tok, 
 								AuthorizationCheckerInterface $ac, 
 								EntityManagerInterface $em)
 	{
 		$this->rs    = $rs;
 		$this->ss    = $ss;
 		$this->log   = $log;
-		$this->secu  = $secu;
+		$this->token = $tok->getToken();
 		$this->ac    = $ac;
 		$this->em    = $em;
 	}
@@ -73,16 +75,16 @@ class ServiceJournal
 		$rs    = $this->rs;
 		$ss    = $this->ss;
 		$log   = $this->log;
-		$secu  = $this->secu;
+		$token = $this->token;
 		$em    = $this->em;
 
         $journal = new Journal();
         $journal->setStamp( new \DateTime() );
 
-		if ($secu->getUser() != null)
+		if ($token != null && $token->getUser() != null)
 		{
-			$journal->setIndividu  ( $secu->getUser() );
-			$journal->setIdIndividu( $secu->getUser()->getId() );
+			$journal->setIndividu  ( $token->getUser() );
+			$journal->setIdIndividu( $token->getUser()->getId() );
 		}
 		else
 		{

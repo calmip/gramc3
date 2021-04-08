@@ -4,8 +4,7 @@ twig:
     strict_variables: '%kernel.debug%'
     exception_controller: null
     globals:
-       #init: '@app.init_controller'
-       infos: '@app.gramc.ServiceInfos'
+       infos: '@App\GramcServices\ServiceInfos'
        mailadmin: '%mailadmin%'
        mesoc: '%mesoc%'
        mesoc_web: '%mesoc_web%'
@@ -17,9 +16,11 @@ twig:
        conso_seuil_1: '%conso_seuil_1%'
        conso_seuil_2: '%conso_seuil_2%'
        noconso: '%noconso%'
+       norattachement: '%norattachement%'
        prj_prefix: '%prj_prefix%'
        max_expertises_nb: '%max_expertises_nb%'
        ressources_conso_group: '%ressources_conso_group%'
+       ressources_conso_user: '%ressources_conso_user%'
        max_page_nb: '%max_page_nb%'
 
 

@@ -25,7 +25,7 @@
 namespace App\Controller;
 
 use App\Entity\Templates;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -38,7 +38,7 @@ use Symfony\Component\HttpFoundation\Request;
  * @Security("is_granted('ROLE_ADMIN')")
  * @Route("templates")
  */
-class TemplatesController extends Controller
+class TemplatesController extends AbstractController
 {
     /**
      * Lists all template entities.

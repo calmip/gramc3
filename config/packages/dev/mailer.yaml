@@ -2,5 +2,5 @@
 framework:
     mailer:
         envelope:
-            recipients: ['emmanuel.courcelle@toulouse-inp.fr']
+            recipients: ["%env(MAILER_RECIPIENT)%"]
 

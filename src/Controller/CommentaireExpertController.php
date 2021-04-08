@@ -27,14 +27,15 @@ namespace App\Controller;
 
 use App\Entity\CommentaireExpert;
 use App\Utils\Functions;
+use App\GramcServices\ServiceJournal;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
-//use App\App;
 
 /****
 * Fichier généré automatiquement et modifié par E.Courcelle
@@ -49,8 +50,20 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  *
  * @Route("commentaireexpert")
  */
-class CommentaireExpertController extends Controller
+class CommentaireExpertController extends AbstractController
 {
+	private $sj;
+	private $tok;
+	
+	
+	public function __construct (ServiceJournal $sj,
+								 TokenStorageInterface $tok
+								 )
+	{
+		$this->sj  = $sj;
+		$this->tok = $tok->getToken();
+	}
+
     /**
      * Displays a form to edit an existing commentaireExpert entity.
      *
@@ -83,8 +96,8 @@ class CommentaireExpertController extends Controller
     ************************/
     public function modifyAction(Request $request, CommentaireExpert $commentaireExpert)
     {
-		$sj = $this->get('app.gramc.ServiceJournal');
-		$token = $this->get('security.token_storage')->getToken();
+		$sj = $this->sj;
+		$token = $this->tok;
 
 		// Chaque expert ne peut accéder qu'à son commentaire à lui
 		$moi = $token->getUser();
@@ -210,7 +223,7 @@ class CommentaireExpertController extends Controller
     **********/
     public function creeOuModifAction(Request $request, $annee)
     {
-		$token = $this->get('security.token_storage')->getToken();
+		$token = $this->tok;
 		$em = $this->getDoctrine()->getManager();
 
 		$moi = $token->getUser();

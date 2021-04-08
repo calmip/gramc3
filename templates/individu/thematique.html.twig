@@ -24,10 +24,11 @@
 		<h3 class="center"> Thématiques</h3>
 		<p><em>Cocher une ou plusieurs cases pour associer cet expert aux thématiques correspondantes.</em></p>
 	    <fieldset>{{ form_widget(form.thematique) }}</fieldset>
-
+		{% if norattachement == false %}
 		<h3 class="center"> Rattachements</h3>
 		<p><em>Cocher une ou plusieurs cases pour associer cet expert aux rattachements correspondants.</em></p>
 	    <fieldset>{{ form_widget(form.rattachement) }}</fieldset>
+	    {% endif %}
 
 	    {{ form_widget(form.submit) }}{{ form_widget(form.reset) }}
 	    {{ form_end(form) }}

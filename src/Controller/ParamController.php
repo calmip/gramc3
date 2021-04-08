@@ -27,7 +27,7 @@ namespace App\Controller;
 use App\Entity\Param;
 use App\Utils\Functions;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -38,16 +38,22 @@ use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
-
-//use App\App;
+use Symfony\Component\Form\FormFactoryInterface;
 
 /**
  * Param controller.
  * @Security("is_granted('ROLE_ADMIN')")
  * @Route("param")
  */
-class ParamController extends Controller
+class ParamController extends AbstractController
 {
+	private $ff;
+	
+	public function __construct (FormFactoryInterface $ff)
+	{
+		$this->ff  = $ff;
+	}
+	
     /**
      * Lists all param entities.
      *
@@ -140,8 +146,8 @@ class ParamController extends Controller
      */
     public function avancerAction(Request $request)
     {
-		$em  = $this->getDoctrine()->getManager();
-		$ff = $this->get('form.factory');
+		$em = $this->getDoctrine()->getManager();
+		$ff = $this->ff;
  
         $now = $em->getRepository(Param::class)->findOneBy(['cle' => 'now']);
         if( $now == null )
