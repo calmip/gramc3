@@ -12,7 +12,7 @@ security:
             memory:
                 users:
                     consoupload:
-                       password: "%password_consoupload%"
+                       password: '%env(PASSWORD_CONSOUPLOAD)%'
                        roles: 'ROLE_ADMIN'
         #user_provider:
         #    id: app.user_provider
