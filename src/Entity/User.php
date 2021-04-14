@@ -38,7 +38,7 @@ class User
     /**
      * @var string
      *
-     * @ORM\Column(name="loginname", type="string", nullable=true,length=100 )
+     * @ORM\Column(name="loginname", type="string", nullable=true,length=20 )
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="NONE")
      */
@@ -47,7 +47,7 @@ class User
     /**
      * @var string
      *
-     * @ORM\Column(name="password", type="string", nullable=true,length=50 )
+     * @ORM\Column(name="password", type="string", nullable=true,length=200 )
      */
     private $password;
 

@@ -1646,7 +1646,15 @@ class ProjetController extends AbstractController
 	    $projets_term        = $projetRepository-> get_projets_etat( $id_individu, 'TERMINE' );
 
 	    $session_actuelle    = $ss->getSessionCourante();
-
+	    
+	    // TODO - Faire en sorte pour que les erreurs soient proprement affichées dans l'API
+		// En attendant ce qui suit permet de se dépanner mais c'est franchement dégueu
+		//echo '<pre>'.strlen($_SERVER['CLE_DE_CHIFFREMENT'])."\n";
+		//echo SODIUM_CRYPTO_SECRETBOX_KEYBYTES.'</pre>';
+		//$enc = Functions::simpleEncrypt("coucou");
+		//$dec = Functions::simpleDecrypt($enc);
+		//echo "$dec\n";
+		
 	    // projets responsable
 	    $projets_resp  = [];
 	    foreach ( $list_projets_resp as $projet )
@@ -1676,6 +1684,7 @@ class ProjetController extends AbstractController
 				else
 				{
 					$passwd    = $u->getPassword();
+					$passwd    = Functions::simpleDecrypt($passwd);
 					$pwd_expir = $u->getPassexpir();
 				}
 			}
