@@ -113,7 +113,6 @@ class Functions
     public static function sauvegarder( $object, EntityManager $em, Logger $logger=null )
     {
         try {
-            //$em = App::getManager();
             if( $em->isOpen() )
 			{
                 $em->persist( $object );
@@ -409,5 +408,60 @@ class Functions
     {
         return $ff->createBuilder(FormType::class, $data, $options);
     }
+
+	/*************************************************************
+	 * SimpleEncrypt: Chiffre un message en utilisant 
+	 *                la clé de la variable d'environnement
+	 *                CLE_DE_CHIFFREMENT
+	 *
+	 * param string $message
+	 * return string (le message chiffré et base64 encoded)
+	 * 
+	 * Utilise la bibliothèque sodium
+	 * adapté de:
+	 * https://paragonie.com/blog/2017/06/libsodium-quick-reference-quick-comparison-similar-functions-and-which-one-use#crypto-secretbox
+	 **************************************************************/
+	 
+	function simpleEncrypt($message)
+	{
+		$key = $_SERVER['CLE_DE_CHIFFREMENT'];
+
+		$nonce     = random_bytes(24); // NONCE = Number to be used ONCE, for each message
+		$encrypted = sodium_crypto_secretbox(
+			$message,
+			$nonce,
+			$key
+		);
+		return base64_encode($nonce . $encrypted);
+	}
+
+	/**************************************************************
+	 * SimpleDecrypt: l'inverse de SimpleEncrypt
+	 **************************************************************/
+
+	function simpleDecrypt($message)
+	{
+		$key = $_SERVER['CLE_DE_CHIFFREMENT'];
+
+		$message = base64_decode($message);
+		$nonce = mb_substr($message, 0, 24, '8bit');
+		$ciphertext = mb_substr($message, 24, null, '8bit');
+		try
+		{
+			$plaintext = sodium_crypto_secretbox_open(
+				$ciphertext,
+				$nonce,
+				$key
+			);
+		}
+		catch ( \Exception $e)
+        { 
+			return "";
+		}
+		if (!is_string($plaintext)) {
+			return "";
+		}
+		return $plaintext;
+	}
 
 }

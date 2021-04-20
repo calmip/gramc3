@@ -252,25 +252,33 @@ class AdminuxController extends AbstractController
 		$passexpir = $grdt->getNew()->add(new \DateInterval($pwd_duree));
 		
 		# Vérifie que ce loginname est connu
-		$cv = $em->getRepository(User::class)->isLoginname($loginname);
+		$cv = $em->getRepository(User::class)->existsLoginname($loginname);
 		if ($cv==false)
 		{
 			return new Response(json_encode( ['KO' => 'No user found in any projet' ]));
 		}
 		
-		# Modifier le mot de passe ou créer un nouveau "user" avec le mot de passe
+		# Modifier le mot de passe
 		else
 		{
 			$user = $em->getRepository(User::class)->findOneBy(['loginname' => $loginname]);
 			if ($user==null)
-			{
+			{			
 				$user = new User();
 				$user->setLoginname($loginname);
 			}
 
+			// Le mot de passe est tronqué à 50 caractères, puis crypté
+			$password = substr($password, 0, 50);
+			$password = Functions::simpleEncrypt($password);
 			$user->setPassword($password);
 			$user->setPassexpir($passexpir);
-			Functions::sauvegarder( $user, $em, $lg );
+			
+			// On n'utilise pas Functions::sauvegarder parce que problèmes de message d'erreur
+			// TODO - A creuser
+            $em->persist( $user );
+            $em->flush( $user );
+			//Functions::sauvegarder( null, $em, $lg );
 			return new Response(json_encode('OK'));
 		}
 	}
