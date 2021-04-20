@@ -34,10 +34,22 @@ efface_bd();
 echo "recrée la BD et remplit à partir de ".$file_name."\n";
 restore_database($file_name);
 
-# On ne modifie plus les adresses mail car symfony enverra tout à l'utilisateur
-# marqué dans le paramètre recipients, fichier config/packages/dev/mailer.yaml
-# echo "modif adresses mail\n";
-# modif_mail();
+# Env dev = On ne modifie plus les adresses mail car symfony enverra tout à l'utilisateur
+#           marqué dans le paramètre recipients, fichier config/packages/dev/mailer.yaml
+#           On finit par l'envoi d'un mail à une adresse bidon, pour vérifier
+#
+# Env prod= Symfony envoie tout à l'utilisateur lui-même
+#           CEPENDANT pour tester l'application en environnement prod il peut être nécessaire
+#           d'utiliser le même stratagème en mode prod
+#           Pour cela:
+#
+#                      cp -a config/packages/dev/mailer.yaml config/packages/prod
+#
+#           Pour savoir dans quelle configuration on se trouve, ce script essaie d'envoyer un mail à toto@exemple.fr
+#           Si on ne le reçoit pas, MEFIANCE !
+
+#echo "modif adresses mail\n";
+#modif_mail();
 
 echo "Appelle bin/console de Symfony\n";
 console_update();
@@ -69,7 +81,7 @@ echo "That's REALLY all Folks\n";
     define('DATABASE_USER', $db_url['user']);
     define('DATABASE_PASSWORD', $db_url['pass']);
     define('DATABASE_NAME', explode ('/',$db_url['path'])[1]);
-    define('MAIL_DEVT', "devt1@exemple.com");
+    //define('MAIL_DEVT', "devt1@exemple.com");
      
     //echo DATABASE_HOST." ".DATABASE_USER." ".DATABASE_PASSWORD." ".DATABASE_NAME."\n";
     //exit;

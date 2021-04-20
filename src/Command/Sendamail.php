@@ -37,12 +37,13 @@ class Sendamail extends Command
     // the name of the command (the part after "bin/console")
     protected static $defaultName = 'app:send-a-mail';
 
-	public function __construct( \Twig\Environment $twig, ServiceNotifications $sn)
+	public function __construct( $env, \Twig\Environment $twig, ServiceNotifications $sn)
     {
         // best practices recommend to call the parent constructor first and
         // then set your own properties. That wouldn't work in this case
         // because configure() needs the properties set in this constructor
         
+        $this->env  = $env;
         $this->sn   = $sn;
         $this->twig = $twig;
 
@@ -67,10 +68,11 @@ class Sendamail extends Command
         
         $sn   = $this->sn;
         $twig = $this->twig;
-
+		$env  = $this->env;
+		
         $address = $input->getArgument('dest');
    		$twig_sujet   = $twig->createTemplate("Essai d'envoi de mails par gramc3");
-		$twig_contenu = $twig->createTemplate("Bonjour " . $address . "\nPour essayer le système de mail\nGramc\n");
+		$twig_contenu = $twig->createTemplate("Bonjour " . $address . "\nPour essayer le système de mail en environnement ".$env."\nGramc\n");
 		$sn -> sendMessage(  $twig_sujet, $twig_contenu, [], [$address]);
         $output->writeln('mail envoyé à '.$address);
         return 0;
