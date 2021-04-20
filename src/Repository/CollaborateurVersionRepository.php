@@ -87,7 +87,7 @@ class CollaborateurVersionRepository extends \Doctrine\ORM\EntityRepository
 	/*
 	 * Renvoie true/false suivant que loginname est dans la table ou pas
 	 */
-	public function isLoginname($loginname)
+	public function existsLoginname($loginname)
 	{
 		$em = $this->getEntityManager();
 		$out= $em->createQuery('SELECT cv FROM App:CollaborateurVersion cv WHERE cv.loginname = :loginname')
