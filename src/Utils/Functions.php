@@ -47,7 +47,8 @@ use App\GramcServices\ServiceJournal;
 
 use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\Validator\Validator\TraceableValidator;
+//use Symfony\Component\Validator\Validator\TraceableValidator;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 
 use Doctrine\ORM\ORMException;
@@ -277,7 +278,7 @@ class Functions
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public static function dataError( TraceableValidator $sval, $data, $groups = ['Default'] )
+    public static function dataError( ValidatorInterface $sval, $data, $groups = ['Default'] )
     {
 	    if( is_string( $groups ) ) $groups = [$groups];
 	    $violations = $sval->validate($data, null, $groups);

@@ -72,7 +72,7 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Component\Validator\Validator\TraceableValidator;
+//use Symfony\Component\Validator\Validator\TraceableValidator;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 use Doctrine\ORM\EntityManager;
@@ -1044,7 +1044,7 @@ class VersionModifController extends AbstractController
     *          Le responsable est dans la cellule 0 du tableau 
     * 
     *****************************************************************************/
-    private static function prepareCollaborateurs(Version $version, ServiceJournal $sj, TraceableValidator $sval)
+    private static function prepareCollaborateurs(Version $version, ServiceJournal $sj, ValidatorInterface $sval)
     {
 	    if( $version == null ) $sj->throwException('VersionController:modifierCollaborateurs : version null');
 	
@@ -1600,7 +1600,7 @@ class VersionModifController extends AbstractController
      * 
      *  TODO - Cette fonction statique ce n'est pas fameux
      **/
-    public static function versionValidate(Version $version, ServiceJournal $sj, EntityManager $em, TraceableValidator $sval)
+    public static function versionValidate(Version $version, ServiceJournal $sj, EntityManager $em, ValidatorInterface $sval)
     {
 	    $todo   =   [];
 	    if( $version->getPrjTitre() == null ) $todo[] = 'prj_titre';

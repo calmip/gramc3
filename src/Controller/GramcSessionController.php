@@ -477,7 +477,7 @@ class GramcSessionController extends AbstractController
 			$em = $this->getDoctrine()->getManager();
 
 			$compteactivation = $this->getDoctrine()
-				->getRepository('App:Compteactivation')
+				->getRepository('App:CompteActivation')
 				->findOneBy( ['key' => $key ] );
 
 			if( !  $compteactivation )
