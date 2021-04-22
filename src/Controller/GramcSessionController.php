@@ -812,7 +812,7 @@ class GramcSessionController extends AbstractController
 		// envoi de mail
 
 		$session = $request->getSession();
-		$twig_sujet   = $this->tw->createTemplate('Activation de votre comptre Gramc');
+		$twig_sujet   = $this->tw->createTemplate('Activation de votre compte Gramc');
 		$twig_contenu = $this->tw->createTemplate("Bonjour\nPour activer votre compte sur gramc, merci de visiter cette url:\n {{ url('activation') }}/{{ key }} \nL'équipe CALMIP");
 		$sn -> sendMessage(  $twig_sujet, $twig_contenu, [ 'key' => $key ], [$session->get('email')]);
 		$sj->infoMessage(__METHOD__ .':' . __LINE__ . ' Activation GRAMC  pour ' .  $session->get('email').  ' envoyé (key=' . $key .')' );
