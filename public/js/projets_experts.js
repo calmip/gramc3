@@ -35,7 +35,6 @@ $( document ).ready(function() {
     function click_fermeture(event) {
         event.preventDefault();
         h = $(this).attr("href");
-        h += "&ajax=1";
 
         $.ajax({url: h,
                 type: "GET",
@@ -57,6 +56,25 @@ $( document ).ready(function() {
          .fail(function(xhr, status, errorThrown) { alert (errorThrown); });
     };
 
+
+	// Sera connecté au click des liens termineroupas
+	function click_termineroupas(event) {
+		event.preventDefault();
+        h = $(this).attr("href");
+		
+        $.ajax({url: h,
+                type: "GET",
+                context: $(this)})
+			.done(
+				function(data){
+					td  = $(this).parent();
+					td.html(data);
+					$( "a.termineroupas" ).click(click_termineroupas);
+					$( "a.fermeture" ).click(click_fermeture);
+				})
+			.fail(function(xhr, status, errorThrown) { alert (errorThrown); });
+	};
+
     // il ferme juste la fenetre
     function ferme_dialog( event )
     {
@@ -73,7 +91,6 @@ $( document ).ready(function() {
         event.preventDefault();
 		form = $( "#formulaire_confirmation form" );
         h =  form.attr('action');
-		h += "&ajax=1";
 		$.ajax({url: h,
 	    type: "POST",
 	    context: gramc_cell,
@@ -248,6 +265,7 @@ $( document ).ready(function() {
 
 	// Connecter aux fonctions click lors de l'initialisation
 	$( "a.fermeture" ).click(click_fermeture);
+	$( "a.termineroupas" ).click(click_termineroupas);
 
 	// Connecter aux fonctions change des checkboxes
 	$( "input.cb" ).change(change_cb);

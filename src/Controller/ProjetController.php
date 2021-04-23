@@ -550,13 +550,53 @@ class ProjetController extends AbstractController
             if( $confirmation == 'OUI' )
 			{
                 $workflow = $this->pw;
-                if( $Workflow->canExecute( Signal::CLK_FERM, $projet) )
-                     $Workflow->execute( Signal::CLK_FERM, $projet);
+                if( $workflow->canExecute( Signal::CLK_FERM, $projet) )
+                     $workflow->execute( Signal::CLK_FERM, $projet);
 			}
             return $this->redirectToRoute('projet_tous'); // NON - on ne devrait jamais y arriver !
 		}
         else
            return $this->render('projet/dialog_fermer.html.twig',
+            [
+            'projet' => $projet,
+            ]);
+    }
+
+    /**
+     * Conserver un projet en standby
+     *
+     * @Security("is_granted('ROLE_ADMIN')")
+     * @Route("/{id}/nepasterminer", name="nepasterminer_projet")
+     * @Method({"GET"})
+     */
+    public function nepasterminerAction(Projet $projet, Request $request)
+    {
+		$em = $this->getDoctrine()->getManager();
+		
+		$projet->setNepasterminer(true);
+		$em->persist($projet);
+		$em->flush($projet);
+		return $this->render('projet/nepasterminer.html.twig',
+            [
+            'projet' => $projet,
+            ]);
+    }
+
+    /**
+     * Permettre la fermeture d'un projet
+     *
+     * @Security("is_granted('ROLE_ADMIN')")
+     * @Route("/{id}/onpeutterminer", name="onpeutterminer_projet")
+     * @Method({"GET","POST"})
+     */
+    public function onpeutterminerAction(Projet $projet, Request $request)
+    {
+		$em = $this->getDoctrine()->getManager();
+		
+		$projet->setNepasterminer(false);
+		$em->persist($projet);
+		$em->flush($projet);
+		return $this->render('projet/onpeutterminer.html.twig',
             [
             'projet' => $projet,
             ]);
