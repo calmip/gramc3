@@ -25,7 +25,7 @@
 /************
  * Voir https://symfony.com/index.php/doc/4.4/doctrine/events.html#doctrine-entity-listeners
  * 
- * Lorsqu'une nouvelle version est créée ou lorqu'une version est supprimée, on recalcule
+ * Lorsqu'une nouvelle version est créée ou lorsqu'une version est supprimée, on recalcule
  * la dernière version et on met à jour le champ correspondant du projet
  * 
  * Lorsqu'une version est active, on met à jour l'entité Projet correspondante
@@ -53,7 +53,8 @@ class ProjetDerniereVersion
     public function postPersist(Version $version, LifecycleEventArgs $event): void
     {
 		$projet = $version->getProjet();
-		$this->sp->calculVersionDerniere($projet);
+		//$this->sp->calculVersionDerniere($projet);
+		$projet->setVersionDerniere($version);
 		$this->em->persist($projet);
 		$this->em->flush();
     }

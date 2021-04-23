@@ -82,7 +82,7 @@
                 <tr role="row" class="odd">
 
                     <td class="sorting_1">
-                    {% if (item.metaetat == 'STANDBY') %}
+                    {% if (item.metaetat == 'standby') %}
                         <a class="fermeture" href="{{ path('fermer_projet', { 'id': item.projet.idProjet }) }}?" title="Fermer le projet">
                             <img src="{{ asset('icones/process-stop.png') }}" alt="Fermer">
                         </a>

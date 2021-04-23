@@ -30,7 +30,8 @@ use     App\Entity\Laboratoire;
 use     App\Entity\Individu;
 use     App\Utils\Functions;
 
-use Symfony\Component\Validator\Validator\TraceableValidator;
+//use Symfony\Component\Validator\Validator\TraceableValidator;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 use App\GramcServices\ServiceJournal;
 use Doctrine\ORM\EntityManager;
@@ -113,7 +114,7 @@ class IndividuForm
 	 * Si les données ne sont pas validées, on ne crée pas l'individu et on renvoie null
 	 * Si les données sont valides, l'individu est créé et renvoyé
 	 *****************************************************************/
-    public function nouvelIndividu(TraceableValidator $sval)
+    public function nouvelIndividu(ValidatorInterface $sval)
     {
 	    $individu = new Individu();
 	    $individu->setMail( $this->getMail() );
