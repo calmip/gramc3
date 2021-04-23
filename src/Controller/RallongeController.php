@@ -366,16 +366,24 @@ class RallongeController extends AbstractController
 	            " parce que : " . $sm->rallonge_expertiser($rallonge)['raison'] );
 	
 	    $editForm = $this->createFormBuilder($rallonge)
-	            ->add('nbHeuresAtt', IntegerType::class, [ 'required'       =>  false, 'data' => $rallonge->getDemHeures() ] )
 	            ->add('commentaireInterne', TextAreaType::class, [ 'required'       =>  false ] )
 	            ->add('validation', ChoiceType::class, ['expanded' => true, 'multiple' => false, 'choices' => [ 'Accepter' => true, 'Refuser' => false ]])
 	            ->add('enregistrer',SubmitType::class, ['label' => 'Enregistrer' ])
 	            ->add('annuler',SubmitType::class, ['label' => 'Annuler' ])
 	            ->add('fermer',SubmitType::class, ['label' => 'Fermer' ])
-	            ->add('envoyer',SubmitType::class, ['label' => 'Envoyer' ])
-	            ->getForm();
+	            ->add('envoyer',SubmitType::class, ['label' => 'Envoyer' ]);
+	            
+		//if( $rallonge->getNbHeuresAtt() == 0 )
+		//{
+        //    $editForm->add('nbHeuresAtt', IntegerType::class , ['required'  =>  false, 'data' => $rallonge->getDemHeures(), ]);
+		//}
+        //else
+        //{
+            $editForm->add('nbHeuresAtt', IntegerType::class , ['required'  =>  false, ]);
+		//}
 	
-	
+		$editForm = $editForm->getForm();
+		
 	    $erreurs = [];
 	    $editForm->handleRequest($request);
 	
@@ -398,8 +406,15 @@ class RallongeController extends AbstractController
 	    if ($editForm->isSubmitted()  )
 		{
             $erreurs = Functions::dataError( $sval, $rallonge, ['expertise'] );
+            $validation = $rallonge->getValidation();
+            //if( $validation != 1 )
+			//{
+            //    $rallonge->setNbHeuresAtt(0);
+			//}
+			
+			$em->persist( $rallonge );
             $em->flush();
-
+            
 			// Bouton FERMER
 			if ($editForm->get('fermer')->isClicked())
 			{
