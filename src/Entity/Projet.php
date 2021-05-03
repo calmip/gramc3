@@ -132,6 +132,13 @@ class Projet
      */
     private $rapportActivite;
 
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="nepasterminer", type="boolean", nullable=false)
+     */
+    private $nepasterminer;
+
     public function getId(){ return $this->getIdProjet(); }
     public function __toString(){ return $this->getIdProjet(); }
 
@@ -265,6 +272,30 @@ class Projet
     public function getVersionDerniere()
     {
         return $this->versionDerniere;
+    }
+
+    /**
+     * Set nepasterminer
+     *
+     * @param boolean $nepasterminer
+     *
+     * @return Projet
+     */
+    public function setNepasterminer($nepasterminer)
+    {
+        $this->nepasterminer = $nepasterminer;
+
+        return $this;
+    }
+
+    /**
+     * Get nepasterminer
+     *
+     * @return boolean
+     */
+    public function getNepasterminer()
+    {
+        return $this->nepasterminer;
     }
 
     /**

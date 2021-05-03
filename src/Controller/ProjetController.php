@@ -550,13 +550,53 @@ class ProjetController extends AbstractController
             if( $confirmation == 'OUI' )
 			{
                 $workflow = $this->pw;
-                if( $Workflow->canExecute( Signal::CLK_FERM, $projet) )
-                     $Workflow->execute( Signal::CLK_FERM, $projet);
+                if( $workflow->canExecute( Signal::CLK_FERM, $projet) )
+                     $workflow->execute( Signal::CLK_FERM, $projet);
 			}
             return $this->redirectToRoute('projet_tous'); // NON - on ne devrait jamais y arriver !
 		}
         else
            return $this->render('projet/dialog_fermer.html.twig',
+            [
+            'projet' => $projet,
+            ]);
+    }
+
+    /**
+     * Conserver un projet en standby
+     *
+     * @Security("is_granted('ROLE_ADMIN')")
+     * @Route("/{id}/nepasterminer", name="nepasterminer_projet")
+     * @Method({"GET"})
+     */
+    public function nepasterminerAction(Projet $projet, Request $request)
+    {
+		$em = $this->getDoctrine()->getManager();
+		
+		$projet->setNepasterminer(true);
+		$em->persist($projet);
+		$em->flush($projet);
+		return $this->render('projet/nepasterminer.html.twig',
+            [
+            'projet' => $projet,
+            ]);
+    }
+
+    /**
+     * Permettre la fermeture d'un projet
+     *
+     * @Security("is_granted('ROLE_ADMIN')")
+     * @Route("/{id}/onpeutterminer", name="onpeutterminer_projet")
+     * @Method({"GET","POST"})
+     */
+    public function onpeutterminerAction(Projet $projet, Request $request)
+    {
+		$em = $this->getDoctrine()->getManager();
+		
+		$projet->setNepasterminer(false);
+		$em->persist($projet);
+		$em->flush($projet);
+		return $this->render('projet/onpeutterminer.html.twig',
             [
             'projet' => $projet,
             ]);
@@ -1336,7 +1376,7 @@ class ProjetController extends AbstractController
 
 	    $projetRepository = $this->getDoctrine()->getManager()->getRepository(Projet::class);
 	    $id_individu      = $token->getUser()->getIdIndividu();
-	    $renouvelables    = $projetRepository-> getProjetsCollab($id_individu);
+	    $renouvelables    = $projetRepository-> getProjetsCollab($id_individu, true, true, true);
         if( $renouvelables == null )   return  $this->redirectToRoute('nouveau_projet', ['type' => $type]);
 
         return $this->render('projet/avant_nouveau_projet.html.twig',
@@ -1403,24 +1443,30 @@ class ProjetController extends AbstractController
 	           $sj->throwException(__METHOD__ . ":" . __LINE__ . " mauvais type de projet " . Functions::show( $type) );
 		}
 
+		// Ecriture du projet dans la BD
+        $em->persist( $projet );
+        $em->flush();
+
 		// Création de la première (et dernière) version
         $version    =   new Version();
         $version->setIdVersion( $session->getIdSession() . $projet->getIdProjet() );
         $version->setProjet( $projet );
-
-        //$projet->setVersionDerniere($version);
         $version->setSession( $session );
         $sv->setLaboResponsable($version, $token->getUser());
-        //return new Response( Functions::show( $version ) );
+
         if( $type == Projet::PROJET_SESS )
             $version->setEtatVersion(Etat::EDITION_DEMANDE);
         else
             $version->setEtatVersion(Etat::EDITION_TEST);
 
-		// Définition de $version en tant que versionDerniere du projet
-		// PAS BESOIN CAR C'EST FAIT DANS L'EVENTLISTENER !
-		// (pour la cohérence de la BD)
-		////$projet->setVersionDerniere($version);
+		// Ecriture de la version dans la BD
+        $em->persist( $version );
+        $em->flush();
+
+		// La dernière version est fixée par l'EventListener
+		// $projet->setVersionDerniere($version);
+		// $em->persist( $projet);
+		// $em->flush();
 		
 		// Affectation de l'utilisateur connecté en tant que responsable
         $moi = $token->getUser();
@@ -1428,9 +1474,7 @@ class ProjetController extends AbstractController
         $collaborateurVersion->setVersion( $version );
         $collaborateurVersion->setResponsable( true );
 
-		// Sauvegarde des données
-        $em->persist( $projet );
-        $em->persist( $version );
+		// Ecriture de collaborateurVersion dans la BD
         $em->persist( $collaborateurVersion );
         $em->flush();
 

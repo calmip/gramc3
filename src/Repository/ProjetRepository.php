@@ -143,10 +143,13 @@ class ProjetRepository extends \Doctrine\ORM\EntityRepository
 	 * 		true		false		=> Renvoie tous les projets dans lesquels $id_individu est responsable
 	 * 		false		false		=> Renvoie un tableau vide
 	 * 
+	 * $seulement_renouv : flag
+	 *      true                    => Renvoie seulement les projets renouvelables
+	 * 
 	 * return = Une collection de projets
 	 * 
 	 ***********************************************************************************************************/
-    public function getProjetsCollab($id_individu, $responsable = true, $collaborateur= true)
+    public function getProjetsCollab($id_individu, $responsable = true, $collaborateur= true, $seulement_renouv = false)
     {
 	    $dql  = 'SELECT p FROM App:Projet p, App:CollaborateurVersion cv, App:Version v, App:Individu i ';
 	    $dql .= ' WHERE  ( v = p.versionDerniere AND i.idIndividu = :id_individu ';
@@ -162,6 +165,10 @@ class ProjetRepository extends \Doctrine\ORM\EntityRepository
 	    $dql .= ' AND cv.version =  v AND cv.collaborateur = i ';
 	    $dql .= ' AND NOT p.etatProjet = :termine ';
 	    $dql .= ' AND NOT  v.etatVersion = :annule AND NOT p.etatProjet = :annule ';
+	    if ($seulement_renouv)
+	    {
+			$dql .= ' AND NOT p.etatProjet = :non_renouvelable ';
+		}
 	    $dql .= ' ) ORDER BY p.versionDerniere DESC';
 
 	    $query = $this->getEntityManager()
@@ -169,12 +176,17 @@ class ProjetRepository extends \Doctrine\ORM\EntityRepository
 			->setParameter('id_individu', $id_individu )
 			->setParameter('termine', Etat::getEtat('TERMINE'))
 			->setParameter('annule', Etat::getEtat('ANNULE'));
+			
 		 if( ! ($responsable===true && $collaborateur===true))
 		 {
 			 $query->setParameter('responsable', $responsable===true?1:0);
 		 }
+		 if( $seulement_renouv===true )
+		 {
+			 $query->setParameter('non_renouvelable', Etat::getEtat('NON_RENOUVELABLE'));
+		 }
 
-	    return $query->getResult();
+		 return $query->getResult();
     }
 
     // la liste des projets avec un état $libelle_etat où un individu est collaborateur ou responsable

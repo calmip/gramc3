@@ -273,6 +273,7 @@ services:
     app.gramc.sendamail:
         class: App\Command\Sendamail
         #arguments: ["@twig","@app.gramc.ServiceNotifications"]
+        arguments: ["%kernel.environment%"]
         tags: ["console.command"]
     App\Command\Sendamail: '@app.gramc.sendamail'
         
