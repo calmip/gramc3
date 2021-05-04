@@ -218,7 +218,7 @@ class AdminuxController extends AbstractController
 	                if( $collaborateur != null && $collaborateur->isEqualTo( $individu ) )
 					{
 	                    $collaborateurVersion->setLoginname( $loginname );
-	                    Functions::sauvegarder( $collaborateurVersion );
+	                    Functions::sauvegarder( $collaborateurVersion, $em );
 	                    return new Response(json_encode('OK'));
 					}
 				}
