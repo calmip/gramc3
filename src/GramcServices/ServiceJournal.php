@@ -23,7 +23,7 @@
 
 namespace App\GramcServices;
 
-//use App\Entity\Individu;
+use App\Entity\Individu;
 //use App\Utils\Functions;
 use App\Entity\Journal;
 
@@ -81,7 +81,8 @@ class ServiceJournal
         $journal = new Journal();
         $journal->setStamp( new \DateTime() );
 
-		if ($token != null && $token->getUser() != null)
+		// Si l'erreur provient de l'API, getUser() n'est pas un Individu
+		if ($token != null && $token->getUser() != null && $token->getUser() instanceof Individu )
 		{
 			$journal->setIndividu  ( $token->getUser() );
 			$journal->setIdIndividu( $token->getUser()->getId() );
