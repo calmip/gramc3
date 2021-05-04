@@ -370,7 +370,7 @@ class Functions
 	
 	            if(  ! array_key_exists('_sf2_attributes', $_SESSION ) )
 	            {
-	                $sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Une session autre que symfony !" );
+	                $sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Une session autre que gramc3 !" );
 				}
 	            elseif( array_key_exists('real_user', $_SESSION['_sf2_attributes'] ) )
                 {
@@ -381,10 +381,12 @@ class Functions
 	                else
 	                    $connexions[] = [ 'user' => $individu, 'minutes' => $min,'heures' => $heures ];
                 }
-	            elseif( ! array_key_exists( '_security_consoupload', $_SESSION['_sf2_attributes'] ) )
-	            {
-	                $sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Problème avec le fichier session " . $filename );
-				}
+                // TODO - Code supprimé car il y a de nouveaux type d'enregistrements de session
+                //        A creuser
+	            //elseif( ! array_key_exists( '_security_consoupload', $_SESSION['_sf2_attributes'] ) )
+	            //{
+	            //    $sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Problème avec le fichier session " . $filename );
+				//}
             }
 		}
 	    $_SESSION = $save;
