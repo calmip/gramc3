@@ -52,6 +52,13 @@ class User
     private $password;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="cpassword", type="string", nullable=true,length=200 )
+     */
+    private $cpassword;
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column(name="pass_expiration", type="datetime", nullable=true)
@@ -76,7 +83,7 @@ class User
      *
      * @param string $loginname
      *
-     * @return CollaborateurVersion
+     * @return User
      */
     public function setLoginname($loginname)
     {
@@ -100,7 +107,7 @@ class User
      *
      * @param string $password
      *
-     * @return CollaborateurVersion
+     * @return User
      */
     public function setPassword($password)
     {
@@ -120,11 +127,35 @@ class User
     }
 
     /**
+     * Set cpassword
+     *
+     * @param string $cpassword
+     *
+     * @return User
+     */
+    public function setCpassword($cpassword)
+    {
+        $this->cpassword = $cpassword;
+
+        return $this;
+    }
+
+    /**
+     * Get cpassword
+     *
+     * @return string
+     */
+    public function getCpassword()
+    {
+        return $this->cpassword;
+    }
+
+    /**
      * Set passexpir
      *
      * @param \DateTime $passexpir
      *
-     * @return CollaborateurVersion
+     * @return User
      */
     public function setPassexpir($passexpir)
     {

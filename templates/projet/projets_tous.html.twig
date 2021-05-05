@@ -19,7 +19,7 @@
         <table>
             <tbody>
                 <tr><th colspan="3">Etats des projets</th></tr>
-                {% for etat in ['termine','standby','accepte','refuse','edition','expertise','nonrenouvele'] %}
+                {% for etat in ['termine','standby','agarder','accepte','refuse','edition','expertise','nonrenouvele'] %}
                 {% if ( attribute(etat_projet,etat) > 0 ) %}
                 <tr>
                     <th>{{ etat }}</th>
@@ -83,13 +83,15 @@
                 <tr role="row" class="odd">
 
                     <td class="sorting_1">
-                    {% if (item.metaetat == 'standby') %}
-						{% if item.projet.nepasterminer==false %}
-							{{ terminermacros.onpeutterminer(item.projet) }}
-						{% else %}
-							{{ terminermacros.nepasterminer(item.projet) }}
+					{% if item.renouvelable %}
+	                    {% if (item.metaetat == 'standby' or item.metaetat == 'agarder') %}
+							{% if item.projet.nepasterminer==false %}
+								{{ terminermacros.onpeutterminer(item.projet) }}
+							{% else %}
+								{{ terminermacros.nepasterminer(item.projet) }}
+		                    {% endif %}
 	                    {% endif %}
-                    {% endif %}
+	                 {% endif %}
 
                     </td>
                     <td>{{ item.projet.idProjet }}</td>
