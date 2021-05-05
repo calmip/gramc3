@@ -1430,6 +1430,7 @@ class ProjetController extends AbstractController
 		$annee    = $session->getAnneeSession();
         $projet   = new Projet($type);
         $projet->setIdProjet($sp->NextProjetId($annee,$type));
+        $projet->setNepasterminer(false);
         switch ($type)
         {
 			case Projet::PROJET_SESS:
