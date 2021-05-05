@@ -1280,7 +1280,7 @@ class ProjetController extends AbstractController
         foreach ( $projets as $projet )
         {
             $info     = $versionRepository->info($projet); // les stats du projet
-            $version  = $versionRepository->findVersionDerniere($projet);
+            $version  = $preojet->getVersionDerniere();
             $metaetat = strtolower($sp->getMetaEtat($projet));
 
             if ( $projet->getTypeProjet() == Projet::PROJET_TEST )

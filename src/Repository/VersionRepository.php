@@ -56,16 +56,6 @@ class VersionRepository extends \Doctrine\ORM\EntityRepository
             ->getOneOrNullResult();
     }
 
-    public function findVersionDerniere(Projet $projet)
-    {
-        return $this->getEntityManager()
-             ->createQuery
-             ('SELECT partial v.{idVersion,etatVersion,prjTitre,prjLLabo,prjThematique,politique} FROM App:Version v JOIN App:Projet p  WHERE ( p = :projet AND p.versionDerniere = v AND NOT v.etatVersion = :annule)')
-             ->setParameter('annule', Etat::getEtat('ANNULE') )
-             ->setParameter('projet', $projet )
-             ->getOneOrNullResult();
-    }
-
     public function findVersions($projet)
     {
         return $this->getEntityManager()
