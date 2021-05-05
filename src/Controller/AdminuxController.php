@@ -317,6 +317,8 @@ class AdminuxController extends AbstractController
 	 * 				gpfs		sondVolDonnPerm stockage permanent demandé (pas d'attribution pour le stockage)
 	 *
 	 */
+	 // curl --netrc -H "Content-Type: application/json" -X POST -d '{ "projet": "P1234" }' https://.../adminux/version/get
+	 
 	 public function versionGetAction(Request $request)
 	 {
 		$em = $this->getDoctrine()->getManager();
@@ -398,49 +400,139 @@ class AdminuxController extends AbstractController
 		foreach ($versions as $v)
 		{
 			if ($v==null) continue;
-			$annee = 2000 + $v->getSession()->getAnneeSession();
-			$attr  = $v->getAttrHeures() - $v->getPenalHeures();
-			foreach ($v->getRallonge() as $r)
-			{
-				$attr += $r->getAttrHeures();
-			}
-
-			// Pour une session de type B = Aller chercher la version de type A correspondante et ajouter les attributions
-			// TODO - Des fonctions de haut niveau (au niveau projet par exemple) ?
-			if ($v->getSession()->getTypeSession())
-			{
-				$id_va = $v->getAutreIdVersion();
-				$va = $em->getRepository(Version::class)->find($id_va);
-				if ($va != null)
-				{
-					$attr += $va->getAttrHeures();
-					$attr -= $va->getPenalHeures();
-					foreach ($va->getRallonge() as $r)
-					{
-						$attr += $r->getAttrHeures();
-					}
-				}
-			}
-			$r = [];
-			$r['idProjet']        = $v->getProjet()->getIdProjet();
-			$r['idSession']       = $v->getSession()->getIdSession();
-			$r['idVersion']       = $v->getIdVersion();
-			$r['etatVersion']     = $v->getEtatVersion();
-			$r['etatProjet']      = $v->getProjet()->getEtatProjet();
-			$r['mail']            = $v->getResponsable()->getMail();
-			$r['attrHeures']      = $attr;
-			$r['sondVolDonnPerm'] = $v->getSondVolDonnPerm();
-			$r['quota']			  = $sp->getConsoRessource($v->getProjet(),'cpu',$annee)[1];
-			// Pour le déboguage
-			// if ($r['quota'] != $r['attrHeures']) $r['attention']="INCOHERENCE";
-
+			$r = $this->__getVersionInfo($v);
 			$retour[] = $r;
-			//$retour[] = $v->getIdVersion();
 		};
 
 		// print_r est plus lisible pour le déboguage
 		// return new Response(print_r($retour,true));
 		return new Response(json_encode($retour));
+
+	 }
+	 
+	 private function __getVersionInfo($v)
+	 {
+		$sp    = $this->sp;
+		$em    = $this->getDoctrine()->getManager();
+		
+		$annee = 2000 + $v->getSession()->getAnneeSession();
+		$attr  = $v->getAttrHeures() - $v->getPenalHeures();
+		foreach ($v->getRallonge() as $r)
+		{
+			$attr += $r->getAttrHeures();
+		}
+
+		// Pour une session de type B = Aller chercher la version de type A correspondante et ajouter les attributions
+		// TODO - Des fonctions de haut niveau (au niveau projet par exemple) ?
+		if ($v->getSession()->getTypeSession())
+		{
+			$id_va = $v->getAutreIdVersion();
+			$va = $em->getRepository(Version::class)->find($id_va);
+			if ($va != null)
+			{
+				$attr += $va->getAttrHeures();
+				$attr -= $va->getPenalHeures();
+				foreach ($va->getRallonge() as $r)
+				{
+					$attr += $r->getAttrHeures();
+				}
+			}
+		}
+		$r = [];
+		$r['idProjet']        = $v->getProjet()->getIdProjet();
+		$r['idSession']       = $v->getSession()->getIdSession();
+		$r['idVersion']       = $v->getIdVersion();
+		$r['etatVersion']     = $v->getEtatVersion();
+		$r['etatProjet']      = $v->getProjet()->getEtatProjet();
+		$r['mail']            = $v->getResponsable()->getMail();
+		$r['attrHeures']      = $attr;
+		$r['sondVolDonnPerm'] = $v->getSondVolDonnPerm();
+		// Pour le déboguage
+		// if ($r['quota'] != $r['attrHeures']) $r['attention']="INCOHERENCE";
+		$r['quota']			  = $sp->getConsoRessource($v->getProjet(),'cpu',$annee)[1];
+		return $r;
+	}
+
+	/**
+	 * get projets non terminés
+	 *
+	 * @Route("/projet/get", name="get_projet", methods={"POST"})
+	 * @Security("is_granted('ROLE_ADMIN')")
+	 * Exemples de données POST (fmt json):
+	 * 			   ''
+	 *             ou
+	 *             '{ "projet" : null     }' -> Tous les projets non terminés
+	 *
+	 *             '{ "projet" : "P01234" }' -> Le projet P01234
+	 *
+	 * Renvoie les informations utiles sur les projets non terminés, à savoir:
+	 *     - typeProjet
+	 *     - etatProjet
+	 *     - metaEtat
+	 *     - nepasterminer (True/False)
+	 *     - versionActive   -> On renvoie les mêmes données que getVersion
+	 *     - versionDerniere -> On renvoie les mêmes données que getVersion
+	 * 
+	 * Données renvoyées pour versionActive et versionDerniere:
+	 * 		 idProjet	P01234
+	 * 		 idSession	20A
+	 * 		 idVersion	20AP01234
+	 * 		 mail		mail du responsable de la version
+	 * 		 attrHeures	Heures cpu attribuées
+	 * 		 quota		Quota sur la machine
+	 * 		 gpfs		sondVolDonnPerm stockage permanent demandé (pas d'attribution pour le stockage)
+	 *
+	 */
+	 public function projetGetAction(Request $request)
+	 {
+		$em = $this->getDoctrine()->getManager();
+		$sp = $this->sp;
+		$rep= $em->getRepository(Projet::class);
+
+		$content  = json_decode($request->getContent(),true);
+		//print_r($content);
+		if ($content == null)
+		{
+			$id_projet = null;
+		}
+		else
+		{
+			$id_projet  = (isset($content['projet'])) ? $content['projet'] : null;
+		}
+
+		$p_tmp = [];
+		$projets = [];
+		if ($id_projet == null)
+		{
+	        $projets = $rep->findNonTermines();
+		}
+		else
+		{
+			$projets[] = $rep->findOneBy(["idProjet" => $id_projet]);
+		}
+        
+        foreach ($projets as $p)
+        {
+			$data = [];
+			$data['idProjet']      = $p->getIdProjet();
+			$data['etatProjet']    = $p->getEtat();
+			$data['metaEtat']      = $sp->getMetaEtat($p);
+			$data['nepasterminer'] = $p->getNepasterminer();
+			$va = ($p->getVersionActive()!=null) ? $p->getVersionActive() : null;
+			$vb = ($p->getVersionDerniere()!=null) ? $p->getVersionDerniere() : null;
+			$v_data = [];
+			foreach (["active"=>$va,"derniere"=>$vb] as $k=>$v)
+			{
+				if ($v != null)
+				{
+					$v_data[$k] = $this->__getVersionInfo($v);
+				}
+			}
+			$data['versions'] = $v_data;
+			$p_tmp[] = $data;
+		}
+
+		return new Response(json_encode($p_tmp));
 
 	 }
 
@@ -486,7 +578,7 @@ class AdminuxController extends AbstractController
 	 *
 	 */
 
-	// curl --netrc -H "Content-Type: application/json" -X POST  -d '{ "projet" : "P0044", "mail" : null, "session" : "19A" }' https://attribution-ressources-dev.calmip.univ-toulouse.fr/gramc2-manu/adminux/users/get
+	// curl --netrc -H "Content-Type: application/json" -X POST  -d '{ "projet" : "P1234", "mail" : null, "session" : "19A" }' https://.../adminux/users/get
 
 	 public function usersGetAction(Request $request)
 	 {
@@ -601,11 +693,12 @@ class AdminuxController extends AbstractController
 	 }
 
     /**
-     * set loginname
+     * get loginname
      *
      * @Route("/getloginnames/{idProjet}/projet", name="get_loginnames", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
+     // curl --netrc -H "Content-Type: application/json" -X GET https://.../adminux/getloginnames/P1234/projet
 	public function getloginnamesAction($idProjet)
 	{
 		$em = $this->getDoctrine()->getManager();
