@@ -230,22 +230,57 @@ class AdminuxController extends AbstractController
    /**
      * set password
      *
-     * @Route("/users/setpassword/{loginname}/loginname/{password}/password", name="set_password", methods={"POST"})
+     * @Route("/users/setpassword", name="set_password", methods={"POST"})
      * @Security("is_granted('ROLE_ADMIN')")
 
      * Positionne le mot de passe du user demandé, à condition que ce user existe dans la table collaborateurVersion
      */
 
-    // exemple: curl --netrc -X POST https://.../adminux/users/setpassword/toto/loginname/azerty/password
-	public function setpasswordAction(Request $request, $loginname, $password, LoggerInterface $lg)
+	// curl --netrc -H "Content-Type: application/json" -X POST -d '{ "loginname": "toto", "password": "azerty", "cpassword": "qwerty" }' https://.../adminux/users/setpassword
+
+	public function setpasswordAction(Request $request, LoggerInterface $lg)
 	{
-		$em = $this->getdoctrine()->getManager();
-		
+		$em = $this->getDoctrine()->getManager();
+		//$sp = $this->sp;
+		//$rep= $em->getRepository(Projet::class);
+
 		if ( $this->getParameter('noconso')==true )
 		{
 			throw new AccessDeniedException("Accès interdit (paramètre noconso)");
 		}
 
+		$content  = json_decode($request->getContent(),true);
+		if ($content == null)
+		{
+			return new Response(json_encode('KO - Pas de données'));
+		}
+		if (empty($content['loginname']))
+		{
+			return new Response(json_encode('KO - Pas de nom de login'));
+		}
+		else
+		{
+			$loginname = $content['loginname'];
+		}
+		
+		if (empty($content['password']))
+		{
+			return new Response(json_encode('KO - Pas de mot de passe'));
+		}
+		else
+		{
+			$password = $content['password'];
+		}
+
+		if (empty($content['cpassword']))
+		{
+			return new Response(json_encode('KO - Pas de version cryptée du mot de passe'));
+		}
+		else
+		{
+			$cpassword = $content['password'];
+		}
+		
 		# Calcul de la date d'expiration
 		$pwd_duree = $this->getParameter('pwd_duree');  // Le nombre de jours avant expiration du mot de passe
 		$grdt      = $this->sd;
@@ -255,7 +290,7 @@ class AdminuxController extends AbstractController
 		$cv = $em->getRepository(User::class)->existsLoginname($loginname);
 		if ($cv==false)
 		{
-			return new Response(json_encode( ['KO' => 'No user found in any projet' ]));
+			return new Response(json_encode( ['KO' => "No user '$loginname' found in any projet" ]));
 		}
 		
 		# Modifier le mot de passe
@@ -273,6 +308,7 @@ class AdminuxController extends AbstractController
 			$password = Functions::simpleEncrypt($password);
 			$user->setPassword($password);
 			$user->setPassexpir($passexpir);
+			$user->setCpassword($cpassword);
 			
 			// On n'utilise pas Functions::sauvegarder parce que problèmes de message d'erreur
 			// TODO - A creuser
@@ -281,6 +317,64 @@ class AdminuxController extends AbstractController
 			//Functions::sauvegarder( null, $em, $lg );
 			return new Response(json_encode('OK'));
 		}
+	}
+
+   /**
+     * clear password
+     *
+     * Efface le mot de passe temporaire pour le user passé en paramètres
+     * 
+     * @Route("/users/clearpassword", name="clear_password", methods={"POST"})
+     * @Security("is_granted('ROLE_ADMIN')")
+	 *
+     * Efface le mot de passe du user demandé
+     */
+
+	// curl --netrc -H "Content-Type: application/json" -X POST -d '{ "loginname": "toto" }' https://.../adminux/users/clearpassword
+
+	public function clearpasswordAction(Request $request, LoggerInterface $lg)
+	{
+		$em = $this->getDoctrine()->getManager();
+
+		if ( $this->getParameter('noconso')==true )
+		{
+			throw new AccessDeniedException("Accès interdit (parametre noconso)");
+		}
+
+		$content  = json_decode($request->getContent(),true);
+		if ($content == null)
+		{
+			return new Response(json_encode('KO - Pas de donnees'));
+		}
+		if (empty($content['loginname']))
+		{
+			return new Response(json_encode('KO - Pas de nom de login'));
+		}
+		else
+		{
+			$loginname = $content['loginname'];
+		}
+				
+		# Vérifie que ce loginname est connu
+		$cv = $em->getRepository(User::class)->existsLoginname($loginname);
+		if ($cv==false)
+		{
+			return new Response(json_encode( ['KO' => "No user '$loginname' found in any projet" ]));
+		}
+		
+		# effacer l'enregistrement
+		else
+		{
+			$user = $em->getRepository(User::class)->findOneBy(['loginname' => $loginname]);
+			if ($user==null)
+			{
+				return new Response(json_encode( ['KO' => "No password stored for '$loginname'" ]));
+			}
+
+			$em->remove($user);
+			$em->flush();
+		}
+		return new Response(json_encode('OK'));
 	}
 
 	/**
@@ -791,33 +885,47 @@ class AdminuxController extends AbstractController
     }
     
     /**
-     * Vérifie la base de données, et supprime les mots de passe temporaires "expirés"
+     * Vérifie la base de données, supprime les mots de passe temporaires "expirés"
+     * et renvoie les mots de passe cryptés (champ cpassword)
+     * On pourra vérifier avec le mot de passe du supercalculateur et savoir s'il a été changé
      * 
-     * @Route("/password_check", name="password_check", methods={"GET"})
+     * @Route("/users/passwordcheck", name="password_check", methods={"GET"})
      * 
-     * curl --netrc -X GET   https://gramc3-local.mylaptop/adminux/password_check
+     * curl --netrc -H "Content-Type: application/json" https://.../adminux/users/passwordcheck
      * 
      */
      public function passwordCheckAction(Request $request, LoggerInterface $lg)
      {
 		$em = $this->getdoctrine()->getManager();
+		if ( $this->getParameter('noconso')==true )
+		{
+			throw new AccessDeniedException("Accès interdit (paramètre noconso)");
+		}
 		
 		if ( $this->getParameter('noconso')==true )
 		{
 			throw new AccessDeniedException("Accès interdit (paramètre noconso)");
 		}
 		
-	    $sd    = $this->sd;
-		$users = $em->getRepository(User::class)->findAll();
+	    $sd     = $this->sd;
+		$users  = $em->getRepository(User::class)->findAll();
+		$rusers = [];
 		foreach ($users as $user)
 		{
 			if ($user->getPassexpir() < $sd)
 			{
 				$em -> remove($user);
 			}
+			else
+			{
+				$u = [];
+				$u["loginname"] = $user->getLoginname();
+				$u["cpassword"] = $user->getCpassword();
+				$rusers[] = $u;
+			}
 		}
 		$em->flush();
 
-		return new Response (json_encode("OK"));
+		return new Response (json_encode($rusers));
 	}
 }
