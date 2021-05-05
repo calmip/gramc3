@@ -135,7 +135,7 @@ class Projet
     /**
      * @var boolean
      *
-     * @ORM\Column(name="nepasterminer", type="boolean", nullable=false)
+     * @ORM\Column(name="nepasterminer", type="boolean", nullable=true)
      */
     private $nepasterminer;
 

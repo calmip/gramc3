@@ -1560,6 +1560,8 @@ class VersionModifController extends AbstractController
                 // $projet->setVersionDerniere( $new_version );
                 $projet_workflow->execute( Signal::CLK_DEMANDE, $projet );
                 
+                // Remettre à false Nepasterminer qui n'a pas trop de sens ici
+                $projet->setNepasterminer(false);
                 $em->persist( $projet );
                 $em->flush();
 

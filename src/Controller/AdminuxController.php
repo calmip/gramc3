@@ -230,22 +230,57 @@ class AdminuxController extends AbstractController
    /**
      * set password
      *
-     * @Route("/users/setpassword/{loginname}/loginname/{password}/password", name="set_password", methods={"POST"})
+     * @Route("/users/setpassword", name="set_password", methods={"POST"})
      * @Security("is_granted('ROLE_ADMIN')")
 
      * Positionne le mot de passe du user demandé, à condition que ce user existe dans la table collaborateurVersion
      */
 
-    // exemple: curl --netrc -X POST https://.../adminux/users/setpassword/toto/loginname/azerty/password
-	public function setpasswordAction(Request $request, $loginname, $password, LoggerInterface $lg)
+	// curl --netrc -H "Content-Type: application/json" -X POST -d '{ "loginname": "toto", "password": "azerty", "cpassword": "qwerty" }' https://.../adminux/users/setpassword
+
+	public function setpasswordAction(Request $request, LoggerInterface $lg)
 	{
-		$em = $this->getdoctrine()->getManager();
-		
+		$em = $this->getDoctrine()->getManager();
+		//$sp = $this->sp;
+		//$rep= $em->getRepository(Projet::class);
+
 		if ( $this->getParameter('noconso')==true )
 		{
 			throw new AccessDeniedException("Accès interdit (paramètre noconso)");
 		}
 
+		$content  = json_decode($request->getContent(),true);
+		if ($content == null)
+		{
+			return new Response(json_encode('KO - Pas de données'));
+		}
+		if (empty($content['loginname']))
+		{
+			return new Response(json_encode('KO - Pas de nom de login'));
+		}
+		else
+		{
+			$loginname = $content['loginname'];
+		}
+		
+		if (empty($content['password']))
+		{
+			return new Response(json_encode('KO - Pas de mot de passe'));
+		}
+		else
+		{
+			$password = $content['password'];
+		}
+
+		if (empty($content['cpassword']))
+		{
+			return new Response(json_encode('KO - Pas de version cryptée du mot de passe'));
+		}
+		else
+		{
+			$cpassword = $content['password'];
+		}
+		
 		# Calcul de la date d'expiration
 		$pwd_duree = $this->getParameter('pwd_duree');  // Le nombre de jours avant expiration du mot de passe
 		$grdt      = $this->sd;
@@ -255,7 +290,7 @@ class AdminuxController extends AbstractController
 		$cv = $em->getRepository(User::class)->existsLoginname($loginname);
 		if ($cv==false)
 		{
-			return new Response(json_encode( ['KO' => 'No user found in any projet' ]));
+			return new Response(json_encode( ['KO' => "No user '$loginname' found in any projet" ]));
 		}
 		
 		# Modifier le mot de passe
@@ -273,6 +308,7 @@ class AdminuxController extends AbstractController
 			$password = Functions::simpleEncrypt($password);
 			$user->setPassword($password);
 			$user->setPassexpir($passexpir);
+			$user->setCpassword($cpassword);
 			
 			// On n'utilise pas Functions::sauvegarder parce que problèmes de message d'erreur
 			// TODO - A creuser
@@ -281,6 +317,64 @@ class AdminuxController extends AbstractController
 			//Functions::sauvegarder( null, $em, $lg );
 			return new Response(json_encode('OK'));
 		}
+	}
+
+   /**
+     * clear password
+     *
+     * Efface le mot de passe temporaire pour le user passé en paramètres
+     * 
+     * @Route("/users/clearpassword", name="clear_password", methods={"POST"})
+     * @Security("is_granted('ROLE_ADMIN')")
+	 *
+     * Efface le mot de passe du user demandé
+     */
+
+	// curl --netrc -H "Content-Type: application/json" -X POST -d '{ "loginname": "toto" }' https://.../adminux/users/clearpassword
+
+	public function clearpasswordAction(Request $request, LoggerInterface $lg)
+	{
+		$em = $this->getDoctrine()->getManager();
+
+		if ( $this->getParameter('noconso')==true )
+		{
+			throw new AccessDeniedException("Accès interdit (parametre noconso)");
+		}
+
+		$content  = json_decode($request->getContent(),true);
+		if ($content == null)
+		{
+			return new Response(json_encode('KO - Pas de donnees'));
+		}
+		if (empty($content['loginname']))
+		{
+			return new Response(json_encode('KO - Pas de nom de login'));
+		}
+		else
+		{
+			$loginname = $content['loginname'];
+		}
+				
+		# Vérifie que ce loginname est connu
+		$cv = $em->getRepository(User::class)->existsLoginname($loginname);
+		if ($cv==false)
+		{
+			return new Response(json_encode( ['KO' => "No user '$loginname' found in any projet" ]));
+		}
+		
+		# effacer l'enregistrement
+		else
+		{
+			$user = $em->getRepository(User::class)->findOneBy(['loginname' => $loginname]);
+			if ($user==null)
+			{
+				return new Response(json_encode( ['KO' => "No password stored for '$loginname'" ]));
+			}
+
+			$em->remove($user);
+			$em->flush();
+		}
+		return new Response(json_encode('OK'));
 	}
 
 	/**
@@ -317,6 +411,8 @@ class AdminuxController extends AbstractController
 	 * 				gpfs		sondVolDonnPerm stockage permanent demandé (pas d'attribution pour le stockage)
 	 *
 	 */
+	 // curl --netrc -H "Content-Type: application/json" -X POST -d '{ "projet": "P1234" }' https://.../adminux/version/get
+	 
 	 public function versionGetAction(Request $request)
 	 {
 		$em = $this->getDoctrine()->getManager();
@@ -398,49 +494,140 @@ class AdminuxController extends AbstractController
 		foreach ($versions as $v)
 		{
 			if ($v==null) continue;
-			$annee = 2000 + $v->getSession()->getAnneeSession();
-			$attr  = $v->getAttrHeures() - $v->getPenalHeures();
-			foreach ($v->getRallonge() as $r)
-			{
-				$attr += $r->getAttrHeures();
-			}
-
-			// Pour une session de type B = Aller chercher la version de type A correspondante et ajouter les attributions
-			// TODO - Des fonctions de haut niveau (au niveau projet par exemple) ?
-			if ($v->getSession()->getTypeSession())
-			{
-				$id_va = $v->getAutreIdVersion();
-				$va = $em->getRepository(Version::class)->find($id_va);
-				if ($va != null)
-				{
-					$attr += $va->getAttrHeures();
-					$attr -= $va->getPenalHeures();
-					foreach ($va->getRallonge() as $r)
-					{
-						$attr += $r->getAttrHeures();
-					}
-				}
-			}
-			$r = [];
-			$r['idProjet']        = $v->getProjet()->getIdProjet();
-			$r['idSession']       = $v->getSession()->getIdSession();
-			$r['idVersion']       = $v->getIdVersion();
-			$r['etatVersion']     = $v->getEtatVersion();
-			$r['etatProjet']      = $v->getProjet()->getEtatProjet();
-			$r['mail']            = $v->getResponsable()->getMail();
-			$r['attrHeures']      = $attr;
-			$r['sondVolDonnPerm'] = $v->getSondVolDonnPerm();
-			$r['quota']			  = $sp->getConsoRessource($v->getProjet(),'cpu',$annee)[1];
-			// Pour le déboguage
-			// if ($r['quota'] != $r['attrHeures']) $r['attention']="INCOHERENCE";
-
+			$r = $this->__getVersionInfo($v);
 			$retour[] = $r;
-			//$retour[] = $v->getIdVersion();
 		};
 
 		// print_r est plus lisible pour le déboguage
 		// return new Response(print_r($retour,true));
 		return new Response(json_encode($retour));
+
+	 }
+	 
+	 private function __getVersionInfo($v)
+	 {
+		$sp    = $this->sp;
+		$em    = $this->getDoctrine()->getManager();
+		
+		$annee = 2000 + $v->getSession()->getAnneeSession();
+		$attr  = $v->getAttrHeures() - $v->getPenalHeures();
+		foreach ($v->getRallonge() as $r)
+		{
+			$attr += $r->getAttrHeures();
+		}
+
+		// Pour une session de type B = Aller chercher la version de type A correspondante et ajouter les attributions
+		// TODO - Des fonctions de haut niveau (au niveau projet par exemple) ?
+		if ($v->getSession()->getTypeSession())
+		{
+			$id_va = $v->getAutreIdVersion();
+			$va = $em->getRepository(Version::class)->find($id_va);
+			if ($va != null)
+			{
+				$attr += $va->getAttrHeures();
+				$attr -= $va->getPenalHeures();
+				foreach ($va->getRallonge() as $r)
+				{
+					$attr += $r->getAttrHeures();
+				}
+			}
+		}
+		$r = [];
+		$r['idProjet']        = $v->getProjet()->getIdProjet();
+		$r['idSession']       = $v->getSession()->getIdSession();
+		$r['idVersion']       = $v->getIdVersion();
+		$r['etatVersion']     = $v->getEtatVersion();
+		$r['etatProjet']      = $v->getProjet()->getEtatProjet();
+		$r['mail']            = $v->getResponsable()->getMail();
+		$r['attrHeures']      = $attr;
+		$r['sondVolDonnPerm'] = $v->getSondVolDonnPerm();
+		// Pour le déboguage
+		// if ($r['quota'] != $r['attrHeures']) $r['attention']="INCOHERENCE";
+		$r['quota']			  = $sp->getConsoRessource($v->getProjet(),'cpu',$annee)[1];
+		return $r;
+	}
+
+	/**
+	 * get projets non terminés
+	 *
+	 * @Route("/projet/get", name="get_projet", methods={"POST"})
+	 * @Security("is_granted('ROLE_ADMIN')")
+	 * Exemples de données POST (fmt json):
+	 * 			   ''
+	 *             ou
+	 *             '{ "projet" : null     }' -> Tous les projets non terminés
+	 *
+	 *             '{ "projet" : "P01234" }' -> Le projet P01234
+	 *
+	 * Renvoie les informations utiles sur les projets non terminés, à savoir:
+	 *     - typeProjet
+	 *     - etatProjet
+	 *     - metaEtat
+	 *     - nepasterminer (True/False)
+	 *     - versionActive   -> On renvoie les mêmes données que getVersion
+	 *     - versionDerniere -> On renvoie les mêmes données que getVersion
+	 * 
+	 * Données renvoyées pour versionActive et versionDerniere:
+	 * 		 idProjet	P01234
+	 * 		 idSession	20A
+	 * 		 idVersion	20AP01234
+	 * 		 mail		mail du responsable de la version
+	 * 		 attrHeures	Heures cpu attribuées
+	 * 		 quota		Quota sur la machine
+	 * 		 gpfs		sondVolDonnPerm stockage permanent demandé (pas d'attribution pour le stockage)
+	 *
+	 */
+ 	 // curl --netrc -H "Content-Type: application/json" -X POST -d '{ "projet": "P1234" }' https://.../adminux/projet/get
+
+	 public function projetGetAction(Request $request)
+	 {
+		$em = $this->getDoctrine()->getManager();
+		$sp = $this->sp;
+		$rep= $em->getRepository(Projet::class);
+
+		$content  = json_decode($request->getContent(),true);
+		//print_r($content);
+		if ($content == null)
+		{
+			$id_projet = null;
+		}
+		else
+		{
+			$id_projet  = (isset($content['projet'])) ? $content['projet'] : null;
+		}
+
+		$p_tmp = [];
+		$projets = [];
+		if ($id_projet == null)
+		{
+	        $projets = $rep->findNonTermines();
+		}
+		else
+		{
+			$projets[] = $rep->findOneBy(["idProjet" => $id_projet]);
+		}
+        
+        foreach ($projets as $p)
+        {
+			$data = [];
+			$data['idProjet']      = $p->getIdProjet();
+			$data['etatProjet']    = $p->getEtat();
+			$data['metaEtat']      = $sp->getMetaEtat($p);
+			$va = ($p->getVersionActive()!=null) ? $p->getVersionActive() : null;
+			$vb = ($p->getVersionDerniere()!=null) ? $p->getVersionDerniere() : null;
+			$v_data = [];
+			foreach (["active"=>$va,"derniere"=>$vb] as $k=>$v)
+			{
+				if ($v != null)
+				{
+					$v_data[$k] = $this->__getVersionInfo($v);
+				}
+			}
+			$data['versions'] = $v_data;
+			$p_tmp[] = $data;
+		}
+
+		return new Response(json_encode($p_tmp));
 
 	 }
 
@@ -486,7 +673,7 @@ class AdminuxController extends AbstractController
 	 *
 	 */
 
-	// curl --netrc -H "Content-Type: application/json" -X POST  -d '{ "projet" : "P0044", "mail" : null, "session" : "19A" }' https://attribution-ressources-dev.calmip.univ-toulouse.fr/gramc2-manu/adminux/users/get
+	// curl --netrc -H "Content-Type: application/json" -X POST  -d '{ "projet" : "P1234", "mail" : null, "session" : "19A" }' https://.../adminux/users/get
 
 	 public function usersGetAction(Request $request)
 	 {
@@ -601,11 +788,12 @@ class AdminuxController extends AbstractController
 	 }
 
     /**
-     * set loginname
+     * get loginname
      *
      * @Route("/getloginnames/{idProjet}/projet", name="get_loginnames", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
+     // curl --netrc -H "Content-Type: application/json" -X GET https://.../adminux/getloginnames/P1234/projet
 	public function getloginnamesAction($idProjet)
 	{
 		$em = $this->getDoctrine()->getManager();
@@ -697,33 +885,47 @@ class AdminuxController extends AbstractController
     }
     
     /**
-     * Vérifie la base de données, et supprime les mots de passe temporaires "expirés"
+     * Vérifie la base de données, supprime les mots de passe temporaires "expirés"
+     * et renvoie les mots de passe cryptés (champ cpassword)
+     * On pourra vérifier avec le mot de passe du supercalculateur et savoir s'il a été changé
      * 
-     * @Route("/password_check", name="password_check", methods={"GET"})
+     * @Route("/users/passwordcheck", name="password_check", methods={"GET"})
      * 
-     * curl --netrc -X GET   https://gramc3-local.mylaptop/adminux/password_check
+     * curl --netrc -H "Content-Type: application/json" https://.../adminux/users/passwordcheck
      * 
      */
      public function passwordCheckAction(Request $request, LoggerInterface $lg)
      {
 		$em = $this->getdoctrine()->getManager();
+		if ( $this->getParameter('noconso')==true )
+		{
+			throw new AccessDeniedException("Accès interdit (paramètre noconso)");
+		}
 		
 		if ( $this->getParameter('noconso')==true )
 		{
 			throw new AccessDeniedException("Accès interdit (paramètre noconso)");
 		}
 		
-	    $sd    = $this->sd;
-		$users = $em->getRepository(User::class)->findAll();
+	    $sd     = $this->sd;
+		$users  = $em->getRepository(User::class)->findAll();
+		$rusers = [];
 		foreach ($users as $user)
 		{
 			if ($user->getPassexpir() < $sd)
 			{
 				$em -> remove($user);
 			}
+			else
+			{
+				$u = [];
+				$u["loginname"] = $user->getLoginname();
+				$u["cpassword"] = $user->getCpassword();
+				$rusers[] = $u;
+			}
 		}
 		$em->flush();
 
-		return new Response (json_encode("OK"));
+		return new Response (json_encode($rusers));
 	}
 }

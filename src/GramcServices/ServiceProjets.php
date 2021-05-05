@@ -155,7 +155,17 @@ class ServiceProjets
         
 		elseif ( $etat_version == Etat::ACTIF_TEST ) return 'ACCEPTE'; // projet-test non renouvelable
 		elseif ( $etat_version == Etat::EN_ATTENTE ) return 'ACCEPTE';
-        elseif ( $etat_version == Etat::TERMINE    ) return 'STANDBY';
+        elseif ( $etat_version == Etat::TERMINE    )
+        {
+			if ($p->getNepasterminer())
+			{
+				return 'AGARDER';
+			}
+			else
+			{
+				return 'STANDBY';
+			}
+		}
         elseif ( $veract       == null             ) return 'STANDBY';
 	}
 	

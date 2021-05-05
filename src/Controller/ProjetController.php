@@ -1265,7 +1265,7 @@ class ProjetController extends AbstractController
         $projets = $em->getRepository(Projet::class)->findAll();
         $sp      = $this->sp;
 
-		foreach (['termine','standby','accepte','refuse','edition','expertise','nonrenouvele'] as $e)
+		foreach (['termine','standby','agarder','accepte','refuse','edition','expertise','nonrenouvele'] as $e)
 		{
 			$etat_projet[$e]         = 0;
 			$etat_projet[$e.'_test'] = 0;
@@ -1280,7 +1280,7 @@ class ProjetController extends AbstractController
         foreach ( $projets as $projet )
         {
             $info     = $versionRepository->info($projet); // les stats du projet
-            $version  = $versionRepository->findVersionDerniere($projet);
+            $version  = $projet->getVersionDerniere();
             $metaetat = strtolower($sp->getMetaEtat($projet));
 
             if ( $projet->getTypeProjet() == Projet::PROJET_TEST )
@@ -1294,6 +1294,7 @@ class ProjetController extends AbstractController
 			
             $data[] = [
                     'projet'       => $projet,
+                    'renouvelable' => $projet->getEtatProjet()==Etat::RENOUVELABLE,
                     'metaetat'     => $metaetat,
                     'version'      => $version,
                     'etat_version' => ($version != null ) ? Etat::getLibelle( $version->getEtatVersion() ): 'SANS_VERSION',
@@ -1430,6 +1431,7 @@ class ProjetController extends AbstractController
 		$annee    = $session->getAnneeSession();
         $projet   = new Projet($type);
         $projet->setIdProjet($sp->NextProjetId($annee,$type));
+        $projet->setNepasterminer(false);
         switch ($type)
         {
 			case Projet::PROJET_SESS:
