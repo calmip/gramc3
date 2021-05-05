@@ -483,6 +483,8 @@ class AdminuxController extends AbstractController
 	 * 		 gpfs		sondVolDonnPerm stockage permanent demandé (pas d'attribution pour le stockage)
 	 *
 	 */
+ 	 // curl --netrc -H "Content-Type: application/json" -X POST -d '{ "projet": "P1234" }' https://.../adminux/projet/get
+
 	 public function projetGetAction(Request $request)
 	 {
 		$em = $this->getDoctrine()->getManager();
@@ -517,7 +519,6 @@ class AdminuxController extends AbstractController
 			$data['idProjet']      = $p->getIdProjet();
 			$data['etatProjet']    = $p->getEtat();
 			$data['metaEtat']      = $sp->getMetaEtat($p);
-			$data['nepasterminer'] = $p->getNepasterminer();
 			$va = ($p->getVersionActive()!=null) ? $p->getVersionActive() : null;
 			$vb = ($p->getVersionDerniere()!=null) ? $p->getVersionDerniere() : null;
 			$v_data = [];

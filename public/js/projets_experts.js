@@ -71,6 +71,20 @@ $( document ).ready(function() {
 					td.html(data);
 					$( "a.termineroupas" ).click(click_termineroupas);
 					$( "a.fermeture" ).click(click_fermeture);
+					th  = td.parent();
+					td1 = th.children(':nth-child(4)');
+					img = td1.children('img');
+					src = img.attr("src");
+					if (src.endsWith("agarder.png"))
+					{
+						src = src.replace("agarder.png","standby.png");
+					}
+					else
+					{
+						src = src.replace("standby.png","agarder.png");
+					}
+					img.attr("src",src);
+					//td1.html('coucou');
 				})
 			.fail(function(xhr, status, errorThrown) { alert (errorThrown); });
 	};
