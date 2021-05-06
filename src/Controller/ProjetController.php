@@ -2120,7 +2120,7 @@ class ProjetController extends AbstractController
 	    $menu[] =   $sm->telecharger_modele_rapport_dactivite( $version );
 
 	    $etat_version = $version->getEtatVersion();
-	    if( ($etat_version == Etat::ACTIF || $etat_version == Etat::TERMINE ) && ! $sp->hasRapport( projet, $version->getAnneeSession() ) )
+	    if( ($etat_version == Etat::ACTIF || $etat_version == Etat::TERMINE ) && ! $sp->hasRapport( $projet, $version->getAnneeSession() ) )
 	        $menu[] =   $sm->televerser_rapport_annee( $version );
 
 	    $menu[] =   $sm->gerer_publications( $projet );

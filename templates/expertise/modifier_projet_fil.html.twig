@@ -165,10 +165,12 @@
 
    <table class="projet">
         <tbody>
+	    {% if commentaireExterne %}
             <tr>
                 <th class="horiz"><label>Commentaire</label><br><small>Ce commentaire sera envoyé au responsable du projet</small></th>
                 <td>{{ form_widget(edit_form.commentaireExterne,{ 'attr': { 'class': 'compteur', 'rows' : 10, 'cols' : 100 } }) }}
             </tr>
+	    {% endif %}
             <tr><th class="horiz"><label>Commentaire pour le comité</label><br>
                     <small>Ce commentaire restera au sein du comité d'attribution</small>
                 </th>
@@ -196,6 +198,12 @@
             {% endif %}
         </tbody>
     </table>
+
+{% if peut_envoyer %}
+<div id="envoyer">
+    {{ form_widget(edit_form.envoyer) }}
+</div>
+{% endif %}
 
 <div id="quitter">
 	{{ form_widget(edit_form.enregistrer, {'attr': {'title' : 'Enregistrer l\'expertise et continuer'}}) }}

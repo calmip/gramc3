@@ -100,13 +100,14 @@
 {% block body %}
 
 {% if noconso==false %}
-{% set conso_cpu = version.projet.consoressource('cpu',version.anneesession) %}
-{% set conso_gpu = version.projet.consoressource('gpu',version.anneesession) %}
+
 {% set conso     = conso_cpu[0] + conso_gpu[0] %}
 {% set quota     = conso_cpu[1]                %}
+
 {% if  quota != 0 %} {% set consop=100.0*conso/quota %}
 {% else           %} {% set consop=0                 %}
 {% endif %}
+
 {% endif %}
 
 <h3>I - Présentation générale</h3>
