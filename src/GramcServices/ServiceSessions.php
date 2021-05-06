@@ -76,36 +76,36 @@ class ServiceSessions
     ************************************************************/
     public function getSessionCourante()
     {
-		if ($this->sessions_non_term==null)
-		{
-			$this->initSessionsNonTerm();
-		}
-		if ($this->sessions_non_term != null)
-		{
-			return $this->sessions_non_term[0];
-		}
-		else
-		{
-			return null;
-		}
+	if ($this->sessions_non_term==null)
+	{
+	    $this->initSessionsNonTerm();
 	}
+	if ($this->sessions_non_term != null)
+	{
+	    return $this->sessions_non_term[0];
+	}
+	else
+	{
+	    return null;
+	}
+    }
 	
-	    // form pour choisir une session
-
-	/************
-	 * Formulaire permettant de choisir une session
-	 *
-	 * $formb   = Un formBuilder (retour de createView)
-	 * $request = La requête
-	 * 
-	 * Retourne:
-	 *     Le formulaire
-	 *     La session choisie
-	 * 
-	 * Utilisation depuis un contrôleur: 
-	 *             $data = $ss->selectSession($this->createFormBuilder(['session' => $une_session"]),$request);
-	 * 
-	 *******************/
+    // form pour choisir une session
+    
+    /************
+    * Formulaire permettant de choisir une session
+    *
+    * $formb   = Un formBuilder (retour de createView)
+    * $request = La requête
+    * 
+    * Retourne:
+    *     Le formulaire
+    *     La session choisie
+    * 
+    * Utilisation depuis un contrôleur: 
+    *             $data = $ss->selectSession($this->createFormBuilder(['session' => $une_session"]),$request);
+    * 
+    *******************/
     public function selectSession(FormBuilder $formb, Request $request)
     {
 	    $form    = $formb

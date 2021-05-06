@@ -111,41 +111,41 @@ class ProjetController extends AbstractController
 	private $ac;
 		
 	public function __construct (ServiceNotifications $sn,
-								 ServiceJournal $sj,
-								 ServiceMenus $sm,
-								 ServiceProjets $sp,
-								 ServiceSessions $ss,
-								 Calcul $gcl,
-								 Stockage $gstk,
-								 CalculTous $gall,
-								 GramcDate $sd,
-								 ServiceVersions $sv,
-								 ServiceExperts $se,
-								 ProjetWorkflow $pw,
- 								 FormFactoryInterface $ff,
-								 TokenStorageInterface $tok,
-								 SessionInterface $sss,
- 								 Environment $tw,
- 								 AuthorizationCheckerInterface $ac
-								 )
+				     ServiceJournal $sj,
+				     ServiceMenus $sm,
+				     ServiceProjets $sp,
+				     ServiceSessions $ss,
+				     Calcul $gcl,
+				     Stockage $gstk,
+				     CalculTous $gall,
+				     GramcDate $sd,
+				     ServiceVersions $sv,
+				     ServiceExperts $se,
+				     ProjetWorkflow $pw,
+				     FormFactoryInterface $ff,
+				     TokenStorageInterface $tok,
+				     SessionInterface $sss,
+				     Environment $tw,
+				     AuthorizationCheckerInterface $ac
+				     )
 	{
-		$this->sn  = $sn;
-		$this->sj  = $sj;
-		$this->sm  = $sm;
-		$this->sp  = $sp;
-		$this->ss  = $ss;
-		$this->gcl = $gcl;
-		$this->gstk= $gstk;
-		$this->gall= $gall;
-		$this->sd  = $sd;
-		$this->sv  = $sv;
-		$this->se  = $se;
-		$this->pw  = $pw;
-		$this->ff  = $ff;
-		$this->token= $tok->getToken();
-		$this->sss = $sss;
-		$this->tw  = $tw;
-		$this->ac  = $ac;
+	    $this->sn  = $sn;
+	    $this->sj  = $sj;
+	    $this->sm  = $sm;
+	    $this->sp  = $sp;
+	    $this->ss  = $ss;
+	    $this->gcl = $gcl;
+	    $this->gstk= $gstk;
+	    $this->gall= $gall;
+	    $this->sd  = $sd;
+	    $this->sv  = $sv;
+	    $this->se  = $se;
+	    $this->pw  = $pw;
+	    $this->ff  = $ff;
+	    $this->token= $tok->getToken();
+	    $this->sss = $sss;
+	    $this->tw  = $tw;
+	    $this->ac  = $ac;
 	}
 
     private static $count;
@@ -177,19 +177,19 @@ class ProjetController extends AbstractController
      */
     public function oldAction(Request $request)
     {
-		$sd = $this->sd;
-		$sj = $this->sj;
-		$sp = $this->sp;
-		$ff = $this->ff;
-		$em = $this->getDoctrine()->getManager();
-		
-	    $list = [];
-	    $mauvais_projets = [];
-	    static::$count = [];
-	    $annees =   [];
-
-    $all_projets = $em->getRepository(Projet::class)->findAll();
-    foreach( $all_projets as $projet )
+	$sd = $this->sd;
+	$sj = $this->sj;
+	$sp = $this->sp;
+	$ff = $this->ff;
+	$em = $this->getDoctrine()->getManager();
+	    
+	$list = [];
+	$mauvais_projets = [];
+	static::$count = [];
+	$annees =   [];
+    
+	$all_projets = $em->getRepository(Projet::class)->findAll();
+	foreach( $all_projets as $projet )
 	{
         $derniereVersion    =  $projet->derniereVersion();
         if(  $derniereVersion == null )
@@ -1368,23 +1368,38 @@ class ProjetController extends AbstractController
      */
     public function avantNouveauAction(Request $request,$type)
     {
-		$sm = $this->sm;
-		$sj = $this->sj;
-		$token = $this->token;
+	$sm = $this->sm;
+	$sj = $this->sj;
+	$ss = $this->ss;
+	$token = $this->token;
 
         if( $sm->nouveau_projet($type)['ok'] == false )
+	{
             $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de créer un nouveau projet parce que " . $sm->nouveau_projet($type)['raison'] );
+	}
 
+	$session_courante = $ss->getSessionCourante();
+	if ($session_courante->getEtatSession() != Etat::EDITION_DEMANDE)
+	{
+	    $renouvelables = null;
+	}
+	else
+	{
 	    $projetRepository = $this->getDoctrine()->getManager()->getRepository(Projet::class);
 	    $id_individu      = $token->getUser()->getIdIndividu();
 	    $renouvelables    = $projetRepository-> getProjetsCollab($id_individu, true, true, true);
-        if( $renouvelables == null )   return  $this->redirectToRoute('nouveau_projet', ['type' => $type]);
+	}
+
+        if( $renouvelables == null )
+	{
+	    return  $this->redirectToRoute('nouveau_projet', ['type' => $type]);
+	}
 
         return $this->render('projet/avant_nouveau_projet.html.twig',
-		[
+	[
             'renouvelables' => $renouvelables,
             'type'          => $type
-		]);
+	]);
     }
 
     /**
@@ -1397,59 +1412,59 @@ class ProjetController extends AbstractController
      */
     public function nouveauAction(Request $request, $type)
     {
-		$sd = $this->sd;
-		$sm = $this->sm;
-		$ss = $this->ss;
-		$sss= $this->sss;
-		$sp = $this->sp;
-		$sv = $this->sv;
-		$sj = $this->sj;
-		$token = $this->token;
-		$em = $this->getDoctrine()->getManager();
-		
-		// Si changement d'état de la session alors que je suis connecté !
-		// + contournement d'un problème lié à Doctrine
+	$sd = $this->sd;
+	$sm = $this->sm;
+	$ss = $this->ss;
+	$sss= $this->sss;
+	$sp = $this->sp;
+	$sv = $this->sv;
+	$sj = $this->sj;
+	$token = $this->token;
+	$em = $this->getDoctrine()->getManager();
+	
+	// Si changement d'état de la session alors que je suis connecté !
+	// + contournement d'un problème lié à Doctrine
         $sss->remove('SessionCourante'); // remove cache
 
         // NOTE - Pour ce controleur, on identifie les types par un chiffre (voir Entity/Projet.php)
         $m = $sm->nouveau_projet("$type");
         if ($m == null || $m['ok']==false)
         {
-			$raison = $m===null?"ERREUR AVEC LE TYPE $type - voir le paramètre prj_type":$m['raison'];
+	    $raison = $m===null?"ERREUR AVEC LE TYPE $type - voir le paramètre prj_type":$m['raison'];
             $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de créer un nouveau projet parce que $raison");
          }
 
         $session  = $ss -> getSessionCourante();
-		$prefixes = $this->getParameter('prj_prefix');
-		if ( !isset ($prefixes[$type]) || $prefixes[$type]==="" )
-	    {
-			$sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Pas de préfixe pour le type $type. Voir le paramètre prj_prefix");
-			return $this->redirectToRoute('accueil');
-		}
+	$prefixes = $this->getParameter('prj_prefix');
+	if ( !isset ($prefixes[$type]) || $prefixes[$type]==="" )
+	{
+	    $sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Pas de préfixe pour le type $type. Voir le paramètre prj_prefix");
+	    return $this->redirectToRoute('accueil');
+	}
 
-		// Création du projet
-		$annee    = $session->getAnneeSession();
+	// Création du projet
+	$annee    = $session->getAnneeSession();
         $projet   = new Projet($type);
         $projet->setIdProjet($sp->NextProjetId($annee,$type));
         $projet->setNepasterminer(false);
         switch ($type)
         {
-			case Projet::PROJET_SESS:
-			case Projet::PROJET_FIL:
-	            $projet->setEtatProjet(Etat::RENOUVELABLE);
-	            break;
-	        case Projet::PROJET_TEST:
-	            $projet->setEtatProjet(Etat::NON_RENOUVELABLE);
-	            break;
-	        default:
-	           $sj->throwException(__METHOD__ . ":" . __LINE__ . " mauvais type de projet " . Functions::show( $type) );
-		}
+	    case Projet::PROJET_SESS:
+	    case Projet::PROJET_FIL:
+		$projet->setEtatProjet(Etat::RENOUVELABLE);
+		break;
+	    case Projet::PROJET_TEST:
+		$projet->setEtatProjet(Etat::NON_RENOUVELABLE);
+		break;
+	    default:
+	       $sj->throwException(__METHOD__ . ":" . __LINE__ . " mauvais type de projet " . Functions::show( $type) );
+	}
 
-		// Ecriture du projet dans la BD
+	// Ecriture du projet dans la BD
         $em->persist( $projet );
         $em->flush();
 
-		// Création de la première (et dernière) version
+	// Création de la première (et dernière) version
         $version    =   new Version();
         $version->setIdVersion( $session->getIdSession() . $projet->getIdProjet() );
         $version->setProjet( $projet );
