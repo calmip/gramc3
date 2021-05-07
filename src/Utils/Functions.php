@@ -258,10 +258,10 @@ class Functions
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public static function formError( EntityManager $em, $data, $constraintes )
+    public static function formError( ValidatorInterface $vl, $data, $constraintes )
     {
 	    $violations = [];
-	    $violations = $em->get('validator')->validate( $data, $constraintes );
+	    $violations = $vl->validate( $data, $constraintes );
 	
 	    if (0 !== count($violations) )
         {

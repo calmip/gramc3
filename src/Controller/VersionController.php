@@ -1194,6 +1194,7 @@ class VersionController extends AbstractController
     private function handleRapport(Request $request, Version $version, $annee = null )
     {
         $em = $this->getDoctrine()->getManager();
+        $vl = $this->vl;
 		$sj = $this->sj;
 
 		$format_fichier = new \Symfony\Component\Validator\Constraints\File(
@@ -1273,7 +1274,7 @@ class VersionController extends AbstractController
 		elseif( $form->isSubmitted() && ! $form->isValid() )
         {
 	        if( isset( $form->getData()['rapport'] ) )
-	            return  Functions::formError( $em, $form->getData()['rapport'], [$format_fichier , new PagesNumber() ]) ;
+	            return  Functions::formError( $vl, $form->getData()['rapport'], [$format_fichier , new PagesNumber() ]) ;
 	        else
 	            return "Le fichier n'a pas été soumis correctement";
 		}
