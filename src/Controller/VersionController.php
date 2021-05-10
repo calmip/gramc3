@@ -1165,11 +1165,12 @@ class VersionController extends AbstractController
 	    $rtn = $this->handleRapport( $request, $version, $annee );
 	
 	    if( $rtn == 'OK' )
-	        return $this->render('version/confirmation_rapport.html.twig',
+		return new Response("");
+/*	        return $this->render('version/confirmation_rapport.html.twig',
 	            [
 	            'projet'    =>  $version->getProjet()->getIdProjet(),
 	            'version'   =>  $version->getIdVersion(),
-	            ]);
+	            ]);*/
 	    elseif( is_object( $rtn ) )
 	        return $this->render('version/televerser_rapport.html.twig',
 	            [

@@ -225,30 +225,36 @@ class VersionModifController extends AbstractController
 	    }
 
 
-		// FORMULAIRE DES COLLABORATEURS
-		$collaborateur_form = $this->getCollaborateurForm( $version );
-		$collaborateur_form->handleRequest($request);
-		$data   =   $collaborateur_form->getData();
+	    // FORMULAIRE DES COLLABORATEURS
+	    $collaborateur_form = $this->getCollaborateurForm( $version );
+	    $collaborateur_form->handleRequest($request);
+	    $data   =   $collaborateur_form->getData();
 
-		if( $data != null && array_key_exists('individus', $data ) )
-		{
-			$sj->debugMessage('modifierAction traitement des collaborateurs');
-			$this->handleIndividuForms( $data['individus'], $version );
+	    if( $data != null && array_key_exists('individus', $data ) )
+	    {
+		    $sj->debugMessage('modifierAction traitement des collaborateurs');
+		    $this->handleIndividuForms( $data['individus'], $version );
 
-			// ACTUCE : le mail est disabled en HTML et en cas de POST il est annulé
-			// nous devons donc refaire le formulaire pour récupérer ces mails
-			$collaborateur_form = $this->getCollaborateurForm( $version );
-		}
+		    // ACTUCE : le mail est disabled en HTML et en cas de POST il est annulé
+		    // nous devons donc refaire le formulaire pour récupérer ces mails
+		    $collaborateur_form = $this->getCollaborateurForm( $version );
+	    }
 
-		// DES FORMULAIRES QUI DEPENDENT DU TYPE DE PROJET
-		if( $version->getProjet()->getTypeProjet()===Projet::PROJET_TEST )
-		{
-			return $this->modifierType2($request, $version, $renouvellement, $image_forms, $collaborateur_form, $lg);
-		}
-		else
-		{
-			return $this->modifierType1($request, $version, $renouvellement, $image_forms, $collaborateur_form, $lg);
-		}
+	    // DES FORMULAIRES QUI DEPENDENT DU TYPE DE PROJET
+	    switch ($version->getProjet()->getTypeProjet())
+	    {
+		case Projet::PROJET_SESS:
+		    return $this->modifierType1($request, $version, $renouvellement, $image_forms, $collaborateur_form, $lg);
+    
+		case Projet::PROJET_FIL:
+		    return $this->modifierType3($request, $version, $renouvellement, $image_forms, $collaborateur_form, $lg);
+
+		case Projet::PROJET_TEST:
+		    return $this->modifierType2($request, $version, $renouvellement, $image_forms, $collaborateur_form, $lg);
+
+		default:
+		   $sj->throwException(__METHOD__ . ":" . __LINE__ . " mauvais type de projet " . Functions::show( $type) );
+	    }
     }
 
     /*
@@ -334,8 +340,8 @@ class VersionModifController extends AbstractController
 	/* Les champs de la partie I */
 	private function modifierPartieI($version,&$form)
 	{ 
-		$em = $this->getDoctrine()->getManager();
-		$form
+	    $em = $this->getDoctrine()->getManager();
+	    $form
             ->add('prjTitre', TextType::class, [ 'required'       =>  false ])
             ->add('prjThematique', EntityType::class,
                     [
@@ -345,17 +351,23 @@ class VersionModifController extends AbstractController
                     'label'       => '',
                     'placeholder' => '-- Indiquez la thématique',
                     ])
-            ->add('prjSousThematique', TextType::class, [ 'required'       =>  false ])
-            ->add('prjRattachement', EntityType::class,
-                    [
-                    'required'    => false,
-                    'multiple'    => false,
-                    'expanded'    => true,
-                    'class'       => 'App:Rattachement',
-                    'empty_data'  => null,
-                    'label'       => '',
-                    'placeholder' => 'AUCUN',
-                    ])
+            ->add('prjSousThematique', TextType::class, [ 'required'       =>  false ]);
+	    
+	    if ($this->getParameter('norattachement')==false)
+	    {
+		$form
+		->add('prjRattachement', EntityType::class,
+			[
+			'required'    => false,
+			'multiple'    => false,
+			'expanded'    => true,
+			'class'       => 'App:Rattachement',
+			'empty_data'  => null,
+			'label'       => '',
+			'placeholder' => 'AUCUN',
+			]);
+	    };
+	    $form
             ->add('demHeures', IntegerType::class, [ 'required'       => false ])
             ->add('prjFinancement', TextType::class, [ 'required'     => false ])
             ->add('prjGenciCentre',     TextType::class, [ 'required' => false ])
@@ -373,7 +385,7 @@ class VersionModifController extends AbstractController
 	/* Les champs de la partie II */
 	private function modifierPartieII($version,&$form)
 	{
-		$form
+	    $form
             ->add('prjResume', TextAreaType::class, [ 'required'       =>  false ] )
             ->add('prjExpose', TextAreaType::class, [ 'required'       =>  false ] )
             ->add('prjAlgorithme', TextAreaType::class, [ 'required'       =>  false ] );
@@ -597,8 +609,10 @@ class VersionModifController extends AbstractController
 					'class' => 'App:Thematique',
 					'label'     => '',
 					'placeholder' => '-- Indiquez la thématique',
-					])
-            ->add('prjRattachement', EntityType::class,
+					]);
+		if ($this->getParameter('norattachement')==false)
+		{
+		    $form->add('prjRattachement', EntityType::class,
                     [
                     'required'    => false,
                     'multiple'    => false,
@@ -607,8 +621,9 @@ class VersionModifController extends AbstractController
                     'empty_data'  => null,
                     'label'       => '',
                     'placeholder' => 'AUCUN',
-                    ])
-			->add('demHeures', IntegerType::class,
+                    ]);
+		}
+		$form->add('demHeures', IntegerType::class,
 				[
 				'required'       =>  false,
 				'data' => $heures_projet_test,
@@ -677,7 +692,6 @@ class VersionModifController extends AbstractController
 
 		// formulaire principal
         $form = $this->createFormBuilder($version)
-			->add('criannTag', TextType::class, [ 'required'       =>  false ])
             ->add('prjTitre', TextType::class, [ 'required'       =>  false ])
             ->add('prjThematique', EntityType::class,
                     [
@@ -1657,11 +1671,12 @@ class VersionModifController extends AbstractController
 	        if ($version->getDataNombreDatasets() == null ) $todo[] = 'Nombre de jeux de données';
 	        if ($version->getDataTailleDatasets() == null ) $todo[] = 'Taille de chaque jeu de données';
 		}
-	    if( $version->typeSession()  == 'A' )
-        {
+		
+	    if( $version->typeSession()  == 'A')
+	    {
 	        $version_precedente = $version->versionPrecedente();
 	        if( $version_precedente != null )
-            {
+		{
 	            $rapportActivite = $em->getRepository(RapportActivite::class)->findOneBy(
 				[
                     'projet' => $version_precedente->getProjet(),

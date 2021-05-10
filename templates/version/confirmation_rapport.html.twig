@@ -1,13 +1,15 @@
-{% extends 'default/base.html.twig' %}
+{#
+    {% extends 'default/base.html.twig' %}
 
 {% block body %}
 
 <section>
+#}
     <h2>Confirmation d'envoi de rapport d'activité</h2>
 
    <div class="message info">Votre rapport d'activité a bien été envoyé.<!-- br-->
    {{mesoc}} vous en remercie</div>
-
+{#
    <nav>
         <ul>
             <li><a class="lien_actif" href="{{ path('consulter_version', { 'id' : projet, 'version' : version } ) }}" title="">Retourner au projet</a></li>
@@ -16,3 +18,4 @@
 </section>
 
 {% endblock %}
+#}

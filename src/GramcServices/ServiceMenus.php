@@ -985,9 +985,9 @@ class ServiceMenus
 				$this->sj->errorMessage(__METHOD__ . ":" . __LINE__ . " version " . $version . " n'est pas associée à aucun projet !");
 				}
 	
-		   if( $etat != Etat::ACTIF && $etat != Etat::TERMINE)
-				$menu['raison'] = "Vous devez soumettre le rapport annuel quand vous avez fini vos calculs de l'année en question";
-		   elseif( ! $version->isCollaborateur($this->token->getUser()) )
+		   //if( $etat != Etat::ACTIF && $etat != Etat::TERMINE)
+		//		$menu['raison'] = "Vous devez soumettre le rapport annuel quand vous avez fini vos calculs de l'année en question";
+		   if( ! $version->isCollaborateur($this->token->getUser()) )
 				$menu['raison'] = "Seul un collaborateur du projet peut téléverser un rapport d'activité pour un projet";
 		   //elseif( $rapportActivite != null)
 		   //     $menu['raison'] = "Vous avez déjà téléversé un rapport d'activité pour ce projet pour l'année en question";
@@ -1009,6 +1009,7 @@ class ServiceMenus
 	
 	    return $menu;
     }
+
 
     ////////////////////////////////////////////////////////////
 
