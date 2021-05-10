@@ -912,6 +912,7 @@ class VersionModifController extends AbstractController
     private function image_handle( $form, Version $version, $request)
     {
 		$sv = $this->sv;
+		$vl = $this->vl;
 		$sj = $this->sj;
 		$em = $this->getDoctrine()->getManager();
 
@@ -967,7 +968,7 @@ class VersionModifController extends AbstractController
 	        else
 	            return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => 'Erreur indeterminée' ];
 
-	        return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => Functions::formError( $em, $image, [ $this->imageConstraints() ] ) ];
+	        return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => Functions::formError( $vl, $image, [ $this->imageConstraints() ] ) ];
 	        //$sj->debugMessage('VersionController:image_handle form for ' . $filename . '('. $form->getData()['image'] . ') is not valide, error = ' .
 	        //    (string) $form->getErrors(true,false)->current() );
 	        //return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => (string) $form->getErrors(true,false)->current() ];
