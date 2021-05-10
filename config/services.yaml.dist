@@ -51,8 +51,11 @@ parameters:
     max_fig_width: 800
     max_fig_height: 400
     
-    # nb de pages masx pour un rapport d'activité
+    # nb de pages max pour un rapport d'activité
     max_page_nb: 5
+    
+    # Si mis à true, on demande le rapport pour toutes les sessions
+    rapport_toujours = true
     
     # Suppression de toutes les fonctionnalités liées à la consommation
     noconso: false
