@@ -99,9 +99,11 @@
     <li>
         <a href="#tab3">III. Description technique</a>
     </li>
+    {% if nodata == false %}
     <li >
         <a href="#tab4">IV. Les données</a>
     </li>
+    {% endif %}
     <li >
         <a href="#tab5">V. Formation</a>
     </li>
@@ -111,7 +113,9 @@
 {% include('version/modifier_projet_sess_partie_I.html.twig') %}
 {% include('version/modifier_projet_sess_partie_II.html.twig') %}
 {% include('version/modifier_projet_sess_partie_III.html.twig') %}
+{% if nodata == false %}
 {% include('version/modifier_projet_sess_partie_IV.html.twig') %}
+{% endif %}
 {% include('version/modifier_projet_sess_partie_V.html.twig') %}
 
 {# ################################################################################## #}

@@ -278,7 +278,10 @@ class VersionModifController extends AbstractController
         $this->modifierPartieI($version,$form);
         $this->modifierPartieII($version,$form);
         $this->modifierPartieIII($version,$form);
-        $this->modifierPartieIV($version,$form);
+	if ($this->getParameter('nodata')==false)
+	{
+	    $this->modifierPartieIV($version,$form);
+	}
         $this->modifierPartieV($version,$form);
 
 		$form
@@ -333,7 +336,7 @@ class VersionModifController extends AbstractController
             'imageJust2'    =>   $this->image('img_justif_renou_2',$version),
             'imageJust3'    =>   $this->image('img_justif_renou_3',$version),
             'collaborateur_form' => $collaborateur_form->createView(),
-            'todo'          => static::versionValidate($version, $sj, $em, $sval),
+            'todo'          => static::versionValidate($version, $sj, $em, $sval,$this->getParameter('nodata')),
             'renouvellement'    => $renouvellement,
             ]);
 	}
@@ -1388,7 +1391,7 @@ class VersionModifController extends AbstractController
      * 
      *  TODO - Cette fonction statique ce n'est pas fameux
      **/
-    public static function versionValidate(Version $version, ServiceJournal $sj, EntityManager $em, ValidatorInterface $sval)
+    public static function versionValidate(Version $version, ServiceJournal $sj, EntityManager $em, ValidatorInterface $sval, $nodata=false)
     {
 	    $todo   =   [];
 	    if( $version->getPrjTitre() == null ) $todo[] = 'prj_titre';
@@ -1416,19 +1419,6 @@ class VersionModifController extends AbstractController
 	            $todo[] = 'prj_justif_renouv';
 			}
 
-			// Stockage de données
-	        if( $version->getSondVolDonnPerm() == null )
-	        {
-	            $todo[] = 'sond_vol_donn_perm';
-			}
-	        elseif( $version->getSondJustifDonnPerm() == null
-	            &&  $version->getSondVolDonnPerm() != '< 1To'
-	            &&  $version->getSondVolDonnPerm() != '1 To'
-	            &&  $version->getSondVolDonnPerm() !=  'je ne sais pas')
-            {
-				$todo[] = 'sond_justif_donn_perm';
-			}
-
 			// Centres nationaux
 			if ( $version->getPrjGenciCentre()     == null
 				|| $version->getPrjGenciMachines() == null
@@ -1439,10 +1429,25 @@ class VersionModifController extends AbstractController
 			};
 
 	        // Partage de données
-	        if ($version->getDataMetaDataFormat() == null ) $todo[] = 'Format de métadonnées';
-	        if ($version->getDataNombreDatasets() == null ) $todo[] = 'Nombre de jeux de données';
-	        if ($version->getDataTailleDatasets() == null ) $todo[] = 'Taille de chaque jeu de données';
+		if ( $nodata == false)
+		{		// Stockage de données
+		    if( $version->getSondVolDonnPerm() == null )
+		    {
+			$todo[] = 'sond_vol_donn_perm';
+		    }
+		    elseif( $version->getSondJustifDonnPerm() == null
+			&&  $version->getSondVolDonnPerm() != '< 1To'
+			&&  $version->getSondVolDonnPerm() != '1 To'
+			&&  $version->getSondVolDonnPerm() !=  'je ne sais pas')
+		    {
+				    $todo[] = 'sond_justif_donn_perm';
+		    }
+
+		    if ($version->getDataMetaDataFormat() == null ) $todo[] = 'Format de métadonnées';
+		    if ($version->getDataNombreDatasets() == null ) $todo[] = 'Nombre de jeux de données';
+		    if ($version->getDataTailleDatasets() == null ) $todo[] = 'Taille de chaque jeu de données';
 		}
+	    }
 		
 	    if( $version->typeSession()  == 'A')
 	    {

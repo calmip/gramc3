@@ -63,6 +63,9 @@ parameters:
     # Suppression de la notion de rattachement administratif
     norattachement: false
     
+    # Suppression des formulaires concernant les données (stockage et partage)
+    nodata: false
+    
     # Nombre max de rallonges par projet et par sessoin
     max_rall: 2
     
@@ -252,7 +255,7 @@ services:
         arguments: [ '%attrib_seuil_a%', "%prj_prefix%", "%fig_directory%", "%signature_directory%" ]
         
     App\GramcServices\ServiceMenus:
-        arguments: [ "%max_rall%" ]
+        arguments: [ "%max_rall%", "%nodata%" ]
         
     App\GramcServices\ServiceNotifications:
         arguments: [ "%mailfrom%" ]

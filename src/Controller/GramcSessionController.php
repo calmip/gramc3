@@ -167,13 +167,16 @@ class GramcSessionController extends AbstractController
         $menu3[] = $sm->projet_session();
         $menu3[] = $sm->projet_annee();
         $menu3[] = $sm->projet_tous();
-        $menu3[] = $sm->projet_donnees();
+	if ($this->getParameter('nodata')==false)
+	{
+	    $menu3[] = $sm->projet_donnees();
+	}
         $menu3[] = $sm->televersement_generique();
 
-		if ($this->getParameter('norattachement')==false)
-		{
-	        $menu4[] = $sm->rattachements();
-		}
+	if ($this->getParameter('norattachement')==false)
+	{
+	    $menu4[] = $sm->rattachements();
+	}
         $menu4[] = $sm->thematiques();
         $menu4[] = $sm->metathematiques();
         $menu4[] = $sm->laboratoires();

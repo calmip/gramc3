@@ -2007,7 +2007,10 @@ class ProjetController extends AbstractController
 	    $menu[] = $sm->modifier_version( $version );
 	    $menu[] = $sm->envoyer_expert( $version );
 	    $menu[] = $sm->modifier_collaborateurs( $version );
+	    if ( $this->getParameter('nodata')==false)
+	    {
 		$menu[] = $sm->donnees( $version );
+	    }
 	    $menu[] = $sm->telechargement_fiche( $version );
 	    $menu[] = $sm->televersement_fiche( $version );
 
