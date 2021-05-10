@@ -15,6 +15,7 @@ use App\GramcServices\ServiceProjets;
 use App\GramcServices\ServiceSessions;
 
 
+
 // Pour debug
 //use App\Entity\Compta;
 
@@ -38,7 +39,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Esxtension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
-use JpGraph\JpGraph;
+include_once (__DIR__.'/../../jpgraph/JpGraph.php');
 
 /**
  * Statistiques controller.
