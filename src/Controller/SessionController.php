@@ -569,7 +569,9 @@ class SessionController extends AbstractController
     {
 		$ss   = $this->ss;
         $data = $ss->selectAnnee($request);
-		$avec_commentaires = $this->container->hasParameter('commentaires_experts_d');
+        // TODO - Utiliser cette methode pour recuperer les paramètres:
+        //        https://ourcodeworld.com/articles/read/1041/how-to-retrieve-specific-and-all-yaml-parameters-from-services-yaml-in-symfony-4
+		$avec_commentaires = $this->getParameter('commentaires_experts_d');
         return $this->render('session/bilanannuel.html.twig',
             [
             'form' => $data['form']->createView(),
