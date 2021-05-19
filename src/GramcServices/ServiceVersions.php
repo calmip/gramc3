@@ -208,6 +208,7 @@ class ServiceVersions
                     $this->sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Le nouveau responsable " . $new . " ne fait partie d'aucun laboratoire");
 				}
                 $this->setLaboResponsable($version, $new );
+                $this->em->persist( $version );
             }
             elseif( $item->getResponsable() == true )
             {
