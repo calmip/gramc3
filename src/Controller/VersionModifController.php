@@ -594,91 +594,89 @@ class VersionModifController extends AbstractController
      */
     private function modifierType2(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form, LoggerInterface $lg)
     {
-		$sj = $this->sj;
-		$sval = $this->vl;
-		$em = $this->getDoctrine()->getManager();
+	$sj = $this->sj;
+	$sval = $this->vl;
+	$em = $this->getDoctrine()->getManager();
 
-		if( $this->has('heures_projet_test' ) )
-			$heures_projet_test = $this->getParameter('heures_projet_test' );
-		else
-			$heures_projet_test =  5000;
-
-		$version->setDemHeures( $heures_projet_test );
-		$form = $this->createFormBuilder($version)
-			->add('prjTitre', TextType::class, [ 'required'       =>  false ])
-			->add('prjThematique', EntityType::class,
-					[
-					'required'       =>  false,
-					'multiple' => false,
-					'class' => 'App:Thematique',
-					'label'     => '',
-					'placeholder' => '-- Indiquez la thématique',
-					]);
-		if ($this->getParameter('norattachement')==false)
-		{
-		    $form->add('prjRattachement', EntityType::class,
-                    [
-                    'required'    => false,
-                    'multiple'    => false,
-                    'expanded'    => true,
-                    'class'       => 'App:Rattachement',
-                    'empty_data'  => null,
-                    'label'       => '',
-                    'placeholder' => 'AUCUN',
-                    ]);
-		}
-		$form->add('demHeures', IntegerType::class,
+	if( $this->has('heures_projet_test' ) )
+	    $heures_projet_test = $this->getParameter('heures_projet_test' );
+	else
+	    $heures_projet_test =  5000;
+	
+	$version->setDemHeures( $heures_projet_test );
+	$form = $this->createFormBuilder($version)
+		->add('prjTitre', TextType::class, [ 'required'       =>  false ])
+		->add('prjThematique', EntityType::class,
 				[
 				'required'       =>  false,
-				'data' => $heures_projet_test,
-				'disabled' => 'disabled' ]
-				)
-			->add('prjResume', TextAreaType::class, [ 'required'       =>  false ] )
-			->add( 'codeNom', TextType::class, [ 'required'       =>  false ] )
-			->add( 'codeFor',  CheckboxType::class, [ 'required'       =>  false ])
-			->add( 'codeC',  CheckboxType::class, [ 'required'       =>  false ])
-			->add( 'codeCpp',  CheckboxType::class, [ 'required'       =>  false ])
-			->add( 'codeAutre',  CheckboxType::class, [ 'required'       =>  false ])
-			->add( 'codeLangage', TextType::class, [ 'required'       =>  false ])
-			->add( 'codeLicence', TextAreaType::class, [ 'required'       =>  false ]  )
-			->add( 'codeUtilSurMach', TextAreaType::class, [ 'required'       =>  false ]  )
-			->add( 'demLogiciels', TextAreaType::class, [ 'required'       =>  false ]  )
-			->add( 'demBib', TextAreaType::class, [ 'required'       =>  false ]  )
-			->add('gpu', ChoiceType::class,
-				[
-				'required'       =>  false,
-				'placeholder'   =>  "-- Choisissez une option",
-				'choices'  =>   [
-								"Oui" => "Oui",
-								"Non" => "Non",
-								"Je ne sais pas" => "je ne sais pas",
-								],
-				])
-			->add( 'fermer',   SubmitType::Class )
-			->add( 'annuler',   SubmitType::Class )
-			->getForm();
-
-		$form->handleRequest($request);
-
-		if( $form->isSubmitted() && $form->isValid()  )
-		{
-			// on sauvegarde tout de même mais il semble que c'est déjà fait avant
-			$version->setDemHeures( $heures_projet_test );
-			$return = Functions::sauvegarder( $version, $em, $lg );
-			return $this->redirectToRoute( 'consulter_projet', ['id' => $version->getProjet()->getIdProjet() ] );
-		}
-
-		$version->setDemHeures($heures_projet_test  );
-		return $this->render('version/modifier_projet_test.html.twig',
-			[
-			'form'      => $form->createView(),
-			'version'   => $version,
-			'collaborateur_form' => $collaborateur_form->createView(),
-			'todo'      => static::versionValidate($version, $sj, $em, $sval),
-			]);
-
+				'multiple' => false,
+				'class' => 'App:Thematique',
+				'label'     => '',
+				'placeholder' => '-- Indiquez la thématique',
+				]);
+	if ($this->getParameter('norattachement')==false)
+	{
+	    $form->add('prjRattachement', EntityType::class,
+	    [
+	    'required'    => false,
+	    'multiple'    => false,
+	    'expanded'    => true,
+	    'class'       => 'App:Rattachement',
+	    'empty_data'  => null,
+	    'label'       => '',
+	    'placeholder' => 'AUCUN',
+	    ]);
 	}
-
+	$form->add('demHeures', IntegerType::class,
+			[
+			'required'       =>  false,
+			'data' => $heures_projet_test,
+			'disabled' => 'disabled' ]
+			)
+		->add('prjResume', TextAreaType::class, [ 'required'       =>  false ] )
+		->add( 'codeNom', TextType::class, [ 'required'       =>  false ] )
+		->add( 'codeFor',  CheckboxType::class, [ 'required'       =>  false ])
+		->add( 'codeC',  CheckboxType::class, [ 'required'       =>  false ])
+		->add( 'codeCpp',  CheckboxType::class, [ 'required'       =>  false ])
+		->add( 'codeAutre',  CheckboxType::class, [ 'required'       =>  false ])
+		->add( 'codeLangage', TextType::class, [ 'required'       =>  false ])
+		->add( 'codeLicence', TextAreaType::class, [ 'required'       =>  false ]  )
+		->add( 'codeUtilSurMach', TextAreaType::class, [ 'required'       =>  false ]  )
+		->add( 'demLogiciels', TextAreaType::class, [ 'required'       =>  false ]  )
+		->add( 'demBib', TextAreaType::class, [ 'required'       =>  false ]  )
+		->add('gpu', ChoiceType::class,
+			[
+			'required'       =>  false,
+			'placeholder'   =>  "-- Choisissez une option",
+			'choices'  =>   [
+							"Oui" => "Oui",
+							"Non" => "Non",
+							"Je ne sais pas" => "je ne sais pas",
+							],
+			])
+		->add( 'fermer',   SubmitType::Class )
+		->add( 'annuler',   SubmitType::Class )
+		->getForm();
+    
+	$form->handleRequest($request);
+    
+	if( $form->isSubmitted() && $form->isValid()  )
+	{
+		// on sauvegarde tout de même mais il semble que c'est déjà fait avant
+		$version->setDemHeures( $heures_projet_test );
+		$return = Functions::sauvegarder( $version, $em, $lg );
+		return $this->redirectToRoute( 'consulter_projet', ['id' => $version->getProjet()->getIdProjet() ] );
+	}
+    
+	$version->setDemHeures($heures_projet_test  );
+	return $this->render('version/modifier_projet_test.html.twig',
+		[
+		'form'      => $form->createView(),
+		'version'   => $version,
+		'collaborateur_form' => $collaborateur_form->createView(),
+		'todo'      => static::versionValidate($version, $sj, $em, $sval),
+		]);
+	}
 
     ////////////////////////////////////////////////////////////////////////////////////
 
@@ -700,9 +698,9 @@ class VersionModifController extends AbstractController
 
     private function image_handle( $form, Version $version, $request)
     {
-		$sv = $this->sv;
-		$sj = $this->sj;
-		$em = $this->getDoctrine()->getManager();
+	    $sv = $this->sv;
+	    $sj = $this->sj;
+	    $em = $this->getDoctrine()->getManager();
 
 	    $form->handleRequest($request);
 

@@ -54,9 +54,12 @@ parameters:
     # nb de pages max pour un rapport d'activité
     max_page_nb: 5
     
-    # Si mis à true, on demande le rapport pour toutes les sessions
-    rapport_toujours = true
-    
+    # Si mis à true, rapport d'activité demandé à la fin de l'année
+    rapport_dactivite: true
+
+    # Si mis à true, propose de téléverser un fichier attaché à chaque version
+    fichier_attache: false
+       
     # Suppression de toutes les fonctionnalités liées à la consommation
     noconso: false
     

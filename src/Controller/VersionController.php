@@ -39,6 +39,7 @@ use App\GramcServices\ServiceJournal;
 use App\GramcServices\ServiceNotifications;
 use App\GramcServices\ServiceProjets;
 use App\GramcServices\ServiceSessions;
+use App\GramcServices\ServiceForms;
 use App\GramcServices\ServiceVersions;
 use App\GramcServices\ServiceExperts\ServiceExperts;
 use App\GramcServices\GramcDate;
@@ -104,26 +105,28 @@ class VersionController extends AbstractController
 	
 	
 	public function __construct (ServiceNotifications $sn,
-								 ServiceJournal $sj,
-								 ServiceMenus $sm,
-								 ServiceProjets $sp,
-								 ServiceSessions $ss,
-								 GramcDate $sd,
-								 ServiceVersions $sv,
-								 ServiceExperts $se,
-								 ProjetWorkflow $pw,
-								 FormFactoryInterface $ff,
-								 ValidatorInterface $vl,
-								 TokenStorageInterface $tok,
-								 SessionInterface $sss,
-								 Pdf $pdf
-								 )
+				     ServiceJournal $sj,
+				     ServiceMenus $sm,
+				     ServiceProjets $sp,
+				     ServiceSessions $ss,
+				     ServiceForms $sf,
+				     GramcDate $sd,
+				     ServiceVersions $sv,
+				     ServiceExperts $se,
+				     ProjetWorkflow $pw,
+				     FormFactoryInterface $ff,
+				     ValidatorInterface $vl,
+				     TokenStorageInterface $tok,
+				     SessionInterface $sss,
+				     Pdf $pdf
+				     )
 	{
 		$this->sn  = $sn;
 		$this->sj  = $sj;
 		$this->sm  = $sm;
 		$this->sp  = $sp;
 		$this->ss  = $ss;
+		$this->sf  = $sf;
 		$this->sd  = $sd;
 		$this->sv  = $sv;
 		$this->se  = $se;
@@ -1142,6 +1145,42 @@ class VersionController extends AbstractController
     }
 
     /**
+     * Téléverser un fichier attaché à une version
+     *
+     * @Route("/{id}/fichier", name="televerser_fichier_attache")
+     * @Method({"GET", "POST"})
+     * @Security("is_granted('ROLE_DEMANDEUR')")
+     */
+    public function televerserFichierAction(version $version, Request $request)
+    {
+	$sv = $this->sv;
+	$sm = $this->sm;
+	$sj = $this->sj;
+
+	// ACL - Mêmes ACL que modification de version !
+	if( $sm->modifier_version($version)['ok'] == false )
+	{
+	    $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de modifier la version " . $version->getIdVersion().
+		" parce que : " . $sm->modifier_version($version)['raison'] );
+	}
+	
+	$dir      = $sv->imageDir($version);
+	$filename = 'document.pdf';
+
+	if(  ! file_exists( $dir ) )
+	{
+	    mkdir( $dir );
+	}
+	elseif( ! is_dir(  $dir ) )
+	{
+	    unlink( $dir );
+	    mkdir( $dir );
+	}
+	$rtn = $this->televerserFichier( $request, $dir, $filename );
+	return new Response($rtn);
+    }
+
+    /**
      * Téléverser le rapport d'actitivé de l'année
      *
      * @Route("/{id}/rapport_annee/{annee}", defaults={"annee"=0}, name="televerser_rapport_annee")
@@ -1192,6 +1231,90 @@ class VersionController extends AbstractController
 
     ////////////////////////////////////////////////////////////////////
 
+    /***
+     * 
+     * Crée le formulaire qui permettra de téléverser le fichier pdf
+     * Gère le mécanisme de soumission et validation
+     * 
+     * params = request
+     * 		dirname : répertoire de destination
+     *          filename: nom définitif du fichier
+     *
+     * return = la form si pas encore soumise
+     *          ou une string: "OK" ou un message d'erreur
+     * 
+     ********************************/
+    private function televerserFichier(Request $request, $dirname, $filename )
+    {
+        //$em = $this->getDoctrine()->getManager();
+	//$sv = $this->sv;
+	$sf = $this->sf;
+	$sj = $this->sj;
+
+	$format_fichier = new \Symfony\Component\Validator\Constraints\File(
+	    [
+	    'mimeTypes'=> [ 'application/pdf' ],
+	    'mimeTypesMessage'=>' Le fichier doit être un fichier pdf. ',
+	    'maxSize' => "2048k",
+	    'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
+	    'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
+	    ]);
+
+	$form = $this->ff
+		->createNamedBuilder( 'fichier', FormType::class, [], ['csrf_protection' => false ] )
+		->add('fichier', FileType::class,
+			[
+				'required'          =>  true,
+				'label'             => "Fichier attaché",
+				'constraints'       => [$format_fichier , new PagesNumber() ]
+		    ])
+		->getForm();
+		//$sj->debugMessage(__METHOD__ . ':' . __LINE__ . " form data = " . Functions::show( $request->request->get('fichier_attache') ) );
+
+	$form->handleRequest( $request );
+
+	// form soumise et valide = On met le fichier à sa place et on retourne OK
+	if( $form->isSubmitted() && $form->isValid() )
+	{
+	    $tempFilename = $form->getData()['fichier'];
+    
+	    if( is_file( $tempFilename ) && ! is_dir( $tempFilename ) )
+		$file = new File( $tempFilename );
+	    elseif( is_dir( $tempFilename ) )
+		return "Erreur interne : Le nom  " . $tempFilename . " correspond à un répertoire" ;
+	    else
+		return "Erreur interne : Le fichier " . $tempFilename . " n'existe pas" ;
+    
+	    $file->move( $dirname, $filename );
+	    $sj->debugMessage(__METHOD__ . ':' . __LINE__ . " Fichier attaché -> " . $filename );
+	    return 'OK';
+        }
+
+	// formulaire non valide ou autres cas d'erreur = On retourne un message d'erreur
+	elseif( $form->isSubmitted() && ! $form->isValid() )
+        {
+	    if( isset( $form->getData()['fichier'] ) )
+	    {
+		return  $sf->formError( $form->getData()['fichier'], [$format_fichier , new PagesNumber() ]);
+	    }
+	    else
+	    {
+		return "Le fichier n'a pas été soumis correctement";
+	    }
+	}
+	elseif( $request->isXMLHttpRequest() )
+	{
+	    return "Le formulaire n'a pas été soumis";
+	}
+	
+	// formulaire non soumis = On retourne le formulaire
+	else
+	{
+	    return $form;
+	}
+    }
+
+    // TODO - SUPPRIMER CETTE FONCTION ET FACTORISER AVEC televerserRapport !
     private function handleRapport(Request $request, Version $version, $annee = null )
     {
         $em = $this->getDoctrine()->getManager();

@@ -1249,7 +1249,20 @@ class ProjetController extends AbstractController
     public function signatureAction(Version $version, Request $request)
     {
         $sv = $this->sv;
-	    return Functions::pdf( $sv->getSigne($version) );
+	return Functions::pdf( $sv->getSigne($version) );
+    }
+
+    /**
+     * download doc attaché
+     *
+     * @Route("/{id}/document", name="document")
+     * @Security("is_granted('ROLE_DEMANDEUR') or is_granted('ROLE_OBS')")
+     * @Method("GET")
+     */
+    public function documentAction(Version $version, Request $request)
+    {
+        $sv = $this->sv;
+	return Functions::pdf( $sv->getDocument($version) );
     }
 
     /**
@@ -1961,9 +1974,7 @@ class ProjetController extends AbstractController
 		$sm = $this->sm;
 		$sp = $this->sp;
 		$ac = $this->ac;
-		$sv = $this->sv
-		
-		;
+		$sv = $this->sv;
 		$sj = $this->sj;
 		$ff = $this->ff;
 
@@ -2015,16 +2026,20 @@ class ProjetController extends AbstractController
 	    $menu[] = $sm->televersement_fiche( $version );
 
 	    $etat_version = $version->getEtatVersion();
-	    if( ($etat_version == Etat::ACTIF || $etat_version == Etat::TERMINE ) && ! $sp->hasRapport( $projet, $version->getAnneeSession() ) )
+	    if ( $this->getParameter('rapport_dactivite') )
 	    {
+		if( ($etat_version == Etat::ACTIF || $etat_version == Etat::TERMINE ) && ! $sp->hasRapport( $projet, $version->getAnneeSession() ) )
+		{
 		    $menu[] = $sm->telecharger_modele_rapport_dactivite( $version );
-	        $menu[] = $sm->televerser_rapport_annee( $version );
+		    $menu[] = $sm->televerser_rapport_annee( $version );
 		}
+	    }
 		
 	    $menu[]       = $sm->gerer_publications( $projet );
 	    $img_expose_1 = $sv->imageProperties('img_expose_1', $version);
 	    $img_expose_2 = $sv->imageProperties('img_expose_2', $version);
 	    $img_expose_3 = $sv->imageProperties('img_expose_3', $version);
+	    $document     = $sv->getdocument($version);
 
 	    /*
 	    if( $img_expose_1 == null )
@@ -2064,6 +2079,7 @@ class ProjetController extends AbstractController
 	            'conso_gpu'          => $sp->getConsoRessource($projet,'gpu',$version->getAnneeSession()),
 	            'rapport_1'          => $rapport_1,
 	            'rapport'            => $rapport,
+		    'document'           => $document,
 	            'toomuch'            => $toomuch
             ]
 	            );

@@ -23,6 +23,7 @@
  **/
 
 // src/Validator/Constraints/PagesNumber.php
+// cf. https://symfony.com/doc/4.4/validation.html
 namespace App\Validator\Constraints;
 
 use Symfony\Component\Validator\Constraint;
@@ -33,5 +34,5 @@ use Symfony\Component\Validator\Constraint;
 class PagesNumber extends Constraint
 {
     public $message1 = 'Le fichier PDF a {{ pages }} pages. Il ne peut avoir que 1 page.';
-    public $message2 = 'Le fichier PDF a {{ pages }} pages. Il ne peut avoir que {{ max_pages }} pages.';
+    public $message2 = 'Le fichier PDF a {{ pages }} pages. Il ne peut avoir plus de {{ max_pages }} pages.';
 }

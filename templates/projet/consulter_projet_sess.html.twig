@@ -46,25 +46,38 @@
     </a>
 </div>
 
-{% if ( rapport_1 != null   ) %}
-<div class="lien-pdf">
-    <a href="{{ path('rapport', { 'id' : version.idVersion, 'annee' : version.getAnneeSession() - 1 }) }}">
-        <img src="{{ asset('icones/pdf32.png') }}" alt="pdf" title="Rapport d'activité {{ version.getAnneeSession - 1 }}">
-        <br>
-        <small>Rapport d'activité {{ version.getAnneeSession - 1 }}</small>
-    </a>
-</div>
-{%  endif %}
-
-{% if ( rapport != null ) %}
-<div class="lien-pdf">
-    <a href="{{ path('rapport', { 'id' : version.idVersion, 'annee' : version.getAnneeSession() }) }}">
-        <img src="{{ asset('icones/pdf32.png') }}" alt="pdf" title="Rapport d'activité {{ version.getAnneeSession  }}">
-        <br>
-        <small>Rapport d'activité {{ version.getAnneeSession }}</small>
-    </a>
-</div>
-{%  endif %}
+{% if rapport_dactivite %}
+    {% if ( rapport_1 != null   ) %}
+    <div class="lien-pdf">
+        <a href="{{ path('rapport', { 'id' : version.idVersion, 'annee' : version.getAnneeSession() - 1 }) }}">
+            <img src="{{ asset('icones/pdf32.png') }}" alt="pdf" title="Rapport d'activité {{ version.getAnneeSession - 1 }}">
+            <br>
+            <small>Rapport d'activité {{ version.getAnneeSession - 1 }}</small>
+        </a>
+    </div>
+    {%  endif %}
+    
+    {% if ( rapport != null ) %}
+    <div class="lien-pdf">
+        <a href="{{ path('rapport', { 'id' : version.idVersion, 'annee' : version.getAnneeSession() }) }}">
+            <img src="{{ asset('icones/pdf32.png') }}" alt="pdf" title="Rapport d'activité {{ version.getAnneeSession  }}">
+            <br>
+            <small>Rapport d'activité {{ version.getAnneeSession }}</small>
+        </a>
+    </div>
+    {%  endif %}
+{% endif %}
+{% if fichier_attache %}
+    {% if document != null %}
+    <div class="lien-pdf">
+        <a href="{{ path('document', { 'id' : version.idVersion }) }}">
+            <img src="{{ asset('icones/pdf32.png') }}" alt="pdf" title="Document attaché">
+            <br>
+            <small>Document attaché</small>
+        </a>
+    </div>
+    {% endif %}
+{% endif %}    
 {% if noconso == 0 %}
 <div class="lien-pdf">
     <img id="bconso" class="bouton_poussoir conso" src="{{ asset('icones/conso64.png') }}"
