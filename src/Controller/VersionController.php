@@ -676,7 +676,7 @@ class VersionController extends AbstractController
 			    $sn->sendMessage ('notification/changement_resp_pour_nouveau-sujet.html.twig',
 								  'notification/changement_resp_pour_nouveau-contenu.html.twig',
 								  $params,
-								  [$ancien_responsable]);
+								  [$nouveau_responsable]);
 	
 	 		    $sn->sendMessage ('notification/changement_resp_pour_admin-sujet.html.twig',
 							      'notification/changement_resp_pour_admin-contenu.html.twig',
