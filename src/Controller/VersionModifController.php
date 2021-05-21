@@ -36,6 +36,7 @@ use App\Entity\Rattachement;
 use App\GramcServices\ServiceJournal;
 use App\GramcServices\ServiceMenus;
 use App\GramcServices\ServiceVersions;
+use App\GramcServices\ServiceForms;
 
 use App\GramcServices\Workflow\Projet\ProjetWorkflow;
 
@@ -96,18 +97,20 @@ class VersionModifController extends AbstractController
 	private $tw;
 		
 	public function __construct (ServiceJournal $sj,
-								 ServiceMenus $sm,
-								 ServiceVersions $sv,
-								 ProjetWorkflow $pw,
-								 FormFactoryInterface $ff,
-								 ValidatorInterface $vl,
-								 SessionInterface $sss,
-								 Environment $tw
-								 )
+				     ServiceMenus $sm,
+				     ServiceVersions $sv,
+				     ServiceForms $sf,
+				     ProjetWorkflow $pw,
+				     FormFactoryInterface $ff,
+				     ValidatorInterface $vl,
+				     SessionInterface $sss,
+				     Environment $tw
+				     )
 	{
 		$this->sj  = $sj;
 		$this->sm  = $sm;
 		$this->sv  = $sv;
+		$this->sf  = $sf;
 		$this->pw  = $pw;
 		$this->ff  = $ff;
 		$this->vl  = $vl;
@@ -699,6 +702,7 @@ class VersionModifController extends AbstractController
     private function image_handle( $form, Version $version, $request)
     {
 	    $sv = $this->sv;
+	    $sf = $this->sf;
 	    $sj = $this->sj;
 	    $em = $this->getDoctrine()->getManager();
 
@@ -754,7 +758,8 @@ class VersionModifController extends AbstractController
 	        else
 	            return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => 'Erreur indeterminée' ];
 
-	        return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => Functions::formError( $em, $image, [ $this->imageConstraints() ] ) ];
+	        return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => $sf->formError($image, [ $this->imageConstraints() ] ) ];
+		
 	        //$sj->debugMessage('VersionController:image_handle form for ' . $filename . '('. $form->getData()['image'] . ') is not valide, error = ' .
 	        //    (string) $form->getErrors(true,false)->current() );
 	        //return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => (string) $form->getErrors(true,false)->current() ];

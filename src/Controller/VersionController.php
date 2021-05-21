@@ -77,6 +77,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Form\IndividuFormType;
+
 use App\Validator\Constraints\PagesNumber;
 
 use Knp\Snappy\Pdf;
@@ -795,10 +796,10 @@ class VersionController extends AbstractController
      */
     public function avantEnvoyerAction(Version $version,  Request $request, LoggerInterface $lg)
     {
-		$sm = $this->sm;
-		$sj = $this->sj;
-		$ff = $this->ff;
-		$em = $this->getdoctrine()->getManager();
+	    $sm = $this->sm;
+	    $sj = $this->sj;
+	    $ff = $this->ff;
+	    $em = $this->getdoctrine()->getManager();
 
 	    $this->MenuACL( $sm->envoyer_expert($version), "Impossible d'envoyer la version " . $version->getIdVersion() . " à l'expert", __METHOD__, __LINE__ );
 
@@ -1119,34 +1120,8 @@ class VersionController extends AbstractController
 
     ///////////////////////////////////////////////////////////////
 
-
     /**
-     * Téléverser le rapport d'actitivé de l'année précedente
-     *
-     * @Route("/{id}/rapport", name="televerser_rapport")
-     * @Method("POST")
-     * @Security("is_granted('ROLE_DEMANDEUR')")
-     */
-    /*
-    public function televerserRapportPrecedentAction(Version $version, Request $request)
-    {
-		$sm = $this->sm;
-		$sj = $this->sj;
-
-	    // ACL
-	    //$sj->debugMessage(__METHOD__ . ':' . __LINE__ . " form data = " . Functions::show( $request->request->get('rapport') ) );
-	    if( $sm->televerser_rapport_annee($version->versionPrecedente())['ok'] == false )
-	        {
-	        $sj->warningMessage(__METHOD__ . ":" . __LINE__ .
-	                " impossible de téléverser le rapport parce que " . $sm->televerser_rapport_annee($version->versionPrecedente())['raison'] );
-	        return new Response( $sm->televerser_rapport_annee($version->versionPrecedente() )['raison'] );
-	        }
-	    //$sj->debugMessage('VersionController:televerserRapportAction');
-	    return new Response( $this->handleRapport( $request, $version->versionPrecedente(), $version->anneeRapport() ) );
-    }
-*/
-    /**
-     * Téléverser le rapport d'actitivé de l'année en cours
+     * Téléverser le rapport d'actitivé
      *
      * @Route("/{id}/rapport_annee/{annee}", defaults={"annee"=0}, name="televerser_rapport_annee")
      * @Method({"GET", "POST"})
@@ -1156,6 +1131,7 @@ class VersionController extends AbstractController
     {
 	$em = $this->getDoctrine()->getManager();
 	$sm = $this->sm;
+	$sf = $this->sf;
 	$sj = $this->sj;
 
 	// ACL
@@ -1181,7 +1157,7 @@ class VersionController extends AbstractController
 	$filename = $annee . $version->getProjet()->getIdProjet() . ".pdf";
 	$path     = $dir . '/' . $filename;
 	
-	$rtn = $this->televerserFichier($request, $dir, $filename);
+	$rtn = $sf->televerserFichier($request, $dir, $filename);
 
 	// Fichier téléversé avec succès -> On écrit dans la base de données
 	//                                  On confirme que le rapport est bien là
@@ -1261,6 +1237,7 @@ class VersionController extends AbstractController
     {
 	$sv = $this->sv;
 	$sm = $this->sm;
+	$sf = $this->sf;
 	$sj = $this->sj;
 
 	// ACL - Mêmes ACL que modification de version !
@@ -1282,198 +1259,13 @@ class VersionController extends AbstractController
 	    unlink( $dir );
 	    mkdir( $dir );
 	}
-	$rtn = $this->televerserFichier( $request, $dir, $filename );
+	$rtn = $sf->televerserFichier( $request, $dir, $filename );
 	return new Response($rtn);
     }
 
     ////////////////////////////////////////////////////////////////////
 
-    /***
-     * 
-     * Crée le formulaire qui permettra de téléverser le fichier pdf
-     * Gère le mécanisme de soumission et validation
-     * 
-     * params = request
-     * 		dirname : répertoire de destination
-     *          filename: nom définitif du fichier
-     *
-     * return = la form si pas encore soumise
-     *          ou une string: "OK" 
-     *          ou un message d'erreur
-     * 
-     ********************************/
-    private function televerserFichier(Request $request, $dirname, $filename )
-    {
-        //$em = $this->getDoctrine()->getManager();
-	//$sv = $this->sv;
-	$sf = $this->sf;
-	$sj = $this->sj;
-
-	$format_fichier = new \Symfony\Component\Validator\Constraints\File(
-	    [
-	    'mimeTypes'=> [ 'application/pdf' ],
-	    'mimeTypesMessage'=>' Le fichier doit être un fichier pdf. ',
-	    'maxSize' => "2048k",
-	    'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
-	    'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
-	    ]);
-
-	$form = $this->ff
-		->createNamedBuilder( 'fichier', FormType::class, [], ['csrf_protection' => false ] )
-		->add('fichier', FileType::class,
-			[
-				'required'          =>  true,
-				'label'             => "Fichier attaché",
-				'constraints'       => [$format_fichier , new PagesNumber() ]
-		    ])
-		->getForm();
-		//$sj->debugMessage(__METHOD__ . ':' . __LINE__ . " form data = " . Functions::show( $request->request->get('fichier_attache') ) );
-
-	$form->handleRequest( $request );
-
-	// form soumise et valide = On met le fichier à sa place et on retourne OK
-	if( $form->isSubmitted() && $form->isValid() )
-	{
-	    $tempFilename = $form->getData()['fichier'];
-    
-	    if( is_file( $tempFilename ) && ! is_dir( $tempFilename ) )
-		$file = new File( $tempFilename );
-	    elseif( is_dir( $tempFilename ) )
-		return "Erreur interne : Le nom  " . $tempFilename . " correspond à un répertoire" ;
-	    else
-		return "Erreur interne : Le fichier " . $tempFilename . " n'existe pas" ;
-    
-	    $file->move( $dirname, $filename );
-	    $sj->debugMessage(__METHOD__ . ':' . __LINE__ . " Fichier attaché -> " . $filename );
-	    return 'OK';
-        }
-
-	// formulaire non valide ou autres cas d'erreur = On retourne un message d'erreur
-	elseif( $form->isSubmitted() && ! $form->isValid() )
-        {
-	    if( isset( $form->getData()['fichier'] ) )
-	    {
-		return  $sf->formError( $form->getData()['fichier'], [$format_fichier , new PagesNumber() ]);
-	    }
-	    else
-	    {
-		return "Le fichier n'a pas été soumis correctement";
-	    }
-	}
-	elseif( $request->isXMLHttpRequest() )
-	{
-	    return "Le formulaire n'a pas été soumis";
-	}
-	
-	// formulaire non soumis = On retourne le formulaire
-	else
-	{
-	    return $form;
-	}
-    }
-
-    // TODO - SUPPRIMER CETTE FONCTION ET FACTORISER AVEC televerserRapport !
-    private function handleRapport(Request $request, Version $version, $annee = null )
-    {
-        $em = $this->getDoctrine()->getManager();
-	$sf = $this->sf;
-	$sj = $this->sj;
-
-	$format_fichier = new \Symfony\Component\Validator\Constraints\File(
-	    [
-	    'mimeTypes'=> [ 'application/pdf' ],
-	    'mimeTypesMessage'=>' Le fichier doit être un fichier pdf. ',
-	    'maxSize' => "2048k",
-	    'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
-	    'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
-	    ]);
-
-	$form = $this->ff
-		->createNamedBuilder( 'rapport', FormType::class, [], ['csrf_protection' => false ] )
-		->add('rapport', FileType::class,
-			[
-				'required'          =>  true,
-				'label'             => "Rapport d'activité",
-				'constraints'       => [$format_fichier , new PagesNumber() ]
-		])
-			->getForm();
-		//$sj->debugMessage(__METHOD__ . ':' . __LINE__ . " form data = " . Functions::show( $request->request->get('rapport') ) );
-
-		$form->handleRequest( $request );
-
-		if( $form->isSubmitted() && $form->isValid() )
-        {
-	        $tempFilename = $form->getData()['rapport'];
-	        if( $annee == null)
-	            $annee = $version->anneeRapport();
-	
-	        if( is_file( $tempFilename ) && ! is_dir( $tempFilename ) )
-	            $file = new File( $tempFilename );
-	        elseif( is_dir( $tempFilename ) )
-	            return "Erreur interne : Le nom  " . $tempFilename . " correspond à un répertoire" ;
-	        else
-	            return "Erreur interne : Le fichier " . $tempFilename . " n'existe pas" ;
-	
-	        $dir = $this->getParameter('rapport_directory') . '/' . $annee;
-
-	        if(  ! file_exists( $dir ) )
-	        {
-	            mkdir( $dir );
-			}
-	        elseif( ! is_dir(  $dir ) )
-            {
-	            unlink( $dir );
-	            mkdir( $dir );
-            }
-
-	        //$file->move( $dir, $version->getIdVersion() . ".pdf" );
-	        //$filename = $dir . "/" . $version->getIdVersion() . ".pdf";
-	        $filename = $annee . $version->getProjet()->getIdProjet() . ".pdf";
-	        $file->move( $dir, $filename );
-	        $filename = $dir . "/" . $filename;
-
-	        $sj->debugMessage(__METHOD__ . ':' . __LINE__ . " Rapport d'activité de l'année " . $annee . " téléversé dans le fichier " . $filename );
-
-	        //$sj->debugMessage(__METHOD__ . ':' . __LINE__ . " filename = " . $filename );
-	        // création de la table RapportActivite
-	        $rapportActivite = $em->getRepository(RapportActivite::class)->findOneBy(
-                [
-                'projet' => $version->getProjet(),
-                'annee' => $annee,
-                ]);
-	        if( $rapportActivite == null )
-	            $rapportActivite    = new RapportActivite( $version->getProjet(), $annee);
-
-	        $rapportActivite->setTaille( filesize( $filename ) );
-	        $rapportActivite->setNomFichier($filename);
-	        $rapportActivite->setFiledata("");
-
-	        $em->persist( $rapportActivite  );
-	        $em->flush();
-	
-	        return 'OK';
-		}
-		elseif( $form->isSubmitted() && ! $form->isValid() )
-		{
-		    if( isset( $form->getData()['rapport'] ) )
-		    {
-			return  $sf->formError( $form->getData()['rapport'], [$format_fichier , new PagesNumber() ]);
-		    }
-		    else
-		    {
-			return "Le fichier n'a pas été soumis correctement";
-		    }
-		}
-		elseif( $request->isXMLHttpRequest() )
-		{
-			return "Le formulaire n'a pas été soumis";
-		}
-	    else
-	    {
-	        return $form;
-		}
-    }
-
+    // TODO - pas bien clair
     private function modifyRapport(Projet $projet, $annee, $filename )
     {
 		$em = $this->getDoctrine()->getManager();
@@ -1495,6 +1287,4 @@ class VersionController extends AbstractController
         $em->persist( $rapportActivite  );
         $em->flush();
     }
-
-
 }

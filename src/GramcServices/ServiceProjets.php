@@ -49,19 +49,19 @@ use Doctrine\ORM\EntityManagerInterface;
 class ServiceProjets
 {
 	public function __construct($prj_prefix, 
-								$ressources_conso_group,
-							    $signature_directory,
-							    $rapport_directory,
-							    $fig_directory,
-							    $dfct_directory,
-								GramcDate $grdt, 
-								ServiceVersions $sv, 
-								ServiceSessions $ss, 
-								ServiceJournal $sj,
-								LoggerInterface $log,
-								AuthorizationCheckerInterface $sac,
-								TokenStorageInterface $tok,
-								EntityManagerInterface $em)
+				    $ressources_conso_group,
+				    $signature_directory,
+				    $rapport_directory,
+				    $fig_directory,
+				    $dfct_directory,
+				    GramcDate $grdt, 
+				    ServiceVersions $sv, 
+				    ServiceSessions $ss, 
+				    ServiceJournal $sj,
+				    LoggerInterface $log,
+				    AuthorizationCheckerInterface $sac,
+				    TokenStorageInterface $tok,
+				    EntityManagerInterface $em)
 	{
 		$this->prj_prefix             = $prj_prefix;
 		$this->ressources_conso_group = $ressources_conso_group;

@@ -269,8 +269,10 @@ class ProjetRepository extends \Doctrine\ORM\EntityRepository
     }
 
     ////////////////////////////////////////////////////////////////////////////////
-
-     public function findProjetsAnnee($annee, $renouvel = Functions::TOUS )
+    // TODO - NE MARCHE PAS AVEC PREFIX DIFFERENT DE P !!!
+    // cf. DefaultController et StatistiquesController
+    //
+    public function findProjetsAnnee($annee, $renouvel = Functions::TOUS )
     {
         $subAnnee = substr( strval($annee), -2 );
         $query = "SELECT  DISTINCT p FROM App:Version  v ";
@@ -296,7 +298,7 @@ class ProjetRepository extends \Doctrine\ORM\EntityRepository
 
     ////////////////////////////////////////////////////////////////////////////////
 
-     public function findNouveauxProjetsAnnee($annee)
+/*     public function findNouveauxProjetsAnnee($annee)
     {
         $subAnnee = substr( strval($annee), -2 );
         $query = "SELECT  DISTINCT p FROM App:Version  v ";
@@ -312,11 +314,12 @@ class ProjetRepository extends \Doctrine\ORM\EntityRepository
         ->getResult();
 
     }
-
+*/
 
 ////////////////////////////////////////////////////////////////////////////////
 
-     public function findAnciensProjetsAnnee($annee)
+
+/*     public function findAnciensProjetsAnnee($annee)
     {
         $subAnnee = substr( strval($annee), -2 );
         $query = "SELECT  DISTINCT p FROM App:Version  v ";
@@ -332,6 +335,7 @@ class ProjetRepository extends \Doctrine\ORM\EntityRepository
         ->getResult();
 
     }
+*/
     //////////////////////////////////////////////////////////////////////////////////
 
      public function countProjetsAnnee($annee)
@@ -353,6 +357,9 @@ class ProjetRepository extends \Doctrine\ORM\EntityRepository
     //////////////////////////////////////////////////////////////////////////////////
     //
     // $renouvel = Functions::TOUS, Functions::NOUVEAUX, Functions::ANCIENS
+    //
+    // TODO - NE MARCHE PAS AVEC PREFIX DIFFERENT DE P !!!
+    //        cf. DefaultController et StatistiquesController
     //
      public function heuresProjetsAnnee($annee, $renouvel = Functions::TOUS )
     {
