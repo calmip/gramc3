@@ -1127,6 +1127,7 @@ class VersionController extends AbstractController
      * @Method("POST")
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
+    /*
     public function televerserRapportPrecedentAction(Version $version, Request $request)
     {
 		$sm = $this->sm;
@@ -1142,6 +1143,111 @@ class VersionController extends AbstractController
 	        }
 	    //$sj->debugMessage('VersionController:televerserRapportAction');
 	    return new Response( $this->handleRapport( $request, $version->versionPrecedente(), $version->anneeRapport() ) );
+    }
+*/
+    /**
+     * Téléverser le rapport d'actitivé de l'année en cours
+     *
+     * @Route("/{id}/rapport_annee/{annee}", defaults={"annee"=0}, name="televerser_rapport_annee")
+     * @Method({"GET", "POST"})
+     * @Security("is_granted('ROLE_DEMANDEUR')")
+     */
+    public function televerserRapportAction(Version $version, Request $request, $annee )
+    {
+	$em = $this->getDoctrine()->getManager();
+	$sm = $this->sm;
+	$sj = $this->sj;
+
+	// ACL
+	if( $sm->televerser_rapport_annee($version)['ok'] == false )
+		$sj->throwException(__METHOD__ . ":" . __LINE__ .
+		    " impossible de téléverser le rapport parce que " . $sm->televerser_rapport_annee($version)['raison'] );
+	//$sj->debugMessage('VersionController:televerserRapportActionAnnee');
+    
+	if( $annee == 0 )
+	    $annee  =   $version->getAnneeSession();
+
+	// Calcul du nom de fichier
+	$dir = $this->getParameter('rapport_directory') . '/' . $annee;
+	if(  ! file_exists( $dir ) )
+	{
+	    mkdir( $dir );
+	}
+	elseif( ! is_dir(  $dir ) )
+	{
+	    unlink( $dir );
+	    mkdir( $dir );
+	}
+	$filename = $annee . $version->getProjet()->getIdProjet() . ".pdf";
+	$path     = $dir . '/' . $filename;
+	
+	$rtn = $this->televerserFichier($request, $dir, $filename);
+
+	// Fichier téléversé avec succès -> On écrit dans la base de données
+	//                                  On confirme que le rapport est bien là
+	if( $rtn == 'OK' )
+	{
+	    $rapportActivite = $em->getRepository(RapportActivite::class)->findOneBy(
+	    [
+	    'projet' => $version->getProjet(),
+	    'annee' => $annee,
+	    ]);
+	    if( $rapportActivite == null )
+		$rapportActivite    = new RapportActivite( $version->getProjet(), $annee);
+
+	    $rapportActivite->setTaille( filesize( $path ) );
+	    
+	    // TODO - ces deux champs ne servent à RIEN Il faut les supprimer
+	    $rapportActivite->setNomFichier("");
+	    $rapportActivite->setFiledata("");
+
+	    $em->persist( $rapportActivite  );
+	    $em->flush();
+	    
+	    if ($request->isXmlHttpRequest())
+	    {
+		return new Response('OK');
+	    }
+	    else
+	    {
+		return $this->render('version/confirmation_rapport.html.twig',
+		    [
+		    'projet'    =>  $version->getProjet()->getIdProjet(),
+		    'version'   =>  $version->getIdVersion(),
+		    ]);
+	    }
+	}
+
+	// L'objet form est retourné = il faut juste l'afficher
+	elseif( is_object( $rtn ) )
+	{
+	    return $this->render('version/televerser_rapport.html.twig',
+		[
+		'projet'    =>  $version->getProjet()->getIdProjet(),
+		'version'   =>  $version->getIdVersion(),
+		'annee'     =>  $version->getAnneeSession(),
+		'form'      =>  $rtn->createView(),
+		]);
+	}
+	
+	// Un autre string = Message d'erreur
+	else
+	{
+	    if ( $request->isXmlHttpRequest())
+	    {
+		return new Response ($rtn);
+	    }
+	    else
+	    {
+		return $this->render('version/erreur_rapport.html.twig',
+		    [
+		    'projet'    =>  $version->getProjet()->getIdProjet(),
+		    'version'   =>  $version->getIdVersion(),
+		    'annee'     =>  $version->getAnneeSession(),
+		    'erreur'    =>  $rtn,
+		    ]);
+	    }
+	}
     }
 
     /**
@@ -1180,55 +1286,6 @@ class VersionController extends AbstractController
 	return new Response($rtn);
     }
 
-    /**
-     * Téléverser le rapport d'actitivé de l'année
-     *
-     * @Route("/{id}/rapport_annee/{annee}", defaults={"annee"=0}, name="televerser_rapport_annee")
-     * @Method({"GET", "POST"})
-     * @Security("is_granted('ROLE_DEMANDEUR')")
-     */
-    public function televerserRapportAction(Version $version, Request $request, $annee )
-    {
-		$sm = $this->sm;
-		$sj = $this->sj;
-
-	    // ACL
-	    if( $sm->televerser_rapport_annee($version)['ok'] == false )
-	            $sj->throwException(__METHOD__ . ":" . __LINE__ .
-	                " impossible de téléverser le rapport parce que " . $sm->televerser_rapport_annee($version)['raison'] );
-	    //$sj->debugMessage('VersionController:televerserRapportActionAnnee');
-	
-	    if( $annee == 0 )
-	        $annee  =   $version->getAnneeSession();
-	
-	    $rtn = $this->handleRapport( $request, $version, $annee );
-	
-	    if( $rtn == 'OK' )
-		return new Response("");
-/*	        return $this->render('version/confirmation_rapport.html.twig',
-	            [
-	            'projet'    =>  $version->getProjet()->getIdProjet(),
-	            'version'   =>  $version->getIdVersion(),
-	            ]);*/
-	    elseif( is_object( $rtn ) )
-	        return $this->render('version/televerser_rapport.html.twig',
-	            [
-	            'projet'    =>  $version->getProjet()->getIdProjet(),
-	            'version'   =>  $version->getIdVersion(),
-	            'annee'     =>  $version->getAnneeSession(),
-	            'form'      =>  $rtn->createView(),
-	            ]);
-	    else
-	        return $this->render('version/erreur_rapport.html.twig',
-	            [
-	            'projet'    =>  $version->getProjet()->getIdProjet(),
-	            'version'   =>  $version->getIdVersion(),
-	            'annee'     =>  $version->getAnneeSession(),
-	            'erreur'    =>  $rtn,
-	            ]);
-	
-    }
-
     ////////////////////////////////////////////////////////////////////
 
     /***
@@ -1241,7 +1298,8 @@ class VersionController extends AbstractController
      *          filename: nom définitif du fichier
      *
      * return = la form si pas encore soumise
-     *          ou une string: "OK" ou un message d'erreur
+     *          ou une string: "OK" 
+     *          ou un message d'erreur
      * 
      ********************************/
     private function televerserFichier(Request $request, $dirname, $filename )
@@ -1318,25 +1376,26 @@ class VersionController extends AbstractController
     private function handleRapport(Request $request, Version $version, $annee = null )
     {
         $em = $this->getDoctrine()->getManager();
-		$sj = $this->sj;
+	$sf = $this->sf;
+	$sj = $this->sj;
 
-		$format_fichier = new \Symfony\Component\Validator\Constraints\File(
+	$format_fichier = new \Symfony\Component\Validator\Constraints\File(
+	    [
+	    'mimeTypes'=> [ 'application/pdf' ],
+	    'mimeTypesMessage'=>' Le fichier doit être un fichier pdf. ',
+	    'maxSize' => "2048k",
+	    'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
+	    'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
+	    ]);
+
+	$form = $this->ff
+		->createNamedBuilder( 'rapport', FormType::class, [], ['csrf_protection' => false ] )
+		->add('rapport', FileType::class,
 			[
-			'mimeTypes'=> [ 'application/pdf' ],
-			'mimeTypesMessage'=>' Le fichier doit être un fichier pdf. ',
-			'maxSize' => "2048k",
-			'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
-			'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
-			]);
-
-		$form = $this->ff
-			->createNamedBuilder( 'rapport', FormType::class, [], ['csrf_protection' => false ] )
-			->add('rapport', FileType::class,
-				[
-					'required'          =>  true,
-					'label'             => "Rapport d'activité",
-					'constraints'       => [$format_fichier , new PagesNumber() ]
-                ])
+				'required'          =>  true,
+				'label'             => "Rapport d'activité",
+				'constraints'       => [$format_fichier , new PagesNumber() ]
+		])
 			->getForm();
 		//$sj->debugMessage(__METHOD__ . ':' . __LINE__ . " form data = " . Functions::show( $request->request->get('rapport') ) );
 
@@ -1393,13 +1452,17 @@ class VersionController extends AbstractController
 	        $em->flush();
 	
 	        return 'OK';
-        }
+		}
 		elseif( $form->isSubmitted() && ! $form->isValid() )
-        {
-	        if( isset( $form->getData()['rapport'] ) )
-	            return  Functions::formError( $em, $form->getData()['rapport'], [$format_fichier , new PagesNumber() ]) ;
-	        else
-	            return "Le fichier n'a pas été soumis correctement";
+		{
+		    if( isset( $form->getData()['rapport'] ) )
+		    {
+			return  $sf->formError( $form->getData()['rapport'], [$format_fichier , new PagesNumber() ]);
+		    }
+		    else
+		    {
+			return "Le fichier n'a pas été soumis correctement";
+		    }
 		}
 		elseif( $request->isXMLHttpRequest() )
 		{

@@ -51,15 +51,24 @@ parameters:
     max_fig_width: 800
     max_fig_height: 400
     
-    # nb de pages max pour un rapport d'activité
-    max_page_nb: 5
-    
-    # Si mis à true, rapport d'activité demandé à la fin de l'année
+    # ATTENTION - Il faut choisir: rapport d'activité OU fichier attaché, PAS les deux !
+    #             C'est redondant et si on a les deux à true ça va entraîner des dysfonctionnements
+    #             Les deux à false, pas de pb
+    # Si mis à true, rapport d'activité (annuel) demandé à la fin de l'année
     rapport_dactivite: true
 
     # Si mis à true, propose de téléverser un fichier attaché à chaque version
     fichier_attache: false
        
+    # nb de pages max pour un rapport d'activité ou un fichier attaché
+    max_page_nb: 50
+    
+    # taille max du fichier de rapport d'activité ou fichier attaché
+    # ATTENTION - Doit être en cohérence avec le paramètre post_max_size défini dans php.ini !
+    #             Et peut-être aussi avec le paramètre équivalent si on est derrière un proxy !
+    #             Unité = Mo
+    max_size_doc: 10
+    
     # Suppression de toutes les fonctionnalités liées à la consommation
     noconso: false
     

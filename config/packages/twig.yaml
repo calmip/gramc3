@@ -23,5 +23,6 @@ twig:
        ressources_conso_group: '%ressources_conso_group%'
        ressources_conso_user: '%ressources_conso_user%'
        max_page_nb: '%max_page_nb%'
+       max_size_doc: '%max_size_doc%'
        rapport_dactivite: '%rapport_dactivite%'
        fichier_attache: '%fichier_attache%'

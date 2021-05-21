@@ -1125,3 +1125,8 @@ img.dfct {
 	border: 2px solid black;
 	//background-color: grey;
 }
+
+/* Les outils de téléversement de fichiers */
+#fileuploader div, #ajax-file-upload-container div {
+	margin: 0 auto;
+}
