@@ -56,7 +56,6 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
  * Session controller.
  *
  * @Route("session")
- * @Security("is_granted('ROLE_ADMIN')")
  */
 class SessionController extends AbstractController
 {
@@ -156,6 +155,7 @@ class SessionController extends AbstractController
      * Creates a new session entity.
      *
      * @Route("/ajouter", name="ajouter_session")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
     public function ajouterAction(Request $request)
@@ -169,8 +169,8 @@ class SessionController extends AbstractController
 
     /**
      *
-     * @security("is_granted('ROLE_ADMIN')")
      * @Route("/{id}/modify", name="modifier_session")
+     * @security("is_granted('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
     public function modifyAction(Request $request, Session $session)
@@ -210,6 +210,7 @@ class SessionController extends AbstractController
     /**
      *
      * @Route("/terminer_saisie", name="terminer_saisie")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function terminerSaisieAction(Request $request)
@@ -239,6 +240,7 @@ class SessionController extends AbstractController
      * Avant changement d'état de la version
      *
      * @Route("/avant_changer_etat/{rtn}/{ctrl}", name="session_avant_changer_etat", defaults= {"rtn" = "X" })
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      *
      */
@@ -263,6 +265,7 @@ class SessionController extends AbstractController
     /**
      *
      * @Route("/activer", name="activer_session")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function activerAction(Request $request)
@@ -334,8 +337,8 @@ class SessionController extends AbstractController
 
     /**
      *
-     * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_PRESIDENT')")
      * @Route("/envoyer_expertises", name="envoyer_expertises")
+     * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_PRESIDENT')")
      * @Method("GET")
      */
     public function envoyerExpertisesAction(Request $request)
@@ -365,6 +368,7 @@ class SessionController extends AbstractController
      *
      *
      * @Route("/demarrer_saisie", name="demarrer_saisie")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function demarrerSaisieAction(Request $request)
@@ -396,6 +400,7 @@ class SessionController extends AbstractController
      * Creates a new session entity.
      *
      * @Route("/new", name="session_new")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
     public function newAction(Request $request)
@@ -421,6 +426,7 @@ class SessionController extends AbstractController
     /**
      * Finds and displays a session entity.
      *
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Route("/{id}/show", name="session_show")
      * @Method("GET")
      */
@@ -437,6 +443,7 @@ class SessionController extends AbstractController
     /**
      * Meme chose que show, mais présenté "à la gramc"
      *
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Route("/{id}/consulter", name="consulter_session")
      * @Method("GET")
      */
@@ -454,6 +461,7 @@ class SessionController extends AbstractController
     /**
      * Displays a form to edit an existing session entity.
      *
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Route("/{id}/edit", name="session_edit")
      * @Method({"GET", "POST"})
      */
@@ -477,9 +485,9 @@ class SessionController extends AbstractController
     }
 
     /**
-     * Displays a form to edit an existing session entity.
      *
      * @Route("/commentaires", name="session_commentaires")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
     public function commentairesAction(Request $request)
@@ -532,6 +540,7 @@ class SessionController extends AbstractController
     /**
      *
      * @Route("/bilan", name="bilan_session")
+     * @Security("is_granted('ROLE_OBS')")
      * @Method({"GET","POST"})
      */
     public function bilanAction(Request $request)
@@ -581,16 +590,11 @@ class SessionController extends AbstractController
             ]);
     }
 
-    //////////////////////////////////////////////////////////////////////
-    //
-    //
-    //
-    //////////////////////////////////////////////////////////////////////
-
     /**
      *
      *
      * @Route("/{id}/questionnaire_csv", name="questionnaire_csv")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function questionnaireCsvAction(Request $request,Session $session)
@@ -670,8 +674,8 @@ class SessionController extends AbstractController
 
     /**
      *
-     * @Security("is_granted('ROLE_OBS')")
      * @Route("/{annee}/bilan_annuel_csv", name="bilan_annuel_csv")
+     * @Security("is_granted('ROLE_OBS')")
      * @Method("GET")
      *
      */
@@ -793,8 +797,8 @@ class SessionController extends AbstractController
 
     /**
      *
-     * @Security("is_granted('ROLE_OBS')")
      * @Route("/{annee}/bilan_annuel_labo_csv", name="bilan_annuel_labo_csv")
+     * @Security("is_granted('ROLE_OBS')")
      * @Method("GET")
      *
      */
@@ -832,6 +836,7 @@ class SessionController extends AbstractController
      *
      * Génère le bilan de session au format CSV
      *
+     * @Security("is_granted('ROLE_OBS')")
      * @Route("/{id}/bilan_csv", name="bilan_session_csv")
      * @Method("GET")
      */
