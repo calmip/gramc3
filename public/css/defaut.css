@@ -53,6 +53,11 @@ img.right {
 	float: right;
 }
 
+/* une cellule de tableau avec texte à droite */
+td.right {
+	text-align: right;
+}
+
 /* Permet de casser le float:left */
 hr.retour {
 	visibility: hidden;
@@ -425,6 +430,10 @@ div.center {
 
 #bilan table {
 	width: 100%;
+}
+
+#bilan table td {
+	text-align: right;
 }
 
 /* Pour la page lire.php (lire le journal) */

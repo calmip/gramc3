@@ -1001,6 +1001,7 @@ class ProjetController extends AbstractController
         $paa     = $sp->projetsParAnnee($annee,$isRecupPrintemps, $isRecupAutomne);
         $projets = $paa[0];
         $total   = $paa[1];
+        $rattachements = $total['rattachements'];
 
         // Les sessions de l'année - On considère que le nombre d'heures par année est fixé par la session A de l'année
         // donc on ne peut pas changer de machine en cours d'année.
@@ -1013,17 +1014,18 @@ class ProjetController extends AbstractController
         }
 
         return $this->render('projet/annee.html.twig',
-                [
-                'form' => $data['form']->createView(), // formulaire
-                'annee'     => $annee,
-                //'mois'    => $mois,
-                'projets'   => $projets,
-                'total'     => $total,
-                'showRapport' => false,
-                'isRecupPrintemps' => $isRecupPrintemps,
-                'isRecupAutomne'   => $isRecupAutomne,
-                'heures_par_an'    => $hparannee
-                ]);
+			[
+			'form' => $data['form']->createView(), // formulaire
+			'annee'     => $annee,
+			//'mois'    => $mois,
+			'projets'   => $projets,
+			'total'     => $total,
+			'rattachements' => $rattachements,
+			'showRapport'   => false,
+			'isRecupPrintemps' => $isRecupPrintemps,
+			'isRecupAutomne'   => $isRecupAutomne,
+			'heures_par_an'    => $hparannee
+			]);
     }
 
     /**

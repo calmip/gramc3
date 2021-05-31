@@ -30,6 +30,7 @@ use App\Entity\Session;
 use App\Entity\Compta;
 use App\Entity\Individu;
 use App\Entity\RapportActivite;
+use App\Entity\Rattachement;
 
 // Pour la suppression des projets RGPD
 use App\Entity\CollaborateurVersion;
@@ -203,6 +204,8 @@ class ServiceProjets
 	 ********************/
     public function projetsParAnnee($annee,$isRecupPrintemps=false,$isRecupAutomne=false)
     {
+		$em = $this->em;
+		
         // Données consolidées
         $total = [];
         $total['prj']         = 0;  // Nombre de projets (A ou B)
@@ -215,7 +218,7 @@ class ServiceProjets
         $total['demHeuresR']  = 0;  // Heures demandées dans des rallonges
         $total['attrHeuresR'] = 0;  // Heures attribuées dans des rallonges
 
-        $total['prjTest']     = 0;  // Nombre deprojets tests
+        $total['prjTest']     = 0;  // Nombre de projets tests
         $total['demHeuresT']  = 0;  // Heures demandées dans des projets tests
         $total['attrHeuresT'] = 0;  // Heures attribuées dans des projets tests
 
@@ -224,9 +227,21 @@ class ServiceProjets
         $total['consoHeuresP']= 0;  // Heures consommées
         $total['recupHeuresP']= 0;  // Heures récupérables
 
-
         $total['penalitesA']  = 0;  // Pénalités de printemps (sous-consommation entre Janvier et Juin)
         $total['penalitesB']  = 0;  // Pénalités d'Automne (sous-consommation l'été)
+
+		// Les rattachements
+        $rattachements = $em->getRepository(Rattachement::class)->findAll();
+        if( $rattachements == null )
+        {
+			$rattachements = [];
+		}
+        
+        $statsRattachements = [];
+        foreach( $rattachements as $rattachement )
+        {
+            $statsRattachements[$rattachement->getLibelleRattachement()]    =   0;
+        }
 
         // $annee = 2017, 2018, etc. (4 caractères)
         $session_id_A = substr($annee, 2, 2) . 'A';
@@ -308,6 +323,13 @@ class ServiceProjets
             // La conso
             $this->ppa_conso($p,$annee);
             $total['consoHeuresP'] += $p['c'];
+            
+            // Les rattachements
+            $ratt = $v->getPrjRattachement();
+            if (! empty($ratt))
+            {
+				$statsRattachements[$ratt->getLibelleRattachement()] += $p['c'];
+			}
 
             // Récup de Printemps
             if ($isRecupPrintemps==true) {
@@ -378,11 +400,23 @@ class ServiceProjets
             $total['attrHeuresP'] -= $v->getPenalHeures();
 
             // La conso (attention à ne pas compter deux fois la conso pour les projets déjà entamés !)
+			//
 			$this->ppa_conso($p,$annee);
+
+            // Les rattachements: seulement pour les Nouveaux projets également
+            //                    NB - Un projet qui change son rattachement entre A et B
+            //                         à partir de son état en session A !!!
+            //                         Ce cas exceptionnel est ignoré.
             if ($this->sv->isNouvelle($v))
             {
                 $total['consoHeuresP'] += $p['c'];
-            }
+
+	            $ratt = $v->getPrjRattachement();
+	            if (! empty($ratt))
+	            {
+					$statsRattachements[$ratt->getLibelleRattachement()] += $p['c'];
+				}
+			}
 
             // Pour le calcul des pénalités d'Automne
             $p['attrete'] = $v->getAttrHeuresEte();
@@ -404,6 +438,7 @@ class ServiceProjets
 			$projets[$p_id] = $p;
 		}
 
+		$total['rattachements'] = $statsRattachements;
 		return [$projets,$total];
     }
 

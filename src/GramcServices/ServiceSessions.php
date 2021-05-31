@@ -44,9 +44,9 @@ class ServiceSessions
 	                            FormFactoryInterface $ff,
 	                            EntityManagerInterface $em)
 	{
-		$this->recup_attrib_seuil = $recup_attrib_seuil;
-	    $this->recup_conso_seuil  = $recup_conso_seuil;
-	    $this->recup_attrib_quant = $recup_attrib_quant;
+		$this->recup_attrib_seuil = intval($recup_attrib_seuil);
+	    $this->recup_conso_seuil  = intval($recup_conso_seuil);
+	    $this->recup_attrib_quant = intval($recup_attrib_quant);
 	    $this->grdt               = $grdt;
 	    $this->ff                 = $ff;
 		$this->em                 = $em;
