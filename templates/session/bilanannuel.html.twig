@@ -11,10 +11,12 @@
 
     <br />
 
+	{% if noconso==false %}
     <form action="{{ path('bilan_annuel_csv', {'annee': annee }) }}">
         <input type="submit" value="Bilan annuel {{ annee }} en csv" />
     </form>
-
+	{% endif %}
+	
     <br />
 
     <form action="{{ path('bilan_annuel_labo_csv', {'annee': annee }) }}">

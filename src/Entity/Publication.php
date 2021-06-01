@@ -254,4 +254,24 @@ class Publication
     {
         return $this->projet;
     }
+    
+    ///////////////////////////////////////////////////////////
+    
+    /**
+     * Get doi, cleaned
+     *************************************/
+    public function getDoiCleaned()
+    {
+		$doi = $this->getDoi();
+		$prf = 'https://doi.org/';
+		
+		if (! empty($doi))
+		{
+			if (str_starts_with($doi,$prf))
+			{
+				$doi = substr ( $doi, strlen($prf) );
+			}
+		}
+		return $doi;
+	}
 }
