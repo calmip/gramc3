@@ -626,11 +626,11 @@ class ExpertiseController extends AbstractController
                 " n'est pas un expert de l'expertise " . $expertise . ", c'est " . $expertise->getExpert() );
         }
 
-		// Si expertise déjà faite on revient à la liste
-		if ($expertise->getDefinitif())
-		{
-			return $this->redirectToRoute('expertise_liste');
-		}
+	// Si expertise déjà faite on revient à la liste
+	if ($expertise->getDefinitif())
+	{
+		return $this->redirectToRoute('expertise_liste');
+	}
 		
         $expertiseRepository = $em->getRepository(Expertise::class);
         $session    = $ss->getSessionCourante();
@@ -638,140 +638,150 @@ class ExpertiseController extends AbstractController
         $anneeCour  = 2000 +$session->getAnneeSession();
         $anneePrec  = $anneeCour - 1;
 
-        // Le comportement diffère suivant le type de projet
         $version = $expertise->getVersion();
         if( $version == null )
+	{
             $sj->throwException(__METHOD__ . ":" . __LINE__ . "  " . $expertise . " n'a pas de version !" );
+	}
+        // Le comportement diffère suivant le type de projet
 
-		// Version est-elle nouvelle ?
-		$isnouvelle = $sv->isNouvelle($version);
-		
-		// $session_edition -> Si false, on autorise le bouton Envoyer
-		//                  -> Si true, on n'autorise pas
-		$msg_explain = '';
-		$projet      = $version->getProjet();
-        $projet_type = $projet->getTypeProjet();
+	// Version est-elle nouvelle ?
+	$isnouvelle = $sv->isNouvelle($version);
+	
+	// $peut_envoyer -> Si true, on autorise le bouton Envoyer
+	$msg_explain = '';
+	$projet      = $version -> getProjet();
+        $projet_type = $projet  -> getTypeProjet();
         $etat_session= $session -> getEtatSession();
 
-		// Projets au fil de l'eau avec plusieurs expertises:
-		//    Si je suis président, on va chercher ces expertises pour affichage
-		//    On vérifie leur état (définitive ou pas)
-		$autres_expertises = [];
-		$toutes_definitives= true;
-		if ($projet_type == Projet::PROJET_FIL && $ac->isGranted('ROLE_PRESIDENT') )
+	// Projets au fil de l'eau avec plusieurs expertises:
+	//    Si je suis président, on va chercher ces expertises pour affichage
+	//    On vérifie leur état (définitive ou pas)
+	$autres_expertises = [];
+	$toutes_definitives= true;
+	if ($projet_type == Projet::PROJET_FIL && $ac->isGranted('ROLE_PRESIDENT') )
+	{
+	    $expertiseRepository = $em->getRepository(Expertise::class);
+	    $autres_expertises   = $expertiseRepository -> findExpertisesForVersion($version,$moi);
+	    foreach ($autres_expertises as $e)
+	    {
+		if (! $e->getDefinitif())
 		{
-			$expertiseRepository = $em->getRepository(Expertise::class);
-			$autres_expertises   = $expertiseRepository -> findExpertisesForVersion($version,$moi);
-			foreach ($autres_expertises as $e)
-			{
-				if (! $e->getDefinitif())
-				{
-					$toutes_definitives = false;
-					break;
-				}
-			}
+		    $toutes_definitives = false;
+		    break;
 		}
+	    }
+	}
 
         switch ($projet_type)
+	{
+	    // Si c'est un projet de type PROJET_SESS, le bouton ENVOYER n'est disponible 
+	    // QUE si la session est en états ATTENTE ou ACTIF
+	    case Projet::PROJET_SESS:
+		if ($session -> getEtatSession() == Etat::EN_ATTENTE || $session -> getEtatSession() == Etat::ACTIF)
 		{
-			case Projet::PROJET_SESS:
-		        // Si c'est un projet de type PROJET_SESS, le bouton ENVOYER n'est disponible QUE si la session est en états ATTENTE ou ACTIF
-		        if ($session -> getEtatSession() == Etat::EN_ATTENTE || $session -> getEtatSession() == Etat::ACTIF)
-		        {
-					// bouton envoyer disponible
-					$session_edition = false;
-				}
-				else
-				{
-					// bouton envoyer pas disponible
-					$session_edition = true;
-				}
-				break;
-			case Projet::PROJET_TEST:
-				// Si c'est un projet de type PROJET_SESS, le bouton ENVOYER est toujours disponible
-				$session_edition = false;
-				break;
-			case Projet::PROJET_FIL:
-				// Si c'est un projet de type PROJET_FIL, le bouton ENVOYER est disponible (presque) tout le temps
-				if ($etat_session == Etat::EDITION_DEMANDE)
-				{
-					$msg_explain = "Vous ne pouvez pas actuellement finaliser votre expertise, car la session est en phase de \"édition des demandes\"";
-					$session_edition = true;
-				}
-				elseif ($etat_session == Etat::EDITION_EXPERTISE)
-				{
-					$msg_explain = "Vous ne pouvez pas actuellement finaliser votre expertise, car la session est en phase d'\"édition des expertises\" et le \"commentaire de session\" n'est pas entré";
-					$session_edition = true;
-				}
-				elseif ($toutes_definitives == false)
-				{
-					$msg_explain = "Vous ne pouvez pas actuellement finaliser votre expertise, il vous faut attendre que les autres experts aient terminé leur expertise";
-					$session_edition = true;
-				}
-				else
-				{
-					$session_edition = false;
-				}
-				break;
+		    // bouton envoyer disponible
+		    $peut_envoyer = true;
 		}
+		else
+		{
+		    // bouton envoyer pas disponible
+		    $peut_envoyer = false;
+		}
+		break;
+	    
+	    case Projet::PROJET_TEST:
+		// Si c'est un projet de type PROJET_TEST, le bouton ENVOYER est toujours disponible
+		$peut_envoyer = true;
+		break;
+		
+	    case Projet::PROJET_FIL:
+		// Si c'est un projet de type PROJET_FIL, le bouton ENVOYER est disponible (presque) tout le temps
+		if ($etat_session == Etat::EDITION_DEMANDE)
+		{
+		    $msg_explain = "Vous ne pouvez pas actuellement finaliser votre expertise, car la session est en phase de \"édition des demandes\"";
+		    $peut_envoyer = false;
+		}
+		elseif ($etat_session == Etat::EDITION_EXPERTISE)
+		{
+		    $msg_explain = "Vous ne pouvez pas actuellement finaliser votre expertise, car la session est en phase d'\"édition des expertises\" et le \"commentaire de session\" n'est pas entré";
+		    $peut_envoyer = false;
+		}
+		elseif ($toutes_definitives == false)
+		{
+		    $msg_explain = "Vous ne pouvez pas actuellement finaliser votre expertise, il vous faut attendre que les autres experts aient terminé leur expertise";
+		    $peut_envoyer = false;
+		}
+		else
+		{
+		    $peut_envoyer = true;
+		}
+		break;
+	}
 
-		// Création du formulaire
-        $editForm = $this->createFormBuilder($expertise)
-            ->add('commentaireInterne', TextAreaType::class, [ 'required' => false ] )
-            ->add('validation', ChoiceType::class ,
-                [
-                'multiple' => false,
-                'choices'   =>  [ 'Accepter' =>     1, 'Accepter, avec zéro heure' => 2, 'Refuser définitivement et fermer le projet'    => 0, ],
-                ]);
+	// Création du formulaire
+	$editForm = $this->createFormBuilder($expertise)
+	    ->add('commentaireInterne', TextAreaType::class, [ 'required' => false ] )
+	    ->add('validation', ChoiceType::class ,
+		[
+		'multiple' => false,
+		'choices'   =>  [ 'Accepter' => 1, 'Accepter, avec zéro heure' => 2, 'Refuser définitivement et fermer le projet' => 0,],
+		]);
 
 		// Projet au fil de l'eau, le commentaire externe est réservé au président !
 		// On utilise un champ caché, de cette manière le formulaire sera valide
 		if ( $projet_type != Projet::PROJET_FIL || $ac->isGranted('ROLE_PRESIDENT'))
 		{
-            $editForm->add('commentaireExterne', TextAreaType::class, [ 'required' => false ] );
+		    $commentaireExterne = true;
+		    $editForm->add('commentaireExterne', TextAreaType::class, [ 'required' => false ] );
 		}
 		else
 		{
-			$editForm->add('commentaireExterne', HiddenType::class, [ 'data' => 'Commentaire externe réservé au Comité' ] );
-
+    		    $commentaireExterne = false;
+		    //$editForm->add('commentaireExterne', HiddenType::class, [ 'data' => 'Commentaire externe réservé au Comité' ] );
 		}
 
-		// Par défaut on attribue les heures demandées !
+	// Par défaut on attribue les heures demandées !
         if( $expertise->getNbHeuresAtt() == 0 )
+	{
             $editForm->add('nbHeuresAtt', IntegerType::class , ['required'  =>  false, 'data' => $version->getDemHeures(), ]);
+	}
         else
+	{
             $editForm->add('nbHeuresAtt', IntegerType::class , ['required'  =>  false, ]);
+	}
 
-		// En session B, on propose une attribution spéciale pour heures d'été
-		// TODO A affiner car en septembre avec des projets PROJET_FIL en sera toujours en session  B et c'est un peu couillon de demander cela
-		if ( $projet_type != Projet::PROJET_TEST )
-	        if ($session->getTypeSession())
-	            $editForm -> add('nbHeuresAttEte');
+	// En session B, on propose une attribution spéciale pour heures d'été
+	// TODO A affiner car en septembre avec des projets PROJET_FIL en sera toujours en session  B et c'est un peu couillon de demander cela
+	if ( $projet_type != Projet::PROJET_TEST )
+	if ($session->getTypeSession())
+	    $editForm -> add('nbHeuresAttEte');
 
-		// Les boutons d'enregistrement ou d'envoi
-		$editForm = $editForm->add('enregistrer', SubmitType::class, ['label' =>  'Enregistrer' ]);
-        if( $session_edition == false)
+	// Les boutons d'enregistrement ou d'envoi
+	$editForm = $editForm->add('enregistrer', SubmitType::class, ['label' =>  'Enregistrer' ]);
+        if( $peut_envoyer == true)
         {
             $editForm   =   $editForm->add('envoyer',   SubmitType::class, ['label' =>  'Envoyer' ]);
-		}
-		$editForm->add( 'annuler', SubmitType::Class, ['label' =>  'Annuler' ]);
+	}
+	$editForm->add( 'annuler', SubmitType::Class, ['label' =>  'Annuler' ]);
         $editForm->add( 'fermer',  SubmitType::Class );
-
 
         $editForm = $editForm->getForm();
         
         $editForm->handleRequest($request);
 
         if( $editForm->isSubmitted() && ! $editForm->isValid() )
+	{
              $sj->warningMessage(__METHOD__ . " form error " .  Functions::show($editForm->getErrors() ) );
+	 }
 
         // Bouton ANNULER
         if( $editForm->isSubmitted() && $editForm->get('annuler')->isClicked() )
         {
-			return $this->redirectToRoute('expertise_liste');
-		}
+	    return $this->redirectToRoute('expertise_liste');
+	}
 
-		// Boutons ENREGISTRER, FERMER ou ENVOYER
+	// Boutons ENREGISTRER, FERMER ou ENVOYER
         $erreur  = 0;
         $erreurs = [];
         if ($editForm->isSubmitted() /* && $editForm->isValid()*/ )
@@ -779,27 +789,29 @@ class ExpertiseController extends AbstractController
             $erreurs = Functions::dataError( $sval, $expertise);
             $validation = $expertise->getValidation();
             if( $validation != 1 )
-			{
+	    {
                 $expertise->setNbHeuresAtt(0);
                 $expertise->setNbHeuresAttEte(0);
                 if ( $validation == 2 && $projet_type == Projet::PROJET_TEST )
                 {
                     $erreurs[] = "Pas possible de refuser un projet test juste pour cette session";
                 }
-			}
+	    }
 
             $em->persist( $expertise );
             $em->flush();
 
-			// Bouton FERMER
-			if ($editForm->get('fermer')->isClicked())
-			{
-				return $this->redirectToRoute('expertise_liste');
-			}
+	    // Bouton FERMER
+	    if ($editForm->get('fermer')->isClicked())
+	    {
+		return $this->redirectToRoute('expertise_liste');
+	    }
 				
             // Bouton ENVOYER --> Vérification des champs non renseignés puis demande de confirmation
-            if( ! $session_edition && $editForm->get('envoyer')->isClicked() && $erreurs == null )
-                    return $this->redirectToRoute('expertise_validation', [ 'id' => $expertise->getId() ]);
+            if( $peut_envoyer && $editForm->get('envoyer')->isClicked() && $erreurs == null )
+	    {
+		return $this->redirectToRoute('expertise_validation', [ 'id' => $expertise->getId() ]);
+	    }
         }
 
         $toomuch = false;
@@ -811,58 +823,58 @@ class ExpertiseController extends AbstractController
             $toomuch      = $sv->is_demande_toomuch($attr_a,$dem_b);
         }
 
-		// LA SUITE DEPEND DU TYPE DE PROJET !
-		// Le workflow n'est pas le même suivant le type de projet, donc l'expertise non plus.
-		switch ($projet_type)
-		{
-			case Projet::PROJET_SESS:
-				$twig = 'expertise/modifier_projet_sess.html.twig';
-				break;
-			case Projet::PROJET_TEST:
-				$twig = 'expertise/modifier_projet_test.html.twig';
-				break;
-			case Projet::PROJET_FIL:
-				$twig = 'expertise/modifier_projet_fil.html.twig';
-				break;
-		}
+	// LA SUITE DEPEND DU TYPE DE PROJET !
+	// Le workflow n'est pas le même suivant le type de projet, donc l'expertise non plus.
+	switch ($projet_type)
+	{
+		case Projet::PROJET_SESS:
+			$twig = 'expertise/modifier_projet_sess.html.twig';
+			break;
+		case Projet::PROJET_TEST:
+			$twig = 'expertise/modifier_projet_test.html.twig';
+			break;
+		case Projet::PROJET_FIL:
+			$twig = 'expertise/modifier_projet_fil.html.twig';
+			break;
+	}
 
-		// Dans le cas de projets tests, $expertises peut être vide même s'il y a un projet test dans la liste
-		// (session B et projet test non expertisé en session A)
-		$expertises = $expertiseRepository->findExpertisesByExpert($moi, $session);
-		uasort($expertises,"self::expprjfirst");
+	// Dans le cas de projets tests, $expertises peut être vide même s'il y a un projet test dans la liste
+	// (session B et projet test non expertisé en session A)
+	$expertises = $expertiseRepository->findExpertisesByExpert($moi, $session);
+	uasort($expertises,"self::expprjfirst");
 
-		if (count($expertises)!=0)
-		{
-			$k = array_search($expertise,$expertises);
-			if ($k==0) 
-			{
-				$prev = null;
-			}
-			else
-			{
-				$prev = $expertises[$k-1];
-			}
-			$next = null;
-			if ($k==count($expertises)-1)
-			{
-				$next = null;
-			}
-			else
-			{
-				$next = $expertises[$k+1];
-			}
-		}
-		else
-		{
-			$prev = null;
-			$next = null;
-		}
+	if (count($expertises)!=0)
+	{
+	    $k = array_search($expertise,$expertises);
+	    if ($k==0) 
+	    {
+		$prev = null;
+	    }
+	    else
+	    {
+		$prev = $expertises[$k-1];
+	    }
+	    $next = null;
+	    if ($k==count($expertises)-1)
+	    {
+		$next = null;
+	    }
+	    else
+	    {
+		$next = $expertises[$k+1];
+	    }
+	}
+	else
+	{
+	    $prev = null;
+	    $next = null;
+	}
 		
-		// Rapport d'activité
-	    $rapport = $sp -> getRapport($projet, $version->getAnneeSession());
+	// Rapport d'activité
+	$rapport = $sp -> getRapport($projet, $version->getAnneeSession());
 
         return $this->render($twig,
-		[
+	[
             'isnouvelle'        => $isnouvelle,
             'expertise'         => $expertise,
             'autres_expertises' => $autres_expertises,
@@ -872,13 +884,14 @@ class ExpertiseController extends AbstractController
             'anneePrec'         => $anneePrec,
             'anneeCour'         => $anneeCour,
             'session'           => $session,
-            'session_edition'   => $session_edition,
+            'peut_envoyer'      => $peut_envoyer,
+	    'commentaireExterne'=> $commentaireExterne,
             'erreurs'           => $erreurs,
             'toomuch'           => $toomuch,
             'prev'              => $prev,
             'next'              => $next, 
             'rapport'           => $rapport
-		]);
+	]);
     }
 
     /**

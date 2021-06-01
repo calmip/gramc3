@@ -111,41 +111,41 @@ class ProjetController extends AbstractController
 	private $ac;
 		
 	public function __construct (ServiceNotifications $sn,
-								 ServiceJournal $sj,
-								 ServiceMenus $sm,
-								 ServiceProjets $sp,
-								 ServiceSessions $ss,
-								 Calcul $gcl,
-								 Stockage $gstk,
-								 CalculTous $gall,
-								 GramcDate $sd,
-								 ServiceVersions $sv,
-								 ServiceExperts $se,
-								 ProjetWorkflow $pw,
- 								 FormFactoryInterface $ff,
-								 TokenStorageInterface $tok,
-								 SessionInterface $sss,
- 								 Environment $tw,
- 								 AuthorizationCheckerInterface $ac
-								 )
+				     ServiceJournal $sj,
+				     ServiceMenus $sm,
+				     ServiceProjets $sp,
+				     ServiceSessions $ss,
+				     Calcul $gcl,
+				     Stockage $gstk,
+				     CalculTous $gall,
+				     GramcDate $sd,
+				     ServiceVersions $sv,
+				     ServiceExperts $se,
+				     ProjetWorkflow $pw,
+				     FormFactoryInterface $ff,
+				     TokenStorageInterface $tok,
+				     SessionInterface $sss,
+				     Environment $tw,
+				     AuthorizationCheckerInterface $ac
+				     )
 	{
-		$this->sn  = $sn;
-		$this->sj  = $sj;
-		$this->sm  = $sm;
-		$this->sp  = $sp;
-		$this->ss  = $ss;
-		$this->gcl = $gcl;
-		$this->gstk= $gstk;
-		$this->gall= $gall;
-		$this->sd  = $sd;
-		$this->sv  = $sv;
-		$this->se  = $se;
-		$this->pw  = $pw;
-		$this->ff  = $ff;
-		$this->token= $tok->getToken();
-		$this->sss = $sss;
-		$this->tw  = $tw;
-		$this->ac  = $ac;
+	    $this->sn  = $sn;
+	    $this->sj  = $sj;
+	    $this->sm  = $sm;
+	    $this->sp  = $sp;
+	    $this->ss  = $ss;
+	    $this->gcl = $gcl;
+	    $this->gstk= $gstk;
+	    $this->gall= $gall;
+	    $this->sd  = $sd;
+	    $this->sv  = $sv;
+	    $this->se  = $se;
+	    $this->pw  = $pw;
+	    $this->ff  = $ff;
+	    $this->token= $tok->getToken();
+	    $this->sss = $sss;
+	    $this->tw  = $tw;
+	    $this->ac  = $ac;
 	}
 
     private static $count;
@@ -177,19 +177,19 @@ class ProjetController extends AbstractController
      */
     public function oldAction(Request $request)
     {
-		$sd = $this->sd;
-		$sj = $this->sj;
-		$sp = $this->sp;
-		$ff = $this->ff;
-		$em = $this->getDoctrine()->getManager();
-		
-	    $list = [];
-	    $mauvais_projets = [];
-	    static::$count = [];
-	    $annees =   [];
-
-    $all_projets = $em->getRepository(Projet::class)->findAll();
-    foreach( $all_projets as $projet )
+	$sd = $this->sd;
+	$sj = $this->sj;
+	$sp = $this->sp;
+	$ff = $this->ff;
+	$em = $this->getDoctrine()->getManager();
+	    
+	$list = [];
+	$mauvais_projets = [];
+	static::$count = [];
+	$annees =   [];
+    
+	$all_projets = $em->getRepository(Projet::class)->findAll();
+	foreach( $all_projets as $projet )
 	{
         $derniereVersion    =  $projet->derniereVersion();
         if(  $derniereVersion == null )
@@ -1251,7 +1251,20 @@ class ProjetController extends AbstractController
     public function signatureAction(Version $version, Request $request)
     {
         $sv = $this->sv;
-	    return Functions::pdf( $sv->getSigne($version) );
+	return Functions::pdf( $sv->getSigne($version) );
+    }
+
+    /**
+     * download doc attaché
+     *
+     * @Route("/{id}/document", name="document")
+     * @Security("is_granted('ROLE_DEMANDEUR') or is_granted('ROLE_OBS')")
+     * @Method("GET")
+     */
+    public function documentAction(Version $version, Request $request)
+    {
+        $sv = $this->sv;
+	return Functions::pdf( $sv->getDocument($version) );
     }
 
     /**
@@ -1370,23 +1383,38 @@ class ProjetController extends AbstractController
      */
     public function avantNouveauAction(Request $request,$type)
     {
-		$sm = $this->sm;
-		$sj = $this->sj;
-		$token = $this->token;
+	$sm = $this->sm;
+	$sj = $this->sj;
+	$ss = $this->ss;
+	$token = $this->token;
 
         if( $sm->nouveau_projet($type)['ok'] == false )
+	{
             $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de créer un nouveau projet parce que " . $sm->nouveau_projet($type)['raison'] );
+	}
 
+	$session_courante = $ss->getSessionCourante();
+	if ($session_courante->getEtatSession() != Etat::EDITION_DEMANDE)
+	{
+	    $renouvelables = null;
+	}
+	else
+	{
 	    $projetRepository = $this->getDoctrine()->getManager()->getRepository(Projet::class);
 	    $id_individu      = $token->getUser()->getIdIndividu();
 	    $renouvelables    = $projetRepository-> getProjetsCollab($id_individu, true, true, true);
-        if( $renouvelables == null )   return  $this->redirectToRoute('nouveau_projet', ['type' => $type]);
+	}
+
+        if( $renouvelables == null )
+	{
+	    return  $this->redirectToRoute('nouveau_projet', ['type' => $type]);
+	}
 
         return $this->render('projet/avant_nouveau_projet.html.twig',
-		[
+	[
             'renouvelables' => $renouvelables,
             'type'          => $type
-		]);
+	]);
     }
 
     /**
@@ -1399,59 +1427,59 @@ class ProjetController extends AbstractController
      */
     public function nouveauAction(Request $request, $type)
     {
-		$sd = $this->sd;
-		$sm = $this->sm;
-		$ss = $this->ss;
-		$sss= $this->sss;
-		$sp = $this->sp;
-		$sv = $this->sv;
-		$sj = $this->sj;
-		$token = $this->token;
-		$em = $this->getDoctrine()->getManager();
-		
-		// Si changement d'état de la session alors que je suis connecté !
-		// + contournement d'un problème lié à Doctrine
+	$sd = $this->sd;
+	$sm = $this->sm;
+	$ss = $this->ss;
+	$sss= $this->sss;
+	$sp = $this->sp;
+	$sv = $this->sv;
+	$sj = $this->sj;
+	$token = $this->token;
+	$em = $this->getDoctrine()->getManager();
+	
+	// Si changement d'état de la session alors que je suis connecté !
+	// + contournement d'un problème lié à Doctrine
         $sss->remove('SessionCourante'); // remove cache
 
         // NOTE - Pour ce controleur, on identifie les types par un chiffre (voir Entity/Projet.php)
         $m = $sm->nouveau_projet("$type");
         if ($m == null || $m['ok']==false)
         {
-			$raison = $m===null?"ERREUR AVEC LE TYPE $type - voir le paramètre prj_type":$m['raison'];
+	    $raison = $m===null?"ERREUR AVEC LE TYPE $type - voir le paramètre prj_type":$m['raison'];
             $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de créer un nouveau projet parce que $raison");
          }
 
         $session  = $ss -> getSessionCourante();
-		$prefixes = $this->getParameter('prj_prefix');
-		if ( !isset ($prefixes[$type]) || $prefixes[$type]==="" )
-	    {
-			$sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Pas de préfixe pour le type $type. Voir le paramètre prj_prefix");
-			return $this->redirectToRoute('accueil');
-		}
+	$prefixes = $this->getParameter('prj_prefix');
+	if ( !isset ($prefixes[$type]) || $prefixes[$type]==="" )
+	{
+	    $sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Pas de préfixe pour le type $type. Voir le paramètre prj_prefix");
+	    return $this->redirectToRoute('accueil');
+	}
 
-		// Création du projet
-		$annee    = $session->getAnneeSession();
+	// Création du projet
+	$annee    = $session->getAnneeSession();
         $projet   = new Projet($type);
         $projet->setIdProjet($sp->NextProjetId($annee,$type));
         $projet->setNepasterminer(false);
         switch ($type)
         {
-			case Projet::PROJET_SESS:
-			case Projet::PROJET_FIL:
-	            $projet->setEtatProjet(Etat::RENOUVELABLE);
-	            break;
-	        case Projet::PROJET_TEST:
-	            $projet->setEtatProjet(Etat::NON_RENOUVELABLE);
-	            break;
-	        default:
-	           $sj->throwException(__METHOD__ . ":" . __LINE__ . " mauvais type de projet " . Functions::show( $type) );
-		}
+	    case Projet::PROJET_SESS:
+	    case Projet::PROJET_FIL:
+		$projet->setEtatProjet(Etat::RENOUVELABLE);
+		break;
+	    case Projet::PROJET_TEST:
+		$projet->setEtatProjet(Etat::NON_RENOUVELABLE);
+		break;
+	    default:
+	       $sj->throwException(__METHOD__ . ":" . __LINE__ . " mauvais type de projet " . Functions::show( $type) );
+	}
 
-		// Ecriture du projet dans la BD
+	// Ecriture du projet dans la BD
         $em->persist( $projet );
         $em->flush();
 
-		// Création de la première (et dernière) version
+	// Création de la première (et dernière) version
         $version    =   new Version();
         $version->setIdVersion( $session->getIdSession() . $projet->getIdProjet() );
         $version->setProjet( $projet );
@@ -1927,6 +1955,7 @@ class ProjetController extends AbstractController
 //			}
 
 		// LA SUITE DEPEND DU TYPE DE PROJET !
+		// Pareil pour projets de type 1 et de type 3
 		$type = $projet->getTypeProjet();
 		switch ($type)
 		{
@@ -1935,7 +1964,7 @@ class ProjetController extends AbstractController
 			case Projet::PROJET_TEST:
 				return $this->consulterType2($projet, $version, $loginname, $request);
 			case Projet::PROJET_FIL:
-				return $this->consulterType3($projet, $version, $loginname, $request);
+				return $this->consulterType1($projet, $version, $loginname, $request);
 			default:
 				$sj->errorMessage(__METHOD__ . " Type de projet inconnu: $type");
 		}
@@ -1947,9 +1976,7 @@ class ProjetController extends AbstractController
 		$sm = $this->sm;
 		$sp = $this->sp;
 		$ac = $this->ac;
-		$sv = $this->sv
-		
-		;
+		$sv = $this->sv;
 		$sj = $this->sj;
 		$ff = $this->ff;
 
@@ -1993,21 +2020,28 @@ class ProjetController extends AbstractController
 	    $menu[] = $sm->modifier_version( $version );
 	    $menu[] = $sm->envoyer_expert( $version );
 	    $menu[] = $sm->modifier_collaborateurs( $version );
+	    if ( $this->getParameter('nodata')==false)
+	    {
 		$menu[] = $sm->donnees( $version );
+	    }
 	    $menu[] = $sm->telechargement_fiche( $version );
 	    $menu[] = $sm->televersement_fiche( $version );
 
 	    $etat_version = $version->getEtatVersion();
-	    if( ($etat_version == Etat::ACTIF || $etat_version == Etat::TERMINE ) && ! $sp->hasRapport( $projet, $version->getAnneeSession() ) )
+	    if ( $this->getParameter('rapport_dactivite') )
 	    {
+		if( ($etat_version == Etat::ACTIF || $etat_version == Etat::TERMINE ) && ! $sp->hasRapport( $projet, $version->getAnneeSession() ) )
+		{
 		    $menu[] = $sm->telecharger_modele_rapport_dactivite( $version );
-	        $menu[] = $sm->televerser_rapport_annee( $version );
+		    $menu[] = $sm->televerser_rapport_annee( $version );
 		}
+	    }
 		
 	    $menu[]       = $sm->gerer_publications( $projet );
 	    $img_expose_1 = $sv->imageProperties('img_expose_1', $version);
 	    $img_expose_2 = $sv->imageProperties('img_expose_2', $version);
 	    $img_expose_3 = $sv->imageProperties('img_expose_3', $version);
+	    $document     = $sv->getdocument($version);
 
 	    /*
 	    if( $img_expose_1 == null )
@@ -2047,6 +2081,7 @@ class ProjetController extends AbstractController
 	            'conso_gpu'          => $sp->getConsoRessource($projet,'gpu',$version->getAnneeSession()),
 	            'rapport_1'          => $rapport_1,
 	            'rapport'            => $rapport,
+		    'document'           => $document,
 	            'toomuch'            => $toomuch
             ]
 	            );
@@ -2076,103 +2111,6 @@ class ProjetController extends AbstractController
             'menu'        => $menu,
             ]
             );
-	}
-
-	// Consulter les projets de type 3 (projets PROJET_FIL)
-    private function consulterType3(Projet $projet, Version $version, $loginname, Request $request)
-    {
-		$sm = $this->sm;
-		$sv = $this->sv;
-		$sp = $this->sp;
-		$sj = $this->sj;
-		$ac = $this->ac;
-		$ff = $this->ff;
-
-	    $session_form = Functions::createFormBuilder($ff, ['version' => $version ] )
-	        ->add('version',   EntityType::class,
-	                [
-	                'multiple' => false,
-	                'class' => 'App:Version',
-	                'required'  =>  true,
-	                'label'     => '',
-	                'choices' =>  $projet->getVersion(),
-	                'choice_label' => function($version){ return $version->getSession(); }
-	                ])
-	    ->add('submit', SubmitType::class, ['label' => 'Changer'])
-	    ->getForm();
-
-	    $session_form->handleRequest($request);
-
-	    if ( $session_form->isSubmitted() && $session_form->isValid() )
-	        $version = $session_form->getData()['version'];
-
-	    if( $version != null )
-	        $session = $version->getSession();
-	    else
-	        $sj->throwException(__METHOD__ . ':' . __LINE__ .' projet ' . $projet . ' sans version');
-
-	    if( $ac->isGranted('ROLE_ADMIN')  ) $menu[] = $sm->rallonge_creation( $projet );
-	    $menu[] =   $sm->changer_responsable($version);
-	    $menu[] =   $sm->renouveler_version($version);
-	    $menu[] =   $sm->modifier_version( $version );
-	    $menu[] =   $sm->envoyer_expert( $version );
-	    $menu[] =   $sm->modifier_collaborateurs( $version );
-	    $menu[] =   $sm->telechargement_fiche( $version );
-	    $menu[] =   $sm->televersement_fiche( $version );
-	    $menu[] =   $sm->telecharger_modele_rapport_dactivite( $version );
-
-	    $etat_version = $version->getEtatVersion();
-	    if( ($etat_version == Etat::ACTIF || $etat_version == Etat::TERMINE ) && ! $sp->hasRapport( projet, $version->getAnneeSession() ) )
-	        $menu[] =   $sm->televerser_rapport_annee( $version );
-
-	    $menu[] =   $sm->gerer_publications( $projet );
-
-	    $img_expose_1 = $sv->imageProperties('img_expose_1', $version);
-	    $img_expose_2 = $sv->imageProperties('img_expose_2', $version);
-	    $img_expose_3 = $sv->imageProperties('img_expose_3', $version);
-
-	    /*
-	    if( $img_expose_1 == null )
-	        $sj->debugMessage(__METHOD__.':'.__LINE__ ." img_expose1 null");
-	    else
-	        $sj->debugMessage(__METHOD__.':'.__LINE__ . " img_expose1 non null");
-	    */
-
-	    $img_justif_renou_1 = $sv->imageProperties('img_justif_renou_1', $version);
-	    $img_justif_renou_2 = $sv->imageProperties('img_justif_renou_2', $version);
-	    $img_justif_renou_3 = $sv->imageProperties('img_justif_renou_3', $version);
-
-	    $toomuch = false;
-	    if ($session->getLibelleTypeSession()=='B' && ! $sv->isNouvelle($version)) {
-	        $version_prec = $version->versionPrecedente();
-	        if ($version_prec->getAnneeSession() == $version_prec->getAnneeSession()) {
-	            $toomuch = $sv->is_demande_toomuch($version_prec->getAttrHeures(),$version->getDemHeures());
-	        }
-	    }
-
-	    $rapport_1 = $sp -> getRapport($projet, $version->getAnneeSession() - 1);
-	    $rapport   = $sp -> getRapport($projet, $version->getAnneeSession());
-	    return $this->render('projet/consulter_projet_fil.html.twig',
-            [
-	            'projet'             => $projet,
-	            'loginname'          => $loginname,
-	            'version_form'       => $session_form->createView(),
-	            'version'            => $version,
-	            'session'            => $session,
-	            'menu'               => $menu,
-	            'img_expose_1'       => $img_expose_1,
-	            'img_expose_2'       => $img_expose_2,
-	            'img_expose_3'       => $img_expose_3,
-	            'img_justif_renou_1' => $img_justif_renou_1,
-	            'img_justif_renou_2' => $img_justif_renou_2,
-	            'img_justif_renou_3' => $img_justif_renou_3,
-	            'conso_cpu'          => $sp->getConsoRessource($projet,'cpu',$version->getAnneeSession()),
-	            'conso_gpu'          => $sp->getConsoRessource($projet,'gpu',$version->getAnneeSession()),
-	            'rapport_1'          => $rapport_1,
-	            'rapport'            => $rapport,
-	            'toomuch'            => $toomuch
-            ]
-		);
 	}
 
     /**

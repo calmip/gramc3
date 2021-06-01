@@ -62,6 +62,7 @@ use Doctrine\ORM\EntityManagerInterface;
 class ServiceMenus 
 {
 	public function __construct($max_rall,
+				    $nodata,
 								ServiceVersions $sv,
 								ServiceProjets $sp,
 								ServiceJournal $sj, 
@@ -74,6 +75,7 @@ class ServiceMenus
 								EntityManagerInterface $em)
 	{
 		$this->max_rall = $max_rall;
+		$this->nodata = $nodata;
 		$this->sp   = $sp;
 		$this->sv   = $sv;
 		$this->sj   = $sj;
@@ -985,9 +987,9 @@ class ServiceMenus
 				$this->sj->errorMessage(__METHOD__ . ":" . __LINE__ . " version " . $version . " n'est pas associée à aucun projet !");
 				}
 	
-		   if( $etat != Etat::ACTIF && $etat != Etat::TERMINE)
-				$menu['raison'] = "Vous devez soumettre le rapport annuel quand vous avez fini vos calculs de l'année en question";
-		   elseif( ! $version->isCollaborateur($this->token->getUser()) )
+		   //if( $etat != Etat::ACTIF && $etat != Etat::TERMINE)
+		//		$menu['raison'] = "Vous devez soumettre le rapport annuel quand vous avez fini vos calculs de l'année en question";
+		   if( ! $version->isCollaborateur($this->token->getUser()) )
 				$menu['raison'] = "Seul un collaborateur du projet peut téléverser un rapport d'activité pour un projet";
 		   //elseif( $rapportActivite != null)
 		   //     $menu['raison'] = "Vous avez déjà téléversé un rapport d'activité pour ce projet pour l'année en question";
@@ -1009,6 +1011,7 @@ class ServiceMenus
 	
 	    return $menu;
     }
+
 
     ////////////////////////////////////////////////////////////
 
@@ -1183,7 +1186,7 @@ class ServiceMenus
             $menu['raison'] = "Le responsable du projet n'a pas demandé de renouvellement";
         elseif( $etatSession != Etat::EDITION_DEMANDE && $isProjetTest == false )
             $menu['raison'] = "Nous ne sommes pas en période de demandes de ressources";
-        elseif( VersionModifController::versionValidate( $version, $this->sj, $this->em, $this->sval ) != [] )
+        elseif( VersionModifController::versionValidate( $version, $this->sj, $this->em, $this->sval, $this->nodata ) != [] )
 		{
 			//$this->sj->debugMessage(__METHOD__ . ' '.$version->getIdVersion() . ' ' . print_r(VersionModifController::versionValidate( $version ), true));
 

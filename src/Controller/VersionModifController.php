@@ -36,6 +36,7 @@ use App\Entity\Rattachement;
 use App\GramcServices\ServiceJournal;
 use App\GramcServices\ServiceMenus;
 use App\GramcServices\ServiceVersions;
+use App\GramcServices\ServiceForms;
 
 use App\GramcServices\Workflow\Projet\ProjetWorkflow;
 
@@ -96,18 +97,20 @@ class VersionModifController extends AbstractController
 	private $tw;
 		
 	public function __construct (ServiceJournal $sj,
-								 ServiceMenus $sm,
-								 ServiceVersions $sv,
-								 ProjetWorkflow $pw,
-								 FormFactoryInterface $ff,
-								 ValidatorInterface $vl,
-								 SessionInterface $sss,
-								 Environment $tw
-								 )
+				     ServiceMenus $sm,
+				     ServiceVersions $sv,
+				     ServiceForms $sf,
+				     ProjetWorkflow $pw,
+				     FormFactoryInterface $ff,
+				     ValidatorInterface $vl,
+				     SessionInterface $sss,
+				     Environment $tw
+				     )
 	{
 		$this->sj  = $sj;
 		$this->sm  = $sm;
 		$this->sv  = $sv;
+		$this->sf  = $sf;
 		$this->pw  = $pw;
 		$this->ff  = $ff;
 		$this->vl  = $vl;
@@ -225,30 +228,37 @@ class VersionModifController extends AbstractController
 	    }
 
 
-		// FORMULAIRE DES COLLABORATEURS
-		$collaborateur_form = $this->getCollaborateurForm( $version );
-		$collaborateur_form->handleRequest($request);
-		$data   =   $collaborateur_form->getData();
+	    // FORMULAIRE DES COLLABORATEURS
+	    $collaborateur_form = $this->getCollaborateurForm( $version );
+	    $collaborateur_form->handleRequest($request);
+	    $data   =   $collaborateur_form->getData();
 
-		if( $data != null && array_key_exists('individus', $data ) )
-		{
-			$sj->debugMessage('modifierAction traitement des collaborateurs');
-			$this->handleIndividuForms( $data['individus'], $version );
+	    if( $data != null && array_key_exists('individus', $data ) )
+	    {
+		    $sj->debugMessage('modifierAction traitement des collaborateurs');
+		    $this->handleIndividuForms( $data['individus'], $version );
 
-			// ACTUCE : le mail est disabled en HTML et en cas de POST il est annulé
-			// nous devons donc refaire le formulaire pour récupérer ces mails
-			$collaborateur_form = $this->getCollaborateurForm( $version );
-		}
+		    // ACTUCE : le mail est disabled en HTML et en cas de POST il est annulé
+		    // nous devons donc refaire le formulaire pour récupérer ces mails
+		    $collaborateur_form = $this->getCollaborateurForm( $version );
+	    }
 
-		// DES FORMULAIRES QUI DEPENDENT DU TYPE DE PROJET
-		if( $version->getProjet()->getTypeProjet()===Projet::PROJET_TEST )
-		{
-			return $this->modifierType2($request, $version, $renouvellement, $image_forms, $collaborateur_form, $lg);
-		}
-		else
-		{
-			return $this->modifierType1($request, $version, $renouvellement, $image_forms, $collaborateur_form, $lg);
-		}
+	    // DES FORMULAIRES QUI DEPENDENT DU TYPE DE PROJET
+	    // (Type1 et Type3 partagent le même formulaire)
+	    switch ($version->getProjet()->getTypeProjet())
+	    {
+		case Projet::PROJET_SESS:
+		    return $this->modifierType1($request, $version, $renouvellement, $image_forms, $collaborateur_form, $lg);
+    
+		case Projet::PROJET_FIL:
+		    return $this->modifierType1($request, $version, $renouvellement, $image_forms, $collaborateur_form, $lg);
+
+		case Projet::PROJET_TEST:
+		    return $this->modifierType2($request, $version, $renouvellement, $image_forms, $collaborateur_form, $lg);
+
+		default:
+		   $sj->throwException(__METHOD__ . ":" . __LINE__ . " mauvais type de projet " . Functions::show( $type) );
+	    }
     }
 
     /*
@@ -271,7 +281,10 @@ class VersionModifController extends AbstractController
         $this->modifierPartieI($version,$form);
         $this->modifierPartieII($version,$form);
         $this->modifierPartieIII($version,$form);
-        $this->modifierPartieIV($version,$form);
+	if ($this->getParameter('nodata')==false)
+	{
+	    $this->modifierPartieIV($version,$form);
+	}
         $this->modifierPartieV($version,$form);
 
 		$form
@@ -326,7 +339,7 @@ class VersionModifController extends AbstractController
             'imageJust2'    =>   $this->image('img_justif_renou_2',$version),
             'imageJust3'    =>   $this->image('img_justif_renou_3',$version),
             'collaborateur_form' => $collaborateur_form->createView(),
-            'todo'          => static::versionValidate($version, $sj, $em, $sval),
+            'todo'          => static::versionValidate($version, $sj, $em, $sval,$this->getParameter('nodata')),
             'renouvellement'    => $renouvellement,
             ]);
 	}
@@ -334,8 +347,8 @@ class VersionModifController extends AbstractController
 	/* Les champs de la partie I */
 	private function modifierPartieI($version,&$form)
 	{ 
-		$em = $this->getDoctrine()->getManager();
-		$form
+	    $em = $this->getDoctrine()->getManager();
+	    $form
             ->add('prjTitre', TextType::class, [ 'required'       =>  false ])
             ->add('prjThematique', EntityType::class,
                     [
@@ -345,17 +358,23 @@ class VersionModifController extends AbstractController
                     'label'       => '',
                     'placeholder' => '-- Indiquez la thématique',
                     ])
-            ->add('prjSousThematique', TextType::class, [ 'required'       =>  false ])
-            ->add('prjRattachement', EntityType::class,
-                    [
-                    'required'    => false,
-                    'multiple'    => false,
-                    'expanded'    => true,
-                    'class'       => 'App:Rattachement',
-                    'empty_data'  => null,
-                    'label'       => '',
-                    'placeholder' => 'AUCUN',
-                    ])
+            ->add('prjSousThematique', TextType::class, [ 'required'       =>  false ]);
+	    
+	    if ($this->getParameter('norattachement')==false)
+	    {
+		$form
+		->add('prjRattachement', EntityType::class,
+			[
+			'required'    => false,
+			'multiple'    => false,
+			'expanded'    => true,
+			'class'       => 'App:Rattachement',
+			'empty_data'  => null,
+			'label'       => '',
+			'placeholder' => 'AUCUN',
+			]);
+	    };
+	    $form
             ->add('demHeures', IntegerType::class, [ 'required'       => false ])
             ->add('prjFinancement', TextType::class, [ 'required'     => false ])
             ->add('prjGenciCentre',     TextType::class, [ 'required' => false ])
@@ -373,7 +392,7 @@ class VersionModifController extends AbstractController
 	/* Les champs de la partie II */
 	private function modifierPartieII($version,&$form)
 	{
-		$form
+	    $form
             ->add('prjResume', TextAreaType::class, [ 'required'       =>  false ] )
             ->add('prjExpose', TextAreaType::class, [ 'required'       =>  false ] )
             ->add('prjAlgorithme', TextAreaType::class, [ 'required'       =>  false ] );
@@ -578,317 +597,88 @@ class VersionModifController extends AbstractController
      */
     private function modifierType2(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form, LoggerInterface $lg)
     {
-		$sj = $this->sj;
-		$sval = $this->vl;
-		$em = $this->getDoctrine()->getManager();
+	$sj = $this->sj;
+	$sval = $this->vl;
+	$em = $this->getDoctrine()->getManager();
 
-		if( $this->has('heures_projet_test' ) )
-			$heures_projet_test = $this->getParameter('heures_projet_test' );
-		else
-			$heures_projet_test =  5000;
-
-		$version->setDemHeures( $heures_projet_test );
-		$form = $this->createFormBuilder($version)
-			->add('prjTitre', TextType::class, [ 'required'       =>  false ])
-			->add('prjThematique', EntityType::class,
-					[
-					'required'       =>  false,
-					'multiple' => false,
-					'class' => 'App:Thematique',
-					'label'     => '',
-					'placeholder' => '-- Indiquez la thématique',
-					])
-            ->add('prjRattachement', EntityType::class,
-                    [
-                    'required'    => false,
-                    'multiple'    => false,
-                    'expanded'    => true,
-                    'class'       => 'App:Rattachement',
-                    'empty_data'  => null,
-                    'label'       => '',
-                    'placeholder' => 'AUCUN',
-                    ])
-			->add('demHeures', IntegerType::class,
+	if( $this->has('heures_projet_test' ) )
+	    $heures_projet_test = $this->getParameter('heures_projet_test' );
+	else
+	    $heures_projet_test =  5000;
+	
+	$version->setDemHeures( $heures_projet_test );
+	$form = $this->createFormBuilder($version)
+		->add('prjTitre', TextType::class, [ 'required'       =>  false ])
+		->add('prjThematique', EntityType::class,
 				[
 				'required'       =>  false,
-				'data' => $heures_projet_test,
-				'disabled' => 'disabled' ]
-				)
-			->add('prjResume', TextAreaType::class, [ 'required'       =>  false ] )
-			->add( 'codeNom', TextType::class, [ 'required'       =>  false ] )
-			->add( 'codeFor',  CheckboxType::class, [ 'required'       =>  false ])
-			->add( 'codeC',  CheckboxType::class, [ 'required'       =>  false ])
-			->add( 'codeCpp',  CheckboxType::class, [ 'required'       =>  false ])
-			->add( 'codeAutre',  CheckboxType::class, [ 'required'       =>  false ])
-			->add( 'codeLangage', TextType::class, [ 'required'       =>  false ])
-			->add( 'codeLicence', TextAreaType::class, [ 'required'       =>  false ]  )
-			->add( 'codeUtilSurMach', TextAreaType::class, [ 'required'       =>  false ]  )
-			->add( 'demLogiciels', TextAreaType::class, [ 'required'       =>  false ]  )
-			->add( 'demBib', TextAreaType::class, [ 'required'       =>  false ]  )
-			->add('gpu', ChoiceType::class,
-				[
-				'required'       =>  false,
-				'placeholder'   =>  "-- Choisissez une option",
-				'choices'  =>   [
-								"Oui" => "Oui",
-								"Non" => "Non",
-								"Je ne sais pas" => "je ne sais pas",
-								],
-				])
-			->add( 'fermer',   SubmitType::Class )
-			->add( 'annuler',   SubmitType::Class )
-			->getForm();
-
-		$form->handleRequest($request);
-
-		if( $form->isSubmitted() && $form->isValid()  )
-		{
-			// on sauvegarde tout de même mais il semble que c'est déjà fait avant
-			$version->setDemHeures( $heures_projet_test );
-			$return = Functions::sauvegarder( $version, $em, $lg );
-			return $this->redirectToRoute( 'consulter_projet', ['id' => $version->getProjet()->getIdProjet() ] );
-		}
-
-		$version->setDemHeures($heures_projet_test  );
-		return $this->render('version/modifier_projet_test.html.twig',
-			[
-			'form'      => $form->createView(),
-			'version'   => $version,
-			'collaborateur_form' => $collaborateur_form->createView(),
-			'todo'      => static::versionValidate($version, $sj, $em, $sval),
-			]);
-
+				'multiple' => false,
+				'class' => 'App:Thematique',
+				'label'     => '',
+				'placeholder' => '-- Indiquez la thématique',
+				]);
+	if ($this->getParameter('norattachement')==false)
+	{
+	    $form->add('prjRattachement', EntityType::class,
+	    [
+	    'required'    => false,
+	    'multiple'    => false,
+	    'expanded'    => true,
+	    'class'       => 'App:Rattachement',
+	    'empty_data'  => null,
+	    'label'       => '',
+	    'placeholder' => 'AUCUN',
+	    ]);
 	}
-
-    /*
-     * Appelée par modifierAction pour les projets de type 3 (PROJET_FIL)
-     *
-     * params = $request, $version
-     *          $renouvellement (toujours true/false)
-     *          $image_forms (formulaire de téléversement d'images)
-     *          $collaborateurs_form (formulaire des collaborateurs)
-     *
-     */
-	private function modifierType3(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form, LoggerInterface $lg)
-    {
-		$sj = $this->sj;
-		$sval = $this->vl;
-		$em = $this->getDoctrine()->getManager();
-
-		// formulaire principal
-        $form = $this->createFormBuilder($version)
-			->add('criannTag', TextType::class, [ 'required'       =>  false ])
-            ->add('prjTitre', TextType::class, [ 'required'       =>  false ])
-            ->add('prjThematique', EntityType::class,
-                    [
-                    'required'       =>  false,
-                    'multiple' => false,
-                    'class' => 'App:Thematique',
-                    'label'     => '',
-                    'placeholder' => '-- Indiquez la thématique',
-                    ])
-            ->add('prjSousThematique', TextType::class, [ 'required'       =>  false ])
-            ->add('demHeures', IntegerType::class, [ 'required'       =>  false ])
-            ->add('prjFinancement', TextType::class, [ 'required'       =>  false ])
-            ->add('prjGenciCentre',     TextType::class, [ 'required'       =>  false ])
-            ->add('prjGenciMachines',   TextType::class, [ 'required'       =>  false ])
-            ->add('prjGenciHeures',     TextType::class, [ 'required'       =>  false ])
-            ->add('prjGenciDari',     TextType::class, [ 'required'       =>  false ])
-            ->add('prjResume', TextAreaType::class, [ 'required'       =>  false ] )
-            ->add('prjExpose', TextAreaType::class, [ 'required'       =>  false ] )
-            ->add( 'prjAlgorithme', TextAreaType::class, [ 'required'       =>  false ] )
-            ->add( 'prjConception', CheckboxType::class, [ 'required'       =>  false ] )
-            ->add( 'prjDeveloppement', CheckboxType::class, [ 'required'       =>  false ] )
-            ->add( 'prjParallelisation', CheckboxType::class, [ 'required'       =>  false ] )
-            ->add( 'prjUtilisation', CheckboxType::class, [ 'required'       =>  false ] )
-            ->add( 'codeNom', TextType::class, [ 'required'       =>  false ] )
-            ->add( 'codeFor',  CheckboxType::class, [ 'required'       =>  false ])
-            ->add( 'codeC',  CheckboxType::class, [ 'required'       =>  false ])
-            ->add( 'codeCpp',  CheckboxType::class, [ 'required'       =>  false ])
-            ->add( 'codeAutre',  CheckboxType::class, [ 'required'       =>  false ])
-            ->add( 'codeLangage', TextType::class, [ 'required'       =>  false ])
-            ->add( 'codeLicence', TextAreaType::class, [ 'required'       =>  false ]  )
-            ->add( 'codeUtilSurMach', TextAreaType::class, [ 'required'       =>  false ]  )
-            ->add( 'codeHeuresPJob', ChoiceType::class,
-                [
-                'required'       =>  false,
-                'placeholder'   =>  "-- Choisissez une option",
-                'choices'  =>   [
-                                "< 6000 heures" => "< 6000 heures",
-                                "< 18000 heures" => "< 18000 heures",
-                                "< 72000 heures" => "< 72000 heures",
-                                "> 72000 heures" => "> 72000 heures",
-                                "Je ne sais pas" => "je ne sais pas",
-                                ],
-                ])
-            ->add('gpu', ChoiceType::class,
-                [
-                'required'       =>  false,
-                'placeholder'   =>  "-- Choisissez une option",
-                'choices'  =>   [
-                                "Oui" => "Oui",
-                                "Non" => "Non",
-                                "Je ne sais pas" => "je ne sais pas",
-                                ],
-                ])
-            ->add( 'codeRamPCoeur', ChoiceType::class,
-                [
-                'required'       =>  false,
-                'placeholder'   =>  "-- Choisissez une option",
-                'choices'  =>   [
-                                "< 5Go" => "< 5Go",
-                                "> 5Go" => "> 5Go",
-                                "Je ne sais pas" => "je ne sais pas",
-                                ],
-                ])
-            ->add( 'codeRamPart', ChoiceType::class,
-                [
-                'required'       =>  false,
-                'placeholder'   =>  "-- Choisissez une option",
-                'choices'  =>   [
-                                "< 192Go" => "< 192Go",
-                                "> 192Go" => "> 192Go",
-                                "< 500Go" => "< 500Go",
-                                "< 1To" => "< 1To",
-                                "> 2To" => "> 2To",
-                                "Je ne sais pas" => "je ne sais pas",
-                                ],
-                ])
-            ->add( 'codeEffParal', ChoiceType::class,
-                [
-                'required'       =>  false,
-                'placeholder'   =>  "-- Choisissez une option",
-                'choices'  =>   [
-                                "< 36" => "< 36",
-                                "36-360" => "36-360",
-                                "> 360" => "> 360",
-                                "< 1008" => "< 1008",
-                                "> 1008" => "> 1008",
-                                "Je ne sais pas" => "je ne sais pas",
-                                ],
-                ])
-            ->add( 'codeVolDonnTmp', ChoiceType::class,
-                [
-                'required'       =>  false,
-                'placeholder'   =>  "-- Choisissez une option",
-                'choices'  =>   [
-                                "< 10Go" => "< 10Go",
-                                "< 100Go" => "< 100Go",
-                                "< 1To" => "< 1To",
-                                "< 10To" => "< 10To",
-                                "> 10To" => "> 10To",
-                                "Je ne sais pas" => "je ne sais pas",
-                                ],
-                ])
-            ->add( 'demLogiciels', TextAreaType::class, [ 'required'       =>  false ]  )
-            ->add( 'demBib', TextAreaType::class, [ 'required'       =>  false ]  )
-            ->add( 'demPostTrait', ChoiceType::class,
-                [
-                'required'       =>  false,
-                'placeholder'   =>  "-- Choisissez une option",
-                'choices'  =>   [
-                                "Oui" => "Oui",
-                                "Non" => "Non",
-                                "Je ne sais pas" => "je ne sais pas",
-                                ],
-                ])
-            ->add( 'demFormPrise',  CheckboxType::class, [ 'required'       =>  false ])
-            ->add( 'demFormDebogage',  CheckboxType::class, [ 'required'       =>  false ])
-            ->add( 'demFormOptimisation',  CheckboxType::class, [ 'required'       =>  false ])
-            ->add( 'demFormFortran',  CheckboxType::class, [ 'required'       =>  false ])
-            ->add( 'demFormC',  CheckboxType::class, [ 'required'       =>  false ])
-            ->add( 'demFormCpp',  CheckboxType::class, [ 'required'       =>  false ])
-            ->add( 'demFormPython',  CheckboxType::class, [ 'required'       =>  false ])
-            ->add( 'demFormMPI',  CheckboxType::class, [ 'required'       =>  false ])
-            ->add( 'demFormOpenMP',  CheckboxType::class, [ 'required'       =>  false ])
-            ->add( 'demFormOpenACC',  CheckboxType::class, [ 'required'       =>  false ])
-            ->add( 'demFormParaview',  CheckboxType::class, [ 'required'       =>  false ])
-            ->add( 'demFormAutresAutres',  TextAreaType::class, [ 'required'       =>  false ])
-            ->add( 'sondVolDonnPerm', ChoiceType::class,
-                [
-                'required'       =>  false,
-                'placeholder'   =>  "-- Choisissez une option",
-                'choices'  =>   [
-                                "< 1To" => "< 1To",
-                                "1 To" => "1 To",
-                                "2 To" => "2 To",
-                                "3 To" => "3 To",
-                                "4 To" => "4 To",
-                                "5 To" => "5 To",
-                                "10 To" => "10 To",
-                                "25 To" => "25 To",
-                                "50 To" => "50 To",
-                                "75 To" => "75 To",
-                                "100 To" => "100 To",
-                                "500 To" => "500 To",
-                                "je ne sais pas" => "je ne sais pas",
-                                ],
-                'required'       =>  false,
-                ])
-            ->add( 'sondJustifDonnPerm',    TextAreaType::class , [ 'required'       =>  false ]  )
-            ->add( 'fermer',   SubmitType::Class )
-                //->add( 'enregistrer',   SubmitType::Class )
-            ->add( 'annuler',   SubmitType::Class );
-
-        if( count( $version->getProjet()->getVersion() ) > 1  )
-             $form = $form->add('prjJustifRenouv', TextAreaType::class, [ 'required'       =>  false ]);
-
-        $form = $form->getForm();
-
-        //$sj->debugMessage('modifierAction before principal form handle Request');
-        $form->handleRequest($request);
-        //$sj->debugMessage('modifierAction after principal form handle Request');
-
-        // traitement du formulaire
-        if( $form->isSubmitted() && $form->isValid() )
-		{
-            if( $form->get('annuler')->isClicked() )
-			{
-                // on ne devrait jamais y arriver !
-                $sj->errorMessage(__METHOD__ . ' seconde annuler clicked !');
-                return $this->redirectToRoute( 'projet_accueil' );
-			}
-
-           // on sauvegarde tout de même mais il semble que c'est déjà fait avant
-           $return = Functions::sauvegarder( $version, $em, $lg );
-
-            if( $request->isXmlHttpRequest() )
-			{
-                $sj->debugMessage(__METHOD__ . ' isXmlHttpRequest clicked');
-                if( $return == true )
-                    return new Response( json_encode('OK - Votre projet est correctement enregistré') );
-                else
-                    return new Response( json_encode("ERREUR - Votre projet n'a PAS été enregistré !") );
-			}
-            /*
-            if( $form->get('fermer')->isClicked() )
-                $sj->debugMessage(__METHOD__ . ' fermer clicked');
-            else
-                $sj->warningMessage(__METHOD__ . ' autre chose clicked');
-            */
-            return $this->redirectToRoute( 'consulter_projet', ['id' => $version->getProjet()->getIdProjet() ] );
-		}
-
-        return $this->render('version/modifier_projet_fil.html.twig',
-            [
-            'form'      => $form->createView(),
-            'version'   => $version,
-            'img_expose_1'   => $image_forms['img_expose_1']->createView(),
-            'img_expose_2'   => $image_forms['img_expose_2']->createView(),
-            'img_expose_3'   => $image_forms['img_expose_3']->createView(),
-            'imageExp1'    => $this->image('img_expose_1',$version),
-            'imageExp2'    => $this->image('img_expose_2',$version),
-            'imageExp3'    => $this->image('img_expose_3',$version),
-            'img_justif_renou_1'    =>  $image_forms['img_justif_renou_1']->createView(),
-            'img_justif_renou_2'    =>  $image_forms['img_justif_renou_2']->createView(),
-            'img_justif_renou_3'    =>  $image_forms['img_justif_renou_3']->createView(),
-            'imageJust1'    =>   $this->image('img_justif_renou_1',$version),
-            'imageJust2'    =>   $this->image('img_justif_renou_2',$version),
-            'imageJust3'    =>   $this->image('img_justif_renou_3',$version),
-            'collaborateur_form' => $collaborateur_form->createView(),
-            'todo'          => static::versionValidate($version, $sj, $em, $sval),
-            'renouvellement'    => $renouvellement,
-            ]);
+	$form->add('demHeures', IntegerType::class,
+			[
+			'required'       =>  false,
+			'data' => $heures_projet_test,
+			'disabled' => 'disabled' ]
+			)
+		->add('prjResume', TextAreaType::class, [ 'required'       =>  false ] )
+		->add( 'codeNom', TextType::class, [ 'required'       =>  false ] )
+		->add( 'codeFor',  CheckboxType::class, [ 'required'       =>  false ])
+		->add( 'codeC',  CheckboxType::class, [ 'required'       =>  false ])
+		->add( 'codeCpp',  CheckboxType::class, [ 'required'       =>  false ])
+		->add( 'codeAutre',  CheckboxType::class, [ 'required'       =>  false ])
+		->add( 'codeLangage', TextType::class, [ 'required'       =>  false ])
+		->add( 'codeLicence', TextAreaType::class, [ 'required'       =>  false ]  )
+		->add( 'codeUtilSurMach', TextAreaType::class, [ 'required'       =>  false ]  )
+		->add( 'demLogiciels', TextAreaType::class, [ 'required'       =>  false ]  )
+		->add( 'demBib', TextAreaType::class, [ 'required'       =>  false ]  )
+		->add('gpu', ChoiceType::class,
+			[
+			'required'       =>  false,
+			'placeholder'   =>  "-- Choisissez une option",
+			'choices'  =>   [
+							"Oui" => "Oui",
+							"Non" => "Non",
+							"Je ne sais pas" => "je ne sais pas",
+							],
+			])
+		->add( 'fermer',   SubmitType::Class )
+		->add( 'annuler',   SubmitType::Class )
+		->getForm();
+    
+	$form->handleRequest($request);
+    
+	if( $form->isSubmitted() && $form->isValid()  )
+	{
+		// on sauvegarde tout de même mais il semble que c'est déjà fait avant
+		$version->setDemHeures( $heures_projet_test );
+		$return = Functions::sauvegarder( $version, $em, $lg );
+		return $this->redirectToRoute( 'consulter_projet', ['id' => $version->getProjet()->getIdProjet() ] );
+	}
+    
+	$version->setDemHeures($heures_projet_test  );
+	return $this->render('version/modifier_projet_test.html.twig',
+		[
+		'form'      => $form->createView(),
+		'version'   => $version,
+		'collaborateur_form' => $collaborateur_form->createView(),
+		'todo'      => static::versionValidate($version, $sj, $em, $sval),
+		]);
 	}
 
     ////////////////////////////////////////////////////////////////////////////////////
@@ -911,10 +701,10 @@ class VersionModifController extends AbstractController
 
     private function image_handle( $form, Version $version, $request)
     {
-		$sv = $this->sv;
-		$vl = $this->vl;
-		$sj = $this->sj;
-		$em = $this->getDoctrine()->getManager();
+	    $sv = $this->sv;
+	    $sf = $this->sf;
+	    $sj = $this->sj;
+	    $em = $this->getDoctrine()->getManager();
 
 	    $form->handleRequest($request);
 
@@ -968,7 +758,8 @@ class VersionModifController extends AbstractController
 	        else
 	            return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => 'Erreur indeterminée' ];
 
-	        return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => Functions::formError( $vl, $image, [ $this->imageConstraints() ] ) ];
+	        return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => $sf->formError($image, [ $this->imageConstraints() ] ) ];
+
 	        //$sj->debugMessage('VersionController:image_handle form for ' . $filename . '('. $form->getData()['image'] . ') is not valide, error = ' .
 	        //    (string) $form->getErrors(true,false)->current() );
 	        //return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => (string) $form->getErrors(true,false)->current() ];
@@ -1603,7 +1394,7 @@ class VersionModifController extends AbstractController
      * 
      *  TODO - Cette fonction statique ce n'est pas fameux
      **/
-    public static function versionValidate(Version $version, ServiceJournal $sj, EntityManager $em, ValidatorInterface $sval)
+    public static function versionValidate(Version $version, ServiceJournal $sj, EntityManager $em, ValidatorInterface $sval, $nodata=false)
     {
 	    $todo   =   [];
 	    if( $version->getPrjTitre() == null ) $todo[] = 'prj_titre';
@@ -1631,19 +1422,6 @@ class VersionModifController extends AbstractController
 	            $todo[] = 'prj_justif_renouv';
 			}
 
-			// Stockage de données
-	        if( $version->getSondVolDonnPerm() == null )
-	        {
-	            $todo[] = 'sond_vol_donn_perm';
-			}
-	        elseif( $version->getSondJustifDonnPerm() == null
-	            &&  $version->getSondVolDonnPerm() != '< 1To'
-	            &&  $version->getSondVolDonnPerm() != '1 To'
-	            &&  $version->getSondVolDonnPerm() !=  'je ne sais pas')
-            {
-				$todo[] = 'sond_justif_donn_perm';
-			}
-
 			// Centres nationaux
 			if ( $version->getPrjGenciCentre()     == null
 				|| $version->getPrjGenciMachines() == null
@@ -1654,15 +1432,31 @@ class VersionModifController extends AbstractController
 			};
 
 	        // Partage de données
-	        if ($version->getDataMetaDataFormat() == null ) $todo[] = 'Format de métadonnées';
-	        if ($version->getDataNombreDatasets() == null ) $todo[] = 'Nombre de jeux de données';
-	        if ($version->getDataTailleDatasets() == null ) $todo[] = 'Taille de chaque jeu de données';
+		if ( $nodata == false)
+		{		// Stockage de données
+		    if( $version->getSondVolDonnPerm() == null )
+		    {
+			$todo[] = 'sond_vol_donn_perm';
+		    }
+		    elseif( $version->getSondJustifDonnPerm() == null
+			&&  $version->getSondVolDonnPerm() != '< 1To'
+			&&  $version->getSondVolDonnPerm() != '1 To'
+			&&  $version->getSondVolDonnPerm() !=  'je ne sais pas')
+		    {
+				    $todo[] = 'sond_justif_donn_perm';
+		    }
+
+		    if ($version->getDataMetaDataFormat() == null ) $todo[] = 'Format de métadonnées';
+		    if ($version->getDataNombreDatasets() == null ) $todo[] = 'Nombre de jeux de données';
+		    if ($version->getDataTailleDatasets() == null ) $todo[] = 'Taille de chaque jeu de données';
 		}
-	    if( $version->typeSession()  == 'A' )
-        {
+	    }
+		
+	    if( $version->typeSession()  == 'A')
+	    {
 	        $version_precedente = $version->versionPrecedente();
 	        if( $version_precedente != null )
-            {
+		{
 	            $rapportActivite = $em->getRepository(RapportActivite::class)->findOneBy(
 				[
                     'projet' => $version_precedente->getProjet(),

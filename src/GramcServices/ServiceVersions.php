@@ -112,23 +112,44 @@ class ServiceVersions
 	            'mime'      =>  $my_image_info['mime'],
 	            ];
         }
-	    else
-	    {
-	        return [];
-	    }
+	else
+	{
+	    return [];
 	}
+    }
 
-	/*************************
-	 * Calcule le nom de fichier de l'image
-	 * 
-	 * param = $filename Nom du fichier, sans le répertoire ni l'extension
-	 * 		   $version  Version associée
-	 * 
-	 * return = Le chemin complet (si le fichier existe)
-	 *          Le chemin avec répertoire mais sans extension sinon
-	 *          TODO - Pas clair du tout !
-	 * 
-	 ************************************/
+    /************************************
+     *
+     * Renvoie le nom du fichier attaché, s'il existe, null sinon 
+     * params: $version  Version associée
+     * 
+     * return: chemin vers fichier ou null
+     * 
+     ***************************/
+    public function getDocument(Version $version)
+    {
+	$document = $this->imageDir($version).'/document.pdf';
+	if( file_exists( $document ) && is_file( $document ) )
+	{
+	    return $document;
+	}
+	else
+	{
+	    return null;
+	}
+    }
+
+    /*************************
+     * Calcule le nom de fichier de l'image
+     * 
+     * param = $filename Nom du fichier, sans le répertoire ni l'extension
+     * 		   $version  Version associée
+     * 
+     * return = Le chemin complet (si le fichier existe)
+     *          Le chemin avec répertoire mais sans extension sinon
+     *          TODO - Pas clair du tout !
+     * 
+     ************************************/
     public function imagePath( $filename, Version $version)
     {
 	    $full_filename = $this->imageDir( $version ) .'/'.  $filename;

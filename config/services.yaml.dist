@@ -51,14 +51,32 @@ parameters:
     max_fig_width: 800
     max_fig_height: 400
     
-    # nb de pages masx pour un rapport d'activité
-    max_page_nb: 5
+    # ATTENTION - Il faut choisir: rapport d'activité OU fichier attaché, PAS les deux !
+    #             C'est redondant et si on a les deux à true ça va entraîner des dysfonctionnements
+    #             Les deux à false, pas de pb
+    # Si mis à true, rapport d'activité (annuel) demandé à la fin de l'année
+    rapport_dactivite: true
+
+    # Si mis à true, propose de téléverser un fichier attaché à chaque version
+    fichier_attache: false
+       
+    # nb de pages max pour un rapport d'activité ou un fichier attaché
+    max_page_nb: 50
+    
+    # taille max du fichier de rapport d'activité ou fichier attaché
+    # ATTENTION - Doit être en cohérence avec le paramètre post_max_size défini dans php.ini !
+    #             Et peut-être aussi avec le paramètre équivalent si on est derrière un proxy !
+    #             Unité = Mo
+    max_size_doc: 10
     
     # Suppression de toutes les fonctionnalités liées à la consommation
     noconso: false
     
     # Suppression de la notion de rattachement administratif
     norattachement: false
+    
+    # Suppression des formulaires concernant les données (stockage et partage)
+    nodata: false
     
     # Nombre max de rallonges par projet et par sessoin
     max_rall: 2
@@ -249,7 +267,7 @@ services:
         arguments: [ '%attrib_seuil_a%', "%prj_prefix%", "%fig_directory%", "%signature_directory%" ]
         
     App\GramcServices\ServiceMenus:
-        arguments: [ "%max_rall%" ]
+        arguments: [ "%max_rall%", "%nodata%" ]
         
     App\GramcServices\ServiceNotifications:
         arguments: [ "%mailfrom%" ]

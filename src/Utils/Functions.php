@@ -256,28 +256,8 @@ class Functions
 	        return $input;
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public static function formError( ValidatorInterface $vl, $data, $constraintes )
-    {
-	    $violations = [];
-	    $violations = $vl->validate( $data, $constraintes );
-	
-	    if (0 !== count($violations) )
-        {
-	        $errors = "<strong>Erreur : </strong>";
-	        foreach ($violations as $violation)
-	            $errors .= $violation->getMessage() .' ';
-	        return $errors;
-        }
-	    else
-	    {
-	        return "Erreur indeterminée concernant des données soumises, les limites du système ont été probablement dépassées";
-		}
-    }
-
     //////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // TODO - A METTRE DANS ServicesForms
     public static function dataError( ValidatorInterface $sval, $data, $groups = ['Default'] )
     {
 	    if( is_string( $groups ) ) $groups = [$groups];
