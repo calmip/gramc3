@@ -760,6 +760,25 @@ class ServiceMenus
 	    return $menu;
     }
 
+    public function formations()
+    {
+	$menu['name']       =   'gerer_formations';
+	$menu['commentaire']=   "Gérer la liste des formations";
+	$menu['lien']       =   "Formations";
+
+	if( $this->ac->isGranted('ROLE_OBS') )
+	{
+	    $menu['ok'] = true;
+	}
+	else
+	{
+	    $menu['ok'] = false;
+	    $menu['raison'] = "Vous devez être au moins un observateur pour accéder à cette page";
+	}
+
+	return $menu;
+    }
+
     //////////////////////////////////////
 
     public function thematiques()

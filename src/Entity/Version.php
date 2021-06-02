@@ -352,6 +352,27 @@ class Version implements Demande
     private $demFormAutres = '';
 
     /**
+     * @var integer
+     *
+     * @ORM\Column(name="dem_form_0", type="integer", nullable=true)
+     */
+    private $demForm0 = '';
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="dem_form_1", type="integer", nullable=true)
+     */
+    private $demForm1 = '';
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="dem_form_2", type="integer", nullable=true)
+     */
+    private $demForm2 = '';
+
+    /**
      * @var boolean
      *
      * @ORM\Column(name="dem_form_fortran", type="boolean", nullable=true)
@@ -2002,6 +2023,78 @@ class Version implements Demande
     public function getDemFormAutres()
     {
         return $this->demFormAutres;
+    }
+
+    /**
+     * Set demForm0
+     *
+     * @param boolean $demForm0
+     *
+     * @return Version
+     */
+    public function setDemForm0($demForm0)
+    {
+        $this->demForm0 = $demForm0;
+
+        return $this;
+    }
+
+    /**
+     * Get demForm0
+     *
+     * @return boolean
+     */
+    public function getDemForm0()
+    {
+        return $this->demForm0;
+    }
+
+    /**
+     * Set demForm1
+     *
+     * @param boolean $demForm1
+     *
+     * @return Version
+     */
+    public function setDemForm1($demForm1)
+    {
+        $this->demForm1 = $demForm1;
+
+        return $this;
+    }
+
+    /**
+     * Get demForm1
+     *
+     * @return boolean
+     */
+    public function getDemForm1()
+    {
+        return $this->demForm1;
+    }
+
+    /**
+     * Set demForm2
+     *
+     * @param boolean $demForm2
+     *
+     * @return Version
+     */
+    public function setDemForm2($demForm2)
+    {
+        $this->demForm2 = $demForm2;
+
+        return $this;
+    }
+
+    /**
+     * Get demForm2
+     *
+     * @return boolean
+     */
+    public function getDemForm2()
+    {
+        return $this->demForm2;
     }
 
     /**

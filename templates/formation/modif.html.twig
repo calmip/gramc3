@@ -1,0 +1,34 @@
+{% extends 'default/base.html.twig' %}
+
+{% block body %}
+<section>
+<h2>Modification d'un formation</h2>
+    {% import "default/macros.html.twig" as gramcmacros %}
+    {{ gramcmacros.menu(menu) }}
+    {{ gramcmacros.info('',"Les numéros d'ordre doivent être compris entre <strong>0 et 10</strong> (pas plus de 10 formations) et être <strong>différents</strong>.<br />
+        Ils sont reliés aux champs demFormN de la table version") }}
+    
+    {{ form_start(edit_form) }}
+    <table>
+        <tr>
+            <th>{{ form_label(edit_form.numeroform) }}</th>
+            <td>{{ form_widget(edit_form.numeroform) }}</td>
+        </tr>
+        <tr>
+            <th>{{ form_label(edit_form.acroform) }}</th>
+            <td>{{ form_widget(edit_form.acroform) }}</td>
+        </tr>
+        <tr>
+            <th>{{ form_label(edit_form.nomform) }}</th>
+            <td>{{ form_widget(edit_form.nomform) }}</td>
+        </tr>
+        <tr>
+            <th></th>
+            <td>{{ form_widget(edit_form.submit) }}{{ form_widget(edit_form.reset) }}</td>
+        </tr>    
+    </table>
+    {{ form_end(edit_form) }}
+
+</section>
+
+{% endblock body %}

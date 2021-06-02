@@ -112,23 +112,23 @@ class GramcSessionController extends AbstractController
 	
 	
 	public function __construct (ServiceNotifications $sn,
-								 ServiceJournal $sj,
-								 ServiceMenus $sm,
-								 ServiceProjets $sp,
-								 ServiceSessions $ss,
-								 PropositionExpertsType1 $pe1,
-								 PropositionExpertsType2 $pe2,
-								 GramcDate $sd,
-								 ServiceVersions $sv,
-								 ProjetWorkflow $pw,
-								 FormFactoryInterface $ff,
-								 ValidatorInterface $vl,
-								 TokenStorageInterface $ts,
-								 SessionInterface $sss,
-								 UserChecker $uc,
- 								 AuthorizationCheckerInterface $ac,
- 								 Environment $tw
-								 )
+				     ServiceJournal $sj,
+				     ServiceMenus $sm,
+				     ServiceProjets $sp,
+				     ServiceSessions $ss,
+				     PropositionExpertsType1 $pe1,
+				     PropositionExpertsType2 $pe2,
+				     GramcDate $sd,
+				     ServiceVersions $sv,
+				     ProjetWorkflow $pw,
+				     FormFactoryInterface $ff,
+				     ValidatorInterface $vl,
+				     TokenStorageInterface $ts,
+				     SessionInterface $sss,
+				     UserChecker $uc,
+				     AuthorizationCheckerInterface $ac,
+				     Environment $tw
+				     )
 	{
 		$this->sn  = $sn;
 		$this->sj  = $sj;
@@ -156,7 +156,7 @@ class GramcSessionController extends AbstractController
 
     public function adminAccueilAction()
     {
-		$sm      = $this->sm;
+	$sm      = $this->sm;
         $menu1[] = $sm->individu_gerer();
 
         $menu2[] = $sm->gerer_sessions();
@@ -180,6 +180,7 @@ class GramcSessionController extends AbstractController
         $menu4[] = $sm->thematiques();
         $menu4[] = $sm->metathematiques();
         $menu4[] = $sm->laboratoires();
+	$menu4[] = $sm->formations();
 
         $menu5[] = $sm->bilan_annuel();
         $menu5[] = $sm->statistiques();
