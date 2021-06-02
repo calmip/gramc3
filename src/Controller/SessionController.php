@@ -789,7 +789,7 @@ class SessionController extends AbstractController
         $line[] = $tttl;
 
         if ($tq > 0) {
-            $line[] = intval(100.0 * $tttl / $tq);
+            $line[] = ($annee_courante_flg) ? 'N/A' : intval(100.0 * $tttl / $tq);
         } else {
             $line[] = 'N/A';
         }
