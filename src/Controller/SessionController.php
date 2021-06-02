@@ -736,8 +736,11 @@ class SessionController extends AbstractController
             $line[] = $p->getTitre();
             $r      = $v->getResponsable();
             $line[] = $r->getPrenom() . ' ' . $r->getNom();
-            $quota  = $v->getQuota();
-            $line[] = $quota;
+            //$quota  = $v->getQuota();
+            //$line[] = $quota;
+       		$consoRessource = $this->sp->getConsoRessource($p,'cpu',$annee);
+			$quota          = $consoRessource[1];
+			$line[] = $quota;
             for ($m=0;$m<12;$m++)
             {
 				$c = $sp->getConsoMois($p,$annee,$m);
@@ -786,7 +789,7 @@ class SessionController extends AbstractController
         $line[] = $tttl;
 
         if ($tq > 0) {
-            $line[] = intval(100.0 * $tttl / $tq);
+            $line[] = ($annee_courante_flg) ? 'N/A' : intval(100.0 * $tttl / $tq);
         } else {
             $line[] = 'N/A';
         }

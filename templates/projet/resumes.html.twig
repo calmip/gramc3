@@ -21,8 +21,8 @@
                 {% for pu in p.publis %}
                     <li>
                         {{ pu.refbib }} -
-                        {% if pu.doi != "" %}<small><strong>doi:</strong> pu.doi</small>{% endif %}
-                        {% if pu.openurl != "" %}<small><strong>url:</strong> pu.open_url</small>{% endif %}
+                        {% if pu.doi != "" %}<small><strong>doi:</strong>&nbsp;{{ pu.doicleaned }}</small>{% endif %}
+                        {% if pu.openurl != "" %}<small><strong>url:</strong> {{ pu.openurl }} </small>{% endif %}
                     </li>
                 {% endfor %}
             </ul>
