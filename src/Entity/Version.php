@@ -373,6 +373,55 @@ class Version implements Demande
     private $demForm2 = '';
 
     /**
+     * @var integer
+     *
+     * @ORM\Column(name="dem_form_3", type="integer", nullable=true)
+     */
+    private $demForm3 = '';
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="dem_form_4", type="integer", nullable=true)
+     */
+    private $demForm4 = '';
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="dem_form_5", type="integer", nullable=true)
+     */
+    private $demForm5 = '';
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="dem_form_6", type="integer", nullable=true)
+     */
+    private $demForm6 = '';
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="dem_form_7", type="integer", nullable=true)
+     */
+    private $demForm7 = '';
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="dem_form_8", type="integer", nullable=true)
+     */
+    private $demForm8 = '';
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="dem_form_9", type="integer", nullable=true)
+     */
+    private $demForm9 = '';
+
+    /**
      * @var boolean
      *
      * @ORM\Column(name="dem_form_fortran", type="boolean", nullable=true)
@@ -2095,6 +2144,174 @@ class Version implements Demande
     public function getDemForm2()
     {
         return $this->demForm2;
+    }
+
+    /**
+     * Set demForm3
+     *
+     * @param boolean $demForm3
+     *
+     * @return Version
+     */
+    public function setDemForm3($demForm3)
+    {
+        $this->demForm3 = $demForm3;
+
+        return $this;
+    }
+
+    /**
+     * Get demForm3
+     *
+     * @return boolean
+     */
+    public function getDemForm3()
+    {
+        return $this->demForm3;
+    }
+
+    /**
+     * Set demForm4
+     *
+     * @param boolean $demForm4
+     *
+     * @return Version
+     */
+    public function setDemForm4($demForm4)
+    {
+        $this->demForm4 = $demForm4;
+
+        return $this;
+    }
+
+    /**
+     * Get demForm4
+     *
+     * @return boolean
+     */
+    public function getDemForm4()
+    {
+        return $this->demForm4;
+    }
+
+    /**
+     * Set demForm5
+     *
+     * @param boolean $demForm5
+     *
+     * @return Version
+     */
+    public function setDemForm5($demForm5)
+    {
+        $this->demForm5 = $demForm5;
+
+        return $this;
+    }
+
+    /**
+     * Get demForm5
+     *
+     * @return boolean
+     */
+    public function getDemForm5()
+    {
+        return $this->demForm5;
+    }
+
+    /**
+     * Set demForm6
+     *
+     * @param boolean $demForm6
+     *
+     * @return Version
+     */
+    public function setDemForm6($demForm6)
+    {
+        $this->demForm6 = $demForm6;
+
+        return $this;
+    }
+
+    /**
+     * Get demForm6
+     *
+     * @return boolean
+     */
+    public function getDemForm6()
+    {
+        return $this->demForm6;
+    }
+
+    /**
+     * Set demForm7
+     *
+     * @param boolean $demForm7
+     *
+     * @return Version
+     */
+    public function setDemForm7($demForm7)
+    {
+        $this->demForm7 = $demForm7;
+
+        return $this;
+    }
+
+    /**
+     * Get demForm7
+     *
+     * @return boolean
+     */
+    public function getDemForm7()
+    {
+        return $this->demForm7;
+    }
+
+    /**
+     * Set demForm8
+     *
+     * @param boolean $demForm8
+     *
+     * @return Version
+     */
+    public function setDemForm8($demForm8)
+    {
+        $this->demForm8 = $demForm8;
+
+        return $this;
+    }
+
+    /**
+     * Get demForm8
+     *
+     * @return boolean
+     */
+    public function getDemForm8()
+    {
+        return $this->demForm8;
+    }
+
+    /**
+     * Set demForm9
+     *
+     * @param boolean $demForm9
+     *
+     * @return Version
+     */
+    public function setDemForm9($demForm9)
+    {
+        $this->demForm9 = $demForm9;
+
+        return $this;
+    }
+
+    /**
+     * Get demForm9
+     *
+     * @return boolean
+     */
+    public function getDemForm9()
+    {
+        return $this->demForm9;
     }
 
     /**

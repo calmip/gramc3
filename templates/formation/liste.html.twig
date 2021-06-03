@@ -10,7 +10,7 @@
     <table id="formations" >
     <thead>
         <tr>
-			{% if is_granted('ROLE_ADMIN') %}<th colspan="2">&nbsp;</th>{% endif %}<th>Numéro d'ordre</th><th>Acronyme</th><th>Libellé</th>
+			{% if is_granted('ROLE_ADMIN') %}<th colspan="2">&nbsp;</th>{% endif %}<th>champ de version</th><th>Acronyme</th><th>Libellé</th>
         </tr>
     </thead>
     <tbody>
@@ -18,15 +18,15 @@
         <tr>
 			{% if is_granted('ROLE_ADMIN') %}
             <td>
-                <a class="suppression" href="{{ path('supprimer_formation',{'id' : form.idForm }) }}" title="Supprimer">
+                <a class="suppression" href="{{ path('supprimer_formation',{'id' : form.id }) }}" title="Supprimer">
                 <img class="bouton_poussoir" src="{{ gramcmacros.img_supprimer() }}" alt="Supprimer" /></a>
             </td>
             <td>
-                <a class="modification" href="{{ path('modifier_formation',{'id' : form.idForm }) }}" title="Modifier le libellé">
+                <a class="modification" href="{{ path('modifier_formation',{'id' : form.id }) }}" title="Modifier le libellé">
                 <img class="bouton_poussoir" src="{{ gramcmacros.img_modifier() }}" alt="Modifier" /></a>
             </td>
             {% endif %}
-            <td>{{ form.numeroform }}</td>
+            <td>{% if form.numeroform<10 %}form{{ form.numeroform }}{% else %} <em>aucun</em> (n°{{form.numeroform}}){% endif %}</td>
             <td> {{ form.acroform }}</td>
             <td>{{ form.nomform }}</td>
         </tr>

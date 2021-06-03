@@ -32,12 +32,12 @@ use App\Entity\Individu;
 use App\Entity\CollaborateurVersion;
 use App\Entity\RapportActivite;
 use App\Entity\Rattachement;
+use App\Entity\Formation;
 
 use App\GramcServices\ServiceJournal;
 use App\GramcServices\ServiceMenus;
 use App\GramcServices\ServiceVersions;
 use App\GramcServices\ServiceForms;
-
 use App\GramcServices\Workflow\Projet\ProjetWorkflow;
 
 use App\Utils\Functions;
@@ -45,7 +45,11 @@ use App\Utils\Etat;
 use App\Utils\Signal;
 use App\Utils\GramcDate;
 use App\Utils\IndividuForm;
+
 use App\Form\IndividuFormType;
+
+use App\Repository\FormationRepository;
+
 use App\Validator\Constraints\PagesNumber;
 
 use Psr\Log\LoggerInterface;
@@ -285,9 +289,10 @@ class VersionModifController extends AbstractController
 	{
 	    $this->modifierPartieIV($version,$form);
 	}
-        $this->modifierPartieV($version,$form);
+        $nb_form = 0;
+	$this->modifierPartieV($version,$form, $nb_form);
 
-		$form
+	$form
             ->add( 'fermer',   SubmitType::Class )
                 //->add( 'enregistrer',   SubmitType::Class )
             ->add( 'annuler',   SubmitType::Class );
@@ -341,6 +346,7 @@ class VersionModifController extends AbstractController
             'collaborateur_form' => $collaborateur_form->createView(),
             'todo'          => static::versionValidate($version, $sj, $em, $sval,$this->getParameter('nodata')),
             'renouvellement'    => $renouvellement,
+	    'nb_form'       => $nb_form
             ]);
 	}
 
@@ -569,21 +575,19 @@ class VersionModifController extends AbstractController
 	}
 
 	/* Les champs de la partie V */
-	private function modifierPartieV($version,&$form)
+	private function modifierPartieV($version, &$form, &$nb_form)
 	{
-		$form
-            ->add( 'demFormPrise',  CheckboxType::class, [ 'required'       =>  false ])
-            ->add( 'demFormDebogage',  CheckboxType::class, [ 'required'       =>  false ])
-            ->add( 'demFormOptimisation',  CheckboxType::class, [ 'required'       =>  false ])
-            ->add( 'demFormFortran',  CheckboxType::class, [ 'required'       =>  false ])
-            ->add( 'demFormC',  CheckboxType::class, [ 'required'       =>  false ])
-            ->add( 'demFormCpp',  CheckboxType::class, [ 'required'       =>  false ])
-            ->add( 'demFormPython',  CheckboxType::class, [ 'required'       =>  false ])
-            ->add( 'demFormMPI',  CheckboxType::class, [ 'required'       =>  false ])
-            ->add( 'demFormOpenMP',  CheckboxType::class, [ 'required'       =>  false ])
-            ->add( 'demFormOpenACC',  CheckboxType::class, [ 'required'       =>  false ])
-            ->add( 'demFormParaview',  CheckboxType::class, [ 'required'       =>  false ])
-            ->add( 'demFormAutresAutres',  TextAreaType::class, [ 'required'       =>  false ]);
+	    $em = $this->getDoctrine()->getManager();
+	    $formations = $em->getRepository(\App\Entity\Formation::class)->getFormationsPourVersion();
+	    
+	    $nb_form = 0;
+	    foreach ($formations as  $f)
+	    {
+		$champ = 'demForm'.$f->getNumeroForm();
+		$label = $f->getNomForm();
+		$form->add($champ, IntegerType::class, [ 'required' => false, 'label' => $label ]);
+		$nb_form++;
+	    }
 	}
 
     /*

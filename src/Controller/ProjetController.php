@@ -28,6 +28,7 @@ use App\Entity\Projet;
 use App\Entity\Version;
 use App\Entity\Session;
 use App\Entity\CollaborateurVersion;
+use App\Entity\Formation;
 use App\Entity\User;
 use App\Entity\Thematique;
 use App\Entity\Rattachement;
@@ -1973,118 +1974,148 @@ class ProjetController extends AbstractController
 	// Consulter les projets de type 1 (projets PROJET_SESS)
     private function consulterType1(Projet $projet, Version $version, $loginname, Request $request)
     {
-		$sm = $this->sm;
-		$sp = $this->sp;
-		$ac = $this->ac;
-		$sv = $this->sv;
-		$sj = $this->sj;
-		$ff = $this->ff;
+	$em = $this->getDoctrine()->getManager();
+	$sm = $this->sm;
+	$sp = $this->sp;
+	$ac = $this->ac;
+	$sv = $this->sv;
+	$sj = $this->sj;
+	$ff = $this->ff;
+    
+    
+	$session_form = Functions::createFormBuilder($ff, ['version' => $version ] )
+	    ->add('version',   EntityType::class,
+		    [
+		    'multiple' => false,
+		    'class'    => 'App:Version',
+		    'required' =>  true,
+		    'label'    => '',
+		    'choices'  =>  $projet->getVersion(),
+		    'choice_label' => function($version){ return $version->getSession(); }
+		    ])
+	->add('submit', SubmitType::class, ['label' => 'Changer'])
+	->getForm();
+    
+	$session_form->handleRequest($request);
 
+	if ( $session_form->isSubmitted() && $session_form->isValid() )
+	{
+	    $version = $session_form->getData()['version'];
+	}
 
-	    $session_form = Functions::createFormBuilder($ff, ['version' => $version ] )
-	        ->add('version',   EntityType::class,
-	                [
-	                'multiple' => false,
-	                'class'    => 'App:Version',
-	                'required' =>  true,
-	                'label'    => '',
-	                'choices'  =>  $projet->getVersion(),
-	                'choice_label' => function($version){ return $version->getSession(); }
-	                ])
-	    ->add('submit', SubmitType::class, ['label' => 'Changer'])
-	    ->getForm();
+	if( $version != null )
+	{
+	    $session = $version->getSession();
+	}
+	else
+	{
+	    $sj->throwException(__METHOD__ . ':' . __LINE__ .' projet ' . $projet . ' sans version');
+	}
 
-	    $session_form->handleRequest($request);
+	$menu = [];
+	if ($ac->isGranted('ROLE_ADMIN'))
+	{
+	    $menu[] = $sm->rallonge_creation( $projet );
+	}
+	$menu[] = $sm->changer_responsable($version);
+	$menu[] = $sm->renouveler_version($version);
+	$menu[] = $sm->modifier_version( $version );
+	$menu[] = $sm->envoyer_expert( $version );
+	$menu[] = $sm->modifier_collaborateurs( $version );
+	if ( $this->getParameter('nodata')==false)
+	{
+	    $menu[] = $sm->donnees( $version );
+	}
+	$menu[] = $sm->telechargement_fiche( $version );
+	$menu[] = $sm->televersement_fiche( $version );
 
-	    if ( $session_form->isSubmitted() && $session_form->isValid() )
+	$etat_version = $version->getEtatVersion();
+	if ( $this->getParameter('rapport_dactivite') )
+	{
+	    if( ($etat_version == Etat::ACTIF || $etat_version == Etat::TERMINE ) && ! $sp->hasRapport( $projet, $version->getAnneeSession() ) )
 	    {
-	        $version = $session_form->getData()['version'];
-		}
-
-	    if( $version != null )
-	    {
-	        $session = $version->getSession();
-		}
-	    else
-	    {
-	        $sj->throwException(__METHOD__ . ':' . __LINE__ .' projet ' . $projet . ' sans version');
-		}
-
-		$menu = [];
-	    if ($ac->isGranted('ROLE_ADMIN'))
-	    {
-			$menu[] = $sm->rallonge_creation( $projet );
-		}
-	    $menu[] = $sm->changer_responsable($version);
-	    $menu[] = $sm->renouveler_version($version);
-	    $menu[] = $sm->modifier_version( $version );
-	    $menu[] = $sm->envoyer_expert( $version );
-	    $menu[] = $sm->modifier_collaborateurs( $version );
-	    if ( $this->getParameter('nodata')==false)
-	    {
-		$menu[] = $sm->donnees( $version );
+		$menu[] = $sm->telecharger_modele_rapport_dactivite( $version );
+		$menu[] = $sm->televerser_rapport_annee( $version );
 	    }
-	    $menu[] = $sm->telechargement_fiche( $version );
-	    $menu[] = $sm->televersement_fiche( $version );
+	}
+	    
+	$menu[]       = $sm->gerer_publications( $projet );
+	$img_expose_1 = $sv->imageProperties('img_expose_1', $version);
+	$img_expose_2 = $sv->imageProperties('img_expose_2', $version);
+	$img_expose_3 = $sv->imageProperties('img_expose_3', $version);
+	$document     = $sv->getdocument($version);
 
-	    $etat_version = $version->getEtatVersion();
-	    if ( $this->getParameter('rapport_dactivite') )
-	    {
-		if( ($etat_version == Etat::ACTIF || $etat_version == Etat::TERMINE ) && ! $sp->hasRapport( $projet, $version->getAnneeSession() ) )
-		{
-		    $menu[] = $sm->telecharger_modele_rapport_dactivite( $version );
-		    $menu[] = $sm->televerser_rapport_annee( $version );
-		}
+	/*
+	if( $img_expose_1 == null )
+	    $sj->debugMessage(__METHOD__.':'.__LINE__ ." img_expose1 null");
+	else
+	    $sj->debugMessage(__METHOD__.':'.__LINE__ . " img_expose1 non null");
+	*/
+
+	$img_justif_renou_1 = $sv->imageProperties('img_justif_renou_1', $version);
+	$img_justif_renou_2 = $sv->imageProperties('img_justif_renou_2', $version);
+	$img_justif_renou_3 = $sv->imageProperties('img_justif_renou_3', $version);
+
+	$toomuch = false;
+	if ($session->getLibelleTypeSession()=='B' && ! $sv->isNouvelle($version)) {
+	    $version_prec = $version->versionPrecedente();
+	    if ($version_prec->getAnneeSession() == $version->getAnneeSession()) {
+		$toomuch  = $sv -> is_demande_toomuch($version_prec->getAttrHeures(),$version->getDemHeures());
 	    }
-		
-	    $menu[]       = $sm->gerer_publications( $projet );
-	    $img_expose_1 = $sv->imageProperties('img_expose_1', $version);
-	    $img_expose_2 = $sv->imageProperties('img_expose_2', $version);
-	    $img_expose_3 = $sv->imageProperties('img_expose_3', $version);
-	    $document     = $sv->getdocument($version);
-
-	    /*
-	    if( $img_expose_1 == null )
-	        $sj->debugMessage(__METHOD__.':'.__LINE__ ." img_expose1 null");
-	    else
-	        $sj->debugMessage(__METHOD__.':'.__LINE__ . " img_expose1 non null");
-	    */
-
-	    $img_justif_renou_1 = $sv->imageProperties('img_justif_renou_1', $version);
-	    $img_justif_renou_2 = $sv->imageProperties('img_justif_renou_2', $version);
-	    $img_justif_renou_3 = $sv->imageProperties('img_justif_renou_3', $version);
-
-	    $toomuch = false;
-	    if ($session->getLibelleTypeSession()=='B' && ! $sv->isNouvelle($version)) {
-	        $version_prec = $version->versionPrecedente();
-	        if ($version_prec->getAnneeSession() == $version->getAnneeSession()) {
-	            $toomuch  = $sv -> is_demande_toomuch($version_prec->getAttrHeures(),$version->getDemHeures());
-	        }
-	    }
-	    $rapport_1 = $sp -> getRapport($projet, $version->getAnneeSession() - 1);
-	    $rapport   = $sp -> getRapport($projet, $version->getAnneeSession());
-	    return $this->render('projet/consulter_projet_sess.html.twig',
-            [
-	            'projet'             => $projet,
-	            'loginname'          => $loginname,
-	            'version_form'       => $session_form->createView(),
-	            'version'            => $version,
-	            'session'            => $session,
-	            'menu'               => $menu,
-	            'img_expose_1'       => $img_expose_1,
-	            'img_expose_2'       => $img_expose_2,
-	            'img_expose_3'       => $img_expose_3,
-	            'img_justif_renou_1' => $img_justif_renou_1,
-	            'img_justif_renou_2' => $img_justif_renou_2,
-	            'img_justif_renou_3' => $img_justif_renou_3,
-	            'conso_cpu'          => $sp->getConsoRessource($projet,'cpu',$version->getAnneeSession()),
-	            'conso_gpu'          => $sp->getConsoRessource($projet,'gpu',$version->getAnneeSession()),
-	            'rapport_1'          => $rapport_1,
-	            'rapport'            => $rapport,
-		    'document'           => $document,
-	            'toomuch'            => $toomuch
-            ]
-	            );
+	}
+	$rapport_1 = $sp -> getRapport($projet, $version->getAnneeSession() - 1);
+	$rapport   = $sp -> getRapport($projet, $version->getAnneeSession());
+	
+	// Construction du tableau formations
+	// $form_ver contient les getDemFormN() 
+	// TODO --> Un eval ? (pas réussi !)
+	$form_ver=[];
+	$form_ver[0] = $version->getDemForm0();
+	$form_ver[1] = $version->getDemForm1();
+	$form_ver[2] = $version->getDemForm2();
+	$form_ver[3] = $version->getDemForm3();
+	$form_ver[4] = $version->getDemForm4();
+	$form_ver[5] = $version->getDemForm5();
+	$form_ver[6] = $version->getDemForm6();
+	$form_ver[7] = $version->getDemForm7();
+	$form_ver[8] = $version->getDemForm8();
+	$form_ver[9] = $version->getDemForm9();
+	
+	$formations_all = $em -> getRepository(Formation::class) -> getFormationsPourVersion();
+	$formation = [];
+	foreach ($formations_all as $fa)
+	{
+	    $f = [];
+	    $f['nb']  = $fa->getNumeroForm();
+	    $f['nom'] = $fa->getNomForm();
+	    $f['acro']= $fa->getAcroForm();
+	    $f['rep'] = $form_ver[$f['nb']];
+	    $formation[] = $f;
+	}
+	
+	return $this->render('projet/consulter_projet_sess.html.twig',
+	[
+	    'projet'             => $projet,
+	    'loginname'          => $loginname,
+	    'version_form'       => $session_form->createView(),
+	    'version'            => $version,
+	    'session'            => $session,
+	    'menu'               => $menu,
+	    'img_expose_1'       => $img_expose_1,
+	    'img_expose_2'       => $img_expose_2,
+	    'img_expose_3'       => $img_expose_3,
+	    'img_justif_renou_1' => $img_justif_renou_1,
+	    'img_justif_renou_2' => $img_justif_renou_2,
+	    'img_justif_renou_3' => $img_justif_renou_3,
+	    'conso_cpu'          => $sp->getConsoRessource($projet,'cpu',$version->getAnneeSession()),
+	    'conso_gpu'          => $sp->getConsoRessource($projet,'gpu',$version->getAnneeSession()),
+	    'rapport_1'          => $rapport_1,
+	    'rapport'            => $rapport,
+	    'document'           => $document,
+	    'toomuch'            => $toomuch,
+	    'formation'          => $formation
+	]
+	);
 	}
 
 	// Consulter les projets de type 2 (projets test)

@@ -88,7 +88,9 @@ class ExceptionListener
 		// pour avoir des détails sur l'erreur
 		// Mais en général, laisser commenté sinon grosses emmerdes en perspective !!!
         //$response =  new Response( '<pre>' . $exception . '</pre>');
-        //$event->setResponse($response);
+	//return $response;
+        
+	//$event->setResponse($response);
  
         // nous captons des erreurs de la page d'accueil
         if( $event->getRequest()->getPathInfo() == '/' )

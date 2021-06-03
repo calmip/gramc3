@@ -63,7 +63,7 @@ class FormationController extends AbstractController
         return $this->render( 'formation/liste.html.twig',
             [
             'menu' => $menu,
-            'formations' => $em->getRepository('App:Formation')->findBy( [],['numeroForm' => 'ASC'])
+            'formations' => $em->getRepository(Formation::class)->findBy( [],['numeroForm' => 'ASC'])
             ]
             );
 	}

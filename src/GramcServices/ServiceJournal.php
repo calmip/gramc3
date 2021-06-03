@@ -72,38 +72,39 @@ class ServiceJournal
      ***/
     private function journalMessage($message, $niveau)
     {
-		$rs    = $this->rs;
-		$ss    = $this->ss;
-		$log   = $this->log;
-		$token = $this->token;
-		$em    = $this->em;
+	return;
+	$rs    = $this->rs;
+	$ss    = $this->ss;
+	$log   = $this->log;
+	$token = $this->token;
+	$em    = $this->em;
 
         $journal = new Journal();
         $journal->setStamp( new \DateTime() );
 
-		// Si l'erreur provient de l'API, getUser() n'est pas un Individu
-		if ($token != null && $token->getUser() != null && $token->getUser() instanceof Individu )
-		{
-			$journal->setIndividu  ( $token->getUser() );
-			$journal->setIdIndividu( $token->getUser()->getId() );
-		}
-		else
-		{
+	// Si l'erreur provient de l'API, getUser() n'est pas un Individu
+	if ($token != null && $token->getUser() != null && $token->getUser() instanceof Individu )
+	{
+		$journal->setIndividu  ( $token->getUser() );
+		$journal->setIdIndividu( $token->getUser()->getId() );
+	}
+	else
+	{
             $journal->setIdIndividu( null );
             $journal->setIndividu( null );
-		}
+	}
 			
         $journal->setGramcSessId( $ss->getId() );
 
-		if ($rs->getMasterRequest() != null
-			&& $rs->getMasterRequest()->getClientIp() != null)
-		{
+	if ($rs->getMasterRequest() != null
+		&& $rs->getMasterRequest()->getClientIp() != null)
+	{
 	        $ip = $rs->getMasterRequest()->getClientIp();
-		}
-	    else
-	    {
-			$ip = '0.0.0.0';
-		}
+	}
+	else
+	{
+		$ip = '0.0.0.0';
+	}
 
         $journal->setIp( $ip );
         $journal->setMessage( substr($message,0,300) );
