@@ -2066,33 +2066,8 @@ class ProjetController extends AbstractController
 	$rapport_1 = $sp -> getRapport($projet, $version->getAnneeSession() - 1);
 	$rapport   = $sp -> getRapport($projet, $version->getAnneeSession());
 	
-	// Construction du tableau formations
-	// $form_ver contient les getDemFormN() 
-	// TODO --> Un eval ? (pas réussi !)
-	$form_ver=[];
-	$form_ver[0] = $version->getDemForm0();
-	$form_ver[1] = $version->getDemForm1();
-	$form_ver[2] = $version->getDemForm2();
-	$form_ver[3] = $version->getDemForm3();
-	$form_ver[4] = $version->getDemForm4();
-	$form_ver[5] = $version->getDemForm5();
-	$form_ver[6] = $version->getDemForm6();
-	$form_ver[7] = $version->getDemForm7();
-	$form_ver[8] = $version->getDemForm8();
-	$form_ver[9] = $version->getDemForm9();
-	
-	$formations_all = $em -> getRepository(Formation::class) -> getFormationsPourVersion();
-	$formation = [];
-	foreach ($formations_all as $fa)
-	{
-	    $f = [];
-	    $f['nb']  = $fa->getNumeroForm();
-	    $f['nom'] = $fa->getNomForm();
-	    $f['acro']= $fa->getAcroForm();
-	    $f['rep'] = $form_ver[$f['nb']];
-	    $formation[] = $f;
-	}
-	
+	$formation = $sv->buildFormations($version);
+		
 	return $this->render('projet/consulter_projet_sess.html.twig',
 	[
 	    'projet'             => $projet,

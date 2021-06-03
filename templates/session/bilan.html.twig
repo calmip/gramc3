@@ -24,7 +24,6 @@
 
     <h2>Réponses au questionnaire (session {{ idSession }})</h2>
 
-
     <form action="{{ path('questionnaire_csv', {'id': idSession } ) }}">
             <input type="submit" value="Télécharger en csv" />
     </form>
@@ -32,7 +31,8 @@
 
     <br>
 
-    <div id="projets"><table id="bilan_session">
+    <div id="projets">
+        <table id="bilan_session">
         <thead>
             <tr>
                 <th>Numéro</th>
@@ -97,8 +97,40 @@
         </tr>
         {% endfor %}
         </tbody>
-    </table></div>
+        </table>
+    
+        <h2>Questionnaire formations</h2>
+    
+        <table id="formations">
+        <thead>
+            <tr>
+                <th>Numéro</th>
+                <th></th>
+                {% for label in form_labels %}
+                    <th><span title="{{label.nom}}">{{label.acro}}</span></th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for version in versions %}
+            <tr>
+                <td>{{version}}</td>
+                <td>
+                {% if version.projet != null and  version.projet.idProjet != null %}
+                <a href="{{ path('consulter_projet', { 'id': version.projet.idProjet }) }}" title="Consulter le projet">
+                <img src="{{ asset('icones/consulter.png') }}" alt="consulter" /></a>
+                {% endif %}
+                </td>
 
+                {% for label in form_labels %}
+                <td>{{versions_suppl[version.idVersion]['formation'][label.acro].rep}}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}            
+        </tbody>
+        </table>
+ 
+    </div>
 </section>
 
 {% endblock body %}

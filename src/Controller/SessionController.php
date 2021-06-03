@@ -29,6 +29,7 @@ use App\Entity\Projet;
 use App\Entity\Version;
 use App\GramcServices\GramcDate;
 use App\GramcServices\ServiceJournal;
+use App\GramcServices\ServiceVersions;
 use App\GramcServices\ServiceMenus;
 use App\GramcServices\ServiceProjets;
 use App\GramcServices\ServiceSessions;
@@ -59,31 +60,34 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
  */
 class SessionController extends AbstractController
 {
-	private $sj;
-	private $sm;
-	private $sp;
-	private $ss;
-	private $sd;
-	private $sw;
-	private $sss;
-		
-	public function __construct (ServiceJournal $sj,
-								 ServiceMenus $sm,
-								 ServiceProjets $sp,
-								 ServiceSessions $ss,
-								 GramcDate $sd,
-								 SessionWorkflow $sw,
- 								 SessionInterface $sss
-								 )
-	{
-		$this->sj = $sj;
-		$this->sm = $sm;
-		$this->sp = $sp;
-		$this->ss = $ss;
-		$this->sd = $sd;
-		$this->sw = $sw;
-		$this->sss= $sss;
-	}
+    private $sj;
+    private $sm;
+    private $sv;
+    private $sp;
+    private $ss;
+    private $sd;
+    private $sw;
+    private $sss;
+	    
+    public function __construct (ServiceJournal $sj,
+				 ServiceMenus $sm,
+				 ServiceVersions $sv,
+				 ServiceProjets $sp,
+				 ServiceSessions $ss,
+				 GramcDate $sd,
+				 SessionWorkflow $sw,
+				 SessionInterface $sss
+				 )
+    {
+	$this->sj = $sj;
+	$this->sm = $sm;
+	$this->sv = $sv;
+	$this->sp = $sp;
+	$this->ss = $ss;
+	$this->sd = $sd;
+	$this->sw = $sw;
+	$this->sss= $sss;
+    }
 
     /**
      * Lists all session entities.
@@ -535,8 +539,6 @@ class SessionController extends AbstractController
         ;
     }
 
-   ////////////////////////////////////////////////////////////////////
-
     /**
      *
      * @Route("/bilan", name="bilan_session")
@@ -545,27 +547,45 @@ class SessionController extends AbstractController
      */
     public function bilanAction(Request $request)
     {
-		$em      = $this->getDoctrine()->getManager();
-		$ss      = $this->ss;
-		$sp      = $this->sp;
-		$session = $ss->getSessionCourante();
+	$em      = $this->getDoctrine()->getManager();
+	$ss      = $this->ss;
+	$sp      = $this->sp;
+	$sv      = $this->sv;
+	$session = $ss->getSessionCourante();
         $data    = $ss->selectSession($this->createFormBuilder(['session'=>$session]),$request); // formulaire
         $session = $data['session']!=null?$data['session']:$session;
         $form    = $data['form']->createView();
 
-		$versions = $em->getRepository(Version::class)->findBy( ['session' => $session ] );
-		$versions_suppl = [];
-		foreach ($versions as $v)
-		{
-			$versions_suppl[$v->getIdVersion()]['conso'] = $sp->getConsoCalculVersion($v);
-		}
+	$versions = $em->getRepository(Version::class)->findBy( ['session' => $session ] );
+	$versions_suppl = [];
+	foreach ($versions as $v)
+	{
+	    $versions_suppl[$v->getIdVersion()]['conso'] = $sp->getConsoCalculVersion($v);
+	    $f = $sv -> buildFormations($v);
+	    $versions_suppl[$v->getIdVersion()]['formation'] = $f;
+	}
+	$form_labels = [];
+	if (count($versions)>0)
+	{
+	    $v0 = $versions[0];
+	    $formation = $versions_suppl[$v0->getIdVersion()]['formation'];
+	    foreach ($formation as $f)
+	    {
+		$fl = [];
+		$fl['acro'] = $f['acro'];
+		$fl['nom']  = $f['nom'];
+		$form_labels[] = $fl;
+	    }
+	}
+	    
         return $this->render('session/bilan.html.twig',
-		[
+	[
             'form'      => $form,
             'idSession' => $session->getIdSession(),
             'versions'  => $versions,
-            'versions_suppl' => $versions_suppl
-		]);
+            'versions_suppl' => $versions_suppl,
+	    'form_labels' => $form_labels
+	]);
     }
 
     /**

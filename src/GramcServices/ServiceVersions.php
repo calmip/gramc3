@@ -28,6 +28,8 @@ use App\Entity\Projet;
 use App\Entity\Version;
 use App\Entity\Session;
 use App\Entity\Individu;
+use App\Entity\Formation;
+
 use App\Utils\GramcDate;
 use App\Utils\Functions;
 
@@ -35,16 +37,16 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class ServiceVersions
 {
-	public function __construct($attrib_seuil_a, $prj_prefix, $fig_directory, $signature_directory, ServiceJournal $sj, EntityManagerInterface $em)
-	{
-		$this->attrib_seuil_a      = intval($attrib_seuil_a);
-		$this->prj_prefix          = $prj_prefix;
-		$this->fig_directory       = $fig_directory;
-		$this->signature_directory = $signature_directory;
-		
-		$this->sj = $sj;
-		$this->em = $em;
-	}
+    public function __construct($attrib_seuil_a, $prj_prefix, $fig_directory, $signature_directory, ServiceJournal $sj, EntityManagerInterface $em)
+    {
+	    $this->attrib_seuil_a      = intval($attrib_seuil_a);
+	    $this->prj_prefix          = $prj_prefix;
+	    $this->fig_directory       = $fig_directory;
+	    $this->signature_directory = $signature_directory;
+	    
+	    $this->sj = $sj;
+	    $this->em = $em;
+    }
 	
     /*********
      * Utilisé seulement en session B
@@ -54,8 +56,8 @@ class ServiceVersions
      * return true/false
      *
      **************************/
-    public function is_demande_toomuch($attr_heures_a, $dem_heures_b) {
-
+    public function is_demande_toomuch($attr_heures_a, $dem_heures_b) 
+    {
         // Si demande en A = 0, no pb (il s'agit d'un nouveau projet apparu en B)
         if ($attr_heures_a==0) return false;
 
@@ -99,18 +101,18 @@ class ServiceVersions
      ***************************/
     public function imageProperties( $filename, Version $version)
     {
-	    $full_filename = $this->imagePath( $filename, $version);
-	    if( file_exists( $full_filename ) && is_file( $full_filename ) )
+	$full_filename = $this->imagePath( $filename, $version);
+	if( file_exists( $full_filename ) && is_file( $full_filename ) )
         {
-	        $imageinfo  =   [];
-	        $my_image_info = getimagesize ($full_filename, $imageinfo  );
-	        return [
-	            'contents'  =>  base64_encode( file_get_contents( $full_filename ) ),
-	            'width'     =>  $my_image_info[0],
-	            'height'    =>  $my_image_info[1],
-	            'balise'    =>  $my_image_info[2],
-	            'mime'      =>  $my_image_info['mime'],
-	            ];
+	    $imageinfo  =   [];
+	    $my_image_info = getimagesize ($full_filename, $imageinfo  );
+	    return [
+		'contents'  =>  base64_encode( file_get_contents( $full_filename ) ),
+		'width'     =>  $my_image_info[0],
+		'height'    =>  $my_image_info[1],
+		'balise'    =>  $my_image_info[2],
+		'mime'      =>  $my_image_info['mime'],
+		];
         }
 	else
 	{
@@ -152,18 +154,18 @@ class ServiceVersions
      ************************************/
     public function imagePath( $filename, Version $version)
     {
-	    $full_filename = $this->imageDir( $version ) .'/'.  $filename;
+	$full_filename = $this->imageDir( $version ) .'/'.  $filename;
 
-	    if( file_exists( $full_filename . ".png" ) && is_file( $full_filename . ".png") )
-	    {
-	        $full_filename  =  $full_filename. ".png";
-		}
-		
-	    elseif( file_exists( $full_filename . ".jpeg" ) && is_file( $full_filename . ".jpeg") )
-	    {
-	        $full_filename  =  $full_filename. ".jpeg";
-		}
-	    return $full_filename;
+	if( file_exists( $full_filename . ".png" ) && is_file( $full_filename . ".png") )
+	{
+	    $full_filename  =  $full_filename. ".png";
+	}
+	    
+	elseif( file_exists( $full_filename . ".jpeg" ) && is_file( $full_filename . ".jpeg") )
+	{
+	    $full_filename  =  $full_filename. ".jpeg";
+	}
+	return $full_filename;
     }
 
 	/*******************************
@@ -176,38 +178,38 @@ class ServiceVersions
 	 *******************************************/
     public function imageDir(Version $version )
     {
-	    $dir = $this->fig_directory;
-	    if( ! is_dir ( $dir ) )
-		{
-            if( file_exists( $dir ) && is_file( $dir ) ) unlink( $dir );
-            mkdir( $dir );
-            $this->sj->warningMessage("fig_directory " . $dir . " créé !");
-		}
-		$dir  .= '/'. $version->getProjet()->getIdProjet();
+	$dir = $this->fig_directory;
+	if( ! is_dir ( $dir ) )
+	{
+	    if( file_exists( $dir ) && is_file( $dir ) ) unlink( $dir );
+	    mkdir( $dir );
+	    $this->sj->warningMessage("fig_directory " . $dir . " créé !");
+	}
+	$dir  .= '/'. $version->getProjet()->getIdProjet();
 
-	    if( ! is_dir ( $dir ) )
-		{
-            if( file_exists( $dir ) && is_file( $dir ) ) unlink( $dir );
-            mkdir( $dir );
-		}
+	if( ! is_dir ( $dir ) )
+	{
+	    if( file_exists( $dir ) && is_file( $dir ) ) unlink( $dir );
+	    mkdir( $dir );
+	}
 
-	    $dir  .= '/'. $version->getIdVersion();
+	$dir  .= '/'. $version->getIdVersion();
 
-	    if( ! is_dir ( $dir ) )
-		{
-            if( file_exists( $dir ) && is_file( $dir ) ) unlink( $dir );
-            mkdir( $dir );
-		}
-	    return $dir;
+	if( ! is_dir ( $dir ) )
+	{
+	    if( file_exists( $dir ) && is_file( $dir ) ) unlink( $dir );
+	    mkdir( $dir );
+	}
+	return $dir;
     }
 
-	/**************************************
-	 * Changer le responsable d'une version
-	 **********************************************/
-	public function changerResponsable(Version $version, Individu $new)
+    /**************************************
+     * Changer le responsable d'une version
+     **********************************************/
+    public function changerResponsable(Version $version, Individu $new)
     {
         foreach( $version->getCollaborateurVersion() as $item )
-		{
+	{
             $collaborateur = $item->getCollaborateur();
             if( $collaborateur == null )
             {
@@ -223,11 +225,11 @@ class ServiceVersions
                 if( $labo != null )
                 {
                     $version->setPrjLLabo( Functions::string_conversion( $labo->getAcroLabo() ) );
-				}
+		}
                 else
                 {
                     $this->sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Le nouveau responsable " . $new . " ne fait partie d'aucun laboratoire");
-				}
+		}
                 $this->setLaboResponsable($version, $new );
                 $this->em->persist( $version );
             }
@@ -236,14 +238,14 @@ class ServiceVersions
                 $item->setResponsable(false);
                 $this->em->persist( $item );
             }
-		}
+	}
         $this->em->flush();
     }
 
-	/********************************************
-	 * Supprimer un collaborateur à une version
-	 **********************************************************/
-	public function supprimerCollaborateur(Version $version, Individu $individu)
+    /********************************************
+     * Supprimer un collaborateur à une version
+     **********************************************************/
+    public function supprimerCollaborateur(Version $version, Individu $individu)
     {
 		// POuRQUOI CE CODE NE MARCHE PAS ?
 		// Car removeCollaborateurVersion n'a pas l'air fabuleux
@@ -272,13 +274,13 @@ class ServiceVersions
                 $this->sj->errorMessage('ServiceVersion:supprimerCollaborateur collaborateur null pour CollaborateurVersion ' . $item);
             
             elseif( $item->getCollaborateur()->isEqualTo($individu ) )
-			{
+	    {
                 $this->sj->debugMessage('ServiceVersion:supprimerCollaborateur ' . $item . ' supprimé pour '. $individu);
                 $this->em->persist( $item );
                 $this->em->remove( $item );
                 $this->em->flush();
-			}
-		}
+	    }
+	}
     }
     
     // modifier login d'un collaborateur d'une version
@@ -287,24 +289,26 @@ class ServiceVersions
         foreach( $version->getCollaborateurVersion() as $item )
         {
             if($item->getCollaborateur() == null )
+	    {
                 $this->sj->errorMessage('Version:modifierLogin collaborateur null pour CollaborateurVersion ' . $item);
+	    }
 
             elseif( $item->getCollaborateur()->isEqualTo($individu ) )
-			{
+	    {
                 $item->setLogin( $login );
                 $this->em->persist( $item );
                 $this->em->flush();
-			}
-		}
+	    }
+	}
     }
 
-	/*******
-	* Retourne true si la version est nouvelle pour cette session
-	*
-	*      - session A -> On vérifie que l'année de création est la même que l'année de la session
-	*      - session B -> En plus on vérifie qu'il n'y a pas eu une version en session A
-	*
-	*****/
+    /*******
+    * Retourne true si la version est nouvelle pour cette session
+    *
+    *      - session A -> On vérifie que l'année de création est la même que l'année de la session
+    *      - session B -> En plus on vérifie qu'il n'y a pas eu une version en session A
+    *
+    *****/
     public function isNouvelle(Version $version)
     {
         // Un projet test ne peut être renouvelé donc il est obligatoirement nouveau !
@@ -318,36 +322,36 @@ class ServiceVersions
 
         if ( $anneeProjet != $anneeSession )
         {
-		    return false;
-		}
-		elseif ( $typeSession == 'A' )
-		{
+	    return false;
+	}
+	    elseif ( $typeSession == 'A' )
+	{
             return true;
-		}
-		else
-		{
- 	        $type_projet = $version->getProjet()->getTypeProjet();
- 			$idVersionA  = $anneeSession . 'A' . $this->prj_prefix[$type_projet] . $anneeProjet . $numero;
+	}
+	else
+	{
+	    $type_projet = $version->getProjet()->getTypeProjet();
+	    $idVersionA  = $anneeSession . 'A' . $this->prj_prefix[$type_projet] . $anneeProjet . $numero;
 
-			if( 0 < $this->em->getRepository( Version::class )->exists( $idVersionA ))
-			{
-				return false; // Il y a une version précédente
-			}
-	        else
-	        {
-	            return true; // Non il n'y en a pas donc on est bien sur une nouvelle version
-			}
-		}
+	    if( 0 < $this->em->getRepository( Version::class )->exists( $idVersionA ))
+	    {
+		    return false; // Il y a une version précédente
+	    }
+	    else
+	    {
+		return true; // Non il n'y en a pas donc on est bien sur une nouvelle version
+	    }
+	}
     }
 
     public function isSigne(Version $version)
     {
         $dir = $this->signature_directory;
         if( $dir == null )
-		{
+	{
             $this->sj->errorMessage("ServiceVersions:isSigne parameter signature_directory absent !" );
             return false;
-		}
+	}
         $file   =  $dir . '/' . $version->getSession()->getIdSession() . '/' . $version->getIdVersion() . '.pdf';
         if( file_exists( $file ) && ! is_dir( $file ) )
             return true;
@@ -356,17 +360,17 @@ class ServiceVersions
     }
     
    /*****************
-	* Retourne le chemin vers le fichier de signature correspondant à cette version
-	*          null si pas de fichier de signature
-	****************/
+    * Retourne le chemin vers le fichier de signature correspondant à cette version
+    *          null si pas de fichier de signature
+    ****************/
     public function getSigne(Version $version)
     {
         $dir = $this->signature_directory;
         if( $dir == null )
-            {
+	{
             //$sj->errorMessage("Version:isSigne parameter signature_directory absent !" );
             return null;
-            }
+	}
 
         $file   =  $dir . '/' . $version->getSession()->getIdSession() . '/' . $version->getIdVersion() . '.pdf';
 
@@ -376,9 +380,9 @@ class ServiceVersions
             return null;
     }
     
-   	/*****************************
-	 * Retourne la taille du fichier de signature
-	 *****************************/
+    /*****************************
+     * Retourne la taille du fichier de signature
+     *****************************/
     public function getSizeSigne(Version $version)
     {
         $signe    =   $this->getSigne($version);
@@ -391,14 +395,48 @@ class ServiceVersions
     ////////////////////////////////////////////////////
     public function setLaboResponsable( Version $version, Individu $individu )
     {
-	    if( $individu == null ) return;
+	if( $individu == null ) return;
 
-	    $labo = $individu->getLabo();
-	    if( $labo != null )
-	        $version->setPrjLLabo( Functions::string_conversion( $labo ) );
-	    else
-	        $this->sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Le nouveau responsable " . $individu . " ne fait partie d'aucun laboratoire");
+	$labo = $individu->getLabo();
+	if( $labo != null )
+	    $version->setPrjLLabo( Functions::string_conversion( $labo ) );
+	else
+	    $this->sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Le nouveau responsable " . $individu . " ne fait partie d'aucun laboratoire");
     }
     
-
+    // A partir des champs demFormN et de la table Formation, construit et retourne un tableau des formations
+    // demandées, sous une forme plus simple à manipuler
+    public function buildFormations(Version $version)
+    {
+	$em = $this->em;
+	
+	// Construction du tableau formations
+	// $form_ver contient les getDemFormN() 
+	// TODO --> Un eval ? (pas réussi !)
+	$form_ver=[];
+	$form_ver[0] = $version->getDemForm0();
+	$form_ver[1] = $version->getDemForm1();
+	$form_ver[2] = $version->getDemForm2();
+	$form_ver[3] = $version->getDemForm3();
+	$form_ver[4] = $version->getDemForm4();
+	$form_ver[5] = $version->getDemForm5();
+	$form_ver[6] = $version->getDemForm6();
+	$form_ver[7] = $version->getDemForm7();
+	$form_ver[8] = $version->getDemForm8();
+	$form_ver[9] = $version->getDemForm9();
+	
+	$formations_all = $em -> getRepository(Formation::class) -> getFormationsPourVersion();
+	$formation = [];
+	foreach ($formations_all as $fa)
+	{
+	    $f = [];
+	    $f['nb']  = $fa->getNumeroForm();
+	    $f['nom'] = $fa->getNomForm();
+	    $f['acro']= $fa->getAcroForm();
+	    $f['rep'] = $form_ver[$f['nb']];
+	    //$formation[] = $f;
+	    $formation[$f['acro']] = $f;
+	}
+	return $formation;
+    }
 }

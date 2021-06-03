@@ -44,7 +44,7 @@ $(document).ready(function() { // table utilisateurs
 	});
 });
 
-$(document).ready(function() { // table projets par session
+$(document).ready(function() { // Bilan de session: table projets
 	$('#bilan_session').DataTable( {
 		"bPaginate": false,
 		"bFilter":	 false,
@@ -53,6 +53,14 @@ $(document).ready(function() { // table projets par session
 	});
 });
 
+$(document).ready(function() { // Bilan de session: table formations
+	$('#formations').DataTable( {
+		"bPaginate": false,
+		"bFilter":	 false,
+		"info":    	 false,
+		"aoColumnDefs": [{bSortable: false,aTargets: [ 1 ]}]
+	});
+});
 $(document).ready(function() { // table anciennes expertises
 	$('#old_expertises').DataTable( {
 		"bPaginate": false,
