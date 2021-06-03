@@ -588,6 +588,7 @@ class VersionModifController extends AbstractController
 		$form->add($champ, IntegerType::class, [ 'required' => false, 'label' => $label ]);
 		$nb_form++;
 	    }
+	    $form->add('demFormAutresAutres', TextAreaType::class, [ 'required' => false, 'label' => 'Vous pouvez préciser ici vos souhaits']);
 	}
 
     /*

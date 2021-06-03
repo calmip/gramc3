@@ -11,12 +11,19 @@
 	</tr>
 	{% for item in form %}
 	    {# On sélectionne les champs form_getDemFormN #}
-	    {% if item.vars.id|slice(0, 12) == "form_demForm" %} 
+	    {% if item.vars.id matches '{^form_demForm[0-9]$}' %} 
 	    <tr>
-		<th class="horiz">{{ form_label( item) }}</th><td>{{ form_widget( item) }}</td>
+		<td class="droite">{{ form_label( item) }}</td><td class="gauche">{{ form_widget( item) }}</td>
 	    </tr>
 	    {% endif %}
 	{% endfor %}
+	<tr>
+	    <td class="droite">{{ form_label(form.demFormAutresAutres) }}</td>
+	    <td class="gauche">{{ form_widget(form.demFormAutresAutres, { 'attr': { 'rows' : 5, 'cols' : 50 } }) }}</td>
+	</tr>
     </tbody></table>
+    
+    <div class="message info"><p><strong>Contenu détaillé des formations</strong> ici:  <a href="{{ mesoc_formation }}">{{mesoc_formation}}</a></a></p>
+
 
 </div>
