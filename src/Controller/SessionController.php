@@ -115,18 +115,19 @@ class SessionController extends AbstractController
      */
     public function gererAction()
     {
-		$sm = $this->sm;
-		$sj = $this->sj;
+	$sm = $this->sm;
+	$sj = $this->sj;
 
-	    if( $sm->gerer_sessions()['ok'] == false )
-	        $sj->throwException(__METHOD__ . ':' . __LINE__ . " Ecran interdit " . 
-	            " parce que : " . $sm->gerer_sessions()['raison'] );
+	if( $sm->gerer_sessions()['ok'] == false )
+	    $sj->throwException(__METHOD__ . ':' . __LINE__ . " Ecran interdit " . 
+		" parce que : " . $sm->gerer_sessions()['raison'] );
 
         $em       = $this->getDoctrine()->getManager();
         $sessions = $em->getRepository(Session::class)->findBy([],['idSession' => 'DESC']);
-        if ( count($sessions)==0 ) {
-            $menu[] =   [
-                        'ok' => true,
+        if ( count($sessions)==0 ) 
+	{
+	    $menu[] = [
+			'ok' => true,
                         'name' => 'ajouter_session' ,
                         'lien' => 'Créer nouvelle session',
                         'commentaire'=> 'Créer la PREMIERE session'
@@ -134,23 +135,21 @@ class SessionController extends AbstractController
         }
         else
         {
-			// Refait le calcul de la session courante sans se fier au cache
-			$this->sss->remove('SessionCourante');
-
+	    // Refait le calcul de la session courante sans se fier au cache
+	    $this->sss->remove('SessionCourante');
 
             $menu[] = $sm->ajouterSession();
-			$menu[] = $sm->modifierSession();
-			$menu[] = $sm->demarrerSaisie();
+	    $menu[] = $sm->modifierSession();
+	    $menu[] = $sm->demarrerSaisie();
             $menu[] = $sm->terminerSaisie();
-			$menu[] = $sm->envoyerExpertises();
-	        $menu[] = $sm->activerSession();
-
+	    $menu[] = $sm->envoyerExpertises();
+	    $menu[] = $sm->activerSession();
         }
         return $this->render('session/gerer.html.twig',
-		[
+	[
             'menu'     => $menu,
             'sessions' => $sessions,
-		]);
+	]);
     }
 
     /////////////////////////////////////////////////////////////////////
@@ -164,11 +163,11 @@ class SessionController extends AbstractController
      */
     public function ajouterAction(Request $request)
     {
-		$sd = $this->sd;
-		$ss = $this->ss;
-		$em = $this->getDoctrine()->getManager();
-		$session = $ss->nouvelleSession();
-		return $this->modifyAction( $request, $session );
+	$sd = $this->sd;
+	$ss = $this->ss;
+	$em = $this->getDoctrine()->getManager();
+	$session = $ss->nouvelleSession();
+	return $this->modifyAction( $request, $session );
     }
 
     /**
@@ -179,12 +178,12 @@ class SessionController extends AbstractController
      */
     public function modifyAction(Request $request, Session $session)
     {
-		$sd = $this->sd;
-		$em = $this->getDoctrine()->getManager();
+	$sd = $this->sd;
+	$em = $this->getDoctrine()->getManager();
         $this->sss->remove('SessionCourante');
-		$debut = $sd;
-		$fin   = $sd->getNew();
-		$fin->add( \DateInterval::createFromDateString( '0 months' ));
+	$debut = $sd;
+	$fin   = $sd->getNew();
+	$fin->add( \DateInterval::createFromDateString( '0 months' ));
 
         if( $session->getDateDebutSession() == null)
             $session->setDateDebutSession( $debut );
@@ -196,12 +195,12 @@ class SessionController extends AbstractController
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid())
-		{
+	{
             $em->persist($session);
             $em->flush();
 
             return $this->redirectToRoute('gerer_sessions');
-		}
+	}
 
         return $this->render('session/modify.html.twig',
             [
@@ -219,20 +218,20 @@ class SessionController extends AbstractController
      */
     public function terminerSaisieAction(Request $request)
     {
-		$ss = $this->ss;
-		$em = $this->getDoctrine()->getManager();
-		
-		$this->sss->remove('SessionCourante');
+	$ss = $this->ss;
+	$em = $this->getDoctrine()->getManager();
+	
+	$this->sss->remove('SessionCourante');
 
         $session_courante = $ss->getSessionCourante();
         $workflow = $this->sw;
 
         if( $workflow->canExecute( Signal::DAT_FIN_DEM, $session_courante) )
-		{
+	{
             $workflow->execute( Signal::DAT_FIN_DEM, $session_courante);
             $em->flush();
             return $this->redirectToRoute('gerer_sessions');
-		}
+	}
         else
             return $this->render('default/error.html.twig',
                 [
@@ -250,12 +249,12 @@ class SessionController extends AbstractController
      */
     public function avantActiverAction($rtn,$ctrl)
     {
-		$ss         = $this->ss;
-		$sj         = $this->sj;
-		$em         = $this->getDoctrine()->getManager();
-
-		$session    = $ss->getSessionCourante();
-		$connexions = Functions::getConnexions($em, $sj);
+	    $ss         = $this->ss;
+	    $sj         = $this->sj;
+	    $em         = $this->getDoctrine()->getManager();
+    
+	    $session    = $ss->getSessionCourante();
+	    $connexions = Functions::getConnexions($em, $sj);
 	    return $this->render('session/avant_changer_etat.html.twig',
             [
             'session'    => $session,

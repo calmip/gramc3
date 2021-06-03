@@ -13,7 +13,6 @@
                 <th>début</th>
                 <th>fin</th>
                 <th>Heures/année</th></th>
-                <th>président</th>
                 <th>projets</th>
                 <th>heures attribuées</th>
                 <th>état</th>
@@ -26,7 +25,6 @@
                 <td>{% if session.dateDebutSession %}{{ session.dateDebutSession|date('Y-m-d') }}{% endif %}</td>
                 <td>{% if session.dateFinSession %}{{ session.dateFinSession|date('Y-m-d') }}{% endif %}</td>
                 <td>{{ session.hparannee }}</td>
-                <td>{{ session.president }}</td>
                 <td>{{ session.version|length }}</td>
                 <td>{{ session.heuresAttribuees }}</th>
                 <td>{{ session.libelleEtat }}</td>

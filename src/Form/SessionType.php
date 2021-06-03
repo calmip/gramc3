@@ -86,15 +86,15 @@ class SessionType extends AbstractType
                     [
                     //'data'          => $options['from'], // valeur par défaut
                     'label'         => 'Heures disponibles (par année):',
-                    ])           
-            ->add('president',  EntityType::class,
-                        [
-                    'multiple' => false,
-                    'class' => 'App:Individu',
-                    'required'  =>  false,
-                    'label'     => 'Président:',
-                    'choices' =>  $this->em->getRepository(Individu::class)->findBy(['expert' => true]),
-                ]);
+                    ]);
+            //->add('president',  EntityType::class,
+            //            [
+            //        'multiple' => false,
+            //        'class' => 'App:Individu',
+            //        'required'  =>  false,
+            //        'label'     => 'Président:',
+            //        'choices' =>  $this->em->getRepository(Individu::class)->findBy(['expert' => true]),
+            //    ])
 
          if(  $options['all'] == true )
             $builder->add('etatSession',   ChoiceType::class,
