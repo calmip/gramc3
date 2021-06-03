@@ -101,7 +101,7 @@ abstract class BilanSession
 	}
 	
 	/*******
-	 * Appelée par bilanAction dans le cas d'une session A
+	 * Appelée par bilanCsvAction
 	 *
 	 *********/
 	public function getCsv()
@@ -114,7 +114,11 @@ abstract class BilanSession
 		$session_precedente_A = $this->session_precedente_A;
 		$session_precedente_B = $this->session_precedente_B;
 		$t_fact               = $this->t_fact;
-        $versions             = $this->em->getRepository(Version::class)->findBy( ['session' => $session ] );
+		
+ 		// Juin 2021 - Non prise en compte des projets test 
+        //$versions             = $this->em->getRepository(Version::class)->findBy( ['session' => $session ] );
+        $versions             = $this->em->getRepository(Version::class)->findVersionsSessionTypeSess($session);
+        
 
 		// Le tableau de totaux
 		$totaux = $this->initTotaux();
