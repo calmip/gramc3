@@ -169,15 +169,15 @@ class AdminuxController extends AbstractController
     /**
      * set loginname
      *
-     * @Route("/users/setloginname/{idProjet}/projet/{idIndividu}/individu/{loginname}/loginname", name="set_loginname", methods={"POST"})
+     * @Route("/users/setloginname", name="set_loginname", methods={"POST"})
      * @Security("is_granted('ROLE_ADMIN')")
      * 
      * Positionne le loginname du user demandé dans la version active ou EN_ATTENTE du projet demandé
      * 
      */
      
-     // exemple: curl --insecure --netrc -X POST https://.../adminux/users/setloginname/P1234/projet/6543/individu/toto/loginname
-	public function setloginnameAction(Request $request, $idProjet, $idIndividu, $loginname, LoggerInterface $lg)
+     // exemple: curl --insecure --netrc -X POST -d '{ "loginname": "toto", "individu": "6543", "projet": "P1234" }'https://.../adminux/users/setloginname
+	public function setloginnameAction(Request $request, LoggerInterface $lg)
 	{
 		$em = $this->getdoctrine()->getManager();
 
@@ -186,6 +186,36 @@ class AdminuxController extends AbstractController
 			throw new AccessDeniedException("Accès interdit (paramètre noconso)");
 		}
 
+		$content  = json_decode($request->getContent(),true);
+		if ($content == null)
+		{
+			return new Response(json_encode('KO - Pas de données'));
+		}
+		if (empty($content['loginname']))
+		{
+			return new Response(json_encode('KO - Pas de nom de login'));
+		}
+		else
+		{
+			$loginname = $content['loginname'];
+		}		
+		if (empty($content['projet']))
+		{
+			return new Response(json_encode('KO - Pas de projet'));
+		}
+		else
+		{
+			$idProjet = $content['projet'];
+		}
+		if (empty($content['individu']))
+		{
+			return new Response(json_encode('KO - Pas de projet'));
+		}
+		else
+		{
+			$idIndividu = $content['individu'];
+		}
+		
 	    $error = [];
 	    $projet      = $em->getRepository(Projet::class)->find($idProjet);
 	    if( $projet == null )
@@ -889,12 +919,12 @@ class AdminuxController extends AbstractController
      * et renvoie les mots de passe cryptés (champ cpassword)
      * On pourra vérifier avec le mot de passe du supercalculateur et savoir s'il a été changé
      * 
-     * @Route("/users/passwordcheck", name="password_check", methods={"GET"})
+     * @Route("/users/checkpassword", name="check_password", methods={"GET"})
      * 
-     * curl --netrc -H "Content-Type: application/json" https://.../adminux/users/passwordcheck
+     * curl --netrc -H "Content-Type: application/json" https://.../adminux/users/checkpassword
      * 
      */
-     public function passwordCheckAction(Request $request, LoggerInterface $lg)
+     public function checkPasswordAction(Request $request, LoggerInterface $lg)
      {
 		$em = $this->getdoctrine()->getManager();
 		if ( $this->getParameter('noconso')==true )
@@ -914,6 +944,9 @@ class AdminuxController extends AbstractController
 		{
 			if ($user->getPassexpir() < $sd)
 			{
+				$u["loginname"] = $user->getLoginname();
+				$u["cpassword"] = null;
+				$rusers[] = $u;
 				$em -> remove($user);
 			}
 			else
