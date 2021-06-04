@@ -278,7 +278,7 @@ class AdminuxController extends AbstractController
 		}
 		else
 		{
-			$cpassword = $content['password'];
+			$cpassword = $content['cpassword'];
 		}
 		
 		# Calcul de la date d'expiration
