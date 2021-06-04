@@ -235,9 +235,10 @@
             <th title="Nouveaux projets">N</th>
             <th></th>
             <th>N°</th>
+            <th>Type</th>
             <th>&nbsp;</th>
             <th title="Etat">E</th>
-            <th>titre</th>
+            <th>Titre</th>
             <th>Thématique</th>
             <th>Rattachement</th>
             <th>dari</th>
@@ -292,6 +293,7 @@
             	{% endif %}
             </td>
             <td>{{ version.projet.idProjet }}</td>
+            <td><strong>{{ version.projet.libelletype }}</strong></td>
             <td>
                 <a href="{{ path('consulter_version', { 'id': version.projet.idProjet, 'version': version.idVersion }) }}" title="Consulter le projet">
                 <img src="{{ asset('icones/consulter.png') }}" alt="Consulter" /></a>

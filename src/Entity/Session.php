@@ -455,7 +455,7 @@ class Session
     ////////////////////////////////////////////
 	public function getEtat()
     {
-		return $this->getEtatProjet();
+		return $this->getEtatSession();
 	}
 
 }

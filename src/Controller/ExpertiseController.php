@@ -608,14 +608,14 @@ class ExpertiseController extends AbstractController
      */
     public function modifierAction(Request $request, Expertise $expertise)
     {
-		$ss = $this->ss;
-		$sv = $this->sv;
-		$sp = $this->sp;
-		$sj = $this->sj;
-		$ac = $this->ac;
-		$sval = $this->vl;
-		$tok = $this->tok;
-		$em = $this->getDoctrine()->getManager();
+	$ss = $this->ss;
+	$sv = $this->sv;
+	$sp = $this->sp;
+	$sj = $this->sj;
+	$ac = $this->ac;
+	$sval = $this->vl;
+	$tok = $this->tok;
+	$em = $this->getDoctrine()->getManager();
 		
         // ACL
         $moi = $tok->getUser();
@@ -629,7 +629,7 @@ class ExpertiseController extends AbstractController
 	// Si expertise déjà faite on revient à la liste
 	if ($expertise->getDefinitif())
 	{
-		return $this->redirectToRoute('expertise_liste');
+	    return $this->redirectToRoute('expertise_liste');
 	}
 		
         $expertiseRepository = $em->getRepository(Expertise::class);
@@ -654,12 +654,12 @@ class ExpertiseController extends AbstractController
         $projet_type = $projet  -> getTypeProjet();
         $etat_session= $session -> getEtatSession();
 
-	// Projets au fil de l'eau avec plusieurs expertises:
+	// Projets session avec plusieurs expertises:
 	//    Si je suis président, on va chercher ces expertises pour affichage
 	//    On vérifie leur état (définitive ou pas)
 	$autres_expertises = [];
 	$toutes_definitives= true;
-	if ($projet_type == Projet::PROJET_FIL && $ac->isGranted('ROLE_PRESIDENT') )
+	if ($ac->isGranted('ROLE_PRESIDENT') )
 	{
 	    $expertiseRepository = $em->getRepository(Expertise::class);
 	    $autres_expertises   = $expertiseRepository -> findExpertisesForVersion($version,$moi);
@@ -680,42 +680,21 @@ class ExpertiseController extends AbstractController
 	    case Projet::PROJET_SESS:
 		if ($session -> getEtatSession() == Etat::EN_ATTENTE || $session -> getEtatSession() == Etat::ACTIF)
 		{
-		    // bouton envoyer disponible
 		    $peut_envoyer = true;
 		}
 		else
 		{
-		    // bouton envoyer pas disponible
 		    $peut_envoyer = false;
 		}
 		break;
-	    
+
+	    // Si c'est un projet de type PROJET_TEST, le bouton ENVOYER est toujours disponible
 	    case Projet::PROJET_TEST:
-		// Si c'est un projet de type PROJET_TEST, le bouton ENVOYER est toujours disponible
 		$peut_envoyer = true;
 		break;
 		
 	    case Projet::PROJET_FIL:
-		// Si c'est un projet de type PROJET_FIL, le bouton ENVOYER est disponible (presque) tout le temps
-		if ($etat_session == Etat::EDITION_DEMANDE)
-		{
-		    $msg_explain = "Vous ne pouvez pas actuellement finaliser votre expertise, car la session est en phase de \"édition des demandes\"";
-		    $peut_envoyer = false;
-		}
-		elseif ($etat_session == Etat::EDITION_EXPERTISE)
-		{
-		    $msg_explain = "Vous ne pouvez pas actuellement finaliser votre expertise, car la session est en phase d'\"édition des expertises\" et le \"commentaire de session\" n'est pas entré";
-		    $peut_envoyer = false;
-		}
-		elseif ($toutes_definitives == false)
-		{
-		    $msg_explain = "Vous ne pouvez pas actuellement finaliser votre expertise, il vous faut attendre que les autres experts aient terminé leur expertise";
-		    $peut_envoyer = false;
-		}
-		else
-		{
-		    $peut_envoyer = true;
-		}
+		$peut_envoyer = true;
 		break;
 	}
 
@@ -738,7 +717,7 @@ class ExpertiseController extends AbstractController
 		else
 		{
     		    $commentaireExterne = false;
-		    //$editForm->add('commentaireExterne', HiddenType::class, [ 'data' => 'Commentaire externe réservé au Comité' ] );
+		    $editForm->add('commentaireExterne', HiddenType::class, [ 'data' => 'Commentaire externe réservé au Comité' ] );
 		}
 
 	// Par défaut on attribue les heures demandées !

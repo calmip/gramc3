@@ -224,57 +224,59 @@ class GramcSessionController extends AbstractController
      *
      */
     public function accueilAction()
+    {
+	$sm     = $this->sm;
+	$ss     = $this->ss;
+	$session= $ss->getSessionCourante();
+	
+	// Si true, cet utilisateur n'est ni expert ni admin ni président !
+	$seulement_demandeur=true;
+	
+	$menu   = [];
+	$m = $sm->demandeur();
+	if ($m['ok'] == false)
 	{
-		$sm     = $this->sm;
-		$ss     = $this->ss;
-		$session= $ss->getSessionCourante();
-		
-		// Si true, cet utilisateur n'est ni expert ni admin ni président !
-		$seulement_demandeur=true;
-		
-		$menu   = [];
-		$m = $sm->demandeur();
-		if ($m['ok'] == false)
-		{
-			// Même pas demandeur !
-			$seulement_demandeur = false;
-		}
-		$menu[] = $m;
-		
-		$m = $sm->expert();
-		if ($m['ok'])
-		{
-			$seulement_demandeur = false;
-		}
-		$menu[] = $m;
-		
-		$m = $sm->administrateur();
-		if ($m['ok'])
-		{
-			$seulement_demandeur = false;
-		}
-		$menu[] = $m;
-		
-		$m = $sm->president();
-		if ($m['ok'])
-		{
-			$seulement_demandeur = false;
-		}
-		$menu[] = $m;
-		$menu[] = $sm->aide();
-
-		if ($seulement_demandeur)
-		{
-			return $this->redirectToRoute('projet_accueil');
-		}
-		else
-		{
-	        return $this->render('default/accueil.html.twig', 
-								['menu' => $menu, 
-								 'projet_test' => $sm->nouveau_projet_test()['ok'],
-								 'session' => $session ]);
-		}
+	    // Même pas demandeur !
+	    $seulement_demandeur = false;
 	}
+	$menu[] = $m;
+	
+	$m = $sm->expert();
+	if ($m['ok'])
+	{
+	    $seulement_demandeur = false;
+	}
+	$menu[] = $m;
+	
+	$m = $sm->administrateur();
+	if ($m['ok'])
+	{
+	    $seulement_demandeur = false;
+	}
+	$menu[] = $m;
+	
+	$m = $sm->president();
+	if ($m['ok'])
+	{
+	    $seulement_demandeur = false;
+	}
+	$menu[] = $m;
+	$menu[] = $sm->aide();
+    
+	if ($seulement_demandeur)
+	{
+	    return $this->redirectToRoute('projet_accueil');
+	}
+	else
+	{
+	    // juin 2021 -> Suppression des projets tests
+	    return $this->render('default/accueil.html.twig', 
+	    ['menu' => $menu, 
+	     //'projet_test' => $sm->nouveau_projet_test()['ok'],
+	     'projet_test' => false,
+	     'session' => $session ]);
+	}
+    }
 
     /**
      * @Route("/president", name="president_accueil" )

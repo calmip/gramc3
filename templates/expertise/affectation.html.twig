@@ -33,8 +33,9 @@
         <table id="affecte_experts">
             <thead>
                 <tr>
-				    <th title="Cocher la case pour sélectionner ce projet ou cochez Inverser la sélection (en bas)">S</th>
+		    <th title="Cocher la case pour sélectionner ce projet ou cochez Inverser la sélection (en bas)">S</th>
                     <th >N</th>
+		    <th>Type</th>
                     <th >N°</th>
                     <th >&nbsp;</th>
                     <th title="Etat">E</th>
@@ -70,7 +71,8 @@
 		{% else %}
 		<td class="{{cls}}">&nbsp;</td>
 		{% endif %}
-                <td > {{ version.projet }}</td>
+                <td> <strong>{{version.projet.libelletype}}</strong></td>
+		<td > {{ version.projet }}</td>
                 <td >
                     <a href="{{ path('consulter_projet', { 'id' : version.projet.idProjet } ) }}">
                     <img class="bouton_poussoir" src="{{ asset('icones/consulter.png') }}" alt="Consulter">

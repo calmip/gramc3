@@ -271,38 +271,38 @@ class ServiceMenus
 		}
 	}
 
-	// Envoyer les expertises
-	public function envoyerExpertises()
-	{
+    // Envoyer les expertises
+    public function envoyerExpertises()
+    {
         $session        = $this->ss->getSessionCourante();
         $workflow       = $this->sw;
         $menu['name']   = 'session_avant_changer_etat';
         $menu['lien']   = 'Envoi des expertises';
         $menu['params'] = [ 'ctrl' => 'envoyer_expertises'];
 
-		if( $workflow->canExecute( Signal::CLK_ATTR_PRS, $session)  &&  $session->getcommGlobal() != null )
-		{
+	if( $workflow->canExecute( Signal::CLK_ATTR_PRS, $session)  &&  $session->getcommGlobal() != null )
+	{
             $menu['ok']          = true;
             $menu['commentaire'] = "Envoyer les expertises";
             return $menu;
-		}
-		else
-		{
-			$menu['ok']          = false;
-			$menu['commentaire'] = "Impossible d'envoyer les expertises";
-			if( $session->getCommGlobal() == null )
-			{
-				$menu['raison']  = "Il n'y a pas de commentaire de session (menu Président)";
-			}
+	}
+	else
+	{
+	    $menu['ok']          = false;
+	    $menu['commentaire'] = "Impossible d'envoyer les expertises";
+	    if( $session->getCommGlobal() == null )
+	    {
+		    $menu['raison']  = "Il n'y a pas de commentaire de session (menu Président)";
+	    }
             else
             {
-				$menu['raison']  = "La session n'est pas en \"expertise\"";
-			}
-			return $menu;
-		}
+		$menu['raison']  = "La session n'est pas en \"expertise\"";
+	    }
+	    return $menu;
 	}
+    }
 	
-	// Commentaire de session - accessible à partir de l'écran Président
+    // Commentaire de session - accessible à partir de l'écran Président
     public function commSess()
     {
         $session      = $this->ss->getSessionCourante();
@@ -333,7 +333,7 @@ class ServiceMenus
         }
     }
 
-	// Activer la session
+    // Activer la session
     public function activerSession()
     {
         $session        = $this->ss->getSessionCourante();
@@ -358,33 +358,33 @@ class ServiceMenus
         }
     }
 
-	/*******************
-	 * Gestion des projets et des versions 
-	 ***************************************************/
+    /*******************
+     * Gestion des projets et des versions 
+     ***************************************************/
 
-	public Function nouveau_projet($type)
+    public Function nouveau_projet($type)
+    {
+	switch ($type)
 	{
-		switch ($type)
-		{
-			case Projet::PROJET_FIL:
-				return $this->nouveau_projet_fil();
-				break;
-			case Projet::PROJET_SESS:
-				return $this->nouveau_projet_sess();
-				break;
-			case Projet::PROJET_TEST:
-				return $this->nouveau_projet_test();
-				break;
-		}
+	    case Projet::PROJET_FIL:
+		return $this->nouveau_projet_fil();
+		break;
+	    case Projet::PROJET_SESS:
+		return $this->nouveau_projet_sess();
+		break;
+	    case Projet::PROJET_TEST:
+		return $this->nouveau_projet_test();
+		break;
 	}
+    }
 
-	/*
-	 * Création d'un projet de type PROJET_SESS:
-	 *     - Peut être créé seulement lors des sessions d'attribution
-	 *     - Renouvelable à chaque session
-	 *     - Créé seulement par un permanent, qui devient responsable du projet
-	 *
-	 */
+    /*
+     * Création d'un projet de type PROJET_SESS:
+     *     - Peut être créé seulement lors des sessions d'attribution
+     *     - Renouvelable à chaque session
+     *     - Créé seulement par un permanent, qui devient responsable du projet
+     *
+     */
     private function  nouveau_projet_sess()
     {
         $menu   =   [];
@@ -487,24 +487,22 @@ class ServiceMenus
 
         $session =  $this->ss->getSessionCourante();
         if( $session == null )
-		{
+	{
             $menu['raison'] = "Il n'y a pas de session courante";
             return $menu;
-		}
+	}
 
         $etat_session   =   $session->getEtatSession();
         if(  ! $this->peut_creer_projets() )
         {
             $menu['raison'] = "Seuls les personnels permanents des laboratoires enregistrés peuvent créer un projet";
-		}
-        elseif( $etat_session != Etat::EDITION_EXPERTISE )
-		{
+	}
+        else
+	{
             $menu['raison'] = '';
             $menu['commentaire'] = "Créez un nouveau projet, vous en serez le responsable";
             $menu['ok'] = true;
-		}
-        else
-            $menu['raison'] = 'La période de saisie des projets est terminée, pas possible de créer un nouveau projet pour l\'instant';
+	}
 
         return $menu;
     }

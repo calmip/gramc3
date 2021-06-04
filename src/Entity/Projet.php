@@ -49,6 +49,14 @@ class Projet
 	const PROJET_SESS = 1;		// Projet créé lors d'une session d'attribution
 	const PROJET_TEST = 2;		// Projet test, créé au fil de l'eau, non renouvelable
 	const PROJET_FIL  = 3;		// Projet créé au fil de l'eau, renouvelable lors des sessions
+    
+    const LIBELLE_TYPE=
+    [
+        self::PROJET_SESS => 'S',
+        self::PROJET_TEST =>  'T',
+        self::PROJET_FIL =>  'A',
+    ];
+
 
     /**
      * @var integer
@@ -554,6 +562,17 @@ class Projet
 		return $this->getEtatProjet();
 	}
 
-
+    public function getLibelleType()
+    {
+        $type = $this->getTypeProjet();
+        if ($type <=3 and $type > 0)
+        {
+            return Projet::LIBELLE_TYPE[$this->getTypeProjet()];
+        }
+        else
+        {
+            return '?';
+        }
+    }
 }
 

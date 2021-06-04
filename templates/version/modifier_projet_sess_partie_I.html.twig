@@ -58,8 +58,25 @@
 </ul>
 
 <p>Plus de détails <a href="{{mesoc_web}}"><strong>sur notre site web</strong></a></p>
-
 </div>
+
+{# Si session en édition ... #}
+{% if session.etat == 2 %}
+<div class="message warning">
+    <h2>Demande d'heures de calcul</h2>
+    <p>Si votre demande d'heures de calcul est <strong>inférieure à {{ prj_seuil_sess }}</strong> 
+    nous vous proposerons un formulaire allégé, et les heures pourront éventuellement être disponibles plus rapidement</p>
+</div>
+{% else %}
+<div class="message warning">
+    <h2>Nombre d'heures limité</h2>
+    <ul>
+    <li>Vous ne pouvez pas <strong>demander plus de {{ prj_seuil_sess }} heures</strong>.</li>
+    <li>Si vous souhaitez tester votre code, nous vous conseillons de <strong>demander 5000 heures</strong></li>
+    <li>Vous pourrez faire une <strong>demande plus importante</strong> lors de la prochaine session d'attribution.</li>
+    </ul>
+</div>
+{% endif %}
 
     <table class="projet"><tbody>
 

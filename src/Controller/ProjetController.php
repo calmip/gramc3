@@ -1394,17 +1394,10 @@ class ProjetController extends AbstractController
             $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de créer un nouveau projet parce que " . $sm->nouveau_projet($type)['raison'] );
 	}
 
-	$session_courante = $ss->getSessionCourante();
-	if ($session_courante->getEtatSession() != Etat::EDITION_DEMANDE)
-	{
-	    $renouvelables = null;
-	}
-	else
-	{
-	    $projetRepository = $this->getDoctrine()->getManager()->getRepository(Projet::class);
-	    $id_individu      = $token->getUser()->getIdIndividu();
-	    $renouvelables    = $projetRepository-> getProjetsCollab($id_individu, true, true, true);
-	}
+	$session = $ss->getSessionCourante();
+	$projetRepository = $this->getDoctrine()->getManager()->getRepository(Projet::class);
+	$id_individu      = $token->getUser()->getIdIndividu();
+	$renouvelables    = $projetRepository-> getProjetsCollab($id_individu, true, true, true);
 
         if( $renouvelables == null )
 	{
@@ -1414,7 +1407,8 @@ class ProjetController extends AbstractController
         return $this->render('projet/avant_nouveau_projet.html.twig',
 	[
             'renouvelables' => $renouvelables,
-            'type'          => $type
+            'type'          => $type,
+	    'session'       => $session
 	]);
     }
 
@@ -1705,126 +1699,178 @@ class ProjetController extends AbstractController
      */
     public function accueilAction()
     {
-		$sm                  = $this->sm;
-		$ss                  = $this->ss;
-		$sp					 = $this->sp;
-		$token               = $this->token;
-		$em                  = $this->getDoctrine()->getManager();
-	    $individu            = $token->getUser();
-	    $id_individu         = $individu->getIdIndividu();
+	$sm                  = $this->sm;
+	$ss                  = $this->ss;
+	$sp					 = $this->sp;
+	$token               = $this->token;
+	$em                  = $this->getDoctrine()->getManager();
+	$individu            = $token->getUser();
+	$id_individu         = $individu->getIdIndividu();
 
-	    $projetRepository    = $em->getRepository(Projet::class);
-	    $cv_repo             = $em->getRepository(CollaborateurVersion::class);
-	    $user_repo           = $em->getRepository(User::class);
+	$projetRepository    = $em->getRepository(Projet::class);
+	$cv_repo             = $em->getRepository(CollaborateurVersion::class);
+	$user_repo           = $em->getRepository(User::class);
 
-	    $list_projets_collab = $projetRepository-> getProjetsCollab($id_individu, false, true);
-	    $list_projets_resp   = $projetRepository-> getProjetsCollab($id_individu, true, false);
+	$list_projets_collab = $projetRepository-> getProjetsCollab($id_individu, false, true);
+	$list_projets_resp   = $projetRepository-> getProjetsCollab($id_individu, true, false);
 
-	    $projets_term        = $projetRepository-> get_projets_etat( $id_individu, 'TERMINE' );
+	$projets_term        = $projetRepository-> get_projets_etat( $id_individu, 'TERMINE' );
 
-	    $session_actuelle    = $ss->getSessionCourante();
+	$session_actuelle    = $ss->getSessionCourante();
 	    
-	    // TODO - Faire en sorte pour que les erreurs soient proprement affichées dans l'API
-		// En attendant ce qui suit permet de se dépanner mais c'est franchement dégueu
-		//echo '<pre>'.strlen($_SERVER['CLE_DE_CHIFFREMENT'])."\n";
-		//echo SODIUM_CRYPTO_SECRETBOX_KEYBYTES.'</pre>';
-		//$enc = Functions::simpleEncrypt("coucou");
-		//$dec = Functions::simpleDecrypt($enc);
-		//echo "$dec\n";
+	// TODO - Faire en sorte pour que les erreurs soient proprement affichées dans l'API
+	// En attendant ce qui suit permet de se dépanner mais c'est franchement dégueu
+	//echo '<pre>'.strlen($_SERVER['CLE_DE_CHIFFREMENT'])."\n";
+	//echo SODIUM_CRYPTO_SECRETBOX_KEYBYTES.'</pre>';
+	//$enc = Functions::simpleEncrypt("coucou");
+	//$dec = Functions::simpleDecrypt($enc);
+	//echo "$dec\n";
 		
-	    // projets responsable
-	    $projets_resp  = [];
-	    foreach ( $list_projets_resp as $projet )
-		{
-	        $versionActive  =   $sp->versionActive($projet);
-	        if( $versionActive != null )
-	        {
-	            $rallonges = $versionActive ->getRallonge();
-	            $cpt_rall  = count($rallonges->toArray());
-	        }
-	        else
-	        {
-	            $rallonges = null;
-	            $cpt_rall  = 0;
-			}
+	// projets responsable
+	$projets_resp  = [];
+	foreach ( $list_projets_resp as $projet )
+	{
+	    $versionActive  =   $sp->versionActive($projet);
+	    if( $versionActive != null )
+	    {
+		$rallonges = $versionActive ->getRallonge();
+		$cpt_rall  = count($rallonges->toArray());
+	    }
+	    else
+	    {
+		$rallonges = null;
+		$cpt_rall  = 0;
+	    }
 
-			if ($versionActive != null)
-			{
-	            $cv    = $cv_repo->findOneBy(['version' => $versionActive, 'collaborateur' => $individu]);
-	            $login = $cv->getLoginname()==null ? 'nologin' : $cv->getLoginname();
-	            $u     = $user_repo->findOneBy(['loginname' => $login]);
-	            if ($u==null)
-	            {
-					$passwd    = null;
-					$pwd_expir = null;
-				}
-				else
-				{
-					$passwd    = $u->getPassword();
-					$passwd    = Functions::simpleDecrypt($passwd);
-					$pwd_expir = $u->getPassexpir();
-				}
-			}
-			else
-			{
-				$login  = 'nologin';
-				$passwd = null;
-				$pwd_expir = null;
-			}
-	        $projets_resp[]   =
+	    if ($versionActive != null)
+	    {
+		$cv    = $cv_repo->findOneBy(['version' => $versionActive, 'collaborateur' => $individu]);
+		$login = $cv->getLoginname()==null ? 'nologin' : $cv->getLoginname();
+		$u     = $user_repo->findOneBy(['loginname' => $login]);
+		if ($u==null)
+		{
+		    $passwd    = null;
+		    $pwd_expir = null;
+		}
+		else
+		{
+		    $passwd    = $u->getPassword();
+		    $passwd    = Functions::simpleDecrypt($passwd);
+		    $pwd_expir = $u->getPassexpir();
+		}
+	    }
+	    else
+	    {
+		$login  = 'nologin';
+		$passwd = null;
+		$pwd_expir = null;
+	    }
+	    $projets_resp[]   =
             [
-	            'projet'    => $projet,
-	            'conso'     => $sp->getConsoCalculP($projet),
-	            'rallonges' => $rallonges,
-	            'cpt_rall'  => $cpt_rall,
-	            'meta_etat' => $sp->getMetaEtat($projet),
-	            'login'     => $login,
-	            'passwd'    => $passwd,
-	            'pwd_expir' => $pwd_expir
+		'projet'    => $projet,
+		'conso'     => $sp->getConsoCalculP($projet),
+		'rallonges' => $rallonges,
+		'cpt_rall'  => $cpt_rall,
+		'meta_etat' => $sp->getMetaEtat($projet),
+		'login'     => $login,
+		'passwd'    => $passwd,
+		'pwd_expir' => $pwd_expir
             ];
-		}
+	}
 
-	    // projets collaborateurs
-	    $projets_collab  = [];
-	    foreach ( $list_projets_collab as $projet )
-		{
-	        $versionActive = $sp->versionActive($projet);
+	// projets collaborateurs
+	$projets_collab  = [];
+	foreach ( $list_projets_collab as $projet )
+	{
+	    $versionActive = $sp->versionActive($projet);
 	        
-	        if( $versionActive != null )
-	        {
-	            $rallonges = $versionActive ->getRallonge();
-	            $cpt_rall  = count($rallonges->toArray());
-	            
-			}
-	        else
-	        {
-	            $rallonges = null;
-				$cpt_rall  = 0;
-			}
+	    if( $versionActive != null )
+	    {
+		$rallonges = $versionActive ->getRallonge();
+		$cpt_rall  = count($rallonges->toArray());
+	    }
+	    else
+	    {
+		$rallonges = null;
+		$cpt_rall  = 0;
+	    }
 
             $cv    = $cv_repo->findOneBy(['version' => $versionActive, 'collaborateur' => $individu]);
             if ($cv != null)
             {
-	            $login = $cv->getLoginname()==null ? 'nologin' : $cv->getLoginname();
-	            $u     = $user_repo->findOneBy(['loginname' => $login]);
-	            if ($u==null)
-	            {
-					$passwd = null;
-					$pwd_expir  = null;
-				}
-				else
-				{
-					$passwd    = $u->getPassword();
-					$pwd_expir = $u->getPassexpir();
-				}
-			}
-			else
-			{
-				$login  = 'nologin';
-				$passwd = null;
-				$pwd_expir = null;
-			}
+		$login = $cv->getLoginname()==null ? 'nologin' : $cv->getLoginname();
+		$u     = $user_repo->findOneBy(['loginname' => $login]);
+		if ($u==null)
+		{
+		    $passwd = null;
+		    $pwd_expir  = null;
+		}
+		else
+		{
+		    $passwd    = $u->getPassword();
+		    $pwd_expir = $u->getPassexpir();
+		}
+	    }
+	    else
+	    {
+		$login  = 'nologin';
+		$passwd = null;
+		$pwd_expir = null;
+	    }
 
+	    $projets_collab[] =
+		[
+		'projet'    => $projet,
+		'conso'     => $sp->getConsoCalculP($projet),
+		'rallonges' => $rallonges,
+		'cpt_rall'  => $cpt_rall,
+			    'meta_etat' => $sp->getMetaEtat($projet),
+		'login'     => $login,
+		'passwd'    => $passwd,
+		'pwd_expir' => $pwd_expir
+		];
+	}
+
+	// projets collaborateurs
+	$projets_collab  = [];
+	foreach ( $list_projets_collab as $projet )
+	{
+	    $versionActive = $sp->versionActive($projet);
+	        
+	    if( $versionActive != null )
+	    {
+		$rallonges = $versionActive ->getRallonge();
+		$cpt_rall  = count($rallonges->toArray());
+	            
+	    }
+	    else
+	    {
+		$rallonges = null;
+		$cpt_rall  = 0;
+	    }
+
+            $cv    = $cv_repo->findOneBy(['version' => $versionActive, 'collaborateur' => $individu]);
+            if ($cv != null)
+            {
+		$login = $cv->getLoginname()==null ? 'nologin' : $cv->getLoginname();
+		$u     = $user_repo->findOneBy(['loginname' => $login]);
+		if ($u==null)
+		{
+		    $passwd = null;
+		    $expir  = null;
+		}
+		else
+		{
+		    $passwd    = $u->getPassword();
+		    $pwd_expir = $u->getPassexpir();
+		}
+	    }
+	    else
+	    {
+		$login = 'nologin';
+		$passwd= null;
+		$expir = null;
+			}
 	        $projets_collab[] =
 	            [
 	            'projet'    => $projet,
@@ -1836,66 +1882,19 @@ class ProjetController extends AbstractController
 	            'passwd'    => $passwd,
 	            'pwd_expir' => $pwd_expir
 	            ];
-		}
-
-	    // projets collaborateurs
-	    $projets_collab  = [];
-	    foreach ( $list_projets_collab as $projet )
-		{
-	        $versionActive = $sp->versionActive($projet);
-	        
-	        if( $versionActive != null )
-	        {
-	            $rallonges = $versionActive ->getRallonge();
-	            $cpt_rall  = count($rallonges->toArray());
-	            
-			}
-	        else
-	        {
-	            $rallonges = null;
-				$cpt_rall  = 0;
-			}
-
-            $cv    = $cv_repo->findOneBy(['version' => $versionActive, 'collaborateur' => $individu]);
-            if ($cv != null)
-            {
-	            $login = $cv->getLoginname()==null ? 'nologin' : $cv->getLoginname();
-	            $u     = $user_repo->findOneBy(['loginname' => $login]);
-	            if ($u==null)
-	            {
-					$passwd = null;
-					$expir  = null;
-				}
-				else
-				{
-					$passwd    = $u->getPassword();
-					$pwd_expir = $u->getPassexpir();
-				}
-			}
-			else
-			{
-				$login = 'nologin';
-				$passwd= null;
-				$expir = null;
-			}
-	        $projets_collab[] =
-	            [
-	            'projet'    => $projet,
-	            'conso'     => $sp->getConsoCalculP($projet),
-	            'rallonges' => $rallonges,
-	            'cpt_rall'  => $cpt_rall,
-				'meta_etat' => $sp->getMetaEtat($projet),
-	            'login'     => $login,
-	            'passwd'    => $passwd,
-	            'pwd_expir' => $pwd_expir
-	            ];
-		}
-		
-		$prefixes = $this->getParameter('prj_prefix');
-		foreach (array_keys($prefixes) as $t)
-		{
-			$menu[] = $sm->nouveau_projet($t);
-		}
+	    }
+	    
+	    /*
+	     * JUIN 2021 - On ne crée QUE des projets PROJET_FIL !
+	     *             Eventuellement ils se transforment par la suite en PROJET_SESS
+	     */
+	    //$prefixes = $this->getParameter('prj_prefix');
+	    //foreach (array_keys($prefixes) as $t)
+	    //{
+	    //	$menu[] = $sm->nouveau_projet($t);
+	    //}
+	    
+	    $menu[] = $sm->nouveau_projet(3);
 
 	    return $this->render('projet/demandeur.html.twig',
 	            [

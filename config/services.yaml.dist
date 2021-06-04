@@ -124,6 +124,9 @@ parameters:
     # Heures fixes pour les projets tests
     heures_projet_test: 50000
     
+    # Seuil à partir duquel on ne peut plus créer de projet au fil de l'eau (ou "agile", ou "dynamique")
+    prj_seuil_sess: 100000
+
     # Différents mails
     mailadmin: admin.calmip@univ-toulouse.fr
     mailfrom: ne-pas-repondre@calmip.univ-toulouse.fr
