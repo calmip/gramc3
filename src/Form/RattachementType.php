@@ -43,12 +43,12 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class RattachementType extends AbstractType
 {
-	public function __construct (EntityManagerInterface $em)
-	{
-		$this -> em = $em;
-	}
-	
-	
+    public function __construct(EntityManagerInterface $em)
+    {
+        $this -> em = $em;
+    }
+
+
     /**
      * {@inheritdoc}
      */
@@ -56,25 +56,28 @@ class RattachementType extends AbstractType
     {
         $builder
             ->add('libelleRattachement')
-            ->add('expert', EntityType::class,
+            ->add(
+                'expert',
+                EntityType::class,
                 [
                 'multiple' => true,
-                //'expanded' => true, 
+                //'expanded' => true,
                 'class' => 'App:Individu',
                 'choices' =>  $options['experts'],
-                ]);
+                ]
+            );
 
-        if( $options['modifier'] == true )
+        if ($options['modifier'] == true) {
             $builder
-                ->add('submit',SubmitType::class, ['label' => 'modifier' ])
-                ->add('reset',ResetType::class, ['label' => 'reset' ]);
-                
-        elseif ( $options['ajouter'] == true )
+                ->add('submit', SubmitType::class, ['label' => 'modifier' ])
+                ->add('reset', ResetType::class, ['label' => 'reset' ]);
+        } elseif ($options['ajouter'] == true) {
             $builder
-                ->add('submit',SubmitType::class, ['label' => 'ajouter' ])
-                ->add('reset',ResetType::class, ['label' => 'reset' ]);
+                ->add('submit', SubmitType::class, ['label' => 'ajouter' ])
+                ->add('reset', ResetType::class, ['label' => 'reset' ]);
+        }
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -86,7 +89,8 @@ class RattachementType extends AbstractType
             'modifier' => false,
             'ajouter'  => false,
             'experts'  => $this->em->getRepository(Individu::class)->findAll(),
-            ]);
+            ]
+        );
     }
 
     /**
@@ -96,6 +100,4 @@ class RattachementType extends AbstractType
     {
         return 'appbundle_rattachement';
     }
-
-
 }

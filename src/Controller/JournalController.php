@@ -44,12 +44,12 @@ use App\Form\SelectJournalType;
  */
 class JournalController extends AbstractController
 {
-	private $ff;
-	
-	public function __construct (FormFactoryInterface $ff)
-	{
-		$this->ff  = $ff;
-	}
+    private $ff;
+
+    public function __construct(FormFactoryInterface $ff)
+    {
+        $this->ff  = $ff;
+    }
 
     /**
      * Lists all Journal entities.
@@ -63,11 +63,13 @@ class JournalController extends AbstractController
 
         // journal/list.html.twig
 
-        return $this->render('journal/list.html.twig',
-        [
+        return $this->render(
+            'journal/list.html.twig',
+            [
             'journals'  => $data['journals'],
             'form'      => $data['form']->createView(),
-        ]);
+        ]
+        );
     }
 
     /**
@@ -83,11 +85,13 @@ class JournalController extends AbstractController
         $data = $this->index($request);
 
 
-        return self::render('journal/index.html.twig',
-        [
+        return self::render(
+            'journal/index.html.twig',
+            [
             'journals'  => $data['journals'],
             'form'      => $data['form']->createView(),
-        ]);
+        ]
+        );
     }
 
     /**
@@ -193,37 +197,34 @@ class JournalController extends AbstractController
         ;
     }
 
-	private function index(Request $request)
-	{
-		$ff = $this->ff;
-		$em = $this->getDoctrine()->getManager();
-		
+    private function index(Request $request)
+    {
+        $ff = $this->ff;
+        $em = $this->getDoctrine()->getManager();
+
         // quand on n'a pas de class on doit définir un nom du formulaire pour HTML
         //$form = Functions::getFormBuilder($ff, 'jnl_requetes', SelectJournalType::class, [] )->getForm();
-        $form = $ff->createNamedBuilder('jnl_requetes', SelectJournalType::class, null, [] ) -> getForm();
+        $form = $ff->createNamedBuilder('jnl_requetes', SelectJournalType::class, null, []) -> getForm();
         $form->handleRequest($request);
 
-        if ( $form->isSubmitted() && $form->isValid() )
-        {
+        if ($form->isSubmitted() && $form->isValid()) {
             // on récupère un array avec des données du formulaire [ 'debut' => ... , 'fin' => ... , 'niveau' => .....]
             $data = $form->getData();
-        }
-        else
-        {
+        } else {
             // des valeurs par défaut
             $data['dateDebut']  = new \DateTime();  // attention, cette valeur remplacée par la valeur dans Form/SelectJournalType
             $data['dateFin'] = new \DateTime();
-            $data['dateFin']->add( \DateInterval::createFromDateString( '1 day' ) ); // attention, cette valeur remplacée par la valeur dans Form/SelectJournalType
+            $data['dateFin']->add(\DateInterval::createFromDateString('1 day')); // attention, cette valeur remplacée par la valeur dans Form/SelectJournalType
             $data['niveau'] = Journal::INFO; // attention, cette valeur remplacée par la valeur dans Form/SelectJournalType
         }
 
         // on regarde si le bouton 'chercher tout' défini dans SelectJournalType a été utilisé
-        if( $form->get('all')->isClicked() )
+        if ($form->get('all')->isClicked()) {
             $journals =  $em->getRepository('App:Journal')->findAll();
-
-        else
-           $journals =  $em->getRepository('App:Journal')->findData( $data['dateDebut'], $data['dateFin'],  $data['niveau'] );
-           //  findData est défini dans JournalRepository - modèle
+        } else {
+            $journals =  $em->getRepository('App:Journal')->findData($data['dateDebut'], $data['dateFin'], $data['niveau']);
+        }
+        //  findData est défini dans JournalRepository - modèle
 
         return [ 'journals' => $journals, 'form' => $form ];
     }

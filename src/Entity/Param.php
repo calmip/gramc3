@@ -79,7 +79,7 @@ class Param
     /**
      * Get cle
      *
-     * @return string 
+     * @return string
      */
     public function getCle()
     {
@@ -100,7 +100,7 @@ class Param
     /**
      * Get val
      *
-     * @return string 
+     * @return string
      */
     public function getVal()
     {

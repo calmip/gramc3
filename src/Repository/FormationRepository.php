@@ -18,9 +18,9 @@ class FormationRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Formation::class);
     }
-    
+
     /* Renvoie les formations pour lesquelles le numéro d'ordre est < 10 */
-    function getFormationsPourVersion()
+    public function getFormationsPourVersion()
     {
         return $this->createQueryBuilder('f')
             ->where('f.numeroForm < 10')

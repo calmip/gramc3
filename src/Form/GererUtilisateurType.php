@@ -34,7 +34,6 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 
-
 class GererUtilisateurType extends AbstractType
 {
     /**
@@ -44,21 +43,30 @@ class GererUtilisateurType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-                ->add('all',        CheckboxType::class,
+                ->add(
+                    'all',
+                    CheckboxType::class,
                     [
                         'label'     =>  'Filtrer sur tous les utilisateurs:',
                         'required'  =>  false,
-                    ])
-                ->add('filtre',     TextType::class,
+                    ]
+                )
+                ->add(
+                    'filtre',
+                    TextType::class,
                     [
                         'label'     =>  'Filtre:',
                         'attr'      =>  [ 'size' => '50' ],
                         'required'  =>  false,
-                    ])
-                 ->add('filtrer',     SubmitType::class,
-                    [
+                    ]
+                )
+                 ->add(
+                     'filtrer',
+                     SubmitType::class,
+                     [
                         'label'         => 'Filtrer',
-                    ])
+                    ]
+                 )
                 /*
                 ->add('active',     SubmitType::class,
                     [
@@ -74,7 +82,7 @@ class GererUtilisateurType extends AbstractType
                     ])*/
                     ;
     }
-    
+
     /**
      * @param OptionsResolver $resolver
      */

@@ -274,7 +274,7 @@ class Journal
     /**
      * Get individu
      *
-     * @return \App\Entity\Individu 
+     * @return \App\Entity\Individu
      */
     public function getIndividu()
     {
@@ -297,7 +297,7 @@ class Journal
     /**
      * Get niveau
      *
-     * @return integer 
+     * @return integer
      */
     public function getNiveau()
     {
@@ -305,17 +305,17 @@ class Journal
     }
 
     /////////////////////////////////////////////////////////////////
-    
-    const   EMERGENCY               = 10;
-    const   ALERT                   = 20;
-    const   CRITICAL                = 30;
-    const   ERROR                   = 40;
-    const   WARNING                 = 50;
-    const   NOTICE                  = 60;
-    const   INFO                    = 70;
-    const   DEBUG                   = 80;
 
-    const   LIBELLE                 =
+    public const   EMERGENCY               = 10;
+    public const   ALERT                   = 20;
+    public const   CRITICAL                = 30;
+    public const   ERROR                   = 40;
+    public const   WARNING                 = 50;
+    public const   NOTICE                  = 60;
+    public const   INFO                    = 70;
+    public const   DEBUG                   = 80;
+
+    public const   LIBELLE                 =
             [
                 self::EMERGENCY             =>  'EMERGENCY',
                 self::ALERT                 =>  'ALERT',

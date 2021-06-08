@@ -66,8 +66,14 @@ class Etablissement
      */
     private $individu;
 
-    public function __toString()    {   return $this->getLibelleEtab(); }
-    public function getId()         {   return $this->getIdEtab();      }
+    public function __toString()
+    {
+        return $this->getLibelleEtab();
+    }
+    public function getId()
+    {
+        return $this->getIdEtab();
+    }
 
     ///////////////////////////////////////////////////////////////////////
 

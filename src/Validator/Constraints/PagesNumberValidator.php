@@ -23,6 +23,7 @@
  **/
 
 // src/Validator/Constraints/PagesNumberValidator.php
+
 namespace App\Validator\Constraints;
 
 use Symfony\Component\Validator\Constraint;
@@ -39,42 +40,35 @@ class PagesNumberValidator extends ConstraintValidator
 {
     public function __construct($max_page_nb, ServiceJournal $sj)
     {
-	    $this->max_page_nb = $max_page_nb;
-	    $this->sj          = $sj;
+        $this->max_page_nb = $max_page_nb;
+        $this->sj          = $sj;
     }
-    
+
     public function validate($path, Constraint $constraint)
     {
-	$max_page_nb = $this->max_page_nb;
+        $max_page_nb = $this->max_page_nb;
 
-	if( $path != null && ! empty( $path ) && $path != "" )
-	{
-	    $num = exec ("pdfinfo " . $path . '| awk -e \'/^Pages:/ {print $2}\' ');
-	    $num = intval($num);
-	}
-	else
-	{
-	    $this->sj->debugMessage("PagesNumberValidator: " . $path . " pas trouvé");
-	    $num  = 0;
-	}
-	$this->sj->debugMessage("PagesNumberValidator: Le fichier PDF a " . $num . " pages");
-    
-	if( $num > $max_page_nb )
-	{
-	    if( $max_page_nb == 1 )
-	    {
-		$this->context->buildViolation($constraint->message1)
-		    ->setParameter('{{ pages }}', $num)
-		    ->addViolation();
-	    }
-	    else
-	    {
-		$this->context->buildViolation($constraint->message2)
-		    ->setParameter('{{ pages }}', $num)
-		    ->setParameter('{{ max_pages }}', $max_page_nb )
-		    ->addViolation();
-	    }
-		//Functions::debugMessage("PagesNumberValidator: violation ajoutée");
-	}
+        if ($path != null && ! empty($path) && $path != "") {
+            $num = exec("pdfinfo " . $path . '| awk -e \'/^Pages:/ {print $2}\' ');
+            $num = intval($num);
+        } else {
+            $this->sj->debugMessage("PagesNumberValidator: " . $path . " pas trouvé");
+            $num  = 0;
+        }
+        $this->sj->debugMessage("PagesNumberValidator: Le fichier PDF a " . $num . " pages");
+
+        if ($num > $max_page_nb) {
+            if ($max_page_nb == 1) {
+                $this->context->buildViolation($constraint->message1)
+            ->setParameter('{{ pages }}', $num)
+            ->addViolation();
+            } else {
+                $this->context->buildViolation($constraint->message2)
+            ->setParameter('{{ pages }}', $num)
+            ->setParameter('{{ max_pages }}', $max_page_nb)
+            ->addViolation();
+            }
+            //Functions::debugMessage("PagesNumberValidator: violation ajoutée");
+        }
     }
 }

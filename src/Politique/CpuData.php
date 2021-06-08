@@ -4,25 +4,50 @@ namespace App\Politique;
 
 use App\Entity\Version;
 
-
-class CpuData  extends Data
+class CpuData extends Data
 {
+    public function getName()
+    {
+        return "cpu";
+    }
 
-    public function getName()   {  return "cpu"; }
+    public function getAttrHeures()
+    {
+        return $this->getVersion()->getAttrHeures();
+    }
 
-    public function getAttrHeures() { return $this->getVersion()->getAttrHeures(); }
+    public function getAttrHeuresRallonge()
+    {
+        return $this->getVersion()->getAttrHeuresRallonge();
+    }
 
-    public function getAttrHeuresRallonge() { return $this->getVersion()->getAttrHeuresRallonge(); }
+    public function getDemHeures()
+    {
+        return $this->getVersion()->getDemHeures();
+    }
 
-    public function getDemHeures() { return $this->getVersion()->getDemHeures(); }
+    public function getDemHeuresRallonge()
+    {
+        return $this->getVersion()->getDemHeuresRallonge();
+    }
 
-    public function getDemHeuresRallonge() { return $this->getVersion()->getDemHeuresRallonge(); }
+    public function getPenalHeures()
+    {
+        return $this->getVersion()->getPenalHeures();
+    }
 
-    public function getPenalHeures(){ return $this->getVersion()->getPenalHeures(); }
+    public function getAttrHeuresEte()
+    {
+        return $this->getVersion()->getAttrHeuresEte();
+    }
 
-    public function getAttrHeuresEte() { return $this->getVersion()->getAttrHeuresEte(); }
+    public function getConso()
+    {
+        return $this->getVersion()->getConso();
+    }
 
-    public function getConso() { return $this->getVersion()->getConso(); }
-
-    public function getQuota() { return $this->getVersion()->getQuota(); }
+    public function getQuota()
+    {
+        return $this->getVersion()->getQuota();
+    }
 }

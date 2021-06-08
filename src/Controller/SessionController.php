@@ -53,6 +53,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+
 /**
  * Session controller.
  *
@@ -68,25 +69,25 @@ class SessionController extends AbstractController
     private $sd;
     private $sw;
     private $sss;
-	    
-    public function __construct (ServiceJournal $sj,
-				 ServiceMenus $sm,
-				 ServiceVersions $sv,
-				 ServiceProjets $sp,
-				 ServiceSessions $ss,
-				 GramcDate $sd,
-				 SessionWorkflow $sw,
-				 SessionInterface $sss
-				 )
-    {
-	$this->sj = $sj;
-	$this->sm = $sm;
-	$this->sv = $sv;
-	$this->sp = $sp;
-	$this->ss = $ss;
-	$this->sd = $sd;
-	$this->sw = $sw;
-	$this->sss= $sss;
+
+    public function __construct(
+        ServiceJournal $sj,
+        ServiceMenus $sm,
+        ServiceVersions $sv,
+        ServiceProjets $sp,
+        ServiceSessions $ss,
+        GramcDate $sd,
+        SessionWorkflow $sw,
+        SessionInterface $sss
+    ) {
+        $this->sj = $sj;
+        $this->sm = $sm;
+        $this->sv = $sv;
+        $this->sp = $sp;
+        $this->ss = $ss;
+        $this->sd = $sd;
+        $this->sw = $sw;
+        $this->sss= $sss;
     }
 
     /**
@@ -115,41 +116,41 @@ class SessionController extends AbstractController
      */
     public function gererAction()
     {
-	$sm = $this->sm;
-	$sj = $this->sj;
+        $sm = $this->sm;
+        $sj = $this->sj;
 
-	if( $sm->gerer_sessions()['ok'] == false )
-	    $sj->throwException(__METHOD__ . ':' . __LINE__ . " Ecran interdit " . 
-		" parce que : " . $sm->gerer_sessions()['raison'] );
+        if ($sm->gerer_sessions()['ok'] == false) {
+            $sj->throwException(__METHOD__ . ':' . __LINE__ . " Ecran interdit " .
+        " parce que : " . $sm->gerer_sessions()['raison']);
+        }
 
         $em       = $this->getDoctrine()->getManager();
-        $sessions = $em->getRepository(Session::class)->findBy([],['idSession' => 'DESC']);
-        if ( count($sessions)==0 ) 
-	{
-	    $menu[] = [
-			'ok' => true,
+        $sessions = $em->getRepository(Session::class)->findBy([], ['idSession' => 'DESC']);
+        if (count($sessions)==0) {
+            $menu[] = [
+            'ok' => true,
                         'name' => 'ajouter_session' ,
                         'lien' => 'Créer nouvelle session',
                         'commentaire'=> 'Créer la PREMIERE session'
                         ];
-        }
-        else
-        {
-	    // Refait le calcul de la session courante sans se fier au cache
-	    $this->sss->remove('SessionCourante');
+        } else {
+            // Refait le calcul de la session courante sans se fier au cache
+            $this->sss->remove('SessionCourante');
 
             $menu[] = $sm->ajouterSession();
-	    $menu[] = $sm->modifierSession();
-	    $menu[] = $sm->demarrerSaisie();
+            $menu[] = $sm->modifierSession();
+            $menu[] = $sm->demarrerSaisie();
             $menu[] = $sm->terminerSaisie();
-	    $menu[] = $sm->envoyerExpertises();
-	    $menu[] = $sm->activerSession();
+            $menu[] = $sm->envoyerExpertises();
+            $menu[] = $sm->activerSession();
         }
-        return $this->render('session/gerer.html.twig',
-	[
+        return $this->render(
+            'session/gerer.html.twig',
+            [
             'menu'     => $menu,
             'sessions' => $sessions,
-	]);
+    ]
+        );
     }
 
     /////////////////////////////////////////////////////////////////////
@@ -163,11 +164,11 @@ class SessionController extends AbstractController
      */
     public function ajouterAction(Request $request)
     {
-	$sd = $this->sd;
-	$ss = $this->ss;
-	$em = $this->getDoctrine()->getManager();
-	$session = $ss->nouvelleSession();
-	return $this->modifyAction( $request, $session );
+        $sd = $this->sd;
+        $ss = $this->ss;
+        $em = $this->getDoctrine()->getManager();
+        $session = $ss->nouvelleSession();
+        return $this->modifyAction($request, $session);
     }
 
     /**
@@ -178,36 +179,42 @@ class SessionController extends AbstractController
      */
     public function modifyAction(Request $request, Session $session)
     {
-	$sd = $this->sd;
-	$em = $this->getDoctrine()->getManager();
+        $sd = $this->sd;
+        $em = $this->getDoctrine()->getManager();
         $this->sss->remove('SessionCourante');
-	$debut = $sd;
-	$fin   = $sd->getNew();
-	$fin->add( \DateInterval::createFromDateString( '0 months' ));
+        $debut = $sd;
+        $fin   = $sd->getNew();
+        $fin->add(\DateInterval::createFromDateString('0 months'));
 
-        if( $session->getDateDebutSession() == null)
-            $session->setDateDebutSession( $debut );
-        if( $session->getDateFinSession() == null)
-            $session->setDateFinSession( $fin );
+        if ($session->getDateDebutSession() == null) {
+            $session->setDateDebutSession($debut);
+        }
+        if ($session->getDateFinSession() == null) {
+            $session->setDateFinSession($fin);
+        }
 
-        $editForm = $this->createForm('App\Form\SessionType', $session,
-            [ 'all' => false, 'buttons' => true ] );
+        $editForm = $this->createForm(
+            'App\Form\SessionType',
+            $session,
+            [ 'all' => false, 'buttons' => true ]
+        );
         $editForm->handleRequest($request);
 
-        if ($editForm->isSubmitted() && $editForm->isValid())
-	{
+        if ($editForm->isSubmitted() && $editForm->isValid()) {
             $em->persist($session);
             $em->flush();
 
             return $this->redirectToRoute('gerer_sessions');
-	}
+        }
 
-        return $this->render('session/modify.html.twig',
+        return $this->render(
+            'session/modify.html.twig',
             [
             'session' => $session,
             'edit_form' => $editForm->createView(),
             'session'   => $session,
-            ]);
+            ]
+        );
     }
 
     /**
@@ -218,51 +225,53 @@ class SessionController extends AbstractController
      */
     public function terminerSaisieAction(Request $request)
     {
-	$ss = $this->ss;
-	$em = $this->getDoctrine()->getManager();
-	
-	$this->sss->remove('SessionCourante');
+        $ss = $this->ss;
+        $em = $this->getDoctrine()->getManager();
+
+        $this->sss->remove('SessionCourante');
 
         $session_courante = $ss->getSessionCourante();
         $workflow = $this->sw;
 
-        if( $workflow->canExecute( Signal::DAT_FIN_DEM, $session_courante) )
-	{
-            $workflow->execute( Signal::DAT_FIN_DEM, $session_courante);
+        if ($workflow->canExecute(Signal::DAT_FIN_DEM, $session_courante)) {
+            $workflow->execute(Signal::DAT_FIN_DEM, $session_courante);
             $em->flush();
             return $this->redirectToRoute('gerer_sessions');
-	}
-        else
-            return $this->render('default/error.html.twig',
+        } else {
+            return $this->render(
+                'default/error.html.twig',
                 [
                 'message'   => 'Impossible terminer la saisie',
                 'titre'     =>  'Erreur',
-                ]);
+                ]
+            );
+        }
     }
-   /**
-     * Avant changement d'état de la version
-     *
-     * @Route("/avant_changer_etat/{rtn}/{ctrl}", name="session_avant_changer_etat", defaults= {"rtn" = "X" })
-     * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
-     *
-     */
-    public function avantActiverAction($rtn,$ctrl)
+    /**
+      * Avant changement d'état de la version
+      *
+      * @Route("/avant_changer_etat/{rtn}/{ctrl}", name="session_avant_changer_etat", defaults= {"rtn" = "X" })
+      * @Security("is_granted('ROLE_ADMIN')")
+      * @Method("GET")
+      *
+      */
+    public function avantActiverAction($rtn, $ctrl)
     {
-	    $ss         = $this->ss;
-	    $sj         = $this->sj;
-	    $em         = $this->getDoctrine()->getManager();
-    
-	    $session    = $ss->getSessionCourante();
-	    $connexions = Functions::getConnexions($em, $sj);
-	    return $this->render('session/avant_changer_etat.html.twig',
+        $ss         = $this->ss;
+        $sj         = $this->sj;
+        $em         = $this->getDoctrine()->getManager();
+
+        $session    = $ss->getSessionCourante();
+        $connexions = Functions::getConnexions($em, $sj);
+        return $this->render(
+            'session/avant_changer_etat.html.twig',
             [
             'session'    => $session,
             'ctrl'       => $ctrl,
             'connexions' => $connexions,
             'rtn'        => $rtn,
             ]
-		);
+        );
     }
 
     /**
@@ -273,69 +282,64 @@ class SessionController extends AbstractController
      */
     public function activerAction(Request $request)
     {
-		$em = $this->getDoctrine()->getManager();
-		$sd = $this->sd;
-		$ss = $this->ss;
-		$sj = $this->sj;
+        $em = $this->getDoctrine()->getManager();
+        $sd = $this->sd;
+        $ss = $this->ss;
+        $sj = $this->sj;
 
-		// Suppression du cache, du coup toutes les personnes connectées seront virées
-		$this->sss->remove('SessionCourante');
+        // Suppression du cache, du coup toutes les personnes connectées seront virées
+        $this->sss->remove('SessionCourante');
 
         $session_courante      = $ss->getSessionCourante();
         $etat_session_courante = $session_courante->getEtatSession();
 
-        $sessions = $em->getRepository(Session::class)->findBy([],['idSession' => 'DESC']);
+        $sessions = $em->getRepository(Session::class)->findBy([], ['idSession' => 'DESC']);
 
-		$ok = false;
+        $ok = false;
         $mois = $sd->format('m');
 
         $workflow = $this->sw;
-        
+
         // On active une session A
-        if( $mois == 1 ||  $mois == 12 )
-		{
-            if( $workflow->canExecute( Signal::CLK_SESS_DEB, $session_courante) && $etat_session_courante == Etat::EN_ATTENTE )
-			{
-				// On termine les deux sessions A et B de l'année précédente
-                foreach( $sessions as $session )
-				{
-					// On ne termine pas la session qui va démarrer !
-                    if( $session->getIdSession() == $session_courante->getIdSession() ) continue;
+        if ($mois == 1 ||  $mois == 12) {
+            if ($workflow->canExecute(Signal::CLK_SESS_DEB, $session_courante) && $etat_session_courante == Etat::EN_ATTENTE) {
+                // On termine les deux sessions A et B de l'année précédente
+                foreach ($sessions as $session) {
+                    // On ne termine pas la session qui va démarrer !
+                    if ($session->getIdSession() == $session_courante->getIdSession()) {
+                        continue;
+                    }
 
-                    if( $workflow->canExecute( Signal::CLK_SESS_FIN, $session) )
-                        $err = $workflow->execute( Signal::CLK_SESS_FIN, $session);
-				}
-                $ok = $workflow->execute( Signal::CLK_SESS_DEB, $session_courante );
-                $em->flush();                
-			}
-		}
-		
-		// On active une session B
-        elseif( $mois == 6 ||  $mois == 7 )
-        {
-            if( $workflow->canExecute(Signal::CLK_SESS_DEB , $session_courante)  && $etat_session_courante == Etat::EN_ATTENTE )
-			{
-                $ok = $workflow->execute(Signal::CLK_SESS_DEB , $session_courante );
+                    if ($workflow->canExecute(Signal::CLK_SESS_FIN, $session)) {
+                        $err = $workflow->execute(Signal::CLK_SESS_FIN, $session);
+                    }
+                }
+                $ok = $workflow->execute(Signal::CLK_SESS_DEB, $session_courante);
                 $em->flush();
-			}
-		}
-		else
-		{
-			$sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Une session ne peut être activée qu'en Décembre, en Janvier, en Juin ou en Juillet");
-		}
+            }
+        }
 
-		if ($ok==true)
-		{
-			return $this->redirectToRoute('gerer_sessions');
-		}
-		else
-		{
-	        return $this->render('default/error.html.twig',
-			[
+        // On active une session B
+        elseif ($mois == 6 ||  $mois == 7) {
+            if ($workflow->canExecute(Signal::CLK_SESS_DEB, $session_courante)  && $etat_session_courante == Etat::EN_ATTENTE) {
+                $ok = $workflow->execute(Signal::CLK_SESS_DEB, $session_courante);
+                $em->flush();
+            }
+        } else {
+            $sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Une session ne peut être activée qu'en Décembre, en Janvier, en Juin ou en Juillet");
+        }
+
+        if ($ok==true) {
+            return $this->redirectToRoute('gerer_sessions');
+        } else {
+            return $this->render(
+                'default/error.html.twig',
+                [
                 'message'   => "Impossible d'activer la session, allez voir le journal !",
                 'titre'     =>  'Erreur',
-			]);
-		}
+            ]
+            );
+        }
     }
 
     /**
@@ -346,25 +350,26 @@ class SessionController extends AbstractController
      */
     public function envoyerExpertisesAction(Request $request)
     {
-		$ss = $this->ss;
-		$em = $this->getDoctrine()->getManager();
-		
+        $ss = $this->ss;
+        $em = $this->getDoctrine()->getManager();
+
         $this->sss->remove('SessionCourante');
         $session_courante = $ss->getSessionCourante();
         $workflow = $this->sw;
 
-        if( $workflow->canExecute( Signal::CLK_ATTR_PRS, $session_courante) )
-		{
-            $workflow->execute( Signal::CLK_ATTR_PRS, $session_courante);
+        if ($workflow->canExecute(Signal::CLK_ATTR_PRS, $session_courante)) {
+            $workflow->execute(Signal::CLK_ATTR_PRS, $session_courante);
             $em->flush();
             return $this->redirectToRoute('gerer_sessions');
-		}
-        else
-            return $this->render('default/error.html.twig',
+        } else {
+            return $this->render(
+                'default/error.html.twig',
                 [
                 'message'   => "Impossible d'envoyer les expertises",
                 'titre'     =>  'Erreur',
-                ]);
+                ]
+            );
+        }
     }
 
     /**
@@ -376,27 +381,28 @@ class SessionController extends AbstractController
      */
     public function demarrerSaisieAction(Request $request)
     {
-		$ss = $this->ss;
-		$em = $this->getDoctrine()->getManager();
-		
+        $ss = $this->ss;
+        $em = $this->getDoctrine()->getManager();
+
         $this->sss->remove('SessionCourante'); // remove cache
 
         $session_courante       = $ss->getSessionCourante();
         //return new Response( $session_courante->getIdSession() );
         $workflow = $this->sw;
 
-        if( $workflow->canExecute( Signal::DAT_DEB_DEM, $session_courante) )
-		{
-            $workflow->execute( Signal::DAT_DEB_DEM, $session_courante);
+        if ($workflow->canExecute(Signal::DAT_DEB_DEM, $session_courante)) {
+            $workflow->execute(Signal::DAT_DEB_DEM, $session_courante);
             $em->flush();
             return $this->redirectToRoute('gerer_sessions');
-		}
-        else
-            return $this->render('default/error.html.twig',
+        } else {
+            return $this->render(
+                'default/error.html.twig',
                 [
                 'message'   => "Impossible demarrer la saisie",
                 'titre'     =>  'Erreur',
-                ]);
+                ]
+            );
+        }
     }
 
     /**
@@ -452,7 +458,7 @@ class SessionController extends AbstractController
      */
     public function consulterAction(Session $session)
     {
-		$sm = $this->sm;
+        $sm = $this->sm;
         $menu = [ $sm->gerer_sessions() ];
 
         return $this->render('session/consulter.html.twig', array(
@@ -471,7 +477,7 @@ class SessionController extends AbstractController
     public function editAction(Request $request, Session $session)
     {
         $deleteForm = $this->createDeleteForm($session);
-        $editForm = $this->createForm('App\Form\SessionType', $session, [ 'all' => true ] );
+        $editForm = $this->createForm('App\Form\SessionType', $session, [ 'all' => true ]);
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
@@ -495,8 +501,8 @@ class SessionController extends AbstractController
      */
     public function commentairesAction(Request $request)
     {
-		$sm = $this->sm;
-		$ss = $this->ss;
+        $sm = $this->sm;
+        $ss = $this->ss;
 
         $this->sss->remove('SessionCourante'); // remove cache
 
@@ -504,22 +510,23 @@ class SessionController extends AbstractController
         $etat_session_courante = $session_courante->getEtatSession();
         $workflow              = $this->sw;
 
-        $editForm = $this->createForm('App\Form\SessionType', $session_courante, [ 'commentaire' => true ] );
+        $editForm = $this->createForm('App\Form\SessionType', $session_courante, [ 'commentaire' => true ]);
         $editForm->handleRequest($request);
 
-		$menu[] = $sm->envoyerExpertises();
+        $menu[] = $sm->envoyerExpertises();
 
-        if ($editForm->isSubmitted() && $editForm->isValid())
-        {
+        if ($editForm->isSubmitted() && $editForm->isValid()) {
             $this->getDoctrine()->getManager()->flush();
         }
 
-        return $this->render('session/commentaires.html.twig',
+        return $this->render(
+            'session/commentaires.html.twig',
             [
             'session'   => $session_courante,
             'edit_form' => $editForm->createView(),
             'menu'      => $menu
-            ]);
+            ]
+        );
     }
 
     /**
@@ -546,45 +553,44 @@ class SessionController extends AbstractController
      */
     public function bilanAction(Request $request)
     {
-	$em      = $this->getDoctrine()->getManager();
-	$ss      = $this->ss;
-	$sp      = $this->sp;
-	$sv      = $this->sv;
-	$session = $ss->getSessionCourante();
-        $data    = $ss->selectSession($this->createFormBuilder(['session'=>$session]),$request); // formulaire
-        $session = $data['session']!=null?$data['session']:$session;
+        $em      = $this->getDoctrine()->getManager();
+        $ss      = $this->ss;
+        $sp      = $this->sp;
+        $sv      = $this->sv;
+        $session = $ss->getSessionCourante();
+        $data    = $ss->selectSession($this->createFormBuilder(['session'=>$session]), $request); // formulaire
+        $session = $data['session']!=null ? $data['session'] : $session;
         $form    = $data['form']->createView();
 
-	$versions = $em->getRepository(Version::class)->findBy( ['session' => $session ] );
-	$versions_suppl = [];
-	foreach ($versions as $v)
-	{
-	    $versions_suppl[$v->getIdVersion()]['conso'] = $sp->getConsoCalculVersion($v);
-	    $f = $sv -> buildFormations($v);
-	    $versions_suppl[$v->getIdVersion()]['formation'] = $f;
-	}
-	$form_labels = [];
-	if (count($versions)>0)
-	{
-	    $v0 = $versions[0];
-	    $formation = $versions_suppl[$v0->getIdVersion()]['formation'];
-	    foreach ($formation as $f)
-	    {
-		$fl = [];
-		$fl['acro'] = $f['acro'];
-		$fl['nom']  = $f['nom'];
-		$form_labels[] = $fl;
-	    }
-	}
-	    
-        return $this->render('session/bilan.html.twig',
-	[
+        $versions = $em->getRepository(Version::class)->findBy(['session' => $session ]);
+        $versions_suppl = [];
+        foreach ($versions as $v) {
+            $versions_suppl[$v->getIdVersion()]['conso'] = $sp->getConsoCalculVersion($v);
+            $f = $sv -> buildFormations($v);
+            $versions_suppl[$v->getIdVersion()]['formation'] = $f;
+        }
+        $form_labels = [];
+        if (count($versions)>0) {
+            $v0 = $versions[0];
+            $formation = $versions_suppl[$v0->getIdVersion()]['formation'];
+            foreach ($formation as $f) {
+                $fl = [];
+                $fl['acro'] = $f['acro'];
+                $fl['nom']  = $f['nom'];
+                $form_labels[] = $fl;
+            }
+        }
+
+        return $this->render(
+            'session/bilan.html.twig',
+            [
             'form'      => $form,
             'idSession' => $session->getIdSession(),
             'versions'  => $versions,
             'versions_suppl' => $versions_suppl,
-	    'form_labels' => $form_labels
-	]);
+        'form_labels' => $form_labels
+    ]
+        );
     }
 
     /**
@@ -595,18 +601,20 @@ class SessionController extends AbstractController
      */
     public function bilanAnnuelAction(Request $request)
     {
-		$ss   = $this->ss;
+        $ss   = $this->ss;
         $data = $ss->selectAnnee($request);
         // TODO - Utiliser cette methode pour recuperer les paramètres:
         //        https://ourcodeworld.com/articles/read/1041/how-to-retrieve-specific-and-all-yaml-parameters-from-services-yaml-in-symfony-4
-		$avec_commentaires = $this->getParameter('commentaires_experts_d');
-        return $this->render('session/bilanannuel.html.twig',
+        $avec_commentaires = $this->getParameter('commentaires_experts_d');
+        return $this->render(
+            'session/bilanannuel.html.twig',
             [
             'form' => $data['form']->createView(),
             'annee'=> $data['annee'],
             'avec_commentaires' => $avec_commentaires
             //'versions'  =>  $em->getRepository(Version::class)->findBy( ['session' => $data['session'] ] )
-            ]);
+            ]
+        );
     }
 
     /**
@@ -616,73 +624,78 @@ class SessionController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
-    public function questionnaireCsvAction(Request $request,Session $session)
+    public function questionnaireCsvAction(Request $request, Session $session)
     {
-		$sp = $this->sp;
-		$em = $this->getDoctrine()->getManager();
-		
-	    $entetes =  [
-			'Projet',
-			'Demande',
-			'Attribution',
-			'Consommation',
-			'Titre',
-			'Thématique',
-			'Responsable scientifique',
-			'Laboratoire',
-			'Langages utilisés',
-			'gpu',
-			'Nom du code',
-			'Licence',
-			'Heures/job',
-			'Ram/cœur',
-			'Ram partagée',
-			'Efficacité parallèle',
-			'Stockage temporaire',
-			'Post-traitement',
-			'Meta données',
-			'Nombre de datasets',
-			'Taille des datasets'
-		];
-	    $sortie = join("\t",$entetes) . "\n";
+        $sp = $this->sp;
+        $em = $this->getDoctrine()->getManager();
 
-	    $versions = $em->getRepository(Version::class)->findBy( ['session' => $session ] );
+        $entetes =  [
+            'Projet',
+            'Demande',
+            'Attribution',
+            'Consommation',
+            'Titre',
+            'Thématique',
+            'Responsable scientifique',
+            'Laboratoire',
+            'Langages utilisés',
+            'gpu',
+            'Nom du code',
+            'Licence',
+            'Heures/job',
+            'Ram/cœur',
+            'Ram partagée',
+            'Efficacité parallèle',
+            'Stockage temporaire',
+            'Post-traitement',
+            'Meta données',
+            'Nombre de datasets',
+            'Taille des datasets'
+        ];
+        $sortie = join("\t", $entetes) . "\n";
 
-	    foreach( $versions as $version )
-		{
-	        $langage = "";
-	        if( $version->getCodeCpp()== true )     $langage .= " C++ ";
-	        if( $version->getCodeC()== true )       $langage .= " C ";
-	        if( $version->getCodeFor()== true )     $langage .= " Fortran ";
-	        $langage .=  Functions::string_conversion($version->getCodeLangage());
-	        $ligne = [
-				($version->getIdVersion() != null) ? $version->getIdVersion() : 'null',
-				$version->getDemHeuresTotal(),
-				$version->getAttrHeuresTotal(),
-				$sp->getConsoCalculVersion($version),
-				Functions::string_conversion($version->getPrjTitre()),
-				Functions::string_conversion($version->getPrjThematique()),
-				$version->getResponsable(),
-				$version->getLabo(),
-				trim($langage),
-				Functions::string_conversion($version->getGpu()),
-				Functions::string_conversion($version->getCodeNom()),
-				Functions::string_conversion($version->getCodeLicence()),
-				Functions::string_conversion($version->getCodeHeuresPJob()),
-				Functions::string_conversion($version->getCodeRamPCoeur()),
-				Functions::string_conversion($version->getCodeRamPart()),
-				Functions::string_conversion($version->getCodeEffParal()),
-				Functions::string_conversion($version->getCodeVolDonnTmp()),
-				Functions::string_conversion($version->getDemPostTrait()),
-				Functions::string_conversion($version->getDataMetaDataFormat()),
-				Functions::string_conversion($version->getDataNombreDatasets()),
-				Functions::string_conversion($version->getDataTailleDatasets()),
+        $versions = $em->getRepository(Version::class)->findBy(['session' => $session ]);
 
-			];
-	        $sortie     .=   join("\t",$ligne) . "\n";
-		}
+        foreach ($versions as $version) {
+            $langage = "";
+            if ($version->getCodeCpp()== true) {
+                $langage .= " C++ ";
+            }
+            if ($version->getCodeC()== true) {
+                $langage .= " C ";
+            }
+            if ($version->getCodeFor()== true) {
+                $langage .= " Fortran ";
+            }
+            $langage .=  Functions::string_conversion($version->getCodeLangage());
+            $ligne = [
+                ($version->getIdVersion() != null) ? $version->getIdVersion() : 'null',
+                $version->getDemHeuresTotal(),
+                $version->getAttrHeuresTotal(),
+                $sp->getConsoCalculVersion($version),
+                Functions::string_conversion($version->getPrjTitre()),
+                Functions::string_conversion($version->getPrjThematique()),
+                $version->getResponsable(),
+                $version->getLabo(),
+                trim($langage),
+                Functions::string_conversion($version->getGpu()),
+                Functions::string_conversion($version->getCodeNom()),
+                Functions::string_conversion($version->getCodeLicence()),
+                Functions::string_conversion($version->getCodeHeuresPJob()),
+                Functions::string_conversion($version->getCodeRamPCoeur()),
+                Functions::string_conversion($version->getCodeRamPart()),
+                Functions::string_conversion($version->getCodeEffParal()),
+                Functions::string_conversion($version->getCodeVolDonnTmp()),
+                Functions::string_conversion($version->getDemPostTrait()),
+                Functions::string_conversion($version->getDataMetaDataFormat()),
+                Functions::string_conversion($version->getDataNombreDatasets()),
+                Functions::string_conversion($version->getDataTailleDatasets()),
 
-	    return Functions::csv($sortie,'bilan_reponses__session_'.$session->getIdSession().'.csv');
+            ];
+            $sortie     .=   join("\t", $ligne) . "\n";
+        }
+
+        return Functions::csv($sortie, 'bilan_reponses__session_'.$session->getIdSession().'.csv');
     }
 
     //////////////////////////////////////////////////////////////////////
@@ -700,22 +713,22 @@ class SessionController extends AbstractController
      */
     public function bilanAnnuelCsvAction(Request $request, $annee)
     {
-		$sd      = $this->sd;
-		$sp      = $this->sp;
-		$em = $this->getDoctrine()->getManager();
-		
+        $sd      = $this->sd;
+        $sp      = $this->sp;
+        $em = $this->getDoctrine()->getManager();
+
         $entetes = ['Projet','Thématique','Titre','Responsable','Quota'];
 
         // Les mois pour les consos
-        array_push($entetes,'Janvier','Février','Mars','Avril', 'Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre');
+        array_push($entetes, 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre');
 
         $entetes[] = "total";
         $entetes[] = "Total(%/quota)";
 
-        $sortie     =   join("\t",$entetes) . "\n";
+        $sortie     =   join("\t", $entetes) . "\n";
 
-		// Sommes-nous dans l'année courante ?
-		$annee_courante_flg = ($sd->showYear()==$annee);
+        // Sommes-nous dans l'année courante ?
+        $annee_courante_flg = ($sd->showYear()==$annee);
 
         //////////////////////////////
 
@@ -727,13 +740,12 @@ class SessionController extends AbstractController
         $session_A = $em->getRepository(Session::class)->findOneBy(['idSession' => $session_id_A ]);
         $session_B = $em->getRepository(Session::class)->findOneBy(['idSession' => $session_id_B ]);
 
-        $versions_A= $em->getRepository(Version::class)->findBy( ['session' => $session_A ] );
-        $versions_B= $em->getRepository(Version::class)->findBy( ['session' => $session_B ] );
+        $versions_A= $em->getRepository(Version::class)->findBy(['session' => $session_A ]);
+        $versions_B= $em->getRepository(Version::class)->findBy(['session' => $session_B ]);
 
         // On stoque dans le tableau $id_projets une paire: [$projet, $version] où $version est la version A, ou la B si elle existe
         $id_projets= [];
-        foreach ( array_merge($versions_A, $versions_B) as $v)
-        {
+        foreach (array_merge($versions_A, $versions_B) as $v) {
             $projet = $v -> getProjet();
             $id_projet = $projet->getIdProjet();
             $id_projets[$id_projet] = [ $projet, $v ];
@@ -745,8 +757,7 @@ class SessionController extends AbstractController
         $tttl= 0;		// Le total de la conso
 
         // Calcul du csv, ligne par ligne
-        foreach ( $id_projets as $id_projet => $paire )
-        {
+        foreach ($id_projets as $id_projet => $paire) {
             $line   = [];
             $line[] = $id_projet;
             $p      = $paire[0];
@@ -757,38 +768,32 @@ class SessionController extends AbstractController
             $line[] = $r->getPrenom() . ' ' . $r->getNom();
             $quota  = $v->getQuota();
             $line[] = $quota;
-            for ($m=0;$m<12;$m++)
-            {
-				$c = $sp->getConsoMois($p,$annee,$m);
-				$line[] = $c;
-				$tm[$m] += $c;
-			}
+            for ($m=0;$m<12;$m++) {
+                $c = $sp->getConsoMois($p, $annee, $m);
+                $line[] = $c;
+                $tm[$m] += $c;
+            }
 
-			// Si on est dans l'année courante on ne fait pas le total
-            $ttl = ($annee_courante_flg) ? 'N/A' : $sp->getConsoCalcul($p,$annee);
-            if ($quota>0)
-            {
-	            $ttlp   = ($annee_courante_flg) ? 'N/A' : 100.0 * $ttl / $quota;
-			}
-			else
-			{
-				$ttlp = 0;
-			}
+            // Si on est dans l'année courante on ne fait pas le total
+            $ttl = ($annee_courante_flg) ? 'N/A' : $sp->getConsoCalcul($p, $annee);
+            if ($quota>0) {
+                $ttlp   = ($annee_courante_flg) ? 'N/A' : 100.0 * $ttl / $quota;
+            } else {
+                $ttlp = 0;
+            }
             $line[] = $ttl;
             $line[] = ($ttlp=='N/A') ? $ttlp : intval($ttlp);
 
-            $sortie .= join("\t",$line) . "\n";
+            $sortie .= join("\t", $line) . "\n";
 
             // Mise à jour des totaux
             $tq   += $quota;
-            if ($ttl==='N/A') 
-            {
-				$tttl = 'N/A';;
-			}
-			else
-			{
-				$tttl += $ttl;
-			}
+            if ($ttl==='N/A') {
+                $tttl = 'N/A';
+                ;
+            } else {
+                $tttl += $ttl;
+            }
         }
 
         // Dernière ligne
@@ -798,10 +803,9 @@ class SessionController extends AbstractController
         $line[] = '';
         $line[] = '';
         $line[] = $tq;
-        for ($m=0; $m<12; $m++)
-        {
-			$line[] = $tm[$m];
-		}
+        for ($m=0; $m<12; $m++) {
+            $line[] = $tm[$m];
+        }
         $line[] = $tttl;
 
         if ($tq > 0) {
@@ -809,9 +813,9 @@ class SessionController extends AbstractController
         } else {
             $line[] = 'N/A';
         }
-        $sortie .= join("\t",$line) . "\n";
+        $sortie .= join("\t", $line) . "\n";
 
-        return Functions::csv($sortie,'bilan_annuel_'.$annee.'.csv');
+        return Functions::csv($sortie, 'bilan_annuel_'.$annee.'.csv');
     }
 
     /**
@@ -824,31 +828,30 @@ class SessionController extends AbstractController
     public function bilanLaboCsvAction(Request $request, $annee)
     {
         $entetes = ['Laboratoire','Nombre de projets','Heures demandées','Heures attribuées','Heure consommées','projets'];
-        $sortie  = join("\t",$entetes) . "\n";
+        $sortie  = join("\t", $entetes) . "\n";
 
-		$sp            = $this->sp;
+        $sp            = $this->sp;
         $stats         = $sp->projetsParCritere($annee, 'getAcroLaboratoire');
-		$acros         = $stats[0];
-		$num_projets   = $stats[1];
-		$liste_projets = $stats[2];
-		$dem_heures    = $stats[3];
-		$attr_heures   = $stats[4];
-		$conso         = $stats[5];
+        $acros         = $stats[0];
+        $num_projets   = $stats[1];
+        $liste_projets = $stats[2];
+        $dem_heures    = $stats[3];
+        $attr_heures   = $stats[4];
+        $conso         = $stats[5];
 
         // Calcul du csv
-        foreach ($acros as $k)
-        {
+        foreach ($acros as $k) {
             $ligne   = [];
             $ligne[] = $k;
             $ligne[] = $num_projets[$k];
             $ligne[] = $dem_heures[$k];
             $ligne[] = $attr_heures[$k];
             $ligne[] = $conso[$k];
-            $ligne[] = implode(',',$liste_projets[$k]);
-            $sortie .= join("\t",$ligne) . "\n";
+            $ligne[] = implode(',', $liste_projets[$k]);
+            $sortie .= join("\t", $ligne) . "\n";
         }
 
-        return Functions::csv($sortie,'bilan_annuel_par_labo'.$annee.'.csv');
+        return Functions::csv($sortie, 'bilan_annuel_par_labo'.$annee.'.csv');
     }
 
     /**
@@ -859,42 +862,41 @@ class SessionController extends AbstractController
      * @Route("/{id}/bilan_csv", name="bilan_session_csv")
      * @Method("GET")
      */
-    public function bilanCsvAction(Request $request,Session $session)
+    public function bilanCsvAction(Request $request, Session $session)
     {
-		$em                 = $this->getDoctrine()->getManager();
-		$ss                 = $this->ss;
-		$grdt               = $this->sd;
-		$sp                 = $this->sp;
-		$ressources_conso_group = $this->getParameter('ressources_conso_group');
+        $em                 = $this->getDoctrine()->getManager();
+        $ss                 = $this->ss;
+        $grdt               = $this->sd;
+        $sp                 = $this->sp;
+        $ressources_conso_group = $this->getParameter('ressources_conso_group');
         $type_session       = $session->getLibelleTypeSession(); // A ou B
         $id_session         = $session->getIdSession();
         $annee_cour         = $session->getAnneeSession();
         $session_courante_A = $em->getRepository(Session::class)->findOneBy(['idSession' => $annee_cour .'A']);
-        if( $session_courante_A == null ) return new Response('Session courante nulle !');
+        if ($session_courante_A == null) {
+            return new Response('Session courante nulle !');
+        }
 
-        if ($type_session == 'A')
-        {
-			$bilan_session = new BilanSessionA($ressources_conso_group, $grdt, $session, $sp, $ss, $em);
-		}
-		else
-		{
-			$bilan_session = new BilanSessionB($ressources_conso_group, $grdt, $session, $sp, $ss, $em);
-		}
+        if ($type_session == 'A') {
+            $bilan_session = new BilanSessionA($ressources_conso_group, $grdt, $session, $sp, $ss, $em);
+        } else {
+            $bilan_session = new BilanSessionB($ressources_conso_group, $grdt, $session, $sp, $ss, $em);
+        }
 
-		$csv = $bilan_session->getCsv();
+        $csv = $bilan_session->getCsv();
 
-		return Functions::csv($csv[0],$csv[1]);
-	}
-	
+        return Functions::csv($csv[0], $csv[1]);
+    }
+
     // type session A ou B
     public static function typeSession(Session $session)
     {
-        return substr($session->getIdSession(),-1);
+        return substr($session->getIdSession(), -1);
     }
 
     // années
     public static function codeSession(Session $session)
     {
-        return intval(substr($session->getIdSession(),0,-1));
+        return intval(substr($session->getIdSession(), 0, -1));
     }
 }

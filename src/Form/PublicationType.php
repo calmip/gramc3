@@ -39,10 +39,10 @@ use App\GramcServices\GramcDate;
 
 class PublicationType extends AbstractType
 {
-	public function __construct (GramcDate $grdt)
-	{
-		$this -> grdt = $grdt;
-	}
+    public function __construct(GramcDate $grdt)
+    {
+        $this -> grdt = $grdt;
+    }
 
     /**
      * {@inheritdoc}
@@ -50,20 +50,23 @@ class PublicationType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('refbib',     TextType::class, ['required'  =>  true, ])
-            ->add('doi',        TextType::class, ['required'  =>  false, ])
-            ->add('openUrl',    TextType::class, ['required'  =>  false, ])
-            ->add('idPubli',  IntegerType::class , ['required'  =>  false, ])
-            ->add('annee',      ChoiceType::class,
+            ->add('refbib', TextType::class, ['required'  =>  true, ])
+            ->add('doi', TextType::class, ['required'  =>  false, ])
+            ->add('openUrl', TextType::class, ['required'  =>  false, ])
+            ->add('idPubli', IntegerType::class, ['required'  =>  false, ])
+            ->add(
+                'annee',
+                ChoiceType::class,
                 [
-                'choices'         => Functions::choicesYear( new \DateTime('2000-01-01'), $this->grdt, 0 ),                
+                'choices'         => Functions::choicesYear(new \DateTime('2000-01-01'), $this->grdt, 0),
                 ]
-                );
-            
-        if( $options['projet']  == true )
+            );
+
+        if ($options['projet']  == true) {
             $builder->add('projet');
+        }
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -73,8 +76,8 @@ class PublicationType extends AbstractType
             [
             'data_class'    => 'App\Entity\Publication',
             'projet'        => false,
-            ]);
-        
+            ]
+        );
     }
 
     /**
@@ -84,6 +87,4 @@ class PublicationType extends AbstractType
     {
         return 'appbundle_publication';
     }
-
-
 }

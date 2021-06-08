@@ -68,23 +68,27 @@ class Laboratoire
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToMany(targetEntity="\App\Entity\Individu", mappedBy="labo")
-     */     
+     */
     private $individu;
-    
+
     public function __toString()
     {
-        if( $this->getAcroLabo() != null && $this->getNomLabo() != null)
+        if ($this->getAcroLabo() != null && $this->getNomLabo() != null) {
             return $this->getAcroLabo() . ' - ' . $this->getNomLabo();
-        elseif( $this->getAcroLabo() != null )
+        } elseif ($this->getAcroLabo() != null) {
             return $this->getAcroLabo();
-        elseif( $this->getNomLabo() != null )
+        } elseif ($this->getNomLabo() != null) {
             return $this->getNomLabo();
-        else
+        } else {
             return $this->getIdLabo();
+        }
     }
-    
-    public function getId(){ return $this->getIdLabo(); }
-    
+
+    public function getId()
+    {
+        return $this->getIdLabo();
+    }
+
     /**
      * Constructor
      */

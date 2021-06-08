@@ -46,11 +46,11 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
  */
 class Projet
 {
-	const PROJET_SESS = 1;		// Projet créé lors d'une session d'attribution
-	const PROJET_TEST = 2;		// Projet test, créé au fil de l'eau, non renouvelable
-	const PROJET_FIL  = 3;		// Projet créé au fil de l'eau, renouvelable lors des sessions
-    
-    const LIBELLE_TYPE=
+    public const PROJET_SESS = 1;		// Projet créé lors d'une session d'attribution
+    public const PROJET_TEST = 2;		// Projet test, créé au fil de l'eau, non renouvelable
+    public const PROJET_FIL  = 3;		// Projet créé au fil de l'eau, renouvelable lors des sessions
+
+    public const LIBELLE_TYPE=
     [
         self::PROJET_SESS => 'S',
         self::PROJET_TEST =>  'T',
@@ -147,8 +147,14 @@ class Projet
      */
     private $nepasterminer;
 
-    public function getId(){ return $this->getIdProjet(); }
-    public function __toString(){ return $this->getIdProjet(); }
+    public function getId()
+    {
+        return $this->getIdProjet();
+    }
+    public function __toString()
+    {
+        return $this->getIdProjet();
+    }
 
     /**
      * Constructor
@@ -315,8 +321,9 @@ class Projet
      */
     public function addPubli(\App\Entity\Publication $publi)
     {
-        if( ! $this->publi->contains( $publi ) )
+        if (! $this->publi->contains($publi)) {
             $this->publi[] = $publi;
+        }
 
         return $this;
     }
@@ -409,10 +416,10 @@ class Projet
         return $this->rapportActivite;
     }
 
-	/***************************************************
-	 * Fonctions utiles pour la class Workflow
-	 * Autre nom pour getEtatProjet/setEtatProjet !
-	 ***************************************************/
+    /***************************************************
+     * Fonctions utiles pour la class Workflow
+     * Autre nom pour getEtatProjet/setEtatProjet !
+     ***************************************************/
     public function getObjectState()
     {
         return $this->getEtatProjet();
@@ -426,18 +433,18 @@ class Projet
     //public function getSubWorkflow()    { return new \App\Workflow\VersionWorkflow(); }
 
     //public function getSubObjects()
-        //{
-            //$versions = $this->getVersion();
-            //$my_versions = new \Doctrine\Common\Collections\ArrayCollection();
+    //{
+    //$versions = $this->getVersion();
+    //$my_versions = new \Doctrine\Common\Collections\ArrayCollection();
 
-            //foreach( $versions as $version )
-                //{
-                    //$etat   =   $version->getEtatVersion();
-                    //if( $etat != Etat::TERMINE && $etat != Etat::ANNULE )
-                        //$my_versions[]  = $version;
-                //}
-            //return $my_versions;
-        //}
+    //foreach( $versions as $version )
+    //{
+    //$etat   =   $version->getEtatVersion();
+    //if( $etat != Etat::TERMINE && $etat != Etat::ANNULE )
+    //$my_versions[]  = $version;
+    //}
+    //return $my_versions;
+    //}
 
     ////////////////////////////////////////
 
@@ -445,134 +452,136 @@ class Projet
 
     public function getLibelleEtat()
     {
-        return Etat::getLibelle( $this->getEtatProjet() );
+        return Etat::getLibelle($this->getEtatProjet());
     }
 
     public function getTitre()
     {
-        if( $this->derniereVersion() != null )
+        if ($this->derniereVersion() != null) {
             return $this->derniereVersion()->getPrjTitre();
-        else
+        } else {
             return null;
+        }
     }
 
     public function getThematique()
     {
-        if( $this->derniereVersion() != null )
+        if ($this->derniereVersion() != null) {
             return $this->derniereVersion()->getPrjThematique();
-        else
+        } else {
             return null;
+        }
     }
 
     public function getRattachement()
     {
-        if( $this->derniereVersion() != null )
+        if ($this->derniereVersion() != null) {
             return $this->derniereVersion()->getPrjRattachement();
-        else
+        } else {
             return null;
+        }
     }
 
     public function getLaboratoire()
     {
-        if( $this->derniereVersion() != null )
+        if ($this->derniereVersion() != null) {
             return $this->derniereVersion()->getPrjLLabo();
-        else
+        } else {
             return null;
+        }
     }
 
     //public function countVersions()
     //{
-        //return App::getRepository(Version::class)->countVersions($this);
+    //return App::getRepository(Version::class)->countVersions($this);
     //}
 
     public function derniereSession()
     {
-        if( $this->derniereVersion() != null )
+        if ($this->derniereVersion() != null) {
             return $this->derniereVersion()->getSession();
-        else
-           return null;
+        } else {
+            return null;
+        }
     }
 
     public function getResponsable()
     {
-        if( $this->derniereVersion() != null )
+        if ($this->derniereVersion() != null) {
             return $this->derniereVersion()->getResponsable();
-        else
+        } else {
             return null;
+        }
     }
 
-	/*
-	 * Renvoie true si le projet est un projet test, false sinon
-	 *
-	 */
+    /*
+     * Renvoie true si le projet est un projet test, false sinon
+     *
+     */
     public function isProjetTest()
     {
-		$type = $this->getTypeProjet();
-		if ($this->getTypeProjet() === Projet::PROJET_TEST)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+        $type = $this->getTypeProjet();
+        if ($this->getTypeProjet() === Projet::PROJET_TEST) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
-     /**
-     * derniereVersion - Alias de getVersionDerniere()
-     *                   TODO - A supprimer !
-     *
-     * @return \App\Entity\Version
-     */
+    /**
+    * derniereVersion - Alias de getVersionDerniere()
+    *                   TODO - A supprimer !
+    *
+    * @return \App\Entity\Version
+    */
     public function derniereVersion()
     {
-		return $this->getVersionDerniere();
+        return $this->getVersionDerniere();
     }
-    
-	/****************
-	 * Retourne true si $individu collabore à au moins une version du projet
-	 ******************************************/
+
+    /****************
+     * Retourne true si $individu collabore à au moins une version du projet
+     ******************************************/
     public function isCollaborateur(Individu $individu)
     {
-        foreach( $this->getVersion() as $version )
-            if( $version->isCollaborateur($individu) == true ) return true;
+        foreach ($this->getVersion() as $version) {
+            if ($version->isCollaborateur($individu) == true) {
+                return true;
+            }
+        }
         return false;
     }
 
     ////////////////////////////////////////////////////
 
-/* Supprimé car non utilisé
-    //public function getCollaborateurs( $versions = [] )
-    //{
-	    //if( $versions == [] ) $versions = App::getRepository(Version::class)->findVersions( $this );
-	
-	    //$collaborateurs = [];
-	    //foreach( $versions as $version )
-	        //foreach( $version->getCollaborateurs() as $collaborateur )
-	            //$collaborateurs[ $collaborateur->getIdIndividu() ] = $collaborateur;
-	
-	    //return $collaborateurs;
-    //}
-*/
+    /* Supprimé car non utilisé
+        //public function getCollaborateurs( $versions = [] )
+        //{
+            //if( $versions == [] ) $versions = App::getRepository(Version::class)->findVersions( $this );
+
+            //$collaborateurs = [];
+            //foreach( $versions as $version )
+                //foreach( $version->getCollaborateurs() as $collaborateur )
+                    //$collaborateurs[ $collaborateur->getIdIndividu() ] = $collaborateur;
+
+            //return $collaborateurs;
+        //}
+    */
     /////////////////////////////////////////////////////
 
-    
-	public function getEtat()
+
+    public function getEtat()
     {
-		return $this->getEtatProjet();
-	}
+        return $this->getEtatProjet();
+    }
 
     public function getLibelleType()
     {
         $type = $this->getTypeProjet();
-        if ($type <=3 and $type > 0)
-        {
+        if ($type <=3 and $type > 0) {
             return Projet::LIBELLE_TYPE[$this->getTypeProjet()];
-        }
-        else
-        {
+        } else {
             return '?';
         }
     }
 }
-

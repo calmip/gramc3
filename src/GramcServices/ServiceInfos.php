@@ -21,7 +21,6 @@
  *            Nicolas Renon - Université Paul Sabatier - CALMIP
  **/
 
-
 namespace App\GramcServices;
 
 use App\GramcServices\GramcDate;
@@ -37,7 +36,7 @@ const VERSION = "3.5.0-criann";
 /*
  * Cette classe garde des informations pouvant être reprises par
  * les autres objets, et en particulier par les pages twig (haut et bas de page)
- * 
+ *
  ******/
 class ServiceInfos
 {
@@ -54,43 +53,42 @@ class ServiceInfos
         $this->em    = $em;
         $this->grdte = $gramc_date;
         // un bogue obscur de symfony (lié à la console)
-        try
-        {
+        try {
             $this->sessions_non_terminees =
                 $em->getRepository('App:Session')->get_sessions_non_terminees();
 
-            if( isset( $this->sessions_non_terminees[0] ) )
+            if (isset($this->sessions_non_terminees[0])) {
                 $this->session_courante = $this->sessions_non_terminees[0];
+            }
 
-            if( $this->session_courante != null )
-			{
+            if ($this->session_courante != null) {
                 $this->etat_session_courante  =  $this->session_courante->getEtatSession();
-                if( array_key_exists( $this->etat_session_courante, Etat::LIBELLE_ETAT ) )
+                if (array_key_exists($this->etat_session_courante, Etat::LIBELLE_ETAT)) {
                     $this->libelle_etat_session_courante = Etat::LIBELLE_ETAT[$this->etat_session_courante];
-                else
+                } else {
                     $this->libelle_etat_session_courante = "UNKNOWN";
+                }
                 $this->id_session_courante = $this->session_courante->getIdSession();
-			}
-        }
-        catch ( \Exception $e)
-        { };
-	}
+            }
+        } catch (\Exception $e) {
+        };
+    }
 
-    function getLibelleEtatSessionCourante()
+    public function getLibelleEtatSessionCourante()
     {
         return $this->libelle_etat_session_courante;
     }
 
-    function getSessionCourante()
-	{
-		return $this->session_courante;
-	}
+    public function getSessionCourante()
+    {
+        return $this->session_courante;
+    }
 
 
-    function getEtatSessionCourante()
-	{
-		return $this->etat_session_courante;
-	}
+    public function getEtatSessionCourante()
+    {
+        return $this->etat_session_courante;
+    }
 
     public function sessions_non_terminees()
     {
@@ -99,76 +97,66 @@ class ServiceInfos
 
     public function mail_replace($mail)
     {
-          return str_replace('@',' at ',$mail);
+        return str_replace('@', ' at ', $mail);
     }
 
-	function gramc_date($format)
-	{
-		$d = $this->grdte;
-		if ($format == 'raw')
-		{
-			return $d;
-		} 
-		else
-		{
-			return $d->format($format);
-		}
-	}
-		
-    function prochaine_session_saison()
+    public function gramc_date($format)
     {
-        $annee        = 2000 + intval(substr($this->id_session_courante,0,2));
-        $type         = substr($this->id_session_courante,2,1);
+        $d = $this->grdte;
+        if ($format == 'raw') {
+            return $d;
+        } else {
+            return $d->format($format);
+        }
+    }
+
+    public function prochaine_session_saison()
+    {
+        $annee        = 2000 + intval(substr($this->id_session_courante, 0, 2));
+        $type         = substr($this->id_session_courante, 2, 1);
         $mois_courant = intval($this->gramc_date('m'));
         $result['annee']=$annee;
-        if ($type == 'A')
-            {
+        if ($type == 'A') {
             $result['type']='P';
-            } else
-            {
+        } else {
             $result['type']='A';
-            }
+        }
         return $result;
-
     } //  function prochaine_session_saison()
 
-    function strftime_fr($format,$date)
-        {
-            setlocale(LC_TIME,'fr_FR.UTF-8');
-            return strftime($format,$date->getTimestamp());
-        } // function strftime_fr
-
-    function   tronquer_chaine($s,$l)
-        {
-        if (grapheme_strlen($s)>=intval($l))
-            {
-            return grapheme_substr($s,0,intval($l)).'...';
-            }
-        else
-            {
-            return $s;
-            }
-        }
-
-
-    function cette_session()
-        {
-            $aujourdhui    = $this->gramc_date('raw');
-            $fin_sess_date = $this->session_courante->getDateFinSession();
-            $interval   = date_diff($aujourdhui,$fin_sess_date);
-            $duree      = $interval->format('%R%a-%H');
-            $jours      = intval($duree);
-            return array( 'jours' => $jours, 'fin_sess' => $fin_sess_date->format("d/m/Y") );
-        } // function cette_session()
-
-    function prochaine_session()
-        {
-            return $this->session_courante->getDateDebutSession()->format("d/m/Y");
-        } // function prochaine_session
-        
-    function getVersion()
+    public function strftime_fr($format, $date)
     {
-		return VERSION;
-	}
+        setlocale(LC_TIME, 'fr_FR.UTF-8');
+        return strftime($format, $date->getTimestamp());
+    } // function strftime_fr
 
+    public function tronquer_chaine($s, $l)
+    {
+        if (grapheme_strlen($s)>=intval($l)) {
+            return grapheme_substr($s, 0, intval($l)).'...';
+        } else {
+            return $s;
+        }
+    }
+
+
+    public function cette_session()
+    {
+        $aujourdhui    = $this->gramc_date('raw');
+        $fin_sess_date = $this->session_courante->getDateFinSession();
+        $interval   = date_diff($aujourdhui, $fin_sess_date);
+        $duree      = $interval->format('%R%a-%H');
+        $jours      = intval($duree);
+        return array( 'jours' => $jours, 'fin_sess' => $fin_sess_date->format("d/m/Y") );
+    } // function cette_session()
+
+    public function prochaine_session()
+    {
+        return $this->session_courante->getDateDebutSession()->format("d/m/Y");
+    } // function prochaine_session
+
+    public function getVersion()
+    {
+        return VERSION;
+    }
 } // class

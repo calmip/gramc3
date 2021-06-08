@@ -26,25 +26,23 @@ namespace App\Utils;
 
 class IDP
 {
-
 // IDP::$dev
 
-public static $dev =
+    public static $dev =
         [
         'Université de Toulouse 3 Paul Sabatier' => 'https://shibboleth.ups-tlse.fr/idp/shibboleth',
         'Comptes CRU - entreprises'  => 'urn:mace:cru.fr:federation:sac',
         'AUTRE'        => 'WAYF'
         ];
 
-// IDP::$prod
+    // IDP::$prod
 
-public static $prod =
+    public static $prod =
         [
         'CNRS'  => 'https://janus.cnrs.fr/idp',
         'Université de Toulouse 3 Paul Sabatier' => 'https://shibboleth.ups-tlse.fr/idp/shibboleth',
         'Comptes CRU - entreprises'  => 'urn:mace:cru.fr:federation:sac',
-        'INPT - Institut National Polytechnique de Toulouse' => 'https://idp.inp-toulouse.fr/idp/shibboleth', 
+        'INPT - Institut National Polytechnique de Toulouse' => 'https://idp.inp-toulouse.fr/idp/shibboleth',
         'AUTRE'        => 'WAYF'
         ];
-
 }

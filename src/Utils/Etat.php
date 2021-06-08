@@ -24,32 +24,31 @@
 
 namespace App\Utils;
 
-
 class Etat
 {
     // etats
-    const CREE_ATTENTE              = 1;
-    const EDITION_DEMANDE           = 2;
-    const EDITION_EXPERTISE         = 3;
-    const EN_ATTENTE                = 4;
-    const ACTIF                     = 5;
-    const NOUVELLE_VERSION_DEMANDEE = 6;
-    const EN_STANDBY                = 7;
-    const EN_SURSIS                 = 8;
-    const TERMINE                   = 9;
-    const ANNULE                    = 10;
-    const FIN_ETATS                 = 11;
+    public const CREE_ATTENTE              = 1;
+    public const EDITION_DEMANDE           = 2;
+    public const EDITION_EXPERTISE         = 3;
+    public const EN_ATTENTE                = 4;
+    public const ACTIF                     = 5;
+    public const NOUVELLE_VERSION_DEMANDEE = 6;
+    public const EN_STANDBY                = 7;
+    public const EN_SURSIS                 = 8;
+    public const TERMINE                   = 9;
+    public const ANNULE                    = 10;
+    public const FIN_ETATS                 = 11;
 
-    const EDITION_TEST              = 21;
-    const EXPERTISE_TEST            = 22;
-    const ACTIF_TEST                = 23;
+    public const EDITION_TEST              = 21;
+    public const EXPERTISE_TEST            = 22;
+    public const ACTIF_TEST                = 23;
 
-    const DESAFFECTE                = 31;
+    public const DESAFFECTE                = 31;
 
-    const RENOUVELABLE              = 41;
-    const NON_RENOUVELABLE          = 42;
+    public const RENOUVELABLE              = 41;
+    public const NON_RENOUVELABLE          = 42;
 
-    const   LIBELLE_ETAT=
+    public const   LIBELLE_ETAT=
         [
             self::CREE_ATTENTE              =>  'CREE_ATTENTE',
             self::EDITION_DEMANDE           =>  'EDITION_DEMANDE',
@@ -72,19 +71,21 @@ class Etat
 
     public static function getLibelle($etat)
     {
-        if( $etat != null && array_key_exists( $etat , Etat::LIBELLE_ETAT) )
+        if ($etat != null && array_key_exists($etat, Etat::LIBELLE_ETAT)) {
             return self::LIBELLE_ETAT[$etat];
-        else
+        } else {
             return 'UNKNOWN';
+        }
     }
 
     public static function getEtat($libelle)
     {
-        $array_flip = array_flip( self::LIBELLE_ETAT  );
+        $array_flip = array_flip(self::LIBELLE_ETAT);
 
-        if( $libelle != null && array_key_exists(  $libelle, $array_flip ) )
+        if ($libelle != null && array_key_exists($libelle, $array_flip)) {
             return $array_flip[$libelle];
-        else
+        } else {
             return null;
+        }
     }
 }

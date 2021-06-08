@@ -40,7 +40,7 @@ class RallongeType extends AbstractType
             ->add('nbHeuresAtt')->add('commentaireInterne')->add('commentaireExterne')->add('validation')->add('expert')
             ;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -58,6 +58,4 @@ class RallongeType extends AbstractType
     {
         return 'appbundle_rallonge';
     }
-
-
 }

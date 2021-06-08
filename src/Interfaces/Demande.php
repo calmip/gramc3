@@ -24,7 +24,7 @@
 
 namespace App\Interfaces;
 
-// Interface Demande: 
+// Interface Demande:
 //      Une demande peut être soit une version, soit une rallonge
 //
 interface Demande
@@ -39,5 +39,4 @@ interface Demande
     public function setAttrHeures($attrHeures);
     public function setDemHeures($demHeures);
     public function setEtat($etat);
-    
 }

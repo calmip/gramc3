@@ -35,130 +35,123 @@ use App\PropositionExperts\PropositionExpertsType2;
 use App\GramcServices\ServiceJournal;
 use Doctrine\ORM\EntityManagerInterface;
 
-
 /***********************************************************************************************
  * PropositionExperts - Propose un expert, l'algorithme dépend du:
  *                          - type de projet
  *                          - rattachement administratif
- * 
+ *
  **********************************************************************/
-abstract class PropositionExperts 
+abstract class PropositionExperts
 {
-	protected $sj;
-	protected $em;
-	
-	public function __construct( ServiceJournal $sj, EntityManagerInterface $em)
-	{
-		$this -> sj = $sj;
-		$this -> em = $em;
-	}
-	
-	abstract public function getProposition(Version $version);
+    protected $sj;
+    protected $em;
 
-	// Cherche un expert acceptable dans les versions précédentes
-	// Retourne $expert, ou null si pas trouvé
-	protected function getExpertVersionPrecedente($version, $exclus)
-	{
-	    $versionPrecedente  =  $version->versionPrecedente ();
-	    if( $versionPrecedente == null )
-	        $derniereExpertise = null;
-	    else
-	        $derniereExpertise  =   $versionPrecedente->getOneExpertise();
+    public function __construct(ServiceJournal $sj, EntityManagerInterface $em)
+    {
+        $this -> sj = $sj;
+        $this -> em = $em;
+    }
 
-	    if( $derniereExpertise != null  )
-        {
-	        $expert = $derniereExpertise->getExpert();
-	        if( $expert == null )
-	            $this->sj->noticeMessage(__METHOD__ . ":" . __LINE__ . " L'expertise de la version précédente " .
-	                    $version->getIdVersion(). "(" .$derniereExpertise->getId() . ") n'a pas d'expert !");
-	        elseif( $expert->isExpert() == false )
-	            $this->sj->noticeMessage(__METHOD__ . ":" . __LINE__ . " L'expert de la version précédente " .
-	                    $version->getIdVersion(). "(" .$derniereExpertise->getId() . ") " . $expert . " n'est plus un expert");
-	        elseif( array_key_exists( $expert->getIdIndividu(), $exclus ) )
-	            $this->sj->noticeMessage(__METHOD__ . ":" . __LINE__ . " L'expert de la version précédente  " .
-	                    $version->getIdVersion(). "(" .$derniereExpertise->getId() . ") " . $expert . " est un collaborateur");
-	        else
-	            return $expert;
+    abstract public function getProposition(Version $version);
+
+    // Cherche un expert acceptable dans les versions précédentes
+    // Retourne $expert, ou null si pas trouvé
+    protected function getExpertVersionPrecedente($version, $exclus)
+    {
+        $versionPrecedente  =  $version->versionPrecedente();
+        if ($versionPrecedente == null) {
+            $derniereExpertise = null;
+        } else {
+            $derniereExpertise  =   $versionPrecedente->getOneExpertise();
         }
 
-	    elseif( $versionPrecedente != null )
-	        $this->sj->noticeMessage(__METHOD__ . ":" . __LINE__ . " La version précédente " . $versionPrecedente . " n'a pas d'expertise !");
-
-		// On recherche un expert dans les versions encore antérieures
-	    $versions = $this->em->getRepository(Version::class)->findVersions( $version );
-	    $dernierIdVersion = $version->getIdVersion();
-	    foreach( $versions as $version )
-        {
-	        $expertise = $version->getOneExpertise();
-	        if( $expertise != null && $version->getIdVersion() != $dernierIdVersion )
-            {
-	            $expert = $expertise->getExpert();
-	            if ( $expert == null )
-	                $this->sj->errorMessage(__METHOD__ .  ":" . __LINE__ . " L'expertise de la version " .  $version->getIdVersion(). "(" .$expertise->getId() . ") n'a pas d'expert !");
-	            elseif ( $expert->isExpert() == false )
-	                $this->sj->noticeMessage(__METHOD__ . ":" . __LINE__ . " L'expert de la version " .
-	                    $version->getIdVersion(). "(" .$expertise->getId() . ") " . $expert . " n'est plus un expert");
-	            elseif( array_key_exists( $expert->getIdIndividu(), $exclus ) )
-	                $this->sj->noticeMessage(__METHOD__ . ":" . __LINE__ . " L'expert de la version " .
-	                    $version->getIdVersion(). "(" .$expertise->getId() . ") " . $expert . " est un collaborateur");
-	            else
-	                return $expert;
+        if ($derniereExpertise != null) {
+            $expert = $derniereExpertise->getExpert();
+            if ($expert == null) {
+                $this->sj->noticeMessage(__METHOD__ . ":" . __LINE__ . " L'expertise de la version précédente " .
+                        $version->getIdVersion(). "(" .$derniereExpertise->getId() . ") n'a pas d'expert !");
+            } elseif ($expert->isExpert() == false) {
+                $this->sj->noticeMessage(__METHOD__ . ":" . __LINE__ . " L'expert de la version précédente " .
+                        $version->getIdVersion(). "(" .$derniereExpertise->getId() . ") " . $expert . " n'est plus un expert");
+            } elseif (array_key_exists($expert->getIdIndividu(), $exclus)) {
+                $this->sj->noticeMessage(__METHOD__ . ":" . __LINE__ . " L'expert de la version précédente  " .
+                        $version->getIdVersion(). "(" .$derniereExpertise->getId() . ") " . $expert . " est un collaborateur");
+            } else {
+                return $expert;
             }
-	        //else
-	        //    $this->sj->noticeMessage(__METHOD__ .  ":" . __LINE__ . " II version " . $version->getIdVersion() . " n'a pas d'expertise !");
+        } elseif ($versionPrecedente != null) {
+            $this->sj->noticeMessage(__METHOD__ . ":" . __LINE__ . " La version précédente " . $versionPrecedente . " n'a pas d'expertise !");
+        }
+
+        // On recherche un expert dans les versions encore antérieures
+        $versions = $this->em->getRepository(Version::class)->findVersions($version);
+        $dernierIdVersion = $version->getIdVersion();
+        foreach ($versions as $version) {
+            $expertise = $version->getOneExpertise();
+            if ($expertise != null && $version->getIdVersion() != $dernierIdVersion) {
+                $expert = $expertise->getExpert();
+                if ($expert == null) {
+                    $this->sj->errorMessage(__METHOD__ .  ":" . __LINE__ . " L'expertise de la version " .  $version->getIdVersion(). "(" .$expertise->getId() . ") n'a pas d'expert !");
+                } elseif ($expert->isExpert() == false) {
+                    $this->sj->noticeMessage(__METHOD__ . ":" . __LINE__ . " L'expert de la version " .
+                        $version->getIdVersion(). "(" .$expertise->getId() . ") " . $expert . " n'est plus un expert");
+                } elseif (array_key_exists($expert->getIdIndividu(), $exclus)) {
+                    $this->sj->noticeMessage(__METHOD__ . ":" . __LINE__ . " L'expert de la version " .
+                        $version->getIdVersion(). "(" .$expertise->getId() . ") " . $expert . " est un collaborateur");
+                } else {
+                    return $expert;
+                }
+            }
+            //else
+            //    $this->sj->noticeMessage(__METHOD__ .  ":" . __LINE__ . " II version " . $version->getIdVersion() . " n'a pas d'expertise !");
         }
         return null;
-	}
+    }
 
     // on cherche un expert le moins sollicité et non exclus parmis la liste passée en entrée
     // Renvoie l'expert, ou null
-	protected function getExpertDisponible($experts, $exclus)
-	{
-		if ($experts==null || count($experts)==0) return null;
-		
-		if (count($experts) == 1)
-		{
-			if (!array_key_exists( $experts[0]->getIdIndividu(), $exclus))
-			{
-				return $experts[0];
-			}
-			else
-			{
-				return null;
-			}
-		}
-		
-		// $nb_expertises contient le nombre d'experties pour chaque expert: key = nombre d'expertises, val = expert 
-	    $nb_expertises = [];
-	    foreach( $experts as $expert )
-	    {
-	        if( $expert->isExpert() &&  ! array_key_exists( $expert->getIdIndividu(), $exclus ) )
-	            $nb_expertises[ $this->em->getRepository(Expertise::class)->countExpertises($expert) ] = $expert;
-	        elseif( ! $expert->isExpert() )
-            {
-	            $this->sj->errorMessage(__METHOD__  .  ":" . __LINE__ . " " .  $expert . " est proposé comme expert mais n'est pas un expert !");
-            }
-		}
-		
-		// On trie sur les clés et on renvoie le premier élément
-	    if( count($nb_expertises) != 0 )
-        {
-	        ksort( $nb_expertises );
-	        return  reset($nb_expertises);
+    protected function getExpertDisponible($experts, $exclus)
+    {
+        if ($experts==null || count($experts)==0) {
+            return null;
         }
-	    else
-	        return null;
-	}
+
+        if (count($experts) == 1) {
+            if (!array_key_exists($experts[0]->getIdIndividu(), $exclus)) {
+                return $experts[0];
+            } else {
+                return null;
+            }
+        }
+
+        // $nb_expertises contient le nombre d'experties pour chaque expert: key = nombre d'expertises, val = expert
+        $nb_expertises = [];
+        foreach ($experts as $expert) {
+            if ($expert->isExpert() &&  ! array_key_exists($expert->getIdIndividu(), $exclus)) {
+                $nb_expertises[ $this->em->getRepository(Expertise::class)->countExpertises($expert) ] = $expert;
+            } elseif (! $expert->isExpert()) {
+                $this->sj->errorMessage(__METHOD__  .  ":" . __LINE__ . " " .  $expert . " est proposé comme expert mais n'est pas un expert !");
+            }
+        }
+
+        // On trie sur les clés et on renvoie le premier élément
+        if (count($nb_expertises) != 0) {
+            ksort($nb_expertises);
+            return  reset($nb_expertises);
+        } else {
+            return null;
+        }
+    }
 }
 
 //~ function PropositionExpertsFactory($version)
 //~ {
-	//~ if ($version -> getTypeProjet() == Projet::PROJET_TEST || $this->getTypeProjet() == Projet::PROJET_FIL)
-	//~ {
-		//~ return new PropositionExpertsType2();
-	//~ }
-	//~ else
-	//~ {
-		//~ return new PropositionExpertsType1();
-	//~ }
+    //~ if ($version -> getTypeProjet() == Projet::PROJET_TEST || $this->getTypeProjet() == Projet::PROJET_FIL)
+    //~ {
+        //~ return new PropositionExpertsType2();
+    //~ }
+    //~ else
+    //~ {
+        //~ return new PropositionExpertsType1();
+    //~ }
 //~ }

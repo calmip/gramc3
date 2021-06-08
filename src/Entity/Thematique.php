@@ -41,14 +41,14 @@ class Thematique
      */
     private $libelleThematique;
 
-     /**
-     * @var \App\Entity\MetaThematique
-     *
-     * @ORM\ManyToOne(targetEntity="App\Entity\MetaThematique")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="id_meta_thematique", referencedColumnName="id_meta_thematique")
-     * })
-     */
+    /**
+    * @var \App\Entity\MetaThematique
+    *
+    * @ORM\ManyToOne(targetEntity="App\Entity\MetaThematique")
+    * @ORM\JoinColumns({
+    *   @ORM\JoinColumn(name="id_meta_thematique", referencedColumnName="id_meta_thematique")
+    * })
+    */
     private $metaThematique;
 
     /**
@@ -85,12 +85,18 @@ class Thematique
 
     //////////////////////////////////////////////////////////
 
-    public function getId(){ return $this->getIdThematique(); }
-    public function __toString(){ return $this->getLibelleThematique(); }
+    public function getId()
+    {
+        return $this->getIdThematique();
+    }
+    public function __toString()
+    {
+        return $this->getLibelleThematique();
+    }
 
     //////////////////////////////////////////////////////////
 
-    
+
     /**
      * Constructor
      */
@@ -168,8 +174,9 @@ class Thematique
      */
     public function addExpert(\App\Entity\Individu $expert)
     {
-        if( ! $this->expert->contains($expert) )
+        if (! $this->expert->contains($expert)) {
             $this->expert[] = $expert;
+        }
 
         return $this;
     }
@@ -227,7 +234,4 @@ class Thematique
     {
         return $this->version;
     }
-
-    
-
 }

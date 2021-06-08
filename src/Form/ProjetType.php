@@ -37,7 +37,7 @@ class ProjetType extends AbstractType
     {
         $builder->add('etatProjet')->add('idProjet')->add('publi')->add('versionActive')->add('versionDerniere')        ;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -55,6 +55,4 @@ class ProjetType extends AbstractType
     {
         return 'appbundle_projet';
     }
-
-
 }

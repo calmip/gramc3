@@ -38,68 +38,65 @@ class CollaborateurVersionRepository extends \Doctrine\ORM\EntityRepository
 {
     public function getResponsable($projet)
     {
-         $collaborateurVersion = $this->getEntityManager()
-         ->createQuery
-        ('SELECT partial v.{id}  FROM App:CollaborateurVersion v JOIN App:Projet p WHERE ( v.responsable = true AND  v.version = p.versionDerniere AND p = :projet)')
+        $collaborateurVersion = $this->getEntityManager()
+         ->createQuery('SELECT partial v.{id}  FROM App:CollaborateurVersion v JOIN App:Projet p WHERE ( v.responsable = true AND  v.version = p.versionDerniere AND p = :projet)')
 
-        ->setParameter('projet', $projet )
+        ->setParameter('projet', $projet)
         ->getOneOrNullResult();
 
-        if( $collaborateurVersion != null )
+        if ($collaborateurVersion != null) {
             return $collaborateurVersion->getCollaborateur();
-        else
+        } else {
             return null;
+        }
     }
 
-	/*
-	 * Renvoie les collaborateurs d'un projet sous forme de tableau associatif:
-	 *      $idIndividu => $individu
-	 */
+    /*
+     * Renvoie les collaborateurs d'un projet sous forme de tableau associatif:
+     *      $idIndividu => $individu
+     */
     public function getCollaborateurs($projet)
     {
-         $output = $this->getEntityManager()
-         ->createQuery
-        ('SELECT i  FROM App:Individu i, App:CollaborateurVersion cv JOIN cv.version v JOIN'
+        $output = $this->getEntityManager()
+         ->createQuery('SELECT i  FROM App:Individu i, App:CollaborateurVersion cv JOIN cv.version v JOIN'
         .' v.projet p WHERE ( cv.collaborateur = i AND p = :projet AND NOT v.etatVersion = :termine AND NOT v.etatVersion = :annule)')
 
-        ->setParameter('projet', $projet )
+        ->setParameter('projet', $projet)
         ->setParameter('termine', Etat::getEtat('TERMINE'))
-        ->setParameter('annule', Etat::getEtat('ANNULE') )
+        ->setParameter('annule', Etat::getEtat('ANNULE'))
         ->getResult();
 
         $collaborateurs =   [];
-        foreach( $output as $user )
+        foreach ($output as $user) {
             $collaborateurs[ $user->getIdIndividu() ] = $user;
+        }
 
         return $collaborateurs;
     }
-    
+
     /*
-     * Renvoie les cv qui ont un mot de passe 
+     * Renvoie les cv qui ont un mot de passe
      */
     public function getCvPasswd()
     {
-		$em = $this->getEntityManager();
-		$coll_ver = $em->createQuery('SELECT cv FROM App:CollaborateurVersion cv WHERE cv.password IS NOT NULL')->getResult();
-		return $coll_ver;
-	}
-	
-	/*
-	 * Renvoie true/false suivant que loginname est dans la table ou pas
-	 */
-	public function existsLoginname($loginname)
-	{
-		$em = $this->getEntityManager();
-		$out= $em->createQuery('SELECT cv FROM App:CollaborateurVersion cv WHERE cv.loginname = :loginname')
-		->setParameter('loginname', $loginname)
-		->getResult();
-		if (count($out)==0)
-		{
-			return false;
-		}
-		else
-		{
-			return true;
-		}
-	}
+        $em = $this->getEntityManager();
+        $coll_ver = $em->createQuery('SELECT cv FROM App:CollaborateurVersion cv WHERE cv.password IS NOT NULL')->getResult();
+        return $coll_ver;
+    }
+
+    /*
+     * Renvoie true/false suivant que loginname est dans la table ou pas
+     */
+    public function existsLoginname($loginname)
+    {
+        $em = $this->getEntityManager();
+        $out= $em->createQuery('SELECT cv FROM App:CollaborateurVersion cv WHERE cv.loginname = :loginname')
+        ->setParameter('loginname', $loginname)
+        ->getResult();
+        if (count($out)==0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 }

@@ -47,13 +47,13 @@ use Symfony\Component\Form\FormFactoryInterface;
  */
 class ParamController extends AbstractController
 {
-	private $ff;
-	
-	public function __construct (FormFactoryInterface $ff)
-	{
-		$this->ff  = $ff;
-	}
-	
+    private $ff;
+
+    public function __construct(FormFactoryInterface $ff)
+    {
+        $this->ff  = $ff;
+    }
+
     /**
      * Lists all param entities.
      *
@@ -146,52 +146,51 @@ class ParamController extends AbstractController
      */
     public function avancerAction(Request $request)
     {
-		$em = $this->getDoctrine()->getManager();
-		$ff = $this->ff;
- 
+        $em = $this->getDoctrine()->getManager();
+        $ff = $this->ff;
+
         $now = $em->getRepository(Param::class)->findOneBy(['cle' => 'now']);
-        if( $now == null )
-        {
-			$now = new Param();
-			$now->setCle('now');
-			//$em->persist( $now );
+        if ($now == null) {
+            $now = new Param();
+            $now->setCle('now');
+            //$em->persist( $now );
         }
 
-        if( $now->getVal() == null)
-        {
+        if ($now->getVal() == null) {
             $date = new \DateTime();
-		}
-        else
-            $date = new \DateTime( $now->getVal() );
+        } else {
+            $date = new \DateTime($now->getVal());
+        }
 
-//		$defaults = [ 'date' => new \DateTime() ];
-		$defaults = [ 'date' => $date ];
+        //		$defaults = [ 'date' => new \DateTime() ];
+        $defaults = [ 'date' => $date ];
         $editForm = $ff->createBuilder(FormType::class, $defaults)
-				        ->add('date',   DateType::class, [ 'label' => " " ] )
-				        ->add('submit', SubmitType::class, ['label' => 'Fixer la date'])
-				        ->add('supprimer', SubmitType::class, ['label' => "Fin de la modification de la date"])
-				        ->getForm();
-    
+                        ->add('date', DateType::class, [ 'label' => " " ])
+                        ->add('submit', SubmitType::class, ['label' => 'Fixer la date'])
+                        ->add('supprimer', SubmitType::class, ['label' => "Fin de la modification de la date"])
+                        ->getForm();
+
         $editForm->handleRequest($request);
 
-        if ($editForm->isSubmitted() && $editForm->isValid())
-        {
+        if ($editForm->isSubmitted() && $editForm->isValid()) {
             $date = $editForm->getData()['date'];
-                
+
             $now->setCle('now');
-            $now->setVal( $date->format("Y-m-d") );
-            $em->persist( $now );
-            if( $editForm->get('supprimer')->isClicked() ) $em->remove( $now );
+            $now->setVal($date->format("Y-m-d"));
+            $em->persist($now);
+            if ($editForm->get('supprimer')->isClicked()) {
+                $em->remove($now);
+            }
             $em->flush();
             return $this->redirectToRoute('admin_accueil');
-		}
-		else
-		{
-	        return $this->render('param/avancer.html.twig',
-			[
-	            'edit_form' => $editForm->createView(),
-			]);
-		}
+        } else {
+            return $this->render(
+                'param/avancer.html.twig',
+                [
+                'edit_form' => $editForm->createView(),
+            ]
+            );
+        }
     }
 
     /**

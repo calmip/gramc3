@@ -38,19 +38,22 @@ use Symfony\Component\Mime\Email;
 
 class ServiceNotifications
 {
-	public function __construct( $mailfrom, \Twig\Environment $twig, 
-	                             TokenStorageInterface $tok, 
-	                             MailerInterface $mailer, 
-	                             ServiceJournal $sj, 
-	                             EntityManagerInterface $em)
-	{
-		$this->mailfrom = $mailfrom;
-		$this->twig     = $twig;
-		$this->token    = $tok->getToken();
-		$this->mailer   = $mailer;
-		$this->sj       = $sj;
-		$this->em       = $em;
-	}
+    public function __construct(
+        $mailfrom,
+        \Twig\Environment $twig,
+        TokenStorageInterface $tok,
+        MailerInterface $mailer,
+        ServiceJournal $sj,
+        EntityManagerInterface $em
+    )
+    {
+        $this->mailfrom = $mailfrom;
+        $this->twig     = $twig;
+        $this->token    = $tok->getToken();
+        $this->mailer   = $mailer;
+        $this->sj       = $sj;
+        $this->em       = $em;
+    }
 
     /*****
      * Envoi d'une notification
@@ -60,7 +63,7 @@ class ServiceNotifications
      * param $users                     Liste d'utilisateurs à qui envoyer des emails (cf mailUsers)
      *
      *********/
-    public function sendMessage( $twig_sujet, $twig_contenu, $params, $users = null )
+    public function sendMessage($twig_sujet, $twig_contenu, $params, $users = null)
     {
         // Twig avec des extensions
         // $twig = clone App::getTwig();
@@ -75,9 +78,9 @@ class ServiceNotifications
         */
 
         $twig    = $this->twig;
-        $body    = $twig->render( $twig_contenu, $params );
-        $subject = $twig->render( $twig_sujet,   $params);
-        $this->sendRawMessage( $subject, $body, $users );
+        $body    = $twig->render($twig_contenu, $params);
+        $subject = $twig->render($twig_sujet, $params);
+        $this->sendRawMessage($subject, $body, $users);
     }
 
     /*****
@@ -88,11 +91,11 @@ class ServiceNotifications
      * param $users                     Liste d'utilisateurs à qui envoyer des emails (cf mailUsers)
      *
      *********/
-    public function sendMessageFromString( $twig_sujet, $twig_contenu, $params, $users = null )
+    public function sendMessageFromString($twig_sujet, $twig_contenu, $params, $users = null)
     {
-		//         $twig = clone App::getTwig();
+        //         $twig = clone App::getTwig();
         //$twig->setLoader(new \Twig_Loader_String());
-        
+
         $twig         = $self->twig;
         $sujet_tmpl   = $twig->createTemplate($twig_sujet);
         $contenu_tmpl = $twig->createTemplate($twig_contenu);
@@ -105,65 +108,67 @@ class ServiceNotifications
                  ]);
         */
 
-        $body       =   $twig->render( $twig_contenu, $params );
-        $subject    =   $twig->render( $twig_sujet,   $params);
-        $this->sendRawMessage( $subject, $body, $users );
+        $body       =   $twig->render($twig_contenu, $params);
+        $subject    =   $twig->render($twig_sujet, $params);
+        $this->sendRawMessage($subject, $body, $users);
     }
 
 
     // Bas niveau: Envoi du message
-    private function sendRawMessage( $subject, $body, $users = null )
+    private function sendRawMessage($subject, $body, $users = null)
     {
-		// Notifiations désactivées pour l'instant - Swift_Message n'existe plus !
-		//return;
+        // Notifiations désactivées pour l'instant - Swift_Message n'existe plus !
+        //return;
         //$message = \Swift_Message::newInstance()
         //            ->setSubject( $subject )
         //            ->setFrom( $this->mailfrom )
         //            ->setBody($body ,'text/plain');
-        
+
         $message = new Email();
         $message -> subject($subject);
         $message -> text($body);
         $message -> from($this->mailfrom);
 
-        if( $users != null )
-		{
+        if ($users != null) {
             $real_users =   [];
             $mails      =   [];
 
-            foreach( $users as $user )
-			{
-                if( $user instanceof Individu )
-                    $real_users[]   =   $user;  // class Individu
-                elseif( is_string( $user ) )
-                    $mails[]        =   $user;  // email string
-                elseif( $users == null  )
-                   $this->sj->warningMessage(__METHOD__ . ":" . __LINE__ . ' users contient un utilisateur null');
-                else
-                   $this->sj->errorMessage(__METHOD__ . ":" . __LINE__ . ' users contient un mauvais type de données: ' . Functions::show($user));
-			}
+            foreach ($users as $user) {
+                if ($user instanceof Individu) {
+                    $real_users[]   =   $user;
+                }  // class Individu
+                elseif (is_string($user)) {
+                    $mails[]        =   $user;
+                }  // email string
+                elseif ($users == null) {
+                    $this->sj->warningMessage(__METHOD__ . ":" . __LINE__ . ' users contient un utilisateur null');
+                } else {
+                    $this->sj->errorMessage(__METHOD__ . ":" . __LINE__ . ' users contient un mauvais type de données: ' . Functions::show($user));
+                }
+            }
 
-            if( $mails == [] )
+            if ($mails == []) {
                 $warning = true;
-            else
+            } else {
                 $warning = false;
+            }
 
-            $mails = array_unique( array_merge( $mails, $this->usersToMail( $real_users, $warning ) ) );
+            $mails = array_unique(array_merge($mails, $this->usersToMail($real_users, $warning)));
 
-			// Ajouter un destinataire
-            foreach( $mails as $mail )
-            {
-				//$message->addTo( $mail);
-				$message -> addTo ($mail);
-			}
+            // Ajouter un destinataire
+            foreach ($mails as $mail) {
+                //$message->addTo( $mail);
+                $message -> addTo($mail);
+            }
 
             // Ecrire une ligne dans le journal et dans les logs
             $to = '';
-            if ( $message->getTo() != null )
-			{
-                $arrayTo = array_values( $message->getTo() );
-                foreach( $arrayTo as $item ) $to = $to . ' ' . $item->toString();
-			}
+            if ($message->getTo() != null) {
+                $arrayTo = array_values($message->getTo());
+                foreach ($arrayTo as $item) {
+                    $to = $to . ' ' . $item->toString();
+                }
+            }
 
             // debug
             // return [ 'subject'  =>  $message->getSubject(), 'contenu' => $message->getBody(), 'to'  => $to  ]; // debug only
@@ -171,9 +176,9 @@ class ServiceNotifications
 
             // Envoi du message
             $this->mailer->send($message);
-		}
-		else
-			$this->sj->warningMessage(__METHOD__ . ":" . __LINE__ . 'email "' . $message->getSubject() . '" envoyé à une liste vide de destinataires');
+        } else {
+            $this->sj->warningMessage(__METHOD__ . ":" . __LINE__ . 'email "' . $message->getSubject() . '" envoyé à une liste vide de destinataires');
+        }
     }
 
     ///////////
@@ -184,102 +189,104 @@ class ServiceNotifications
     // Output: Liste d'individus (pour passer à sendMessage)
     //
 
-    public function mailUsers( $mail_roles = [], $objet = null )
+    public function mailUsers($mail_roles = [], $objet = null)
     {
-		$em    = $this->em;
-	    $users = [];
-	    foreach ( $mail_roles as $mail_role )
-        {
-            switch( $mail_role )
-            {
+        $em    = $this->em;
+        $users = [];
+        foreach ($mail_roles as $mail_role) {
+            switch ($mail_role) {
                 case 'D': // demandeur
                     $user = $this->token->getUser();
-                    if( $user != null )
-                        $users  =  array_merge( $users, [ $user ] );
-                    else
+                    if ($user != null) {
+                        $users  =  array_merge($users, [ $user ]);
+                    } else {
                         $this->sj->errorMessage(__METHOD__ . ":" . __LINE__ ." Utilisateur n'est pas connecté !");
+                    }
                     break;
                 case 'A': // admin
                     $new_users = $em->getRepository(Individu::class)->findBy(['admin'  =>  true ]);
-                    if(  $new_users == null )
+                    if ($new_users == null) {
                         $this->sj->warningMessage(__METHOD__ . ":"  . __LINE__ .' Aucun admin !');
-                    else
-					{
-                        if( ! is_array( $new_users ) ) $new_users = $new_users->toArray();
-                        $users = array_merge( $users, $new_users );
-					}
+                    } else {
+                        if (! is_array($new_users)) {
+                            $new_users = $new_users->toArray();
+                        }
+                        $users = array_merge($users, $new_users);
+                    }
                     break;
                 case 'S': // sysadmin
                     $new_users = $em->getRepository(Individu::class)->findBy(['sysadmin'  =>  true ]);
-                    if( $new_users == null )
+                    if ($new_users == null) {
                         $this->sj->warningMessage(__METHOD__ . ":"  . __LINE__ .' Aucun sysadmin !');
-                    else
-					{
-                        if( ! is_array( $new_users ) ) $new_users = $new_users->toArray();
-                        $users = array_merge( $users, $new_users );
-					}
+                    } else {
+                        if (! is_array($new_users)) {
+                            $new_users = $new_users->toArray();
+                        }
+                        $users = array_merge($users, $new_users);
+                    }
                     break;
                 case 'P': //président
                     $new_users = $em->getRepository(Individu::class)->findBy(['president'  =>  true ]);
-                    if(  $new_users == null )
+                    if ($new_users == null) {
                         $this->sj->warningMessage(__METHOD__ . ":" .  __LINE__ .' Aucun président !');
-                    else
-					{
-                        if( ! is_array( $new_users ) ) $new_users = $new_users->toArray();
-                        $users = array_merge( $users, $new_users );
-					}
+                    } else {
+                        if (! is_array($new_users)) {
+                            $new_users = $new_users->toArray();
+                        }
+                        $users = array_merge($users, $new_users);
+                    }
                     break;
 
                 case 'E': // expert
-                    if( $objet == null )
-					{
+                    if ($objet == null) {
                         $this->sj->warningMessage(__METHOD__ . ":" . __LINE__ .' Objet null pour expert');
                         break;
-					}
+                    }
                     $new_users  = $objet->getExperts();
                     //$this->sj->debugMessage(__METHOD__ .":" . __LINE__ .  " experts : " . Functions::show($new_users) );
-                    if(  $new_users == null )
+                    if ($new_users == null) {
                         $this->sj->warningMessage(__METHOD__ . ":" . __LINE__ ." Aucun expert pour l'objet " . $objet . ' !');
-                    else
-					{
-                        if( ! is_array( $new_users ) ) $new_users = $new_users->toArray();
+                    } else {
+                        if (! is_array($new_users)) {
+                            $new_users = $new_users->toArray();
+                        }
                         //$this->sj->debugMessage(__METHOD__ .":" . __LINE__ .  " experts après toArray : " . Functions::show($new_users) );
-                        $users  =  array_merge( $users, $new_users );
-					}
+                        $users  =  array_merge($users, $new_users);
+                    }
                     break;
                 case 'R': // responsable
-                    if( $objet == null )
-					{
+                    if ($objet == null) {
                         $this->sj->warningMessage(__METHOD__ . ":" . __LINE__ .' Objet null pour responsable');
                         break;
-					}
+                    }
                     $new_users  = $objet->getResponsables();
-                    if(  $new_users == null )
+                    if ($new_users == null) {
                         $this->sj->warningMessage(__METHOD__ . ":" . __LINE__ ." Aucun responsable pour l'objet " . $objet . ' !');
-                    else
-					{
-                        if( ! is_array( $new_users ) ) $new_users = $new_users->toArray();
-                        $users  =  array_merge( $users, $new_users );
-					}
+                    } else {
+                        if (! is_array($new_users)) {
+                            $new_users = $new_users->toArray();
+                        }
+                        $users  =  array_merge($users, $new_users);
+                    }
                     break;
                 case 'ET': // experts pour la thématique
-                    if( $objet == null )
-					{
+                    if ($objet == null) {
                         $this->sj->warningMessage(__METHOD__ . ":" .  __LINE__ .' Objet null pour experts de la thématique');
                         break;
-					}
+                    }
                     $new_users  = $objet->getExpertsThematique();
-                    if(  $new_users == null )
+                    if ($new_users == null) {
                         $this->sj->warningMessage(__METHOD__ . ":" . __LINE__ ." Aucun expert pour la thématique pour l'objet " . $objet . ' !');
-                    else
-					{
-                        if( ! is_array( $new_users ) ) $new_users = $new_users->toArray();
-                        $users  =  array_merge( $users, $new_users );
-					}
+                    } else {
+                        if (! is_array($new_users)) {
+                            $new_users = $new_users->toArray();
+                        }
+                        $users  =  array_merge($users, $new_users);
+                    }
                     break;
             }
         }
-	    return $users;
+        return $users;
     }
 
     /////////////////////////
@@ -287,37 +294,32 @@ class ServiceNotifications
     // obtenir des adresses mail à partir des utilisateurs
     //
 
-    public function usersToMail( $users, $warning = false )
+    public function usersToMail($users, $warning = false)
     {
-    $mail   =   [];
+        $mail   =   [];
 
-    if( $users == null )
-        {
-        if( $warning == true )
-            $this->sj->warningMessage(__METHOD__ . ":" . __LINE__ .' La liste des utilisateurs est vide');
-        return $mail;
-        }
-
-    foreach( $users as $user )
-        {
-        if( $user != null && $user instanceof Individu )
-            {
-            $user_mail =  $user->getMail();
-            if( $user_mail  !=  null    )
-                $mail[] = $user_mail;
-            else
-                $this->sj->warningMessage(__METHOD__ . ":" . __LINE__ . ' Utilisateur '. $user . " n'a pas de mail");
+        if ($users == null) {
+            if ($warning == true) {
+                $this->sj->warningMessage(__METHOD__ . ":" . __LINE__ .' La liste des utilisateurs est vide');
             }
-        elseif( $user == null )
-            $this->sj->errorMessage(__METHOD__ . ":" . __LINE__ . ' Utilisater null dans la liste');
-        elseif( ! $user instanceof Individu )
-            $this->sj->errorMessage(__METHOD__ . ":".  __LINE__ . ' Un objet autre que Individu dans la liste des utilisateurs');
+            return $mail;
         }
 
-    return array_unique( $mail );
+        foreach ($users as $user) {
+            if ($user != null && $user instanceof Individu) {
+                $user_mail =  $user->getMail();
+                if ($user_mail  !=  null) {
+                    $mail[] = $user_mail;
+                } else {
+                    $this->sj->warningMessage(__METHOD__ . ":" . __LINE__ . ' Utilisateur '. $user . " n'a pas de mail");
+                }
+            } elseif ($user == null) {
+                $this->sj->errorMessage(__METHOD__ . ":" . __LINE__ . ' Utilisater null dans la liste');
+            } elseif (! $user instanceof Individu) {
+                $this->sj->errorMessage(__METHOD__ . ":".  __LINE__ . ' Un objet autre que Individu dans la liste des utilisateurs');
+            }
+        }
+
+        return array_unique($mail);
     }
-
-
-
-
 }

@@ -37,7 +37,7 @@ class ExpertiseType extends AbstractType
     {
         $builder->add('validation')->add('nbHeuresAtt')->add('commentaireInterne')->add('commentaireExterne')->add('definitif')->add('nbHeuresAttEte')->add('version')->add('expert')        ;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -55,6 +55,4 @@ class ExpertiseType extends AbstractType
     {
         return 'appbundle_expertise';
     }
-
-
 }

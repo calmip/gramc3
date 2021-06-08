@@ -34,8 +34,7 @@ use App\Utils\Etat;
  */
 class SessionRepository extends \Doctrine\ORM\EntityRepository
 {
-
-function get_sessions_non_terminees()
+    public function get_sessions_non_terminees()
     {
         return $this->createQueryBuilder('s')
             ->where('s.etatSession != :termine')
@@ -44,7 +43,4 @@ function get_sessions_non_terminees()
             ->getQuery()
             ->getResult();
     }
-
-
-    
 }

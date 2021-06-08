@@ -30,27 +30,56 @@ use Symfony\Component\Security\Core\Role\SwitchUserRole;
 
 class TestUser implements UserInterface, EquatableInterface
 {
-    public function __toString() {return 'Test User';}
+    public function __toString()
+    {
+        return 'Test User';
+    }
 
     // implementation EquatableInterface
 
     public function isEqualTo(UserInterface $user)
-    {        
-        if ($user instanceof TestUser) return true;
-        else return false;
+    {
+        if ($user instanceof TestUser) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     // implementation UserInterface
-    
-    public function getUsername()   {   return 'test';  }
-    public function getSalt()       {   return null;    }
-    public function getPassword()   {   return 'test';  }
-    public function eraseCredentials()  {}    
-    public function getRoles() { return ['ROLE_USER','ROLE_GLOBAL_ACCESS','ROLE_GLOBAL_ACCESS_W','ROLE_ALLOWED_TO_SWITCH']; }
+
+    public function getUsername()
+    {
+        return 'test';
+    }
+    public function getSalt()
+    {
+        return null;
+    }
+    public function getPassword()
+    {
+        return 'test';
+    }
+    public function eraseCredentials()
+    {
+    }
+    public function getRoles()
+    {
+        return ['ROLE_USER','ROLE_GLOBAL_ACCESS','ROLE_GLOBAL_ACCESS_W','ROLE_ALLOWED_TO_SWITCH'];
+    }
 
     // implemenation Gramc
-    
-    public function getPrenom()     {return 'Test'; }
-    public function getNom()        {return 'Test'; }
-    public function idIndividu()    {return 0; }
+
+    public function getPrenom()
+    {
+        return 'Test';
+    }
+    public function getNom()
+    {
+        return 'Test';
+    }
+    public function idIndividu()
+    {
+        return 0;
+    }
 }

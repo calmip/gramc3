@@ -116,11 +116,14 @@ class Templates
     {
         return $this->nom;
     }
-    public function getId() { return $this->getNom(); }
+    public function getId()
+    {
+        return $this->getNom();
+    }
 
     /**
      * Set nom
-     * 
+     *
      * @param string
      * @return Templates
      */
@@ -129,5 +132,4 @@ class Templates
         $this->nom = $nom;
         return $this;
     }
-    
 }

@@ -25,8 +25,7 @@ namespace App\GramcServices;
 
 use Doctrine\ORM\EntityManagerInterface;
 
-
-/* Ce service est utilisé pour afficher la date avec un décalage 
+/* Ce service est utilisé pour afficher la date avec un décalage
  * éventuellement stoqué dans la table Params
  * cf. aussi GramcDateTime
  */
@@ -43,10 +42,14 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class GramcDate extends GramcDateTime
 {
-
-
-    public function __construct ($rpd, $rpf, $rad, $raf,
-							     ServiceParam $sp, EntityManagerInterface $em)
+    public function __construct(
+        $rpd,
+        $rpf,
+        $rad,
+        $raf,
+        ServiceParam $sp,
+        EntityManagerInterface $em
+    )
     {
         parent::__construct($sp, $em);
         $this->recup_printemps_d = $rpd;
@@ -55,25 +58,27 @@ class GramcDate extends GramcDateTime
         $this->recup_automne_f   = $raf;
         $this->sp = $sp;
         $this->em = $em;
-        $this->setTime(0,0,0);
+        $this->setTime(0, 0, 0);
     }
 
     //static public function get()
     //{
     //    return new GramcDate();
     //}
-    
+
     // retourne une nouvelle instance
     public function getNew()
     {
-		$date = new GramcDate(  $this->recup_printemps_d,
-								$this->recup_printemps_f,
-						        $this->recup_automne_d,
-						        $this->recup_automne_f,
-						        $this->sp,
-						        $this->em );
-		return $date;
-	}
+        $date = new GramcDate(
+            $this->recup_printemps_d,
+            $this->recup_printemps_f,
+            $this->recup_automne_d,
+            $this->recup_automne_f,
+            $this->sp,
+            $this->em
+        );
+        return $date;
+    }
 
 
     // Sommes-nous en periode de récupération des heures de printemps ?
@@ -82,19 +87,22 @@ class GramcDate extends GramcDateTime
     public function isRecupPrintemps($annee)
     {
         // Pas de paramètres: renvoie false
-        if ($this->recup_printemps_d == 0) return false;
-        if ($this->recup_printemps_f == 0) return false;
+        if ($this->recup_printemps_d == 0) {
+            return false;
+        }
+        if ($this->recup_printemps_f == 0) {
+            return false;
+        }
 
-		// annee non courante = renvoie false
-        if ($annee!=$this->showYear() && $annee-2000!=$this->showYear()) return false;
+        // annee non courante = renvoie false
+        if ($annee!=$this->showYear() && $annee-2000!=$this->showYear()) {
+            return false;
+        }
 
         $m = intval($this->showMonth());
-        if ($m >= intval($this->recup_printemps_d) && $m < intval($this->recup_printemps_f))
-        {
+        if ($m >= intval($this->recup_printemps_d) && $m < intval($this->recup_printemps_f)) {
             return true;
-        }
-        else
-        {
+        } else {
             return false;
         }
     }
@@ -105,22 +113,24 @@ class GramcDate extends GramcDateTime
     public function isRecupAutomne($annee)
     {
         // Pas de paramètres: renvoie false
-        if ($this->recup_automne_d == 0) return false;
-        if ($this->recup_automne_f == 0) return false;
+        if ($this->recup_automne_d == 0) {
+            return false;
+        }
+        if ($this->recup_automne_f == 0) {
+            return false;
+        }
 
-		// annee non courante = renvoie false
-        if ($annee!=$this->showYear() && $annee-2000!=$this->showYear()) return false;
+        // annee non courante = renvoie false
+        if ($annee!=$this->showYear() && $annee-2000!=$this->showYear()) {
+            return false;
+        }
 
         $m = intval($this->showMonth());
 
-        if ( $m >= intval($this->recup_automne_d) && $m < intval($this->recup_automne_f))
-        {
+        if ($m >= intval($this->recup_automne_d) && $m < intval($this->recup_automne_f)) {
             return true;
-        }
-        else
-        {
+        } else {
             return false;
         }
     }
-    
 }

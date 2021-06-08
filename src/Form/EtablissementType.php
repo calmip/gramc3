@@ -37,7 +37,7 @@ class EtablissementType extends AbstractType
     {
         $builder->add('libelleEtab')->add('individu')        ;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -55,6 +55,4 @@ class EtablissementType extends AbstractType
     {
         return 'appbundle_etablissement';
     }
-
-
 }

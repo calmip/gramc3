@@ -28,7 +28,6 @@ use App\Entity\Projet;
 use App\Entity\Individu;
 use App\Entity\CollaborateurVersion;
 
-
 /***********************************************************************************************
  * PropositionExpertsType2 et 3 - Propose un expert, pour les projets de type 2/3 (fil de l'eau):
  *        - S'il y a un rattachement administratif:
@@ -37,38 +36,33 @@ use App\Entity\CollaborateurVersion;
  *        - Sinon
  *               - On prend les présidents
  *               - On gère les conflits d'intérêts
- * 
+ *
  **********************************************************************/
 class PropositionExpertsType2 extends PropositionExperts
 {
-	public function getProposition(Version $version)
-	{
-		$rattachement = $version -> getPrjRattachement();
-		
-		if ($rattachement == null)
-		{
-			// Les exclus sont les collaborateurs actuels du projet
-		    $exclus = $this->em->getRepository(CollaborateurVersion::class)->getCollaborateurs( $version );
-		} else {
-			// pas d'exclus
-			$exclus = [];
-		}
+    public function getProposition(Version $version)
+    {
+        $rattachement = $version -> getPrjRattachement();
 
-		if ($rattachement != null) 
-		{
-		    $experts = $rattachement->getExpert();
-		    if( $experts == null  )
-	        {
-		        $this->sj->warningMessage(__METHOD__  .  ":" . __LINE__ ." rattachement " . $rattachement . " n'a pas d'expert !" );
-		        return null;
-	        }
-		}
-		else
-		{
-	        $experts = $this->em->getRepository(Individu::class)->findBy(['president'=>true]);
-		}
+        if ($rattachement == null) {
+            // Les exclus sont les collaborateurs actuels du projet
+            $exclus = $this->em->getRepository(CollaborateurVersion::class)->getCollaborateurs($version);
+        } else {
+            // pas d'exclus
+            $exclus = [];
+        }
 
-		$expert = $this->getExpertDisponible($experts, $exclus);
-		return $expert;
-	}
+        if ($rattachement != null) {
+            $experts = $rattachement->getExpert();
+            if ($experts == null) {
+                $this->sj->warningMessage(__METHOD__  .  ":" . __LINE__ ." rattachement " . $rattachement . " n'a pas d'expert !");
+                return null;
+            }
+        } else {
+            $experts = $this->em->getRepository(Individu::class)->findBy(['president'=>true]);
+        }
+
+        $expert = $this->getExpertDisponible($experts, $exclus);
+        return $expert;
+    }
 }

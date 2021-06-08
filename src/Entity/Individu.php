@@ -41,17 +41,16 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class Individu implements UserInterface, EquatableInterface
 {
+    public const INCONNU       = 0;
+    public const POSTDOC       = 1;
+    public const ATER          = 2;
+    public const DOCTORANT     = 3;
+    public const ENSEIGNANT    = 11;
+    public const CHERCHEUR     = 12;
+    public const INGENIEUR     = 14;
 
-    const INCONNU       = 0;
-    const POSTDOC       = 1;
-    const ATER          = 2;
-    const DOCTORANT     = 3;
-    const ENSEIGNANT    = 11;
-    const CHERCHEUR     = 12;
-    const INGENIEUR     = 14;
-
-/* LIBELLE DES STATUTS */
-const LIBELLE_STATUT =
+    /* LIBELLE DES STATUTS */
+    public const LIBELLE_STATUT =
         [
         self::INCONNU     => 'INCONNU',
         self::POSTDOC     => 'Post-doctorant',
@@ -62,7 +61,7 @@ const LIBELLE_STATUT =
         self::INGENIEUR   => 'Ingénieur'
         ];
 
-/////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////
 
     /**
      * @var \DateTime
@@ -245,42 +244,58 @@ const LIBELLE_STATUT =
     */
     public function setInitialMajStamp()
     {
-    $this->creationStamp = new \DateTime();
+        $this->creationStamp = new \DateTime();
     }
 
     //////////////////////////////////////////
 
     public function __toString()
-        {
-        if(  $this->getPrenom() != null ||  $this->getNom() != null)
+    {
+        if ($this->getPrenom() != null ||  $this->getNom() != null) {
             return $this->getPrenom() . ' ' . $this->getNom();
-        elseif( $this->getMail() != null )
+        } elseif ($this->getMail() != null) {
             return $this->getMail();
-        else
+        } else {
             return 'sans prénom, nom et mail';
         }
+    }
 
     ////////////////////////////////////////////////////////////////////////////
 
     /* Pour verifier que deux classes sont égales, utiliser cet interface et pas == ! */
     public function isEqualTo(UserInterface $user)
     {
-
-        if ( $user == null || !$user instanceof Individu) return false;
-
-        if ($this->idIndividu !== $user->getId())
+        if ($user == null || !$user instanceof Individu) {
             return false;
-        else
-            return true;
+        }
 
+        if ($this->idIndividu !== $user->getId()) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
-    public function getId()         {   return $this->idIndividu;}
-    public function getUsername()   {   return $this->idIndividu;}
+    public function getId()
+    {
+        return $this->idIndividu;
+    }
+    public function getUsername()
+    {
+        return $this->idIndividu;
+    }
 
-    public function getSalt()       {   return null;}
-    public function getPassword()   {   return null;}
-    public function eraseCredentials(){}
+    public function getSalt()
+    {
+        return null;
+    }
+    public function getPassword()
+    {
+        return null;
+    }
+    public function eraseCredentials()
+    {
+    }
 
     /* LES ROLES DEFINIS DANS L'APPLICATION
      *     - ROLE_DEMANDEUR = Peut demander des ressoureces - Le minimum
@@ -293,31 +308,26 @@ const LIBELLE_STATUT =
      */
     public function getRoles()
     {
-
         $roles[] = 'ROLE_DEMANDEUR';
 
-        if( $this->getAdmin() == true )
-        {
+        if ($this->getAdmin() == true) {
             $roles[] = 'ROLE_ADMIN';
             $roles[] = 'ROLE_OBS';
             $roles[] = 'ROLE_ALLOWED_TO_SWITCH';
         }
 
-        if( $this->getPresident() == true )
-        {
+        if ($this->getPresident() == true) {
             $roles[] = 'ROLE_PRESIDENT';
             $roles[] = 'ROLE_EXPERT';
-        }
-        elseif( $this->getExpert() == true )
+        } elseif ($this->getExpert() == true) {
             $roles[] = 'ROLE_EXPERT';
+        }
 
-        if ( $this->getObs() == true )
-        {
+        if ($this->getObs() == true) {
             $roles[] = 'ROLE_OBS';
         }
 
-        if ( $this->getSysadmin() == true )
-        {
+        if ($this->getSysadmin() == true) {
             $roles[] = 'ROLE_SYSADMIN';
             $roles[] = 'ROLE_OBS';
         }
@@ -325,7 +335,7 @@ const LIBELLE_STATUT =
         return $roles;
     }
 
- //////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
     /**
@@ -424,11 +434,11 @@ const LIBELLE_STATUT =
      */
     public function setMail($mail)
     {
-		// Suppression des accents et autres ç
-		// voir https://stackoverflow.com/questions/1284535/php-transliteration
-		//$mail_ascii = transliterator_transliterate('Any-Latin;Latin-ASCII;', $mail);
+        // Suppression des accents et autres ç
+        // voir https://stackoverflow.com/questions/1284535/php-transliteration
+        //$mail_ascii = transliterator_transliterate('Any-Latin;Latin-ASCII;', $mail);
         //$this->mail = $mail_ascii;
-		// Ne fonctionne pas ! plantage dans connection_dbg (???)
+        // Ne fonctionne pas ! plantage dans connection_dbg (???)
         $this->mail = $mail;
         return $this;
     }
@@ -916,8 +926,9 @@ const LIBELLE_STATUT =
      */
     public function addJournal(\App\Entity\Journal $journal)
     {
-        if (!$this->journal->contains($journal))
-           $this->journal[] = $journal;
+        if (!$this->journal->contains($journal)) {
+            $this->journal[] = $journal;
+        }
 
         return $this;
     }
@@ -946,70 +957,78 @@ const LIBELLE_STATUT =
 
     public function getIDP()
     {
-        return implode(',',$this->getSso()->toArray() );
+        return implode(',', $this->getSso()->toArray());
     }
 
-	// TODO - Revoir cette fonction !!!!
-	//        Suppression de Functions::warningMessage pas cool
+    // TODO - Revoir cette fonction !!!!
+    //        Suppression de Functions::warningMessage pas cool
     public function getEtablissement()
     {
         $server =  Request::createFromGlobals()->server;
-        if(  $server->has('REMOTE_USER') || $server->has('REDIRECT_REMOTE_USER') )
-		{
-            if( $server->has('REMOTE_USER') )           $eppn =  $server->get('REMOTE_USER');
-            if( $server->has('REDIRECT_REMOTE_USER') )  $eppn =  $server->get('REDIRECT_REMOTE_USER');
-            preg_match( '/^.+@(.+)$/', $$eppn, $matches );
-            if( $matches[0] != null )
+        if ($server->has('REMOTE_USER') || $server->has('REDIRECT_REMOTE_USER')) {
+            if ($server->has('REMOTE_USER')) {
+                $eppn =  $server->get('REMOTE_USER');
+            }
+            if ($server->has('REDIRECT_REMOTE_USER')) {
+                $eppn =  $server->get('REDIRECT_REMOTE_USER');
+            }
+            preg_match('/^.+@(.+)$/', $$eppn, $matches);
+            if ($matches[0] != null) {
                 return $matches[0];
+            }
             //else
             //    Functions::warningMessage('Individu::getEtablissements user '. $this .' a un EPPN bizarre');
-		}
+        }
         return 'aucun établissement connu';
     }
 
     public function isExpert()
     {
-	    return $this->expert;
+        return $this->expert;
     }
 
     ////
 
     public function isPermanent()
     {
-    $statut = $this->getStatut();
-    if( $statut != null && $statut->isPermanent() )
-        return true;
-    else
-        return false;
+        $statut = $this->getStatut();
+        if ($statut != null && $statut->isPermanent()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public function isFromLaboRegional()
     {
-    $labo = $this->getLabo();
-    if( $labo != null && $labo->isLaboRegional() )
-        return true;
-    else
-        return false;
+        $labo = $this->getLabo();
+        if ($labo != null && $labo->isLaboRegional()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     ///
 
     public function getEppn()
     {
-    $ssos = $this->getSso();
-    $eppn = [];
-    foreach( $ssos as $sso )
-        $eppn[] =   $sso->getEppn();
-    return $eppn;
+        $ssos = $this->getSso();
+        $eppn = [];
+        foreach ($ssos as $sso) {
+            $eppn[] =   $sso->getEppn();
+        }
+        return $eppn;
     }
 
     ///
 
     public function peut_creer_projets()
     {
-    if( $this->isPermanent() && $this->isFromLaboRegional() )
-        return true;
-    else
-        return false;
+        if ($this->isPermanent() && $this->isFromLaboRegional()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

@@ -33,8 +33,8 @@ namespace App\Repository;
 class JournalRepository extends \Doctrine\ORM\EntityRepository
 {
     public function findData(\DateTime $debut, \DateTime $fin, $niveau)
-    {        
-            return $this->getEntityManager()
+    {
+        return $this->getEntityManager()
                    ->createQuery('SELECT j FROM App:Journal j WHERE ( j.stamp <= :fin AND j.stamp >= :debut AND j.niveau <= :niveau) ORDER BY j.stamp DESC ')
                    ->setParameter('fin', $fin)
                    ->setParameter('debut', $debut)
@@ -44,10 +44,9 @@ class JournalRepository extends \Doctrine\ORM\EntityRepository
 
     public function liste_avant($date)
     {
-            return $this->getEntityManager()
+        return $this->getEntityManager()
             ->createQuery("SELECT j FROM App:Journal j WHERE j.stamp <= :date")
-            ->setParameter('date', $date )
+            ->setParameter('date', $date)
             ->getResult();
-       
     }
 }

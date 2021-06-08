@@ -24,6 +24,7 @@
 
 // src/Validator/Constraints/PagesNumber.php
 // cf. https://symfony.com/doc/4.4/validation.html
+
 namespace App\Validator\Constraints;
 
 use Symfony\Component\Validator\Constraint;

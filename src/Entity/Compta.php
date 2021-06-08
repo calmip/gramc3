@@ -4,7 +4,6 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-
 /**
  * Compta
  *
@@ -13,9 +12,9 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Compta
 {
-    const USER = 1;
-    const GROUP= 2;
-    
+    public const USER = 1;
+    public const GROUP= 2;
+
     /**
      * @var int
      *
@@ -68,7 +67,7 @@ class Compta
     private $quota;
 
 
-    
+
 
     /**
      * Get id

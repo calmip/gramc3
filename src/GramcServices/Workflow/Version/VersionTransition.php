@@ -33,86 +33,91 @@ use App\Entity\Version;
 use App\GramcServices\Workflow\Rallonge\RallongeWorkflow;
 use App\GramcServices\Workflow\Projet\ProjetWorkflow;
 
-
 class VersionTransition extends Transition
 {
     private static $execute_en_cours     = false;
-    
+
     ////////////////////////////////////////////////////
     public function canExecute($version)
-    { 
-		if ( !$version instanceof Version ) throw new \InvalidArgumentException;
+    {
+        if (!$version instanceof Version) {
+            throw new \InvalidArgumentException();
+        }
 
-		// Pour éviter une boucle infinie entre projet et version !
-		if (self::$execute_en_cours) return true;
-		else                         self::$execute_en_cours = true;
+        // Pour éviter une boucle infinie entre projet et version !
+        if (self::$execute_en_cours) {
+            return true;
+        } else {
+            self::$execute_en_cours = true;
+        }
 
-		$rtn = true;
-		if (Transition::FAST == false && $this->getPropageSignal())
-		{
-			$rallonges = $version->getRallonge();
-			if( $rallonges != null )
-			{
-				$workflow = new RallongeWorkflow($this->sn, $this->sj, $this->ss, $this->em);
-				foreach( $rallonges as $rallonge )
-				{
-					$rtn = $rtn && $workflow->canExecute( $this->getSignal(), $rallonge );
-				}
-			}
-		}
-		
-		self::$execute_en_cours = false;
-		return $rtn;
+        $rtn = true;
+        if (Transition::FAST == false && $this->getPropageSignal()) {
+            $rallonges = $version->getRallonge();
+            if ($rallonges != null) {
+                $workflow = new RallongeWorkflow($this->sn, $this->sj, $this->ss, $this->em);
+                foreach ($rallonges as $rallonge) {
+                    $rtn = $rtn && $workflow->canExecute($this->getSignal(), $rallonge);
+                }
+            }
+        }
+
+        self::$execute_en_cours = false;
+        return $rtn;
     }
 
     ////////////////////////////////////////////////////
     public function execute($version)
     {
-		if ( !$version instanceof Version ) throw new \InvalidArgumentException;
-		if (Transition::DEBUG) $this->sj->debugMessage(">>> " .  __FILE__ . ":" . __LINE__ . " $this $version" );
+        if (!$version instanceof Version) {
+            throw new \InvalidArgumentException();
+        }
+        if (Transition::DEBUG) {
+            $this->sj->debugMessage(">>> " .  __FILE__ . ":" . __LINE__ . " $this $version");
+        }
 
-		// Pour éviter une boucle infinie entre projet et version !
-		if (self::$execute_en_cours) return true;
-		self::$execute_en_cours = true;
-		
-		$rtn = true;
+        // Pour éviter une boucle infinie entre projet et version !
+        if (self::$execute_en_cours) {
+            return true;
+        }
+        self::$execute_en_cours = true;
 
-		// Propage le signal aux rallonges si demandé
-		if ($this->getPropageSignal())
-		{
-			$rallonges = $version->getRallonge();
+        $rtn = true;
 
-			if (count($rallonges) > 0)
-			{
+        // Propage le signal aux rallonges si demandé
+        if ($this->getPropageSignal()) {
+            $rallonges = $version->getRallonge();
+
+            if (count($rallonges) > 0) {
                 $workflow = new RallongeWorkflow($this->sn, $this->sj, $this->ss, $this->em);
 
-				// Propage le signal à toutes les rallonges qui dépendent de cette version
-                foreach( $rallonges as $rallonge )
-				{
-                    $output = $workflow->execute( $this->getSignal(), $rallonge );
-                    $rtn = Functions::merge_return( $rtn, $output );
-				}
-			}
-		}
+                // Propage le signal à toutes les rallonges qui dépendent de cette version
+                foreach ($rallonges as $rallonge) {
+                    $output = $workflow->execute($this->getSignal(), $rallonge);
+                    $rtn = Functions::merge_return($rtn, $output);
+                }
+            }
+        }
 
-		// Propage le signal au projet si demandé
-		if ($this->getPropageSignal())
-		{
-			$projet = $version->getProjet();
-			$workflow = new ProjetWorkflow($this->sn, $this->sj, $this->ss, $this->em);
-			$output   = $workflow->execute( $this->getSignal(), $projet);
-			$rtn = Functions::merge_return( $rtn, $output);
-		}
-		
-		// Change l'état de la version
-		$this->changeEtat($version);
+        // Propage le signal au projet si demandé
+        if ($this->getPropageSignal()) {
+            $projet = $version->getProjet();
+            $workflow = new ProjetWorkflow($this->sn, $this->sj, $this->ss, $this->em);
+            $output   = $workflow->execute($this->getSignal(), $projet);
+            $rtn = Functions::merge_return($rtn, $output);
+        }
 
-		// Envoi des notifications
-		$this->sendNotif($version);
+        // Change l'état de la version
+        $this->changeEtat($version);
 
-		self::$execute_en_cours = false;
-		if (Transition::DEBUG) $this->sj->debugMessage( "<<< " . __FILE__ . ":" . __LINE__ . " rtn = " . Functions::show($rtn));
+        // Envoi des notifications
+        $this->sendNotif($version);
 
-		return $rtn;
+        self::$execute_en_cours = false;
+        if (Transition::DEBUG) {
+            $this->sj->debugMessage("<<< " . __FILE__ . ":" . __LINE__ . " rtn = " . Functions::show($rtn));
+        }
+
+        return $rtn;
     }
 }

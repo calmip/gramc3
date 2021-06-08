@@ -32,32 +32,33 @@ use App\Utils\Signal;
 use App\Entity\Rallonge;
 use App\GramcServices\Workflow\Rallonge\RallongeWorkflow;
 
-
 class RallongeTransition extends Transition
 {
-
     ////////////////////////////////////////////////////
-    
+
     public function canExecute($rallonge)
     {
-       if ( $rallonge instanceof Rallonge )
+        if ($rallonge instanceof Rallonge) {
             return true;
-        else
-            return false;        
+        } else {
+            return false;
+        }
     }
 
     ///////////////////////////////////////////////////////
-    
+
     public function execute($rallonge)
     {
-		if ( !$rallonge instanceof Rallonge ) throw new \InvalidArgumentException;
+        if (!$rallonge instanceof Rallonge) {
+            throw new \InvalidArgumentException();
+        }
 
- 		// Change l'état de la rallonge
-		$this->changeEtat($rallonge);
+        // Change l'état de la rallonge
+        $this->changeEtat($rallonge);
 
-		// Envoyer les notifications
-		$this->sendNotif($rallonge);
+        // Envoyer les notifications
+        $this->sendNotif($rallonge);
 
-		return true;
+        return true;
     }
 }

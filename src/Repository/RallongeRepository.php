@@ -42,58 +42,52 @@ use App\Entity\Session;
  */
 class RallongeRepository extends \Doctrine\ORM\EntityRepository
 {
-
-
     public function findSessionRallonges($sessions)
     {
-    $rallonges = [];
-    foreach( $sessions as $session )
-        {
+        $rallonges = [];
+        foreach ($sessions as $session) {
             $dql     =   'SELECT r FROM App:Rallonge r';
             $dql    .=  " INNER JOIN App:Version v WITH r.version = v ";
             $dql    .=  " WHERE  v.session = :session  ";
 
-        $session_rallonges = $this->getEntityManager()
-                                ->createQuery( $dql )
-                                ->setParameter('session', $session )
+            $session_rallonges = $this->getEntityManager()
+                                ->createQuery($dql)
+                                ->setParameter('session', $session)
                                 ->getResult();
-        $rallonges = array_merge( $session_rallonges, $rallonges);
+            $rallonges = array_merge($session_rallonges, $rallonges);
         }
-    return $rallonges;
+        return $rallonges;
     }
 
     public function findRallongesOuvertes(Version $version)
     {
-	    if( $version == null )
-        {
-	        return [];
+        if ($version == null) {
+            return [];
         }
-        
-	    $dql     =   'SELECT r FROM App:Rallonge r';
-	    $dql    .=  " WHERE  ( r.version = :version ";
-	    $dql    .=  " AND  ( r.etatRallonge = :ed_dem OR r.etatRallonge = :ed_exp OR r.etatRallonge = :att ) ";
-	    $dql    .= " )";
-	
-	    return $this->getEntityManager()
-	                        ->createQuery( $dql )
-	                        ->setParameter('version', $version )
-	                        ->setParameter('ed_dem', Etat::EDITION_DEMANDE)
-	                        ->setParameter('ed_exp', Etat::EDITION_EXPERTISE)
-	                        ->setParameter('att',Etat::EN_ATTENTE)
-	                        ->getResult();
+
+        $dql     =   'SELECT r FROM App:Rallonge r';
+        $dql    .=  " WHERE  ( r.version = :version ";
+        $dql    .=  " AND  ( r.etatRallonge = :ed_dem OR r.etatRallonge = :ed_exp OR r.etatRallonge = :att ) ";
+        $dql    .= " )";
+
+        return $this->getEntityManager()
+                            ->createQuery($dql)
+                            ->setParameter('version', $version)
+                            ->setParameter('ed_dem', Etat::EDITION_DEMANDE)
+                            ->setParameter('ed_exp', Etat::EDITION_EXPERTISE)
+                            ->setParameter('att', Etat::EN_ATTENTE)
+                            ->getResult();
     }
 
     public function findRallongesExpert(Individu $expert)
     {
+        $dql     =   'SELECT r FROM App:Rallonge r';
+        $dql    .=  " WHERE  ( r.expert = :expert AND  r.etatRallonge = :ed_exp )";
 
-    $dql     =   'SELECT r FROM App:Rallonge r';
-    $dql    .=  " WHERE  ( r.expert = :expert AND  r.etatRallonge = :ed_exp )";
-    
-    return $this->getEntityManager()
-                        ->createQuery( $dql )
+        return $this->getEntityManager()
+                        ->createQuery($dql)
                         ->setParameter('ed_exp', Etat::EDITION_EXPERTISE)
-                        ->setParameter('expert',$expert)
+                        ->setParameter('expert', $expert)
                         ->getResult();
     }
-    
 }
