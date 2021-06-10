@@ -176,7 +176,7 @@ class AdminuxController extends AbstractController
      * 
      */
      
-     // exemple: curl --insecure --netrc -X POST -d '{ "loginname": "toto", "individu": "6543", "projet": "P1234" }'https://.../adminux/users/setloginname
+     // exemple: curl --insecure --netrc -X POST -d '{ "loginname": "toto", "idIndividu": "6543", "projet": "P1234" }'https://.../adminux/users/setloginname
 	public function setloginnameAction(Request $request, LoggerInterface $lg)
 	{
 		$em = $this->getdoctrine()->getManager();
@@ -207,13 +207,13 @@ class AdminuxController extends AbstractController
 		{
 			$idProjet = $content['projet'];
 		}
-		if (empty($content['individu']))
+		if (empty($content['idIndividu']))
 		{
-			return new Response(json_encode('KO - Pas de projet'));
+			return new Response(json_encode('KO - Pas de idIndividu'));
 		}
 		else
 		{
-			$idIndividu = $content['individu'];
+			$idIndividu = $content['idIndividu'];
 		}
 		
 	    $error = [];
@@ -226,7 +226,7 @@ class AdminuxController extends AbstractController
 	    $individu = $em->getRepository(Individu::class)->find($idIndividu);
 	    if( $individu == null )
 	    {
-	        $error[]    =   'No Individu ' . $idIndividu;
+	        $error[]    =   'No idIndividu ' . $idIndividu;
 		}
 		
 	    if ( $error != [] )
@@ -247,6 +247,17 @@ class AdminuxController extends AbstractController
 	                $collaborateur  =  $collaborateurVersion->getCollaborateur() ;
 	                if( $collaborateur != null && $collaborateur->isEqualTo( $individu ) )
 					{
+						// Pas de pb pour écraser un loginnma précédent
+						// A moins qu'il ait déjà un mot de passe !
+						if ($collaborateurVersion->getLoginname() != null)
+						{
+							$old_loginname = $collaborateurVersion->getLoginname();
+							$user = $em->getRepository(User::class)->findBy( [ 'loginname' => $old_loginname ]);
+							if ($user != null)
+							{
+								return new Response(json_encode('KO - Commencez par appeler clearpassword'));
+							}
+						}																
 	                    $collaborateurVersion->setLoginname( $loginname );
 	                    Functions::sauvegarder( $collaborateurVersion, $em );
 	                    return new Response(json_encode('OK'));
@@ -254,7 +265,7 @@ class AdminuxController extends AbstractController
 				}
 			}
 		}
-		return new Response(json_encode( ['KO' => 'No user found' ]));
+		return new Response(json_encode( ['KO' => 'Mauvais projet ou mauvais idIndividu !' ]));
      }
 
    /**
@@ -918,6 +929,7 @@ class AdminuxController extends AbstractController
      * Vérifie la base de données, supprime les mots de passe temporaires "expirés"
      * et renvoie les mots de passe cryptés (champ cpassword)
      * On pourra vérifier avec le mot de passe du supercalculateur et savoir s'il a été changé
+     * Si le mot de passe est expiré, renvoie null
      * 
      * @Route("/users/checkpassword", name="check_password", methods={"GET"})
      * 
@@ -942,23 +954,19 @@ class AdminuxController extends AbstractController
 		$rusers = [];
 		foreach ($users as $user)
 		{
+			$u = [];
 			if ($user->getPassexpir() < $sd)
 			{
 				$u["loginname"] = $user->getLoginname();
 				$u["cpassword"] = null;
-				$rusers[] = $u;
-				$em -> remove($user);
 			}
 			else
 			{
-				$u = [];
 				$u["loginname"] = $user->getLoginname();
 				$u["cpassword"] = $user->getCpassword();
-				$rusers[] = $u;
 			}
+			$rusers[] = $u;
 		}
-		$em->flush();
-
 		return new Response (json_encode($rusers));
 	}
 }
