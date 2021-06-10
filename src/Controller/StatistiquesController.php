@@ -1,5 +1,27 @@
 <?php
 
+/**
+ * This file is part of GRAMC (Computing Ressource Granting Software)
+ * GRAMC stands for : Gestion des Ressources et de leurs Attributions pour Mésocentre de Calcul
+ *
+ * GRAMC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ *  GRAMC is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with GRAMC.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *  authors : Miloslav Grundmann - C.N.R.S. - UMS 3667 - CALMIP
+ *            Emmanuel Courcelle - C.N.R.S. - UMS 3667 - CALMIP
+ *            Nicolas Renon - Université Paul Sabatier - CALMIP
+ **/
+
 namespace App\Controller;
 
 use App\Entity\Projet;
@@ -15,6 +37,23 @@ use App\GramcServices\ServiceProjets;
 use App\GramcServices\ServiceSessions;
 
 
+/***************************
+ *  Passe php-stan level 1:
+ *
+ *  php tools/php-stan/vendor/phpstan/phpstan/phpstan.phar analyze -c tools/php-stan/config.neon -a ./vendor/autoload.php --memory-limit=-1 --level 1  src/Controller/StatistiquesController.php
+ *
+ *  config.neon:
+ * 
+
+parameters:
+  excludePaths:
+     - ../../jpgraph/src/Examples
+  scanFiles:
+     - ../../jpgraph/JpGraph.php
+  scanDirectories:
+     - ../../jpgraph/src
+  
+ ***************************/
 
 // Pour debug
 //use App\Entity\Compta;
@@ -753,6 +792,7 @@ class StatistiquesController extends AbstractController
         $ylegend = 0.80;
         \JpGraph\JpGraph::load();
         \JpGraph\JpGraph::module('pie');
+        
         // Création du graph Pie. Ce dernier peut être mise en cache  avec PieGraph(300,300,"SomCacheFileName")
         $graph = new \PieGraph($x, $y);
         $graph->SetMargin(60, 60, 50, 50);
@@ -800,7 +840,7 @@ class StatistiquesController extends AbstractController
         \JpGraph\JpGraph::load();
         \JpGraph\JpGraph::module('bar');
         \JpGraph\JpGraph::module('pie');
-        $graph = new \BarGraph(700, 500);
+        $graph = new \BarPlot(700, 500);
         return null;
 
         // Echelle lineaire ('lin') en ordonnee et pas de valeur en abscisse ('text')

@@ -102,6 +102,24 @@ class RallongeController extends AbstractController
     }
 
     /**
+     * A partir d'une rallonge, renvoie version, projet, session
+     * 
+     *************************************/
+     private function getVerProjSess(Rallonge $rallonge) 
+     {
+        $version = $rallonge->getVersion();
+        $projet = null;
+        $session = null;
+        if ($version != null) {
+            $projet  = $version->getProjet();
+            $session = $version->getSession();
+        } else {
+            $this->sj->throwException(__METHOD__ . ":" . __LINE__ . " rallonge " . $rallonge . " n'est pas associée à une version !");
+        }
+        return [ $version, $projet, $session ];
+     }
+         
+    /**
      * Lists all rallonge entities.
      *
      * @Route("/", name="rallonge_index")
@@ -135,7 +153,7 @@ class RallongeController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $em->persist($rallonge);
-            $em->flush($rallonge);
+            $em->flush();
 
             return $this->redirectToRoute('rallonge_show', array('id' => $rallonge->getId()));
         }
@@ -252,13 +270,7 @@ class RallongeController extends AbstractController
         $sp = $this->sp;
         $sj = $this->sj;
 
-        $version = $rallonge->getVersion();
-        if ($version != null) {
-            $projet  = $version->getProjet();
-            $session = $version->getSession();
-        } else {
-            $sj->throwException(__METHOD__ . ":" . __LINE__ . " rallonge " . $rallonge . " n'est pas associée à une version !");
-        }
+        [ $version, $projet, $session ] = $this->getVerProjSess($rallonge);
 
         // ACL
         if (! $sp->projetACL($projet) || $projet == null) {
@@ -307,13 +319,7 @@ class RallongeController extends AbstractController
             ->add('fermer', SubmitType::class, ['label' => 'Fermer' ])
             ->getForm();
 
-        $version = $rallonge->getVersion();
-        if ($version != null) {
-            $projet = $version->getProjet();
-            $session = $version->getSession();
-        } else {
-            $sj->throwException(__METHOD__ . ":" . __LINE__ . " rallonge " . $rallonge . " n'est pas associée à une version !");
-        }
+        [ $version, $projet, $session ] = $this->getVerProjSess($rallonge);
 
         $erreurs = [];
         $editForm->handleRequest($request);
@@ -493,13 +499,7 @@ class RallongeController extends AbstractController
 
         $editForm->handleRequest($request);
 
-        $version = $rallonge->getVersion();
-        if ($version != null) {
-            $projet = $version->getProjet();
-            $session = $version->getSession();
-        } else {
-            $sj->throwException(__METHOD__ . ":" . __LINE__ . " rallonge " . $rallonge . " n'est pas associée à une version !");
-        }
+        [ $version, $projet, $session ] = $this->getVerProjSess($rallonge);
 
         //if( ! $rallonge->isFinalisable() )
         //    $sj->throwException(__METHOD__ . ":" . __LINE__ . " rallonge " . $rallonge . " n'est pas en attente !");
@@ -569,13 +569,7 @@ class RallongeController extends AbstractController
                 " au président parce que : " . $sm->rallonge_expertiser($rallonge)['raison']);
         }
 
-        $version = $rallonge->getVersion();
-        if ($version != null) {
-            $projet = $version->getProjet();
-            $session = $version->getSession();
-        } else {
-            $sj->throwException(__METHOD__ . ":" . __LINE__ . " rallonge " . $rallonge . " n'est pas associée à une version !");
-        }
+        [ $version, $projet, $session ] = $this->getVerProjSess($rallonge);
 
         $erreurs = Functions::dataError($sval, $rallonge, ['expertise']);
 
@@ -610,13 +604,8 @@ class RallongeController extends AbstractController
             $sj->throwException(__METHOD__ . " impossible d'envoyer la rallonge " . $rallonge->getIdRallonge().
                 " à l'expert parce que : " . $sm->rallonge_envoyer($rallonge)['raison']);
         }
-        $version = $rallonge->getVersion();
-        if ($version != null) {
-            $projet = $version->getProjet();
-            $session = $version->getSession();
-        } else {
-            $sj->throwException(__METHOD__ . ":" . __LINE__ . " rallonge " . $rallonge . " n'est pas associée à une version !");
-        }
+
+        [ $version, $projet, $session ] = $this->getVerProjSess($rallonge);
 
         $erreurs = Functions::dataError($sval, $rallonge);
         return $this->render(
@@ -663,14 +652,7 @@ class RallongeController extends AbstractController
 
         $workflow->execute(Signal::CLK_VAL_DEM, $rallonge);
 
-        $version = $rallonge->getVersion();
-        if ($version != null) {
-            $projet = $version->getProjet();
-            $session = $version->getSession();
-        } else {
-            $sj->throwException(__METHOD__ . ":" . __LINE__ . " rallonge " . $rallonge . " n'est pas associée à une version !");
-        }
-
+        [ $version, $projet, $session ] = $this->getVerProjSess($rallonge);
 
         return $this->render(
             'rallonge/envoyer.html.twig',
@@ -713,15 +695,7 @@ class RallongeController extends AbstractController
             $workflow->execute(Signal::CLK_FERM, $rallonge);
         }
 
-        $version = $rallonge->getVersion();
-        if ($version != null) {
-            $rallonge->setAttrHeures($rallonge->getNbHeuresAtt());
-            $projet = $version->getProjet();
-            $session = $version->getSession();
-        } else {
-            $sj->throwException(__METHOD__ . ":" . __LINE__ . " rallonge " . $rallonge . " n'est pas associée à une version !");
-        }
-
+        [ $version, $projet, $session ] = $this->getVerProjSess($rallonge);
 
         return $this->render(
             'rallonge/rallonge_finalisee.html.twig',
@@ -774,14 +748,7 @@ class RallongeController extends AbstractController
             $sj->throwException(__METHOD__ . ":" . __LINE__ . " rallonge " . $rallonge . " contient une validation erronée !");
         }
 
-
-        $version = $rallonge->getVersion();
-        if ($version != null) {
-            $projet = $version->getProjet();
-            $session = $version->getSession();
-        } else {
-            $sj->throwException(__METHOD__ . ":" . __LINE__ . " rallonge " . $rallonge . " n'est pas associée à une version !");
-        }
+        [ $version, $projet, $session ] = $this->getVerProjSess($rallonge);
 
         return $this->render(
             'rallonge/envoyer_president.html.twig',
@@ -792,8 +759,6 @@ class RallongeController extends AbstractController
             ]
         );
     }
-
-
 
     /**
      * Affectation des experts
@@ -938,7 +903,7 @@ class RallongeController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $em->remove($rallonge);
-            $em->flush($rallonge);
+            $em->flush();
         }
 
         return $this->redirectToRoute('rallonge_index');

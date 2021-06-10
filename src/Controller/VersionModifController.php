@@ -95,6 +95,7 @@ class VersionModifController extends AbstractController
     private $sm;
     private $ss;
     private $sv;
+    private $sf;
     private $pw;
     private $ff;
     private $vl;
@@ -141,7 +142,8 @@ class VersionModifController extends AbstractController
         $sv = $this->sv;
         $sj = $this->sj;
         $twig = $this->tw;
-
+        $html = [];
+        
         // ACL
         if ($sm->modifier_version($version)['ok'] == false) {
             $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de modifier la version " . $version->getIdVersion().
@@ -249,7 +251,8 @@ class VersionModifController extends AbstractController
 
         // DES FORMULAIRES QUI DEPENDENT DU TYPE DE PROJET
         // (Type1 et Type3 partagent le même formulaire)
-        switch ($version->getProjet()->getTypeProjet()) {
+        $type = $version->getProjet()->getTypeProjet();
+        switch ($type) {
         case Projet::PROJET_SESS:
         return $this->modifierType1($request, $version, $renouvellement, $image_forms, $collaborateur_form, $lg);
 
@@ -595,7 +598,6 @@ class VersionModifController extends AbstractController
                 "500 To" => "500 To",
                 "je ne sais pas" => "je ne sais pas",
                 ],
-        'required'       =>  false,
         ]
     )
     ->add('sondJustifDonnPerm', TextAreaType::class, [ 'required'       =>  false ])

@@ -41,7 +41,7 @@ use App\Form\IndividuType;
 use App\Entity\Individu;
 use App\Entity\Scalar;
 use App\Entity\Sso;
-use App\Entity\Compteactivation;
+use App\Entity\CompteActivation;
 use App\Entity\Journal;
 
 use App\Utils\Functions;
@@ -81,11 +81,11 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 use Twig\Environment;
 
-function redirection_externe($url)
-{
-    $controller = new Controller();
-    return $controller->redirect($url);
-}
+//function redirection_externe($url)
+//{
+//    $controller = new Controller();
+//    return $controller->redirect($url);
+//}
 
 
 /////////////////////////////////////////////////////
@@ -104,10 +104,12 @@ class GramcSessionController extends AbstractController
     private $pw;
     private $ff;
     private $vl;
+    private $ts;
     private $tok;
     private $sss;
     private $uc;
     private $ac;
+    private $tw;
 
 
     public function __construct(
@@ -391,8 +393,8 @@ class GramcSessionController extends AbstractController
             return $this->redirectToRoute('accueil');
         }
 
-        $user = new Individu();
-        $mail = $user->getMail();
+        $u = new Individu();
+        //$mail = $user->getMail();
 
         $experts    = $repository->findBy(['expert'   => true ]);
         $admins     = $repository->findBy(['admin'    => true ]);
@@ -405,7 +407,7 @@ class GramcSessionController extends AbstractController
         $users          = array_unique(array_merge($admins, $experts, $obs, $sysadmins, $responsables, $collaborateurs));
         sort($users);
 
-        $form = $this->createFormBuilder($user)
+        $form = $this->createFormBuilder($u)
             ->add(
                 'mail',
                 EntityType::class,
@@ -429,7 +431,9 @@ class GramcSessionController extends AbstractController
         //    }
 
         if ($form->isSubmitted()) {
-            $user  = $repository->findOneByMail($user->getMail()->getMail());
+            // TODO - Particulièrement laid et incompréhensible !
+            //        php-stan (level -2) renvoie une erreur et pourtant ça marche
+            $user  = $repository->findOneByMail($u->getMail()->getMail());
             $roles = $user->getRoles();
             $token = new UsernamePasswordToken($user, null, 'main', $roles);
 
@@ -478,7 +482,7 @@ class GramcSessionController extends AbstractController
             $em = $this->getDoctrine()->getManager();
 
             $compteactivation = $this->getDoctrine()
-                ->getRepository('App:CompteActivation')
+                ->getRepository(CompteActivation::class)
                 ->findOneBy(['key' => $key ]);
 
             if (!  $compteactivation) {
@@ -743,7 +747,7 @@ class GramcSessionController extends AbstractController
         // vérifier si email est disponible dans $session
         if (! $request->getSession()->has('email')) { // une tentative de piratage
             $sj->warningMessage(__FILE__ . ":" . __LINE__ . " Pas d'email pour le nouveau profil");
-            $lg->warning("No email at nouveau_profil", ['request' => $event->getRequest()]);
+            //$lg->warning("No email at nouveau_profil", ['request' => $event->getRequest()]);
             return $this->redirectToRoute('accueil');
         }
 
@@ -785,7 +789,7 @@ class GramcSessionController extends AbstractController
         $sn = $this->sn;
 
         $key = md5(random_int(1, 10000000000) . microtime());
-        $compteactivation = new Compteactivation();
+        $compteactivation = new CompteActivation();
         $compteactivation->setIndividu($individu);
         $compteactivation->setKey($key);
         $em = $this->getDoctrine()->getManager();

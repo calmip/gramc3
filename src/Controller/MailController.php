@@ -25,7 +25,7 @@ use App\Form\IndividuType;
 use App\Entity\Individu;
 use App\Entity\Scalar;
 use App\Entity\Sso;
-use App\Entity\Compteactivation;
+//use App\Entity\CompteActivation;
 use App\Entity\Journal;
 use App\Entity\Projet;
 use App\Entity\Version;

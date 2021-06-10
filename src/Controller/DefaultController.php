@@ -152,6 +152,7 @@ class DefaultController extends AbstractController
      * @Route("/count", name="count")
      * @Security("is_granted('ROLE_ADMIN')")
      */
+/*
     public function countAction(Request $request)
     {
         $sp = $this->sp;
@@ -182,6 +183,7 @@ class DefaultController extends AbstractController
         $projets = $em->getRepository(Projet::class)->countProjetsAnnee($annee);
         return new Response(Functions::show($projets));
     }
+*/
 
     /**
      * @Route("/test_params/{id1}/{id2}", name="test_params")
@@ -199,7 +201,8 @@ class DefaultController extends AbstractController
     public function test_sessionAction(Request $request)
     {
         $ss = $this->ss;
-        return new Response(var_dump($ss->getSessionCourante()));
+        var_dump($ss->getSessionCourante());
+        return new Response('OK');
     }
 
     /**

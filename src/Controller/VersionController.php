@@ -93,6 +93,7 @@ class VersionController extends AbstractController
     private $sm;
     private $sp;
     private $ss;
+    private $sf;
     private $sd;
     private $sv;
     private $se;
@@ -211,7 +212,6 @@ class VersionController extends AbstractController
         );
     }
 
-
     /**
      * Supprimer version
      *
@@ -233,9 +233,11 @@ class VersionController extends AbstractController
         }
 
         $etat = $version->getEtatVersion();
+        $idProjet = null;
+        $idVersion = null;
         if ($version->getProjet() == null) {
             $idProjet = null;
-            $idVersion == $version->getIdVersion();
+            $idVersion = $version->getIdVersion();
         } else {
             $idProjet   =  $version->getProjet()->getIdProjet();
         }
@@ -410,7 +412,6 @@ class VersionController extends AbstractController
         return Functions::pdf($pdf);
     }
 
-
     ///////////////////////////////////////////////////////////////
 
     /**
@@ -428,7 +429,7 @@ class VersionController extends AbstractController
 
         // ACL
         if ($sm->televersement_fiche($version)['ok'] == false) {
-            $sj->throwException(__METHOD__ . ':' . __LINE__ . " impossible de téléverser la fiche du projet " . $projet .
+            $sj->throwException(__METHOD__ . ':' . __LINE__ . " impossible de téléverser la fiche de la version " . $version .
                 " parce que : " . $sm -> telechargement_fiche($version)['raison']);
         }
 
@@ -457,7 +458,8 @@ class VersionController extends AbstractController
 
         $erreurs  = [];
         $resultat = [];
-
+        $file = null;
+        
         $form->handleRequest($request);
         if ($form->isSubmitted()) {
             $data = $form->getData();
@@ -1009,6 +1011,7 @@ class VersionController extends AbstractController
 
             $sp->createDirectories($annee, $session);
 
+            $file = null;
             if (is_file($tempFilename) && ! is_dir($tempFilename)) {
                 $file = new File($tempFilename);
             } elseif (is_dir($tempFilename)) {
@@ -1046,7 +1049,7 @@ class VersionController extends AbstractController
                         $annee . $projet->getIdProjet() . ".pdf"
                     );
                     $resultat[] =   " Fichier " . $filename . " téléversé";
-                    $this->modifyRapport($projet, $annee, $filename, false);
+                    $this->modifyRapport($projet, $annee, $filename);
                 }
             }
         }

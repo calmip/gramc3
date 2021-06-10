@@ -89,8 +89,11 @@ class WorkflowController extends AbstractController
     public function indexAction(Request $request, LoggerInterface $lg)
     {
         $ff = $this->ff;
+        $sj = $this->sj;
         $em = $this->getdoctrine()->getManager();
-
+        $signal_view_forms = [];
+        $etat_view_forms = [];
+        
         $projets = [];
         foreach ($em->getRepository(Projet::class)->findAll() as $projet) {
             if ($projet->getEtatProjet() != Etat::TERMINE) {
@@ -178,11 +181,11 @@ class WorkflowController extends AbstractController
         return $this->render(
             'workflow/index.html.twig',
             [
-            'projets' => $projets,
+            'projets'  => $projets,
             'sessions' => $sessions,
-            'signal_view_forms'         => $signal_view_forms,
-            'etat_view_forms'           => $etat_view_forms,
-            'menu'  => $menu,
+            'signal_view_forms' => $signal_view_forms,
+            'etat_view_forms'   => $etat_view_forms,
+            'menu'     => $menu,
             ]
         );
     }

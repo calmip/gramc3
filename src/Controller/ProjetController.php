@@ -109,13 +109,12 @@ class ProjetController extends AbstractController
     private $se;
     private $pw;
     private $ff;
-    private $tok;
+    private $token;
     private $sss;
     private $tw;
     private $ac;
 
     public function __construct(
-        ServiceNotifications $sn,
         ServiceJournal $sj,
         ServiceMenus $sm,
         ServiceProjets $sp,
@@ -133,7 +132,6 @@ class ProjetController extends AbstractController
         Environment $tw,
         AuthorizationCheckerInterface $ac
     ) {
-        $this->sn  = $sn;
         $this->sj  = $sj;
         $this->sm  = $sm;
         $this->sp  = $sp;
@@ -197,6 +195,7 @@ class ProjetController extends AbstractController
             $derniereVersion    =  $projet->derniereVersion();
             if ($derniereVersion == null) {
                 $mauvais_projets[$projet->getIdProjet()]    =   $projet;
+                $annee = 0;
             } else {
                 $annee = $projet->derniereVersion()->getAnneeSession();
             }
@@ -566,7 +565,7 @@ class ProjetController extends AbstractController
 
         $projet->setNepasterminer(true);
         $em->persist($projet);
-        $em->flush($projet);
+        $em->flush();
         return $this->render(
             'projet/nepasterminer.html.twig',
             [
@@ -588,7 +587,7 @@ class ProjetController extends AbstractController
 
         $projet->setNepasterminer(false);
         $em->persist($projet);
-        $em->flush($projet);
+        $em->flush();
         return $this->render(
             'projet/onpeutterminer.html.twig',
             [
@@ -719,9 +718,11 @@ class ProjetController extends AbstractController
             new Response('Aucune thématique !');
         }
 
+        $idThematiques = [];
+        $statsThematique = [];
         foreach ($thematiques as $thematique) {
-            $statsThematique[$thematique->getLibelleThematique()]    =   0;
-            $idThematiques[$thematique->getLibelleThematique()]      =   $thematique->getIdThematique();
+            $statsThematique[$thematique->getLibelleThematique()] = 0;
+            $idThematiques[$thematique->getLibelleThematique()] = $thematique->getIdThematique();
         }
 
         // Les rattachements
@@ -733,8 +734,8 @@ class ProjetController extends AbstractController
         $statsRattachement = [];
         $idRattachements   = [];
         foreach ($rattachements as $rattachement) {
-            $statsRattachement[$rattachement->getLibelleRattachement()]    =   0;
-            $idRattachements[$rattachement->getLibelleRattachement()]      =   $rattachement->getIdRattachement();
+            $statsRattachement[$rattachement->getLibelleRattachement()] = 0;
+            $idRattachements[$rattachement->getLibelleRattachement()] = $rattachement->getIdRattachement();
         }
 
         //$items  =   [];
@@ -844,9 +845,6 @@ class ProjetController extends AbstractController
         return $this->render(
             'projet/session.html.twig',
             [
-            //'typeMetadata'			=>	$typeMetadata,
-            //'nombreDatasets'		=>	$nombreDatasets,
-            //'tailleDatasets'		=>	$tailleDatasets,
             'nombreEditionTest'   => $nombreEditionTest,
             'nombreExpertiseTest' => $nombreExpertiseTest,
             'nombreEdition'       => $nombreEdition,
@@ -863,7 +861,6 @@ class ProjetController extends AbstractController
             'session'             => $session,
             'versions'            => $versions,
             'versions_suppl'      => $versions_suppl,
-            'nombreNouveaux'      => $nombreNouveaux,
             'demHeures'           => $demHeures,
             'attrHeures'          => $attrHeures,
             'nombreProjets'       => $nombreProjets,
@@ -915,6 +912,7 @@ class ProjetController extends AbstractController
                 continue;
             }
             $thematique= $v->getPrjThematique();
+            $metathema = null;
             if ($thematique==null) {
                 $sj->warningMessage(__METHOD__ . ':' . __LINE__ . " version " . $v . " n'a pas de thématique !");
             } else {
@@ -932,7 +930,7 @@ class ProjetController extends AbstractController
             $prj['laboratoire'] = $v->getLabo();
             $a = $v->getProjet()->getIdProjet();
             $a = substr($a, 1, 2);
-            $a = 2000 + $a;
+            $a = 2000 + intval($a);
             $prj['annee'] = $a;
             $publis = array_slice($v->getProjet()->getPubli()->toArray(), -2, 2);
             //$publis = array_slice($publis, -2, 2); // On garde seulement les deux dernières
@@ -1334,7 +1332,7 @@ class ProjetController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $em->persist($projet);
-            $em->flush($projet);
+            $em->flush();
 
             return $this->redirectToRoute('projet_show', array('id' => $projet->getId()));
         }
@@ -1545,6 +1543,7 @@ class ProjetController extends AbstractController
         }
 
         // Verification du paramètre $utype
+        $ntype = null;
         if ($utype == 'user') {
             $ntype = 1;
         } elseif ($utype == 'group') {
@@ -1590,14 +1589,13 @@ class ProjetController extends AbstractController
             $struct_data = $dessin_work->createStructuredData($debut, $fin, $db_work, $ressource['unite']);
             $image_conso = $dessin_work->createImage($struct_data, $ressource)[0];
         }
+        else {
+            $image_conso = '';
+        }
 
         $twig     = $this->tw;
         $template = $twig->createTemplate('<img src="data:image/png;base64, {{ image_conso }}" alt="" title="" />');
         $html     = $twig->render($template, [ 'image_conso' => $image_conso ]);
-
-        //$twig     = new \Twig_Environment( new \Twig_Loader_String(), array( 'strict_variables' => false ) );
-        //$twig_src = '<img src="data:image/png;base64, {{ image_conso }}" alt="" title="" />';
-        //$html = $twig->render( $twig_src,  [ 'image_conso' => $image_conso ] );
 
         return new Response($html);
     }
@@ -1782,15 +1780,15 @@ class ProjetController extends AbstractController
                 $u     = $user_repo->findOneBy(['loginname' => $login]);
                 if ($u==null) {
                     $passwd = null;
-                    $expir  = null;
+                    $pwd_expir = null;
                 } else {
-                    $passwd    = $u->getPassword();
+                    $passwd = $u->getPassword();
                     $pwd_expir = $u->getPassexpir();
                 }
             } else {
                 $login = 'nologin';
                 $passwd= null;
-                $expir = null;
+                $pwd_expir = null;
             }
             $projets_collab[] =
                 [
@@ -1923,6 +1921,7 @@ class ProjetController extends AbstractController
             $version = $session_form->getData()['version'];
         }
 
+        $session = null;
         if ($version != null) {
             $session = $version->getSession();
         } else {
@@ -2104,7 +2103,7 @@ class ProjetController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $em->remove($projet);
-            $em->flush($projet);
+            $em->flush();
         }
 
         return $this->redirectToRoute('projet_index');

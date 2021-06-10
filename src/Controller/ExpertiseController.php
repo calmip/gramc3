@@ -168,7 +168,8 @@ class ExpertiseController extends AbstractController
         $stats       = $affectationExperts->getStats();
         $stats['nouveau'] = null;
         $attHeures   = $affectationExperts->getAttHeures();
-
+        
+        $versions_suppl = [];
         foreach ($versions as $version) {
             $id_version                  = $version->getIdVersion();
             $projet                      = $version->getProjet();
@@ -673,26 +674,27 @@ class ExpertiseController extends AbstractController
             }
         }
 
+        $peut_envoyer = false;
         switch ($projet_type) {
-        // Si c'est un projet de type PROJET_SESS, le bouton ENVOYER n'est disponible
-        // QUE si la session est en états ATTENTE ou ACTIF
-        case Projet::PROJET_SESS:
-        if ($session -> getEtatSession() == Etat::EN_ATTENTE || $session -> getEtatSession() == Etat::ACTIF) {
+            // Si c'est un projet de type PROJET_SESS, le bouton ENVOYER n'est disponible
+            // QUE si la session est en états ATTENTE ou ACTIF
+            case Projet::PROJET_SESS:
+            if ($session -> getEtatSession() == Etat::EN_ATTENTE || $session -> getEtatSession() == Etat::ACTIF) {
+                $peut_envoyer = true;
+            } else {
+                $peut_envoyer = false;
+            }
+            break;
+    
+            // Si c'est un projet de type PROJET_TEST, le bouton ENVOYER est toujours disponible
+            case Projet::PROJET_TEST:
             $peut_envoyer = true;
-        } else {
-            $peut_envoyer = false;
+            break;
+    
+            case Projet::PROJET_FIL:
+            $peut_envoyer = true;
+            break;
         }
-        break;
-
-        // Si c'est un projet de type PROJET_TEST, le bouton ENVOYER est toujours disponible
-        case Projet::PROJET_TEST:
-        $peut_envoyer = true;
-        break;
-
-        case Projet::PROJET_FIL:
-        $peut_envoyer = true;
-        break;
-    }
 
         // Création du formulaire
         $editForm = $this->createFormBuilder($expertise)
@@ -790,6 +792,7 @@ class ExpertiseController extends AbstractController
 
         // LA SUITE DEPEND DU TYPE DE PROJET !
         // Le workflow n'est pas le même suivant le type de projet, donc l'expertise non plus.
+        $twig = '';
         switch ($projet_type) {
         case Projet::PROJET_SESS:
             $twig = 'expertise/modifier_projet_sess.html.twig';
@@ -841,7 +844,7 @@ class ExpertiseController extends AbstractController
             'anneeCour'         => $anneeCour,
             'session'           => $session,
             'peut_envoyer'      => $peut_envoyer,
-        'commentaireExterne'=> $commentaireExterne,
+            'commentaireExterne'=> $commentaireExterne,
             'erreurs'           => $erreurs,
             'toomuch'           => $toomuch,
             'prev'              => $prev,
@@ -906,6 +909,7 @@ class ExpertiseController extends AbstractController
                 $validation =  $expertise->getValidation();
 
                 $rtn = null;
+                $signal = 0;
                 if ($validation == 1) {
                     $signal = Signal::CLK_VAL_EXP_OK;
                 } elseif ($validation == 2) {
@@ -948,6 +952,7 @@ class ExpertiseController extends AbstractController
 
         $version = $expertise->getVersion();
         $projet_type = $version->getProjet()->getTypeProjet();
+        $twig = '';
         switch ($projet_type) {
             case Projet::PROJET_SESS:
                 $twig = 'expertise/valider_projet_sess.html.twig';

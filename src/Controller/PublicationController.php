@@ -56,7 +56,7 @@ class PublicationController extends AbstractController
     private $sj;
     private $ss;
     private $ff;
-    private $tok;
+    private $token;
     private $ac;
 
     public function __construct(
@@ -97,6 +97,7 @@ class PublicationController extends AbstractController
      */
     public function gererAction(Projet $projet, Request $request, LoggerInterface $lg)
     {
+        $sj = $this->sj;
         $em = $this->getDoctrine()->getManager();
 
         $publication    = new Publication();
@@ -235,7 +236,7 @@ class PublicationController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $em->persist($publication);
-            $em->flush($publication);
+            $em->flush();
 
             return $this->redirectToRoute('publication_show', array('id' => $publication->getId()));
         }
@@ -341,7 +342,7 @@ class PublicationController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $em->remove($publication);
-            $em->flush($publication);
+            $em->flush();
         }
 
         return $this->redirectToRoute('publication_index');
@@ -374,7 +375,7 @@ class PublicationController extends AbstractController
         if ($publication->getProjet() == null) {
             $em = $this->getDoctrine()->getManager();
             $em->remove($publication);
-            $em->flush($publication);
+            $em->flush();
         }
 
         return $this->redirectToRoute('gerer_publications', [ 'id' => $projet->getIdProjet() ]);

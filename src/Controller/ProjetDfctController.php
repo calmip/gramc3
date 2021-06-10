@@ -191,7 +191,7 @@ class ProjetDfctController extends AbstractController
 
         $filename = $dfct->getPath($projet, $annee, $nb);
         if ($filename == '') {
-            $sj->errorMessage(__METHOD__ . ":" . __LINE__ . " fichier de données de facturation $nb, projet $projet, année $anne n'existe pas");
+            $sj->errorMessage(__METHOD__ . ":" . __LINE__ . " fichier de données de facturation $nb, projet $projet, année $annee n'existe pas");
             return Functions::pdf(null);
         } else {
             $dwnfn = "Données_de_facturation_".$projet."_".$annee."_".$nb.".pdf";

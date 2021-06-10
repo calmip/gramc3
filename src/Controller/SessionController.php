@@ -210,7 +210,6 @@ class SessionController extends AbstractController
         return $this->render(
             'session/modify.html.twig',
             [
-            'session' => $session,
             'edit_form' => $editForm->createView(),
             'session'   => $session,
             ]
