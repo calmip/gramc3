@@ -57,6 +57,28 @@ abstract class BilanSession
     protected $em;
     protected $ss;
     protected $grdt;
+    protected $sp;
+    protected $session;
+    protected $id_session;
+    protected $annee_cour;
+    protected $annee_prec;
+    protected $full_annee_cour;
+    protected $full_annee_prec;
+    protected $session_courante_A;
+    protected $session_courante_B;
+    protected $session_precedente_A;
+    protected $session_precedente_B;
+    protected $annee_conso;
+    protected $ress;
+    protected $nom_ress;
+    protected $t_fact;
+    
+    // Fonctions implémentées dans les classes dérivées
+    protected function initTotaux() {}
+    protected function getTotaux($totaux) {}
+    protected function getEntetes() {}
+    protected function getLigne(Version $version, &$totaux) {}
+
 
     public function __construct($ressources_conso_group, GramcDate $grdt, Session $session, ServiceProjets $sp, ServiceSessions $ss, EntityManager $em)
     {
@@ -151,6 +173,7 @@ abstract class BilanSession
     {
         $annee_conso = $this->annee_conso;
         $full_annee_prec = $this->full_annee_prec;
+        $ligne = [];
         for ($m=0;$m<12;$m++) {
             $consmois= $this->sp->getConsoMois($version->getProjet(), $annee_conso, $m);
             $index   = 'm' . ($m<10 ? '0' : '') . $m;

@@ -130,6 +130,7 @@ class BilanSessionA extends BilanSession
     protected function getLigne(Version $version, &$totaux)
     {
         $em                   = $this->em;
+        $sp                   = $this->sp;
         $session_precedente_A = $this->session_precedente_A;
         $session_precedente_B = $this->session_precedente_B;
         $session_courante_A   = $this->session_courante_A;
