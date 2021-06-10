@@ -74,7 +74,6 @@ class ServiceJournal
      ***/
     private function journalMessage($message, $niveau)
     {
-        return;
         $rs    = $this->rs;
         $ss    = $this->ss;
         $log   = $this->log;
