@@ -72,7 +72,7 @@ class User
         return $output;
     }
 
-    public function __construct(Individu $individu = null, Version $version = null)
+    public function __construct()
     {
         $this->password  = null;
         $this->passexpir = null;

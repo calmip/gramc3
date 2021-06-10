@@ -204,9 +204,9 @@ class Rallonge implements Demande
 
         return $this;
     }
-    public function setEtat($etatVersion)
+    public function setEtat($etatRallonge)
     {
-        return $this->setEtatVersion();
+        return $this->setEtatRallonge($etatRallonge);
     }
 
     /**
@@ -461,30 +461,6 @@ class Rallonge implements Demande
     public function getValidation()
     {
         return $this->validation;
-    }
-
-    /**
-     * Set rallonge
-     *
-     * @param \App\Entity\Rallonge
-     *
-     * @return Rallonge
-     */
-    public function setRallonge($rallonge)
-    {
-        $this->rallonge = $rallonge;
-
-        return $this;
-    }
-
-    /**
-     * Get rallonge
-     *
-     * @return \App\Entity\Rallonge
-     */
-    public function getRallonge()
-    {
-        return $this->rallonge;
     }
 
     /**

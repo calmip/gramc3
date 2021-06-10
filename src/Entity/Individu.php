@@ -966,6 +966,7 @@ class Individu implements UserInterface, EquatableInterface
     {
         $server =  Request::createFromGlobals()->server;
         if ($server->has('REMOTE_USER') || $server->has('REDIRECT_REMOTE_USER')) {
+            $eppn = '';
             if ($server->has('REMOTE_USER')) {
                 $eppn =  $server->get('REMOTE_USER');
             }

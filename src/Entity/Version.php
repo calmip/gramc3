@@ -777,7 +777,7 @@ class Version implements Demande
     }
     public function setEtat($etatVersion)
     {
-        return $this->setEtatVersion();
+        return $this->setEtatVersion($etatVersion);
     }
 
     /**

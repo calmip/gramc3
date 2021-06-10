@@ -121,16 +121,18 @@ class Session
 
     ///////////////////////////////////////////////////////////////
 
+    
+    // SUPPRIME CAR BUGGE ET NON APPELE
     /**
     * @ ORM\PostUpdate
     * @ ORM\PostPersist
     */
-    public function clearCacheSessionCourante()
-    {
-        if (App::getSession()->has('SessionCourante')) {
-            App::getSession()->remove('SessionCourante');
-        } // clear cache
-    }
+    //public function clearCacheSessionCourante()
+    //{
+     //   if (App::getSession()->has('SessionCourante')) {
+     //       App::getSession()->remove('SessionCourante');
+     //   } // clear cache
+    //}
     /////////////////////////
 
     /**
@@ -139,7 +141,8 @@ class Session
     public function __construct()
     {
         $this->version = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->projetTest = new \Doctrine\Common\Collections\ArrayCollection();
+        // Variable NON UTILISEE
+        //$this->projetTest = new \Doctrine\Common\Collections\ArrayCollection();
         $this->etatSession = Etat::getEtat('CREE_ATTENTE');
     }
 
