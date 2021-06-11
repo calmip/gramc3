@@ -36,6 +36,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationException;
 
 /********************
  * Ce service est utilisé pour envoyer des notifications par mail aux utilisateurs
@@ -43,6 +44,13 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class ServiceJournal
 {
+    private $rs;
+    private $ss;
+    private $log;
+    private $token;
+    private $ac;
+    private $em;
+    
     // request_stack, session,logger, security.helper, doc
     // request_stack, session,logger, security.token_storage,doc
     public function __construct(

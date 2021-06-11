@@ -61,6 +61,20 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class ServiceMenus
 {
+    private $max_rall;
+    private $nodata;
+    private $sv;
+    private $sp;
+    private $sj;
+    private $sw;
+    private $grdt;
+    private $sval;
+    private $ss;
+    private $token;
+    private $ac;
+    private $em;
+    private $sessions_non_term;
+    
     public function __construct(
         $max_rall,
         $nodata,
@@ -812,10 +826,7 @@ class ServiceMenus
         $etatVersion    =   $version->getEtatVersion();
         $isProjetTest   =   $version->isProjetTest();
 
-        if ($version == null) {
-            $menu['raison'] = "Pas de projet à soumettre";
-            $this->sj->errorMessage(__METHOD__ . ' le projet ' . Functions::show($projet) . " n'a pas de version !");
-        } elseif ($version->getSession() == null) {
+        if ($version->getSession() == null) {
             $menu['raison'] = "Pas de session attachée à ce projet !";
             $this->sj->errorMessage(__METHOD__ . ' la version ' . Functions::show($version) . " n'a pas de session attachée !");
         } elseif ($etatVersion ==  Etat::EDITION_EXPERTISE) {

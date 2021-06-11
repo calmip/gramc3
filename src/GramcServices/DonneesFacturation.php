@@ -74,6 +74,8 @@ use App\Utils\Functions;
 class DonneesFacturation
 {
     private $dfct_directory;
+    private $sp;
+    private $sj;
     private $em;
 
     public function __construct($dfct_directory, ServiceProjets $sp, ServiceJournal $sj, EntityManagerInterface $em)

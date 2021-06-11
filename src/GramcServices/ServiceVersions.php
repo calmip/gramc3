@@ -37,6 +37,13 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class ServiceVersions
 {
+    private $attrib_seuil_a;
+    private $prj_prefix;
+    private $fig_directory;
+    private $signature_directory;
+    private $sj;
+    private $em;
+    
     public function __construct($attrib_seuil_a, $prj_prefix, $fig_directory, $signature_directory, ServiceJournal $sj, EntityManagerInterface $em)
     {
         $this->attrib_seuil_a      = intval($attrib_seuil_a);
@@ -70,7 +77,7 @@ class ServiceVersions
 
         // Si attribution inférieure au seuil, la somme ne doit pas dépasser 1,5 * seuil
         if ($attr_heures_a < $this->attrib_seuil_a) {
-            if ($dem_heures_b + $attr_heures_a > $this->attrib_seuil_a * 1.5) {
+            if (floatval($dem_heures_b + $attr_heures_a) > $this->attrib_seuil_a * 1.5) {
                 return true;
             } else {
                 return false;

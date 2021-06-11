@@ -148,7 +148,7 @@ abstract class Workflow
     public function execute($transition_code, $object)
     {
         if ($object == null) {
-            $this->sj->warningMessage(__METHOD__ ." on a null object dans " . $workflowIdentifier);
+            $this->sj->warningMessage(__METHOD__ ." on a null object dans " . $this->workflowIdentifier);
             return  false;
         }
         $state = $this->getObjectState($object);

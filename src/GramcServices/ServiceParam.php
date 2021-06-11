@@ -34,6 +34,8 @@ use Doctrine\ORM\EntityManagerInterface;
  */
 class ServiceParam
 {
+    private $em;
+    
     public function __construct(EntityManagerInterface $em)
     {
         $this->em             = $em;

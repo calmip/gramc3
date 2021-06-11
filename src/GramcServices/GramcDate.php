@@ -42,6 +42,17 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class GramcDate extends GramcDateTime
 {
+    private $recup_printemps_d;
+    private $recup_printemps_f;
+    private $recup_automne_d;
+    private $recup_automne_f;
+    private $rpd;
+    private $rpf;
+    private $rad;
+    private $raf;
+    private $sp;
+    private $em;
+    
     public function __construct(
         $rpd,
         $rpf,

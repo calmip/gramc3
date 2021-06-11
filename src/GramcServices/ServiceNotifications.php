@@ -38,6 +38,13 @@ use Symfony\Component\Mime\Email;
 
 class ServiceNotifications
 {
+    private $mailfrom;
+    private $twig;
+    private $token;
+    private $mailer;
+    private $sj;
+    private $em;
+    
     public function __construct(
         $mailfrom,
         \Twig\Environment $twig,
@@ -96,7 +103,7 @@ class ServiceNotifications
         //         $twig = clone App::getTwig();
         //$twig->setLoader(new \Twig_Loader_String());
 
-        $twig         = $self->twig;
+        $twig         = $this->twig;
         $sujet_tmpl   = $twig->createTemplate($twig_sujet);
         $contenu_tmpl = $twig->createTemplate($twig_contenu);
 

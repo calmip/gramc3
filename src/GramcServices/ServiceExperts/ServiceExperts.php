@@ -67,6 +67,7 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class ServiceExperts
 {
+    protected $max_expertises_nb;
     protected $formFactory;
     protected $sn;
     protected $sj;
@@ -74,6 +75,12 @@ class ServiceExperts
     protected $pe2;
     protected $lg;
     protected $em;
+    
+    protected $notifications;
+    private $form_buttons;
+    private $thematiques;
+    private $rattachements;
+    private $demandes;
 
     public function __construct(
         $max_expertises_nb,
@@ -211,7 +218,8 @@ class ServiceExperts
                 foreach ($rattachement->getExpert() as $expert) {
                     if ($expert->getExpert() == false) {
                         $this->sj->warningMessage(__METHOD__ . ':' . __LINE__ . " $expert" . " est supprimé de la thématique pour ce projet" . $rattachement);
-                        Functions::noRattachement($expert);
+                        //Functions::noRattachement($expert);
+                        $expert->removeRattachement($rattachement);
                     }
                 }
                 $rattachements[ $rattachement->getIdRattachement() ] =
@@ -298,6 +306,7 @@ class ServiceExperts
         $pe1 = $this->pe1;
         $pe2 = $this->pe2;
         $lg  = $this->lg;
+        $sj = $this->sj;
         $em  = $this->em;
 
         // S'il y a déjà une expertise on ne fait rien

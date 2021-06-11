@@ -37,6 +37,14 @@ use Symfony\Component\Form\FormFactoryInterface;
 
 class ServiceSessions
 {
+    private $recup_attrib_seuil;
+    private $recup_conso_seuil;
+    private $recup_attrib_quant;
+    private $grdt;
+    private $ff;
+    private $em;
+    private $sessions_non_term;
+    
     public function __construct(
         $recup_attrib_seuil,
         $recup_conso_seuil,
@@ -63,13 +71,14 @@ class ServiceSessions
         $this->sessions_non_term = $this->em->getRepository(Session::class)->get_sessions_non_terminees();
     }
 
-    /*******
-     * vide le "cache" des sessnios non terminées - utile lorsqu'on crée une session ou change l'état des sessions
-     *******/
-    public function clearCache()
-    {
-        $this->sessions_non_term = null;
-    }
+//    SUPPRIME CAR NON APPELE
+//    /*******
+//     * vide le "cache" des sessnios non terminées - utile lorsqu'on crée une session ou change l'état des sessions
+//     *******/
+//    public function clearCache()
+//    {
+//        $this->sessions_non_term = null;
+//    }
 
     /***********
     * Renvoie la session courante, c'est-à-dire la PLUS RECENTE session NON TERMINEE

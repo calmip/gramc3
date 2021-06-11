@@ -55,10 +55,10 @@ abstract class Transition
     abstract public function canExecute($object);
     abstract public function execute($object);
 
-    private $etat            = 0;
-    private $signal_rallonge = 0;
-    private $propage_signal  = false;
-    private $mail            = [];
+    private $etat = 0;
+    private $signal = 0;
+    private $propage_signal = false;
+    private $mail = [];
 
     // TODO - Les services devraient être des variables de classe !
     protected $sn = null;

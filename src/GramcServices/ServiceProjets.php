@@ -38,6 +38,7 @@ use App\Entity\Expertise;
 use App\Entity\Sso;
 use App\Entity\CompteActivation;
 
+//use App\GramcServices\ServiceJournal;
 
 use App\Utils\Functions;
 
@@ -49,6 +50,21 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class ServiceProjets
 {
+    private $prj_prefix;
+    private $ressources_conso_group;
+    private $signature_directory;
+    private $rapport_directory;
+    private $fig_directory;
+    private $dfct_directory;
+    private $grdt;
+    private $sv;
+    private $ss;
+    private $sj;
+    private $log;
+    private $sac;
+    private $token;
+    private $em;
+    
     public function __construct(
         $prj_prefix,
         $ressources_conso_group,
@@ -213,6 +229,7 @@ class ServiceProjets
     public function projetsParAnnee($annee, $isRecupPrintemps=false, $isRecupAutomne=false)
     {
         $em = $this->em;
+        $ss = $this->ss;
 
         // Données consolidées
         $total = [];
@@ -1145,7 +1162,7 @@ class ServiceProjets
                 rmdir($dir);
             }
         } else {
-            static::warningMessage(__FILE__ . ":" . __LINE__ . " répértoire " . $dir . " n'existe pas ou ce n'est pas un répértoire ");
+            $this->sj->warningMessage(__FILE__ . ":" . __LINE__ . " répértoire " . $dir . " n'existe pas ou ce n'est pas un répértoire ");
         }
     }
 

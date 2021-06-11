@@ -397,7 +397,7 @@ class Functions
      * https://paragonie.com/blog/2017/06/libsodium-quick-reference-quick-comparison-similar-functions-and-which-one-use#crypto-secretbox
      **************************************************************/
 
-    public function simpleEncrypt($message)
+    public static function simpleEncrypt($message)
     {
         $key = $_SERVER['CLE_DE_CHIFFREMENT'];
 
@@ -414,7 +414,7 @@ class Functions
      * SimpleDecrypt: l'inverse de SimpleEncrypt
      **************************************************************/
 
-    public function simpleDecrypt($message)
+    public static function simpleDecrypt($message)
     {
         $key = $_SERVER['CLE_DE_CHIFFREMENT'];
 
