@@ -38,6 +38,9 @@ use App\Utils\Functions;
  */
 class PagesNumberValidator extends ConstraintValidator
 {
+    private $max_page_nb;
+    private $sj;
+    
     public function __construct($max_page_nb, ServiceJournal $sj)
     {
         $this->max_page_nb = $max_page_nb;

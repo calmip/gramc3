@@ -64,9 +64,12 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class ExceptionListener
 {
+    private $kernel_debug;
     private $router;
     private $logger;
+    private $sj;
     private $session;
+    private $em;
 
     public function __construct($kernel_debug, RouterInterface $router, LoggerInterface $logger, ServiceJournal $sj, SessionInterface $session, EntityManagerInterface $em)
     {
@@ -176,7 +179,7 @@ class ExceptionListener
                 //$response =  new Response($username);
                 $event->setResponse($response);
             } else { // il ne devrait jamais y arriver
-                $this->sj->journalMessage(__METHOD__ . ":" . __LINE__ ." UnknownAuthenticationCredentialsNotFoundException  pour la page " . $event->getRequest()->getRequestUri(), Journal::ERROR);
+                $this->sj->errorMessage(__METHOD__ . ":" . __LINE__ ." UnknownAuthenticationCredentialsNotFoundException  pour la page " . $event->getRequest()->getRequestUri());
                 $this->logger->warning(
                     __METHOD__ . ":" . __LINE__ ." UnknownAuthenticationCredentialsNotFoundException !",
                     [

@@ -44,19 +44,21 @@ use Doctrine\Persistence\Event\LifecycleEventArgs;
 
 class VersionStamp
 {
+    private $token;
+    
     public function __construct(TokenStorageInterface $tok)
     {
-        $this->tok = $tok->getToken();
+        $this->token = $tok->getToken();
     }
 
     // the entity listener methods receive two arguments:
     // the entity instance and the lifecycle event
     public function preUpdate(Version $version, LifecycleEventArgs $event): void
     {
-        if ($this->tok == null) {
+        if ($this->token == null) {
             return;
         }
-        $user = $this->tok->getUser();
+        $user = $this->token->getUser();
         if ($version->isCollaborateur($user)) {
             $version->setMajInd($user);
             $version->setMajStamp(new \DateTime());

@@ -50,16 +50,22 @@ use App\GramcServices\ServiceJournal;
 
 class UserChecker implements UserCheckerInterface
 {
+    private $secu_auto_chk;
+    private $token;
+    private $sss;
+    private $sj;
+    private $em;
+    
     public function __construct(
         AuthorizationCheckerInterface $secu_auto_chk,
-        TokenStorageInterface $token,
+        TokenStorageInterface $tok,
         SessionInterface $sss,
         ServiceJournal $sj,
         EntityManagerInterface $em
     )
     {
         $this->secu_auto_chk = $secu_auto_chk;
-        $this->token         = $token->getToken();
+        $this->token         = $tok->getToken();
         $this->sss           = $sss;
         $this->sj            = $sj;
         $this->em            = $em;

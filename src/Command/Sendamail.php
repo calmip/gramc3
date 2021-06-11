@@ -37,6 +37,10 @@ class Sendamail extends Command
     // the name of the command (the part after "bin/console")
     protected static $defaultName = 'app:send-a-mail';
 
+    private $env;
+    private $twig;
+    private $sn;
+    
     public function __construct($env, \Twig\Environment $twig, ServiceNotifications $sn)
     {
         // best practices recommend to call the parent constructor first and

@@ -16,6 +16,8 @@ use App\GramcServices\ServiceProjets;
  *******************************/
 class ProjetsVersionDerniereActive implements ORMFixtureInterface
 {
+    private $sp;
+    
     public function __construct(ServiceProjets $sp)
     {
         $this->sp = $sp;

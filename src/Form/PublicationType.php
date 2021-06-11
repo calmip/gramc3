@@ -39,6 +39,8 @@ use App\GramcServices\GramcDate;
 
 class PublicationType extends AbstractType
 {
+    private $grdt;
+    
     public function __construct(GramcDate $grdt)
     {
         $this -> grdt = $grdt;

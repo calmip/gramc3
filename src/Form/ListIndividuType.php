@@ -32,13 +32,14 @@ use App\Utils\IndividuForm;
 
 class ListIndividuType extends AbstractType
 {
+    
     /**
      * {@inheritdoc}
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->add('tags', CollectionType::class, array(
-            'entry_type' => IndividiForm::class
+            'entry_type' => IndividuForm::class
         ));
     }
 

@@ -80,15 +80,8 @@ class Functions
      * calcul des années pour des formulaires
      *
      */
-    public static function years($begin = null, $end = null, $difference = 5)
+    public static function years($begin, $end, $difference = 5)
     {
-        if ($begin == null) {
-            $begin = new GramcDate();
-        }
-        if ($end  == null) {
-            $end = new GramcDate();
-        }
-
         // le nombre d'années est +- 5 par défaut, nous devons le changer
         $first_year = $begin->format('Y');      // la première année
         $last_year = $end->format('Y');         // la dernière année
@@ -285,7 +278,7 @@ class Functions
         } elseif (is_bool($old)  && is_bool($new)) {
             return $new && $old;
         } else {
-            throw Exception();
+            throw new \exception;
         }
         //else
         //    static::errorMessage(__METHOD__ . " arguments error" . static::show( $new ) . " " . static::show( $old ) );
@@ -307,7 +300,7 @@ class Functions
             if ($filename != '.' && $filename != '..') {
                 $path = $dir . '/' . $filename;
                 if (@unlink($path)==false) {
-                    Functions::errorMessage(__METHOD__ . ':' . __LINE__ . " Le fichier $path n'a pas pu être supprimé !");
+                    //Functions::errorMessage(__METHOD__ . ':' . __LINE__ . " Le fichier $path n'a pas pu être supprimé !");
                     $result = false;
                 }
             }

@@ -48,6 +48,9 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class SessionType extends AbstractType
 {
+    private $grdt;
+    private $em; 
+    
     public function __construct(GramcDate $grdt, EntityManagerInterface $em)
     {
         $this -> grdt = $grdt;
