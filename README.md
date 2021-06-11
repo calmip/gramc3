@@ -24,29 +24,6 @@ apt-get install xfonts-75dpi xfonts-base xfonts-utils x11-common libfontenc1 xfo
 ```
 - Installer `wkhtmltopd` depuis https://wkhtmltopdf.org (disponible en .deb)
 
-configuration apache2:
-----
-*Il est important que gramc3 ne ne soit pas à l'URL /, sinon on aura du mal à configurer shibboleth. Le plus "simple" est alors de:*
-
-- Activer le module rewrite d'Apache
-
-- Laisser `DocumentRoot` sur `/var/www/html`
-
-- Créer un lien symbolique `gramc3` sur le répertoire `public`
-
-- Utiliser la commande suivante pour générer un fichier .htaccess:
-
-  ```
-  composer.phar remove symfony/apache-pack
-  composer.phar require symfony/apache-pack
-  ```
-
-- Ajouter au fichier /etc/apache2/envvars la ligne suivante:
-
-  ```
-  export BASE="/gramc3"
-  ```
-
 
 Répertoire data:
 -----
@@ -156,6 +133,7 @@ Base de données:
 ----
 
 **Installation d'une base de donnees déjà en exploitation sur une instance de développement:**
+
 ~~~~
 cd reprise
 sudo -u www-data ./drop-db-recharge-pour-debug un-dump-de-la-bd.sql
@@ -174,6 +152,7 @@ Configuration du mail:
 ----
 
 **Le serveur doit être capable d'envoyer des mails:**
+
   - Par exemple `postfix` fonctionne très bien avec gramc
   - Ou encore `ssmtp` (les mails sont envoyés, jamais reçus)
 
@@ -183,8 +162,33 @@ Avec une version de développement vous ne voudrez pas que l'application envoie 
 
 Pour éviter cela, n'oubliez pas la variable `MAILER_RECIPIENT` du fichier `.env.local`
 
-Fin de la configuration:
+configuration apache2:
 ----
+
+*Il est important que gramc3 ne ne soit pas à l'URL /, sinon on aura du mal à configurer shibboleth. Le plus "simple" est alors de:*
+
+- Activer le module rewrite d'Apache
+
+- Laisser `DocumentRoot` sur `/var/www/html`
+
+- Créer un lien symbolique `gramc3` sur le répertoire `public`
+
+- Utiliser la commande suivante pour générer un fichier .htaccess:
+
+  ```
+  composer.phar remove symfony/apache-pack
+  composer.phar require symfony/apache-pack
+  ```
+
+- Ajouter au fichier /etc/apache2/envvars la ligne suivante:
+
+  ```
+  export BASE="/gramc3"
+  ```
+
+
+Fin de la configuration:
+-----
 
 - Se connecter à gramc avec un navigateur: cliquer sur `connection (dbg)`
   **ATTENTION**: `app_dev.php` doit être activée dans la configuration apache ci-dessus
@@ -212,7 +216,7 @@ CONFIGURATION DE SHIBBOLETH:
   ~~~~
   # important pour pouvoir utiliser d'autres techniques d'authentification (cf. pour git)
   ShibCompatValidUser On
-
+  
   <Location "url-de-gramc/login">
        AuthType shibboleth
        ShibRequestSetting requireSession 1
