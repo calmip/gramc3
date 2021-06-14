@@ -802,7 +802,8 @@ class RallongeController extends AbstractController
 	    $sv = $this->sv;
 		$affectationExperts = $this->sr;
 
-	    $sessions = $em->getRepository(Session::class) ->findBy( ['etatSession' => Etat::ACTIF ] );
+	    //$sessions = $em->getRepository(Session::class) ->findBy( ['etatSession' => Etat::ACTIF ] );
+	    $sessions = $em->getRepository(Session::class) -> get_sessions_non_terminees();
 	    if ( isset( $sessions[0] ) )
 	        $session1 = $sessions[0];
 	    else
