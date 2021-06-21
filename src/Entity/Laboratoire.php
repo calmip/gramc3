@@ -44,7 +44,7 @@ class Laboratoire
     /**
      * @var string
      *
-     * @ORM\Column(name="acro_labo", type="string", length=15, nullable=false)
+     * @ORM\Column(name="acro_labo", type="string", length=100, nullable=false)
      */
     private $acroLabo = '';
 
