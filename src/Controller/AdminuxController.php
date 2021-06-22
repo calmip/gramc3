@@ -955,7 +955,8 @@ class AdminuxController extends AbstractController
 		foreach ($users as $user)
 		{
 			$u = [];
-			if ($user->getPassexpir() < $sd)
+			//echo ($user->getPassexpir()->format('Y-m-d')."   ".$sd->format('Y-m-d')."\n");
+			if ($user->getPassexpir() <= $sd)
 			{
 				$u["loginname"] = $user->getLoginname();
 				$u["cpassword"] = null;
