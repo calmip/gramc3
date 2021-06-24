@@ -59,7 +59,7 @@ class Version implements Demande
     /**
      * @var string
      *
-     * @ORM\Column(name="prj_titre", type="string", length=150, nullable=true)
+     * @ORM\Column(name="prj_titre", type="string", length=500, nullable=true)
      */
     private $prjTitre = '';
 
