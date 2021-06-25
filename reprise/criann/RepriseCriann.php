@@ -31,12 +31,13 @@
     {
         private $sd;
         private $ss;
-        
-        public function __construct (GramcDate $sd, ServiceSessions $ss) {
+
+        public function __construct(GramcDate $sd, ServiceSessions $ss)
+        {
             $this -> sd = $sd;
             $this -> ss = $ss;
         }
-        
+
         public function load(ObjectManager $em)
         {
             // On commence par créer la session 21B
@@ -47,10 +48,11 @@
             $this->loadProjet($em);
         }
 
-        private function newSession(ObjectManager $em) {
+        private function newSession(ObjectManager $em)
+        {
             $annee_base     = 2002;
             $annee_courante = 2021; // todo very dirty houlala !
-            
+
             // Création d'autant de sessions A que nécessaire compte tenu des projets à reprendre
             // On ne crée pas de session B
             for ($a=$annee_base; $a <= $annee_courante; $a++) {
@@ -62,18 +64,18 @@
                 $session->setDateDebutSession(new \DateTime($a_str.'-11-01'));
                 $session->setDateFinSession(new \DateTime($a_str.'-11-30'));
                 $session->setHParAnnee(50000000);
-                $id_session = substr($a_str,2,2) . 'A';
+                $id_session = substr($a_str, 2, 2) . 'A';
                 $session->setIdSession($id_session);
                 $em->persist($session);
                 $em->flush();
             }
         }
-                    
+
         // Remplissage des tables Projet, Version, CollaborateurVersion etc.
         // On part des fichiers:
         //    - Projets.csv: id_projet, demandées, attribuées, Titre, thématique
         //    - CollaborateursVersion: id_projet, mail, responsable (0/1)
-        
+
         private function loadProjet(ObjectManager $em)
         {
             // Lecture du fichier Projets.csv - sera mis dans un tableau de tableaux
@@ -87,16 +89,16 @@
                     $row += 1;
                     $num = count($data);
                     if ($num != 5) {
-                        error_log("ERREUR - ".NOM_FICHIER_PROJETS." Ligne $row - $num champs",0);
+                        error_log("ERREUR - ".NOM_FICHIER_PROJETS." Ligne $row - $num champs", 0);
                         continue;
                     }
-                    if (substr($data[0],0,2) != "20") {
+                    if (substr($data[0], 0, 2) != "20") {
                         continue;
                     }
                     $csv_projets[] = $data;
                 }
             } else {
-                error_log("ne peut pas ouvrir " . NOM_FICHIER_PROJETS,0);
+                error_log("ne peut pas ouvrir " . NOM_FICHIER_PROJETS, 0);
                 return;
             }
 
@@ -114,10 +116,10 @@
                     $row += 1;
                     $num = count($data);
                     if ($num != 2) {
-                        error_log("ERREUR - ".NOM_FICHIER_LOGIN." Ligne $row - $num champs",0);
+                        error_log("ERREUR - ".NOM_FICHIER_LOGIN." Ligne $row - $num champs", 0);
                         continue;
                     }
-                    if (substr($data[0],0,2) != "20") {
+                    if (substr($data[0], 0, 2) != "20") {
                         continue;
                     }
 
@@ -130,7 +132,7 @@
                     } else {
                         $ver_mails[] = $ver_mail;
                     }
-                    
+
                     $cv = [];
                     $cv['mail'] = $data[1];
                     $cv['login']= true;
@@ -141,10 +143,10 @@
                     $csv_collver[$ver][] = $cv;
                 }
             } else {
-                error_log("ne peut pas ouvrir " . NOM_FICHIER_LOGIN,0);
+                error_log("ne peut pas ouvrir " . NOM_FICHIER_LOGIN, 0);
                 return;
             }
-            
+
             // Lecture du fichier resp.csv - sera ajouté à $csv_collver:
             //      Si le resp est déjà dans $csv_collver on met à true l'élément resp
             //      Sinon on crée un nouvel enregistrement avec resp true et login false
@@ -159,16 +161,16 @@
                         error_log("ERREUR - ".NOM_FICHIER_RESP." Ligne $row - $num champs");
                         continue;
                     }
-                    if (substr($data[0],0,2) != "20") {
+                    if (substr($data[0], 0, 2) != "20") {
                         continue;
                     }
                     $ver = $data[0];
                     $mail= $data[1];
-                    
+
                     // Le projet a au moins un compte. Le resp en fait-il partie ?
-                    if ( isset($csv_collver[$ver]) ) {
+                    if (isset($csv_collver[$ver])) {
                         $collver_data = &$csv_collver[$ver];
-                        
+
                         // on cherche un élément avec le mail correct !
                         $found = false;
 
@@ -181,7 +183,7 @@
                                 break;
                             }
                         }
-                        
+
                         // Le responsable n'a pas de compte
                         if (! $found) {
                             $cv1 = [];
@@ -190,9 +192,9 @@
                             $cv1['resp'] = true;
                             $collver_data[] = $cv1;
                         }
-                        
-                    // Le projet n'a pas de compte, seulement un responsable
-                    // Je suppose que le responsable a un compte 
+
+                        // Le projet n'a pas de compte, seulement un responsable
+                    // Je suppose que le responsable a un compte
                     } else {
                         $collver_data = [];
                         $cv = [];
@@ -204,7 +206,7 @@
                     }
                 }
             } else {
-                error_log("ne peut pas ouvrir " . NOM_FICHIER_RESP,0);
+                error_log("ne peut pas ouvrir " . NOM_FICHIER_RESP, 0);
                 return;
             }
 
@@ -213,17 +215,25 @@
                 $resp = 0;
                 $login= 0;
                 foreach ($collver_data as $cv) {
-                    if ($cv['resp']) $resp  += 1;
-                    if ($cv['login']) $login += 1;
+                    if ($cv['resp']) {
+                        $resp  += 1;
+                    }
+                    if ($cv['login']) {
+                        $login += 1;
+                    }
                 }
-                if ($resp != 1) error_log("ATTENTION - PROJET $ver: $resp RESPONSABLE",0);
-                if ($login == 0) error_log("ATTENTION - PROJET $ver: PAS DE LOGIN",0);
+                if ($resp != 1) {
+                    error_log("ATTENTION - PROJET $ver: $resp RESPONSABLE", 0);
+                }
+                if ($login == 0) {
+                    error_log("ATTENTION - PROJET $ver: PAS DE LOGIN", 0);
+                }
             }
-           
+
 
             // Session courante
             $session = $this->ss->getSessionCourante();
-            
+
             // Toutes les sessions dans un tableau indexé par l'id_session
             $sessions = [];
             foreach ($em -> getRepository('App:Session')->findAll() as $s) {
@@ -241,22 +251,22 @@
             foreach ($csv_projets as $data) {
                 $prj_erreur = false;     // Erreur sur ce projet
                 $id_projet = $data[0];
-                
+
                 $projet = new Projet(1);
                 $projet->setIdProjet($data[0]);
                 $projet->setEtatProjet(41);     // Renouvelable
                 $em->persist($projet);
-                
-                $prj_annee = intval(substr($id_projet,0,4));
+
+                $prj_annee = intval(substr($id_projet, 0, 4));
                 $annee_base     = 2002;
                 $annee_courante = 2021; // todo - Hoooooo !
-                
+
                 // On crée une version par session depuis la création du projet
                 for ($a=$prj_annee; $a <= $annee_courante; $a++) {
-                    $id_session = substr(strval($a),2,2) . 'A';
+                    $id_session = substr(strval($a), 2, 2) . 'A';
                     $sess = $sessions[$id_session];
                     $id_version= $id_session . $id_projet;
-                    error_log("Création de la version $id_version",0);
+                    error_log("Création de la version $id_version", 0);
                     $version = new Version();
                     $version->setIdVersion($id_version);
                     $version->setProjet($projet);
@@ -266,20 +276,20 @@
                     $version->setPrjThematique($thematiques[$data[4]]);
                     $version->setDemHeures(intval($data[1]));
                     $version->setAttrHeures(intval($data[2]));
-                    
+
                     // Justification du renouvellement
                     if ($a > $prj_annee) {
                         $version->setPrjJustifRenouv("Renouvellement demandé et argumenté ici");
                     }
                     $em->persist($version);
                     $em->flush();
-                    
+
                     // Les collaborateurs, dont le responsable
                     $nom_laboratoire="";
                     foreach ($csv_collver[$id_projet] as $cv) {
-                        $coll = $repos_individu -> findOneBy( [ 'mail' => $cv['mail'] ] );
+                        $coll = $repos_individu -> findOneBy([ 'mail' => $cv['mail'] ]);
                         if ($coll == null) {
-                            error_log("ATTENTION - " . $cv['mail'] . " PAS TROUVE DANS Individus !",0);
+                            error_log("ATTENTION - " . $cv['mail'] . " PAS TROUVE DANS Individus !", 0);
                             $prj_erreur = true;
                             break;
                         }
@@ -300,19 +310,19 @@
                         $em->persist($collver);
                     }
                     if ($prj_erreur) {
-                        error_log("ERREUR - Projet $id_projet - Erreur rencontrée, projet incomplet",0);
+                        error_log("ERREUR - Projet $id_projet - Erreur rencontrée, projet incomplet", 0);
                         break;
                     }
-                    
+
                     // Garder le nom du laboratoire
-                    // NOTE - Un labo peut disparaître ou changer de nom, du coup on stoque son nom 
+                    // NOTE - Un labo peut disparaître ou changer de nom, du coup on stoque son nom
                     $version->setPrjLLabo($nom_laboratoire);
                     $em->persist($version);
-                    
+
                     $em->flush();
                 }
             }
-        } 
+        }
 
         // Remplissage de la table Laboratoire à partir d'un fichier csv
         // Le csv a ce format: ID;Sigle;Nom
@@ -328,7 +338,7 @@
                     $row += 1;
                     $num = count($data);
                     if ($num != 3) {
-                        error_log("ERREUR - " . NOM_FICHIER_LABOS . " Ligne $row - $num champs",0);
+                        error_log("ERREUR - " . NOM_FICHIER_LABOS . " Ligne $row - $num champs", 0);
                         continue;
                     }
                     if ($data[0] === 'ID') {
@@ -341,10 +351,10 @@
                     $csv_labos[] = $data;
                 }
             } else {
-                error_log("ne peut pas ouvrir " . NOM_FICHIER_LABOS,0);
+                error_log("ne peut pas ouvrir " . NOM_FICHIER_LABOS, 0);
                 return;
             }
-            
+
             // Remplissage de la table
             foreach ($csv_labos as $data) {
                 $labo = new Laboratoire();
@@ -361,7 +371,7 @@
         private function loadIndividu(ObjectManager $em)
         {
             $sd = $this->sd;
-            
+
             // Lecture du fichier csv - sera mis dans un tableau de tableaux
             $mails = [];    // Pour garantir l'unicité du mail !
             $csv_indivs = [];
@@ -371,13 +381,13 @@
                     $row += 1;
                     $num = count($data);
                     if ($num != 4) {
-                        error_log("ERREUR - ".NOM_FICHIER_USERS." Ligne $row - $num champs",0);
+                        error_log("ERREUR - ".NOM_FICHIER_USERS." Ligne $row - $num champs", 0);
                         continue;
                     }
                     if ($data[0] === 'Nom') {
                         continue;
                     }
-                    
+
                     // Si le mail est dupliqué, on ignore !
                     $mail = $data[2];
                     if (in_array($mail, $mails)) {
@@ -389,25 +399,25 @@
                     $csv_indivs[] = $data;
                 }
             } else {
-                error_log("ne peut pas ouvrir " . NOM_FICHIER_USERS,0);
+                error_log("ne peut pas ouvrir " . NOM_FICHIER_USERS, 0);
                 return;
             }
 
-            
+
             // Lecture de la table Laboratoire
             $laboratoires = $em->getRepository('App:Laboratoire')->findAll();
-            
+
             // Index avec AcroLabo comme point d'entrée
             $ind_labos = [];
             foreach ($laboratoires as $l) {
                 $acro = $l->getAcroLabo();
-                if ( isset ($ind_labos[$acro])) {
+                if (isset($ind_labos[$acro])) {
                     echo "ERREUR - $acro est présent pluieurs fois dans la table laboratoires !\n";
                     exit;
                 }
                 $ind_labos[$acro] = $l;
             }
-            
+
             foreach ($csv_indivs as $data) {
                 $ind = new Individu();
                 $ind -> setNom($data[0])
@@ -415,25 +425,24 @@
                      -> setMail($data[2])
                      -> setCreationStamp(new \DateTime());
                 $acro = $data[3];
-                if (isset($ind_labos[$acro]))
-                {
+                if (isset($ind_labos[$acro])) {
                     $ind -> setLabo($ind_labos[$acro]);
                 }
-                
+
                 $em -> persist($ind);
             }
             $em -> flush();
         }
-        
+
         // Remplissage de la table Thematique à partir d'un fichier csv
         // Le csv a ce format: "id_thematique","id_meta_thematique","libelle_thematique"
         private function loadThematique(ObjectManager $em)
         {
             $sd = $this->sd;
-            
+
             // On vide la table
             $this-> truncateTables($em, ['thematique']);
-            
+
             // Lecture du fichier csv - sera mis dans un tableau de tableaux
             $csv_thema = [];
             $row = 0;
@@ -451,11 +460,11 @@
                     $csv_thema[] = $data;
                 }
             } else {
-                error_log("ne peut pas ouvrir " . NOM_FICHIER_THEMATIQUES,0);
+                error_log("ne peut pas ouvrir " . NOM_FICHIER_THEMATIQUES, 0);
                 return;
             }
 
- 
+
             // Remplissage de la table
             foreach ($csv_thema as $data) {
                 $thema = new Thematique();
@@ -465,13 +474,14 @@
             $em -> flush();
         }
 
-        // Vider une table d'après https://stackoverflow.com/questions/8526534/how-to-truncate-a-table-using-doctrine 
-        public function truncateTables(ObjectManager $em, $tableNames = array(), $cascade = false) {
+        // Vider une table d'après https://stackoverflow.com/questions/8526534/how-to-truncate-a-table-using-doctrine
+        public function truncateTables(ObjectManager $em, $tableNames = array(), $cascade = false)
+        {
             $connection = $em->getConnection();
             $platform = $connection->getDatabasePlatform();
             $connection->executeQuery('SET FOREIGN_KEY_CHECKS = 0;');
             foreach ($tableNames as $name) {
-                $connection->executeUpdate($platform->getTruncateTableSQL($name,$cascade));
+                $connection->executeUpdate($platform->getTruncateTableSQL($name, $cascade));
             }
             $connection->executeQuery('SET FOREIGN_KEY_CHECKS = 1;');
         }
