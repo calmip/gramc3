@@ -167,20 +167,40 @@ class AdminuxController extends AbstractController
     /**
      * set loginname
      *
-     * @Route("/users/setloginname/{idProjet}/projet/{idIndividu}/individu/{loginname}/loginname", name="set_loginname", methods={"POST"})
+     * @Route("/users/setloginname", name="set_loginname", methods={"POST"})
      * @Security("is_granted('ROLE_ADMIN')")
      *
      * Positionne le loginname du user demandé dans la version active ou EN_ATTENTE du projet demandé
      *
      */
 
-    // exemple: curl --insecure --netrc -X POST https://.../adminux/users/setloginname/P1234/projet/6543/individu/toto/loginname
-    public function setloginnameAction(Request $request, $idProjet, $idIndividu, $loginname, LoggerInterface $lg)
+    // exemple: curl --netrc -X POST -d '{ "loginname": "toto", "idIndividu": "6543", "projet": "P1234" }'https://.../adminux/users/setloginname
+    public function setloginnameAction(Request $request, LoggerInterface $lg)
     {
         $em = $this->getdoctrine()->getManager();
 
         if ($this->getParameter('noconso')==true) {
             throw new AccessDeniedException("Accès interdit (paramètre noconso)");
+        }
+
+        $content  = json_decode($request->getContent(), true);
+        if ($content == null) {
+            return new Response(json_encode('KO - Pas de données'));
+        }
+        if (empty($content['loginname'])) {
+            return new Response(json_encode('KO - Pas de nom de login'));
+        } else {
+            $loginname = $content['loginname'];
+        }
+        if (empty($content['projet'])) {
+            return new Response(json_encode('KO - Pas de projet'));
+        } else {
+            $idProjet = $content['projet'];
+        }
+        if (empty($content['idIndividu'])) {
+            return new Response(json_encode('KO - Pas de idIndividu'));
+        } else {
+            $idIndividu = $content['idIndividu'];
         }
 
         $error = [];
@@ -191,7 +211,7 @@ class AdminuxController extends AbstractController
 
         $individu = $em->getRepository(Individu::class)->find($idIndividu);
         if ($individu == null) {
-            $error[]    =   'No Individu ' . $idIndividu;
+            $error[]    =   'No idIndividu ' . $idIndividu;
         }
 
         if ($error != []) {
@@ -207,6 +227,15 @@ class AdminuxController extends AbstractController
                 foreach ($version->getCollaborateurVersion() as $collaborateurVersion) {
                     $collaborateur  =  $collaborateurVersion->getCollaborateur() ;
                     if ($collaborateur != null && $collaborateur->isEqualTo($individu)) {
+                        // Pas de pb pour écraser un loginnma précédent
+                        // A moins qu'il ait déjà un mot de passe !
+                        if ($collaborateurVersion->getLoginname() != null) {
+                            $old_loginname = $collaborateurVersion->getLoginname();
+                            $user = $em->getRepository(User::class)->findBy([ 'loginname' => $old_loginname ]);
+                            if ($user != null) {
+                                return new Response(json_encode('KO - Commencez par appeler clearpassword'));
+                            }
+                        }
                         $collaborateurVersion->setLoginname($loginname);
                         Functions::sauvegarder($collaborateurVersion, $em);
                         return new Response(json_encode('OK'));
@@ -214,7 +243,7 @@ class AdminuxController extends AbstractController
                 }
             }
         }
-        return new Response(json_encode(['KO' => 'No user found' ]));
+        return new Response(json_encode(['KO' => 'Mauvais projet ou mauvais idIndividu !' ]));
     }
 
     /**
@@ -257,7 +286,7 @@ class AdminuxController extends AbstractController
         if (empty($content['cpassword'])) {
             return new Response(json_encode('KO - Pas de version cryptée du mot de passe'));
         } else {
-            $cpassword = $content['password'];
+            $cpassword = $content['cpassword'];
         }
 
         # Calcul de la date d'expiration
@@ -805,13 +834,14 @@ class AdminuxController extends AbstractController
      * Vérifie la base de données, supprime les mots de passe temporaires "expirés"
      * et renvoie les mots de passe cryptés (champ cpassword)
      * On pourra vérifier avec le mot de passe du supercalculateur et savoir s'il a été changé
+     * Si le mot de passe est expiré, renvoie null
      *
-     * @Route("/users/passwordcheck", name="password_check", methods={"GET"})
+     * @Route("/users/checkpassword", name="check_password", methods={"GET"})
      *
-     * curl --netrc -H "Content-Type: application/json" https://.../adminux/users/passwordcheck
+     * curl --netrc -H "Content-Type: application/json" https://.../adminux/users/checkpassword
      *
      */
-    public function passwordCheckAction(Request $request, LoggerInterface $lg)
+    public function checkPasswordAction(Request $request, LoggerInterface $lg)
     {
         $em = $this->getdoctrine()->getManager();
         if ($this->getParameter('noconso')==true) {
@@ -826,17 +856,17 @@ class AdminuxController extends AbstractController
         $users  = $em->getRepository(User::class)->findAll();
         $rusers = [];
         foreach ($users as $user) {
-            if ($user->getPassexpir() < $sd) {
-                $em -> remove($user);
+            $u = [];
+            //echo ($user->getPassexpir()->format('Y-m-d')."   ".$sd->format('Y-m-d')."\n");
+            if ($user->getPassexpir() <= $sd) {
+                $u["loginname"] = $user->getLoginname();
+                $u["cpassword"] = null;
             } else {
-                $u = [];
                 $u["loginname"] = $user->getLoginname();
                 $u["cpassword"] = $user->getCpassword();
-                $rusers[] = $u;
             }
+            $rusers[] = $u;
         }
-        $em->flush();
-
         return new Response(json_encode($rusers));
     }
 }
