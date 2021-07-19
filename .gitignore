@@ -44,3 +44,5 @@ adminer\.php
 
 public/index.php
 
+vendor/**
+

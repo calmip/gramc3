@@ -24,6 +24,14 @@ apt-get install xfonts-75dpi xfonts-base xfonts-utils x11-common libfontenc1 xfo
 ```
 - Installer `wkhtmltopd` depuis https://wkhtmltopdf.org (disponible en .deb)
 
+Installer le code de gramc3:
+
+Répertoire gramc3:
+----
+```
+git clone https://github.com/calmip/gramc3
+cd gramc3
+```
 
 Répertoire data:
 -----
@@ -56,14 +64,24 @@ C'est dans ce répertoire que vont se trouver:
 
 - Les fichiers de log
 
-  Les sous-répertoires var *ne doivent* pas être exportés par apache (cf. ci-dessus)
+- doit être accessible en écriture par www-data
+
+- Les sous-répertoires var *ne doivent* pas être exportés par apache (cf. ci-dessus)
 
 ~~~~
   mkdir var
   chown www-data.www-data var
 ~~~~
 
-- doit être accessible en écriture par www-data
+Installation de symfony:
+----
+
+Appeler composer avec les droits www-data:
+
+```
+mkdir vendor && chown www-data.www-data vendor
+sudo -u www-data php composer.phar install
+```
 
 Configuration, personnalisation:
 ----
