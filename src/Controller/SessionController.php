@@ -281,14 +281,16 @@ class SessionController extends AbstractController
         $session_courante      = $ss->getSessionCourante();
         $etat_session_courante = $session_courante->getEtatSession();
 
-        $sessions = $em->getRepository(Session::class)->findBy([],['idSession' => 'DESC']);
+		// manu - correction juillet 2021 !
+        //$sessions = $em->getRepository(Session::class)->findBy([],['idSession' => 'DESC']);
+        $sessions = $em->getRepository(Session::class)->get_sessions_non_terminees();
 
 		$ok = false;
         $mois = $sd->format('m');
 
         $workflow = $this->sw;
         
-        // On active une session A
+        // On active une session A = Jusqu'à trois sessions renvoyées !
         if( $mois == 1 ||  $mois == 12 )
 		{
             if( $workflow->canExecute( Signal::CLK_SESS_DEB, $session_courante) && $etat_session_courante == Etat::EN_ATTENTE )
@@ -307,13 +309,26 @@ class SessionController extends AbstractController
 			}
 		}
 		
-		// On active une session B
+		// On active une session B = Jusqu'à deux sessions renvoyées
         elseif( $mois == 6 ||  $mois == 7 )
         {
-            if( $workflow->canExecute(Signal::CLK_SESS_DEB , $session_courante)  && $etat_session_courante == Etat::EN_ATTENTE )
+			// manu - corrigé le 20 juillet 2021
+            //if( $workflow->canExecute(Signal::CLK_SESS_DEB , $session_courante)  && $etat_session_courante == Etat::EN_ATTENTE )
+			//{
+            //    $ok = $workflow->execute(Signal::CLK_SESS_DEB , $session_courante );
+            //    $em->flush();
+			//}
+			// il faut envoyer le signal aux DEUX sessions A et B
+			// Le signal se propage aux versions sous-jacentes
+			// Les versions de A passeront de NOUVELLE_VERSION_DEMANDEE à TERMINE
+			// Les versions de B passeront de EN_ATTENTE à ACTIF
+			foreach( $sessions as $session )
 			{
-                $ok = $workflow->execute(Signal::CLK_SESS_DEB , $session_courante );
-                $em->flush();
+				if( $workflow->canExecute(Signal::CLK_SESS_DEB , $session))
+				{
+	                $ok = $workflow->execute(Signal::CLK_SESS_DEB , $session);
+	                $em->flush();
+				}	
 			}
 		}
 		else
