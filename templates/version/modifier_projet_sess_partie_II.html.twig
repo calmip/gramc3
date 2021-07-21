@@ -3,7 +3,28 @@
 <div id="tab2" class="onglet"><br><br>
     <h3>Description scientifique du projet de recherche</h3>
 
-    <table class="projet"><tbody>
+     {% if fichier_attache == true %}
+        <div id="fichier_attache">
+        
+            {% if version.typeSession == 'B' or version.anneeRapport == 0 %}
+            <div class="message info"><em>Si vous le souhaitez</em>, vous pouvez téléverser une description scientifique détaillée de votre projet.
+            Le fichier doit être un pdf de moins de {{ max_page_nb }} pages.
+            </div>
+            {% else %}
+            <div class="message info">Vous <strong>devez</strong> téléverser un rapport d'activité sur l'année écoulée. Si vous le souhaitez, vous pouvez ajouter
+            un paragraphe sur les perspectives pour l'année prochaine.
+            Le fichier est obligatoirement un pdf de moins de {{ max_page_nb }} pages de {{ max_size_doc }} Mo.
+            </div>
+            {% endif %}
+            <div id="uploadstatus"></div>
+            <div id="fileuploader"><a href="{{ path('televerser_fichier_attache', { 'id' : version.idVersion } ) }}" target="_blank" >
+                <strong>Téléversez le fichier</strong></a>
+            </div>
+        </div>
+    {% endif %}
+
+   <h4>Description détaillée de votre projet</h4>
+   <table class="projet"><tbody>
         <tr>
             <th>Références bibliographiques</th>
         </tr>

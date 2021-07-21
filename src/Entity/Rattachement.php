@@ -75,12 +75,18 @@ class Rattachement
 
     //////////////////////////////////////////////////////////
 
-    public function getId(){ return $this->getIdRattachement(); }
-    public function __toString(){ return $this->getLibelleRattachement(); }
+    public function getId()
+    {
+        return $this->getIdRattachement();
+    }
+    public function __toString()
+    {
+        return $this->getLibelleRattachement();
+    }
 
     //////////////////////////////////////////////////////////
 
-    
+
     /**
      * Constructor
      */
@@ -134,8 +140,9 @@ class Rattachement
      */
     public function addExpert(\App\Entity\Individu $expert)
     {
-        if( ! $this->expert->contains($expert) )
+        if (! $this->expert->contains($expert)) {
             $this->expert[] = $expert;
+        }
 
         return $this;
     }

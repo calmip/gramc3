@@ -30,19 +30,19 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use App\Utils\IndividuForm;
 
-
 class ListIndividuType extends AbstractType
 {
+    
     /**
      * {@inheritdoc}
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-    $builder->add('tags', CollectionType::class, array(
-            'entry_type' => IndividiForm::class
-        ));    
+        $builder->add('tags', CollectionType::class, array(
+            'entry_type' => IndividuForm::class
+        ));
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -50,8 +50,7 @@ class ListIndividuType extends AbstractType
     {
         $resolver->setDefaults(
             [
-            ]);
+            ]
+        );
     }
-
-
 }

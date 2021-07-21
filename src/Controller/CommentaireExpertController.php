@@ -22,7 +22,6 @@
  *            Nicolas Renon - Université Paul Sabatier - CALMIP
  **/
 
-
 namespace App\Controller;
 
 use App\Entity\CommentaireExpert;
@@ -35,7 +34,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-
 
 /****
 * Fichier généré automatiquement et modifié par E.Courcelle
@@ -52,17 +50,17 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
  */
 class CommentaireExpertController extends AbstractController
 {
-	private $sj;
-	private $tok;
-	
-	
-	public function __construct (ServiceJournal $sj,
-								 TokenStorageInterface $tok
-								 )
-	{
-		$this->sj  = $sj;
-		$this->tok = $tok->getToken();
-	}
+    private $sj;
+    private $tok;
+
+
+    public function __construct(
+        ServiceJournal $sj,
+        TokenStorageInterface $tok
+    ) {
+        $this->sj  = $sj;
+        $this->tok = $tok->getToken();
+    }
 
     /**
      * Displays a form to edit an existing commentaireExpert entity.
@@ -96,33 +94,32 @@ class CommentaireExpertController extends AbstractController
     ************************/
     public function modifyAction(Request $request, CommentaireExpert $commentaireExpert)
     {
-		$sj = $this->sj;
-		$token = $this->tok;
+        $sj = $this->sj;
+        $token = $this->tok;
 
-		// Chaque expert ne peut accéder qu'à son commentaire à lui
-		$moi = $token->getUser();
-		if ($moi->getId() != $commentaireExpert->getExpert()->getId())
-		{
+        // Chaque expert ne peut accéder qu'à son commentaire à lui
+        $moi = $token->getUser();
+        if ($moi->getId() != $commentaireExpert->getExpert()->getId()) {
             $sj->throwException(__METHOD__ . ':' . __LINE__ .' problème avec ACL');
-		}
+        }
 
-		$em = $this->getDoctrine()->getManager();
-		$editForm = $this->createForm('App\Form\CommentaireExpertType', $commentaireExpert, ["only_comment" => true]);
-		$editForm->handleRequest($request);
+        $em = $this->getDoctrine()->getManager();
+        $editForm = $this->createForm('App\Form\CommentaireExpertType', $commentaireExpert, ["only_comment" => true]);
+        $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-			$commentaireExpert->setMajStamp(new \DateTime());
+            $commentaireExpert->setMajStamp(new \DateTime());
             $em->flush();
             return $this->redirectToRoute('commentaireexpert_modify', array('id' => $commentaireExpert->getId()));
         }
 
-		$menu = [];
+        $menu = [];
         return $this->render('commentaireexpert/modify.html.twig', array(
-        	'menu'              => $menu,
+            'menu'              => $menu,
             'commentaireExpert' => $commentaireExpert,
             'edit_form'         => $editForm->createView(),
         ));
-	}
+    }
 
     /**
      * Creates a new commentaireExpert entity.
@@ -223,22 +220,21 @@ class CommentaireExpertController extends AbstractController
     **********/
     public function creeOuModifAction(Request $request, $annee)
     {
-		$token = $this->tok;
-		$em = $this->getDoctrine()->getManager();
+        $token = $this->tok;
+        $em = $this->getDoctrine()->getManager();
 
-		$moi = $token->getUser();
-		$commentaireExpert = $em->getRepository('App:CommentaireExpert')->findOneBy( ['expert' => $moi, 'annee' => $annee ] );
-		if ($commentaireExpert==null)
-		{
-			$commentaireExpert = new Commentaireexpert();
-			$commentaireExpert->setAnnee($annee);
-			$commentaireExpert->setExpert($moi);
-			$commentaireExpert->setMajStamp(new \DateTime());
-			$em->persist($commentaireExpert);
-			$em->flush();
-		}
+        $moi = $token->getUser();
+        $commentaireExpert = $em->getRepository('App:CommentaireExpert')->findOneBy(['expert' => $moi, 'annee' => $annee ]);
+        if ($commentaireExpert==null) {
+            $commentaireExpert = new Commentaireexpert();
+            $commentaireExpert->setAnnee($annee);
+            $commentaireExpert->setExpert($moi);
+            $commentaireExpert->setMajStamp(new \DateTime());
+            $em->persist($commentaireExpert);
+            $em->flush();
+        }
 
-		return $this->redirectToRoute('commentaireexpert_modify', array('id' => $commentaireExpert->getId()));
+        return $this->redirectToRoute('commentaireexpert_modify', array('id' => $commentaireExpert->getId()));
     }
 
     /**
@@ -250,9 +246,9 @@ class CommentaireExpertController extends AbstractController
     **********/
     public function listeAction(Request $request, $annee)
     {
-		$em = $this->getDoctrine()->getManager();
-		$commentairesExperts = $em->getRepository('App:CommentaireExpert')->findBy( ['annee' => $annee ] );
+        $em = $this->getDoctrine()->getManager();
+        $commentairesExperts = $em->getRepository('App:CommentaireExpert')->findBy(['annee' => $annee ]);
 
-		return $this->render('commentaireexpert/liste_annee.html.twig', ['annee' => $annee, 'commentairesExperts' => $commentairesExperts]);
-	}
+        return $this->render('commentaireexpert/liste_annee.html.twig', ['annee' => $annee, 'commentairesExperts' => $commentairesExperts]);
+    }
 }

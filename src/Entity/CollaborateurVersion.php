@@ -29,8 +29,8 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * CollaborateurVersion
  *
- * @ORM\Table(name="collaborateurVersion", 
- *            uniqueConstraints={@ORM\UniqueConstraint(name="id_version_2", columns={"id_version", "id_collaborateur"})}, 
+ * @ORM\Table(name="collaborateurVersion",
+ *            uniqueConstraints={@ORM\UniqueConstraint(name="id_version_2", columns={"id_version", "id_collaborateur"})},
  *            indexes={@ORM\Index(name="id_coll_labo", columns={"id_coll_labo"}),
  *                     @ORM\Index(name="id_coll_statut", columns={"id_coll_statut"}),
  *                     @ORM\Index(name="id_coll_etab", columns={"id_coll_etab"}),
@@ -68,7 +68,7 @@ class CollaborateurVersion
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="id_coll_statut", referencedColumnName="id_statut")
      * })
-     */ 
+     */
     private $statut;
 
     /**
@@ -122,34 +122,39 @@ class CollaborateurVersion
 
     public function __toString()
     {
-    $output = '{';
-    if( $this->getResponsable() == true ) $output .= 'responsable:';
-    if( $this->getLogin() == true ) $output .= 'login:';
-    $output .= 'version=' . $this->getVersion() .':';
-    $output .= 'id=' . $this->getId() . ':';
-    $output .= 'statut=' .$this->getStatut() .':';
-    $output .= 'labo=' . $this->getLabo() .':';
-    $output .= 'etab=' .$this->getEtab() .':';
-    $output .= 'collab=' .$this->getCollaborateur() .'}';
-    return $output;
+        $output = '{';
+        if ($this->getResponsable() == true) {
+            $output .= 'responsable:';
+        }
+        if ($this->getLogin() == true) {
+            $output .= 'login:';
+        }
+        $output .= 'version=' . $this->getVersion() .':';
+        $output .= 'id=' . $this->getId() . ':';
+        $output .= 'statut=' .$this->getStatut() .':';
+        $output .= 'labo=' . $this->getLabo() .':';
+        $output .= 'etab=' .$this->getEtab() .':';
+        $output .= 'collab=' .$this->getCollaborateur() .'}';
+        return $output;
     }
 
-    public function __construct(Individu $individu = null, Version $version = null )
+    public function __construct(Individu $individu = null, Version $version = null)
     {
-    $this->login        =   false;
-    $this->responsable  =   false;
-    
-    if( $individu != null )
-            {
+        $this->login        =   false;
+        $this->responsable  =   false;
+
+        if ($individu != null) {
             $this->statut           =   $individu->getStatut();
             $this->labo             =   $individu->getLabo();
             $this->etab             =   $individu->getEtab();
             $this->collaborateur    =   $individu;
-            }
-            
-    if( $version != null )  $this->version  =   $version;
+        }
+
+        if ($version != null) {
+            $this->version  =   $version;
+        }
     }
-    
+
     /**
      * Set responsable
      *

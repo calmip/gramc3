@@ -65,7 +65,7 @@ class TemplatesController extends AbstractController
      */
     public function newAction(Request $request)
     {
-        $template = new Template();
+        $template = new Templates();
         $form = $this->createForm('App\Form\TemplatesType', $template);
         $form->handleRequest($request);
 

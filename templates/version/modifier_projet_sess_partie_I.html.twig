@@ -58,8 +58,25 @@
 </ul>
 
 <p>Plus de détails <a href="{{mesoc_web}}"><strong>sur notre site web</strong></a></p>
-
 </div>
+
+{# Si session en édition ... #}
+{% if session.etat == 2 %}
+<div class="message warning">
+    <h2>Demande d'heures de calcul</h2>
+    <p>Si votre demande d'heures de calcul est <strong>inférieure à {{ prj_seuil_sess }}</strong> 
+    nous vous proposerons un formulaire allégé, et les heures pourront éventuellement être disponibles plus rapidement</p>
+</div>
+{% else %}
+<div class="message warning">
+    <h2>Nombre d'heures limité</h2>
+    <ul>
+    <li>Vous ne pouvez pas <strong>demander plus de {{ prj_seuil_sess }} heures</strong>.</li>
+    <li>Si vous souhaitez tester votre code, nous vous conseillons de <strong>demander 5000 heures</strong></li>
+    <li>Vous pourrez faire une <strong>demande plus importante</strong> lors de la prochaine session d'attribution.</li>
+    </ul>
+</div>
+{% endif %}
 
     <table class="projet"><tbody>
 
@@ -95,18 +112,20 @@
     {{ form_widget(collaborateur_form) }}
     </div>
 
-    <div id="rapport_activite">
-    <h4>Rapport d'activité de l'année précédente</h4>
-    {% if version.typeSession == 'B'  %}
-        <div class="message info">Vous n'avez pas besoin de téléverser de rapport d'activité lors d'une session B. <br />Nous vous le demanderons à la fin de l'année</div>
-    {% elseif version.anneeRapport == 0 %}
-        <div class="message info">Vous n'avez pas besoin de téléverser de rapport d'activité maintenant. Nous vous le demanderons à la fin de l'année</div>
-    {% else %}
-        <div id="uploadstatus"></div>
-        <div id="fileuploader"><a href="{{ path('televerser_rapport', { 'id' : version.idVersion } ) }}" target="_blank" >
-            <strong>Téléversez le rapport d'activité</strong></a></div>
+    {% if rapport_dactivite == true %}
+        <div id="rapport_activite">
+        <h4>Rapport d'activité de l'année précédente</h4>
+        {% if version.typeSession == 'B'  %}
+            <div class="message info">Vous n'avez pas besoin de téléverser de rapport d'activité lors d'une session B. <br />Nous vous le demanderons à la fin de l'année</div>
+        {% elseif version.anneeRapport == 0 %}
+            <div class="message info">Vous n'avez pas besoin de téléverser de rapport d'activité maintenant. Nous vous le demanderons à la fin de l'année</div>
+        {% else %}
+            <div id="uploadstatus"></div>
+            <div id="fileuploader"><a href="{{ path('televerser_rapport_annee', { 'id' : version.versionprecedente.idVersion, 'annee': version.versionprecedente.anneerapport } ) }}" target="_blank" >
+                <strong>Téléversez le rapport d'activité</strong></a></div>
+        {% endif %}
+        </div>
     {% endif %}
-    </div>
 
     {% if version.versionPrecedente != null  %}
     <h4 id="prj_justif_renou">Justification du renouvellement</h4>

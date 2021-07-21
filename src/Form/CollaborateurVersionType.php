@@ -37,7 +37,7 @@ class CollaborateurVersionType extends AbstractType
     {
         $builder->add('responsable')->add('login')->add('statut')->add('version')->add('labo')->add('etab')->add('collaborateur')        ;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -55,6 +55,4 @@ class CollaborateurVersionType extends AbstractType
     {
         return 'appbundle_collaborateurversion';
     }
-
-
 }

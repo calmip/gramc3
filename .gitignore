@@ -34,6 +34,7 @@ services.yaml
 /web/bundles/
 /mesocentres/**/banniere.png
 /mesocentres/**/favicon.ico
+config/packages/security.yaml
 
 altermeso
 config/adresses.txt
@@ -42,4 +43,6 @@ config/adresses.txt
 adminer\.php
 
 public/index.php
+
+vendor/**
 

@@ -83,10 +83,10 @@ class RapportActivite
 
     ///////////////////////////////////////////////////////////////////////////////
 
-    public function __construct( $projet, $annee )
+    public function __construct($projet, $annee)
     {
-        $this->setProjet( $projet );
-        $this->setAnnee( $annee );
+        $this->setProjet($projet);
+        $this->setAnnee($annee);
     }
 
     /**
@@ -161,7 +161,7 @@ class RapportActivite
         return $this->taille;
     }
 
-   
+
 
     /**
      * Set filedata

@@ -1,0 +1,8 @@
+#! /bin/bash
+
+source ../.env
+source ../.env.local
+export DATABASE_URL
+
+php reload-db.php $*
+

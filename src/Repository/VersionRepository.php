@@ -38,138 +38,125 @@ class VersionRepository extends \Doctrine\ORM\EntityRepository
 {
     public function findNonTermines()
     {
-         return $this->getEntityManager()
+        return $this->getEntityManager()
                    ->createQuery('SELECT p FROM App:Version p WHERE ( NOT p.etatVersion = :termine AND NOT p.etatVersion = :annule)')
                    ->setParameter('termine', Etat::getEtat('TERMINE'))
-                   ->setParameter('annule', Etat::getEtat('ANNULE') )
+                   ->setParameter('annule', Etat::getEtat('ANNULE'))
                    ->getResult();
     }
 
     public function findOneVersion(Session $session, Projet $projet)
     {
         return $this->getEntityManager()
-            ->createQuery
-            ('SELECT partial v.{idVersion,etatVersion,prjTitre,prjLLabo,prjThematique,demHeures,attrHeures,penalHeures} FROM App:Version v WHERE ( v.projet = :projet AND v.session = :session AND NOT v.etatVersion = :annule)')
-            ->setParameter('annule', Etat::getEtat('ANNULE') )
-            ->setParameter('projet', $projet )
-            ->setParameter('session', $session )
+            ->createQuery('SELECT partial v.{idVersion,etatVersion,prjTitre,prjLLabo,prjThematique,demHeures,attrHeures,penalHeures} FROM App:Version v WHERE ( v.projet = :projet AND v.session = :session AND NOT v.etatVersion = :annule)')
+            ->setParameter('annule', Etat::getEtat('ANNULE'))
+            ->setParameter('projet', $projet)
+            ->setParameter('session', $session)
             ->getOneOrNullResult();
     }
 
     public function findVersions($projet)
     {
         return $this->getEntityManager()
-        ->createQuery
-        ('SELECT partial v.{idVersion,etatVersion,prjTitre,prjLLabo,demHeures,attrHeures,politique}  FROM App:Version v WHERE ( v.projet = :projet AND NOT v.etatVersion = :annule) ORDER BY v.idVersion ASC')
-        ->setParameter('annule', Etat::getEtat('ANNULE') )
-        ->setParameter('projet', $projet )
+        ->createQuery('SELECT partial v.{idVersion,etatVersion,prjTitre,prjLLabo,demHeures,attrHeures,politique}  FROM App:Version v WHERE ( v.projet = :projet AND NOT v.etatVersion = :annule) ORDER BY v.idVersion ASC')
+        ->setParameter('annule', Etat::getEtat('ANNULE'))
+        ->setParameter('projet', $projet)
         ->getResult();
     }
 
     public function findSessionVersions($session)
     {
         return $this->getEntityManager()
-        ->createQuery
-        ('SELECT partial v.{idVersion,etatVersion,prjGenciDari,prjTitre,prjLLabo,demHeures,attrHeures,penalHeures,politique,sondVolDonnPerm}  FROM App:Version v JOIN v.session s WHERE ( s = :session AND NOT v.etatVersion = :annule)')
-        ->setParameter('annule', Etat::getEtat('ANNULE') )
-        ->setParameter('session', $session )
+        ->createQuery('SELECT partial v.{idVersion,etatVersion,prjGenciDari,prjTitre,prjLLabo,demHeures,attrHeures,penalHeures,politique,sondVolDonnPerm}  FROM App:Version v JOIN v.session s WHERE ( s = :session AND NOT v.etatVersion = :annule)')
+        ->setParameter('annule', Etat::getEtat('ANNULE'))
+        ->setParameter('session', $session)
         ->getResult();
     }
 
-	/*
-	 *  Renvoie les versions actives de la session, c-à-d qui sont en état: ACTIF, EN_ATTENTE, NOUVELLE_VERSION_DEMANDEE
-	 *
-	 *  NOTE - Fonction écrite pour AdminuxController::versionGetAction() mais finalement PAS UTILISEE
-	 *
-	 *
-	 * */
+    /*
+     *  Renvoie les versions actives de la session, c-à-d qui sont en état: ACTIF, EN_ATTENTE, NOUVELLE_VERSION_DEMANDEE
+     *
+     *  NOTE - Fonction écrite pour AdminuxController::versionGetAction() mais finalement PAS UTILISEE
+     *
+     *
+     * */
     public function findSessionVersionsActives($session)
     {
         return $this->getEntityManager()
-        ->createQuery
-        ('SELECT partial v.{idVersion,etatVersion,prjGenciDari,prjTitre,prjLLabo,demHeures,attrHeures,politique}  FROM App:Version v JOIN v.session s WHERE ( s = :session AND (v.etatVersion = :actif OR v.etatVersion = :nouvelle_version_demandee OR v.etatVersion = :en_attente))')
+        ->createQuery('SELECT partial v.{idVersion,etatVersion,prjGenciDari,prjTitre,prjLLabo,demHeures,attrHeures,politique}  FROM App:Version v JOIN v.session s WHERE ( s = :session AND (v.etatVersion = :actif OR v.etatVersion = :nouvelle_version_demandee OR v.etatVersion = :en_attente))')
         ->setParameter('nouvelle_version_demandee', Etat::getetat('NOUVELLE_VERSION_DEMANDEE'))
         ->setParameter('en_attente', Etat::getetat('EN_ATTENTE'))
         ->setParameter('actif', Etat::getetat('ACTIF'))
-        ->setParameter('session', $session )
+        ->setParameter('session', $session)
         ->getResult();
     }
 
     public function findAnneeTestVersions($annee)
     {
         return $this->getEntityManager()
-        ->createQuery
-        ('SELECT partial v.{idVersion,etatVersion,prjGenciDari,prjTitre,prjLLabo,demHeures,attrHeures,politique}  FROM App:Version v  WHERE ( v.idVersion LIKE :pattern AND NOT v.etatVersion = :annule)')
-        ->setParameter('annule', Etat::getEtat('ANNULE') )
-        ->setParameter('pattern', '%T' . $annee . '%' )
+        ->createQuery('SELECT partial v.{idVersion,etatVersion,prjGenciDari,prjTitre,prjLLabo,demHeures,attrHeures,politique}  FROM App:Version v  WHERE ( v.idVersion LIKE :pattern AND NOT v.etatVersion = :annule)')
+        ->setParameter('annule', Etat::getEtat('ANNULE'))
+        ->setParameter('pattern', '%T' . $annee . '%')
         //->setParameter('pattern', $annee . 'T' . $annee)
         ->getResult();
     }
 
     public function countVersions($projet)
     {
-         return $this->getEntityManager()
-         ->createQuery
-        ('SELECT count(v) FROM App:Version v WHERE ( v.projet = :projet AND NOT v.etatVersion = :annule)')
-        ->setParameter('annule', Etat::getEtat('ANNULE') )
-        ->setParameter('projet', $projet )
+        return $this->getEntityManager()
+         ->createQuery('SELECT count(v) FROM App:Version v WHERE ( v.projet = :projet AND NOT v.etatVersion = :annule)')
+        ->setParameter('annule', Etat::getEtat('ANNULE'))
+        ->setParameter('projet', $projet)
         ->getSingleScalarResult();
-
     }
 
     public function countEtat($etat)
     {
-         return $this->getEntityManager()
-         ->createQuery
-        ('SELECT count(v) FROM App:Version v WHERE ( v.etatVersion = :etat)')
-        ->setParameter('etat', Etat::getEtat($etat) )
+        return $this->getEntityManager()
+         ->createQuery('SELECT count(v) FROM App:Version v WHERE ( v.etatVersion = :etat)')
+        ->setParameter('etat', Etat::getEtat($etat))
         ->getSingleScalarResult();
     }
 
     public function demHeures($projet)
     {
-         return $this->getEntityManager()
-         ->createQuery
-        ('SELECT SUM(v.demHeures) FROM App:Version v WHERE ( v.projet = :projet AND NOT v.etatVersion = :annule)')
-        ->setParameter('annule', Etat::getEtat('ANNULE') )
-        ->setParameter('projet', $projet )
+        return $this->getEntityManager()
+         ->createQuery('SELECT SUM(v.demHeures) FROM App:Version v WHERE ( v.projet = :projet AND NOT v.etatVersion = :annule)')
+        ->setParameter('annule', Etat::getEtat('ANNULE'))
+        ->setParameter('projet', $projet)
         ->getSingleScalarResult();
     }
 
     public function attrHeures($projet)
     {
-         return $this->getEntityManager()
-         ->createQuery
-        ('SELECT SUM(v.attrHeures) FROM App:Version v WHERE ( v.projet = :projet AND NOT v.etatVersion = :annule)')
-        ->setParameter('annule', Etat::getEtat('ANNULE') )
-        ->setParameter('projet', $projet )
+        return $this->getEntityManager()
+         ->createQuery('SELECT SUM(v.attrHeures) FROM App:Version v WHERE ( v.projet = :projet AND NOT v.etatVersion = :annule)')
+        ->setParameter('annule', Etat::getEtat('ANNULE'))
+        ->setParameter('projet', $projet)
         ->getSingleScalarResult();
     }
 
     public function info($projet)
     {
-         return $this->getEntityManager()
-         ->createQuery
-        ('SELECT COUNT(v), SUM(v.demHeures), SUM(v.attrHeures) FROM App:Version v WHERE ( v.projet = :projet AND NOT v.etatVersion = :annule)')
-        ->setParameter('annule', Etat::getEtat('ANNULE') )
-        ->setParameter('projet', $projet )
+        return $this->getEntityManager()
+         ->createQuery('SELECT COUNT(v), SUM(v.demHeures), SUM(v.attrHeures) FROM App:Version v WHERE ( v.projet = :projet AND NOT v.etatVersion = :annule)')
+        ->setParameter('annule', Etat::getEtat('ANNULE'))
+        ->setParameter('projet', $projet)
         ->getSingleResult();
     }
 
     public function etat(Projet $projet)
     {
         return $this->getEntityManager()
-         ->createQuery
-        ('SELECT v.etatVersion FROM App:Version v JOIN App:Projet p WHERE ( p.versionDerniere = v AND p = :projet)')
-        ->setParameter('projet', $projet )
+         ->createQuery('SELECT v.etatVersion FROM App:Version v JOIN App:Projet p WHERE ( p.versionDerniere = v AND p = :projet)')
+        ->setParameter('projet', $projet)
         ->getOneOrNullResult();
     }
 
     public function exists($idVersion)
     {
         return $this->getEntityManager()
-         ->createQuery
-        ('SELECT COUNT(v) FROM App:Version v  WHERE v.idVersion = :id')
+         ->createQuery('SELECT COUNT(v) FROM App:Version v  WHERE v.idVersion = :id')
         ->setParameter('id', $idVersion)
         ->getSingleScalarResult();
     }
@@ -177,21 +164,19 @@ class VersionRepository extends \Doctrine\ORM\EntityRepository
     public function countThematique($thematique)
     {
         return $this->getEntityManager()
-         ->createQuery
-        ('SELECT COUNT(v) FROM App:Version v  WHERE v.prjThematique; = :thematique')
-        ->setParameter('thematique', $thematique )
+         ->createQuery('SELECT COUNT(v) FROM App:Version v  WHERE v.prjThematique; = :thematique')
+        ->setParameter('thematique', $thematique)
         ->getSingleResult();
     }
 
     public function findVersionsAnnee($annee)
     {
-        $subAnnee = substr( strval($annee), -2 );
+        $subAnnee = substr(strval($annee), -2);
 
         return $this->getEntityManager()
-        ->createQuery
-        ('SELECT partial v.{idVersion,etatVersion,prjGenciDari,prjTitre,prjLLabo,demHeures,attrHeures,politique}  FROM App:Version v  WHERE ( v.idVersion LIKE :pattern AND NOT v.etatVersion = :annule)')
-        ->setParameter('annule', Etat::getEtat('ANNULE') )
-        ->setParameter('pattern', $subAnnee . '%' )
+        ->createQuery('SELECT partial v.{idVersion,etatVersion,prjGenciDari,prjTitre,prjLLabo,demHeures,attrHeures,politique}  FROM App:Version v  WHERE ( v.idVersion LIKE :pattern AND NOT v.etatVersion = :annule)')
+        ->setParameter('annule', Etat::getEtat('ANNULE'))
+        ->setParameter('pattern', $subAnnee . '%')
         //->setParameter('pattern', $annee . 'T' . $annee)
         ->getResult();
     }

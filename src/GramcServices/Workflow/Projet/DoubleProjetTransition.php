@@ -26,7 +26,7 @@
  *
  * une transition qui ajoute DAT_SESS_DEB si la session associée est déjà en état ACTIF
  * Utile quand un expert valide ou invalide une version après le démarrage de la session
- * 
+ *
  */
 
 namespace App\GramcServices\Workflow\Projet;
@@ -43,69 +43,73 @@ use App\GramcServices\Workflow\Version\VersionWorkflow;
 class DoubleProjetTransition extends ProjetTransition
 {
     ////////////////////////////////////////////////////
-    
+
     public function canExecute($projet)
     {
-        if ( ! $projet instanceof Projet ) throw new \InvalidArgumentException;
+        if (! $projet instanceof Projet) {
+            throw new \InvalidArgumentException();
+        }
 
         $rtn    =   parent::canExecute($projet);
-            
+
         $version = $projet->getVersionDerniere();
-        if( $version == null )
-		{
+        if ($version == null) {
             $this->sj->errorMessage("DoubleProjetTransition : version dernière null pour le projet " . $projet);
             return false;
-		}
+        }
 
         $session = $version->getSession();
-        if( $session == null )
-		{
+        if ($session == null) {
             $this->sj->errorMessage("DoubleProjetTransition : session null pour la version " . $projet);
             return false;
-		}
-            
+        }
+
         return $rtn;
     }
 
     ///////////////////////////////////////////////////////
-    
+
     public function execute($projet)
     {
-        if ( ! $projet instanceof Projet ) return false;
-		if (Transition::DEBUG) $this->sj->debugMessage( ">>> " . __FILE__ . ":" . __LINE__ . " $this $projet");
+        if (! $projet instanceof Projet) {
+            return false;
+        }
+        if (Transition::DEBUG) {
+            $this->sj->debugMessage(">>> " . __FILE__ . ":" . __LINE__ . " $this $projet");
+        }
 
         // Envoie le signal en utilisant ProjetTransition
-        $rtn = parent::execute( $projet );
+        $rtn = parent::execute($projet);
 
-		// NOTE - DoubleProjetTransition ne doit être employée QUE avec le signal CLK_VAL_EXP_OK
+        // NOTE - DoubleProjetTransition ne doit être employée QUE avec le signal CLK_VAL_EXP_OK
         // Si la session COURANTE est active, l'expert est en retard: il expertise le projet APRES l'activation de la session
-        // Dans ce cas, après CLK_VAL_EXP_OK, on envoie aux versions le signal CLK_SESS_DEB        
-		$session = $this->ss->getSessionCourante();
-		if( $session == null )
-		{
-			$this->sj->errorMessage("DoubleProjetTransition : session courante nulle");
-			return false;
-		}
-		if( $session->getEtatSession() != Etat::ACTIF )
-		{
-			if (Transition::DEBUG) $this->sj->debugMessage( "<<< " . __FILE__ . ":" . __LINE__ . " rtn = " . Functions::show($rtn));
-			return $rtn;
-		}
-	                
+        // Dans ce cas, après CLK_VAL_EXP_OK, on envoie aux versions le signal CLK_SESS_DEB
+        $session = $this->ss->getSessionCourante();
+        if ($session == null) {
+            $this->sj->errorMessage("DoubleProjetTransition : session courante nulle");
+            return false;
+        }
+        if ($session->getEtatSession() != Etat::ACTIF) {
+            if (Transition::DEBUG) {
+                $this->sj->debugMessage("<<< " . __FILE__ . ":" . __LINE__ . " rtn = " . Functions::show($rtn));
+            }
+            return $rtn;
+        }
+
         $workflow = new VersionWorkflow($this->sn, $this->sj, $this->ss, $this->em);
-        foreach( $projet->getVersion() as $version )
-		{
-            if( $session->getEtatSession() == Etat::ACTIF )
-			{
-				// Renvoie le signal de début de session à la version
-                $return = $workflow->execute( Signal::CLK_SESS_DEB, $version );
-                $rtn = Functions::merge_return( $rtn, $return );
-                Functions::sauvegarder( $version, $this->em );
-			}
-		}
+        foreach ($projet->getVersion() as $version) {
+            if ($session->getEtatSession() == Etat::ACTIF) {
+                // Renvoie le signal de début de session à la version
+                $return = $workflow->execute(Signal::CLK_SESS_DEB, $version);
+                $rtn = Functions::merge_return($rtn, $return);
+                Functions::sauvegarder($version, $this->em);
+            }
+        }
 
-		if (Transition::DEBUG) $this->sj->debugMessage( "<<< " . __FILE__ . ":" . __LINE__ . " rtn = " . Functions::show($rtn));
+        if (Transition::DEBUG) {
+            $this->sj->debugMessage("<<< " . __FILE__ . ":" . __LINE__ . " rtn = " . Functions::show($rtn));
+        }
 
-	    return $rtn; 
+        return $rtn;
     }
 }

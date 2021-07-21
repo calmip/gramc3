@@ -23,17 +23,15 @@
  **/
 
 // src/App/Security/User/TestUserProvider.php
+
 namespace App\Security\User;
 
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 
-
-class TestUserProvider  implements UserProviderInterface
+class TestUserProvider implements UserProviderInterface
 {
-
-
     public function loadUserByUsername($username)
     {
         return new TestUser();

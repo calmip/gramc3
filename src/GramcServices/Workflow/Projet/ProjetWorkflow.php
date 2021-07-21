@@ -37,54 +37,54 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class ProjetWorkflow extends Workflow
 {
-
     public function __construct(ServiceNotifications $sn, ServiceJournal $sj, ServiceSessions $ss, EntityManagerInterface $em)
     {
         $this->workflowIdentifier   = get_class($this);
         parent::__construct($sn, $sj, $ss, $em);
-        
+
         $this
-            ->addState( Etat::RENOUVELABLE,
+            ->addState(
+                Etat::RENOUVELABLE,
                 [
                 // Utile seulement pour propagation aux versions
                 Signal::CLK_DEMANDE         =>  new ProjetTransition(Etat::RENOUVELABLE, Signal::CLK_DEMANDE, [], true),
                 Signal::CLK_VAL_DEM         =>  new ProjetTransition(Etat::RENOUVELABLE, Signal::CLK_VAL_DEM, [], true),
-                Signal::CLK_ARR             =>  new ProjetTransition(Etat::RENOUVELABLE, Signal::CLK_ARR,     [], true),
-                
+                Signal::CLK_ARR             =>  new ProjetTransition(Etat::RENOUVELABLE, Signal::CLK_ARR, [], true),
+
                 Signal::CLK_VAL_EXP_OK      =>  new DoubleProjetTransition(Etat::RENOUVELABLE, Signal::CLK_VAL_EXP_OK, [], true),
                 Signal::CLK_VAL_EXP_CONT    =>  new ProjetTransition(Etat::RENOUVELABLE, Signal::CLK_VAL_EXP_CONT, [], true),
-                
-                Signal::CLK_SESS_FIN        =>  new NoTransition(0,0),
-                Signal::CLK_SESS_DEB        =>  new ProjetTransition(Etat::RENOUVELABLE, Signal::CLK_SESS_DEB ),
-                 
-                Signal::CLK_VAL_EXP_KO      =>  new ProjetTransition(Etat::NON_RENOUVELABLE,Signal::CLK_VAL_EXP_KO,[],true),
-                Signal::CLK_FERM            =>  new ProjetTransition(Etat::TERMINE,Signal::CLK_FERM),
-                ])
-             ->addState( Etat::NON_RENOUVELABLE,
-                [
+
+                Signal::CLK_SESS_FIN        =>  new NoTransition(0, 0),
+                Signal::CLK_SESS_DEB        =>  new ProjetTransition(Etat::RENOUVELABLE, Signal::CLK_SESS_DEB),
+
+                Signal::CLK_VAL_EXP_KO      =>  new ProjetTransition(Etat::NON_RENOUVELABLE, Signal::CLK_VAL_EXP_KO, [], true),
+                Signal::CLK_FERM            =>  new ProjetTransition(Etat::TERMINE, Signal::CLK_FERM),
+                ]
+            )
+             ->addState(
+                 Etat::NON_RENOUVELABLE,
+                 [
                 Signal::CLK_DEMANDE         =>  new ProjetTransition(Etat::NON_RENOUVELABLE, Signal::CLK_DEMANDE, [], true),
                 Signal::CLK_VAL_DEM         =>  new ProjetTransition(Etat::NON_RENOUVELABLE, Signal::CLK_VAL_DEM, [], true),
-                Signal::CLK_ARR             =>  new ProjetTransition(Etat::NON_RENOUVELABLE, Signal::CLK_ARR,     [], true),
+                Signal::CLK_ARR             =>  new ProjetTransition(Etat::NON_RENOUVELABLE, Signal::CLK_ARR, [], true),
                 Signal::CLK_VAL_EXP_OK      =>  new ProjetTransition(Etat::NON_RENOUVELABLE, Signal::CLK_VAL_EXP_OK, [], true),
-    
+
                 Signal::CLK_VAL_EXP_CONT    =>  new ProjetTransition(Etat::TERMINE, Signal::CLK_VAL_EXP_CONT),
-                Signal::CLK_VAL_EXP_KO      =>  new ProjetTransition(Etat::TERMINE,Signal::CLK_VAL_EXP_KO, [], true),
-                Signal::CLK_FERM            =>  new ProjetTransition(Etat::TERMINE,Signal::CLK_FERM, [], true),
+                Signal::CLK_VAL_EXP_KO      =>  new ProjetTransition(Etat::TERMINE, Signal::CLK_VAL_EXP_KO, [], true),
+                Signal::CLK_FERM            =>  new ProjetTransition(Etat::TERMINE, Signal::CLK_FERM, [], true),
 
-                Signal::CLK_SESS_DEB        =>  new NoTransition(0,0),
+                Signal::CLK_SESS_DEB        =>  new NoTransition(0, 0),
                 Signal::CLK_SESS_FIN        =>  new ProjetTransition(Etat::TERMINE, Signal::CLK_SESS_FIN),
-                 ])
-             
-             ->addState( Etat::TERMINE,
-                [
-                Signal::CLK_SESS_FIN        =>  new NoTransition(0,0),
-                Signal::CLK_SESS_DEB        =>  new NoTransition(0,0),
-                Signal::CLK_FERM            =>  new NoTransition(0,0),
-                ]);
-            
+                 ]
+             )
 
+             ->addState(
+                 Etat::TERMINE,
+                 [
+                Signal::CLK_SESS_FIN        =>  new NoTransition(0, 0),
+                Signal::CLK_SESS_DEB        =>  new NoTransition(0, 0),
+                Signal::CLK_FERM            =>  new NoTransition(0, 0),
+                ]
+             );
     }
-
-    
-    
 }

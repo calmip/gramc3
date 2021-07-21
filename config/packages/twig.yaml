@@ -12,16 +12,19 @@ twig:
        mesoc_merci: '%mesoc_merci%'
        mesoc_cgu: '%mesoc_cgu%'
        mesoc_visu: '%mesoc_visu%'
+       mesoc_formation: '%mesoc_formation%'
        mesoc_address: '%mesoc_address%'
        conso_seuil_1: '%conso_seuil_1%'
        conso_seuil_2: '%conso_seuil_2%'
        noconso: '%noconso%'
        norattachement: '%norattachement%'
+       nodata: '%nodata%'
        prj_prefix: '%prj_prefix%'
+       prj_seuil_sess: '%prj_seuil_sess%'
        max_expertises_nb: '%max_expertises_nb%'
        ressources_conso_group: '%ressources_conso_group%'
        ressources_conso_user: '%ressources_conso_user%'
        max_page_nb: '%max_page_nb%'
-
-
-
+       max_size_doc: '%max_size_doc%'
+       rapport_dactivite: '%rapport_dactivite%'
+       fichier_attache: '%fichier_attache%'

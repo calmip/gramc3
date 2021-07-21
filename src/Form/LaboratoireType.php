@@ -41,24 +41,26 @@ class LaboratoireType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('numeroLabo',IntegerType::class, ['required' => false, 'label' => "Numéro d'ordre:" ])
-            ->add('acroLabo',TextType::class, ['required' => false, 'label' => 'Acronyme:' ])
-            ->add('nomLabo',TextType::class, ['required' => true, 'label' => 'Nom *:' ]);
+            ->add('numeroLabo', IntegerType::class, ['required' => false, 'label' => "Numéro d'ordre:" ])
+            ->add('acroLabo', TextType::class, ['required' => false, 'label' => 'Acronyme:' ])
+            ->add('nomLabo', TextType::class, ['required' => true, 'label' => 'Nom *:' ]);
 
-        if( $options['modifier'] == false &&  $options['ajouter'] == false) $builder->add('individu');
+        if ($options['modifier'] == false &&  $options['ajouter'] == false) {
+            $builder->add('individu');
+        }
 
-        if( $options['modifier'] == true )
+        if ($options['modifier'] == true) {
             $builder
-                ->add('submit',SubmitType::class, ['label' => 'modifier' ])
-                ->add('reset',ResetType::class, ['label' => 'reset' ]);
-                
-        elseif ( $options['ajouter'] == true )
+                ->add('submit', SubmitType::class, ['label' => 'modifier' ])
+                ->add('reset', ResetType::class, ['label' => 'reset' ]);
+        } elseif ($options['ajouter'] == true) {
             $builder
-                ->add('submit',SubmitType::class, ['label' => 'ajouter' ])
-                ->add('reset',ResetType::class, ['label' => 'reset' ])
+                ->add('submit', SubmitType::class, ['label' => 'ajouter' ])
+                ->add('reset', ResetType::class, ['label' => 'reset' ])
                 ;
+        }
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -69,7 +71,8 @@ class LaboratoireType extends AbstractType
             'data_class' => 'App\Entity\Laboratoire',
             'modifier' => false,
             'ajouter'  => false,
-            ]);
+            ]
+        );
     }
 
     /**
@@ -79,6 +82,4 @@ class LaboratoireType extends AbstractType
     {
         return 'appbundle_laboratoire';
     }
-
-
 }

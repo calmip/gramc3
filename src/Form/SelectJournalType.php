@@ -43,49 +43,64 @@ class SelectJournalType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('dateDebut', DateTimeType::class,
-                    [
+        $builder->add(
+            'dateDebut',
+            DateTimeType::class,
+            [
                     'data'          => $options['from'], // valeur par défaut
                     'label'         => 'Heure de début d\'affichage',
                     'with_seconds'  => true,
-                    'years'         => Functions::years( $options['from'], new \DateTime()   ),
-                    ])
-                ->add('dateFin', DateTimeType::class,
+                    'years'         => Functions::years($options['from'], new \DateTime()),
+                    ]
+        )
+                ->add(
+                    'dateFin',
+                    DateTimeType::class,
                     [
                     'data'          => $options['untill'],
                     'label'         => 'Heure de fin d\'affichage',
                     'with_seconds'  => true,
-                    'years'         => Functions::years($options['untill'] , new \DateTime() ),
-                    ])
-                ->add('niveau',     ChoiceType::class,
+                    'years'         => Functions::years($options['untill'], new \DateTime()),
+                    ]
+                )
+                ->add(
+                    'niveau',
+                    ChoiceType::class,
                     [
-                        'choices'           =>  array_flip( Journal::LIBELLE ),
+                        'choices'           =>  array_flip(Journal::LIBELLE),
                         'data'              =>  Journal::INFO , // valeur par défaut
                         'label'             => 'Niveau de log',
-                    ])
-                ->add('submit',     SubmitType::class,
+                    ]
+                )
+                ->add(
+                    'submit',
+                    SubmitType::class,
                     [
                         'label'         => 'chercher',
-                    ])
-                ->add('all',     SubmitType::class,
+                    ]
+                )
+                ->add(
+                    'all',
+                    SubmitType::class,
                     [
                         'label'         => 'AFFICHER TOUT',
-                    ]);
+                    ]
+                );
     }
-    
+
     /**
      * @param OptionsResolver $resolver
      */
     public function configureOptions(OptionsResolver $resolver)
     {
-		$from = new \DateTime();
-		$from->setTime(0,0,0);
+        $from = new \DateTime();
+        $from->setTime(0, 0, 0);
 
-		$until= new \DateTime();
-		$until->add( \DateInterval::createFromDateString( '1 day' ) );
+        $until= new \DateTime();
+        $until->add(\DateInterval::createFromDateString('1 day'));
         $resolver->setDefaults([
-	        'from'    => $from,
-	        'untill'  => $until
-	        ]);
+            'from'    => $from,
+            'untill'  => $until
+            ]);
     }
 }

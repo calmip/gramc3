@@ -26,11 +26,11 @@ namespace App\GramcServices;
 //use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
-/* Ce service est utilisé pour afficher la date + heure avec un décalage 
+/* Ce service est utilisé pour afficher la date + heure avec un décalage
  * éventuellement stoqué dans la table Params
- * 
+ *
  * GramcDateTime est la classe mère de GramcDate
- * 
+ *
  */
 
 /*
@@ -45,68 +45,62 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class GramcDateTime extends \DateTime
 {
-
-	public function __construct (ServiceParam $sp, EntityManagerInterface $em)
+    private $sp;
+    private $em;
+    
+    public function __construct(ServiceParam $sp, EntityManagerInterface $em)
     {
-		$this->sp = $sp;
-		$this->em = $em;
-	
-        parent::__construct( 'now' );
+        $this->sp = $sp;
+        $this->em = $em;
 
-	    if($sp->hasParameter('now'))
-	    {
-	        parent::__construct( $sp->getParameter('now'));
-		}
-	    elseif($sp->hasParameter('DateString'))
-        {
-            $dateInterval =  \DateInterval::createFromDateString( $sp->getParameter('DateString') );
+        parent::__construct('now');
+
+        if ($sp->hasParameter('now')) {
+            parent::__construct($sp->getParameter('now'));
+        } elseif ($sp->hasParameter('DateString')) {
+            $dateInterval =  \DateInterval::createFromDateString($sp->getParameter('DateString'));
             $this->add($dateInterval);
             return;
-        }
-
-	    elseif ($sp->hasParameter('DateShift'))
-        {
+        } elseif ($sp->hasParameter('DateShift')) {
             $dateInterval = new \DateInterval($sp->getParameter('DateShift'));
 
-            if( $sp->hasParameter('future') && $sp->getParameter('future') == false )
+            if ($sp->hasParameter('future') && $sp->getParameter('future') == false) {
                 $this->sub($dateInterval);
-            else
+            } else {
                 $this->add($dateInterval);
+            }
             return;
-        }
-
-	    elseif ($sp->hasParameter('NewDate') &&  $sp->hasParameter('OldDate'))
-        {
+        } elseif ($sp->hasParameter('NewDate') &&  $sp->hasParameter('OldDate')) {
             $oldDate      = new \DateTime($sp->getParameter('OldDate'));
             $newDate      = new \DateTime($sp->getParameter('NewDate'));
-            $dateInterval = date_diff( $oldDate, $newDate );
+            $dateInterval = date_diff($oldDate, $newDate);
             $this->add($dateInterval);
             return;
         }
     }
 
 
-	public function showDate( $format = "d F Y" )
+    public function showDate($format = "d F Y")
     {
         return $this->format($format);
     }
 
-	public function showDateTime( $format = "d F Y H:i:s" )
+    public function showDateTime($format = "d F Y H:i:s")
     {
         return $this->format($format);
     }
 
-	public function showYear( $format = "Y" )
+    public function showYear($format = "Y")
     {
         return $this->format($format);
     }
 
-	public function showMonth( $format = "m" )
+    public function showMonth($format = "m")
     {
         return $this->format($format);
     }
 
-	//static public function get()
+    //static public function get()
     //{
     //    return new GramcDateTime();
     //}

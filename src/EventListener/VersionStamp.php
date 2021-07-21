@@ -24,7 +24,7 @@
 
 /**
  * Voir https://symfony.com/index.php/doc/4.4/doctrine/events.html#doctrine-entity-listeners
- * 
+ *
  * Le stamp de modification est inséré dans Version lors d'une MISE A JOUR uniquement
  * Rien ne se passe à la CREATION de la version (il faudrait écrire un événement prePersist)
  * Rien ne se passe si on fait un flush sans modification, ie le stamp n'est pas modifié
@@ -34,6 +34,7 @@
  ****/
 
 // src/EventListener/UserChangedNotifier.php
+
 namespace App\EventListener;
 
 use App\Entity\Version;
@@ -43,25 +44,26 @@ use Doctrine\Persistence\Event\LifecycleEventArgs;
 
 class VersionStamp
 {
-	public function __construct(TokenStorageInterface $tok)
-	{
-		$this->tok = $tok->getToken();
-	}
-	
+    private $token;
+    
+    public function __construct(TokenStorageInterface $tok)
+    {
+        $this->token = $tok->getToken();
+    }
+
     // the entity listener methods receive two arguments:
     // the entity instance and the lifecycle event
     public function preUpdate(Version $version, LifecycleEventArgs $event): void
     {
-		if ($this->tok == null) return;
-		$user = $this->tok->getUser();
-		if ($version->isCollaborateur($user))
-		{
+        if ($this->token == null) {
+            return;
+        }
+        $user = $this->token->getUser();
+        if ($version->isCollaborateur($user)) {
             $version->setMajInd($user);
-			$version->setMajStamp(new \DateTime());
-		}
-		else
-		{
-			$version->setMajInd(null);
-		}
+            $version->setMajStamp(new \DateTime());
+        } else {
+            $version->setMajInd(null);
+        }
     }
 }

@@ -24,7 +24,6 @@
 
 namespace App\BilanSession;
 
-
 use App\Entity\Session;
 use App\Entity\Version;
 use App\GramcServices\ServiceSessions;
@@ -46,41 +45,63 @@ use App\Utils\Functions;
 
 abstract class BilanSession
 {
-	// Arguments: 
-	//            $ressources_conso_group Paramètre
-	//            $request   
-	//            $grdt    GramcDate
-	//			  $session   
-	//            $ss      ServiceSession
-	//            $em
+    // Arguments:
+    //            $ressources_conso_group Paramètre
+    //            $request
+    //            $grdt    GramcDate
+    //			  $session
+    //            $ss      ServiceSession
+    //            $em
 
-	protected $ressources_conso_group;
-	protected $em;
-	protected $ss;
-	protected $grdt;
+    protected $ressources_conso_group;
+    protected $em;
+    protected $ss;
+    protected $grdt;
+    protected $sp;
+    protected $session;
+    protected $id_session;
+    protected $annee_cour;
+    protected $annee_prec;
+    protected $full_annee_cour;
+    protected $full_annee_prec;
+    protected $session_courante_A;
+    protected $session_courante_B;
+    protected $session_precedente_A;
+    protected $session_precedente_B;
+    protected $annee_conso;
+    protected $ress;
+    protected $nom_ress;
+    protected $t_fact;
+    
+    // Fonctions implémentées dans les classes dérivées
+    protected function initTotaux() {}
+    protected function getTotaux($totaux) {}
+    protected function getEntetes() {}
+    protected function getLigne(Version $version, &$totaux) {}
 
-	function __construct ($ressources_conso_group, GramcDate $grdt, Session $session, ServiceProjets $sp, ServiceSessions $ss, EntityManager $em)
-	{
-		$this->ressources_conso_group = $ressources_conso_group;
-		$this->grdt       = $grdt; 
-		$this->em         = $em;
 
-		$this->ss         = $ss;
-		$this->sp         = $sp;
-		$this->session    = $session;
-		
+    public function __construct($ressources_conso_group, GramcDate $grdt, Session $session, ServiceProjets $sp, ServiceSessions $ss, EntityManager $em)
+    {
+        $this->ressources_conso_group = $ressources_conso_group;
+        $this->grdt       = $grdt;
+        $this->em         = $em;
+
+        $this->ss         = $ss;
+        $this->sp         = $sp;
+        $this->session    = $session;
+
         $this->id_session = $session->getIdSession();
         $this->annee_cour = $session->getAnneeSession();
         $this->annee_prec = $this->annee_cour - 1;
         $this->full_annee_cour      = 2000 + $this->annee_cour;
         $this->full_annee_prec      = 2000 + $this->annee_prec;
-        
+
         $this->session_courante_A   = $em->getRepository(Session::class)->findOneBy(['idSession' => $this->annee_cour .'A']);
         $this->session_courante_B   = $em->getRepository(Session::class)->findOneBy(['idSession' => $this->annee_cour .'B']);
-		$this->session_precedente_A = $em->getRepository(Session::class)->findOneBy(['idSession' => $this->annee_prec .'A']);
+        $this->session_precedente_A = $em->getRepository(Session::class)->findOneBy(['idSession' => $this->annee_prec .'A']);
         $this->session_precedente_B = $em->getRepository(Session::class)->findOneBy(['idSession' => $this->annee_prec .'B']);
-        
-        // Année de prise en compte pour le calcul de la conso passée: 
+
+        // Année de prise en compte pour le calcul de la conso passée:
         // 20A -> 2019, 20B -> 2020
 		$type_session      = $session->getLibelleTypeSession(); // A ou B
 		$this->annee_conso = ($type_session==='A') ? $this->annee_prec : $this->annee_cour;
@@ -127,46 +148,44 @@ abstract class BilanSession
 		$sortie = join($this->getEntetes(),"\t") . "\n";;
 
         // boucle principale
-        foreach( $versions as $version )
-		{
-			$sortie .= join("\t",$this->getLigne($version,$totaux));
-			$sortie.= "\t";
-            $sortie .= join("\t",$this->getLigneConso($version, $totaux));
+        foreach ($versions as $version) {
+            $sortie .= join("\t", $this->getLigne($version, $totaux));
+            $sortie.= "\t";
+            $sortie .= join("\t", $this->getLigneConso($version, $totaux));
             $sortie .= "\n";
-		} 
+        }
 
-		// Dernière ligne = les totaux
-		$sortie .= join ("\t", $this->getTotaux($totaux));
-		$sortie .= "\n";
-		
-		$file_name = 'bilan_session_'.$id_session.'.csv';
+        // Dernière ligne = les totaux
+        $sortie .= join("\t", $this->getTotaux($totaux));
+        $sortie .= "\n";
+
+        $file_name = 'bilan_session_'.$id_session.'.csv';
 
         return [$sortie, $file_name];
     }
-	
-	/*********************************************
-	 * Calcule la fin de  ligne du csv
-	 * Données de consommation par mois
-	 * 
-	 * Params = $version = La version
-	 *          $totaux  = Le tableau des totaux
-	 * 
-	 * Renvoie    = Un tableau correspondant à la FIN de la ligne csv
-	 * Voir aussi = getLigne
-	 *************************************************/
-	protected function getLigneConso(Version $version, &$totaux)
-	{
-		$annee_conso = $this->annee_conso;
-		$full_annee_prec = $this->full_annee_prec;
-		for ($m=0;$m<12;$m++)
-		{
-			$consmois= $this->sp->getConsoMois($version->getProjet(),$annee_conso,$m);
-			$index   = 'm' . ($m<10?'0':'') . $m;
 
-			$ligne[]         = $consmois;
-			$totaux[$index] += $consmois;
-		};
-		return $ligne;
-	}
+    /*********************************************
+     * Calcule la fin de  ligne du csv
+     * Données de consommation par mois
+     *
+     * Params = $version = La version
+     *          $totaux  = Le tableau des totaux
+     *
+     * Renvoie    = Un tableau correspondant à la FIN de la ligne csv
+     * Voir aussi = getLigne
+     *************************************************/
+    protected function getLigneConso(Version $version, &$totaux)
+    {
+        $annee_conso = $this->annee_conso;
+        $full_annee_prec = $this->full_annee_prec;
+        $ligne = [];
+        for ($m=0;$m<12;$m++) {
+            $consmois= $this->sp->getConsoMois($version->getProjet(), $annee_conso, $m);
+            $index   = 'm' . ($m<10 ? '0' : '') . $m;
 
+            $ligne[]         = $consmois;
+            $totaux[$index] += $consmois;
+        };
+        return $ligne;
+    }
 }

@@ -36,6 +36,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationException;
 
 /********************
  * Ce service est utilisé pour envoyer des notifications par mail aux utilisateurs
@@ -43,22 +44,31 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class ServiceJournal
 {
-	// request_stack, session,logger, security.helper, doc
-	// request_stack, session,logger, security.token_storage,doc
-	public function __construct(RequestStack $rs, 
-								SessionInterface $ss, 
-								LoggerInterface $log, 
-								TokenStorageInterface $tok, 
-								AuthorizationCheckerInterface $ac, 
-								EntityManagerInterface $em)
-	{
-		$this->rs    = $rs;
-		$this->ss    = $ss;
-		$this->log   = $log;
-		$this->token = $tok->getToken();
-		$this->ac    = $ac;
-		$this->em    = $em;
-	}
+    private $rs;
+    private $ss;
+    private $log;
+    private $token;
+    private $ac;
+    private $em;
+    
+    // request_stack, session,logger, security.helper, doc
+    // request_stack, session,logger, security.token_storage,doc
+    public function __construct(
+        RequestStack $rs,
+        SessionInterface $ss,
+        LoggerInterface $log,
+        TokenStorageInterface $tok,
+        AuthorizationCheckerInterface $ac,
+        EntityManagerInterface $em
+    )
+    {
+        $this->rs    = $rs;
+        $this->ss    = $ss;
+        $this->log   = $log;
+        $this->token = $tok->getToken();
+        $this->ac    = $ac;
+        $this->em    = $em;
+    }
 
     /**
      * Ecrire quelque chose dans le journal
@@ -72,129 +82,116 @@ class ServiceJournal
      ***/
     private function journalMessage($message, $niveau)
     {
-		$rs    = $this->rs;
-		$ss    = $this->ss;
-		$log   = $this->log;
-		$token = $this->token;
-		$em    = $this->em;
+        $rs    = $this->rs;
+        $ss    = $this->ss;
+        $log   = $this->log;
+        $token = $this->token;
+        $em    = $this->em;
 
         $journal = new Journal();
-        $journal->setStamp( new \DateTime() );
+        $journal->setStamp(new \DateTime());
 
-		// Si l'erreur provient de l'API, getUser() n'est pas un Individu
-		if ($token != null && $token->getUser() != null && $token->getUser() instanceof Individu )
-		{
-			$journal->setIndividu  ( $token->getUser() );
-			$journal->setIdIndividu( $token->getUser()->getId() );
-		}
-		else
-		{
-            $journal->setIdIndividu( null );
-            $journal->setIndividu( null );
-		}
-			
-        $journal->setGramcSessId( $ss->getId() );
+        // Si l'erreur provient de l'API, getUser() n'est pas un Individu
+        if ($token != null && $token->getUser() != null && $token->getUser() instanceof Individu) {
+            $journal->setIndividu($token->getUser());
+            $journal->setIdIndividu($token->getUser()->getId());
+        } else {
+            $journal->setIdIndividu(null);
+            $journal->setIndividu(null);
+        }
 
-		if ($rs->getMasterRequest() != null
-			&& $rs->getMasterRequest()->getClientIp() != null)
-		{
-	        $ip = $rs->getMasterRequest()->getClientIp();
-		}
-	    else
-	    {
-			$ip = '0.0.0.0';
-		}
+        $journal->setGramcSessId($ss->getId());
 
-        $journal->setIp( $ip );
-        $journal->setMessage( substr($message,0,300) );
-        $journal->setNiveau( $niveau );
-        $journal->setType( Journal::LIBELLE[$niveau] );
+        if ($rs->getMasterRequest() != null
+        && $rs->getMasterRequest()->getClientIp() != null) {
+            $ip = $rs->getMasterRequest()->getClientIp();
+        } else {
+            $ip = '0.0.0.0';
+        }
+
+        $journal->setIp($ip);
+        $journal->setMessage(substr($message, 0, 300));
+        $journal->setNiveau($niveau);
+        $journal->setType(Journal::LIBELLE[$niveau]);
 
         // nous testons des problèmes de Doctrine pour éviter une exception
         //if( App::getEnvironment() != 'test' )
-		//{
-          if( $em->isOpen() )
-			{
-                $em->persist( $journal );
-                $em->flush();
-			}
-            else
-            {
-                $log->error('Entity manager closed, message = ' . $message);
-			}
-		//}
+        //{
+        if ($em->isOpen()) {
+            $em->persist($journal);
+            $em->flush();
+        } else {
+            $log->error('Entity manager closed, message = ' . $message);
+        }
+        //}
 
         return $journal;
     }
 
-    public  function emergencyMessage( $message )
+    public function emergencyMessage($message)
     {
-            $this->log->emergency($message);
-            $this->journalMessage($message, Journal::EMERGENCY);
+        $this->log->emergency($message);
+        $this->journalMessage($message, Journal::EMERGENCY);
     }
 
-    public  function alertMessage( $message )
+    public function alertMessage($message)
     {
-            $this->log->alert($message);
-            $this->journalMessage($message, Journal::ALERT);
+        $this->log->alert($message);
+        $this->journalMessage($message, Journal::ALERT);
     }
 
-    public  function criticalMessage( $message )
+    public function criticalMessage($message)
     {
-            $this->log->critical($message);
-            $this->journalMessage($message, Journal::CRITICAL);
+        $this->log->critical($message);
+        $this->journalMessage($message, Journal::CRITICAL);
     }
 
-    public  function errorMessage( $message )
+    public function errorMessage($message)
     {
-            $this->log->error($message);
-            $this->journalMessage($message, Journal::ERROR);
+        $this->log->error($message);
+        $this->journalMessage($message, Journal::ERROR);
     }
 
-    public  function warningMessage( $message )
+    public function warningMessage($message)
     {
-            $this->log->warning($message);
-            $this->journalMessage($message, Journal::WARNING);
+        $this->log->warning($message);
+        $this->journalMessage($message, Journal::WARNING);
     }
 
-    public  function noticeMessage( $message )
+    public function noticeMessage($message)
     {
-            $this->log->notice($message);
-            $this->journalMessage($message, Journal::NOTICE);
+        $this->log->notice($message);
+        $this->journalMessage($message, Journal::NOTICE);
     }
 
-    public  function infoMessage( $message )
+    public function infoMessage($message)
     {
-            $this->log->info($message);
-            $this->journalMessage($message, Journal::INFO);
+        $this->log->info($message);
+        $this->journalMessage($message, Journal::INFO);
     }
 
-    public  function debugMessage( $message )
+    public function debugMessage($message)
     {
-            $this->log->debug($message);
-            $this->journalMessage($message, Journal::DEBUG);
+        $this->log->debug($message);
+        $this->journalMessage($message, Journal::DEBUG);
     }
-    
+
     /************************
      * Ecrit un message dans le journal (niveau warning)
      * Lance une exception
      * L'exception n'est pas la même suivant qu'on est authentifié ou pas
-     * 
+     *
      **************************************/
-    public function throwException( $text = null )
+    public function throwException($text = null)
     {
-        if( $text != null ) 
-        {
-			$this->warningMessage("EXCEPTION " . $text);
-		}
+        if ($text != null) {
+            $this->warningMessage("EXCEPTION " . $text);
+        }
 
-        if( $this->ac->isGranted( 'IS_AUTHENTICATED_FULLY' ) )
-        {
+        if ($this->ac->isGranted('IS_AUTHENTICATED_FULLY')) {
             throw new AccessDeniedHttpException();
-		}
-        else
-        {
+        } else {
             throw new InsufficientAuthenticationException();
-		}
-	}
+        }
+    }
 }

@@ -35,39 +35,50 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilder;
 use Symfony\Component\Form\FormFactoryInterface;
 
-class ServiceSessions 
+class ServiceSessions
 {
-	public function __construct($recup_attrib_seuil,
-	                            $recup_conso_seuil,
-	                            $recup_attrib_quant,
-	                            GramcDate $grdt,
-	                            FormFactoryInterface $ff,
-	                            EntityManagerInterface $em)
-	{
-		$this->recup_attrib_seuil = intval($recup_attrib_seuil);
-	    $this->recup_conso_seuil  = intval($recup_conso_seuil);
-	    $this->recup_attrib_quant = intval($recup_attrib_quant);
-	    $this->grdt               = $grdt;
-	    $this->ff                 = $ff;
-		$this->em                 = $em;
-		$this->sessions_non_term  = null;
-	}
+    private $recup_attrib_seuil;
+    private $recup_conso_seuil;
+    private $recup_attrib_quant;
+    private $grdt;
+    private $ff;
+    private $em;
+    private $sessions_non_term;
+    
+    public function __construct(
+        $recup_attrib_seuil,
+        $recup_conso_seuil,
+        $recup_attrib_quant,
+        GramcDate $grdt,
+        FormFactoryInterface $ff,
+        EntityManagerInterface $em
+    )
+    {
+        $this->recup_attrib_seuil = intval($recup_attrib_seuil);
+        $this->recup_conso_seuil  = intval($recup_conso_seuil);
+        $this->recup_attrib_quant = intval($recup_attrib_quant);
+        $this->grdt               = $grdt;
+        $this->ff                 = $ff;
+        $this->em                 = $em;
+        $this->sessions_non_term  = null;
+    }
 
-	/*******
-	 * initialise le "cache" des sessions non terminées
-	 *******/
-	private function initSessionsNonTerm()
-	{
-		$this->sessions_non_term = $this->em->getRepository(Session::class)->get_sessions_non_terminees();
-	}
+    /*******
+     * initialise le "cache" des sessions non terminées
+     *******/
+    private function initSessionsNonTerm()
+    {
+        $this->sessions_non_term = $this->em->getRepository(Session::class)->get_sessions_non_terminees();
+    }
 
-	/*******
-	 * vide le "cache" des sessnios non terminées - utile lorsqu'on crée une session ou change l'état des sessions
-	 *******/
-	public function clearCache()
-	{
-		$this->sessions_non_term = null;
-	}
+//    SUPPRIME CAR NON APPELE
+//    /*******
+//     * vide le "cache" des sessnios non terminées - utile lorsqu'on crée une session ou change l'état des sessions
+//     *******/
+//    public function clearCache()
+//    {
+//        $this->sessions_non_term = null;
+//    }
 
     /***********
     * Renvoie la session courante, c'est-à-dire la PLUS RECENTE session NON TERMINEE
@@ -76,100 +87,101 @@ class ServiceSessions
     ************************************************************/
     public function getSessionCourante()
     {
-		if ($this->sessions_non_term==null)
-		{
-			$this->initSessionsNonTerm();
-		}
-		if ($this->sessions_non_term != null)
-		{
-			return $this->sessions_non_term[0];
-		}
-		else
-		{
-			return null;
-		}
-	}
-	
-	    // form pour choisir une session
+        if ($this->sessions_non_term==null) {
+            $this->initSessionsNonTerm();
+        }
+        if ($this->sessions_non_term != null) {
+            return $this->sessions_non_term[0];
+        } else {
+            return null;
+        }
+    }
 
-	/************
-	 * Formulaire permettant de choisir une session
-	 *
-	 * $formb   = Un formBuilder (retour de createView)
-	 * $request = La requête
-	 * 
-	 * Retourne:
-	 *     Le formulaire
-	 *     La session choisie
-	 * 
-	 * Utilisation depuis un contrôleur: 
-	 *             $data = $ss->selectSession($this->createFormBuilder(['session' => $une_session"]),$request);
-	 * 
-	 *******************/
+    // form pour choisir une session
+
+    /************
+    * Formulaire permettant de choisir une session
+    *
+    * $formb   = Un formBuilder (retour de createView)
+    * $request = La requête
+    *
+    * Retourne:
+    *     Le formulaire
+    *     La session choisie
+    *
+    * Utilisation depuis un contrôleur:
+    *             $data = $ss->selectSession($this->createFormBuilder(['session' => $une_session"]),$request);
+    *
+    *******************/
     public function selectSession(FormBuilder $formb, Request $request)
     {
-	    $form    = $formb
-		            ->add('session',   ChoiceType::class,
-	                    [
-	                    'multiple'     => false,
-	                    'required'     =>  true,
-	                    'label'        => '',
-	                    'choices'      => $this->em->getRepository(Session::class)->findBy([],['idSession' => 'DESC']),
-	                    'choice_label' => function ($session) { return $session->__toString(); },
-	                    ])
-			        ->add('submit', SubmitType::class, ['label' => 'Choisir'])
-			        ->getForm();
+        $form    = $formb
+                    ->add(
+                        'session',
+                        ChoiceType::class,
+                        [
+                        'multiple'     => false,
+                        'required'     =>  true,
+                        'label'        => '',
+                        'choices'      => $this->em->getRepository(Session::class)->findBy([], ['idSession' => 'DESC']),
+                        'choice_label' => function ($session) {
+                            return $session->__toString();
+                        },
+                        ]
+                    )
+                    ->add('submit', SubmitType::class, ['label' => 'Choisir'])
+                    ->getForm();
         $form->handleRequest($request);
 
-        if ( $form->isSubmitted() && $form->isValid() )
-        {
+        if ($form->isSubmitted() && $form->isValid()) {
             $session = $form->getData()['session'];
-		}
-		else
-		{
-			$session = null;
-		}
+        } else {
+            $session = null;
+        }
         return ['form' => $form, 'session' => $session ];
     }
-    
 
-	/************
-	 * Formulaire permettant de choisir une année
-	 *
-	 * $request = La requête
-	 * $annee   = L'année, si null on prend l'année courante
-	 * 
-	 * Retourne:
-	 *     Le formulaire
-	 *     L'année choisie
-	 * 
-	 * Utilisation depuis un contrôleur: 
-	 *             $data = $ss->selectAnnee($request);
-	 * 
-	 *******************/
+
+    /************
+     * Formulaire permettant de choisir une année
+     *
+     * $request = La requête
+     * $annee   = L'année, si null on prend l'année courante
+     *
+     * Retourne:
+     *     Le formulaire
+     *     L'année choisie
+     *
+     * Utilisation depuis un contrôleur:
+     *             $data = $ss->selectAnnee($request);
+     *
+     *******************/
 
     public function selectAnnee(Request $request, $annee = null)
     {
-        if( $annee == null )
-        {
+        if ($annee == null) {
             $annee=$this->grdt->showYear();
-		}
+        }
 
-        $choices = array_reverse(Functions::choicesYear( new \DateTime('2000-01-01'), $this->grdt, 0 ),true);
-        $form    = Functions::createFormBuilder($this->ff, ['annee' => $annee ] )
-					->add('annee',   ChoiceType::class,
-						[
-							'multiple' => false,
-							'required' =>  true,
-							'label'    => '',
-							'choices'  => $choices,
-						])
-		            ->add('submit', SubmitType::class, ['label' => 'Choisir'])
-		            ->getForm();
+        $choices = array_reverse(Functions::choicesYear(new \DateTime('2000-01-01'), $this->grdt, 0), true);
+        $form    = Functions::createFormBuilder($this->ff, ['annee' => $annee ])
+                    ->add(
+                        'annee',
+                        ChoiceType::class,
+                        [
+                            'multiple' => false,
+                            'required' =>  true,
+                            'label'    => '',
+                            'choices'  => $choices,
+                        ]
+                    )
+                    ->add('submit', SubmitType::class, ['label' => 'Choisir'])
+                    ->getForm();
 
         $form->handleRequest($request);
-        if ( $form->isSubmitted() && $form->isValid() )
+        if ($form->isSubmitted() && $form->isValid()) {
             $annee = $form->getData()['annee'];
+        }
 
         return ['form'  =>  $form, 'annee'    => $annee ];
     }
@@ -181,18 +193,22 @@ class ServiceSessions
      * Return: [ $sessionA,$sessionB ] ou [ $sessionA] ou []
      *
      **/
-     public function sessionsParAnnee($annee)
-     {
-         $annee -= 2000;
-         $sessions = [];
+    public function sessionsParAnnee($annee)
+    {
+        $annee -= 2000;
+        $sessions = [];
 
-         $s = $this->em->getRepository(Session::class)->findOneBy(['idSession' => $annee.'A']);
-         if ($s!=null) $sessions[]=$s;
+        $s = $this->em->getRepository(Session::class)->findOneBy(['idSession' => $annee.'A']);
+        if ($s!=null) {
+            $sessions[]=$s;
+        }
 
-         $s = $this->em->getRepository(Session::class)->findOneBy(['idSession' => $annee.'B']);
-         if ($s!=null) $sessions[]=$s;
-         return $sessions;
-     }
+        $s = $this->em->getRepository(Session::class)->findOneBy(['idSession' => $annee.'B']);
+        if ($s!=null) {
+            $sessions[]=$s;
+        }
+        return $sessions;
+    }
 
 
 
@@ -205,30 +221,31 @@ class ServiceSessions
     *      param $attrib = Attribution
     *      return $recup = Heures pouvant être récupérées
     *********************/
-    public function calc_recup_heures_printemps( $conso, $attrib)
+    public function calc_recup_heures_printemps($conso, $attrib)
     {
-		$recup_heures = 0;
-		if( $attrib <= 0 ) return 0;
+        $recup_heures = 0;
+        if ($attrib <= 0) {
+            return 0;
+        }
 
-		if( ! $this->recup_attrib_seuil
+        if (! $this->recup_attrib_seuil
           ||! $this->recup_conso_seuil
           ||! $this->recup_attrib_quant
-          )
-          return 0;
+          ) {
+            return 0;
+        }
 
-        if ( $attrib >= $this->recup_attrib_seuil )
-        {
+        if ($attrib >= $this->recup_attrib_seuil) {
             $conso_rel = (100.0 * $conso) / $attrib;
-            if ( $conso_rel < $this->recup_conso_seuil)
-            {
+            if ($conso_rel < $this->recup_conso_seuil) {
                 $recup_heures = $attrib * $this->recup_attrib_quant / 100;
-			}
+            }
         }
         return $recup_heures;
     }
 
-	/********************************
-	* calc_recup_heures_automne
+    /********************************
+    * calc_recup_heures_automne
     * Si le projet a consommé moins d'heures en été que demandé par le comité,
     * on récupère ce qui n'a pas été consommé
     *
@@ -236,38 +253,39 @@ class ServiceSessions
     * param $attrib_ete = L'attribution pour l'été
     * return $recup     = Heures pouvant être récupérées
     **********************************/
-    public function calc_recup_heures_automne( $conso_ete, $attrib_ete )
+    public function calc_recup_heures_automne($conso_ete, $attrib_ete)
     {
-       $recup_heures = 0;
-       if( $attrib_ete <= 0 ) return 0;
+        $recup_heures = 0;
+        if ($attrib_ete <= 0) {
+            return 0;
+        }
 
-       if ( $conso_ete < $attrib_ete ) {
-          $recup_heures = $attrib_ete - $conso_ete;
-          $recup_heures = 1000 * ( intval($recup_heures / 1000 ));
-       }
-       return $recup_heures;
-    }	
-    
+        if ($conso_ete < $attrib_ete) {
+            $recup_heures = $attrib_ete - $conso_ete;
+            $recup_heures = 1000 * (intval($recup_heures / 1000));
+        }
+        return $recup_heures;
+    }
+
     /**********************************
      * Crée une nouvelle session... si nécessaire
-     * 
-     * NB - N'appelle pas persist, c'est l'appelant qui devra le faire, 
+     *
+     * NB - N'appelle pas persist, c'est l'appelant qui devra le faire,
      *      si la création est confirmée
-     * 
+     *
      * return $session
      **********************************/
     public function nouvelleSession()
     {
-		$grdt = $this->grdt;
-		$em   = $this->em;
-		
-		$sess_info = $this->nextSessionInfo();
-		$sess_id   = $sess_info['id'];
-		$sess_type = $sess_info['type'];
+        $grdt = $this->grdt;
+        $em   = $this->em;
+
+        $sess_info = $this->nextSessionInfo();
+        $sess_id   = $sess_info['id'];
+        $sess_type = $sess_info['type'];
         $session   = $em->getRepository(Session::class)->find($sess_id);
-		
-        if( $session == null )
-        {
+
+        if ($session == null) {
             $hparannee = 0;
             $sess_act = $this->getSessionCourante();
             if ($sess_act != null) {
@@ -277,36 +295,31 @@ class ServiceSessions
             $session = new Session();
             $debut = $grdt;
             $fin   = $grdt->getNew();
-            $fin->add( \DateInterval::createFromDateString( '1 months' ));
-            
-            $session->setDateDebutSession( $debut )
-                ->setDateFinSession( $fin )
-                ->setIdSession( $sess_id )
-                ->setTypeSession( $sess_type )
+            $fin->add(\DateInterval::createFromDateString('1 months'));
+
+            $session->setDateDebutSession($debut)
+                ->setDateFinSession($fin)
+                ->setIdSession($sess_id)
+                ->setTypeSession($sess_type)
                 ->setHParAnnee($hparannee)
-                ->setEtatSession( Etat::CREE_ATTENTE );
+                ->setEtatSession(Etat::CREE_ATTENTE);
         }
-		return $session;
-	}
-	
+        return $session;
+    }
+
     private function nextSessionInfo()
     {
-		$grdt = $this->grdt;
+        $grdt = $this->grdt;
         $annee = $grdt->format('y');   // 15 pour 2015
         $mois  = $grdt->format('m');   // 5 pour mai
 
-        if ($mois<7)
-        {
+        if ($mois<7) {
             $id_session = $annee.'B';
             $type       = 1;
-        }
-        else
-        {
+        } else {
             $id_session = $annee+1 .'A';
             $type       = 0;
         }
         return [ 'id' => $id_session, 'type' => $type ];
     }
-
- 
 }

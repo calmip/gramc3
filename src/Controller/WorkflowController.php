@@ -55,7 +55,6 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 
 use Symfony\Component\Form\FormFactoryInterface;
 
-
 /**
  * Workflow controller pour faire des tests.
  * @Security("is_granted('ROLE_ADMIN')")
@@ -63,21 +62,23 @@ use Symfony\Component\Form\FormFactoryInterface;
  */
 class WorkflowController extends AbstractController
 {
-	private $sj;
-	private $pw;
-	private $sw;
-	private $ff;
-	
-	public function __construct(ServiceJournal $sj,
-								ProjetWorkflow $pw,
-								SessionWorkflow $sw,
-								FormFactoryInterface $ff)
-	{
-		$this->sj = $sj;
-		$this->pw = $pw;
-		$this->sw = $sw;
-		$this->ff = $ff;
-	}
+    private $sj;
+    private $pw;
+    private $sw;
+    private $ff;
+
+    public function __construct(
+        ServiceJournal $sj,
+        ProjetWorkflow $pw,
+        SessionWorkflow $sw,
+        FormFactoryInterface $ff
+    )
+    {
+        $this->sj = $sj;
+        $this->pw = $pw;
+        $this->sw = $sw;
+        $this->ff = $ff;
+    }
 
     /**
      * entry.
@@ -87,22 +88,28 @@ class WorkflowController extends AbstractController
      */
     public function indexAction(Request $request, LoggerInterface $lg)
     {
-		$ff = $this->ff;
-		$em = $this->getdoctrine()->getManager();
-
+        $ff = $this->ff;
+        $sj = $this->sj;
+        $em = $this->getdoctrine()->getManager();
+        $signal_view_forms = [];
+        $etat_view_forms = [];
+        
         $projets = [];
-        foreach( $em->getRepository(Projet::class)->findAll() as $projet )
-            if( $projet->getEtatProjet() != Etat::TERMINE )
-                 $projets[] = $projet;
+        foreach ($em->getRepository(Projet::class)->findAll() as $projet) {
+            if ($projet->getEtatProjet() != Etat::TERMINE) {
+                $projets[] = $projet;
+            }
+        }
 
-        $sessions = array_slice( $em->getRepository(Session::class)->findAll(), -4);
+        $sessions = array_slice($em->getRepository(Session::class)->findAll(), -4);
         $menu   = [];
 
-        foreach( $sessions as $session )
-            {
+        foreach ($sessions as $session) {
             $signal_forms[$session->getIdSession()] = Functions::getFormBuilder($ff, 'signal' . $session->getIdSession())
-            ->add('signal',   ChoiceType::class,
-                    [
+            ->add(
+                'signal',
+                ChoiceType::class,
+                [
                     'multiple' => false,
                     'required'  => true,
                     'label'     => '',
@@ -114,32 +121,35 @@ class WorkflowController extends AbstractController
                                 'CLK_SESS_DEB'       =>   Signal::CLK_SESS_DEB,
                                 'CLK_SESS_FIN'       =>   Signal::CLK_SESS_FIN,
                                 ],
-                    ])
+                    ]
+            )
             ->add('submit', SubmitType::class, ['label' => 'Envoyer le signal à la session ' . $session->getIdSession()], ['required'  => false ])
             ->getForm();
 
             $signal_forms[$session->getIdSession()]->handleRequest($request);
             $signal_view_forms[$session->getIdSession()] = $signal_forms[$session->getIdSession()]->createView();
 
-            if( $signal_forms[$session->getIdSession()]->isSubmitted() && $signal_forms[$session->getIdSession()]->isValid() )
-                {
+            if ($signal_forms[$session->getIdSession()]->isSubmitted() && $signal_forms[$session->getIdSession()]->isValid()) {
                 $signal = $signal_forms[$session->getIdSession()]->getData()['signal'];
 
                 $sessionWorkflow    =   $this->sw;
-                $rtn = $sessionWorkflow->execute( $signal, $session );
-                if ( $rtn == true )
-                    $sj->debugMessage('WorkflowController : signal ' . Signal::getLibelle( $signal ). " a été appliqué avec succès sur " . $session);
-                else
-                    $sj->debugMessage('WorkflowController : signal ' . Signal::getLibelle( $signal ). " a été appliqué avec erreur sur " . $session);
-                return $this->redirectToRoute('workflow_index');
+                $rtn = $sessionWorkflow->execute($signal, $session);
+                if ($rtn == true) {
+                    $sj->debugMessage('WorkflowController : signal ' . Signal::getLibelle($signal). " a été appliqué avec succès sur " . $session);
+                } else {
+                    $sj->debugMessage('WorkflowController : signal ' . Signal::getLibelle($signal). " a été appliqué avec erreur sur " . $session);
                 }
+                return $this->redirectToRoute('workflow_index');
+            }
 
 
             ///////////////////////////////
 
-            $etat_forms[$session->getIdSession()] = Functions::getFormBuilder($ff, 'etat' . $session->getIdSession() )
-            ->add('etat',   ChoiceType::class,
-                    [
+            $etat_forms[$session->getIdSession()] = Functions::getFormBuilder($ff, 'etat' . $session->getIdSession())
+            ->add(
+                'etat',
+                ChoiceType::class,
+                [
                     'multiple' => false,
                     'required'  => true,
                     'label'     => '',
@@ -153,45 +163,49 @@ class WorkflowController extends AbstractController
                                 'ACTIF'                         =>   Etat::ACTIF,
                                 'TERMINE'                       =>   Etat::TERMINE,
                                 ],
-                    ])
+                    ]
+            )
             ->add('submit', SubmitType::class, ['label' => "Changer l'état de la session " . $session->getIdSession()], ['required'  => false ])
             ->getForm();
 
             $etat_forms[$session->getIdSession()]->handleRequest($request);
             $etat_view_forms[$session->getIdSession()] = $etat_forms[$session->getIdSession()]->createView();
 
-            if( $etat_forms[$session->getIdSession()]->isSubmitted() && $etat_forms[$session->getIdSession()]->isValid() )
-                {
+            if ($etat_forms[$session->getIdSession()]->isSubmitted() && $etat_forms[$session->getIdSession()]->isValid()) {
                 $session->setEtatSession($etat_forms[$session->getIdSession()]->getData()['etat']);
-                Functions::sauvegarder( $session, $em, $lg );
+                Functions::sauvegarder($session, $em, $lg);
                 return $this->redirectToRoute('workflow_index');
-                }
             }
+        }
 
-        return $this->render('workflow/index.html.twig',
+        return $this->render(
+            'workflow/index.html.twig',
             [
-            'projets' => $projets,
+            'projets'  => $projets,
             'sessions' => $sessions,
-            'signal_view_forms'         => $signal_view_forms,
-            'etat_view_forms'           => $etat_view_forms,
-            'menu'  => $menu,
-            ]);
+            'signal_view_forms' => $signal_view_forms,
+            'etat_view_forms'   => $etat_view_forms,
+            'menu'     => $menu,
+            ]
+        );
     }
 
-     /**
-     *
-     * @Route("/{id}/modify", name="worklow_modifier_session")
-     * @Method({"GET", "POST"})
-     */
+    /**
+    *
+    * @Route("/{id}/modify", name="worklow_modifier_session")
+    * @Method({"GET", "POST"})
+    */
     public function modifySessionAction(Request $request, Session $session, LoggerInterface $lg)
     {
-		$sj = $this->sj;
-		$ff = $this->ff;
-		$em = $this->getdoctrine()->getManager();
+        $sj = $this->sj;
+        $ff = $this->ff;
+        $em = $this->getdoctrine()->getManager();
 
         $session_form = Functions::createFormBuilder($ff)
-            ->add('signal',   ChoiceType::class,
-                    [
+            ->add(
+                'signal',
+                ChoiceType::class,
+                [
                     'multiple' => false,
                     'required'  => true,
                     'label'     => 'Signal',
@@ -203,31 +217,34 @@ class WorkflowController extends AbstractController
                                 'CLK_SESS_DEB'       =>   Signal::CLK_SESS_DEB,
                                 'CLK_SESS_FIN'       =>   Signal::CLK_SESS_FIN,
                                 ],
-                    ])
+                    ]
+            )
         ->add('submit', SubmitType::class, ['label' => 'Envoyer le signal'], ['required'  => false ])
         ->getForm();
 
         $session_form->handleRequest($request);
 
-        if ( $session_form->isSubmitted() && $session_form->isValid() )
-            {
+        if ($session_form->isSubmitted() && $session_form->isValid()) {
             $signal = $session_form->getData()['signal'];
 
             //$sessionWorkflow    =   new SessionWorkflow();
             $sessionWorkflow    =   $this->sw;
-            $rtn = $sessionWorkflow->execute( $signal, $session );
-            if ( $rtn == true )
-                $sj->debugMessage('WorkflowController : signal ' . Signal::getLibelle( $signal ). " a été appliqué avec succès");
-            else
-                $sj->debugMessage('WorkflowController : signal ' . Signal::getLibelle( $signal ). " a été appliqué avec erreur");
-            return $this->redirectToRoute('worklow_modifier_session', [ 'id' => $session->getIdSession() ]);
+            $rtn = $sessionWorkflow->execute($signal, $session);
+            if ($rtn == true) {
+                $sj->debugMessage('WorkflowController : signal ' . Signal::getLibelle($signal). " a été appliqué avec succès");
+            } else {
+                $sj->debugMessage('WorkflowController : signal ' . Signal::getLibelle($signal). " a été appliqué avec erreur");
             }
+            return $this->redirectToRoute('worklow_modifier_session', [ 'id' => $session->getIdSession() ]);
+        }
 
         ////////////////////////////
 
         $etat_form = Functions::createFormBuilder($ff)
-            ->add('etat',   ChoiceType::class,
-                    [
+            ->add(
+                'etat',
+                ChoiceType::class,
+                [
                     'multiple' => false,
                     'required'  =>  true,
                     'label'     => 'État',
@@ -241,27 +258,29 @@ class WorkflowController extends AbstractController
                                 'ACTIF'                         =>   Etat::ACTIF,
                                 'TERMINE'                       =>   Etat::TERMINE,
                                 ],
-                    ])
+                    ]
+            )
         ->add('submit', SubmitType::class, ['label' => "Changer l'état"])
         ->getForm();
 
         $etat_form->handleRequest($request);
 
-        if ( $etat_form->isSubmitted() &&  $etat_form->isValid())
-		{
-            $session->setEtatSession( $etat_form->getData()['etat'] );
-            Functions::sauvegarder( $session, $em, $lg );
+        if ($etat_form->isSubmitted() &&  $etat_form->isValid()) {
+            $session->setEtatSession($etat_form->getData()['etat']);
+            Functions::sauvegarder($session, $em, $lg);
             return $this->redirectToRoute('worklow_modifier_session', [ 'id' => $session->getIdSession() ]);
-		}
+        }
 
         ////////////////////////////
 
-        return $this->render('workflow/modify_session.html.twig',
+        return $this->render(
+            'workflow/modify_session.html.twig',
             [
             'session' => $session,
             'session_form' => $session_form->createView(),
             'etat_form' => $etat_form->createView(),
-            ]);
+            ]
+        );
     }
 
     /**
@@ -271,52 +290,62 @@ class WorkflowController extends AbstractController
      */
     public function signalProjetAction(Request $request, Projet $projet, LoggerInterface $lg)
     {
-		$sj = $this->sj;
-		$ff = $this->ff;
-		$em = $this->getdoctrine()->getManager();
+        $sj = $this->sj;
+        $ff = $this->ff;
+        $em = $this->getdoctrine()->getManager();
 
-			
-	    $versions = $projet->getVersion();
-	    $sessions = [];
-	    $old_sessions = [];
-	    foreach( $versions as $version ) $old_sessions[] = $version->getSession();
 
-    foreach ( array_slice( $em->getRepository(Session::class)->findAll(), -4) as $session )
-        if( ! in_array( $session,  $old_sessions ) ) $sessions[] = $session;
+        $versions = $projet->getVersion();
+        $sessions = [];
+        $old_sessions = [];
+        foreach ($versions as $version) {
+            $old_sessions[] = $version->getSession();
+        }
 
-     $form = Functions::getFormBuilder($ff, 'session')
-            ->add('session',   EntityType::class,
-                    [
+        foreach (array_slice($em->getRepository(Session::class)->findAll(), -4) as $session) {
+            if (! in_array($session, $old_sessions)) {
+                $sessions[] = $session;
+            }
+        }
+
+        $form = Functions::getFormBuilder($ff, 'session')
+            ->add(
+                'session',
+                EntityType::class,
+                [
                     'multiple' => false,
                     'class' => 'App:Session',
                     'required'  =>  true,
                     'label'     => 'Session',
                     'choices' =>  $sessions,
-                    'choice_label' => function($session){ return $session->getIdSession(); }
-                    ])
+                    'choice_label' => function ($session) {
+                        return $session->getIdSession();
+                    }
+                    ]
+            )
         ->add('submit', SubmitType::class, ['label' => 'Nouvelle version'])
         ->getForm();
 
-    $form->handleRequest($request);
-    if( $form->isSubmitted()&& $form->isValid() )
-	{
-        $session = $form->getData()['session'];
-        if( $session != null )
-		{
-            $version = new Version();
-            $version->setSession( $session );
-            $version->setIdVersion( $session->getIdSession() . $projet->getIdProjet() );
-            $version->setProjet( $projet );
-            Functions::sauvegarder( $version, $em, $lg);
-            return $this->redirectToRoute('workflow_signal_projet', [ 'id' => $projet->getIdProjet() ]);
-		}
-	}
+        $form->handleRequest($request);
+        if ($form->isSubmitted()&& $form->isValid()) {
+            $session = $form->getData()['session'];
+            if ($session != null) {
+                $version = new Version();
+                $version->setSession($session);
+                $version->setIdVersion($session->getIdSession() . $projet->getIdProjet());
+                $version->setProjet($projet);
+                Functions::sauvegarder($version, $em, $lg);
+                return $this->redirectToRoute('workflow_signal_projet', [ 'id' => $projet->getIdProjet() ]);
+            }
+        }
 
-    //////////////////////
+        //////////////////////
 
-    $signal_form  = Functions::getFormBuilder($ff, 'signal')
-            ->add('signal',   ChoiceType::class,
-                    [
+        $signal_form  = Functions::getFormBuilder($ff, 'signal')
+            ->add(
+                'signal',
+                ChoiceType::class,
+                [
                     'multiple' => false,
                     'required'  =>  true,
                     'label'     => 'Signal',
@@ -332,38 +361,40 @@ class WorkflowController extends AbstractController
                                 'CLK_SESS_FIN'       =>   Signal::CLK_SESS_FIN,
                                 'CLK_FERM'      =>   Signal::CLK_FERM,
                                 ],
-                    ])
+                    ]
+            )
         ->add('submit', SubmitType::class, ['label' => 'Envoyer le signal au projet'])
         ->getForm();
 
-    $signal_form->handleRequest($request);
-    if( $signal_form->isSubmitted()&& $signal_form->isValid() )
-        {
-        $signal = $signal_form->getData()['signal'];
+        $signal_form->handleRequest($request);
+        if ($signal_form->isSubmitted()&& $signal_form->isValid()) {
+            $signal = $signal_form->getData()['signal'];
 
 
-        //$projetWorkflow    =   new ProjetWorkflow();
-        $projetWorkflow    =   $this->pw;
-        $rtn = $projetWorkflow->execute( $signal, $projet );
-        if ( $rtn == true )
-            $sj->debugMessage('WorkflowController : signal ' . Signal::getLibelle( $signal ). " a été appliqué avec succès sur le projet " . $projet);
-        elseif( $rtn == false )
-            $sj->debugMessage('WorkflowController : signal ' .Signal::getLibelle( $signal ) . " a été appliqué avec erreur sur le projet " . $projet);
-        elseif( is_array($rtn ) )
-            {
-            $message = 'WorkflowController : signal ' . $signal;
-            foreach( $rtn as $return )
-                $message .= "(" . $return['signal'] . ":" . $return['object'] . ")";
-            $sj->debugMessage($message);
+            //$projetWorkflow    =   new ProjetWorkflow();
+            $projetWorkflow    =   $this->pw;
+            $rtn = $projetWorkflow->execute($signal, $projet);
+            if ($rtn == true) {
+                $sj->debugMessage('WorkflowController : signal ' . Signal::getLibelle($signal). " a été appliqué avec succès sur le projet " . $projet);
+            } elseif ($rtn == false) {
+                $sj->debugMessage('WorkflowController : signal ' .Signal::getLibelle($signal) . " a été appliqué avec erreur sur le projet " . $projet);
+            } elseif (is_array($rtn)) {
+                $message = 'WorkflowController : signal ' . $signal;
+                foreach ($rtn as $return) {
+                    $message .= "(" . $return['signal'] . ":" . $return['object'] . ")";
+                }
+                $sj->debugMessage($message);
             }
 
-       return $this->redirectToRoute('workflow_signal_projet', [ 'id' => $projet->getIdProjet() ]);
+            return $this->redirectToRoute('workflow_signal_projet', [ 'id' => $projet->getIdProjet() ]);
         }
 
-    //////////////////////////////////
-    $projet_form = Functions::getFormBuilder($ff, 'projet' )
-            ->add('etat',   ChoiceType::class,
-                    [
+        //////////////////////////////////
+        $projet_form = Functions::getFormBuilder($ff, 'projet')
+            ->add(
+                'etat',
+                ChoiceType::class,
+                [
                     'multiple' => false,
                     'required'  =>  true,
                     'label'     => 'État',
@@ -382,30 +413,31 @@ class WorkflowController extends AbstractController
                                 'EN_SURSIS'                     =>   Etat:: EN_SURSIS,
                                 'ANNULE'                        =>   Etat::ANNULE,
                                 ],
-                    ])
+                    ]
+            )
         ->add('submit', SubmitType::class, ['label' => "Changer l'état du projet " . $projet->getIdProjet() ])
         ->getForm();
 
         $projet_form->handleRequest($request);
 
-        if ( $projet_form->isSubmitted() &&  $projet_form->isValid())
-		{
-            $projet->setEtatProjet( $projet_form->getData()['etat'] );
-            Functions::sauvegarder( $projet, $em, $lg );
+        if ($projet_form->isSubmitted() &&  $projet_form->isValid()) {
+            $projet->setEtatProjet($projet_form->getData()['etat']);
+            Functions::sauvegarder($projet, $em, $lg);
             return $this->redirectToRoute('workflow_signal_projet', [ 'id' => $projet->getIdProjet() ]);
-		}
+        }
 
-    //////////////////////////////////
+        //////////////////////////////////
 
-    $versions = $projet->getVersion();
+        $versions = $projet->getVersion();
 
-    $etat_view_forms = [];
+        $etat_view_forms = [];
 
-    foreach( $versions as $version )
-        {
-        $etat_forms[$version->getIdVersion()] = Functions::getFormBuilder($ff, 'version' . $version->getIdVersion() )
-            ->add('etat',   ChoiceType::class,
-                    [
+        foreach ($versions as $version) {
+            $etat_forms[$version->getIdVersion()] = Functions::getFormBuilder($ff, 'version' . $version->getIdVersion())
+            ->add(
+                'etat',
+                ChoiceType::class,
+                [
                     'multiple' => false,
                     'required'  =>  true,
                     'label'     => 'État',
@@ -420,22 +452,23 @@ class WorkflowController extends AbstractController
                                 'TERMINE'                       =>   Etat::TERMINE,
                                 'ANNULE'                        =>   Etat::ANNULE,
                                 ],
-                    ])
+                    ]
+            )
         ->add('submit', SubmitType::class, ['label' => "Changer l'état de la version " . $version->getIdVersion() ])
         ->getForm();
 
-        $etat_forms[$version->getIdVersion()]->handleRequest($request);
-        $etat_view_forms[$version->getIdVersion()] = $etat_forms[$version->getIdVersion()]->createView();
+            $etat_forms[$version->getIdVersion()]->handleRequest($request);
+            $etat_view_forms[$version->getIdVersion()] = $etat_forms[$version->getIdVersion()]->createView();
 
-        if ( $etat_forms[$version->getIdVersion()]->isSubmitted() &&  $etat_forms[$version->getIdVersion()]->isValid())
-            {
-            $version->setEtatVersion( $etat_forms[$version->getIdVersion()]->getData()['etat'] );
-            Functions::sauvegarder( $version, $em, $lg );
-            return $this->redirectToRoute('workflow_signal_projet', [ 'id' => $projet->getIdProjet() ]);
+            if ($etat_forms[$version->getIdVersion()]->isSubmitted() &&  $etat_forms[$version->getIdVersion()]->isValid()) {
+                $version->setEtatVersion($etat_forms[$version->getIdVersion()]->getData()['etat']);
+                Functions::sauvegarder($version, $em, $lg);
+                return $this->redirectToRoute('workflow_signal_projet', [ 'id' => $projet->getIdProjet() ]);
             }
         }
 
-    return $this->render('workflow/add_version.html.twig',
+        return $this->render(
+            'workflow/add_version.html.twig',
             [
             'projet' => $projet,
             'versions' => $versions,
@@ -443,21 +476,21 @@ class WorkflowController extends AbstractController
             'signal_form'   => $signal_form->createView(),
             'etat_view_forms'   => $etat_view_forms,
             'projet_form'   => $projet_form->createView(),
-            ]);
-
+            ]
+        );
     }
 
-     /**
-     *
-     * @Route("/{id}/reset", name="workflow_reset_version")
-     * @Method({"GET", "POST"})
-     */
+    /**
+    *
+    * @Route("/{id}/reset", name="workflow_reset_version")
+    * @Method({"GET", "POST"})
+    */
     public function resetVersionAction(Request $request, Version $version, LoggerInterface $lg)
     {
-		$em = $this->getdoctrine()->getManager();
+        $em = $this->getdoctrine()->getManager();
 
-	    $version->setEtatVersion( Etat::EDITION_DEMANDE );
-	    Functions::sauvegarder( $version, $em, $lg );
-	    return $this->redirectToRoute('workflow_signal_projet', [ 'id' => $version->getProjet()->getIdProjet() ]);
+        $version->setEtatVersion(Etat::EDITION_DEMANDE);
+        Functions::sauvegarder($version, $em, $lg);
+        return $this->redirectToRoute('workflow_signal_projet', [ 'id' => $version->getProjet()->getIdProjet() ]);
     }
 }

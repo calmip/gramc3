@@ -37,7 +37,7 @@ class JournalType extends AbstractType
     {
         $builder->add('idIndividu')->add('gramcSessId')->add('type')->add('message')->add('stamp')->add('ip')        ;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -55,6 +55,4 @@ class JournalType extends AbstractType
     {
         return 'appbundle_journal';
     }
-
-
 }

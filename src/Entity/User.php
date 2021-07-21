@@ -28,7 +28,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * User
  *
- * @ORM\Table(name="user", uniqueConstraints={@ORM\UniqueConstraint(name="loginname", 
+ * @ORM\Table(name="user", uniqueConstraints={@ORM\UniqueConstraint(name="loginname",
  *                         columns={"loginname"})},
  *                         indexes={@ORM\Index(name="loginname", columns={"loginname"})})
  * @ORM\Entity(repositoryClass="App\Repository\CollaborateurVersionRepository")
@@ -67,17 +67,17 @@ class User
 
     public function __toString()
     {
-	    $output = '{';
-	    $output .= 'loginname=' . $this->getLoginname() .'}';
-	    return $output;
+        $output = '{';
+        $output .= 'loginname=' . $this->getLoginname() .'}';
+        return $output;
     }
 
-    public function __construct(Individu $individu = null, Version $version = null )
+    public function __construct()
     {
-	    $this->password  = null;
-	    $this->passexpir = null;
+        $this->password  = null;
+        $this->passexpir = null;
     }
-    
+
     /**
      * Set loginname
      *

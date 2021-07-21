@@ -37,83 +37,79 @@ use App\Entity\Session;
 use App\Entity\Projet;
 use App\Entity\Version;
 
-
 class SessionTransition extends Transition
 {
-
     public function canExecute($session)
     {
-		if ( !$session instanceof Session ) throw new \InvalidArgumentException;
-		
-		$rtn = true;
-		if (Transition::FAST == false && $this->getPropageSignal())
-		{
-			// Propagation vers les versions
-			$versions = $this->em->getRepository(Version::class)->findBy( ['session' => $session] );
-			$workflow = new VersionWorkflow($this->sn, $this->sj, $this->ss, $this->em);
-			if( $versions == null && Transition::DEBUG)
-			{
-				$this->sj->debugMessage(__METHOD__ . ':' . __LINE__ . " aucune version pour la session " . $session );
-			}
+        if (!$session instanceof Session) {
+            throw new \InvalidArgumentException();
+        }
 
-			foreach( $versions as $version )
-			{
-				$output = $workflow->canExecute( $this->getSignal(), $version );
-				$rtn = Functions::merge_return( $rtn, $output );
-				if( $output != true && Transition::DEBUG)
-				{
-					$this->sj->debugMessage(__METHOD__ . ':' . __LINE__ . " Version " . $version . "  ne passe pas en état "
-						. Etat::getLibelle( $version->getEtatVersion() ) . " signal = " . signal::getLibelle( $this->getSignal() ));
-				}
-			}
-		}
-		return $rtn;
+        $rtn = true;
+        if (Transition::FAST == false && $this->getPropageSignal()) {
+            // Propagation vers les versions
+            $versions = $this->em->getRepository(Version::class)->findBy(['session' => $session]);
+            $workflow = new VersionWorkflow($this->sn, $this->sj, $this->ss, $this->em);
+            if ($versions == null && Transition::DEBUG) {
+                $this->sj->debugMessage(__METHOD__ . ':' . __LINE__ . " aucune version pour la session " . $session);
+            }
+
+            foreach ($versions as $version) {
+                $output = $workflow->canExecute($this->getSignal(), $version);
+                $rtn = Functions::merge_return($rtn, $output);
+                if ($output != true && Transition::DEBUG) {
+                    $this->sj->debugMessage(__METHOD__ . ':' . __LINE__ . " Version " . $version . "  ne passe pas en état "
+                        . Etat::getLibelle($version->getEtatVersion()) . " signal = " . signal::getLibelle($this->getSignal()));
+                }
+            }
+        }
+        return $rtn;
     }
 
     public function execute($session)
     {
-		if ( !$session instanceof Session ) throw new \InvalidArgumentException;
-		$rtn = true;
+        if (!$session instanceof Session) {
+            throw new \InvalidArgumentException();
+        }
+        $rtn = true;
 
-		// Si on ne peut pas remettre toutes les sessions php à zéro, renvoie false
-		// La transition n'a pas eu lieu
-		// Cela est une sécurité afin de s'assurer que personne ne reste connecté, ne sachant pas que la session
-		// a changé d'état !
-		if (Functions::clear_phpSessions()==false)
-		{
-			$rtn = false;
-			$this->sj->errorMessage(__METHOD__ . ':' . __LINE__ . " clear_phpSessions renvoie false");
-			return $rtn;
-		}
-		else
-		{
-			if (Transition::DEBUG) $this->sj->debugMessage( __FILE__ . ":" . __LINE__ . " nettoyage des sessions php" );
-		}
+        // Si on ne peut pas remettre toutes les sessions php à zéro, renvoie false
+        // La transition n'a pas eu lieu
+        // Cela est une sécurité afin de s'assurer que personne ne reste connecté, ne sachant pas que la session
+        // a changé d'état !
+        if (Functions::clear_phpSessions()==false) {
+            $rtn = false;
+            $this->sj->errorMessage(__METHOD__ . ':' . __LINE__ . " clear_phpSessions renvoie false");
+            return $rtn;
+        } else {
+            if (Transition::DEBUG) {
+                $this->sj->debugMessage(__FILE__ . ":" . __LINE__ . " nettoyage des sessions php");
+            }
+        }
 
-		if( $this->getSignal() == null ) 
-		{
-			$this->sj->ErrorMessage( __FILE__ . ":" . __LINE__ . " signal null" );
-			return false;
-		}
+        if ($this->getSignal() == null) {
+            $this->sj->ErrorMessage(__FILE__ . ":" . __LINE__ . " signal null");
+            return false;
+        }
 
-		$versions = $this->em->getRepository(Version::class)->findBy( ['session' => $session] );
-		if ($this->getPropageSignal())
-		{
-			if (Transition::DEBUG) $this->sj->debugMessage( __FILE__ . ":" . __LINE__ . " propagation du signal ".$this->getSignal()." à ".count($versions)." versions");
-	
-			$workflow = new VersionWorkflow($this->sn, $this->sj, $this->ss, $this->em);
-	
-			// Propage le signal à toutes les versions qui dépendent de la session
-			foreach( $versions as $version )
-			{
-				$output = $workflow->execute( $this->getSignal(), $version );
-				$rtn = Functions::merge_return( $rtn, $output );
-			}
-		}
-		
-		// Change l'état de la session
-		$this->changeEtat($session);
+        $versions = $this->em->getRepository(Version::class)->findBy(['session' => $session]);
+        if ($this->getPropageSignal()) {
+            if (Transition::DEBUG) {
+                $this->sj->debugMessage(__FILE__ . ":" . __LINE__ . " propagation du signal ".$this->getSignal()." à ".count($versions)." versions");
+            }
 
-		return $rtn;
+            $workflow = new VersionWorkflow($this->sn, $this->sj, $this->ss, $this->em);
+
+            // Propage le signal à toutes les versions qui dépendent de la session
+            foreach ($versions as $version) {
+                $output = $workflow->execute($this->getSignal(), $version);
+                $rtn = Functions::merge_return($rtn, $output);
+            }
+        }
+
+        // Change l'état de la session
+        $this->changeEtat($session);
+
+        return $rtn;
     }
 }

@@ -1,0 +1,38 @@
+{% extends 'default/base.html.twig' %}
+
+{% block body %}
+<section>
+    <h1>Formations enregistrées dans gramc</h1>
+
+    {% import "default/macros.html.twig" as gramcmacros %}
+    {{ gramcmacros.menu(menu) }}
+
+    <table id="formations" >
+    <thead>
+        <tr>
+			{% if is_granted('ROLE_ADMIN') %}<th colspan="2">&nbsp;</th>{% endif %}<th>champ de version</th><th>Acronyme</th><th>Libellé</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for form in formations %}
+        <tr>
+			{% if is_granted('ROLE_ADMIN') %}
+            <td>
+                <a class="suppression" href="{{ path('supprimer_formation',{'id' : form.id }) }}" title="Supprimer">
+                <img class="bouton_poussoir" src="{{ gramcmacros.img_supprimer() }}" alt="Supprimer" /></a>
+            </td>
+            <td>
+                <a class="modification" href="{{ path('modifier_formation',{'id' : form.id }) }}" title="Modifier le libellé">
+                <img class="bouton_poussoir" src="{{ gramcmacros.img_modifier() }}" alt="Modifier" /></a>
+            </td>
+            {% endif %}
+            <td>{% if form.numeroform<10 %}form{{ form.numeroform }}{% else %} <em>aucun</em> (n°{{form.numeroform}}){% endif %}</td>
+            <td> {{ form.acroform }}</td>
+            <td>{{ form.nomform }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+</section>
+
+{% endblock body  %}

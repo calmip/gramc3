@@ -71,15 +71,14 @@
                 </thead>
                 <tbody>
                 {% for expertise in expertises_thematique.expertises %}
-                {% if( expertise.expert == true and session.etatsession != 2) %}
+                {% if (expertise.expert == true) %}
                     <tr class="gras" >
 				{% else %}
 				    <tr class="leger" >
 			    {% endif %}
                         <td>{{ expertise.projetId }}</td>
                         <td>
-							{# Si la session est en etat demande l'expert n'est pas encore définitivement attribué #}
-                            {% if( expertise.expert == true and session.etatsession != 2) %}
+                            {% if( expertise.expert == true) %}
                                 <a href="{{ path('expertise_modifier', { 'id' : expertise.expertise.id } ) }}">
                                 <img src="{{ asset('icones/modifier.png') }}" alt="Expertiser" title="Expertiser le projet" class="bouton_poussoir"></a>
                             {% else %}
@@ -117,14 +116,14 @@
         </thead>
         <tbody>
           {% for expertise in expertises_hors_thematique %}
-                {% if( expertise.expert == true and session.etatsession != 2) %}
+                {% if( expertise.expert == true) %}
                     <tr class="gras" >
 				{% else %}
 				    <tr class="leger" >
 			    {% endif %}
                         <td>{{ expertise.projetId }}</td>
-                        <td>{# Si la session est en etat demande l'expert n'est pas encore définitivement attribué #}
-							{% if( expertise.expert == true and session.etatsession != 2) %}
+                        <td>
+							{% if( expertise.expert == true) %}
                                 <a href="{{ path('expertise_modifier', { 'id' : expertise.expertise.id } ) }}">
                                 <img src="{{ asset('icones/modifier.png') }}" alt="Expertiser" title="Expertiser le projet" class="bouton_poussoir"></a>
                             {% else %}

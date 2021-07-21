@@ -48,57 +48,69 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class SessionType extends AbstractType
 {
-	public function __construct (GramcDate $grdt, EntityManagerInterface $em)
-	{
-		$this -> grdt = $grdt;
-		$this -> em   = $em;
-	}
+    private $grdt;
+    private $em; 
+    
+    public function __construct(GramcDate $grdt, EntityManagerInterface $em)
+    {
+        $this -> grdt = $grdt;
+        $this -> em   = $em;
+    }
 
     /**
      * {@inheritdoc}
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        if( $options['commentaire'] )
-        {
+        if ($options['commentaire']) {
             $builder->add('commGlobal');
             return;
         }
-        if( $options['all'] )
-        {
+        if ($options['all']) {
             $builder->add('typeSession')->add('commGlobal');
         }
 
         $builder
-            ->add('dateDebutSession', DateType::class,
-                    [
+            ->add(
+                'dateDebutSession',
+                DateType::class,
+                [
                     //'data'          => $options['from'], // valeur par défaut
                     'label'         => 'Date de début des saisies:',
-                    'years'         => Functions::years( new \DateTime(), $this->grdt->getNew() ),
-                    ])
-            ->add('dateFinSession', DateType::class,
-                    [
+                    'years'         => Functions::years(new \DateTime(), $this->grdt->getNew()),
+                    ]
+            )
+            ->add(
+                'dateFinSession',
+                DateType::class,
+                [
                     //'data'          => $options['from'], // valeur par défaut
                     'label'         => 'Date de fin des saisies:',
-                    'years'         => Functions::years( new \DateTime(), $this->grdt->getNew() ),
-                    ])
-            ->add('hParAnnee', IntegerType::class,
-                    [
+                    'years'         => Functions::years(new \DateTime(), $this->grdt->getNew()),
+                    ]
+            )
+            ->add(
+                'hParAnnee',
+                IntegerType::class,
+                [
                     //'data'          => $options['from'], // valeur par défaut
                     'label'         => 'Heures disponibles (par année):',
-                    ])           
-            ->add('president',  EntityType::class,
-                        [
-                    'multiple' => false,
-                    'class' => 'App:Individu',
-                    'required'  =>  false,
-                    'label'     => 'Président:',
-                    'choices' =>  $this->em->getRepository(Individu::class)->findBy(['expert' => true]),
-                ]);
+                    ]
+            );
+        //->add('president',  EntityType::class,
+        //            [
+        //        'multiple' => false,
+        //        'class' => 'App:Individu',
+        //        'required'  =>  false,
+        //        'label'     => 'Président:',
+        //        'choices' =>  $this->em->getRepository(Individu::class)->findBy(['expert' => true]),
+        //    ])
 
-         if(  $options['all'] == true )
-            $builder->add('etatSession',   ChoiceType::class,
-                    [
+        if ($options['all'] == true) {
+            $builder->add(
+                'etatSession',
+                ChoiceType::class,
+                [
                         'choices'           =>
                                             [
                                             'CREE_ATTENTE'          =>  Etat::CREE_ATTENTE,
@@ -109,13 +121,16 @@ class SessionType extends AbstractType
                                             'TERMINE'               =>  Etat::TERMINE,
                                             ],
                         'label'             => 'Etat',
-                    ])
+                    ]
+            )
                     ->add('idSession');
+        }
 
-        if( $options['buttons'] == true )
+        if ($options['buttons'] == true) {
             $builder
-                ->add('submit',SubmitType::class, ['label' => $options['submit_label']  ])
-                ->add('reset',   ResetType::class, ['label' => 'reset' ]);
+                ->add('submit', SubmitType::class, ['label' => $options['submit_label']  ])
+                ->add('reset', ResetType::class, ['label' => 'reset' ]);
+        }
     }
 
     /**
@@ -130,7 +145,8 @@ class SessionType extends AbstractType
             'buttons'        => false,
             'submit_label'  =>  'modifier',
             'commentaire'   =>  false
-            ]);
+            ]
+        );
     }
 
     /**
@@ -140,6 +156,4 @@ class SessionType extends AbstractType
     {
         return 'appbundle_session';
     }
-
-
 }

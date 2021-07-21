@@ -52,43 +52,42 @@ class IndividuRepository extends \Doctrine\ORM\EntityRepository
 
     public function countAll()
     {
-         return $this->createQueryBuilder('l')
+        return $this->createQueryBuilder('l')
                         ->select('COUNT(l)')
                         ->getQuery()
                         ->getSingleScalarResult();
-
     }
 
     public function getCollaborateurs($responsable = false)
     {
-         $dql  =    'SELECT u FROM App:Individu u INNER JOIN App:CollaborateurVersion c WITH c.collaborateur = u ';
-         $dql .=    ' WHERE NOT ( u.admin = true OR u.expert = true OR u.president = true ) ';
-         $dql .=    ' AND c.responsable = :responsable';
+        $dql  =    'SELECT u FROM App:Individu u INNER JOIN App:CollaborateurVersion c WITH c.collaborateur = u ';
+        $dql .=    ' WHERE NOT ( u.admin = true OR u.expert = true OR u.president = true ) ';
+        $dql .=    ' AND c.responsable = :responsable';
 
         $query = $this->getEntityManager()
-         ->createQuery( $dql )
-         ->setParameter('responsable', $responsable );
-         
+         ->createQuery($dql)
+         ->setParameter('responsable', $responsable);
+
         return $query->getResult();
     }
 
     public function liste_mail_like($mail)
     {
-        if(  is_string( $mail ) && strlen( $mail ) > 2 )
+        if (is_string($mail) && strlen($mail) > 2) {
             return $this->getEntityManager()
             ->createQuery("SELECT u.mail FROM App:Individu u WHERE u.mail LIKE :key")
-            ->setParameter('key', '%' . $mail .'%' )
+            ->setParameter('key', '%' . $mail .'%')
             ->getResult();
-        else
+        } else {
             return [];
+        }
     }
 
-     public function liste_avant($date)
+    public function liste_avant($date)
     {
-            return $this->getEntityManager()
+        return $this->getEntityManager()
             ->createQuery("SELECT u FROM App:Individu u WHERE u.creationStamp <= :date")
-            ->setParameter('date', $date )
+            ->setParameter('date', $date)
             ->getResult();
-       
     }
 }

@@ -37,7 +37,7 @@ class StatutType extends AbstractType
     {
         $builder->add('idStatut')->add('libelleStatut')->add('permanent')        ;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -55,6 +55,4 @@ class StatutType extends AbstractType
     {
         return 'appbundle_statut';
     }
-
-
 }

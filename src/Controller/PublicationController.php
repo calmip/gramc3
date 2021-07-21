@@ -53,25 +53,25 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
  */
 class PublicationController extends AbstractController
 {
-	private $sj;
-	private $ss;
-	private $ff;
-	private $tok;
-	private $ac;
-		
-	public function __construct (ServiceJournal $sj,
-								 ServiceSessions $ss,
- 								 FormFactoryInterface $ff,
-								 TokenStorageInterface $tok,
- 								 AuthorizationCheckerInterface $ac
-								 )
-	{
-		$this->sj  = $sj;
-		$this->ss  = $ss;
-		$this->ff  = $ff;
-		$this->token= $tok->getToken();
-		$this->ac  = $ac;
-	}
+    private $sj;
+    private $ss;
+    private $ff;
+    private $token;
+    private $ac;
+
+    public function __construct(
+        ServiceJournal $sj,
+        ServiceSessions $ss,
+        FormFactoryInterface $ff,
+        TokenStorageInterface $tok,
+        AuthorizationCheckerInterface $ac
+    ) {
+        $this->sj  = $sj;
+        $this->ss  = $ss;
+        $this->ff  = $ff;
+        $this->token= $tok->getToken();
+        $this->ac  = $ac;
+    }
 
     /**
      * Lists all publication entities.
@@ -90,63 +90,59 @@ class PublicationController extends AbstractController
             'publications' => $publications,
         ));
     }
-    
+
     /**
      * @Route("/{id}/gerer",name="gerer_publications" )
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function gererAction(Projet $projet, Request $request, LoggerInterface $lg)
     {
-		$em = $this->getDoctrine()->getManager();
-		
+        $sj = $this->sj;
+        $em = $this->getDoctrine()->getManager();
+
         $publication    = new Publication();
         $form = $this->createForm('App\Form\PublicationType', $publication);
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid() )
-        {
-            if( $publication->getIdPubli() != null )
-            {
-                $sj->noticeMessage( "PublicationController gererAction : La publication " . $publication->getIdPubli() . " est partagée par plusieurs projets");
-                $old = $em->getRepository(Publication::class)->find( $publication->getIdPubli() );
-                if( $old->getRefbib() != $publication->getRefbib() )
-                {
-                    $sj->warningMessage("Changement de REFBIB de la publication " . $publication->getIdPubli() );
-                    $old->setRefbib( $publication->getRefbib() );
-                }
-                
-                if( $old->getDoi() != $publication->getDoi() )
-                {
-                    $sj->warningMessage("Changement de DOI de la publication " . $publication->getIdPubli() );
-                    $old->setDoi( $publication->getDoi() );
+        if ($form->isSubmitted() && $form->isValid()) {
+            if ($publication->getIdPubli() != null) {
+                $sj->noticeMessage("PublicationController gererAction : La publication " . $publication->getIdPubli() . " est partagée par plusieurs projets");
+                $old = $em->getRepository(Publication::class)->find($publication->getIdPubli());
+                if ($old->getRefbib() != $publication->getRefbib()) {
+                    $sj->warningMessage("Changement de REFBIB de la publication " . $publication->getIdPubli());
+                    $old->setRefbib($publication->getRefbib());
                 }
 
-                if( $old->getOpenUrl() != $publication->getOpenUrl() )
-                {
-                    $sj->warningMessage("Changement de OpenUrl de la publication " . $publication->getIdPubli() );
-                    $old->setOpenUrl( $publication->getOpenUrl() );
+                if ($old->getDoi() != $publication->getDoi()) {
+                    $sj->warningMessage("Changement de DOI de la publication " . $publication->getIdPubli());
+                    $old->setDoi($publication->getDoi());
                 }
 
-                if( $old->getAnnee() != $publication->getAnnee() )
-                {
-                    $sj->warningMessage("Changement d'année de la publication " . $publication->getIdPubli() );
-                    $old->setAnnee( $publication->getAnnee() );
+                if ($old->getOpenUrl() != $publication->getOpenUrl()) {
+                    $sj->warningMessage("Changement de OpenUrl de la publication " . $publication->getIdPubli());
+                    $old->setOpenUrl($publication->getOpenUrl());
                 }
-                
+
+                if ($old->getAnnee() != $publication->getAnnee()) {
+                    $sj->warningMessage("Changement d'année de la publication " . $publication->getIdPubli());
+                    $old->setAnnee($publication->getAnnee());
+                }
+
                 $publication = $old;
             }
-                
-            $projet->addPubli( $publication );
-            $publication->addProjet( $projet );
-            Functions::sauvegarder( $publication, $em, $lg );
-            Functions::sauvegarder( $projet, $em, $lg );
+
+            $projet->addPubli($publication);
+            $publication->addProjet($projet);
+            Functions::sauvegarder($publication, $em, $lg);
+            Functions::sauvegarder($projet, $em, $lg);
         }
 
-        $form = $this->createForm('App\Form\PublicationType', new Publication() ); // on efface le formulaire
-            
-        return $this->render( 'publication/liste.html.twig',
-        [
+        $form = $this->createForm('App\Form\PublicationType', new Publication()); // on efface le formulaire
+
+        return $this->render(
+            'publication/liste.html.twig',
+            [
             'publications' => $projet->getPubli(),
             'form'  => $form->createView(),
             'projet'    => $projet,
@@ -160,9 +156,9 @@ class PublicationController extends AbstractController
      */
     public function consulterAction(Projet $projet, Request $request)
     {
-            
-        return $this->render( 'publication/consulter.html.twig',
-        [
+        return $this->render(
+            'publication/consulter.html.twig',
+            [
             'publications' => $projet->getPubli(),
             'projet'    => $projet,
         ]
@@ -176,18 +172,20 @@ class PublicationController extends AbstractController
      */
     public function AnneeAction(Request $request)
     {
-		$ss    = $this->ss;
-		$data  = $ss->selectAnnee($request); // formulaire
+        $ss    = $this->ss;
+        $data  = $ss->selectAnnee($request); // formulaire
         $annee = $data['annee'];
         $em    = $this->getDoctrine()->getManager();
-        $publications = $em->getRepository(Publication::class)->findBy( ['annee' => $annee ] );
+        $publications = $em->getRepository(Publication::class)->findBy(['annee' => $annee ]);
 
-        return $this->render('publication/annee.html.twig',
-			[
-			'form'  => $data['form']->createView(), // formulaire
-			'annee' => $annee,
-			'publications' => $publications,
-			]);
+        return $this->render(
+            'publication/annee.html.twig',
+            [
+            'form'  => $data['form']->createView(), // formulaire
+            'annee' => $annee,
+            'publications' => $publications,
+            ]
+        );
     }
 
     /**
@@ -198,29 +196,28 @@ class PublicationController extends AbstractController
     public function AnneeCsvAction($annee)
     {
         $em    = $this->getDoctrine()->getManager();
-        $publications = $em->getRepository(Publication::class)->findBy( ['annee' => $annee ] );
-        
-		$header  = [
+        $publications = $em->getRepository(Publication::class)->findBy(['annee' => $annee ]);
+
+        $header  = [
                     'Référence',
                     'annee',
                     'doi',
                     'URL',
                     'Projets'
                     ];
-                    
-        $sortie = join("\t",$header) . "\n";
-        foreach ( $publications as $publi)
-        {
-			$line   = [];
-			$line[] = '"'.str_replace(["\n","\r\n","\t",'"'],[' ',' ',' ',' '],$publi->getRefbib()).'"';
-			//$line[] = 'ref';
-			$line[] = $publi->getAnnee();
-			$line[] = $publi->getDoi();
-			$line[] = $publi->getOpenUrl();
-			$line[] = join(" ",$publi->getProjet()->toArray());
-			$sortie.= join("\t",$line) . "\n";
-		}
-		return Functions::csv($sortie,'publis_'.$annee.'.csv');
+
+        $sortie = join("\t", $header) . "\n";
+        foreach ($publications as $publi) {
+            $line   = [];
+            $line[] = '"'.str_replace(["\n","\r\n","\t",'"'], [' ',' ',' ',' '], $publi->getRefbib()).'"';
+            //$line[] = 'ref';
+            $line[] = $publi->getAnnee();
+            $line[] = $publi->getDoi();
+            $line[] = $publi->getOpenUrl();
+            $line[] = join(" ", $publi->getProjet()->toArray());
+            $sortie.= join("\t", $line) . "\n";
+        }
+        return Functions::csv($sortie, 'publis_'.$annee.'.csv');
     }
 
     /**
@@ -236,11 +233,10 @@ class PublicationController extends AbstractController
         $form = $this->createForm('App\Form\PublicationType', $publication);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid())
-        {
+        if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $em->persist($publication);
-            $em->flush($publication);
+            $em->flush();
 
             return $this->redirectToRoute('publication_show', array('id' => $publication->getId()));
         }
@@ -299,29 +295,29 @@ class PublicationController extends AbstractController
      * Displays a form to edit an existing publication entity.
      *
      * @Route("/{id}/{projet}/modify", name="modifier_publication")
-     * @Security("is_granted('ROLE_DEMANDEUR')") 
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      * @Method({"GET", "POST"})
      */
     public function modifyAction(Request $request, Publication $publication, Projet $projet, LoggerInterface $lg)
     {
-		$sj = $this->sj;
-		$em = $this->getdoctrine()->getManager();
+        $sj = $this->sj;
+        $em = $this->getdoctrine()->getManager();
 
         $editForm = $this->createForm('App\Form\PublicationType', $publication);
         $editForm->handleRequest($request);
-        
+
         $deleteForm =  $this->createFormBuilder()
-            ->setAction($this->generateUrl('supprimer_publication', ['id' => $publication->getId(), 'projet' =>  $projet->getIdProjet()] ))
+            ->setAction($this->generateUrl('supprimer_publication', ['id' => $publication->getId(), 'projet' =>  $projet->getIdProjet()]))
             ->setMethod('DELETE')
             ->getForm()
         ;
-        if ($editForm->isSubmitted() && $editForm->isValid())
-            {
-            Functions::sauvegarder( $publication, $em, $lg );
-            if( count(  $publication->getProjet() ) > 1 )
-                 $sj->warningMessage("Modification de la publication  " . $publication->getIdPubli() . " partagée par plusieurs projets" ); 
-            return $this->redirectToRoute('gerer_publications', [ 'id' => $projet->getIdProjet() ] );
+        if ($editForm->isSubmitted() && $editForm->isValid()) {
+            Functions::sauvegarder($publication, $em, $lg);
+            if (count($publication->getProjet()) > 1) {
+                $sj->warningMessage("Modification de la publication  " . $publication->getIdPubli() . " partagée par plusieurs projets");
             }
+            return $this->redirectToRoute('gerer_publications', [ 'id' => $projet->getIdProjet() ]);
+        }
 
         return $this->render('publication/modify.html.twig', array(
             'publication' => $publication,
@@ -334,20 +330,19 @@ class PublicationController extends AbstractController
     /**
      * Deletes a publication entity.
      *
-     * @Security("is_granted('ROLE_ADMIN')") 
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Route("/{id}", name="publication_delete")
      * @Method("DELETE")
      */
     public function deleteAction(Request $request, Publication $publication)
     {
-
         $form = $this->createDeleteForm($publication);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $em->remove($publication);
-            $em->flush($publication);
+            $em->flush();
         }
 
         return $this->redirectToRoute('publication_index');
@@ -355,37 +350,35 @@ class PublicationController extends AbstractController
 
     /**
      * Deletes a publication entity.
-     * 
-     * @Security("is_granted('ROLE_DEMANDEUR')") 
+     *
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      * @Route("/{id}/{projet}/supprimer", name="supprimer_publication")
      * @Method({ "GET","DELETE"})
      */
     public function supprimerAction(Request $request, Publication $publication, Projet $projet, LoggerInterface $lg)
     {
-		$ac = $this->ac;
-		$token = $this->token;
-		$sj = $this->sj;
-		$em = $this->getdoctrine()->getManager();
+        $ac = $this->ac;
+        $token = $this->token;
+        $sj = $this->sj;
+        $em = $this->getdoctrine()->getManager();
 
         // ACL
-        if( ! $projet->isCollaborateur($token->getUser()) && ! $ac->isGranted('ROLE_ADMIN') )
-        {
-			$sj->throwException();
-		}
-        
-        $projet->removePubli( $publication );
-        $publication->removeProjet( $projet );
-        Functions::sauvegarder( $projet, $em, $lg );
-        Functions::sauvegarder( $publication, $em, $lg );
+        if (! $projet->isCollaborateur($token->getUser()) && ! $ac->isGranted('ROLE_ADMIN')) {
+            $sj->throwException();
+        }
 
-        if( $publication->getProjet() == null )
-                {
-                $em = $this->getDoctrine()->getManager();
-                $em->remove($publication);
-                $em->flush($publication);
-                }
-                
-        return $this->redirectToRoute('gerer_publications', [ 'id' => $projet->getIdProjet() ] );
+        $projet->removePubli($publication);
+        $publication->removeProjet($projet);
+        Functions::sauvegarder($projet, $em, $lg);
+        Functions::sauvegarder($publication, $em, $lg);
+
+        if ($publication->getProjet() == null) {
+            $em = $this->getDoctrine()->getManager();
+            $em->remove($publication);
+            $em->flush();
+        }
+
+        return $this->redirectToRoute('gerer_publications', [ 'id' => $projet->getIdProjet() ]);
     }
 
     /**
@@ -399,7 +392,7 @@ class PublicationController extends AbstractController
     private function createDeleteForm(Publication $publication)
     {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('publication_delete', ['id' => $publication->getId() ] ))
+            ->setAction($this->generateUrl('publication_delete', ['id' => $publication->getId() ]))
             ->setMethod('DELETE')
             ->getForm()
         ;
@@ -409,63 +402,63 @@ class PublicationController extends AbstractController
      * Autocomplete publication
      *
      * @Route("/autocomplete", name="publication_autocomplete")
-     * @Security("is_granted('ROLE_DEMANDEUR')") 
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      * @Method({"POST","GET"})
      */
     public function autocompleteAction(Request $request)
     {
-		$sj = $this->sj;
-		$em = $this->getDoctrine()->getManager();
-		
-        $sj->debugMessage('autocompleteAction ' .  print_r($_POST, true) );
-        $form = $this->ff
-		            ->createNamedBuilder('autocomplete_form', FormType::class, [])
-		            ->add('refbib', TextType::class, [ 'required' => true, 'csrf_protection' => false] )
-		            ->getForm();
-            
-        $form->handleRequest($request);
-        
-        if ( $form->isSubmitted() ) // nous ne pouvons pas ajouter $form->isValid() et nous ne savons pas pourquoi
-            {
-             if ( array_key_exists('refbib',$form->getData() ) )
-                $data   =   $em->getRepository(Publication::class)->liste_refbib_like( $form->getData()['refbib'] );
-            else
-                $data  =   [ ['refbib' => 'Problème avec AJAX dans PublicationController:autocompleteAction' ] ];
-            
-            $output = [];
-            foreach( $data as $item )
-                if( array_key_exists('refbib', $item ))
-                    $output[]   =   $item['refbib'];
+        $sj = $this->sj;
+        $em = $this->getDoctrine()->getManager();
 
-            $response = new Response(json_encode( $output ) );
+        $sj->debugMessage('autocompleteAction ' .  print_r($_POST, true));
+        $form = $this->ff
+                    ->createNamedBuilder('autocomplete_form', FormType::class, [])
+                    ->add('refbib', TextType::class, [ 'required' => true, 'csrf_protection' => false])
+                    ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted()) { // nous ne pouvons pas ajouter $form->isValid() et nous ne savons pas pourquoi
+            if (array_key_exists('refbib', $form->getData())) {
+                $data   =   $em->getRepository(Publication::class)->liste_refbib_like($form->getData()['refbib']);
+            } else {
+                $data  =   [ ['refbib' => 'Problème avec AJAX dans PublicationController:autocompleteAction' ] ];
+            }
+
+            $output = [];
+            foreach ($data as $item) {
+                if (array_key_exists('refbib', $item)) {
+                    $output[]   =   $item['refbib'];
+                }
+            }
+
+            $response = new Response(json_encode($output));
             $response->headers->set('Content-Type', 'application/json');
             return $response;
-            }
+        }
 
         // on complète le reste des informations
 
         $publication    = new Publication();
-        $form = $this->createForm(PublicationType::class, $publication, ['csrf_protection' => false]);            
+        $form = $this->createForm(PublicationType::class, $publication, ['csrf_protection' => false]);
         $form->handleRequest($request);
-        
-        if (  $form->isSubmitted()  && $form->isValid() )
-            {
+
+        if ($form->isSubmitted()  && $form->isValid()) {
             $publication = $em->getRepository(Publication::class)->findOneBy(['refbib' => $publication->getRefbib() ]);
-            
-            if( $publication != null   )
-                {
-                $form = $this->createForm(PublicationType::class, $publication, ['csrf_protection' => true]);   
-                return $this->render('publication/form.html.twig', [ 'form' => $form->createView() ] );
-                }
-            else
+
+            if ($publication != null) {
+                $form = $this->createForm(PublicationType::class, $publication, ['csrf_protection' => true]);
+                return $this->render('publication/form.html.twig', [ 'form' => $form->createView() ]);
+            } else {
                 return  new Response('nopubli');
             }
+        }
         //return new Response( 'no form submitted' );
 
-        $form = $this->createForm(PublicationType::class, $publication, ['csrf_protection' => true]);   
-                
-        return $this->render('publication/form.html.twig', [ 'form' => $form->createView() ] );
-        
-        return new Response( json_encode('no form submitted') );
+        $form = $this->createForm(PublicationType::class, $publication, ['csrf_protection' => true]);
+
+        return $this->render('publication/form.html.twig', [ 'form' => $form->createView() ]);
+
+        return new Response(json_encode('no form submitted'));
     }
 }

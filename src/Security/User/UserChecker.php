@@ -48,86 +48,88 @@ use Symfony\Component\Security\Core\User\UserInterface;
 //use App\Utils\Functions;
 use App\GramcServices\ServiceJournal;
 
-
 class UserChecker implements UserCheckerInterface
 {
-	public function __construct(AuthorizationCheckerInterface $secu_auto_chk,
-								TokenStorageInterface $token,
-								SessionInterface $sss,
-								ServiceJournal $sj,
-								EntityManagerInterface $em)
-	{
-		$this->secu_auto_chk = $secu_auto_chk;
-		$this->token         = $token->getToken();
-		$this->sss           = $sss;
-		$this->sj            = $sj;
-		$this->em            = $em;
-	}
+    private $secu_auto_chk;
+    private $token;
+    private $sss;
+    private $sj;
+    private $em;
+    
+    public function __construct(
+        AuthorizationCheckerInterface $secu_auto_chk,
+        TokenStorageInterface $tok,
+        SessionInterface $sss,
+        ServiceJournal $sj,
+        EntityManagerInterface $em
+    )
+    {
+        $this->secu_auto_chk = $secu_auto_chk;
+        $this->token         = $tok->getToken();
+        $this->sss           = $sss;
+        $this->sj            = $sj;
+        $this->em            = $em;
+    }
 
     public function checkPreAuth(UserInterface $user)
-	{
-        if (!$user instanceof AppUser) return;
+    {
+        if (!$user instanceof AppUser) {
+            return;
+        }
 
-        if( $this->secu_auto_chk->isGranted('ROLE_PREVIOUS_ADMIN') )
+        if ($this->secu_auto_chk->isGranted('ROLE_PREVIOUS_ADMIN')) {
             $this->sj->debugMessage('UserChecker : checkPreAuth : User ' . $user->getPrenom() . ' ' . $user->getNom() .
                 " ROLE_PREVIOUS_ADMIN granted");
+        }
 
-        if( $user->getDesactive() )
-		{
+        if ($user->getDesactive()) {
             $this->sj->warningMessage('UserChecker : checkPreAuth : User ' . $user->getPrenom() . ' ' . $user->getNom() .
                 " est désactivé");
             throw new UserException($user);
-		}
-        else
-		{
+        } else {
             //  $this->sj->debugMessage('UserChecker : checkPreAuth : User ' . $user->getPrenom() . ' ' . $user->getNom() .
             //   " peut se connecter");
             return true;
-		}
+        }
     }
 
     public function checkPostAuth(UserInterface $user)
     {
-		if (!$user instanceof AppUser) return;
+        if (!$user instanceof AppUser) {
+            return;
+        }
 
         // on peut faire sudo même si l'utilisateur n'a pas le droit de se connecter
-        if(  $user->getDesactive() && ! $this->secu_auto_chk->isGranted('ROLE_ALLOWED_TO_SWITCH' ))
-		{
-			$this->sj->warningMessage('UserChecker : checkPostAuth : User ' . $user->getPrenom() . ' ' . $user->getNom() .
+        if ($user->getDesactive() && ! $this->secu_auto_chk->isGranted('ROLE_ALLOWED_TO_SWITCH')) {
+            $this->sj->warningMessage('UserChecker : checkPostAuth : User ' . $user->getPrenom() . ' ' . $user->getNom() .
                 " est désactivé");
-			throw new UserException($user);
-		}
+            throw new UserException($user);
+        }
 
         // on stocke l'information sur SUDO dans la variable de la session 'real_user'
         // s'il n'y a pas de SUDO 'real_user' = $user
         // en cas de SUDO 'real_user' est l'utilisateur qui a fait SUDO
 
-        if( ! $this->secu_auto_chk->isGranted('ROLE_PREVIOUS_ADMIN') )
-		{
-			if( $this->secu_auto_chk->isGranted('ROLE_ALLOWED_TO_SWITCH' ) && $this->sss->has('real_user') )
-			{
-				$this->sj->debugMessage('UserChecker : checkPostAuth : User ' . 
-				                         $user->getPrenom() . ' ' . 
-				                         $user->getNom() . " est connecté en SUDO par " .
-				                         $this->token->getUser());
-				$this->sss->set('real_user', $this->token->getUser() );
-				$this->sss->set('sudo_url', Request::createFromGlobals()->headers->get('referer') );
-				//$this->sj->debugMessage(__METHOD__ . " sudo_url set to : " . $this->sss->get('sudo_url') );
-			}
-			else
-			{
-				$this->sss->set('real_user', $user);
-				$this->sss->remove('sudo_url');
-				//$this->sj->debugMessage(__METHOD__ . " sudo_url removed" );
-				//$this->sj->debugMessage('UserChecker : checkPostAuth : User ' . $user->getPrenom() . ' ' . $user->getNom() . " est connecté");
-			}
-		}
-		else
-		{
-			$this->sj->debugMessage('UserChecker : checkPostAuth : User '. $this->token->getUser() . " redevient ".  $user );
-			$this->sss->remove('sudo_url');
-			$this->sj->debugMessage(__METHOD__ . " sudo_url removed" );
-		}
-		return true;
+        if (! $this->secu_auto_chk->isGranted('ROLE_PREVIOUS_ADMIN')) {
+            if ($this->secu_auto_chk->isGranted('ROLE_ALLOWED_TO_SWITCH') && $this->sss->has('real_user')) {
+                $this->sj->debugMessage('UserChecker : checkPostAuth : User ' .
+                                         $user->getPrenom() . ' ' .
+                                         $user->getNom() . " est connecté en SUDO par " .
+                                         $this->token->getUser());
+                $this->sss->set('real_user', $this->token->getUser());
+                $this->sss->set('sudo_url', Request::createFromGlobals()->headers->get('referer'));
+            //$this->sj->debugMessage(__METHOD__ . " sudo_url set to : " . $this->sss->get('sudo_url') );
+            } else {
+                $this->sss->set('real_user', $user);
+                $this->sss->remove('sudo_url');
+                //$this->sj->debugMessage(__METHOD__ . " sudo_url removed" );
+                //$this->sj->debugMessage('UserChecker : checkPostAuth : User ' . $user->getPrenom() . ' ' . $user->getNom() . " est connecté");
+            }
+        } else {
+            $this->sj->debugMessage('UserChecker : checkPostAuth : User '. $this->token->getUser() . " redevient ".  $user);
+            $this->sss->remove('sudo_url');
+            $this->sj->debugMessage(__METHOD__ . " sudo_url removed");
+        }
+        return true;
     }
 }

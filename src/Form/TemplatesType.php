@@ -37,7 +37,7 @@ class TemplatesType extends AbstractType
     {
         $builder->add('sujet')->add('contenu')->add('nom')        ;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -55,6 +55,4 @@ class TemplatesType extends AbstractType
     {
         return 'appbundle_templates';
     }
-
-
 }

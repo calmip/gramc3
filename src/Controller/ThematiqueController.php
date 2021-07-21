@@ -41,12 +41,12 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class ThematiqueController extends AbstractController
 {
-	private $ac;
-		
-	public function __construct (AuthorizationCheckerInterface $ac)
-	{
-		$this->ac  = $ac;
-	}
+    private $ac;
+
+    public function __construct(AuthorizationCheckerInterface $ac)
+    {
+        $this->ac  = $ac;
+    }
 
     /**
      * Lists all thematique entities.
@@ -71,20 +71,21 @@ class ThematiqueController extends AbstractController
      * @Security("is_granted('ROLE_OBS')")
      */
     public function gererAction()
-	{
-		$ac = $this->ac;
-		$em = $this->getDoctrine()->getManager();
-		
-		// Si on n'est pas admin on n'a pas accès au menu
-		$menu = $ac->isGranted('ROLE_ADMIN')?[ ['ok' => true,'name' => 'ajouter_thematique' ,'lien' => 'Ajouter une thématique','commentaire'=> 'Ajouter une thématique'] ] : [];
+    {
+        $ac = $this->ac;
+        $em = $this->getDoctrine()->getManager();
 
-        return $this->render( 'thematique/liste.html.twig',
+        // Si on n'est pas admin on n'a pas accès au menu
+        $menu = $ac->isGranted('ROLE_ADMIN') ? [ ['ok' => true,'name' => 'ajouter_thematique' ,'lien' => 'Ajouter une thématique','commentaire'=> 'Ajouter une thématique'] ] : [];
+
+        return $this->render(
+            'thematique/liste.html.twig',
             [
             'menu' => $menu,
-            'thematiques' => $em->getRepository('App:Thematique')->findBy( [],['libelleThematique' => 'ASC'])
+            'thematiques' => $em->getRepository('App:Thematique')->findBy([], ['libelleThematique' => 'ASC'])
             ]
-		);
-	}
+        );
+    }
 
     /**
      * Creates a new thematique entity.
@@ -96,13 +97,16 @@ class ThematiqueController extends AbstractController
      */
     public function newAction(Request $request)
     {
-		$em = $this->getDoctrine()->getManager();
+        $em = $this->getDoctrine()->getManager();
         $thematique = new Thematique();
-        $form = $this->createForm('App\Form\ThematiqueType', $thematique,
+        $form = $this->createForm(
+            'App\Form\ThematiqueType',
+            $thematique,
             [
             'ajouter' => true,
-            'experts'   => $em->getRepository(Individu::class)->findBy(['expert' => true ] ),
-            ]);
+            'experts'   => $em->getRepository(Individu::class)->findBy(['expert' => true ]),
+            ]
+        );
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -113,7 +117,8 @@ class ThematiqueController extends AbstractController
             return $this->redirectToRoute('gerer_thematiques');
         }
 
-        return $this->render('thematique/ajouter.html.twig',
+        return $this->render(
+            'thematique/ajouter.html.twig',
             [
             'menu' => [ [
                         'ok' => true,
@@ -123,7 +128,8 @@ class ThematiqueController extends AbstractController
                         ] ],
             'thematique' => $thematique,
             'edit_form' => $form->createView(),
-            ]);
+            ]
+        );
     }
 
     /**
@@ -150,12 +156,15 @@ class ThematiqueController extends AbstractController
      */
     public function modifyAction(Request $request, Thematique $thematique)
     {
-		$em = $this->getDoctrine()->getManager();
-        $editForm = $this->createForm('App\Form\ThematiqueType', $thematique,
+        $em = $this->getDoctrine()->getManager();
+        $editForm = $this->createForm(
+            'App\Form\ThematiqueType',
+            $thematique,
             [
             'modifier'  => true,
-            'experts'   => $em->getRepository(Individu::class)->findBy(['expert' => true ] ),
-            ]);
+            'experts'   => $em->getRepository(Individu::class)->findBy(['expert' => true ]),
+            ]
+        );
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
@@ -164,7 +173,8 @@ class ThematiqueController extends AbstractController
             return $this->redirectToRoute('gerer_thematiques');
         }
 
-        return $this->render('thematique/modif.html.twig',
+        return $this->render(
+            'thematique/modif.html.twig',
             [
             'menu' => [ [
                         'ok' => true,
@@ -174,7 +184,8 @@ class ThematiqueController extends AbstractController
                         ] ],
             'thematique' => $thematique,
             'edit_form' => $editForm->createView(),
-            ]);
+            ]
+        );
     }
     /**
      * Finds and displays a thematique entity.

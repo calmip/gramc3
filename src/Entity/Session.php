@@ -37,9 +37,8 @@ use App\Utils\Functions;
  * @ORM\Entity(repositoryClass="App\Repository\SessionRepository")
  * @ORM\HasLifecycleCallbacks()
  */
-class Session 
+class Session
 {
-        
     /**
      * @var boolean
      *
@@ -108,32 +107,42 @@ class Session
      */
     private $version;
 
-    
+
     ////////////////////////////////////////////////////////////////
-    
-    public function __toString(){ return $this->getIdSession(); }
-    public function getId(){ return $this->getIdSession(); }
+
+    public function __toString()
+    {
+        return $this->getIdSession();
+    }
+    public function getId()
+    {
+        return $this->getIdSession();
+    }
 
     ///////////////////////////////////////////////////////////////
+
     
+    // SUPPRIME CAR BUGGE ET NON APPELE
     /**
     * @ ORM\PostUpdate
     * @ ORM\PostPersist
     */
-    public function clearCacheSessionCourante()
-    {
-        if( App::getSession()->has('SessionCourante') )
-                App::getSession()->remove('SessionCourante'); // clear cache
-    }
+    //public function clearCacheSessionCourante()
+    //{
+     //   if (App::getSession()->has('SessionCourante')) {
+     //       App::getSession()->remove('SessionCourante');
+     //   } // clear cache
+    //}
     /////////////////////////
-    
+
     /**
      * Constructor
      */
     public function __construct()
     {
         $this->version = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->projetTest = new \Doctrine\Common\Collections\ArrayCollection();
+        // Variable NON UTILISEE
+        //$this->projetTest = new \Doctrine\Common\Collections\ArrayCollection();
         $this->etatSession = Etat::getEtat('CREE_ATTENTE');
     }
 
@@ -364,21 +373,22 @@ class Session
         return $this->version;
     }
 
-    
+
 
     //////////////////////////////////////////
 
     public function getLibelleEtat()
     {
-        return Etat::getLibelle ($this->getEtatSession());
+        return Etat::getLibelle($this->getEtatSession());
     }
 
     // pour TWIG
     public function getHeuresAttribuees()
     {
         $heures = 0;
-        foreach ( $this->getVersion() as $version )
+        foreach ($this->getVersion() as $version) {
             $heures += $version->getAttrHeures();
+        }
         return $heures;
     }
 
@@ -390,21 +400,21 @@ class Session
     //{
     //    $etat = Etat::getEtat( $libelle );
 //
-  //      if( $etat != null )
-  //          $this->setEtatSession( $etat );
-  //      else
-  //          {
-  //          Functions::warningMessage("libelleEtat de la Session '" . $libelle . "' n'existe pas");
-  //          $this->setEtatSession( null  );
-  //          }
-  //          
-  //      return $this;
-  //  }
+    //      if( $etat != null )
+    //          $this->setEtatSession( $etat );
+    //      else
+    //          {
+    //          Functions::warningMessage("libelleEtat de la Session '" . $libelle . "' n'existe pas");
+    //          $this->setEtatSession( null  );
+    //          }
+    //
+    //      return $this;
+    //  }
 
-	/***************************************************
-	 * Fonctions utiles pour la class Workflow
-	 * Autre nom pour getEtatSession/setEtatSession !
-	 ***************************************************/
+    /***************************************************
+     * Fonctions utiles pour la class Workflow
+     * Autre nom pour getEtatSession/setEtatSession !
+     ***************************************************/
     public function getObjectState()
     {
         return $this->getEtatSession();
@@ -417,29 +427,26 @@ class Session
 
     //public function getSubWorkflow()        { return new \App\Workflow\ProjetWorkflow(); }
     //public function getSubObjects()         { return App::getRepository(Projet::class)->findNonTermines();  }
-    
-    
+
+
     ///////////////////////////////////////
-    
+
     // type session A ou B
-    public  function getLibelleTypeSession()
+    public function getLibelleTypeSession()
     {
-        if( $this->getTypeSession() == false)
-        {
-			return 'A';
-		}
-		else
-		{
-			return 'B';
-		}
-	}
-		
-    // Renvoie les deux derniers chiffres de l'année
-    public  function getAnneeSession()
-    {
-        return intval(substr($this->getIdSession(),0,-1));
+        if ($this->getTypeSession() == false) {
+            return 'A';
+        } else {
+            return 'B';
+        }
     }
-    
+
+    // Renvoie les deux derniers chiffres de l'année
+    public function getAnneeSession()
+    {
+        return intval(substr($this->getIdSession(), 0, -1));
+    }
+
     // id Session A
     public function getIdSessionPrincipale()
     {
@@ -451,11 +458,10 @@ class Session
     {
         return ($this->getAnneeSession() + 1) . 'A';
     }
-    
-    ////////////////////////////////////////////
-	public function getEtat()
-    {
-		return $this->getEtatProjet();
-	}
 
+    ////////////////////////////////////////////
+    public function getEtat()
+    {
+        return $this->getEtatSession();
+    }
 }
