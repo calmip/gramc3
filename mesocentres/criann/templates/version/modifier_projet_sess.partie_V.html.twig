@@ -1,0 +1,29 @@
+{# ################################################################################## #}
+
+<div id="tab5" class="onglet">
+
+    <h3>Formation</h3>
+    
+    <table class="projet"><tbody>
+	<tr>
+	    <th colspan="2">Êtes-vous intéressés par des formations organisée par {{mesoc}} ou un partenaire ?<br>
+	    <em><small>Si oui cochez indiquez le nombre de collaborateurs éventuellement intéressés</small></em></th>
+	</tr>
+	{% for item in form %}
+	    {# On sélectionne les champs form_getDemFormN #}
+	    {% if item.vars.id matches '{^form_demForm[0-9]$}' %} 
+	    <tr>
+		<td class="droite">{{ form_label( item) }}</td><td class="gauche">{{ form_widget( item) }}</td>
+	    </tr>
+	    {% endif %}
+	{% endfor %}
+	<tr>
+	    <td class="droite">{{ form_label(form.demFormAutresAutres) }}</td>
+	    <td class="gauche">{{ form_widget(form.demFormAutresAutres, { 'attr': { 'rows' : 5, 'cols' : 50 } }) }}</td>
+	</tr>
+    </tbody></table>
+    
+    <div class="message info"><p><strong>Contenu détaillé des formations</strong> ici:  <a href="{{ mesoc_formation }}">{{mesoc_formation}}</a></a></p>
+
+
+</div>
