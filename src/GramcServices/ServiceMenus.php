@@ -823,8 +823,9 @@ class ServiceMenus
             return $menu;
         }
 
-        $etatVersion    =   $version->getEtatVersion();
-        $isProjetTest   =   $version->isProjetTest();
+        $etatVersion = $version->getEtatVersion();
+        $isProjetTest = $version->isProjetTest();
+        $isProjetSess = $version->getProjet()->getTypeProjet() === Projet::PROJET_SESS;
 
         if ($version->getSession() == null) {
             $menu['raison'] = "Pas de session attachée à ce projet !";
@@ -835,7 +836,7 @@ class ServiceMenus
             $menu['raison'] = "Le projet test a été annulé !";
         } elseif ($isProjetTest == true && $etatVersion !=  Etat::EDITION_TEST) {
             $menu['raison'] = "Le projet test a déjà été envoyé à l'expert !";
-        } elseif ($version->getSession()->getEtatSession() != Etat::EDITION_DEMANDE && $isProjetTest == false) {
+        } elseif ($isProjetSess && $version->getSession()->getEtatSession() != Etat::EDITION_DEMANDE) {
             $menu['raison'] = "Nous ne sommes pas en période de demandes de ressources";
         }
         if ($version->isCollaborateur($this->token->getUser()) == false) {
@@ -1060,9 +1061,11 @@ class ServiceMenus
 
         $etatVersion  = $version->getEtatVersion();
 
-        // true si le projet est un projet test OU un projet fil de l'eau
+        // true si le projet est un projet test 
         $type_projet  = $version->getProjet()->getTypeProjet();
-        $isProjetTest = ($type_projet == Projet::PROJET_FIL || $type_projet == Projet::PROJET_TEST);
+        //$isProjetTest = ($type_projet == Projet::PROJET_FIL || $type_projet == Projet::PROJET_TEST);
+        $isProjetTest = $type_projet == Projet::PROJET_TEST;
+        $isProjetSess = $type_projet == Projet::PROJET_SESS;
 
         if ($version->getSession() != null) {
             $etatSession = $version->getSession()->getEtatSession();
@@ -1091,7 +1094,7 @@ class ServiceMenus
             $menu['raison'] = "Le projet test a déjà été envoyé à l'expert !";
         } elseif ($etatVersion !=  Etat::EDITION_DEMANDE && $etatVersion !=  Etat::EDITION_TEST) {
             $menu['raison'] = "Le responsable du projet n'a pas demandé de renouvellement";
-        } elseif ($etatSession != Etat::EDITION_DEMANDE && $isProjetTest == false) {
+        } elseif ($isProjetSess && $etatSession != Etat::EDITION_DEMANDE) {
             $menu['raison'] = "Nous ne sommes pas en période de demandes de ressources";
         } elseif (VersionModifController::versionValidate($version, $this->sj, $this->em, $this->sval, $this->nodata) != []) {
             //$this->sj->debugMessage(__METHOD__ . ' '.$version->getIdVersion() . ' ' . print_r(VersionModifController::versionValidate( $version ), true));

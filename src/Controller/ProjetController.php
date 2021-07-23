@@ -1447,10 +1447,10 @@ class ProjetController extends AbstractController
         $version->setSession($session);
         $sv->setLaboResponsable($version, $token->getUser());
 
-        if ($type == Projet::PROJET_SESS) {
-            $version->setEtatVersion(Etat::EDITION_DEMANDE);
-        } else {
+        if ($type == Projet::PROJET_TEST) {
             $version->setEtatVersion(Etat::EDITION_TEST);
+        } else {
+            $version->setEtatVersion(Etat::EDITION_DEMANDE);
         }
 
         // Ecriture de la version dans la BD
