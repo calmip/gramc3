@@ -75,7 +75,7 @@ class ServiceExperts
     protected $pe2;
     protected $lg;
     protected $em;
-    
+
     protected $notifications;
     private $form_buttons;
     private $thematiques;
@@ -91,8 +91,7 @@ class ServiceExperts
         PropositionExpertsType2 $pe2,
         LoggerInterface $lg,
         EntityManagerInterface $em
-    )
-    {
+    ) {
         $this->max_expertises_nb = $max_expertises_nb;
         $this->formFactory       = $ff;
         $this->sn                = $sn;

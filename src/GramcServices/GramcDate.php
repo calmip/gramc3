@@ -52,7 +52,7 @@ class GramcDate extends GramcDateTime
     private $raf;
     private $sp;
     private $em;
-    
+
     public function __construct(
         $rpd,
         $rpf,
@@ -60,8 +60,7 @@ class GramcDate extends GramcDateTime
         $raf,
         ServiceParam $sp,
         EntityManagerInterface $em
-    )
-    {
+    ) {
         parent::__construct($sp, $em);
         $this->recup_printemps_d = $rpd;
         $this->recup_printemps_f = $rpf;

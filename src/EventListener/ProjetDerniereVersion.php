@@ -46,7 +46,7 @@ class ProjetDerniereVersion
 {
     private $sp;
     private $em;
-    
+
     public function __construct(ServiceProjets $sp, EntityManagerInterface $em)
     {
         $this->sp = $sp;

@@ -55,15 +55,14 @@ class UserChecker implements UserCheckerInterface
     private $sss;
     private $sj;
     private $em;
-    
+
     public function __construct(
         AuthorizationCheckerInterface $secu_auto_chk,
         TokenStorageInterface $tok,
         SessionInterface $sss,
         ServiceJournal $sj,
         EntityManagerInterface $em
-    )
-    {
+    ) {
         $this->secu_auto_chk = $secu_auto_chk;
         $this->token         = $tok->getToken();
         $this->sss           = $sss;

@@ -64,7 +64,7 @@ class ServiceProjets
     private $sac;
     private $token;
     private $em;
-    
+
     public function __construct(
         $prj_prefix,
         $ressources_conso_group,
@@ -80,8 +80,7 @@ class ServiceProjets
         AuthorizationCheckerInterface $sac,
         TokenStorageInterface $tok,
         EntityManagerInterface $em
-    )
-    {
+    ) {
         $this->prj_prefix             = $prj_prefix;
         $this->ressources_conso_group = $ressources_conso_group;
         $this->signature_directory    = $signature_directory;

@@ -43,7 +43,7 @@ use App\GramcServices\ServiceSessions;
  *  php tools/php-stan/vendor/phpstan/phpstan/phpstan.phar analyze -c tools/php-stan/config.neon -a ./vendor/autoload.php --memory-limit=-1 --level 1  src/Controller/StatistiquesController.php
  *
  *  config.neon:
- * 
+ *
 
 parameters:
   excludePaths:
@@ -52,7 +52,7 @@ parameters:
      - ../../jpgraph/JpGraph.php
   scanDirectories:
      - ../../jpgraph/src
-  
+
  ***************************/
 
 // Pour debug
@@ -792,7 +792,7 @@ class StatistiquesController extends AbstractController
         $ylegend = 0.80;
         \JpGraph\JpGraph::load();
         \JpGraph\JpGraph::module('pie');
-        
+
         // Création du graph Pie. Ce dernier peut être mise en cache  avec PieGraph(300,300,"SomCacheFileName")
         $graph = new \PieGraph($x, $y);
         $graph->SetMargin(60, 60, 50, 50);

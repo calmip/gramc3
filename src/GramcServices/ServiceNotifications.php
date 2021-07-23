@@ -44,7 +44,7 @@ class ServiceNotifications
     private $mailer;
     private $sj;
     private $em;
-    
+
     public function __construct(
         $mailfrom,
         \Twig\Environment $twig,
@@ -52,8 +52,7 @@ class ServiceNotifications
         MailerInterface $mailer,
         ServiceJournal $sj,
         EntityManagerInterface $em
-    )
-    {
+    ) {
         $this->mailfrom = $mailfrom;
         $this->twig     = $twig;
         $this->token    = $tok->getToken();

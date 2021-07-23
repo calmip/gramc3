@@ -32,7 +32,6 @@ use App\Utils\IndividuForm;
 
 class ListIndividuType extends AbstractType
 {
-    
     /**
      * {@inheritdoc}
      */

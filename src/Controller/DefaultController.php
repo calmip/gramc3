@@ -136,56 +136,6 @@ class DefaultController extends AbstractController
     }
 
     /**
-       * @Route("/test_projet", name="test_projet")
-       * @Security("is_granted('ROLE_ADMIN')")
-       */
-    //public function test_projetAction(Request $request)
-    //{
-    //   $projets = $em->getRepository(Projet::class)->get_projets_resp_ou_collab('31', false, true);
-    //   return new Response( $projets[0]->getIdProjet() );
-    //}
-
-    /**
-     *
-     * ça fait quoi ça ? (manu)
-     *
-     * @Route("/count", name="count")
-     * @Security("is_granted('ROLE_ADMIN')")
-     */
-/*
-    public function countAction(Request $request)
-    {
-        $sp = $this->sp;
-        $sj = $this->sj;
-        $em = $this->getDoctrine()->getManager();
-
-        $projets = $em->getRepository(Projet::class)->heuresProjetsAnnee($annee, Functions::TOUS);
-        //return new Response( Functions::show( $projets ));
-
-
-        $projets = $em->getRepository(Projet::class)->heuresProjetsAnnee($annee);
-        //return new Response( Functions::show( $projets ));
-
-        $projets = $em->getRepository(Projet::class)->findProjetsAnnee($annee, Functions::TOUS);
-
-        $conso = 0;
-        foreach ($projets as $projet) {
-            $consoProjet    =  $sp->getConsoCalcul($projet, $annee);
-            if ($consoProjet < 0) {
-                $sj->errorMessage(__METHOD__ . ':' . __FILE__ . " consommation du projet " . $projet . " pour l'année " . $annee . " negative !");
-            } else {
-                $conso  +=  $consoProjet;
-            }
-        }
-
-        return new Response("conso = " . $conso . "  ". Functions::show($projets));
-
-        $projets = $em->getRepository(Projet::class)->countProjetsAnnee($annee);
-        return new Response(Functions::show($projets));
-    }
-*/
-
-    /**
      * @Route("/test_params/{id1}/{id2}", name="test_params")
      * @Security("is_granted('ROLE_ADMIN')")
      */

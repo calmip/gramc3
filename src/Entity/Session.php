@@ -121,7 +121,7 @@ class Session
 
     ///////////////////////////////////////////////////////////////
 
-    
+
     // SUPPRIME CAR BUGGE ET NON APPELE
     /**
     * @ ORM\PostUpdate
@@ -129,9 +129,9 @@ class Session
     */
     //public function clearCacheSessionCourante()
     //{
-     //   if (App::getSession()->has('SessionCourante')) {
-     //       App::getSession()->remove('SessionCourante');
-     //   } // clear cache
+    //   if (App::getSession()->has('SessionCourante')) {
+    //       App::getSession()->remove('SessionCourante');
+    //   } // clear cache
     //}
     /////////////////////////
 

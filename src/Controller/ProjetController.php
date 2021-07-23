@@ -1588,8 +1588,7 @@ class ProjetController extends AbstractController
             $dessin_work = $this -> gstk;
             $struct_data = $dessin_work->createStructuredData($debut, $fin, $db_work, $ressource['unite']);
             $image_conso = $dessin_work->createImage($struct_data, $ressource)[0];
-        }
-        else {
+        } else {
             $image_conso = '';
         }
 

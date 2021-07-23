@@ -74,7 +74,7 @@ class ServiceMenus
     private $ac;
     private $em;
     private $sessions_non_term;
-    
+
     public function __construct(
         $max_rall,
         $nodata,
@@ -88,8 +88,7 @@ class ServiceMenus
         TokenStorageInterface $tok,
         AuthorizationCheckerInterface $ac,
         EntityManagerInterface $em
-    )
-    {
+    ) {
         $this->max_rall = $max_rall;
         $this->nodata = $nodata;
         $this->sp   = $sp;
@@ -1061,7 +1060,7 @@ class ServiceMenus
 
         $etatVersion  = $version->getEtatVersion();
 
-        // true si le projet est un projet test 
+        // true si le projet est un projet test
         $type_projet  = $version->getProjet()->getTypeProjet();
         //$isProjetTest = ($type_projet == Projet::PROJET_FIL || $type_projet == Projet::PROJET_TEST);
         $isProjetTest = $type_projet == Projet::PROJET_TEST;

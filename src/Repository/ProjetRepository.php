@@ -259,7 +259,7 @@ class ProjetRepository extends \Doctrine\ORM\EntityRepository
 
     ////////////////////////////////////////////////////////////////////////////////
     // TODO - NE MARCHE PAS AVEC PREFIX DIFFERENT DE P !!!
-    // cf. DefaultController et StatistiquesController
+    // cf. StatistiquesController
     //
     public function findProjetsAnnee($annee, $renouvel = Functions::TOUS)
     {
@@ -349,7 +349,7 @@ class ProjetRepository extends \Doctrine\ORM\EntityRepository
     // $renouvel = Functions::TOUS, Functions::NOUVEAUX, Functions::ANCIENS
     //
     // TODO - NE MARCHE PAS AVEC PREFIX DIFFERENT DE P !!!
-    //        cf. DefaultController et StatistiquesController
+    //        cf. StatistiquesController
     //
     public function heuresProjetsAnnee($annee, $renouvel = Functions::TOUS)
     {

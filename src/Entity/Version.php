@@ -3301,8 +3301,8 @@ class Version implements Demande
         usort(
             $versions,
             function (Version $b, Version $a) {
-                    return strcmp($a->getIdVersion(), $b->getIdVersion());
-                }
+                return strcmp($a->getIdVersion(), $b->getIdVersion());
+            }
         );
 
         //$sj->debugMessage( __METHOD__ .':'. __LINE__ . " version ID 0 1 = " . $versions[0]." " . $versions[1] );

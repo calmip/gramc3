@@ -50,7 +50,7 @@ class ServiceJournal
     private $token;
     private $ac;
     private $em;
-    
+
     // request_stack, session,logger, security.helper, doc
     // request_stack, session,logger, security.token_storage,doc
     public function __construct(
@@ -60,8 +60,7 @@ class ServiceJournal
         TokenStorageInterface $tok,
         AuthorizationCheckerInterface $ac,
         EntityManagerInterface $em
-    )
-    {
+    ) {
         $this->rs    = $rs;
         $this->ss    = $ss;
         $this->log   = $log;

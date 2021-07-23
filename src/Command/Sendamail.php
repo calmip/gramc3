@@ -40,7 +40,7 @@ class Sendamail extends Command
     private $env;
     private $twig;
     private $sn;
-    
+
     public function __construct($env, \Twig\Environment $twig, ServiceNotifications $sn)
     {
         // best practices recommend to call the parent constructor first and

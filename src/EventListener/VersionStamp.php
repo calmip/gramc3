@@ -45,7 +45,7 @@ use Doctrine\Persistence\Event\LifecycleEventArgs;
 class VersionStamp
 {
     private $token;
-    
+
     public function __construct(TokenStorageInterface $tok)
     {
         $this->token = $tok->getToken();

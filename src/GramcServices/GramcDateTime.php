@@ -47,7 +47,7 @@ class GramcDateTime extends \DateTime
 {
     private $sp;
     private $em;
-    
+
     public function __construct(ServiceParam $sp, EntityManagerInterface $em)
     {
         $this->sp = $sp;

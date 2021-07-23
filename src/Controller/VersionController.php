@@ -459,7 +459,7 @@ class VersionController extends AbstractController
         $erreurs  = [];
         $resultat = [];
         $file = null;
-        
+
         $form->handleRequest($request);
         if ($form->isSubmitted()) {
             $data = $form->getData();

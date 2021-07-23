@@ -168,7 +168,7 @@ class ExpertiseController extends AbstractController
         $stats       = $affectationExperts->getStats();
         $stats['nouveau'] = null;
         $attHeures   = $affectationExperts->getAttHeures();
-        
+
         $versions_suppl = [];
         foreach ($versions as $version) {
             $id_version                  = $version->getIdVersion();
@@ -685,12 +685,12 @@ class ExpertiseController extends AbstractController
                 $peut_envoyer = false;
             }
             break;
-    
+
             // Sinon le bouton ENVOYER est toujours disponible
             case Projet::PROJET_TEST:
             $peut_envoyer = true;
             break;
-    
+
             case Projet::PROJET_FIL:
             $peut_envoyer = true;
             break;

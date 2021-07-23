@@ -72,8 +72,7 @@ class WorkflowController extends AbstractController
         ProjetWorkflow $pw,
         SessionWorkflow $sw,
         FormFactoryInterface $ff
-    )
-    {
+    ) {
         $this->sj = $sj;
         $this->pw = $pw;
         $this->sw = $sw;
@@ -93,7 +92,7 @@ class WorkflowController extends AbstractController
         $em = $this->getdoctrine()->getManager();
         $signal_view_forms = [];
         $etat_view_forms = [];
-        
+
         $projets = [];
         foreach ($em->getRepository(Projet::class)->findAll() as $projet) {
             if ($projet->getEtatProjet() != Etat::TERMINE) {

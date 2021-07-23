@@ -43,7 +43,7 @@ class ServiceVersions
     private $signature_directory;
     private $sj;
     private $em;
-    
+
     public function __construct($attrib_seuil_a, $prj_prefix, $fig_directory, $signature_directory, ServiceJournal $sj, EntityManagerInterface $em)
     {
         $this->attrib_seuil_a      = intval($attrib_seuil_a);

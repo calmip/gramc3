@@ -44,7 +44,7 @@ use Doctrine\ORM\EntityManagerInterface;
 class RattachementType extends AbstractType
 {
     private $em;
-    
+
     public function __construct(EntityManagerInterface $em)
     {
         $this -> em = $em;

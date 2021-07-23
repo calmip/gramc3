@@ -278,7 +278,7 @@ class Functions
         } elseif (is_bool($old)  && is_bool($new)) {
             return $new && $old;
         } else {
-            throw new \exception;
+            throw new \exception();
         }
         //else
         //    static::errorMessage(__METHOD__ . " arguments error" . static::show( $new ) . " " . static::show( $old ) );

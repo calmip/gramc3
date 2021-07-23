@@ -292,7 +292,7 @@ class SessionController extends AbstractController
         $session_courante      = $ss->getSessionCourante();
         $etat_session_courante = $session_courante->getEtatSession();
 
-		// manu - correction juillet 2021 !
+        // manu - correction juillet 2021 !
         //$sessions = $em->getRepository(Session::class)->findBy([],['idSession' => 'DESC']);
         $sessions = $em->getRepository(Session::class)->get_sessions_non_terminees();
 
@@ -300,61 +300,54 @@ class SessionController extends AbstractController
         $mois = $sd->format('m');
 
         $workflow = $this->sw;
-        
-        // On active une session A = Jusqu'à trois sessions renvoyées !
-        if( $mois == 1 ||  $mois == 12 )
-		{
-            if( $workflow->canExecute( Signal::CLK_SESS_DEB, $session_courante) && $etat_session_courante == Etat::EN_ATTENTE )
-			{
-				// On termine les deux sessions A et B de l'année précédente
-                foreach( $sessions as $session )
-				{
-					// On ne termine pas la session qui va démarrer !
-                    if( $session->getIdSession() == $session_courante->getIdSession() ) continue;
 
-                    if( $workflow->canExecute( Signal::CLK_SESS_FIN, $session) )
-                        $err = $workflow->execute( Signal::CLK_SESS_FIN, $session);
-				}
-                $ok = $workflow->execute( Signal::CLK_SESS_DEB, $session_courante );
-                $em->flush();                
-			}
-		}
-		
-		// On active une session B = Jusqu'à deux sessions renvoyées
-        elseif( $mois == 6 ||  $mois == 7 )
-        {
-			// manu - corrigé le 20 juillet 2021
+        // On active une session A = Jusqu'à trois sessions renvoyées !
+        if ($mois == 1 ||  $mois == 12) {
+            if ($workflow->canExecute(Signal::CLK_SESS_DEB, $session_courante) && $etat_session_courante == Etat::EN_ATTENTE) {
+                // On termine les deux sessions A et B de l'année précédente
+                foreach ($sessions as $session) {
+                    // On ne termine pas la session qui va démarrer !
+                    if ($session->getIdSession() == $session_courante->getIdSession()) {
+                        continue;
+                    }
+
+                    if ($workflow->canExecute(Signal::CLK_SESS_FIN, $session)) {
+                        $err = $workflow->execute(Signal::CLK_SESS_FIN, $session);
+                    }
+                }
+                $ok = $workflow->execute(Signal::CLK_SESS_DEB, $session_courante);
+                $em->flush();
+            }
+        }
+
+        // On active une session B = Jusqu'à deux sessions renvoyées
+        elseif ($mois == 6 ||  $mois == 7) {
+            // manu - corrigé le 20 juillet 2021
             //if( $workflow->canExecute(Signal::CLK_SESS_DEB , $session_courante)  && $etat_session_courante == Etat::EN_ATTENTE )
-			//{
+            //{
             //    $ok = $workflow->execute(Signal::CLK_SESS_DEB , $session_courante );
             //    $em->flush();
-			//}
-			// il faut envoyer le signal aux DEUX sessions A et B
-			// Le signal se propage aux versions sous-jacentes
-			// Les versions de A passeront de NOUVELLE_VERSION_DEMANDEE à TERMINE
-			// Les versions de B passeront de EN_ATTENTE à ACTIF
-			foreach( $sessions as $session )
-			{
-				if( $workflow->canExecute(Signal::CLK_SESS_DEB , $session))
-				{
-	                $ok = $workflow->execute(Signal::CLK_SESS_DEB , $session);
-	                $em->flush();
-				}	
-			}
-		}
-		else
-		{
-			$sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Une session ne peut être activée qu'en Décembre, en Janvier, en Juin ou en Juillet");
-		}
+            //}
+            // il faut envoyer le signal aux DEUX sessions A et B
+            // Le signal se propage aux versions sous-jacentes
+            // Les versions de A passeront de NOUVELLE_VERSION_DEMANDEE à TERMINE
+            // Les versions de B passeront de EN_ATTENTE à ACTIF
+            foreach ($sessions as $session) {
+                if ($workflow->canExecute(Signal::CLK_SESS_DEB, $session)) {
+                    $ok = $workflow->execute(Signal::CLK_SESS_DEB, $session);
+                    $em->flush();
+                }
+            }
+        } else {
+            $sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Une session ne peut être activée qu'en Décembre, en Janvier, en Juin ou en Juillet");
+        }
 
-		if ($ok==true)
-		{
-			return $this->redirectToRoute('gerer_sessions');
-		}
-		else
-		{
-	        return $this->render('default/error.html.twig',
-			[
+        if ($ok==true) {
+            return $this->redirectToRoute('gerer_sessions');
+        } else {
+            return $this->render(
+                'default/error.html.twig',
+                [
                 'message'   => "Impossible d'activer la session, allez voir le journal !",
                 'titre'     =>  'Erreur',
             ]
@@ -582,23 +575,42 @@ class SessionController extends AbstractController
         $session = $data['session']!=null ? $data['session'] : $session;
         $form    = $data['form']->createView();
 
-		//$versions = $em->getRepository(Version::class)->findBy( ['session' => $session ] );
-		
-		// Juin 2021 - Suppression des projets test 
-		$versions = $em->getRepository(Version::class)->findVersionsSessionTypeSess( $session );
-		$versions_suppl = [];
-		foreach ($versions as $v)
-		{
-			$versions_suppl[$v->getIdVersion()]['conso'] = $sp->getConsoCalculVersion($v);
-		}
-        return $this->render('session/bilan.html.twig',
-		[
+        $versions = $em->getRepository(Version::class)->findBy( ['session' => $session ] );
+
+        // Juin 2021 - Suppression des projets test
+        //$versions = $em->getRepository(Version::class)->findVersionsSessionTypeSess($session);
+        $versions_suppl = [];
+        foreach ($versions as $v) {
+            $versions_suppl[$v->getIdVersion()]['conso'] = $sp->getConsoCalculVersion($v);
+        }
+        
+        $versions_suppl = [];
+        foreach ($versions as $v) {
+            $versions_suppl[$v->getIdVersion()]['conso'] = $sp->getConsoCalculVersion($v);
+            $f = $sv -> buildFormations($v);
+            $versions_suppl[$v->getIdVersion()]['formation'] = $f;
+        }
+        $form_labels = [];
+        if (count($versions)>0) {
+            $v0 = $versions[0];
+            $formation = $versions_suppl[$v0->getIdVersion()]['formation'];
+            foreach ($formation as $f) {
+                $fl = [];
+                $fl['acro'] = $f['acro'];
+                $fl['nom']  = $f['nom'];
+                $form_labels[] = $fl;
+            }
+        }
+
+        return $this->render(
+            'session/bilan.html.twig',
+            [
             'form'      => $form,
             'idSession' => $session->getIdSession(),
             'versions'  => $versions,
             'versions_suppl' => $versions_suppl,
-        'form_labels' => $form_labels
-	    ]
+            'form_labels' => $form_labels
+        ]
         );
     }
 
@@ -777,26 +789,22 @@ class SessionController extends AbstractController
             $line[] = $r->getPrenom() . ' ' . $r->getNom();
             //$quota  = $v->getQuota();
             //$line[] = $quota;
-       		$consoRessource = $this->sp->getConsoRessource($p,'cpu',$annee);
-			$quota          = $consoRessource[1];
-			$line[] = $quota;
-            for ($m=0;$m<12;$m++)
-            {
-				$c = $sp->getConsoMois($p,$annee,$m);
-				$line[] = $c;
-				$tm[$m] += $c;
-			}
+            $consoRessource = $this->sp->getConsoRessource($p, 'cpu', $annee);
+            $quota          = $consoRessource[1];
+            $line[] = $quota;
+            for ($m=0;$m<12;$m++) {
+                $c = $sp->getConsoMois($p, $annee, $m);
+                $line[] = $c;
+                $tm[$m] += $c;
+            }
 
-			// Si on est dans l'année courante on ne fait pas le total
-            $ttl = ($annee_courante_flg) ? 'N/A' : $sp->getConsoCalcul($p,$annee);
-            if ($quota>0)
-            {
-	            $ttlp   = ($annee_courante_flg) ? 'N/A' : 100.0 * $ttl / $quota;
-			}
-			else
-			{
-				$ttlp = 0;
-			}
+            // Si on est dans l'année courante on ne fait pas le total
+            $ttl = ($annee_courante_flg) ? 'N/A' : $sp->getConsoCalcul($p, $annee);
+            if ($quota>0) {
+                $ttlp   = ($annee_courante_flg) ? 'N/A' : 100.0 * $ttl / $quota;
+            } else {
+                $ttlp = 0;
+            }
 
             $line[] = $ttl;
             $line[] = ($ttlp=='N/A') ? $ttlp : intval($ttlp);

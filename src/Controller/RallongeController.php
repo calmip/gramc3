@@ -103,10 +103,10 @@ class RallongeController extends AbstractController
 
     /**
      * A partir d'une rallonge, renvoie version, projet, session
-     * 
+     *
      *************************************/
-     private function getVerProjSess(Rallonge $rallonge) 
-     {
+    private function getVerProjSess(Rallonge $rallonge)
+    {
         $version = $rallonge->getVersion();
         $projet = null;
         $session = null;
@@ -117,8 +117,8 @@ class RallongeController extends AbstractController
             $this->sj->throwException(__METHOD__ . ":" . __LINE__ . " rallonge " . $rallonge . " n'est pas associée à une version !");
         }
         return [ $version, $projet, $session ];
-     }
-         
+    }
+
     /**
      * Lists all rallonge entities.
      *
@@ -769,23 +769,23 @@ class RallongeController extends AbstractController
      */
     public function affectationAction(Request $request)
     {
-		$em = $this->getDoctrine()->getManager();
-		$sp = $this->sp;
-	    $sv = $this->sv;
-		$affectationExperts = $this->sr;
+        $em = $this->getDoctrine()->getManager();
+        $sp = $this->sp;
+        $sv = $this->sv;
+        $affectationExperts = $this->sr;
 
-	    //$sessions = $em->getRepository(Session::class) ->findBy( ['etatSession' => Etat::ACTIF ] );
-	    $sessions = $em->getRepository(Session::class) -> get_sessions_non_terminees();
-	    if ( isset( $sessions[0] ) )
-	        $session1 = $sessions[0];
-	    else
-	        $session1 = null;
-	    $session = $session1;
+        //$sessions = $em->getRepository(Session::class) ->findBy( ['etatSession' => Etat::ACTIF ] );
+        $sessions = $em->getRepository(Session::class) -> get_sessions_non_terminees();
+        if (isset($sessions[0])) {
+            $session1 = $sessions[0];
+        } else {
+            $session1 = null;
+        }
+        $session = $session1;
 
-	    if ( isset( $sessions[1] ) )
-        {
-	        $session2 = $sessions[1];
-	        $session  = $session2;
+        if (isset($sessions[1])) {
+            $session2 = $sessions[1];
+            $session  = $session2;
         }
 
         $annee = $session->getAnneeSession();

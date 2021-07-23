@@ -44,7 +44,7 @@ class ServiceSessions
     private $ff;
     private $em;
     private $sessions_non_term;
-    
+
     public function __construct(
         $recup_attrib_seuil,
         $recup_conso_seuil,
@@ -52,8 +52,7 @@ class ServiceSessions
         GramcDate $grdt,
         FormFactoryInterface $ff,
         EntityManagerInterface $em
-    )
-    {
+    ) {
         $this->recup_attrib_seuil = intval($recup_attrib_seuil);
         $this->recup_conso_seuil  = intval($recup_conso_seuil);
         $this->recup_attrib_quant = intval($recup_attrib_quant);

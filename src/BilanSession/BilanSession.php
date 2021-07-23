@@ -72,12 +72,20 @@ abstract class BilanSession
     protected $ress;
     protected $nom_ress;
     protected $t_fact;
-    
+
     // Fonctions implémentées dans les classes dérivées
-    protected function initTotaux() {}
-    protected function getTotaux($totaux) {}
-    protected function getEntetes() {}
-    protected function getLigne(Version $version, &$totaux) {}
+    protected function initTotaux()
+    {
+    }
+    protected function getTotaux($totaux)
+    {
+    }
+    protected function getEntetes()
+    {
+    }
+    protected function getLigne(Version $version, &$totaux)
+    {
+    }
 
 
     public function __construct($ressources_conso_group, GramcDate $grdt, Session $session, ServiceProjets $sp, ServiceSessions $ss, EntityManager $em)
@@ -103,49 +111,48 @@ abstract class BilanSession
 
         // Année de prise en compte pour le calcul de la conso passée:
         // 20A -> 2019, 20B -> 2020
-		$type_session      = $session->getLibelleTypeSession(); // A ou B
-		$this->annee_conso = ($type_session==='A') ? $this->annee_prec : $this->annee_cour;
-        
-		// Pour les ressources de stockage
-		$ressources = $this->ressources_conso_group;
-		foreach ($ressources as $k=>$r)
-		{
-			if ($r['type']==='stockage')
-			{
-				$this->ress     = $r['ress'];
-				$this->nom_ress = $r['nom'];
-			}
-		}
-		
-		//		$t_fact = 1024*1024*1024;	// Conversion octets -> To
-		$this->t_fact = 1024*1024*1024;
-	}
-	
-	/*******
-	 * Appelée par bilanCsvAction
-	 *
-	 *********/
-	public function getCsv()
-	{
-		$session              = $this->session;
-		$id_session           = $this->id_session;
-		$annee_cour           = $this->annee_cour;
-		$annee_prec           = $this->annee_prec;
-		$session_courante_A   = $this->session_courante_A;
-		$session_precedente_A = $this->session_precedente_A;
-		$session_precedente_B = $this->session_precedente_B;
-		$t_fact               = $this->t_fact;
-		
- 		// Juin 2021 - Non prise en compte des projets test 
+        $type_session      = $session->getLibelleTypeSession(); // A ou B
+        $this->annee_conso = ($type_session==='A') ? $this->annee_prec : $this->annee_cour;
+
+        // Pour les ressources de stockage
+        $ressources = $this->ressources_conso_group;
+        foreach ($ressources as $k=>$r) {
+            if ($r['type']==='stockage') {
+                $this->ress     = $r['ress'];
+                $this->nom_ress = $r['nom'];
+            }
+        }
+
+        //		$t_fact = 1024*1024*1024;	// Conversion octets -> To
+        $this->t_fact = 1024*1024*1024;
+    }
+
+    /*******
+     * Appelée par bilanCsvAction
+     *
+     *********/
+    public function getCsv()
+    {
+        $session              = $this->session;
+        $id_session           = $this->id_session;
+        $annee_cour           = $this->annee_cour;
+        $annee_prec           = $this->annee_prec;
+        $session_courante_A   = $this->session_courante_A;
+        $session_precedente_A = $this->session_precedente_A;
+        $session_precedente_B = $this->session_precedente_B;
+        $t_fact               = $this->t_fact;
+
+        // Juin 2021 - Non prise en compte des projets test
         //$versions             = $this->em->getRepository(Version::class)->findBy( ['session' => $session ] );
         $versions             = $this->em->getRepository(Version::class)->findVersionsSessionTypeSess($session);
-        
 
-		// Le tableau de totaux
-		$totaux = $this->initTotaux();
 
-		// première ligne = les entêtes
-		$sortie = join($this->getEntetes(),"\t") . "\n";;
+        // Le tableau de totaux
+        $totaux = $this->initTotaux();
+
+        // première ligne = les entêtes
+        $sortie = join($this->getEntetes(), "\t") . "\n";
+        ;
 
         // boucle principale
         foreach ($versions as $version) {

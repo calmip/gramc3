@@ -181,13 +181,12 @@ class VersionRepository extends \Doctrine\ORM\EntityRepository
         ->getResult();
     }
 
-	// Renvoie les projets de type SESS qui appartiennent à la session passée en paramètres
-	public function findVersionsSessionTypeSess($session)
-	{
-		return $this->getEntityManager()
-        ->createQuery
-        ('SELECT v FROM App:Version v, App:Projet p WHERE (v.session = :session AND v.projet = p AND p.typeProjet = 1)')
+    // Renvoie les projets de type SESS qui appartiennent à la session passée en paramètres
+    public function findVersionsSessionTypeSess($session)
+    {
+        return $this->getEntityManager()
+        ->createQuery('SELECT v FROM App:Version v, App:Projet p WHERE (v.session = :session AND v.projet = p AND p.typeProjet = 1)')
         ->setParameter('session', $session)
         ->getResult();
-	}
+    }
 }
