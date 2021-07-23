@@ -1,16 +1,25 @@
 {% extends 'default/base.html.twig' %}
+{% import "default/macros.html.twig" as gramcmacros %}
 
 {% block body %}
 <section>
     <h1>Formations enregistrées dans gramc</h1>
 
-    {% import "default/macros.html.twig" as gramcmacros %}
-    {{ gramcmacros.menu(menu) }}
+    <div class="message info">
+        <h2>Gérer les formations proposées</h2>
+        <ul>
+            <li>Vous êtes limité à <strong>10 formations</strong></li>
+            <li>Les formations seront proposées dans l'ordre donné par la "numéro d'ordre"</li>
+            <li>Attention à ne pas donner le même numero d'ordre à deux formations</li>
+        </ul>
+    </div>
 
+    {{ gramcmacros.menu(menu) }}
+    
     <table id="formations" >
     <thead>
         <tr>
-			{% if is_granted('ROLE_ADMIN') %}<th colspan="2">&nbsp;</th>{% endif %}<th>champ de version</th><th>Acronyme</th><th>Libellé</th>
+			{% if is_granted('ROLE_ADMIN') %}<th colspan="2">&nbsp;</th>{% endif %}<th>Numéro d'ordre</th><th>Acronyme</th><th>Libellé</th>
         </tr>
     </thead>
     <tbody>
@@ -26,7 +35,7 @@
                 <img class="bouton_poussoir" src="{{ gramcmacros.img_modifier() }}" alt="Modifier" /></a>
             </td>
             {% endif %}
-            <td>{% if form.numeroform<10 %}form{{ form.numeroform }}{% else %} <em>aucun</em> (n°{{form.numeroform}}){% endif %}</td>
+            <td>{% if form.numeroform<10 %}{{ form.numeroform }}{% else %} <em>aucun</em> (n°{{form.numeroform}}){% endif %}</td>
             <td> {{ form.acroform }}</td>
             <td>{{ form.nomform }}</td>
         </tr>
