@@ -20,11 +20,9 @@
                 <td>
                     <strong>
                         {% if( expertise.validation == 0 ) %}
-                        REFUSE ET FERMER LE PROJET
-                        {% elseif( expertise.validation == 2 ) %}
-                        REFUSE JUSTE POUR CETTE SESSION
+                        REFUSER ET FERMER LE PROJET
                         {% elseif( expertise.validation == 1 ) %}
-                        ACCEPTE
+                        ACCEPTER
                         {% endif %}
                     </strong>
                 </td>

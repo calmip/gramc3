@@ -126,8 +126,6 @@
     {#
     {% if erreur==1 %}
         <div class="message erreur"><p>ERREUR: Vous n'avez pas rempli les deux champs de commentaire</p></div>
-    {% elseif erreur==2 %}
-        <div class="message erreur"><p>ERREUR: Si vous n'attribuez pas d'heure, cliquez sur "Refuser pour cette session"</p></div>
     {% elseif erreur==3 %}
         <div class="message erreur"><p>ERREUR: Vous ne pouvez pas attribuer plus d'heures pour l'été que pour la session</p></div>
     {% endif %}

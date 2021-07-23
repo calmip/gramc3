@@ -686,7 +686,7 @@ class ExpertiseController extends AbstractController
             }
             break;
     
-            // Si c'est un projet de type PROJET_TEST, le bouton ENVOYER est toujours disponible
+            // Sinon le bouton ENVOYER est toujours disponible
             case Projet::PROJET_TEST:
             $peut_envoyer = true;
             break;
@@ -704,8 +704,9 @@ class ExpertiseController extends AbstractController
             ChoiceType::class,
             [
         'multiple' => false,
-        'choices'   =>  [ 'Accepter' => 1, 'Accepter, avec zéro heure' => 2, 'Refuser définitivement et fermer le projet' => 0,],
-        ]
+        'choices'   =>  [ 'Accepter' => 1, 'Refuser' => 0,],
+        'data' => 1
+        ],
         );
 
         // Projet au fil de l'eau, le commentaire externe est réservé au président !
@@ -725,9 +726,8 @@ class ExpertiseController extends AbstractController
             $editForm->add('nbHeuresAtt', IntegerType::class, ['required'  =>  false, ]);
         }
 
-        // En session B, on propose une attribution spéciale pour heures d'été
-        // TODO A affiner car en septembre avec des projets PROJET_FIL en sera toujours en session  B et c'est un peu couillon de demander cela
-        if ($projet_type != Projet::PROJET_TEST) {
+        // En session B mais SEULEMENT POUR LES PROJETS DE SESSION, on propose une attribution spéciale pour heures d'été
+        if ($projet_type == Projet::PROJET_SESS) {
             if ($session->getTypeSession()) {
                 $editForm -> add('nbHeuresAttEte');
             }
@@ -760,12 +760,9 @@ class ExpertiseController extends AbstractController
         if ($editForm->isSubmitted() /* && $editForm->isValid()*/) {
             $erreurs = Functions::dataError($sval, $expertise);
             $validation = $expertise->getValidation();
-            if ($validation != 1) {
+            if ($validation == 0) {
                 $expertise->setNbHeuresAtt(0);
                 $expertise->setNbHeuresAttEte(0);
-                if ($validation == 2 && $projet_type == Projet::PROJET_TEST) {
-                    $erreurs[] = "Pas possible de refuser un projet test juste pour cette session";
-                }
             }
 
             $em->persist($expertise);
