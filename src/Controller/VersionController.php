@@ -1079,7 +1079,7 @@ class VersionController extends AbstractController
             }
             if ($version != null) {
                 $etat = $version -> getEtatVersion();
-                if ($etat != Etat::ACTIF && $etat != Etat::EN_ATTENTE) {
+                if ($etat == Etat::TERMINE || $etat == Etat::ANNULE ) {
                     $libelle = Etat::LIBELLE_ETAT[$etat];
                     $erreurs1[] = "La version ".$version->getIdVersion()." est en état $libelle, pas possible de changer son attribution !";
                 }
