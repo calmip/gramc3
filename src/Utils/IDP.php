@@ -26,7 +26,7 @@ namespace App\Utils;
 
 class IDP
 {
-// IDP::$dev
+    // IDP::$dev
 
     public static $dev =
         [

@@ -575,7 +575,7 @@ class SessionController extends AbstractController
         $session = $data['session']!=null ? $data['session'] : $session;
         $form    = $data['form']->createView();
 
-        $versions = $em->getRepository(Version::class)->findBy( ['session' => $session ] );
+        $versions = $em->getRepository(Version::class)->findBy(['session' => $session ]);
 
         // Juin 2021 - Suppression des projets test
         //$versions = $em->getRepository(Version::class)->findVersionsSessionTypeSess($session);
@@ -583,7 +583,7 @@ class SessionController extends AbstractController
         foreach ($versions as $v) {
             $versions_suppl[$v->getIdVersion()]['conso'] = $sp->getConsoCalculVersion($v);
         }
-        
+
         $versions_suppl = [];
         foreach ($versions as $v) {
             $versions_suppl[$v->getIdVersion()]['conso'] = $sp->getConsoCalculVersion($v);

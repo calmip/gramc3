@@ -56,7 +56,7 @@ class VersionWorkflow extends Workflow
             ->addState(Etat::EDITION_TEST, // projet test
                 [
                 Signal::CLK_VAL_DEM     => new VersionTransition(
-                    Etat::EXPERTISE_TEST ,
+                    Etat::EXPERTISE_TEST,
                     Signal::CLK_VAL_DEM,
                     [ 'R' => 'depot_projet_test_pour_demandeur',
                                              'A' => 'depot_projet_test_pour_admin',
@@ -85,14 +85,14 @@ class VersionWorkflow extends Workflow
                 Etat::EXPERTISE_TEST,
                 [
                 Signal::CLK_VAL_EXP_OK  => new VersionTransition(
-                    Etat::ACTIF_TEST     ,
+                    Etat::ACTIF_TEST,
                     Signal::CLK_VAL_EXP_OK,
                     [ 'R' => 'expertise',
                                              'E' => 'expertise_pour_expert',
                                              'A' => 'expertise_pour_admin' ]
                 ),
                 Signal::CLK_VAL_EXP_KO  => new VersionTransition(
-                    Etat::TERMINE        ,
+                    Etat::TERMINE,
                     Signal::CLK_VAL_EXP_KO,
                     [ 'E' => 'expertise_pour_expert',
                                              'A' => 'expertise_pour_admin',
@@ -133,14 +133,14 @@ class VersionWorkflow extends Workflow
                                              'A' => 'expertise_pour_admin' ]
                 ),
                 Signal::CLK_VAL_EXP_KO  => new VersionTransition(
-                    Etat::TERMINE   ,
+                    Etat::TERMINE,
                     Signal::CLK_VAL_EXP_KO,
                     [ 'E' => 'expertise_pour_expert',
                                              'A' => 'expertise_pour_admin',
                                              'P' => 'expertise_refusee' ]
                 ),
                 Signal::CLK_VAL_EXP_CONT=> new VersionTransition(
-                    Etat::TERMINE   ,
+                    Etat::TERMINE,
                     Signal::CLK_VAL_EXP_CONT,
                     [ 'R' => 'expertise',
                                              'E' => 'expertise_pour_expert',
