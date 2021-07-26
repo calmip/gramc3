@@ -1402,7 +1402,7 @@ class ProjetController extends AbstractController
         $em = $this->getDoctrine()->getManager();
 
         // Si changement d'état de la session alors que je suis connecté !
-    // + contournement d'un problème lié à Doctrine
+   		// + contournement d'un problème lié à Doctrine
         $sss->remove('SessionCourante'); // remove cache
 
         // NOTE - Pour ce controleur, on identifie les types par un chiffre (voir Entity/Projet.php)
@@ -1812,7 +1812,12 @@ class ProjetController extends AbstractController
         //	$menu[] = $sm->nouveau_projet($t);
         //}
 
-        $menu[] = $sm->nouveau_projet(3);
+		$etat = 3;
+		if ($ss->getSessionCourante()->getEtatSession() == Etat::EDITION_DEMANDE)
+		{
+			$etat = 1;
+		}
+        $menu[] = $sm->nouveau_projet($etat);
 
         return $this->render(
             'projet/demandeur.html.twig',
