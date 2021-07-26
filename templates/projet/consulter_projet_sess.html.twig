@@ -44,6 +44,7 @@
 {% else %}
 <section>
 {% endif %}
+
 <div class="lien-pdf">
     <a href="{{ path('version_pdf', { 'id' : version.idVersion }) }}">
         <img src="{{ asset('icones/pdf32.png') }}" alt="pdf" title="Version pdf">
@@ -136,6 +137,16 @@
 	<p>Les heures gpu sont affichées en heures <strong>normalisées</strong></p>
 </div>
 {% endif %}
+
+{% if warn_type and session.etatsession == 2 %}
+coucou EDITION_DEMANDE
+{% endif %}
+{% if warn_type and session.etatsession != 2 %}
+<div class="message warning"> <strong>ATTENTION</strong> - Vous ne pouvez demander plus de {{prj_seuil_sess}} heures actuellement. 
+Vous pourrez demander à nouveau des heures (sans limitation) lors de la prochaine session d'attribution.
+</div>
+{% endif %}
+
 <table class="projet">
     <tbody> 
         <tr><th class="horiz">Titre</th><td>{{ version.prjTitre }}</td></tr>

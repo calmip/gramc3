@@ -41,7 +41,6 @@
     <h2>Champs à compléter</h2>
     Les champs ci-dessous <strong>doivent être complétés</strong> avant que vous puissiez envoyer votre projet en expertise.<br />
 
-    {% if 'prj_titre' in todo %}<a href="#form_prjTitre" class="gerer_onglets">titre du projet</a><br>{% endif %}
     {% if 'dem_heures' in todo %}<a href="#form_demHeures" class="gerer_onglets">Nombre d'heures demandées</a><br>{% endif %}
     {% if 'prj_id_thematique' in todo %}<a href="#form_prjThematique" class="gerer_onglets">Choix d'une thématique</a><br>{% endif %}
     {% if 'prj_resume' in todo %}<a href="#form_prjResume" class="gerer_onglets">Résumé du projet</a><br>{% endif %}
@@ -105,6 +104,11 @@
 	{% endif %}
 	
     <div class="message warning">Les heures sont comptées en heures normalisées</div>
+    
+    {% if version.session.etatsession != 2 %}
+    <div class="message warning">Vous pouvez demander jusqu'à <strong>{{prj_seuil_sess}}</strong> heures normalisées. 
+    <br />Vous pourrez en demander davantage lors de la prochaine session d'attribution.</div>
+    {% endif %}
 
     <table class="projet"><tbody>
 

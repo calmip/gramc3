@@ -1829,11 +1829,13 @@ class ProjetController extends AbstractController
      * Affiche un projet avec un menu pour choisir la version
      *
      * @Route("/{id}/consulter", name="consulter_projet")
+     * @Route("/{id}/consulter/{warn_type}", name="consulter_projet")
      * @Route("/{id}/consulter/{version}", name="consulter_version")
+     * 
      * @Method({"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
-    public function consulterAction(Projet $projet, Version $version = null, Request $request)
+    public function consulterAction(Projet $projet, Version $version = null, Request $request, $warn_type=0)
     {
         $em = $this->getDoctrine()->getManager();
         $sp = $this->sp;
@@ -1874,18 +1876,18 @@ class ProjetController extends AbstractController
         $type = $projet->getTypeProjet();
         switch ($type) {
             case Projet::PROJET_SESS:
-                return $this->consulterType1($projet, $version, $loginname, $request);
+                return $this->consulterType1($projet, $version, $loginname, $request, $warn_type);
             case Projet::PROJET_TEST:
-                return $this->consulterType2($projet, $version, $loginname, $request);
+                return $this->consulterType2($projet, $version, $loginname, $request, $warn_type);
             case Projet::PROJET_FIL:
-                return $this->consulterType1($projet, $version, $loginname, $request);
+                return $this->consulterType1($projet, $version, $loginname, $request, $warn_type);
             default:
                 $sj->errorMessage(__METHOD__ . " Type de projet inconnu: $type");
         }
     }
 
     // Consulter les projets de type 1 (projets PROJET_SESS)
-    private function consulterType1(Projet $projet, Version $version, $loginname, Request $request)
+    private function consulterType1(Projet $projet, Version $version, $loginname, Request $request, $warn_type)
     {
         $em = $this->getDoctrine()->getManager();
         $sm = $this->sm;
@@ -1982,26 +1984,27 @@ class ProjetController extends AbstractController
         return $this->render(
             'projet/consulter_projet_sess.html.twig',
             [
-        'projet'             => $projet,
-        'loginname'          => $loginname,
-        'version_form'       => $session_form->createView(),
-        'version'            => $version,
-        'session'            => $session,
-        'menu'               => $menu,
-        'img_expose_1'       => $img_expose_1,
-        'img_expose_2'       => $img_expose_2,
-        'img_expose_3'       => $img_expose_3,
-        'img_justif_renou_1' => $img_justif_renou_1,
-        'img_justif_renou_2' => $img_justif_renou_2,
-        'img_justif_renou_3' => $img_justif_renou_3,
-        'conso_cpu'          => $sp->getConsoRessource($projet, 'cpu', $version->getAnneeSession()),
-        'conso_gpu'          => $sp->getConsoRessource($projet, 'gpu', $version->getAnneeSession()),
-        'rapport_1'          => $rapport_1,
-        'rapport'            => $rapport,
-        'document'           => $document,
-        'toomuch'            => $toomuch,
-        'formation'          => $formation
-    ]
+            	'warn_type'          => $warn_type,
+		        'projet'             => $projet,
+		        'loginname'          => $loginname,
+		        'version_form'       => $session_form->createView(),
+		        'version'            => $version,
+		        'session'            => $session,
+		        'menu'               => $menu,
+		        'img_expose_1'       => $img_expose_1,
+		        'img_expose_2'       => $img_expose_2,
+		        'img_expose_3'       => $img_expose_3,
+		        'img_justif_renou_1' => $img_justif_renou_1,
+		        'img_justif_renou_2' => $img_justif_renou_2,
+		        'img_justif_renou_3' => $img_justif_renou_3,
+		        'conso_cpu'          => $sp->getConsoRessource($projet, 'cpu', $version->getAnneeSession()),
+		        'conso_gpu'          => $sp->getConsoRessource($projet, 'gpu', $version->getAnneeSession()),
+		        'rapport_1'          => $rapport_1,
+		        'rapport'            => $rapport,
+		        'document'           => $document,
+		        'toomuch'            => $toomuch,
+		        'formation'          => $formation
+		    ]
         );
     }
 

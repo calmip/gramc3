@@ -77,7 +77,6 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-//use Symfony\Component\Validator\Validator\TraceableValidator;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 use Doctrine\ORM\EntityManager;
@@ -360,6 +359,7 @@ class VersionModifController extends AbstractController
      *         NB - On ne fait pas de flush, c'est l'appelant qui s'en chargera.
      *
      * params = $version
+     * return = true si OK, false changement de type de projet ou heures plafonnées !
      *
      */
     private function validDemHeures($version)
@@ -370,9 +370,11 @@ class VersionModifController extends AbstractController
         $type = $projet->getTypeProjet();
         $seuil = intval($this->getParameter('prj_seuil_sess'));
         $demande = $version->getDemHeures();
+        $rvl = true;
 
         if ($type == Projet::PROJET_FIL) {
             if ($demande > $seuil) {
+				$rvl = false;
                 $etat_session = $ss->getSessionCourante()->getEtat();
 
                 // Si on est en edition_demande on passe le projet en type 1
@@ -386,10 +388,12 @@ class VersionModifController extends AbstractController
             }
         } elseif ($type == Projet::PROJET_SESS) {
             if ($demande <= $seuil) {
+				$rvl = false;
                 $projet->setTypeProjet(Projet::PROJET_FIL);
                 $em->persist($projet);
             }
         }
+        return $rvl;
     }
 
     /* Les champs de la partie I */
@@ -757,23 +761,28 @@ class VersionModifController extends AbstractController
 
 		$form = $form_builder->getForm();
         $form->handleRequest($request);
-
+		$valid = true;
+		
         if ($form->isSubmitted() && $form->isValid()) {
             // on sauvegarde tout de même mais il semble que c'est déjà fait avant
             //$version->setDemHeures($heures_projet_test);
+ 
+            // Changement de type ou plafonnement de la demande en heures !
+            $valid = $this->validDemHeures($version);
+
             $return = Functions::sauvegarder($version, $em, $lg);
-            return $this->redirectToRoute('consulter_projet', ['id' => $version->getProjet()->getIdProjet() ]);
+            return $this->redirectToRoute('consulter_projet', ['id' => $version->getProjet()->getIdProjet(),'warn_type' => $valid ? 0:1 ]);
         }
 
         //$version->setDemHeures($heures_projet_test);
         return $this->render(
             'version/modifier_projet_test.html.twig',
             [
-        'form'      => $form->createView(),
-        'version'   => $version,
-        'collaborateur_form' => $collaborateur_form->createView(),
-        'todo'      => static::versionValidate($version, $sj, $em, $sval),
-        ]
+		        'form'      => $form->createView(),
+		        'version'   => $version,
+		        'collaborateur_form' => $collaborateur_form->createView(),
+		        'todo'      => static::versionValidate($version, $sj, $em, $sval),
+	        ]
         );
     }
 
@@ -1502,7 +1511,7 @@ class VersionModifController extends AbstractController
         }
 
 		// TODO - Automatiser cela avec le formulaire !
-        if ($version->getProjet()->getTypeProjet()==1) {
+        if ($version->getProjet()->getTypeProjet()==Projet::PROJET_SESS) {
             if ($version->getPrjExpose() == null) {
                 $todo[] = 'prj_expose';
             }
@@ -1560,21 +1569,21 @@ class VersionModifController extends AbstractController
 	                $todo[] = 'Taille de chaque jeu de données';
 	            }
 	        }
-        }
-
-        if ($version->typeSession()  == 'A') {
-            $version_precedente = $version->versionPrecedente();
-            if ($version_precedente != null) {
-                $rapportActivite = $em->getRepository(RapportActivite::class)->findOneBy(
-                    [
-                    'projet' => $version_precedente->getProjet(),
-                    'annee' => $version_precedente->getAnneeSession(),
-                ]
-                );
-                if ($rapportActivite == null) {
-                    $todo[] = 'rapport_activite';
-                }
-            }
+	       
+			if ($version->typeSession()  == 'A' ) {
+	            $version_precedente = $version->versionPrecedente();
+	            if ($version_precedente != null) {
+	                $rapportActivite = $em->getRepository(RapportActivite::class)->findOneBy(
+	                    [
+	                    'projet' => $version_precedente->getProjet(),
+	                    'annee' => $version_precedente->getAnneeSession(),
+	                ]
+	                );
+	                if ($rapportActivite == null) {
+	                    $todo[] = 'rapport_activite';
+	                }
+	            }
+			}
         }
 
         if (! static::validateIndividuForms(self::prepareCollaborateurs($version, $sj, $sval), true)) {
