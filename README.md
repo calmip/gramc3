@@ -299,8 +299,21 @@ COMMENT MODIFIER LE CODE ?
 ----
 - Editer dans:
   - `src`
-  - `app/Resources/views`
-  - `web`
+  - `templates`
+  - `public`
+- Aide au déboguage:
+  ~~~
+  mkdir tools/phpstan
+  php composer.phar require --working-dir=tools/phpstan --dev phpstan/phpstan
+  tools/phpstan/vendor/bin/phpstan analyse src
+  ~~~
+- Attention au Coding Style:
+  ~~~~
+  mkdir -p tools/php-cs-fixer
+  php composer.phar require --working-dir=tools/php-cs-fixer friendsofphp/php-cs-fixer
+  tools/php-cs-fixer/vendor/bin/php-cs-fixer fix src
+  ~~~~
+
 - Pour comprendre ce qui se passe:
         `Functions::debugMessage(__METHOD__ .":" . __LINE__ . " bla bla " . $variable );`
         La sortie se trouve dans le journal (Ecrans d'administration)
