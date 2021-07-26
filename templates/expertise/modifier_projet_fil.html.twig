@@ -188,14 +188,6 @@
                 </th>
                 <td>{{ form_widget(edit_form.nbHeuresAtt) }}</td>
             </tr>
-            {% if session.typesession==true and not version.projet.projettest %}
-            <tr>
-                <th class="horiz"><label for="nb_heures_att_ete">Parmi ces heures, Nombre d'heures attribuées pour l'été</label><br>
-                <small>Il s'agit d'allouer des heures qui doivent être utilisées avant la fin de l'été, faute de quoi elles pourront être récupérées</small>
-                </th>
-                <td>{{ form_widget(edit_form.nbHeuresAttEte) }}</td>
-            </tr>
-            {% endif %}
         </tbody>
     </table>
 

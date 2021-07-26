@@ -831,7 +831,7 @@ class ExpertiseController extends AbstractController
         return $this->render(
             $twig,
             [
-            'isnouvelle'        => $isnouvelle,
+            'isNouvelle'        => $isnouvelle,
             'expertise'         => $expertise,
             'autres_expertises' => $autres_expertises,
             'msg_explain'       => $msg_explain,

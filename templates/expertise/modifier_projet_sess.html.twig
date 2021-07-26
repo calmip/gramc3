@@ -78,7 +78,7 @@
         </a>
 
 		{% if noconso==false %}
-	        {% if not isnouvelle %}
+	        {% if not isNouvelle %}
 	            <img id="bconso_1" class="bouton_poussoir conso" src="{{ asset('icones/conso64.png') }}"
 	            alt="Consommation {{anneePrec}}" title="consommation {{anneePrec}}"
 	            data-href="{{ absolute_url(path('projet_conso', { 'id': expertise.version.projet.idProjet, 'annee' : anneePrec })) }}"/>
