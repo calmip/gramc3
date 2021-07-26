@@ -54,7 +54,7 @@ class Projet
     [
         self::PROJET_SESS => 'S',
         self::PROJET_TEST =>  'T',
-        self::PROJET_FIL =>  'A',
+        self::PROJET_FIL =>  'F',
     ];
 
 
