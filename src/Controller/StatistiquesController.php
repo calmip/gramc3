@@ -37,24 +37,6 @@ use App\GramcServices\ServiceProjets;
 use App\GramcServices\ServiceSessions;
 
 
-/***************************
- *  Passe php-stan level 1:
- *
- *  php tools/php-stan/vendor/phpstan/phpstan/phpstan.phar analyze -c tools/php-stan/config.neon -a ./vendor/autoload.php --memory-limit=-1 --level 1  src/Controller/StatistiquesController.php
- *
- *  config.neon:
- *
-
-parameters:
-  excludePaths:
-     - ../../jpgraph/src/Examples
-  scanFiles:
-     - ../../jpgraph/JpGraph.php
-  scanDirectories:
-     - ../../jpgraph/src
-
- ***************************/
-
 // Pour debug
 //use App\Entity\Compta;
 
@@ -176,7 +158,7 @@ class StatistiquesController extends AbstractController
                              ];
 
         # Remplissage de $individus et $individus_uniques
-        foreach ($versions as $version) {
+       foreach ($versions as $version) {
             $collaborateurs_versions = $version->getCollaborateurVersion();
             foreach ($collaborateurs_versions as $collaborateurVersion) {
                 $individu   = $collaborateurVersion->getCollaborateur();
@@ -191,11 +173,14 @@ class StatistiquesController extends AbstractController
                 $individus[$idIndividu] = $individu;
                 if ($collaborateurVersion->getResponsable()) {
                     # Plutôt que d'utiliser $version->getLabo() qui rejoue la même boucle
-                    $lab = $collaborateurVersion->getLabo()->getId();
-                    if (! isset($labos[$lab])) {
-                        $labos[$lab] = 0;
+                    $lab = $collaborateurVersion->getLabo();
+                    if ($lab != null) {
+                        $labid = $lab->getId();
+                        if (! isset($labos[$labid])) {
+                            $labos[$labid] = 0;
+                        }
+                        $labos[$labid] += 1;
                     }
-                    $labos[$lab] += 1;
                 }
             }
         }
