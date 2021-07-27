@@ -1,0 +1,9 @@
+parameters:
+  excludePaths:
+     - ../../jpgraph/src/Examples
+  scanFiles:
+     - ../../jpgraph/JpGraph.php
+     - ../../jpgraph/src/jpgraph.php
+     - ../../jpgraph/src/jpgraph_date.php
+  scanDirectories:
+     - ../../jpgraph/src

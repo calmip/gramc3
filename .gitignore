@@ -45,4 +45,5 @@ adminer\.php
 public/index.php
 
 vendor/**
-tools/**
+tools/phpstan/**
+tools/php-cs-fixer/**

@@ -305,7 +305,7 @@ COMMENT MODIFIER LE CODE ?
   ~~~
   mkdir tools/phpstan
   php composer.phar require --working-dir=tools/phpstan --dev phpstan/phpstan
-  tools/phpstan/vendor/bin/phpstan analyse src
+  php tools/phpstan/vendor/bin/phpstan.phar analyze -c tools/phpstan-config/config.neon -a ./vendor/autoload.php --level 1  src
   ~~~
 - Attention au Coding Style:
   ~~~~
