@@ -298,6 +298,27 @@ class Version implements Demande
     /**
      * @var string
      *
+     * @ORM\Column(name="code_vol_donn_usr", type="string", length=15, nullable=true)
+     */
+    private $codeVolDonnUsr = '';
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="code_nb_fich_tmp", type="string", length=15, nullable=true)
+     */
+    private $codeNbFichTmp = '';
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="code_nb_fich_perm", type="string", length=15, nullable=true)
+     */
+    private $codeNbFichPerm = '';
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="dem_logiciels", type="text", length=65535, nullable=true)
      */
     private $demLogiciels ='';
@@ -308,6 +329,13 @@ class Version implements Demande
      * @ORM\Column(name="dem_bib", type="text", length=65535, nullable=true)
      */
     private $demBib ='';
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="dem_autres", type="text", length=65535, nullable=true)
+     */
+    private $demAutres ='';
 
     /**
      * @var string
@@ -1675,6 +1703,78 @@ class Version implements Demande
     }
 
     /**
+     * Set codeVolDonnUsr
+     *
+     * @param string $codeVolDonnUsr
+     *
+     * @return Version
+     */
+    public function setCodeVolDonnUsr($codeVolDonnUsr)
+    {
+        $this->codeVolDonnUsr = $codeVolDonnUsr;
+
+        return $this;
+    }
+
+    /**
+     * Get codeVolDonnUsr
+     *
+     * @return string
+     */
+    public function getCodeVolDonnUsr()
+    {
+        return $this->codeVolDonnUsr;
+    }
+
+    /**
+     * Set codeNbFichTmp
+     *
+     * @param string $codeNbFichTmp
+     *
+     * @return Version
+     */
+    public function setCodeNbFichTmp($codeNbFichTmp)
+    {
+        $this->codeNbFichTmp = $codeNbFichTmp;
+
+        return $this;
+    }
+
+    /**
+     * Get codeNbFichTmp
+     *
+     * @return string
+     */
+    public function getCodeNbFichTmp()
+    {
+        return $this->codeNbFichTmp;
+    }
+
+    /**
+     * Set codeNbFichPerm
+     *
+     * @param string $codeNbFichPerm
+     *
+     * @return Version
+     */
+    public function setCodeNbFichPerm($codeNbFichPerm)
+    {
+        $this->codeNbFichPerm = $codeNbFichPerm;
+
+        return $this;
+    }
+
+    /**
+     * Get codeNbFichPerm
+     *
+     * @return string
+     */
+    public function getCodeNbFichPerm()
+    {
+        return $this->codeNbFichPerm;
+    }
+
+    /**
      * Set demLogiciels
      *
      * @param string $demLogiciels
@@ -1713,7 +1813,31 @@ class Version implements Demande
     }
 
     /**
-     * Get demBib
+     * Get demAutres
+     *
+     * @return string
+     */
+    public function getDemAutres()
+    {
+        return $this->demAutres;
+    }
+
+    /**
+     * Set demAutres
+     *
+     * @param string $demAutres
+     *
+     * @return Version
+     */
+    public function setDemAutres($demAutres)
+    {
+        $this->demAutres = $demAutres;
+
+        return $this;
+    }
+
+    /**
+     * Get demAutres
      *
      * @return string
      */

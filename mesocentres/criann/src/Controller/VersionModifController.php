@@ -587,8 +587,55 @@ class VersionModifController extends AbstractController
                 ],
         ]
     )
+    ->add(
+        'codeVolDonnUsr',
+        ChoiceType::class,
+        [
+        'required'       =>  false,
+        'placeholder'   =>  "-- Choisissez une option",
+        'choices'  =>   [
+                "< 10Go" => "< 10Go",
+                "< 100Go" => "< 100Go",
+                "< 1To" => "< 1To",
+                "< 10To" => "< 10To",
+                "> 10To" => "> 10To",
+                "Je ne sais pas" => "je ne sais pas",
+                ],
+        ]
+    )
+    ->add(
+        'codeNbFichTmp',
+        ChoiceType::class,
+        [
+        'required'       =>  false,
+        'placeholder'   =>  "-- Choisissez une option",
+        'choices'  =>   [
+                "< 1 000" => "< 1 000",
+                "< 10 000" => "< 10 000",
+                "< 100 000" => "< 100 000",
+                "> 1 000 000" => "> 1 000 000",
+                "Je ne sais pas" => "je ne sais pas",
+                ],
+        ]
+    )
+    ->add(
+        'codeNbFichPerm',
+        ChoiceType::class,
+        [
+        'required'       =>  false,
+        'placeholder'   =>  "-- Choisissez une option",
+        'choices'  =>   [
+                 "< 1 000" => "< 1 000",
+                "< 10 000" => "< 10 000",
+                "< 100 000" => "< 100 000",
+                "> 1 000 000" => "> 1 000 000",
+                "Je ne sais pas" => "je ne sais pas",
+                ],
+        ]
+    )
     ->add('demLogiciels', TextAreaType::class, [ 'required'       =>  false ])
     ->add('demBib', TextAreaType::class, [ 'required'       =>  false ])
+    ->add('demAutres', TextAreaType::class, [ 'required'       =>  false ])
     ->add(
         'demPostTrait',
         ChoiceType::class,
@@ -1551,6 +1598,15 @@ class VersionModifController extends AbstractController
         }
         if ($version->getCodeVolDonnTmp() == null) {
             $todo[] = 'code_vol_donn_tmp';
+        }
+        if ($version->getCodeVolDonnUsr() == null) {
+            $todo[] = 'code_vol_donn_usr';
+        }
+        if ($version->getCodeNbFichTmp() == null) {
+            $todo[] = 'code_nb_fich_tmp';
+        }
+        if ($version->getCodeNbFichPerm() == null) {
+            $todo[] = 'code_nb_fich_perm';
         }
         if ($version->getDemPostTrait() == null) {
             $todo[] = 'dem_post_trait';

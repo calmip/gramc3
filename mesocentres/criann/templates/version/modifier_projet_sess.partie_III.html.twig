@@ -86,12 +86,28 @@
 	            <td class="gauche">{{ form_widget(form.codeVolDonnTmp) }}<br><br></td>
 	        </tr>
 	        <tr>
+	            <td class="droite">{{ form_label(form.codeVolDonnUsr, "Volume maximal de stockage de données par utilisateur (/home et/ou /work)") }}</td>
+	            <td class="gauche">{{ form_widget(form.codeVolDonnUsr) }}<br><br></td>
+	        </tr>
+	        <tr>
+	            <td class="droite">{{ form_label(form.codeNbFichTmp, "Nombre de fichiers pour un calcul (temporaires)") }}</td>
+	            <td class="gauche">{{ form_widget(form.codeNbFichTmp) }}<br><br></td>
+	        </tr>
+	        <tr>
+	            <td class="droite">{{ form_label(form.codeNbFichPerm, "Nombre de fichiers pour un calcul (à stocker)") }}</td>
+	            <td class="gauche">{{ form_widget(form.codeNbFichPerm) }}<br><br></td>
+	        </tr>
+	        <tr>
 	            <td class="droite">{{ form_label(form.demLogiciels, "Autres logiciels nécessaires au projet" ) }}<br></td>
 	            <td class="gauche">{{ form_widget(form.demLogiciels, { 'attr': { 'rows' : 5, 'cols' : 50 } }) }}<br><br></td>
 	        </tr>
 	       <tr>
 	            <td class="droite">{{ form_label(form.demBib, "Bibliothèques nécessaires" ) }}<br></td>
 	            <td class="gauche">{{ form_widget(form.demBib, { 'attr': { 'rows' : 5, 'cols' : 50 } }) }}<br><br></td>
+	        </tr>
+	        <tr>
+	            <td class="droite">{{ form_label(form.demAutres, "Besoins techniques particuliers (préciser)" ) }}<br></td>
+	            <td class="gauche">{{ form_widget(form.demAutres, { 'attr': { 'rows' : 5, 'cols' : 50 } }) }}<br><br></td>
 	        </tr>
 
 	        <tr>
