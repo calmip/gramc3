@@ -1098,20 +1098,11 @@ class ServiceMenus
             $menu['raison'] = "Le responsable du projet n'a pas demandé de renouvellement";
         } elseif ($isProjetSess && $etatSession != Etat::EDITION_DEMANDE) {
             $menu['raison'] = "Nous ne sommes pas en période de demandes de ressources";
-        } elseif (VersionModifController::versionValidate($version, $this->sj, $this->em, $this->sval, $this->nodata) != []) {
-            //$this->sj->debugMessage(__METHOD__ . ' '.$version->getIdVersion() . ' ' . print_r(VersionModifController::versionValidate( $version ), true));
-
-            $menu['raison']      = "Votre demande est incomplète";
-            $menu['name']        = 'version_avant_modifier';
-            $menu['commentaire'] = "Vous ne pouvez pas envoyer ce projet à l'expert parce que votre demande est incomplète";
-            $menu['incomplet']   = true;
-            $menu['ok']          = true;
-            $menu['param']       = $version->getIdVersion();
-            $menu['todo']        = "Lorsqu'il sera complété, envoyer le projet en <strong>expertise</strong>";
         } else {
             $menu['ok']          = true;
             $menu['commentaire'] = "Envoyer votre demande pour expertise. ATTENTION, vous ne pourrez plus la modifier par la suite";
             $menu['todo']        = "Envoyer le projet en <strong>expertise</strong>";
+            $menu['name']        = 'avant_modifier_version';
         }
 
         return $menu;

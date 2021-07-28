@@ -713,7 +713,7 @@ class VersionController extends AbstractController
 
 
     /**
-     * Mettre une pénalité sur une version (en GET par aajx)
+     * Mettre une pénalité sur une version (en GET par ajax)
      *
      * @Route("/{id}/version/{penal}/penalite", name="penal_version")
      * @Method({"GET"})
@@ -741,58 +741,6 @@ class VersionController extends AbstractController
     }
 
     /**
-     * Ecran affiché dans le cas où la demande est incomplète
-     *
-     * @Route("/{id}/avant_modifier", name="version_avant_modifier")
-     * @Method({"GET", "POST"})
-     * @Security("is_granted('ROLE_DEMANDEUR')")
-     */
-    public function avant_modifierAction(Request $request, Version $version)
-    {
-        $sm = $this->sm;
-        $sj = $this->sj;
-
-
-        // ACL
-        if ($sm->modifier_version($version)['ok'] == false) {
-            $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de modifier la version " . $version->getIdVersion().
-                " parce que : " . $sm->modifier_version($version)['raison']);
-        }
-
-        return $this->render(
-            'version/avant_modifier.html.twig',
-            [
-            'version'   => $version
-        ]
-        );
-    }
-
-    /***
-     * ???? pas bien compris ce que ça fait
-     * TODO - Intégrer cette fonction à ServiceMenus et la généraliser ?
-     *        Il y a d'autres xxxxACL fonctions
-     *
-     ********************/
-
-    private function MenuACL($menu, $message = "", $method = "", $line = "")
-    {
-        $sj = $this->sj;
-
-        if ($menu['ok'] == false) {
-            if ($method != "" && $line != "") {
-                $output = $method . ":" . $line;
-            } elseif ($method != "") {
-                $output = $method;
-            } else {
-                $output = __METHOD__ . ":" . __LINE__;
-            }
-
-            $output .= ' ' . $message . " parce que " . $menu['raison'];
-            $sj->throwException($output);
-        }
-    }
-
-    /**
      * envoyer à l'expert
      *
      * @Route("/{id}/avant_envoyer", name="avant_envoyer_expert")
@@ -806,7 +754,7 @@ class VersionController extends AbstractController
         $ff = $this->ff;
         $em = $this->getdoctrine()->getManager();
 
-        $this->MenuACL($sm->envoyer_expert($version), "Impossible d'envoyer la version " . $version->getIdVersion() . " à l'expert", __METHOD__, __LINE__);
+        ////$this->MenuACL($sm->envoyer_expert($version), "Impossible d'envoyer la version " . $version->getIdVersion() . " à l'expert", __METHOD__, __LINE__);
 
         $projet  = $version->getProjet();
         $session = $version->getSession();
@@ -867,7 +815,7 @@ class VersionController extends AbstractController
         $se = $this->se;
         $em = $this->getdoctrine()->getManager();
 
-        $this->MenuACL($sm->envoyer_expert($version), " Impossible d'envoyer la version " . $version->getIdVersion() . " à l'expert", __METHOD__, __LINE__);
+        ////$this->MenuACL($sm->envoyer_expert($version), " Impossible d'envoyer la version " . $version->getIdVersion() . " à l'expert", __METHOD__, __LINE__);
 
         $projet = $version -> getProjet();
 

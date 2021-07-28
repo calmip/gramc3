@@ -77,7 +77,6 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-//use Symfony\Component\Validator\Validator\TraceableValidator;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 use Doctrine\ORM\EntityManager;
@@ -126,6 +125,39 @@ class VersionModifController extends AbstractController
         $this->tw = $tw;
     }
 
+    /**
+     * Appelé par le bouton Envoyer à l'expert: si la demande est incomplète
+     * on envoie un éran pour la compléter. Sinon on passe à envoyer à l'expert
+     *
+     * @Route("/{id}/avant_modifier", name="avant_modifier_version")
+     * @Method({"GET", "POST"})
+     * @Security("is_granted('ROLE_DEMANDEUR')")
+     */
+    public function avantModifierVersionAction(Request $request, Version $version)
+    {
+        $sm = $this->sm;
+        $sj = $this->sj;
+        $vl = $this->vl;
+        $em = $this->getDoctrine()->getManager();
+
+
+        // ACL
+        if ($sm->modifier_version($version)['ok'] == false) {
+            $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de modifier la version " . $version->getIdVersion().
+                " parce que : " . $sm->modifier_version($version)['raison']);
+        }
+        if ($this->versionValidate($version) != []) {
+            return $this->render(
+                'version/avant_modifier.html.twig',
+                [
+                'version'   => $version
+                ]);
+        }
+        else {
+            return $this->redirectToRoute('avant_envoyer_expert', [ 'id' => $version->getIdVersion() ]);
+        }
+    }
+    
     /**
      * Modification d'une version existante
      *
@@ -284,14 +316,14 @@ class VersionModifController extends AbstractController
 
         // formulaire principal
         $form_builder = $this->createFormBuilder($version);
-        $this->modifierPartieI($version, $form_builder);
-        $this->modifierPartieII($version, $form_builder);
-        $this->modifierPartieIII($version, $form_builder);
+        $this->modifierType1PartieI($version, $form_builder);
+        $this->modifierType1PartieII($version, $form_builder);
+        $this->modifierType1PartieIII($version, $form_builder);
         if ($this->getParameter('nodata')==false) {
-            $this->modifierPartieIV($version, $form_builder);
+            $this->modifierType1PartieIV($version, $form_builder);
         }
         $nb_form = 0;
-        $this->modifierPartieV($version, $form_builder, $nb_form);
+        $this->modifierType1PartieV($version, $form_builder, $nb_form);
 
         $form_builder
             ->add('fermer', SubmitType::class)
@@ -346,7 +378,7 @@ class VersionModifController extends AbstractController
             'imageJust2'    =>   $this->image('img_justif_renou_2', $version),
             'imageJust3'    =>   $this->image('img_justif_renou_3', $version),
             'collaborateur_form' => $collaborateur_form->createView(),
-            'todo'          => static::versionValidate($version, $sj, $em, $sval, $this->getParameter('nodata')),
+            'todo'          => $this->versionValidate($version),
             'renouvellement'    => $renouvellement,
         'nb_form'       => $nb_form
             ]
@@ -393,7 +425,7 @@ class VersionModifController extends AbstractController
     }
 
     /* Les champs de la partie I */
-    private function modifierPartieI($version, &$form)
+    private function modifierType1PartieI($version, &$form)
     {
         $em = $this->getDoctrine()->getManager();
         $form
@@ -442,7 +474,7 @@ class VersionModifController extends AbstractController
     }
 
     /* Les champs de la partie II */
-    private function modifierPartieII($version, &$form)
+    private function modifierType1PartieII($version, &$form)
     {
         $form
     ->add('prjResume', TextAreaType::class, [ 'required'       =>  false ])
@@ -451,7 +483,7 @@ class VersionModifController extends AbstractController
     }
 
     /* Les champs de la partie III */
-    private function modifierPartieIII($version, &$form)
+    private function modifierType1PartieIII($version, &$form)
     {
         $form
     ->add('prjConception', CheckboxType::class, [ 'required'       =>  false ])
@@ -573,7 +605,7 @@ class VersionModifController extends AbstractController
     }
 
     /* Les champs de la partie IV */
-    private function modifierPartieIV($version, &$form)
+    private function modifierType1PartieIV($version, &$form)
     {
         $form
     ->add(
@@ -653,7 +685,7 @@ class VersionModifController extends AbstractController
     }
 
     /* Les champs de la partie V */
-    private function modifierPartieV($version, &$form, &$nb_form)
+    private function modifierType1PartieV($version, &$form, &$nb_form)
     {
         $em = $this->getDoctrine()->getManager();
         $formations = $em->getRepository(\App\Entity\Formation::class)->getFormationsPourVersion();
@@ -770,7 +802,7 @@ class VersionModifController extends AbstractController
         'form'      => $form->createView(),
         'version'   => $version,
         'collaborateur_form' => $collaborateur_form->createView(),
-        'todo'      => static::versionValidate($version, $sj, $em, $sval),
+        'todo'      => $this->versionValidate($version),
         ]
         );
     }
@@ -1305,7 +1337,7 @@ class VersionModifController extends AbstractController
         }
 
         $form = $this->createFormBuilder($version);
-        $this->modifierPartieIV($version, $form);
+        $this->modifierType1PartieIV($version, $form);
         $form
             ->add('valider', SubmitType::class)
             ->add('annuler', SubmitType::class);
@@ -1471,8 +1503,11 @@ class VersionModifController extends AbstractController
      *
      *  TODO - Cette fonction statique ce n'est pas fameux
      **/
-    public static function versionValidate(Version $version, ServiceJournal $sj, EntityManager $em, ValidatorInterface $sval, $nodata=false)
+    private function versionValidate(Version $version)
     {
+        $em   = $this->getDoctrine()->getManager();
+        $nodata = $this->getParameter('nodata');
+
         $todo   =   [];
         if ($version->getPrjTitre() == null) {
             $todo[] = 'prj_titre';
@@ -1496,44 +1531,45 @@ class VersionModifController extends AbstractController
             $todo[] = 'gpu';
         }
 
-        if (! $version->isProjetTest()) {
-            if ($version->getPrjExpose() == null) {
-                $todo[] = 'prj_expose';
-            }
-            if ($version->getCodeHeuresPJob() == null) {
-                $todo[] = 'code_heures_p_job';
-            }
-            if ($version->getCodeRamPCoeur() == null) {
-                $todo[] = 'code_ram_p_coeur';
-            }
-            if ($version->getCodeRamPart() == null) {
-                $todo[] = 'code_ram_part';
-            }
+        // Pas de projets test
+        //if (! $version->isProjetTest()) {
+        if ($version->getPrjExpose() == null) {
+            $todo[] = 'prj_expose';
+        }
+        if ($version->getCodeHeuresPJob() == null) {
+            $todo[] = 'code_heures_p_job';
+        }
+        if ($version->getCodeRamPCoeur() == null) {
+            $todo[] = 'code_ram_p_coeur';
+        }
+        if ($version->getCodeRamPart() == null) {
+            $todo[] = 'code_ram_part';
+        }
 
-            if ($version->getCodeEffParal() == null) {
-                $todo[] = 'code_eff_paral';
-            }
-            if ($version->getCodeVolDonnTmp() == null) {
-                $todo[] = 'code_vol_donn_tmp';
-            }
-            if ($version->getDemPostTrait() == null) {
-                $todo[] = 'dem_post_trait';
-            }
+        if ($version->getCodeEffParal() == null) {
+            $todo[] = 'code_eff_paral';
+        }
+        if ($version->getCodeVolDonnTmp() == null) {
+            $todo[] = 'code_vol_donn_tmp';
+        }
+        if ($version->getDemPostTrait() == null) {
+            $todo[] = 'dem_post_trait';
+        }
 
-            // s'il s'agit d'un renouvellement
-            if (count($version->getProjet()->getVersion()) > 1 && $version->getPrjJustifRenouv() == null) {
-                $todo[] = 'prj_justif_renouv';
-            }
+        // s'il s'agit d'un renouvellement
+        if (count($version->getProjet()->getVersion()) > 1 && $version->getPrjJustifRenouv() == null) {
+            $todo[] = 'prj_justif_renouv';
+        }
 
-            // Centres nationaux
-            if ($version->getPrjGenciCentre()     == null
-                || $version->getPrjGenciMachines() == null
-                || $version->getPrjGenciHeures()   == null
-                || $version->getPrjGenciDari()     == null) {
-                $todo[] = 'genci';
-            };
+        // Centres nationaux
+        if ($version->getPrjGenciCentre()     == null
+            || $version->getPrjGenciMachines() == null
+            || $version->getPrjGenciHeures()   == null
+            || $version->getPrjGenciDari()     == null) {
+            $todo[] = 'genci';
+        };
 
-            // Partage de données
+        // Partage de données
         if ($nodata == false) {		// Stockage de données
             if ($version->getSondVolDonnPerm() == null) {
                 $todo[] = 'sond_vol_donn_perm';
@@ -1554,24 +1590,25 @@ class VersionModifController extends AbstractController
                 $todo[] = 'Taille de chaque jeu de données';
             }
         }
-        }
-
-        if ($version->typeSession()  == 'A') {
-            $version_precedente = $version->versionPrecedente();
-            if ($version_precedente != null) {
-                $rapportActivite = $em->getRepository(RapportActivite::class)->findOneBy(
-                    [
-                    'projet' => $version_precedente->getProjet(),
-                    'annee' => $version_precedente->getAnneeSession(),
-                ]
-                );
-                if ($rapportActivite == null) {
-                    $todo[] = 'rapport_activite';
+        
+        if ($this->getParameter('rapport_dactivite')) {
+            if ($version->typeSession()  == 'A') {
+                $version_precedente = $version->versionPrecedente();
+                if ($version_precedente != null) {
+                    $rapportActivite = $em->getRepository(RapportActivite::class)->findOneBy(
+                        [
+                        'projet' => $version_precedente->getProjet(),
+                        'annee' => $version_precedente->getAnneeSession(),
+                    ]
+                    );
+                    if ($rapportActivite == null) {
+                        $todo[] = 'rapport_activite';
+                    }
                 }
             }
         }
 
-        if (! static::validateIndividuForms(self::prepareCollaborateurs($version, $sj, $sval), true)) {
+        if (! static::validateIndividuForms(self::prepareCollaborateurs($version, $this->sj, $this->vl), true)) {
             $todo[] = 'collabs';
         }
 

@@ -126,6 +126,39 @@ class VersionModifController extends AbstractController
     }
 
     /**
+     * Appelé par le bouton Envoyer à l'expert: si la demande est incomplète
+     * on envoie un éran pour la compléter. Sinon on passe à envoyer à l'expert
+     *
+     * @Route("/{id}/avant_modifier", name="avant_modifier_version")
+     * @Method({"GET", "POST"})
+     * @Security("is_granted('ROLE_DEMANDEUR')")
+     */
+    public function avantModifierVersionAction(Request $request, Version $version)
+    {
+        $sm = $this->sm;
+        $sj = $this->sj;
+        $vl = $this->vl;
+        $em = $this->getDoctrine()->getManager();
+
+
+        // ACL
+        if ($sm->modifier_version($version)['ok'] == false) {
+            $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de modifier la version " . $version->getIdVersion().
+                " parce que : " . $sm->modifier_version($version)['raison']);
+        }
+        if ($this->versionValidate($version) != []) {
+            return $this->render(
+                'version/avant_modifier.html.twig',
+                [
+                'version'   => $version
+                ]);
+        }
+        else {
+            return $this->redirectToRoute('avant_envoyer_expert', [ 'id' => $version->getIdVersion() ]);
+        }
+    }
+
+    /**
      * Modification d'une version existante
      *
      *      1/ D'abord une partie générique (images, collaborateurs)
@@ -1480,13 +1513,12 @@ class VersionModifController extends AbstractController
      *    return= Un array contenant la "todo liste", ie la liste de choses à faire pour que le formulaire soit validé
      *            Un array vide [] signifie: "Formulaire validé"
      *
-     *  TODO - Cette fonction statique ce n'est pas fameux
-     *         Remplacer par une fonction de ServiceVersion
-     *         Etudier le forumaire et ne mettre dans todo que des champs existant réellement 
-     *         (dépend du formulaire qui dépend du type de projet)
      **/
-    public static function versionValidate(Version $version, ServiceJournal $sj, EntityManager $em, ValidatorInterface $sval, $nodata=false)
+    private function versionValidate(Version $version)
     {
+        $em   = $this->getDoctrine()->getManager();
+        $nodata = $this->getParameter('nodata');
+
         $todo   =   [];
         if ($version->getPrjTitre() == null) {
             $todo[] = 'prj_titre';
@@ -1586,7 +1618,7 @@ class VersionModifController extends AbstractController
 			}
         }
 
-        if (! static::validateIndividuForms(self::prepareCollaborateurs($version, $sj, $sval), true)) {
+        if (! static::validateIndividuForms(self::prepareCollaborateurs($version, $this->sj, $this->vl), true)) {
             $todo[] = 'collabs';
         }
 
