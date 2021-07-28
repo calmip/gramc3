@@ -1881,18 +1881,18 @@ class ProjetController extends AbstractController
         $type = $projet->getTypeProjet();
         switch ($type) {
             case Projet::PROJET_SESS:
-                return $this->consulterType1($projet, $version, $loginname, $request, $warn_type);
+                return $this->consulterType1_3($projet, $version, $loginname, $request, $warn_type);
             case Projet::PROJET_TEST:
                 return $this->consulterType2($projet, $version, $loginname, $request, $warn_type);
             case Projet::PROJET_FIL:
-                return $this->consulterType1($projet, $version, $loginname, $request, $warn_type);
+                return $this->consulterType1_3($projet, $version, $loginname, $request, $warn_type);
             default:
                 $sj->errorMessage(__METHOD__ . " Type de projet inconnu: $type");
         }
     }
 
-    // Consulter les projets de type 1 (projets PROJET_SESS)
-    private function consulterType1(Projet $projet, Version $version, $loginname, Request $request, $warn_type)
+    // Consulter les projets de type 1 (projets PROJET_SESS) ou type 3 (PROJET_FIL)
+    private function consulterType1_3(Projet $projet, Version $version, $loginname, Request $request, $warn_type)
     {
         $em = $this->getDoctrine()->getManager();
         $sm = $this->sm;
@@ -1986,8 +1986,14 @@ class ProjetController extends AbstractController
 
         $formation = $sv->buildFormations($version);
 
+		if ($projet->getTypeProjet() == Projet::PROJET_SESS) {
+			$tmpl = 'projet/consulter_projet_sess.html.twig';
+		} else {
+			$tmpl = 'projet/consulter_projet_fil.html.twig';
+		}
+		
         return $this->render(
-            'projet/consulter_projet_sess.html.twig',
+            $tmpl,
             [
             	'warn_type'          => $warn_type,
 		        'projet'             => $projet,
@@ -2032,8 +2038,11 @@ class ProjetController extends AbstractController
             [
             'projet'      => $projet,
             'version'     => $version,
+            'session'     => $version->getSession(),
             'consocalcul' => $sp->getConsoCalculVersion($version),
             'quotacalcul' => $sp->getQuotaCalculVersion($version),
+	        'conso_cpu'   => $sp->getConsoRessource($projet, 'cpu', $version->getAnneeSession()),
+	        'conso_gpu'   => $sp->getConsoRessource($projet, 'gpu', $version->getAnneeSession()),
             'menu'        => $menu,
             ]
         );
