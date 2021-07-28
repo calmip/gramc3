@@ -6,7 +6,6 @@
 *.bkp
 *.tar
 *.tgz
-var
 var.*
 data/*
 *#
@@ -20,7 +19,7 @@ src/cache/*
 services.yaml
 /build/
 /phpunit.xml
-/var/*
+!/var/CACHEDIR.TAG
 !/var/cache
 /var/cache/*
 !var/cache/.gitkeep
