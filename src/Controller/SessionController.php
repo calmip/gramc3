@@ -141,7 +141,11 @@ class SessionController extends AbstractController
             $menu[] = $sm->modifierSession();
             $menu[] = $sm->demarrerSaisie();
             $menu[] = $sm->terminerSaisie();
-            $menu[] = $sm->envoyerExpertises();
+            
+            if ($this->getParameter('noedition_expertise')==false) {
+                // On saut une étape si ce paramètre est à true
+                $menu[] = $sm->envoyerExpertises();
+            }
             $menu[] = $sm->activerSession();
         }
         return $this->render(
@@ -222,6 +226,7 @@ class SessionController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
+     // On vient de cliquer sur le bouton Expertises
     public function terminerSaisieAction(Request $request)
     {
         $ss = $this->ss;
@@ -235,6 +240,7 @@ class SessionController extends AbstractController
         if ($workflow->canExecute(Signal::DAT_FIN_DEM, $session_courante)) {
             $workflow->execute(Signal::DAT_FIN_DEM, $session_courante);
             $em->flush();
+            return $this->redirectToRoute('envoyer_expertises');
             return $this->redirectToRoute('gerer_sessions');
         } else {
             return $this->render(
@@ -392,6 +398,7 @@ class SessionController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
+     // On vient de cliquer sur le bouton Demandes
     public function demarrerSaisieAction(Request $request)
     {
         $ss = $this->ss;

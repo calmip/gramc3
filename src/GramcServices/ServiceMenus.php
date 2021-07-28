@@ -226,7 +226,7 @@ class ServiceMenus
         $session        = $this->ss->getSessionCourante();
         $workflow       = $this->sw;
         $menu['name']   = 'session_avant_changer_etat';
-        $menu['lien']   = "Début de la saisie";
+        $menu['lien']   = "Demandes";
         $menu['params'] = [ 'ctrl' => 'demarrer_saisie'];
 
         if ($workflow->canExecute(Signal::DAT_DEB_DEM, $session)) {
@@ -247,15 +247,15 @@ class ServiceMenus
         $session        = $this->ss->getSessionCourante();
         $workflow       = $this->sw;
         $menu['name']   = 'session_avant_changer_etat';
-        $menu['lien']   = "Fin de la saisie";
+        $menu['lien']   = "Expertises";
         $menu['params'] = [ 'ctrl' => 'terminer_saisie'];
 
         if ($workflow->canExecute(Signal::DAT_FIN_DEM, $session)) {
             $menu['ok']          = true;
-            $menu['commentaire'] = 'Fin de la saisie des demandeurs';
+            $menu['commentaire'] = "Début d'expertise des projets";
             return $menu;
         } else {
-            $menu['commentaire'] = 'Pas possible de terminer la saisie des projets';
+            $menu['commentaire'] = 'Pas possible de passer les projets en expertise';
             $menu['ok']          = false;
             $menu['raison']      = 'La session n\'est pas en période de saisie des projets';
             return $menu;
@@ -278,11 +278,13 @@ class ServiceMenus
         } else {
             $menu['ok']          = false;
             $menu['commentaire'] = "Impossible d'envoyer les expertises";
+            
             if ($session->getCommGlobal() == null) {
                 $menu['raison']  = "Il n'y a pas de commentaire de session (menu Président)";
             } else {
                 $menu['raison']  = "La session n'est pas en \"expertise\"";
             }
+            
             return $menu;
         }
     }
@@ -321,13 +323,14 @@ class ServiceMenus
         $workflow       = $this->sw;
 
         $menu['name']   = 'session_avant_changer_etat';
-        $menu['lien']   = "Activer la session";
+        $menu['lien']   = "Activation";
         $menu['params'] = [ 'ctrl' => 'activer_session'];
 
-        if (! $workflow->canExecute(Signal::CLK_SESS_DEB, $session)) {
+        // NOTE - Le workflow accepte d'activer la session plusieurs fois, du coup il faut tester l'état ici
+        if (! $workflow->canExecute(Signal::CLK_SESS_DEB, $session) || $session->getEtatSession() == Etat::ACTIF) {
             $menu['ok']          = false;
-            $menu['commentaire'] = "Vous ne pouvez pas activer la session";
-            $menu['raison']      = "Le commentaire de session n'a pas été envoyé, ou la session est déjà active";
+            $menu['commentaire'] = "Vous ne pouvez pas activer la session pour l'instant";
+            $menu['raison']      = "La session n'est pas en attente";
             return $menu;
         } else {
             $menu['ok']          = true;

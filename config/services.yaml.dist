@@ -70,6 +70,9 @@ parameters:
     # Suppression des formulaires concernant les données (stockage et partage)
     nodata: false
     
+    # Suppression d'une étape dans le workflow des sessions
+    noedition_expertise: true
+    
     # Nombre max de rallonges par projet et par sessoin
     max_rall: 2
     
