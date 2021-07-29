@@ -37,29 +37,6 @@
     </table>
 	{% endif %}
 	
-    <div class="message warning"><h2>Heures normalisées</h2>
-
-<ul><li>Les heures que vous demandez seront utilisables indifféremment sur des noeuds CPU ou des noeuds avec GPU.</li>
-<li>Sur un nœud GPU:
-	<ul>
-		<li>Les heures utilisées seront converties en heures cpu avec un coefficient de conversion égal à 33 par GPU.</li>
-		<li>Les heures CPU <strong>ne seront pas comptées</strong></li>
-	</ul>
-</li>
-<li>Si vous pensez utiliser les noeuds GPU <strong>vous devez prendre en compte ce coefficient de conversion</strong>.
-<li>Votre demande d'heures totale intègre vos besoins en usage des noeuds CPU <strong>et vos besoins en usage des noeuds GPU</strong>.</li>
-</ul>
-
-<h4>Quelques exemples:</h4>
-<ul>
-<li>Un calcul utilisant <strong>1 cœur</strong> et <strong>1 GPU</strong> durant <strong>1 heure</strong> comptera <strong>33 heures</strong></li>
-<li>Un calcul utilisant <strong>2 cœurs</strong>  et <strong>2 GPUs</strong> durant <strong>1 heure</strong> comptera 2x33=<strong>66 heures</strong></li>
-<li>Un calcul utilisant <strong>36 cœurs</strong> et <strong>4 GPUs</strong> durant <strong>1 heure</strong> comptera 4x33 = <strong>132 heures</strong></li>
-</ul>
-
-<p>Plus de détails <a href="{{mesoc_web}}"><strong>sur notre site web</strong></a></p>
-</div>
-
 {# Si session en édition ... #}
 {% if session.etat == 2 %}
 <div class="message warning">
@@ -71,7 +48,7 @@
 <div class="message warning">
     <h2>Nombre d'heures limité</h2>
     <ul>
-    <li>Vous ne pouvez pas <strong>demander plus de {{ prj_seuil_sess }} heures</strong>.</li>
+    <li>Vous ne pouvez pas <strong>demander plus de {{ prj_seuil_sess }} heures CPU</strong>.</li>
     <li>Si vous souhaitez tester votre code, nous vous conseillons de <strong>demander 5000 heures</strong></li>
     <li>Vous pourrez faire une <strong>demande plus importante</strong> lors de la prochaine session d'attribution.</li>
     </ul>
@@ -81,8 +58,12 @@
     <table class="projet"><tbody>
 
     <tr>
-        <th class="horiz">{{ form_label( form.demHeures, "Nombre d'heures demandées") }} </th>
+        <th class="horiz">{{ form_label( form.demHeures, "Nombre d’heures CPU (heures x cœurs) demandées") }} </th>
         <td>{{ form_widget( form.demHeures) }}</td>
+    </tr>
+    <tr>
+        <th class="horiz">{{ form_label( form.demHeures, "Durée « elapsed » cumulée des travaux en heures.gpu") }} </th>
+        <td>{{ form_widget( form.demHeuresGpu) }}</td>
     </tr>
     <tbody></table>
 

@@ -461,6 +461,7 @@ class VersionModifController extends AbstractController
         };
         $form
     ->add('demHeures', IntegerType::class, [ 'required'       => false ])
+    ->add('demHeuresGpu', IntegerType::class, [ 'required'       => false ])
     ->add('prjFinancement', TextType::class, [ 'required'     => false ])
     ->add('prjGenciCentre', TextType::class, [ 'required' => false ])
     ->add('prjGenciMachines', TextType::class, [ 'required' => false ])
@@ -1561,6 +1562,9 @@ class VersionModifController extends AbstractController
         }
         if ($version->getDemHeures() == null) {
             $todo[] = 'dem_heures';
+        }
+        if ($version->getDemHeuresGpu() == null) {
+            $todo[] = 'dem_heures_gpu';
         }
         if ($version->getPrjThematique() == null) {
             $todo[] = 'prj_id_thematique';

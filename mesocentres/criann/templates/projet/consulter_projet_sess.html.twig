@@ -132,12 +132,6 @@
 
 <h3>I - Présentation générale</h3>
 
-{% if conso_gpu[0] > 0 %}
-<div class="message info">
-	<p>Les heures gpu sont affichées en heures <strong>normalisées</strong></p>
-</div>
-{% endif %}
-
 {% if warn_type and session.etatsession == 2 %}
 coucou EDITION_DEMANDE
 {% endif %}
@@ -169,21 +163,32 @@ Vous pourrez demander à nouveau des heures (sans limitation) lors de la prochai
         {% if versionPrec != null %}
         {% if versionPrec.anneeSession == version.anneeSession %}
         <tr>
-            <th class="horiz">Nombre d'heures demandées session {{ versionPrec.session }}<br>
+            <th class="horiz">Nombre d'heures CPU demandées session {{ versionPrec.session }}<br>
             <span class="petit">Y compris les rallonges</span>
             </th>
             <td>{{ (versionPrec.getDemHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
         </tr>
+        <tr>
+            <th class="horiz">Durée « elapsed » cumulée des travaux en heures.gpu<br>
+            </th>
+            <td>{{ (versionPrec.getDemHeuresGpu)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
+        </tr>
         {% endif %}
         {% endif %}
         <tr>
-            <th class="horiz">Nombre d'heures demandées session {{ session }}<br>
+            <th class="horiz">Nombre d'heures CPU demandées session {{ session }}<br>
             <span class="petit">Y compris les rallonges</span>
             </th>
             <td>{{ (version.getDemHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}
             {% if toomuch %} <img src="{{ absolute_url(asset('icones/attention16.png')) }}" alt="Demande trop forte, cf. règles d'attribution" title="Demande trop forte, cf. règles d'attribution" /> {% endif %}
             </td>
+        </tr>        
+        <tr>
+            <th class="horiz">Durée « elapsed » cumulée des travaux en heures.gpu<br>
+            </th>
+            <td>{{ (version.getDemHeuresGpu)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
         </tr>
+
     </tbody>
 </table>
 

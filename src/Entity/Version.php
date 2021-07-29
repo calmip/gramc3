@@ -73,6 +73,13 @@ class Version implements Demande
     /**
      * @var integer
      *
+     * @ORM\Column(name="dem_heures_gpu", type="integer", nullable=true)
+     */
+    private $demHeuresGpu = '0';
+
+    /**
+     * @var integer
+     *
      * @ORM\Column(name="attr_heures", type="integer", nullable=true)
      */
     private $attrHeures = '0';
@@ -889,6 +896,30 @@ class Version implements Demande
     public function getDemHeures()
     {
         return $this->demHeures;
+    }
+
+    /**
+     * Set demHeuresGpu
+     *
+     * @param integer $demHeuresGpu
+     *
+     * @return Version
+     */
+    public function setDemHeuresGpu($demHeuresGpu)
+    {
+        $this->demHeuresGpu = $demHeuresGpu;
+
+        return $this;
+    }
+
+    /**
+     * Get demHeuresGpu
+     *
+     * @return integer
+     */
+    public function getDemHeuresGpu()
+    {
+        return $this->demHeuresGpu;
     }
 
     /**
