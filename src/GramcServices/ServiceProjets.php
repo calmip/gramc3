@@ -710,6 +710,9 @@ class ServiceProjets
     }
 
 
+	// TODO php 8.0 - $projet peut être soit un Projet soit un CollaborateurVersion !
+	//                Il faudra faire une Union cf. https://php.watch/versions/8.0/union-types
+	
     /************************************
     * calcul de la consommation et du quota d'une ressource à une date donnée
     * N'est utilisée que par les méthodes de cette classe
@@ -718,9 +721,15 @@ class ServiceProjets
     * NOTE - Si la table est chargée à 8h00 du matin, toutes les consos de l'année courante seront = 0 avant 8h00
     *
     ************/
-    private function getConsoDate(Projet $projet, $ressource, \DateTime $date)
+    private function getConsoDate($projet, $ressource, \DateTime $date)
     {
-        $loginName = strtolower($projet->getIdProjet());
+		if ($projet instanceof Projet) {
+	        $loginName = strtolower($projet->getIdProjet());
+	        $type = 2;
+		} else {
+			$loginName = strtolower($projet->getLoginname());
+			$type = 1;
+		}
         $conso     = 0;
         $quota     = 0;
         $compta    = $this->em->getRepository(Compta::class)->findOneBy(
@@ -728,7 +737,7 @@ class ServiceProjets
                             'date'      => $date,
                             'ressource' => $ressource,
                             'loginname' => $loginName,
-                            'type'      => 2
+                            'type'      => $type
                         ]
         );
         if ($compta != null) {
@@ -739,6 +748,8 @@ class ServiceProjets
         return [$conso, $quota];
     }
 
+	// TODO php 8.0 - $projet peut être soit un Projet soit un CollaborateurVersion !
+	//                Il faudra faire une Union cf. https://php.watch/versions/8.0/union-types
     /***********************
     * calcul de la consommation et du quota d'une ressource (cpu, gpu, work_space, etc.)
     *
@@ -759,7 +770,7 @@ class ServiceProjets
     *        Si on utilise avant 8h00 du matin toutes les consos sont à 0 !
     *
     *******************/
-    public function getConsoRessource(Projet $projet, $ressource, $annee_ou_date=null)
+    public function getConsoRessource($projet, $ressource, $annee_ou_date=null)
     {
         //return [0,0];
         $annee_ou_date_courante = $this->grdt->showYear();
@@ -772,6 +783,9 @@ class ServiceProjets
         }
         return $this->getConsoDate($projet, $ressource, $date);
     }
+
+	// TODO php 8.0 - $projet peut être soit un Projet soit un CollaborateurVersion !
+	//                Il faudra faire une Union cf. https://php.watch/versions/8.0/union-types
 
     /*******
     * calcul de la consommation cumulée d'une ou plusieurs ressources dans un intervalle de dates données
@@ -787,7 +801,7 @@ class ServiceProjets
     * TODO - Diminuer le nombre de requêtes SQL avec une seule requête plus complexe
     *
     ***********************/
-    public function getConsoIntervalle(Projet $projet, $ressources, $dates)
+    public function getConsoIntervalle($projet, $ressources, $dates)
     {
         if (! is_array($ressources) || ! is_array($dates)) {
             $this->sj->throwException(__METHOD__ . ":" . __LINE__ . " Erreur interne - \$ressources ou \$dates n'est pas un array");
@@ -811,6 +825,9 @@ class ServiceProjets
         return ($conso_fin) ? $conso_fin-$conso_debut : 0;
     }
 
+	// TODO php 8.0 - $projet peut être soit un Projet soit un CollaborateurVersion !
+	//                Il faudra faire une Union cf. https://php.watch/versions/8.0/union-types
+
     /*******************
     * calcul de la consommation "calcul" à une date donnée ou pour une année donnée
     *
@@ -818,7 +835,7 @@ class ServiceProjets
     *           Ne retourne pas le quota
     *
     *************************/
-    public function getConsoCalcul(Projet $projet, $annee_ou_date)
+    public function getConsoCalcul($projet, $annee_ou_date)
     {
         $conso_gpu = $this->getConsoRessource($projet, 'gpu', $annee_ou_date);
         $conso_cpu = $this->getConsoRessource($projet, 'cpu', $annee_ou_date);
@@ -834,6 +851,9 @@ class ServiceProjets
         $annee  = $version->getAnneeSession();
         return $this->getConsoCalcul($projet, $annee);
     }
+
+	// TODO php 8.0 - $projet peut être soit un Projet soit un CollaborateurVersion !
+	//                Il faudra faire une Union cf. https://php.watch/versions/8.0/union-types
 
     /*******************
     * calcul de la consommation "calcul" à une date donnée ou pour une année donnée, en pourcentage du quota
@@ -853,6 +873,8 @@ class ServiceProjets
         }
     }
 
+	// TODO php 8.0 - $projet peut être soit un Projet soit un CollaborateurVersion !
+	//                Il faudra faire une Union cf. https://php.watch/versions/8.0/union-types
     /***************
     * Renvoie la consommation calcul (getConsoCalcul() de l'année et du mois
     *
