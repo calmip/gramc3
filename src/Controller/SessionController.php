@@ -27,6 +27,8 @@ namespace App\Controller;
 use App\Entity\Session;
 use App\Entity\Projet;
 use App\Entity\Version;
+use App\Entity\CollaborateurVersion;
+
 use App\GramcServices\GramcDate;
 use App\GramcServices\ServiceJournal;
 use App\GramcServices\ServiceVersions;
@@ -884,6 +886,54 @@ class SessionController extends AbstractController
         }
 
         return Functions::csv($sortie, 'bilan_annuel_par_labo'.$annee.'.csv');
+    }
+
+    /**
+     *
+     * @Route("/{annee}/bilan_annuel_users_csv", name="bilan_annuel_users_csv")
+     * @Security("is_granted('ROLE_OBS')")
+     * @Method("GET")
+     *
+     */
+    public function bilanUserCsvAction(Request $request, $annee)
+    {
+        $entetes = ['Nom','Prénom','Login','mail','Statut','Heures cpu','Heures GPU'];
+        $sortie  = join("\t", $entetes) . "\n";
+        $em = $this->getDoctrine()->getManager();
+        $sp = $this->sp;
+        
+        // Les collaborateurs-versions de cette année
+        $cvs = $em->getRepository(CollaborateurVersion::class)->findAllUsers($annee);
+        
+        // On les copie dans un tableau $users, indexé par le loginname
+        $users = [];
+        foreach ($cvs as $cv) {
+			// On peut avoir deux fois le même CollaborateurVersion (sessions A et B)
+			$loginname = $cv->getLoginname();
+			if (isset ($users[$loginname])) {
+				continue;
+			}
+			
+			$u = [];
+			$u['indiv'] = $cv->getCollaborateur();
+			$u['hcpu'] = $sp->getConsoRessource($cv, 'cpu', $annee)[0];
+		    $u['hgpu'] = $sp->getConsoRessource($cv, 'gpu', $annee)[0];
+		    $users[$loginname] = $u;
+		}
+
+		// Calcul de csv
+		foreach ($users as $loginname => $u) {
+			$ligne = [];
+			$ligne[] = $u['indiv']->getNom();
+			$ligne[] = $u['indiv']->getPrenom();
+			$ligne[] = $loginname;
+			$ligne[] = $u['indiv']->getMail();
+			$ligne[] = $u['indiv']->getStatut();
+			$ligne[] = $u['hcpu'];
+			$ligne[] = $u['hgpu'];
+			$sortie .= join("\t", $ligne) . "\n";
+		}
+        return Functions::csv($sortie, 'bilan_annuel_par_utilisateur'.$annee.'.csv');
     }
 
     /**
