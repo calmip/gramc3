@@ -297,10 +297,20 @@ gramc2 est une application symfony, il repose donc sur le patron de conception M
 
 COMMENT MODIFIER LE CODE ?
 ----
-- Editer dans:
+Editer dans:
   - `src`
   - `templates`
   - `public`
+  - `mesocentres/*/src`
+  - `mesocentres/*/templates`
+  - `mesocentres/*/public`
+- Pour comprendre ce qui se passe, on peut utiliser la fonction debugMessage du service ServiceJournal
+        La sortie se trouve dans le journal (Ecrans d'administration)
+- OU
+        Les logs symfony (var/log)
+- OU
+        Les logs apache
+- Pour savoir quel contrôleur est appelé, quel fichier twig etc., regarder le bandeau de Symfony en bas de page (mode Debug seulement)
 - Aide au déboguage:
   ~~~
   mkdir tools/phpstan
@@ -313,12 +323,12 @@ COMMENT MODIFIER LE CODE ?
   php composer.phar require --working-dir=tools/php-cs-fixer friendsofphp/php-cs-fixer
   tools/php-cs-fixer/vendor/bin/php-cs-fixer fix src
   ~~~~
+COMMENT MODIFIER LE FORMULAIRE PRINCIPAL ?
+----
+Pour modifier le formulaire principal (par exemple ajouter un champ) il faut intervenir dans les fichiers suivants:
+- `src/Entity/Version.php` (l'entité correspondant à la table de la base de données, la structure est commune à tous les mésocentres).
+- `mesocentres/*/src/Controller/VersionModifController.php` (le formulaire proprement dit, spécifique à chaque mésocentre)
+- `mesocentres/*/templates/version/modifier_proset_sess*` (le fichier twig permettant d'afficher le formulaire. Ce fichier est découpé en plusieurs parties pour améliorer la visibilité)
+- `mesocentres/*/templates/projet/consulter_projet.html.twig` (l'affichage des données de version)
 
-- Pour comprendre ce qui se passe:
-        `Functions::debugMessage(__METHOD__ .":" . __LINE__ . " bla bla " . $variable );`
-        La sortie se trouve dans le journal (Ecrans d'administration)
-- OU
-        Les logs apache2
-- OU
-        Les logs symfony: dans var/log
-- Pour savoir quel contrôleur est appelé (et accéder au code), regarder le bandeau de Symfony en bas de page (mode Debug seulement)
+Après avoir modifié l'entité Version il convient de mettre à jour la base de données par: `bin/console/doctrine:schema:update`
