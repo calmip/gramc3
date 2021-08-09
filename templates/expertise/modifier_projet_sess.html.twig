@@ -106,10 +106,11 @@
                 <hr />
                 <p>{{ session.commGlobal | e | nl2br}}</p>
         </div>
-    {% elseif not version.projet.isProjetTest %}
+    {% endif %}
+    {% if not peut_envoyer %}
         <div class="message warning">
             <h2>EXPERTISE EN EDITION SEULEMENT</h2>
-                <p>Tant que le comité d'attribution ne s'est pas réuni vous ne pouvez pas envoyer votre expertise.
+                <p>Pour l'instant vous ne pouvez pas envoyer votre expertise.
                 Vous pouvez cependant l'éditer et la sauvegarder</p>
         </div>
     {% endif %}

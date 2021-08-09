@@ -293,7 +293,7 @@ class GramcSessionController extends AbstractController
             $menu[] = $sm->commSess();
         }
         $menu[] = $sm->affectation_rallonges();
-        $menu[] = $sm->affectation_test();
+        /* $menu[] = $sm->affectation_test(); */
         return $this->render('default/president.html.twig', ['menu' => $menu]);
     }
 
