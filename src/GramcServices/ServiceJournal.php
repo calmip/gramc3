@@ -24,22 +24,19 @@
 namespace App\GramcServices;
 
 use App\Entity\Individu;
-//use App\Utils\Functions;
 use App\Entity\Journal;
 
 use Doctrine\ORM\EntityManagerInterface;
-//use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-//use Symfony\Bridge\Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationException;
 
 /********************
- * Ce service est utilisé pour envoyer des notifications par mail aux utilisateurs
+ * Ce service est utilisé pour gérer le journal système
  ********************/
 
 class ServiceJournal

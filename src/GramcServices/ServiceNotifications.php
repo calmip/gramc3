@@ -64,7 +64,9 @@ class ServiceNotifications
     /*****
      * Envoi d'une notification
      *
-     * param $twig_sujet, $twig_contenu Templates Twig des messages (ce sont des fichiers)
+     * param $twig_sujet, $twig_contenu Templates Twig des messages:
+     *                                            - soit des fichiers .html.twig
+     *                                            - soit la sortie de $twig->createTemplate()
      * param $params                    La notification est un template twig, le contenu de $params est passé à la fonction de rendu
      * param $users                     Liste d'utilisateurs à qui envoyer des emails (cf mailUsers)
      *
