@@ -23,8 +23,8 @@ services.yaml
 !/var/cache
 /var/cache/*
 !var/cache/.gitkeep
-!/var/logs
-/var/logs/*
+!/var/log
+/var/log/*
 !var/logs/.gitkeep
 !/var/sessions
 /var/sessions/*

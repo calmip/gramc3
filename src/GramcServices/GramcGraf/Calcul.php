@@ -70,7 +70,8 @@ class Calcul extends GramcGraf
                     $structured_data[$key][$item->getRessource()] = $item->getConso();
                     $quota1 = $structured_data[$key]['quota'];
                     $quota2 = $item->getQuota();
-                    if ($quota1 != $quota2) {
+                    // si l'un des deux quotas est null il n'y a pas d'incohérence, mais une donnée manquante
+                    if ($quota1 != $quota2 && $quota1*$quota2 != 0) {
                         $this->sj->errorMessage(__METHOD__ . ':' . __LINE__ . ' incohérence dans les quotas, date = ' .  $item->getDate()->format("d F Y") . "$quota1=$quota1 quota2=$quota2");
                     }
                 } else {
