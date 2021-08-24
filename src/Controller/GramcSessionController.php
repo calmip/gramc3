@@ -616,63 +616,54 @@ class GramcSessionController extends AbstractController
         $sj->infoMessage("shiblogin d'un utilisateur");
         $em = $this->getDoctrine()->getManager();
 
-        /*
-        if( $request->getSession()->has('url') )
-            return $this->redirect( $request->getSession()->get('url') );
-        else
-            return $this->redirectToRoute('index');
-        */
-        $individu = $this->ts->getToken()->getUser(); // OK si l'authentification remote_user de symfony
-        //$sj->debugMessage("coucou ".$individu." REMOTE USER = ".getenv('REMOTE_USER'));
-        //
-        // utilisé si on n'utilise pas l'authentification remote_user de symfony
-        //
-        //$individu='anon.';
-        if ($individu == 'anon.' || ! ($individu instanceof Individu)
-        || ! $ac->isGranted('IS_AUTHENTICATED_FULLY')
-        ) {
-            $server = $request->server;
-            if (($username = getenv('REMOTE_USER')) || $server->has('REMOTE_USER') || $server->has('REDIRECT_REMOTE_USER')) {
-                if ($server->has('REMOTE_USER')) {
-                    $username =  $server->get('REMOTE_USER');
-                }
-                if ($server->has('REDIRECT_REMOTE_USER')) {
-                    $username =  $server->get('REDIRECT_REMOTE_USER');
-                }
 
-                $repository1 = $em->getRepository(Sso::class);
-                $repository2 = $em->getRepository(Individu::class);
+        // PAS BO
+        //$myfile = fopen("/tmp/testfile.txt", "w");
+        //fwrite($myfile, print_r($request->headers->keys(),true));
+        //fclose($myfile);
 
-                if ($sso = $repository1->findOneByEppn($username)) {
-                    $individu = $sso->getIndividu();
-                } elseif ($individu = $repository2->find($username)) { // seulement en mode testing
-                } else { // nouvel utilisateur
-                    $session = $request->getSession();
-                    $session->set('eppn', $username);
+        //$sj->debugMessage("Shib infos = ".$request->headers->get('affiliation').' '.$request->headers->get('eppn').' ');
+        $server = $request->server;
+        if (($username = getenv('REMOTE_USER')) || $server->has('REMOTE_USER') || $server->has('REDIRECT_REMOTE_USER')) {
+            if ($server->has('REMOTE_USER')) {
+                $sj->debugMessage('REMOTE_USER='.$server->get('REMOTE_USER'));
+                $username =  $server->get('REMOTE_USER');
+            }
+            if ($server->has('REDIRECT_REMOTE_USER')) {
+                $sj->debugMessage('REDIRECT_REMOTE_USER='.$server->get('REDIRECT_REMOTE_USER'));
+                $username =  $server->get('REDIRECT_REMOTE_USER');
+            }
 
-                    //return new Response('nouvel utilisateur');
-                    return $this->redirectToRoute('nouveau_compte');
-                }
+            $repository1 = $em->getRepository(Sso::class);
+            $repository2 = $em->getRepository(Individu::class);
 
-                // authentification manuelle sans remote_user de symfony
-                //$userChecker = new UserChecker();
-                $userChecker = $this->uc;
-                $userChecker->checkPreAuth($individu);
-
-                $token = new UsernamePasswordToken($individu, null, 'main', $individu->getRoles());
+            if ($sso = $repository1->findOneByEppn($username)) {
+                $individu = $sso->getIndividu();
+            } elseif ($individu = $repository2->find($username)) { // seulement en mode testing
+            } else { // nouvel utilisateur
                 $session = $request->getSession();
+                $session->set('eppn', $username);
 
-                $this->ts->setToken($token);
-                $session->set('_security_main', serialize($token));
+                //return new Response('nouvel utilisateur');
+                return $this->redirectToRoute('nouveau_compte');
+            }
 
-                $userChecker->checkPostAuth($individu);
-            //return new Response("<pre> manual login ".print_r($_SESSION,true)."</pre>");
-            } //  if( $server->has('REMOTE_USER') )
-            else { // no REMOTE_USER
-                //return new Response("<pre> no login ".print_r($_SESSION,true)."</pre>");
-                return $this->redirectToRoute('deconnexion');
-            } //  if( $server->has('REMOTE_USER') )
-        } // if  ( $individu == 'anon.' || ! ($individu instanceof Individu)  )
+            // authentification manuelle sans remote_user de symfony
+            //$userChecker = new UserChecker();
+            $userChecker = $this->uc;
+            $userChecker->checkPreAuth($individu);
+
+            $token = new UsernamePasswordToken($individu, null, 'main', $individu->getRoles());
+            $session = $request->getSession();
+
+            $this->ts->setToken($token);
+            $session->set('_security_main', serialize($token));
+
+            $userChecker->checkPostAuth($individu);
+        } //  if( $server->has('REMOTE_USER') )
+        else { // no REMOTE_USER
+            return $this->redirectToRoute('deconnexion');
+        } //  if( $server->has('REMOTE_USER') )
 
         $sj->infoMessage("Controller : connexion d'un utilisateur");
 
@@ -811,8 +802,8 @@ class GramcSessionController extends AbstractController
         // envoi de mail
 
         $session = $request->getSession();
-        $twig_sujet   = $this->tw->createTemplate('Activation de votre compte Gramc');
-        $twig_contenu = $this->tw->createTemplate("Bonjour\nPour activer votre compte sur gramc, merci de visiter cette url:\n {{ url('activation') }}/{{ key }} \nL'équipe CALMIP");
+        $twig_sujet   = 'notification/activation-sujet.html.twig';
+        $twig_contenu = 'notification/activation-contenu.html.twig';
         $sn -> sendMessage($twig_sujet, $twig_contenu, [ 'key' => $key ], [$session->get('email')]);
         $sj->infoMessage(__METHOD__ .':' . __LINE__ . ' Activation GRAMC  pour ' .  $session->get('email').  ' envoyé (key=' . $key .')');
 
@@ -830,7 +821,6 @@ class GramcSessionController extends AbstractController
             );
         }
     }
-
 
     /**
     * @Route("/erreur_login", name="erreur_login")
