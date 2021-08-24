@@ -1548,8 +1548,6 @@ class VersionModifController extends AbstractController
      *            $em l'entity manager
      *    return= Un array contenant la "todo liste", ie la liste de choses à faire pour que le formulaire soit validé
      *            Un array vide [] signifie: "Formulaire validé"
-     *
-     *  TODO - Cette fonction statique ce n'est pas fameux
      **/
     private function versionValidate(Version $version)
     {
@@ -1563,7 +1561,7 @@ class VersionModifController extends AbstractController
         if ($version->getDemHeures() == null) {
             $todo[] = 'dem_heures';
         }
-        if ($version->getDemHeuresGpu() == null) {
+        if ($version->getDemHeuresGpu() === null) {
             $todo[] = 'dem_heures_gpu';
         }
         if ($version->getPrjThematique() == null) {

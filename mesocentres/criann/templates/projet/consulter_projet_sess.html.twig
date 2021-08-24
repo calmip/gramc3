@@ -132,9 +132,6 @@
 
 <h3>I - Présentation générale</h3>
 
-{% if warn_type and session.etatsession == 2 %}
-coucou EDITION_DEMANDE
-{% endif %}
 {% if warn_type and session.etatsession != 2 %}
 <div class="message warning"> <strong>ATTENTION</strong> - Vous ne pouvez demander plus de {{prj_seuil_sess}} heures actuellement. 
 Vous pourrez demander à nouveau des heures (sans limitation) lors de la prochaine session d'attribution.

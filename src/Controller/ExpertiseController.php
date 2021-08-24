@@ -658,7 +658,7 @@ class ExpertiseController extends AbstractController
         $projet_type = $projet  -> getTypeProjet();
         $etat_session= $session -> getEtatSession();
 
-        // Projets session avec plusieurs expertises:
+        // Projets avec plusieurs expertises:
         //    Si je suis président, on va chercher ces expertises pour affichage
         //    On vérifie leur état (définitive ou pas)
         $autres_expertises = [];
@@ -675,25 +675,30 @@ class ExpertiseController extends AbstractController
         }
 
         $peut_envoyer = false;
-        switch ($projet_type) {
-            // Si c'est un projet de type PROJET_SESS, le bouton ENVOYER n'est disponible
-            // QUE si la session est en états ATTENTE ou ACTIF
-            case Projet::PROJET_SESS:
-            if ($session -> getEtatSession() == Etat::EN_ATTENTE || $session -> getEtatSession() == Etat::ACTIF) {
+        
+        // Si le flag toutes_definitives est à false (président), on ne PEUT PAS ENVOYER l'expertise !
+        // Sinon ça dépend de la session et du type de projet
+        if ($toutes_definitives==true) {
+            switch ($projet_type) {
+                // Si c'est un projet de type PROJET_SESS, le bouton ENVOYER n'est disponible
+                // QUE si la session est en états ATTENTE ou ACTIF
+                case Projet::PROJET_SESS:
+                if ($session -> getEtatSession() == Etat::EN_ATTENTE || $session -> getEtatSession() == Etat::ACTIF) {
+                    $peut_envoyer = true;
+                } else {
+                    $peut_envoyer = false;
+                }
+                break;
+    
+                // Sinon le bouton ENVOYER est toujours disponible
+                case Projet::PROJET_TEST:
                 $peut_envoyer = true;
-            } else {
-                $peut_envoyer = false;
+                break;
+    
+                case Projet::PROJET_FIL:
+                $peut_envoyer = true;
+                break;
             }
-            break;
-
-            // Sinon le bouton ENVOYER est toujours disponible
-            case Projet::PROJET_TEST:
-            $peut_envoyer = true;
-            break;
-
-            case Projet::PROJET_FIL:
-            $peut_envoyer = true;
-            break;
         }
 
         // Création du formulaire
