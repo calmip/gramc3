@@ -22,7 +22,7 @@ security:
 
     firewalls:
         # disables authentication for assets and the profiler, adapt it according to your needs
-        accueil:
+        dev:
             pattern: ^/(_(profiler|wdt)|css|icones|js)/
             security: false
 
