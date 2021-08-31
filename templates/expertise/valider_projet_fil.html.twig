@@ -39,14 +39,12 @@
     </table>
 
 	{% if is_granted("ROLE_PRESIDENT") %}
-	    <div class="message info">
+    <div class="message info">
         <h2>Notifications</h2>
         <p>Si le projet est <strong>accepté</strong>,
-        un courriel sera envoyé au responsable de projet avec votre commentaire et le commentaire de session du président<br>
-        Si vous avez cliqué sur <strong>Refuser définitivement</strong>, le courriel sera envoyé au <strong>président du comité d'attribution</strong> qui prendra contact avec le responsable de projet</br>
-        Si vous avez cliqué sur <strong>Accepter avec zéro heure</strong>, aucune heure ne sera attribuée au projet, mais le projet pour être
-        renouvelé lors d'une prochaine session.</p>
-	    </div>
+        un courriel sera envoyé au responsable de projet avec votre commentaire<br>
+        <p>Si le projet est <strong>refusé</strong>, le président du comité d'attribution devra prendre contact avec l'utilisateur.</p>
+    </div>
 	{% else %}
 	    <div class="message info">
 	        <h2>Notifications</h2>
