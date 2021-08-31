@@ -30,7 +30,7 @@ use App\Entity\Rattachement;
 use App\Utils\Functions;
 
 use App\GramcServices\ServiceJournal;
-use App\GramcServices\ServiceExperts;
+use App\GramcServices\ServiceExperts\ServiceExperts;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -70,19 +70,22 @@ use App\Entity\Version;
  */
 class IndividuController extends AbstractController
 {
-    private $sj;
-    private $ff;
-    private $ac;
+    private $sj = null;
+    private $se = null;
+    private $ff = null;
+    private $ac = null;
 
 
     public function __construct(
+        ServiceExperts $se,
         ServiceJournal $sj,
         FormFactoryInterface $ff,
         AuthorizationCheckerInterface $ac
     ) {
-        $this->sj  = $sj;
-        $this->ff  = $ff;
-        $this->ac  = $ac;
+        $this->se = $se;
+        $this->sj = $sj;
+        $this->ff = $ff;
+        $this->ac = $ac;
     }
 
     /**
@@ -111,9 +114,9 @@ class IndividuController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
         $sj = $this->sj;
+        $ff = $this->ff;
 
-        $form = $this
-            ->get('form.factory')
+        $form = $ff
             ->createNamedBuilder('autocomplete_form', FormType::class, [])
             ->add(
                 'mail',
@@ -651,7 +654,7 @@ class IndividuController extends AbstractController
     public function plusExpertAction(Request $request, Individu $individu)
     {
         $em = $this->getDoctrine()->getManager();
-        $se = $this->get('App\GramcServices\ServiceExperts');
+        $se = $this->se;
 
         $individu->setExpert(false);
         $em->persist($individu);
@@ -814,10 +817,10 @@ class IndividuController extends AbstractController
      */
     public function mailAutocompleteAction(Request $request)
     {
-        $sj   = $this->sj;
-        $em   = $this->getDoctrine()->getManager();
-        $form = $this
-            ->get('form.factory')
+        $sj = $this->sj;
+        $ff = $this->ff;
+        $em = $this->getDoctrine()->getManager();
+        $form = $ff
             ->createNamedBuilder('autocomplete_form', FormType::class, [])
             ->add('mail', TextType::class, [ 'required' => true, 'csrf_protection' => false])
             ->getForm();
@@ -896,7 +899,7 @@ class IndividuController extends AbstractController
      */
     public function gererAction(Request $request)
     {
-        $ff = $this->get('form.factory');
+        $ff = $this->ff;
         $em = $this->getDoctrine()->getManager();
 
         $form = Functions::getFormBuilder($ff, 'tri', GererUtilisateurType::class, [])->getForm();
