@@ -804,7 +804,7 @@ class GramcSessionController extends AbstractController
         $session = $request->getSession();
         $twig_sujet   = 'notification/activation-sujet.html.twig';
         $twig_contenu = 'notification/activation-contenu.html.twig';
-        $sn -> sendMessage($twig_sujet, $twig_contenu, [ 'key' => $key ], [$session->get('email')]);
+        $sn -> sendMessage($twig_sujet, $twig_contenu, [ 'key' => $key, 'user' => $individu ], [$session->get('email')]);
         $sj->infoMessage(__METHOD__ .':' . __LINE__ . ' Activation GRAMC  pour ' .  $session->get('email').  ' envoyé (key=' . $key .')');
 
         /* Envoi d'une notification aux admins dans le cas où il s'agit d'un compte CRU */
