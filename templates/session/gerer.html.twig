@@ -9,14 +9,15 @@
     <table id="sessions">
         <thead>
             <tr>
-                <th>id</th>
+                <th rowspan="2">id</th>
                 <th>début</th>
                 <th>fin</th>
-                <th>Heures/année</th></th>
-                <th>projets</th>
-                <th>heures attribuées</th>
-                <th>état</th>
+                <th rowspan="2">Heures/année</th></th>
+                <th rowspan="2">projets</th>
+                <th rowspan="2">heures attribuées</th>
+                <th rowspan="2">état</th>
             </tr>
+            <tr><th colspan="2"><small>de la saisie des demandes</small></td></tr>
         </thead>
         <tbody>
         {% for session in sessions %}
