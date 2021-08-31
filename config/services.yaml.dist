@@ -281,6 +281,9 @@ services:
     App\GramcServices\ServiceExperts\ServiceExpertsRallonge:
         arguments: [ "%max_expertises_nb%" ]
 
+    App\Controller\ExpertiseController:
+        arguments: [ '%max_expertises_nb%' ]
+
     # Formulaires, validateurs
     App\Form\:
         resource: '../src/Form/*'

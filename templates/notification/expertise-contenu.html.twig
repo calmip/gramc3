@@ -13,7 +13,7 @@ Parmi ces heures, nous vous demandons d'utiliser {{ object.expertise[0].nbHeures
 Commentaire de l'expert :
 {{ object.expertise[0].commentaireExterne |raw }}
 
-{% if (not object.isProjetTest) %}
+{% if (object.session.commGlobal != "") %}
 Commentaire de session du comité d'attributions de {{mesoc}} :
 {{ object.session.commGlobal |raw }}
 {% endif %}
