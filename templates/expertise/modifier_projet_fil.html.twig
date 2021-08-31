@@ -4,27 +4,6 @@
     <script type="text/javascript" src="{{asset('js/expertiser.js')}}" ></script>
 {% endblock myjavascripts %}
 
-{# TODO - Pas utilisé, voir le controleur !!! #}
-{% block choice_widget_expanded %}
-    <br>
-    <input id="form_validation_0" name="form[validation]" class="validation" value="1"  checked=""  type="radio">
-    <label class="validation" for="valide">Accepter</label>
-    <br>
-
-    <input  id="form_validation_1" name="form[validation]" class="validation" value="2" type="radio" >
-    <label class="validation" for="refus">Accepter, avec zéro heure<br>
-        <small> (NOTE: Vous attribuez <strong>ZERO HEURES</strong> pour cette session <strong>SEULEMENT</strong>)</small>
-    </label>
-    <br>
-
-    <input id="form_validation_2" name="form[validation]" class="validation" value="0"  type="radio" >
-    <label class="validation" for="refus">Refuser définitivement le projet<br>
-    <small> (NOTE: Le projet sera marqué comme <strong>TERMINE</strong>, il ne pourra plus être renouvelé)</small>
-    </label>
-    <br>
-
-{% endblock choice_widget_expanded %}
-
 {% form_theme edit_form _self %}
 
 {# ############################################################################################################################ #}
@@ -33,25 +12,25 @@
 <section id="expertise">
 
     <h2>Saisie de l'expertise du projet {{ version.projet }}</h2>
+    <h3>({{version.acroLaboratoire }} - {{ version.responsable }})</h3>
 
-
-	<div class="message info">
-	{% if not is_granted('ROLE_PRESIDENT') %}
-	<p>Vous pouvez:
-	<ul>
-	<li>Entrer un commentaire à destination du comité d'attribution</li>
-	<li>Proposer une attribution (en heures cpu normalisées)</li>
-	<li>Cliquer sur le bouton <strong>Enregistrer</strong> pour enregistrer un brouillon de votre expertise</li>
-	<li><strong>N'oubliez pas de Cliquer sur le bouton <strong>Envoyer</strong></strong> pour envoyer votre expertise au comité d'attribution</li>
-	</ul>
-	</p>
-	{% else %}
-	<p>Merci de renseigner le formulaire ci-dessous <strong>en prenant en compte l'avis des autres experts</strong>. <br />
-	{% if msg_explain %} {{msg_explain }}<br /> {% endif %}
-	<em><strong>Lorsque vous aurez terminé, n'oubliez pas de cliquer sur "Envoyer"</strong></em>
-	</p>
-	{% endif %}
-	</div>
+    <div class="message info">
+    {% if not is_granted('ROLE_PRESIDENT') %}
+    <p>Vous pouvez:
+    <ul>
+    <li>Entrer un commentaire à destination du comité d'attribution</li>
+    <li>Proposer une attribution (en heures cpu normalisées)</li>
+    <li>Cliquer sur le bouton <strong>Enregistrer</strong> pour enregistrer un brouillon de votre expertise</li>
+    <li><strong>N'oubliez pas de Cliquer sur le bouton <strong>Envoyer</strong></strong> pour envoyer votre expertise au comité d'attribution</li>
+    </ul>
+    </p>
+    {% else %}
+    <p>Merci de renseigner le formulaire ci-dessous <strong>en prenant en compte l'avis des autres experts</strong>. <br />
+    {% if msg_explain %} {{msg_explain }}<br /> {% endif %}
+    <em><strong>Lorsque vous aurez terminé, n'oubliez pas de cliquer sur "Envoyer"</strong></em>
+    </p>
+    {% endif %}
+    </div>
 
     <table class="projet">
         <tbody>
@@ -90,17 +69,17 @@
             <img class="bouton_poussoir" src="{{ asset('icones/publis.png') }}" alt="Publications" title="Publications associées au projet version.idProjet" />
         </a>
 
-		{% if noconso==false %}
-	        {% if not isNouvelle %}
-	            <img id="bconso_1" class="bouton_poussoir bconso" src="{{ asset('icones/conso64.png') }}"
-	            alt="Consommation {{anneePrec}}" title="consommation {{anneePrec}}"
-	            data-href="{{ absolute_url(path('projet_conso', { 'id': expertise.version.projet.idProjet, 'annee' : anneePrec })) }}"/>
-	            {% if version.session.libelleTypeSession == 'B' %}
-	                <img id="bconso_2" class="bouton_poussoir bconso" src="{{ asset('icones/conso64.png') }}"
-	                alt="Consommation {{anneeCour}}" title="Consommation {{anneeCour}}"
-	                data-href="{{ absolute_url(path('projet_conso', { 'id': expertise.version.projet.idProjet, 'annee' : anneeCour })) }}" />
-	            {% endif %}
-	        {% endif %}
+        {% if noconso==false %}
+            {% if not isNouvelle %}
+                <img id="bconso_1" class="bouton_poussoir bconso" src="{{ asset('icones/conso64.png') }}"
+                alt="Consommation {{anneePrec}}" title="consommation {{anneePrec}}"
+                data-href="{{ absolute_url(path('projet_conso', { 'id': expertise.version.projet.idProjet, 'annee' : anneePrec })) }}"/>
+                {% if version.session.libelleTypeSession == 'B' %}
+                    <img id="bconso_2" class="bouton_poussoir bconso" src="{{ asset('icones/conso64.png') }}"
+                    alt="Consommation {{anneeCour}}" title="Consommation {{anneeCour}}"
+                    data-href="{{ absolute_url(path('projet_conso', { 'id': expertise.version.projet.idProjet, 'annee' : anneeCour })) }}" />
+                {% endif %}
+            {% endif %}
         {%endif %}
 
     </div>
@@ -114,29 +93,29 @@
         </div>
     {% endif %}
 
-	{% for expertise in autres_expertises %}
+    {% for expertise in autres_expertises %}
     <table  class="projet">
         <tbody>
-				<tr><th colspan="2">Expertise de {{ expertise.expert.prenom }} {{ expertise.expert.nom }}</th></tr>
-				{% if expertise.definitif == false %}
-					<tr><td colspan="2"><span class="attention">Cette expertise n'est pas terminée</span></td></tr>
-				{% else %}
-					<tr>
-						<th>Commentaire interne</th>
-						<td>{{ expertise.commentaireInterne }}</td>
-					</tr>
-					<tr>
-						<th>Proposition</th>
-						<td>{{ expertise.nbheuresatt }}
-						{% if expertise.nbheuresattete != 0 %}
-						   (dont {{ expertise.nbheuresattete }} pour l'été)
-						{% endif %}
-						</td>
-					</tr>
-				{% endif %}
-		</tbody>
-	</table>
-	{% endfor %}
+                <tr><th colspan="2">Expertise de {{ expertise.expert.prenom }} {{ expertise.expert.nom }}</th></tr>
+                {% if expertise.definitif == false %}
+                    <tr><td colspan="2"><span class="attention">Cette expertise n'est pas terminée</span></td></tr>
+                {% else %}
+                    <tr>
+                        <th>Commentaire interne</th>
+                        <td>{{ expertise.commentaireInterne }}</td>
+                    </tr>
+                    <tr>
+                        <th>Proposition</th>
+                        <td>{{ expertise.nbheuresatt }}
+                        {% if expertise.nbheuresattete != 0 %}
+                           (dont {{ expertise.nbheuresattete }} pour l'été)
+                        {% endif %}
+                        </td>
+                    </tr>
+                {% endif %}
+        </tbody>
+    </table>
+    {% endfor %}
 
     {% if not erreurs == null %}
     <div class="message erreur">
@@ -148,11 +127,11 @@
 
     <table class="projet">
         <tbody>
-			<tr>
-				<th colspan="2">Votre expertise </th>
-			</tr>
-		</tbody>
-	</table>
+            <tr>
+                <th colspan="2">Votre expertise </th>
+            </tr>
+        </tbody>
+    </table>
 
     <table class="projet">
         <tbody>
@@ -165,12 +144,12 @@
 
    <table class="projet">
         <tbody>
-	    {% if commentaireExterne %}
+        {% if commentaireExterne %}
             <tr>
                 <th class="horiz"><label>Commentaire</label><br><small>Ce commentaire sera envoyé au responsable du projet</small></th>
                 <td>{{ form_widget(edit_form.commentaireExterne,{ 'attr': { 'class': 'compteur', 'rows' : 10, 'cols' : 100 } }) }}
             </tr>
-	    {% endif %}
+        {% endif %}
             <tr><th class="horiz"><label>Commentaire pour le comité</label><br>
                     <small>Ce commentaire restera au sein du comité d'attribution</small>
                 </th>
@@ -198,19 +177,19 @@
 {% endif %}
 
 <div id="quitter">
-	{{ form_widget(edit_form.enregistrer, {'attr': {'title' : 'Enregistrer l\'expertise et continuer'}}) }}
-	{{ form_widget( edit_form.annuler,{ 'attr': { 'title' : 'Abandonner les modifications' } }) }}
-	{{ form_widget( edit_form.fermer, { 'attr': { 'title' : 'Enregistrer et fermer l\'expertise' } }) }}
-	{% if prev!=null %}
-		<a href="{{ path('expertise_modifier', { 'id' : prev.id } ) }}"><img class="left bouton_poussoir" src="{{ asset('icones/go-prev.png') }}" title="{{prev.version.projet}}" alt="Expertise précédente" /></a>
-	{% else %}
-		<img class="left bouton_inactif" src="{{ asset('icones/go-prev.png') }}" title="Pas d'expertise précédente" alt="Pas d'expertise précédente" />
-	{% endif %}
-	{% if next!=null %}
-		<a href="{{ path('expertise_modifier', { 'id' : next.id } ) }}"><img class="right bouton_poussoir" src="{{ asset('icones/go-next.png') }}"title="{{next.version.projet}}" alt="Expertise suivante" /></a>
-	{% else %}
-		<img class="right bouton_inactif" src="{{ asset('icones/go-next.png') }}"title="Pas d'expertise suivante" alt="Pas d'expertise suivante" />
-	{% endif %}
+    {{ form_widget(edit_form.enregistrer, {'attr': {'title' : 'Enregistrer l\'expertise et continuer'}}) }}
+    {{ form_widget( edit_form.annuler,{ 'attr': { 'title' : 'Abandonner les modifications' } }) }}
+    {{ form_widget( edit_form.fermer, { 'attr': { 'title' : 'Enregistrer et fermer l\'expertise' } }) }}
+    {% if prev!=null %}
+        <a href="{{ path('expertise_modifier', { 'id' : prev.id } ) }}"><img class="left bouton_poussoir" src="{{ asset('icones/go-prev.png') }}" title="{{prev.version.projet}}" alt="Expertise précédente" /></a>
+    {% else %}
+        <img class="left bouton_inactif" src="{{ asset('icones/go-prev.png') }}" title="Pas d'expertise précédente" alt="Pas d'expertise précédente" />
+    {% endif %}
+    {% if next!=null %}
+        <a href="{{ path('expertise_modifier', { 'id' : next.id } ) }}"><img class="right bouton_poussoir" src="{{ asset('icones/go-next.png') }}"title="{{next.version.projet}}" alt="Expertise suivante" /></a>
+    {% else %}
+        <img class="right bouton_inactif" src="{{ asset('icones/go-next.png') }}"title="Pas d'expertise suivante" alt="Pas d'expertise suivante" />
+    {% endif %}
 </div>
 
 

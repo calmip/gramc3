@@ -675,29 +675,40 @@ class ExpertiseController extends AbstractController
         }
 
         $peut_envoyer = false;
+
+        // Si je ne suis pas président je peux toujours envoyer mon expertise
+        // TODO - SEULEMENT S'IL Y A PLUSIEURS EXPERTS !
+        if ( !$ac->isGranted('ROLE_PRESIDENT') )
+        {
+            $peut_envoyer = true;
+        }
+        else
+        {
+            // Je suis président !
+            // Si le flag toutes_definitives est à false, on ne PEUT PAS ENVOYER l'expertise !
+            // Sinon ça dépend de la session et du type de projet
+            if ($toutes_definitives==true)
+            {
+                switch ($projet_type) {
+                    // Si c'est un projet de type PROJET_SESS, le bouton ENVOYER n'est disponible
+                    // QUE si la session est en états ATTENTE ou ACTIF
+                    case Projet::PROJET_SESS:
+                    if ($session -> getEtatSession() == Etat::EN_ATTENTE || $session -> getEtatSession() == Etat::ACTIF) {
+                        $peut_envoyer = true;
+                    } else {
+                        $peut_envoyer = false;
+                    }
+                    break;
         
-        // Si le flag toutes_definitives est à false (président), on ne PEUT PAS ENVOYER l'expertise !
-        // Sinon ça dépend de la session et du type de projet
-        if ($toutes_definitives==true) {
-            switch ($projet_type) {
-                // Si c'est un projet de type PROJET_SESS, le bouton ENVOYER n'est disponible
-                // QUE si la session est en états ATTENTE ou ACTIF
-                case Projet::PROJET_SESS:
-                if ($session -> getEtatSession() == Etat::EN_ATTENTE || $session -> getEtatSession() == Etat::ACTIF) {
+                    // Sinon le bouton ENVOYER est toujours disponible
+                    case Projet::PROJET_TEST:
                     $peut_envoyer = true;
-                } else {
-                    $peut_envoyer = false;
+                    break;
+        
+                    case Projet::PROJET_FIL:
+                    $peut_envoyer = true;
+                    break;
                 }
-                break;
-    
-                // Sinon le bouton ENVOYER est toujours disponible
-                case Projet::PROJET_TEST:
-                $peut_envoyer = true;
-                break;
-    
-                case Projet::PROJET_FIL:
-                $peut_envoyer = true;
-                break;
             }
         }
 
@@ -716,7 +727,9 @@ class ExpertiseController extends AbstractController
 
         // Projet au fil de l'eau, le commentaire externe est réservé au président !
         // On utilise un champ caché, de cette manière le formulaire sera valide
-        if ($projet_type != Projet::PROJET_FIL || $ac->isGranted('ROLE_PRESIDENT')) {
+        // TODO - commentaireExterne est true s'il y a 1 seule expertise !
+        //        Ne dépend PAS de PROJET_FIL ou PROJET_SESS
+        if ($ac->isGranted('ROLE_PRESIDENT')) {
             $commentaireExterne = true;
             $editForm->add('commentaireExterne', TextAreaType::class, [ 'required' => false ]);
         } else {
@@ -901,9 +914,10 @@ class ExpertiseController extends AbstractController
             // Bouton Confirmer
             // Si projet au fil de l'eau mais qu'on n'est pas président, on n'envoie pas de signal
             // Dans tous les autres cas on envoie un signal CLK_VAL_EXP_XXX
-            //
+            // TODO - Même problème que ci-dessus - Le discriminant n'est PAS file de l'eau/session
+            //        C'est le nombre d'expertises !
             $type_projet = $expertise->getVersion()->getProjet()->getTypeProjet();
-            if ($type_projet != Projet::PROJET_FIL || $ac->isGranted('ROLE_PRESIDENT')) {
+            if ($ac->isGranted('ROLE_PRESIDENT')) {
                 $expertise->getVersion()->setAttrHeures($expertise->getNbHeuresAtt());
                 $expertise->getVersion()->setAttrHeuresEte($expertise->getNbHeuresAttEte());
                 $expertise->getVersion()->setAttrAccept($expertise->getValidation());
