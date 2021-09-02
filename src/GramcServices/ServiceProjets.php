@@ -194,6 +194,7 @@ class ServiceProjets
 	 ********************/
     public function projetsParAnnee($annee,$isRecupPrintemps=false,$isRecupAutomne=false)
     {
+        $ss = $this->ss;
 		$em = $this->em;
 		
         // Données consolidées
