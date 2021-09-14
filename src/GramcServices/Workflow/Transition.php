@@ -36,21 +36,21 @@ use Doctrine\ORM\EntityManager;
 /************************
  * Transition - Implémente une transition d'états
  *              C'est une classe abstraite, elle a deux fonctions abstraites:
- *              canExecute pemet de définir des ACL: suivant la personne connectée la transition peut être exécutée ou pas.
- * 					retourne true/false
- * 				execute essaie d'exécuter la transition:
- * 					retourne true  -> la transition est exécutée
- * 					retourne false -> il y a eu un pb (voir le journal) la transition ne s'est pas faite (ou s'est faite en partie)
+ *              canExecute permet de définir des ACL: suivant la personne connectée la transition peut être exécutée ou pas.
+ *                         retourne true/false
+ *              execute essaie d'exécuter la transition:
+ *                         retourne true  -> la transition est exécutée
+ *                         retourne false -> il y a eu un pb (voir le journal) la transition ne s'est pas faite (ou s'est faite en partie)
  ************************/
 abstract class Transition
 {
-    public const DEBUG = false;				// Activer - ou pas - le debug dans les transitions
-                                        // ATTENTION ! Mettre à false pour la prod, sinon perte de perfs !
-    public const FAST  = false;				// TODO - VIRER TOUTE PROPAGATION DANS canExecute !!!
-                                        // Si FAST est à false, on appelle canExecute pour TOUS les objets
-                                        // Si canExecute sur Session on appelle canExecute pour tous les versions,
-                                        // Les versions appellent canExecute pour tous les projets etc.
-                                        // Cela est lent et pas très utile et pratique
+    public const DEBUG = false;   // Activer - ou pas - le debug dans les transitions
+                                  // ATTENTION ! Mettre à false pour la prod, sinon perte de perfs !
+    public const FAST  = false;   // TODO - VIRER TOUTE PROPAGATION DANS canExecute !!!
+                                  // Si FAST est à false, on appelle canExecute pour TOUS les objets
+                                  // Si canExecute sur Session on appelle canExecute pour tous les versions,
+                                  // Les versions appellent canExecute pour tous les projets etc.
+                                  // Cela est lent et pas très utile et pratique
 
     abstract public function canExecute($object);
     abstract public function execute($object);

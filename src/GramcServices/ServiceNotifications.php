@@ -39,6 +39,7 @@ use Symfony\Component\Mime\Email;
 class ServiceNotifications
 {
     private $mailfrom;
+    private $noedition_expertise;
     private $twig;
     private $token;
     private $mailer;
@@ -47,6 +48,7 @@ class ServiceNotifications
 
     public function __construct(
         $mailfrom,
+        $noedition_expertise,
         \Twig\Environment $twig,
         TokenStorageInterface $tok,
         MailerInterface $mailer,
@@ -54,6 +56,7 @@ class ServiceNotifications
         EntityManagerInterface $em
     ) {
         $this->mailfrom = $mailfrom;
+        $this->noedition_expertise = $noedition_expertise;
         $this->twig     = $twig;
         $this->token    = $tok->getToken();
         $this->mailer   = $mailer;
@@ -73,18 +76,6 @@ class ServiceNotifications
      *********/
     public function sendMessage($twig_sujet, $twig_contenu, $params, $users = null)
     {
-        // Twig avec des extensions
-        // $twig = clone App::getTwig();
-        //$twig->setLoader(new \Twig_Loader_String());
-
-        // Twig sans extensions - meilleure sécurité
-        /* $twig = new \Twig_Environment( new \Twig_Loader_String(),
-                 [
-                 'strict_variables' => false,
-                 'autoescape' => false,
-                 ]);
-        */
-
         $twig    = $this->twig;
         $body    = $twig->render($twig_contenu, $params);
         $subject = $twig->render($twig_sujet, $params);
@@ -101,20 +92,9 @@ class ServiceNotifications
      *********/
     public function sendMessageFromString($twig_sujet, $twig_contenu, $params, $users = null)
     {
-        //         $twig = clone App::getTwig();
-        //$twig->setLoader(new \Twig_Loader_String());
-
         $twig         = $this->twig;
         $sujet_tmpl   = $twig->createTemplate($twig_sujet);
         $contenu_tmpl = $twig->createTemplate($twig_contenu);
-
-        // Twig sans extensions - meilleure sécurité
-        /* $twig = new \Twig_Environment( new \Twig_Loader_String(),
-                 [
-                 'strict_variables' => false,
-                 'autoescape' => false,
-                 ]);
-        */
 
         $body       =   $twig->render($twig_contenu, $params);
         $subject    =   $twig->render($twig_sujet, $params);
@@ -278,18 +258,23 @@ class ServiceNotifications
                     }
                     break;
                 case 'ET': // experts pour la thématique
-                    if ($objet == null) {
-                        $this->sj->warningMessage(__METHOD__ . ":" .  __LINE__ .' Objet null pour experts de la thématique');
-                        break;
-                    }
-                    $new_users  = $objet->getExpertsThematique();
-                    if ($new_users == null) {
-                        $this->sj->warningMessage(__METHOD__ . ":" . __LINE__ ." Aucun expert pour la thématique pour l'objet " . $objet . ' !');
-                    } else {
-                        if (! is_array($new_users)) {
-                            $new_users = $new_users->toArray();
+                    // Si noedition_expertise, on n'a pas de "comité d'attribution" constitué
+                    // Dans ce cas, on n'envoie pas de mail aux experts de la thématique = ils n'y comprendraient rien
+                    if ($this->noedition_expertise == false)
+                    {
+                        if ($objet == null) {
+                            $this->sj->warningMessage(__METHOD__ . ":" .  __LINE__ .' Objet null pour experts de la thématique');
+                            break;
                         }
-                        $users  =  array_merge($users, $new_users);
+                        $new_users  = $objet->getExpertsThematique();
+                        if ($new_users == null) {
+                            $this->sj->warningMessage(__METHOD__ . ":" . __LINE__ ." Aucun expert pour la thématique pour l'objet " . $objet . ' !');
+                        } else {
+                            if (! is_array($new_users)) {
+                                $new_users = $new_users->toArray();
+                            }
+                            $users  =  array_merge($users, $new_users);
+                        }
                     }
                     break;
             }

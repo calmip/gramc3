@@ -71,6 +71,9 @@ parameters:
     nodata: false
     
     # Suppression d'une étape dans le workflow des sessions
+    # Cette étape est utile si on a un comité d'attribution constitué,
+    # car elle vient APRES la réunion: on attend la réunion ET l'entrée du commentaire de session
+    # pour pour laisser les experts envoyer les expertises !
     noedition_expertise: true
     
     # Nombre max de rallonges par projet et par sessoin
