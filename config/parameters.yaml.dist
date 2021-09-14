@@ -166,4 +166,3 @@ parameters:
 
     # Pour crypter les cookies
     secret: '%env(APP_SECRET)%'
-

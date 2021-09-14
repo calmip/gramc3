@@ -1,6 +1,7 @@
 {% extends 'default/base.html.twig' %}
 
 {% block myjavascripts %}
+    <script type="text/javascript" src="{{asset('js/projet.js')}}" ></script>
     <script type="text/javascript" src="{{asset('js/expertiser.js')}}" ></script>
 {% endblock myjavascripts %}
 
@@ -15,21 +16,36 @@
     <h3>({{version.acroLaboratoire }} - {{ version.responsable }})</h3>
 
     <div class="message info">
-    {% if not is_granted('ROLE_PRESIDENT') %}
-    <p>Vous pouvez:
-    <ul>
-    <li>Entrer un commentaire à destination du comité d'attribution</li>
-    <li>Proposer une attribution (en heures cpu normalisées)</li>
-    <li>Cliquer sur le bouton <strong>Enregistrer</strong> pour enregistrer un brouillon de votre expertise</li>
-    <li><strong>N'oubliez pas de Cliquer sur le bouton <strong>Envoyer</strong></strong> pour envoyer votre expertise au comité d'attribution</li>
-    </ul>
-    </p>
-    {% else %}
-    <p>Merci de renseigner le formulaire ci-dessous <strong>en prenant en compte l'avis des autres experts</strong>. <br />
-    {% if msg_explain %} {{msg_explain }}<br /> {% endif %}
-    <em><strong>Lorsque vous aurez terminé, n'oubliez pas de cliquer sur "Envoyer"</strong></em>
-    </p>
-    {% endif %}
+
+        {% if max_expertises_nb > 1 %}
+            {% if not is_granted('ROLE_PRESIDENT') %}
+                <p>Vous pouvez:
+                    <ul>
+                        <li>Entrer un commentaire à destination du comité d'attribution</li>
+                        <li>Proposer une attribution (en heures cpu normalisées)</li>
+                        <li>Cliquer sur le bouton <strong>Enregistrer</strong> ou <strong>Fermer</strong> pour enregistrer un brouillon de votre expertise</li>
+                        <li><strong>N'oubliez pas de Cliquer sur le bouton <strong>Envoyer</strong></strong> pour envoyer votre expertise au comité d'attribution</li>
+                    </ul>
+                </p>
+            {% else %}
+                <p>Merci de renseigner le formulaire ci-dessous <strong>en prenant en compte l'avis des autres experts</strong>. <br />
+                    {% if msg_explain %} {{msg_explain }}<br /> {% endif %}
+                    <em><strong>Lorsque vous aurez terminé, n'oubliez pas de cliquer sur "Envoyer"</strong></em>
+                </p>
+            {% endif %}
+        {% else %}
+                <p>Vous pouvez:
+                    <ul>
+                        <li>Accepter ou refuser le projet</li>
+                        <li>Entrer un commentaire à destination du comité d'attribution</li>
+                        <li>Entrer un commentaire à destination du responsable du projet</li>
+                        <li>Proposer une attribution (en heures cpu normalisées)</li>
+                        <li>Cliquer sur le bouton <strong>Enregistrer</strong> ou <strong>Fermer</strong> pour enregistrer un brouillon de votre expertise</li>
+                        <li><strong>N'oubliez pas de Cliquer sur le bouton <strong>Envoyer</strong></strong> pour envoyer votre expertise au comité d'attribution</li>
+                    </ul>
+                </p>
+        {% endif %}
+        
     </div>
 
     <table class="projet">
@@ -56,32 +72,53 @@
         </tbody>
     </table>
 
-    <div id="menu_expertiser" class="center">
+    <div id="menu_expertiser" class="center" style="width:500px;margin-bottom:20px">
+        <div style="float:left">
         <a href="{{ path('consulter_projet', { 'id' : expertise.version.projet.idProjet } ) }}" target="_blank">
         <img class="bouton_poussoir" src="{{ asset('icones/consulter64.png') }}" title="Consulter le projet" alt="Consulter le projet" />
-        </a>
-        {% if ( rapport != null ) %}
-        <a href="{{ path('rapport', { 'id' : version.idVersion }) }}"  target="_blank">
-            <img class="bouton_poussoir" src="{{ asset('icones/pdf64.png') }}" alt="pdf" title="Rapport d'activité {{version.anneeRapport}}" />
-        </a>
-        {%  endif %}
-        <a href="{{ path('consulter_publications', { 'id' : version.projet }) }}"  target="_blank" >
-            <img class="bouton_poussoir" src="{{ asset('icones/publis.png') }}" alt="Publications" title="Publications associées au projet version.idProjet" />
-        </a>
+        </a><br /><small><strong>projet</small></strong>
+        </div>
 
+        {% if ( rapport != null ) %}
+        <div style="float:left">
+            <a href="{{ path('rapport', { 'id' : version.idVersion }) }}"  target="_blank">
+                <img class="bouton_poussoir" src="{{ asset('icones/pdf64.png') }}" alt="pdf" title="Rapport d'activité {{version.anneeRapport}}" />
+            </a><br /><small><strong>rapport d'activité</small></strong>
+        </div>
+        {%  endif %}
+
+        {% if document != null %}
+        <div style="float:left">
+        <a href="{{ path('document', { 'id' : version.idVersion }) }}"  target="_blank">
+            <img class="bouton_poussoir" src="{{ asset('icones/pdf64.png') }}" alt="pdf" title="Document attaché" />
+        </a><br /><small><strong>doc attaché</small></strong>
+        </div>
+        {% endif %}
+
+        <div style="float:left">
+        <a href="{{ path('consulter_publications', { 'id' : version.projet }) }}"  target="_blank" >
+            <img class="bouton_poussoir" src="{{ asset('icones/publis.png') }}" alt="Publications" title="Publications associées au projet {{version.projet.idProjet}}" />
+        </a><br /><small><strong>Publications</small></strong>
+        </div>
+        
         {% if noconso==false %}
-            {% if not isNouvelle %}
-                <img id="bconso_1" class="bouton_poussoir bconso" src="{{ asset('icones/conso64.png') }}"
+            {% if  isNouvelle %}
+                <div style="float:left">
+                <img id="bconso_1" class="bouton_poussoir conso" src="{{ asset('icones/conso64.png') }}"
                 alt="Consommation {{anneePrec}}" title="consommation {{anneePrec}}"
                 data-href="{{ absolute_url(path('projet_conso', { 'id': expertise.version.projet.idProjet, 'annee' : anneePrec })) }}"/>
+                <br /><small><strong>Conso {{anneePrec}}</small></strong>
+                </div>
                 {% if version.session.libelleTypeSession == 'B' %}
-                    <img id="bconso_2" class="bouton_poussoir bconso" src="{{ asset('icones/conso64.png') }}"
+                    <div style="float:left">
+                    <img id="bconso_2" class="bouton_poussoir conso" src="{{ asset('icones/conso64.png') }}"
                     alt="Consommation {{anneeCour}}" title="Consommation {{anneeCour}}"
                     data-href="{{ absolute_url(path('projet_conso', { 'id': expertise.version.projet.idProjet, 'annee' : anneeCour })) }}" />
+                    <br /><small><strong>Conso {{anneeCour}}</small></strong>
+                    </div>
                 {% endif %}
             {% endif %}
-        {%endif %}
-
+        {% endif %}
     </div>
 
    {{ form_start(edit_form) }}
@@ -90,6 +127,22 @@
         <div class="message erreur">
             <h2>EXPERTISE DÉJÀ ENVOYEE</h2>
                 <p>Votre expertise a déjà été envoyée, vous ne pouvez plus la modifier.</p>
+        </div>
+    {# session en edition expertise #}
+    {% elseif( session.commGlobal!=null and not version.projet.isProjetTest)  %}
+        <div class="message info">
+            <h2>Commentaire de session</h2>
+                <p><em>Ce commentaire, écrit par le président du comité d'attribution, sera envoyé aux responsables des projets avec le résultat de votre expertise</em></p>
+                <hr />
+                <p>{{ session.commGlobal | e | nl2br}}</p>
+        </div>
+    {% endif %}
+    
+    {% if not peut_envoyer %}
+        <div class="message warning">
+            <h2>EXPERTISE EN EDITION SEULEMENT</h2>
+                <p>Pour l'instant vous ne pouvez pas envoyer votre expertise.
+                Vous pouvez cependant l'éditer et la sauvegarder</p>
         </div>
     {% endif %}
 
@@ -117,6 +170,14 @@
     </table>
     {% endfor %}
 
+    {#
+    {% if erreur==1 %}
+        <div class="message erreur"><p>ERREUR: Vous n'avez pas rempli les deux champs de commentaire</p></div>
+    {% elseif erreur==3 %}
+        <div class="message erreur"><p>ERREUR: Vous ne pouvez pas attribuer plus d'heures pour l'été que pour la session</p></div>
+    {% endif %}
+    #}
+
     {% if not erreurs == null %}
     <div class="message erreur">
     {% for erreur in erreurs %}
@@ -133,16 +194,19 @@
         </tbody>
     </table>
 
-    <table class="projet">
-        <tbody>
-            <tr>
-                <th class="horiz">Validation</th>
-                <td>{{ form_widget(edit_form.validation)  }}</td>
-            </tr>
-        </tbody>
-    </table>
+    {# bouton de validation et commentaire externe marchent ensemble #}
+    {% if commentaireExterne %}
+        <table class="projet">
+            <tbody>
+                <tr>
+                    <th class="horiz">Validation</th>
+                    <td>{{ form_widget(edit_form.validation)  }}</td>
+                </tr>
+            </tbody>
+        </table>
+    {% endif %}
 
-   <table class="projet">
+    <table class="projet">
         <tbody>
         {% if commentaireExterne %}
             <tr>
