@@ -29,6 +29,7 @@ use App\Entity\Version;
 use App\Entity\Session;
 use App\Entity\Individu;
 use App\Entity\Formation;
+use App\Entity\User;
 
 use App\Utils\GramcDate;
 use App\Utils\Functions;
@@ -230,7 +231,7 @@ class ServiceVersions
     }
 
     /********************************************
-     * Supprimer un collaborateur à une version
+     * Supprimer un collaborateur d'une version
      **********************************************************/
     public function supprimerCollaborateur(Version $version, Individu $individu)
     {
@@ -256,9 +257,12 @@ class ServiceVersions
 
         // ET POURQUOI CE CODE MARCHE ?
         foreach ($version->getCollaborateurVersion() as $item) {
-            if ($item->getCollaborateur() == null) {
+            if ($item->getCollaborateur() == null)
+            {
                 $this->sj->errorMessage('ServiceVersion:supprimerCollaborateur collaborateur null pour CollaborateurVersion ' . $item);
-            } elseif ($item->getCollaborateur()->isEqualTo($individu)) {
+            }
+            elseif ($item->getCollaborateur()->isEqualTo($individu))
+            {
                 $this->sj->debugMessage('ServiceVersion:supprimerCollaborateur ' . $item . ' supprimé pour '. $individu);
                 $this->em->persist($item);
                 $this->em->remove($item);
@@ -268,13 +272,27 @@ class ServiceVersions
     }
 
     // modifier login d'un collaborateur d'une version
+    // Si le login passe à false, suppression du Loginname,
+    // et suppression de la ligne correspondante si elle existe (mot de passe) dans la table user
     public function modifierLogin(Version $version, Individu $individu, $login)
     {
+        $em = $this->em;
         foreach ($version->getCollaborateurVersion() as $item) {
             if ($item->getCollaborateur() == null) {
                 $this->sj->errorMessage('Version:modifierLogin collaborateur null pour CollaborateurVersion ' . $item);
             } elseif ($item->getCollaborateur()->isEqualTo($individu)) {
                 $item->setLogin($login);
+                if (! $login)
+                {
+                    $loginname = $item->getLoginname();
+                    if (! empty($loginname)) {
+                        $item->setLoginname(null);
+                        $user = $em->getRepository(User::class)->findOneBy(['loginname' => $loginname]);
+                        if ($user != null) {
+                            $em->remove($user);
+                        }
+                    }
+                }
                 $this->em->persist($item);
                 $this->em->flush();
             }

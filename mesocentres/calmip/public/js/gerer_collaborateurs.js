@@ -78,26 +78,78 @@ function opacity(context)
         { complete_ligne( $(this).val(), $(this) ); })
 
 
-    $("input[id$='_delete'][type='checkbox']", context.parent() .parent() ).unbind('change')
+    // Lorsqu'on décoche une case login, on se choppe un message !
+    $("input[id$='_login'][type='checkbox']", context.parent() .parent() ).unbind('change')
+    .change(function()
+    {
+        //alert("coucou");
+        if( !$(this).prop('checked') )
+        {
+            prenom = $(this).parent().parent().find("input[name*='[prenom]']").val();
+            nom    = $(this).parent().parent().find("input[name*='[nom]']").val();
+            if( nom == '' && prenom == '' ) nom = "cet utilisateur";
 
-    // $(".collection-contents .collection-tbody input[id$='_delete'][type='checkbox']", context.parent()).unbind('change')
-        .change(function()
+            // Ouvre un dialogue lorsqu'on clique sur "login" pour Décocher la case
+            var case_login = $(this);
+            $("#dialog-collaborateur").html('<p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span><strong>ATTENTION</strong> - Si vous décochez la case login de '+prenom+' '+nom+', son compte sera fermé. OK ?</p>');
+            $("#dialog-collaborateur").dialog({
+                resizable: false,
+                height: "auto",
+                width: 400,
+                modal: true,
+                buttons: {
+                    "OK": function() {
+                        $( this ).dialog( "close" );
+                    },
+                    "NOOON !": function() {
+                        case_login.prop('checked',true);
+                        $( this ).dialog( "close" );
+                    }
+                }
+            });
+        };
+    });
+
+    // Lorsqu'on coche une case Suppression, on se choppe un message !
+    $("input[id$='_delete'][type='checkbox']", context.parent() .parent() ).unbind('change')
+    .change(function()
+    {
+        alert('here');
+        if( $(this).prop('checked') )
         {
-        //alert('here');
-    if( $(this).prop('checked') )
-        {
-        $(this).parent().parent().find(":not([id$='_delete']):not([id$='_id'])").prop('disabled', true);
-        $(this).parent().parent().find("[id$='_delete'],[id$='_id']").prop('disabled', false);
-        prenom = $(this).parent().parent().find("input[name*='[prenom]']").val();
-        nom    = $(this).parent().parent().find("input[name*='[nom]']").val();
-        if( nom == '' && prenom == '' ) nom = "cet utilisateur";
-        alert('ATTENTION ! Voulez-vous vraiment supprimer '+prenom+' '+nom+' de la liste des collaborateurs ?');
-		}
-    else
-        {
-        $(this).parent().parent().find(":not([id$='_mail'])").prop('disabled', false);
-        $(this).parent().parent().find("[id$='_mail']").each( function() {complete_ligne( $(this).val(), $(this) );});
-        }
+            //$(this).parent().parent().find(":not([id$='_delete']):not([id$='_id'])").prop('disabled', true);
+            //$(this).parent().parent().find("[id$='_delete'],[id$='_id']").prop('disabled', false);
+            prenom = $(this).parent().parent().find("input[name*='[prenom]']").val();
+            nom    = $(this).parent().parent().find("input[name*='[nom]']").val();
+            if( nom == '' && prenom == '' ) nom = "cet utilisateur";
+
+            // Ouvre un dialogue lorsqu'on clique sur "Supprimer collaborateur"
+            var case_suppr = $(this);
+            $("#dialog-suppression").html('<p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span><strong>ATTENTION</strong> - Si vous supprimez '+prenom+' '+nom+' et s\'il a un compte, celui-ci sera fermé. OK ?</p>');
+            $("#dialog-suppression").dialog({
+                resizable: false,
+                height: "auto",
+                width: 400,
+                modal: true,
+                buttons: {
+                    "OK": function() {
+                        $( this ).dialog( "close" );
+                    },
+                    "NOOON !": function() {
+                        case_suppr.prop('checked',false);
+                        $( this ).dialog( "close" );
+                    }
+                }
+            });
+            //alert('ATTENTION ! Voulez-vous vraiment supprimer '+prenom+' '+nom+' de la liste des collaborateurs ?');
+          };
+ 
+       // else
+       // {
+       //     $(this).parent().parent().find(":not([id$='_mail'])").prop('disabled', false);
+       //     $(this).parent().parent().find("[id$='_mail']").each( function() {complete_ligne( $(this).val(), $(this) );});
+       //     };
+    
     });
 } // function opacity()
 
