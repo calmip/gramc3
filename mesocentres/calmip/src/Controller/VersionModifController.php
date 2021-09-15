@@ -421,7 +421,7 @@ class VersionModifController extends AbstractController
             }
         } elseif ($type == Projet::PROJET_SESS) {
             if ($demande <= $seuil) {
-				$rvl = false;
+                $rvl = false;
                 $projet->setTypeProjet(Projet::PROJET_FIL);
                 $em->persist($projet);
             }
@@ -465,7 +465,7 @@ class VersionModifController extends AbstractController
         );
         };
         $form
-    ->add('demHeures', IntegerType::class, [ 'required'       => false ])
+    ->add('demHeures', IntegerType::class, [ 'required'       => false,'attr' => ['min' => $this->getParameter('prj_heures_min')]])
     ->add('prjFinancement', TextType::class, [ 'required'     => false ])
     ->add('prjGenciCentre', TextType::class, [ 'required' => false ])
     ->add('prjGenciMachines', TextType::class, [ 'required' => false ])

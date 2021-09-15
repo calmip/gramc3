@@ -133,6 +133,9 @@ parameters:
     # Seuil à partir duquel on ne peut plus créer de projet au fil de l'eau (ou "agile", ou "dynamique")
     prj_seuil_sess: 100000
 
+    # Nombre d'heures minimal pour un projet
+    prj_heures_mini: 50000
+    
     # Différents mails
     mailadmin: admin.calmip@univ-toulouse.fr
     mailfrom: ne-pas-repondre@calmip.univ-toulouse.fr

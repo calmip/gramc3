@@ -460,7 +460,7 @@ class VersionModifController extends AbstractController
         );
         };
         $form
-    ->add('demHeures', IntegerType::class, [ 'required'       => false ])
+    ->add('demHeures', IntegerType::class, [ 'required'       => false, 'attr' => ['min' => $this->getParameter('prj_heures_min')] ])
     ->add('demHeuresGpu', IntegerType::class, [ 'required'       => false ])
     ->add('prjFinancement', TextType::class, [ 'required'     => false ])
     ->add('prjGenciCentre', TextType::class, [ 'required' => false ])
