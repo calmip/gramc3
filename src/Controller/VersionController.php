@@ -345,9 +345,14 @@ class VersionController extends AbstractController
                 $toomuch  = $sv -> is_demande_toomuch($version_prec->getAttrHeures(), $version->getDemHeures());
             }
         }
+
+        $formation = $sv->buildFormations($version);
+
         $html4pdf =  $this->render(
             'version/pdf.html.twig',
             [
+            'warn_type'          => false,
+            'formation'          => $formation,
             'projet'             => $projet,
             'version_form'       => null,
             'version'            => $version,
@@ -367,7 +372,7 @@ class VersionController extends AbstractController
         ]
         );
 
-        //file_put_contents("/tmp/output.html", $html4pdf->getContent());
+        $pdf = $spdf->setOption('enable-local-file-access', true);
         $pdf = $spdf->getOutputFromHtml($html4pdf->getContent());
         return Functions::pdf($pdf);
     }

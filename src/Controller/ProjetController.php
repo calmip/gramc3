@@ -1871,10 +1871,10 @@ class ProjetController extends AbstractController
             $loginname = 'nologin';
         }
 
-        //			if ($loginname == 'nologin')
-        //			{
-        //				$sj->throwException(__METHOD__ . ':' . __LINE__ ." Projet $projet Année $annee Pas d'utilisateurs !");
-        //			}
+        // if ($loginname == 'nologin')
+        // {
+        //     $sj->throwException(__METHOD__ . ':' . __LINE__ ." Projet $projet Année $annee Pas d'utilisateurs !");
+        // }
 
         // LA SUITE DEPEND DU TYPE DE PROJET !
         // Pareil pour projets de type 1 et de type 3
@@ -1986,41 +1986,41 @@ class ProjetController extends AbstractController
 
         $formation = $sv->buildFormations($version);
 
-		if ($projet->getTypeProjet() == Projet::PROJET_SESS) {
-			$tmpl = 'projet/consulter_projet_sess.html.twig';
-		} else {
-			$tmpl = 'projet/consulter_projet_fil.html.twig';
-		}
-		
+        if ($projet->getTypeProjet() == Projet::PROJET_SESS) {
+            $tmpl = 'projet/consulter_projet_sess.html.twig';
+        } else {
+            $tmpl = 'projet/consulter_projet_fil.html.twig';
+        }
+        
         return $this->render(
             $tmpl,
             [
-            	'warn_type'          => $warn_type,
-		        'projet'             => $projet,
-		        'loginname'          => $loginname,
-		        'version_form'       => $session_form->createView(),
-		        'version'            => $version,
-		        'session'            => $session,
-		        'menu'               => $menu,
-		        'img_expose_1'       => $img_expose_1,
-		        'img_expose_2'       => $img_expose_2,
-		        'img_expose_3'       => $img_expose_3,
-		        'img_justif_renou_1' => $img_justif_renou_1,
-		        'img_justif_renou_2' => $img_justif_renou_2,
-		        'img_justif_renou_3' => $img_justif_renou_3,
-		        'conso_cpu'          => $sp->getConsoRessource($projet, 'cpu', $version->getAnneeSession()),
-		        'conso_gpu'          => $sp->getConsoRessource($projet, 'gpu', $version->getAnneeSession()),
-		        'rapport_1'          => $rapport_1,
-		        'rapport'            => $rapport,
-		        'document'           => $document,
-		        'toomuch'            => $toomuch,
-		        'formation'          => $formation
-		    ]
+                'warn_type'          => $warn_type,
+                'projet'             => $projet,
+                'loginname'          => $loginname,
+                'version_form'       => $session_form->createView(),
+                'version'            => $version,
+                'session'            => $session,
+                'menu'               => $menu,
+                'img_expose_1'       => $img_expose_1,
+                'img_expose_2'       => $img_expose_2,
+                'img_expose_3'       => $img_expose_3,
+                'img_justif_renou_1' => $img_justif_renou_1,
+                'img_justif_renou_2' => $img_justif_renou_2,
+                'img_justif_renou_3' => $img_justif_renou_3,
+                'conso_cpu'          => $sp->getConsoRessource($projet, 'cpu', $version->getAnneeSession()),
+                'conso_gpu'          => $sp->getConsoRessource($projet, 'gpu', $version->getAnneeSession()),
+                'rapport_1'          => $rapport_1,
+                'rapport'            => $rapport,
+                'document'           => $document,
+                'toomuch'            => $toomuch,
+                'formation'          => $formation
+            ]
         );
     }
 
     // Consulter les projets de type 2 (projets test)
-    private function consulterType2(Projet $projet, Version $version, $loginname, Request $request)
+    private function consulterType2(Projet $projet, Version $version, $loginname, Request $request, $warn_type)
     {
         $sm = $this->sm;
         $sp = $this->sp;
