@@ -768,7 +768,7 @@ class ExpertiseController extends AbstractController
         }
 
         // En session B mais SEULEMENT POUR LES PROJETS DE SESSION, on propose une attribution spéciale pour heures d'été
-        if ($projet_type == Projet::PROJET_SESS) {
+        if ($this->getParameter('heures_ete') && $session->getTypeSession() && $projet_type == Projet::PROJET_SESS) {
             if ($session->getTypeSession()) {
                 $editForm -> add('nbHeuresAttEte');
             }
@@ -840,7 +840,7 @@ class ExpertiseController extends AbstractController
         case Projet::PROJET_FIL:
             $twig = 'expertise/modifier_projet_fil.html.twig';
             break;
-    }
+        }
 
         // Dans le cas de projets tests, $expertises peut être vide même s'il y a un projet test dans la liste
         // (session B et projet test non expertisé en session A)

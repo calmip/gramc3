@@ -231,6 +231,16 @@
                 </th>
                 <td>{{ form_widget(edit_form.nbHeuresAtt) }}</td>
             </tr>
+
+            {# Heures d'été seulement si le paramètre heures_ete vaut true, si projet session, et si session B #}
+            {% if heures_ete and session.typesession==true and version.projet.typeprojet == 1 %}
+            <tr>
+                <th class="horiz"><label for="nb_heures_att_ete">Parmi ces heures, Nombre d'heures attribuées pour l'été</label><br>
+                <small>Il s'agit d'allouer des heures qui doivent être utilisées avant la fin de l'été, faute de quoi elles pourront être récupérées</small>
+                </th>
+                <td>{{ form_widget(edit_form.nbHeuresAttEte) }}</td>
+            </tr>
+            {% endif %}
         </tbody>
     </table>
 

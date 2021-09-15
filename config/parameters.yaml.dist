@@ -75,6 +75,9 @@ parameters:
     # car elle vient APRES la réunion: on attend la réunion ET l'entrée du commentaire de session
     # pour pour laisser les experts envoyer les expertises !
     noedition_expertise: true
+
+    # Fonctionnalité permettant d'affecter des heures spéciales pour l'été (en session B uniquement) #}
+    heures_ete: true
     
     # Nombre max de rallonges par projet et par sessoin
     max_rall: 2

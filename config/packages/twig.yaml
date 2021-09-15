@@ -22,6 +22,7 @@ twig:
        norattachement: '%norattachement%'
        nodata: '%nodata%'
        noedition_expertise: '%noedition_expertise%'
+       heures_ete: '%heures_ete%'
        prj_prefix: '%prj_prefix%'
        prj_seuil_sess: '%prj_seuil_sess%'
        max_expertises_nb: '%max_expertises_nb%'
