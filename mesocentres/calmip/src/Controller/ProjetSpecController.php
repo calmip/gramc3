@@ -610,6 +610,8 @@ class ProjetSpecController extends AbstractController
         if ($ac->isGranted('ROLE_ADMIN')) {
             $menu[] = $sm->rallonge_creation($projet);
         }
+        $menu[] = $this->menu_transformer($projet);
+        $menu[] = $sm->renouveler_version($version);
         $menu[] = $sm->modifier_version($version);
         $menu[] = $sm->envoyer_expert($version);
         $menu[] = $sm->modifier_collaborateurs($version);
@@ -628,4 +630,110 @@ class ProjetSpecController extends AbstractController
             ]
         );
     }
+
+    /*
+     * Transformation d'un projet FIL ( ou projet test) en projet de session
+     *     - Seulement lors des sessions d'attribution
+     *     - La transformation inverse n'est pas possible
+     *
+     * NOTE - Cette fonction a vocation à rejoindre le ServiceMenu, mais pour l'instant
+     *        on la laisse là (utilisée seulement par CALMIP)
+     *
+     */
+    private function menu_transformer(Projet $projet)
+    {
+        $token = $this->token;
+        $user = $token->getUser();
+        
+        $menu = [];
+        $menu['commentaire'] = "Impossible pour l'instant";
+        $menu['name'] = 'avant_transformer';
+        $menu['params'] = [ 'projet' => $projet ];
+        $menu['lien'] = 'Transformer';
+        $menu['ok'] = false;
+
+        $session = $this->ss->getSessionCourante();
+        if ($session == null) {
+            $menu['raison'] = "Il n'y a pas de session courante";
+            return $menu;
+        }
+
+        $etat_session   =   $session->getEtatSession();
+
+        if ($user == null)
+        {
+            $menu['raison'] = "Connexion anonyme ?";
+            return $menu;
+        }
+            
+        if (! $user->peut_creer_projets()) {
+            $menu['raison'] = "Commencez par changer de responsable, le responsable doit être membre permanent d'un laboratoire enregistré";
+        } elseif ($etat_session == Etat::EDITION_DEMANDE) {
+            $menu['raison'] = '';
+            $menu['commentaire'] = "Confirmez le test, créez un VRAI projet !";
+            $menu['ok'] = true;
+        } else {
+            $menu['raison'] = 'Nous ne sommes pas en période de demande';
+        }
+
+        return $menu;
+    }
+
+    
+    /**
+     * Envoie un écran d'explication avant de transformer un projet Fil (=test)
+     *
+     * @Route("/avant_transformer/{projet}", name="avant_transformer")
+     * @Method({"GET", "POST"})
+     * @Security("is_granted('ROLE_DEMANDEUR')")
+     *
+     */
+    public function avantTransformerAction(Request $request, Projet $projet)
+    {
+        $sm = $this->sm;
+        $sj = $this->sj;
+        $ss = $this->ss;
+        $token = $this->token;
+
+        $m = $this->menu_transformer($projet);
+        if ($m['ok'] == false) {
+            $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de transformer le projet car " . $m['raison']);
+        }
+
+        $session = $ss->getSessionCourante();
+        $projetRepository = $this->getDoctrine()->getManager()->getRepository(Projet::class);
+        $id_individu      = $token->getUser()->getIdIndividu();
+
+        return $this->render(
+            'projet/avant_transformer.html.twig',
+            [
+            'projet' => $projet,
+            ]
+        );
+    }
+
+    /**
+     * Transforme un projet Fil (=Test) en projet de session
+     *
+     * @Route("/transformer/{projet}", name="transformer")
+     * @Method({"GET", "POST"})
+     * @Security("is_granted('ROLE_DEMANDEUR')")
+     *
+     */
+    public function TransformerAction(Request $request, Projet $projet)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $m = $this->menu_transformer($projet);
+        if ($m['ok'] == false) {
+            $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de transformer le projet car " . $m['raison']);
+        }
+
+        $projet->setTypeProjet(Projet::PROJET_SESS);
+        $em->persist($projet);
+        $em->flush();
+        
+        return $this->redirectToRoute('consulter_projet', ['id' => $projet]);
+    }
+
 }
