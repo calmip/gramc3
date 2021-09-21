@@ -288,7 +288,7 @@ class VersionModifController extends AbstractController
         return $this->modifierType1($request, $version, $renouvellement, $image_forms, $collaborateur_form, $lg);
 
         case Projet::PROJET_TEST:
-        return $this->modifierType2($request, $version, $renouvellement, $image_forms, $collaborateur_form, $lg);
+        return $this->modifierType3($request, $version, $renouvellement, $image_forms, $collaborateur_form, $lg);
 
         case Projet::PROJET_FIL:
         return $this->modifierType3($request, $version, $renouvellement, $image_forms, $collaborateur_form, $lg);
@@ -387,8 +387,7 @@ class VersionModifController extends AbstractController
 
     /*
      * Appelée par modifierType1
-     *         Si on est en type 3, soit plafonne le nombre d'heures, soit passe en type 1,
-     *         selon l'état de la session courante
+     *         Si on est en type 3, on plafonne le nombre d'heures
      *         NB - On ne fait pas de flush, c'est l'appelant qui s'en chargera.
      *
      * params = $version
@@ -398,7 +397,7 @@ class VersionModifController extends AbstractController
     private function validDemHeures($version)
     {
         $em = $this->getDoctrine()->getManager();
-        $ss = $this->ss;
+        //$ss = $this->ss;
         $projet = $version->getProjet();
         $type = $projet->getTypeProjet();
         $seuil = intval($this->getParameter('prj_seuil_sess'));
@@ -407,23 +406,8 @@ class VersionModifController extends AbstractController
 
         if ($type == Projet::PROJET_FIL) {
             if ($demande > $seuil) {
-				$rvl = false;
-                $etat_session = $ss->getSessionCourante()->getEtat();
-
-                // Si on est en edition_demande on passe le projet en type 1
-                // Sinon on plafonne les heures
-                if ($etat_session == Etat::EDITION_DEMANDE) {
-                    $projet->setTypeProjet(Projet::PROJET_SESS);
-                    $em->persist($projet);
-                } else {
-                    $version -> setDemHeures($seuil);
-                }
-            }
-        } elseif ($type == Projet::PROJET_SESS) {
-            if ($demande <= $seuil) {
-				$rvl = false;
-                $projet->setTypeProjet(Projet::PROJET_FIL);
-                $em->persist($projet);
+                $version -> setDemHeures($seuil);
+                $rvl = false;
             }
         }
         return $rvl;
@@ -706,7 +690,7 @@ class VersionModifController extends AbstractController
     }
 
     /*
-     * Appelée par modifierAction pour les projets de type 2 (PROJET_TEST)
+     * Appelée par modifierAction pour les projets de type 3 (PROJET_FIL => PROJET_TEST)
      *
      * params = $request, $version
      *          $renouvellement (toujours false)
@@ -714,14 +698,14 @@ class VersionModifController extends AbstractController
      *          $collaborateurs_form (formulaire des collaborateurs)
      *
      */
-    private function modifierType2(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form, LoggerInterface $lg)
+    private function modifierType3(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form, LoggerInterface $lg)
     {
         $sj = $this->sj;
         $sval = $this->vl;
         $em = $this->getDoctrine()->getManager();
 
         //if ($this->has('heures_projet_test')) {
-	    //    $heures_projet_test = $this->getParameter('heures_projet_test');
+        //    $heures_projet_test = $this->getParameter('heures_projet_test');
         //} else {
         //    $heures_projet_test =  5000;
         //}
@@ -763,8 +747,8 @@ class VersionModifController extends AbstractController
 //            'data' => $heures_projet_test,
 //            'disabled' => 'disabled' ]
 //        )
-		$form_builder
-		->add('demHeures', IntegerType::class, ['required' => false])
+        $form_builder
+        ->add('demHeures', IntegerType::class, ['required' => false])
         ->add('prjResume', TextAreaType::class, [ 'required'       =>  false ])
         ->add('codeNom', TextType::class, [ 'required'       =>  false ])
         ->add('codeFor', CheckboxType::class, [ 'required'       =>  false ])
@@ -792,10 +776,10 @@ class VersionModifController extends AbstractController
         ->add('fermer', SubmitType::class)
         ->add('annuler', SubmitType::class);
 
-		$form = $form_builder->getForm();
+        $form = $form_builder->getForm();
         $form->handleRequest($request);
-		$valid = true;
-		
+        $valid = true;
+
         if ($form->isSubmitted() && $form->isValid()) {
             // on sauvegarde tout de même mais il semble que c'est déjà fait avant
             //$version->setDemHeures($heures_projet_test);
@@ -811,29 +795,13 @@ class VersionModifController extends AbstractController
         return $this->render(
             'version/modifier_projet_test.html.twig',
             [
-		        'form'      => $form->createView(),
-		        'version'   => $version,
-		        'collaborateur_form' => $collaborateur_form->createView(),
-		        'todo'      => static::versionValidate($version, $sj, $em, $sval),
-	        ]
+                'form'      => $form->createView(),
+                'version'   => $version,
+                'collaborateur_form' => $collaborateur_form->createView(),
+                'todo'      => static::versionValidate($version, $sj, $em, $sval),
+            ]
         );
     }
-
-
-    /*
-     * Appelée par modifierAction pour les projets de type 3 (PROJET_FIL)
-     *
-     * params = $request, $version
-     *          $renouvellement (toujours false)
-     *          $image_forms (formulaire de téléversement d'images)
-     *          $collaborateurs_form (formulaire des collaborateurs)
-     *
-     */
-    private function modifierType3(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form, LoggerInterface $lg)
-    {
-		# Même formulaire pour Type3 que pour Type2 (projets test)
-		return $this->modifierType2($request,$version,$renouvellement, $image_forms, $collaborateur_form, $lg);
-	}
 
     ////////////////////////////////////////////////////////////////////////////////////
 
