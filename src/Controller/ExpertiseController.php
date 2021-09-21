@@ -345,26 +345,12 @@ class ExpertiseController extends AbstractController
         $session             = $ss->getSessionCourante();
 
         // Les expertises affectées à cet expert
-        $expertises  = $expertiseRepository->findExpertisesByExpert($moi, $session);
-
-        # Pour une session B on lit aussi les expertises de la session A (il peut y avoir des projets tests qui trainent)
-        if ($session->getTypeSession()) {
-            $id_sessionA= $session->getAnneeSession().'A';
-            $sessionRepository = $em->getRepository(Session::class);
-            $sessionA   = $sessionRepository->findOneBy(['idSession' => $id_sessionA ]);
-            if ($sessionA != null) {
-                $expertisesA= $expertiseRepository->findExpertisesByExpert($moi, $sessionA);
-                $expertisesB= $expertises;
-                $expertises = array_merge($expertisesA, $expertisesB);
-            }
-        }
+        // On regarde toutes les sessions (il peut y avoir des projets fil de l'eau qui trainent)
+        // mais seulement les expertises non terminées
+        $expertises  = $expertiseRepository->findExpertisesByExpertForAllSessions($moi,true); //($moi, $session);
 
         $my_expertises  =   [];
         foreach ($expertises as $expertise) {
-            // On n'affiche pas les expertises définitives
-            if ($expertise->getDefinitif()) {
-                continue;
-            }
 
             $version    =   $expertise->getVersion();
             $projetId   =   $version->getProjet()->getIdProjet();

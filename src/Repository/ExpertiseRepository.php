@@ -91,15 +91,25 @@ class ExpertiseRepository extends \Doctrine\ORM\EntityRepository
          ->getResult();
     }
 
-    public function findExpertisesByExpertForAllSessions(Individu $expert)
+    // Les expertises liées à un expert, toutes session confondues
+    // Seulement les non définitives si $non_def vaut true
+    public function findExpertisesByExpertForAllSessions(Individu $expert, $non_def=false)
     {
-        $dql     =   'SELECT e FROM App:Expertise e';
-        $dql    .=  " INNER JOIN App:Version v WITH e.version = v ";
-        $dql    .=  " WHERE ( e.expert = :expert ) ";
+        $dql  = "SELECT e FROM App:Expertise e";
+        $dql .= " INNER JOIN App:Version v WITH e.version = v ";
+        $dql .= " WHERE ( e.expert = :expert AND v.etatVersion != :annule";
+        if ($non_def) {
+            $dql .= " AND e.definitif = 0 ) ";
+        }
+        else
+        {
+            $dql .= " )";
+        }        
 
         return $this->getEntityManager()
          ->createQuery($dql)
          ->setParameter('expert', $expert)
+         ->setParameter('annule', Etat::ANNULE)
          ->getResult();
     }
 
