@@ -26,6 +26,7 @@ namespace App\Controller;
 
 use App\Entity\Version;
 use App\Entity\Projet;
+use App\Entity\User;
 use App\Entity\Session;
 use App\Entity\Individu;
 use App\Entity\CollaborateurVersion;
@@ -37,6 +38,7 @@ use App\GramcServices\ServiceJournal;
 use App\GramcServices\ServiceMenus;
 use App\GramcServices\ServiceSessions;
 use App\GramcServices\ServiceVersions;
+use App\GramcServices\ServiceProjets;
 use App\GramcServices\ServiceForms;
 use App\GramcServices\Workflow\Projet\ProjetWorkflow;
 
@@ -77,6 +79,7 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 use Doctrine\ORM\EntityManager;
@@ -90,44 +93,242 @@ use Twig\Environment;
  */
 class VersionModifController extends AbstractController
 {
-    private $sj;
-    private $sm;
-    private $ss;
-    private $sv;
-    private $sf;
-    private $pw;
-    private $ff;
-    private $vl;
-    private $sss;
-    private $tw;
+    private $sj = null;
+    private $sm = null;
+    private $ss = null;
+    private $sv = null;
+    private $sp = null;
+    private $sf = null;
+    private $pw = null;
+    private $ff = null;
+    private $vl = null;
+    private $sss = null;
+    private $tw = null;
+    private $tok = null;
 
     public function __construct(
         ServiceJournal $sj,
         ServiceMenus $sm,
         ServiceSessions $ss,
         ServiceVersions $sv,
+        ServiceProjets $sp,
         ServiceForms $sf,
         ProjetWorkflow $pw,
         FormFactoryInterface $ff,
         ValidatorInterface $vl,
         SessionInterface $sss,
-        Environment $tw
+        Environment $tw,
+        TokenStorageInterface $tok
     ) {
         $this->sj  = $sj;
         $this->sm  = $sm;
         $this->ss  = $ss;
         $this->sv  = $sv;
+        $this->sp  = $sp;
         $this->sf  = $sf;
         $this->pw  = $pw;
         $this->ff  = $ff;
         $this->vl  = $vl;
         $this->sss = $sss;
         $this->tw = $tw;
+        $this->tok= $tok;
+    }
+
+    /**
+     * Montre les projets d'un utilisateur
+     *
+     * NOTE - etait autrefois dans le controleur Projet, mais a été déplacé
+     *        ici pour avoir une version dépendant du mésocentre
+     * 
+     * @Route("/projet/accueil", name="projet_accueil")
+     * @Route("/projet/accueil/", name="projet_accueil1")
+     * @Method("GET")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
+     */
+    public function accueilAction()
+    {
+        $sm                  = $this->sm;
+        $ss                  = $this->ss;
+        $sp                  = $this->sp;
+        $token               = $this->tok->getToken();
+        $em                  = $this->getDoctrine()->getManager();
+        $individu            = $token->getUser();
+        $id_individu         = $individu->getIdIndividu();
+
+        $projetRepository    = $em->getRepository(Projet::class);
+        $cv_repo             = $em->getRepository(CollaborateurVersion::class);
+        $user_repo           = $em->getRepository(User::class);
+
+        $list_projets_collab = $projetRepository-> getProjetsCollab($id_individu, false, true);
+        $list_projets_resp   = $projetRepository-> getProjetsCollab($id_individu, true, false);
+
+        $projets_term        = $projetRepository-> get_projets_etat($id_individu, 'TERMINE');
+
+        $session_actuelle    = $ss->getSessionCourante();
+
+        // TODO - Faire en sorte pour que les erreurs soient proprement affichées dans l'API
+        // En attendant ce qui suit permet de se dépanner mais c'est franchement dégueu
+        //echo '<pre>'.strlen($_SERVER['CLE_DE_CHIFFREMENT'])."\n";
+        //echo SODIUM_CRYPTO_SECRETBOX_KEYBYTES.'</pre>';
+        //$enc = Functions::simpleEncrypt("coucou");
+        //$dec = Functions::simpleDecrypt($enc);
+        //echo "$dec\n";
+
+        // projets responsable
+        $projets_resp  = [];
+        foreach ($list_projets_resp as $projet) {
+            $versionActive  =   $sp->versionActive($projet);
+            if ($versionActive != null) {
+                $rallonges = $versionActive ->getRallonge();
+                $cpt_rall  = count($rallonges->toArray());
+            } else {
+                $rallonges = null;
+                $cpt_rall  = 0;
+            }
+
+            if ($versionActive != null) {
+                $cv    = $cv_repo->findOneBy(['version' => $versionActive, 'collaborateur' => $individu]);
+                $login = $cv->getLoginname()==null ? 'nologin' : $cv->getLoginname();
+                $u     = $user_repo->findOneBy(['loginname' => $login]);
+                if ($u==null) {
+                    $passwd    = null;
+                    $pwd_expir = null;
+                } else {
+                    $passwd    = $u->getPassword();
+                    $passwd    = Functions::simpleDecrypt($passwd);
+                    $pwd_expir = $u->getPassexpir();
+                }
+            } else {
+                $login  = 'nologin';
+                $passwd = null;
+                $pwd_expir = null;
+            }
+            $projets_resp[]   =
+            [
+                'projet'    => $projet,
+                'conso'     => $sp->getConsoCalculP($projet),
+                'rallonges' => $rallonges,
+                'cpt_rall'  => $cpt_rall,
+                'meta_etat' => $sp->getMetaEtat($projet),
+                'login'     => $login,
+                'passwd'    => $passwd,
+                'pwd_expir' => $pwd_expir
+            ];
+        }
+
+        // projets collaborateurs
+        $projets_collab  = [];
+        foreach ($list_projets_collab as $projet) {
+            $versionActive = $sp->versionActive($projet);
+
+            if ($versionActive != null) {
+                $rallonges = $versionActive ->getRallonge();
+                $cpt_rall  = count($rallonges->toArray());
+            } else {
+                $rallonges = null;
+                $cpt_rall  = 0;
+            }
+
+            $cv    = $cv_repo->findOneBy(['version' => $versionActive, 'collaborateur' => $individu]);
+            if ($cv != null) {
+                $login = $cv->getLoginname()==null ? 'nologin' : $cv->getLoginname();
+                $u     = $user_repo->findOneBy(['loginname' => $login]);
+                if ($u==null) {
+                    $passwd = null;
+                    $pwd_expir  = null;
+                } else {
+                    $passwd    = $u->getPassword();
+                    $pwd_expir = $u->getPassexpir();
+                }
+            } else {
+                $login  = 'nologin';
+                $passwd = null;
+                $pwd_expir = null;
+            }
+
+            $projets_collab[] =
+                [
+                    'projet'    => $projet,
+                    'conso'     => $sp->getConsoCalculP($projet),
+                    'rallonges' => $rallonges,
+                    'cpt_rall'  => $cpt_rall,
+                    'meta_etat' => $sp->getMetaEtat($projet),
+                    'login'     => $login,
+                    'passwd'    => $passwd,
+                    'pwd_expir' => $pwd_expir
+                ];
+        }
+
+        // projets collaborateurs
+        $projets_collab  = [];
+        foreach ($list_projets_collab as $projet) {
+            $versionActive = $sp->versionActive($projet);
+
+            if ($versionActive != null) {
+                $rallonges = $versionActive ->getRallonge();
+                $cpt_rall  = count($rallonges->toArray());
+            } else {
+                $rallonges = null;
+                $cpt_rall  = 0;
+            }
+
+            $cv    = $cv_repo->findOneBy(['version' => $versionActive, 'collaborateur' => $individu]);
+            if ($cv != null) {
+                $login = $cv->getLoginname()==null ? 'nologin' : $cv->getLoginname();
+                $u     = $user_repo->findOneBy(['loginname' => $login]);
+                if ($u==null) {
+                    $passwd = null;
+                    $pwd_expir = null;
+                } else {
+                    $passwd = $u->getPassword();
+                    $pwd_expir = $u->getPassexpir();
+                }
+            } else {
+                $login = 'nologin';
+                $passwd= null;
+                $pwd_expir = null;
+            }
+            $projets_collab[] =
+                [
+                'projet'    => $projet,
+                'conso'     => $sp->getConsoCalculP($projet),
+                'rallonges' => $rallonges,
+                'cpt_rall'  => $cpt_rall,
+                'meta_etat' => $sp->getMetaEtat($projet),
+                'login'     => $login,
+                'passwd'    => $passwd,
+                'pwd_expir' => $pwd_expir
+                ];
+        }
+
+        /*
+         * JUIN 2021 - On ne crée QUE des projets PROJET_FIL !
+         *             Eventuellement ils se transforment par la suite en PROJET_SESS
+         */
+        //$prefixes = $this->getParameter('prj_prefix');
+        //foreach (array_keys($prefixes) as $t)
+        //{
+        //	$menu[] = $sm->nouveau_projet($t);
+        //}
+        $menu = [];
+        $menu[] = $sm -> nouveau_projet(3);
+        //$menu[] = $this->menu_nouveau_projet_test();
+        //$menu[] = $this->menu_nouveau_projet_sess();
+
+        return $this->render(
+            'projet/demandeur.html.twig',
+            [
+                'projets_collab'  => $projets_collab,
+                'projets_resp'    => $projets_resp,
+                'projets_term'    => $projets_term,
+                'menu'            => $menu,
+                ]
+        );
     }
 
     /**
      * Appelé par le bouton Envoyer à l'expert: si la demande est incomplète
-     * on envoie un éran pour la compléter. Sinon on passe à envoyer à l'expert
+     * on envoie un écran pour la compléter. Sinon on passe à envoyer à l'expert
      *
      * @Route("/{id}/avant_modifier", name="avant_modifier_version")
      * @Method({"GET", "POST"})
