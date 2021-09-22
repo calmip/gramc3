@@ -704,6 +704,8 @@ class VersionModifController extends AbstractController
         $sval = $this->vl;
         $em = $this->getDoctrine()->getManager();
 
+        $heures_projet_test = $this->getParameter('heures_projet_test');
+
         //if ($this->has('heures_projet_test')) {
         //    $heures_projet_test = $this->getParameter('heures_projet_test');
         //} else {
@@ -729,26 +731,27 @@ class VersionModifController extends AbstractController
                 'prjRattachement',
                 EntityType::class,
                 [
-        'required'    => false,
-        'multiple'    => false,
-        'expanded'    => true,
-        'class'       => 'App:Rattachement',
-        'empty_data'  => null,
-        'label'       => '',
-        'placeholder' => 'AUCUN',
-        ]
+                    'required'    => false,
+                    'multiple'    => false,
+                    'expanded'    => true,
+                    'class'       => 'App:Rattachement',
+                    'empty_data'  => null,
+                    'label'       => '',
+                    'placeholder' => 'AUCUN',
+                ]
             );
         }
-//        $form_builder->add(
-//            'demHeures',
-//            IntegerType::class,
-//            [
-//            'required'       =>  false,
-//            'data' => $heures_projet_test,
-//            'disabled' => 'disabled' ]
-//        )
-        $form_builder
-        ->add('demHeures', IntegerType::class, ['required' => false])
+        $form_builder->add(
+            'demHeures',
+            IntegerType::class,
+            [
+                'required'       =>  false,
+                'data' => $heures_projet_test,
+                'disabled' => 'disabled'
+            ]
+        )
+        //$form_builder
+        //->add('demHeures', IntegerType::class, ['required' => false ])
         ->add('prjResume', TextAreaType::class, [ 'required'       =>  false ])
         ->add('codeNom', TextType::class, [ 'required'       =>  false ])
         ->add('codeFor', CheckboxType::class, [ 'required'       =>  false ])

@@ -466,7 +466,7 @@ class ProjetSpecController extends AbstractController
             case Projet::PROJET_TEST:
                 return $this->consulterType2($projet, $version, $loginname, $request, $warn_type);
             case Projet::PROJET_FIL:
-                return $this->consulterType2($projet, $version, $loginname, $request, $warn_type);
+                return $this->consulterType3($projet, $version, $loginname, $request, $warn_type);
             default:
                 $sj->errorMessage(__METHOD__ . " Type de projet inconnu: $type");
         }
@@ -600,7 +600,8 @@ class ProjetSpecController extends AbstractController
         );
     }
 
-    // Consulter les projets de type 2 (projets test)
+    // Consulter les projets de type 2 (projets test, en voie de disparition)
+    // Même chose que Type3, moins le lien Transformer et Renouveler
     private function consulterType2(Projet $projet, Version $version, $loginname, Request $request)
     {
         $sm = $this->sm;
@@ -610,8 +611,39 @@ class ProjetSpecController extends AbstractController
         if ($ac->isGranted('ROLE_ADMIN')) {
             $menu[] = $sm->rallonge_creation($projet);
         }
+        //$menu[] = $this->menu_transformer($projet);
+        //$menu[] = $sm->renouveler_version($version);
+        $menu[] = $sm->modifier_version($version);
+        $menu[] = $sm->envoyer_expert($version);
+        $menu[] = $sm->modifier_collaborateurs($version);
+
+        return $this->render(
+            'projet/consulter_projet_test.html.twig',
+            [
+            'projet'      => $projet,
+            'version'     => $version,
+            'session'     => $version->getSession(),
+            'consocalcul' => $sp->getConsoCalculVersion($version),
+            'quotacalcul' => $sp->getQuotaCalculVersion($version),
+            'conso_cpu'   => $sp->getConsoRessource($projet, 'cpu', $version->getAnneeSession()),
+            'conso_gpu'   => $sp->getConsoRessource($projet, 'gpu', $version->getAnneeSession()),
+            'menu'        => $menu,
+            ]
+        );
+    }
+
+    // Consulter les projets de type 3 (projets fil, c-a-d nouveaux projets test)
+    private function consulterType3(Projet $projet, Version $version, $loginname, Request $request)
+    {
+        $sm = $this->sm;
+        $sp = $this->sp;
+        $ac = $this->ac;
+
+        if ($ac->isGranted('ROLE_ADMIN')) {
+            $menu[] = $sm->rallonge_creation($projet);
+        }
         $menu[] = $this->menu_transformer($projet);
-        $menu[] = $sm->renouveler_version($version);
+        //$menu[] = $sm->renouveler_version($version);
         $menu[] = $sm->modifier_version($version);
         $menu[] = $sm->envoyer_expert($version);
         $menu[] = $sm->modifier_collaborateurs($version);
