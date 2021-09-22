@@ -315,14 +315,14 @@ class ProjetSpecController extends AbstractController
         //$prefixes = $this->getParameter('prj_prefix');
         //foreach (array_keys($prefixes) as $t)
         //{
-        //	$menu[] = $sm->nouveau_projet($t);
+        //    $menu[] = $sm->nouveau_projet($t);
         //}
 
-		$etat = 3;
-		if ($ss->getSessionCourante()->getEtatSession() == Etat::EDITION_DEMANDE)
-		{
-			$etat = 1;
-		}
+        $etat = 3;
+        if ($ss->getSessionCourante()->getEtatSession() == Etat::EDITION_DEMANDE)
+        {
+            $etat = 1;
+        }
         $menu[] = $sm->nouveau_projet($etat);
         $menu = [];
         return $this->render(
@@ -333,6 +333,225 @@ class ProjetSpecController extends AbstractController
                 'projets_term'    => $projets_term,
                 'menu'            => $menu,
                 ]
+        );
+    }
+        /**
+     * Affiche un projet avec un menu pour choisir la version
+     *
+     * @Route("/{id}/consulter", name="consulter_projet")
+     * @Route("/{id}/consulter/{warn_type}", name="consulter_projet")
+     * @Route("/{id}/consulter/{version}", name="consulter_version")
+     * 
+     * @Method({"GET","POST"})
+     * @Security("is_granted('ROLE_DEMANDEUR')")
+     */
+    public function consulterAction(Projet $projet, Version $version = null, Request $request, $warn_type=0)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $sp = $this->sp;
+        $sj = $this->sj;
+        $coll_vers_repo= $em->getRepository(CollaborateurVersion::class);
+        $token = $this->token;
+
+        // choix de la version
+        if ($version == null) {
+            $version =  $projet->getVersionDerniere();
+            if ($version == null) {
+                $sj->throwException(__METHOD__ . ':' . __LINE__ .' Projet ' . $projet . ': la dernière version est nulle !');
+            }
+        } else {
+            $projet =   $version->getProjet();
+        } // nous devons être sûrs que le projet corresponde à la version
+
+        if (! $sp->projetACL($projet)) {
+            $sj->throwException(__METHOD__ . ':' . __LINE__ .' problème avec ACL');
+        }
+
+        // Calcul du loginname, pour affichage de la conso
+        $loginname = null;
+        $cv = $coll_vers_repo->findOneBy(['version' => $version, 'collaborateur' => $token->getUser()]);
+        if ($cv != null) {
+            $loginname = $cv -> getLoginname() == null ? 'nologin' : $cv -> getLoginname();
+        } else {
+            $loginname = 'nologin';
+        }
+
+        //            if ($loginname == 'nologin')
+        //            {
+        //                $sj->throwException(__METHOD__ . ':' . __LINE__ ." Projet $projet Année $annee Pas d'utilisateurs !");
+        //            }
+
+        // LA SUITE DEPEND DU TYPE DE PROJET !
+        // Pareil pour projets de type 1 et de type 3
+        $type = $projet->getTypeProjet();
+        switch ($type) {
+            case Projet::PROJET_SESS:
+                return $this->consulterType1_3($projet, $version, $loginname, $request, $warn_type);
+            case Projet::PROJET_TEST:
+                return $this->consulterType2($projet, $version, $loginname, $request, $warn_type);
+            case Projet::PROJET_FIL:
+                return $this->consulterType1_3($projet, $version, $loginname, $request, $warn_type);
+            default:
+                $sj->errorMessage(__METHOD__ . " Type de projet inconnu: $type");
+        }
+    }
+
+    // Consulter les projets de type 1 (projets PROJET_SESS) ou type 3 (PROJET_FIL)
+    private function consulterType1_3(Projet $projet, Version $version, $loginname, Request $request, $warn_type)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $sm = $this->sm;
+        $sp = $this->sp;
+        $ac = $this->ac;
+        $sv = $this->sv;
+        $sj = $this->sj;
+        $ff = $this->ff;
+
+
+        $session_form = Functions::createFormBuilder($ff, ['version' => $version ])
+        ->add(
+            'version',
+            EntityType::class,
+            [
+            'multiple' => false,
+            'class'    => 'App:Version',
+            'required' =>  true,
+            'label'    => '',
+            'choices'  =>  $projet->getVersion(),
+            'choice_label' => function ($version) {
+                return $version->getSession();
+            }
+            ]
+        )
+    ->add('submit', SubmitType::class, ['label' => 'Changer'])
+    ->getForm();
+
+        $session_form->handleRequest($request);
+
+        if ($session_form->isSubmitted() && $session_form->isValid()) {
+            $version = $session_form->getData()['version'];
+        }
+
+        $session = null;
+        if ($version != null) {
+            $session = $version->getSession();
+        } else {
+            $sj->throwException(__METHOD__ . ':' . __LINE__ .' projet ' . $projet . ' sans version');
+        }
+
+        $menu = [];
+        if ($ac->isGranted('ROLE_ADMIN')) {
+            $menu[] = $sm->rallonge_creation($projet);
+        }
+        $menu[] = $sm->changer_responsable($version);
+        $menu[] = $sm->renouveler_version($version);
+        $menu[] = $sm->modifier_version($version);
+        $menu[] = $sm->envoyer_expert($version);
+        $menu[] = $sm->modifier_collaborateurs($version);
+        if ($this->getParameter('nodata')==false) {
+            $menu[] = $sm->donnees($version);
+        }
+        $menu[] = $sm->telechargement_fiche($version);
+        $menu[] = $sm->televersement_fiche($version);
+
+        $etat_version = $version->getEtatVersion();
+        if ($this->getParameter('rapport_dactivite')) {
+            if (($etat_version == Etat::ACTIF || $etat_version == Etat::TERMINE) && ! $sp->hasRapport($projet, $version->getAnneeSession())) {
+                $menu[] = $sm->telecharger_modele_rapport_dactivite($version);
+                $menu[] = $sm->televerser_rapport_annee($version);
+            }
+        }
+
+        $menu[]       = $sm->gerer_publications($projet);
+        $img_expose_1 = $sv->imageProperties('img_expose_1', $version);
+        $img_expose_2 = $sv->imageProperties('img_expose_2', $version);
+        $img_expose_3 = $sv->imageProperties('img_expose_3', $version);
+        $document     = $sv->getdocument($version);
+
+        /*
+        if( $img_expose_1 == null )
+            $sj->debugMessage(__METHOD__.':'.__LINE__ ." img_expose1 null");
+        else
+            $sj->debugMessage(__METHOD__.':'.__LINE__ . " img_expose1 non null");
+        */
+
+        $img_justif_renou_1 = $sv->imageProperties('img_justif_renou_1', $version);
+        $img_justif_renou_2 = $sv->imageProperties('img_justif_renou_2', $version);
+        $img_justif_renou_3 = $sv->imageProperties('img_justif_renou_3', $version);
+
+        $toomuch = false;
+        if ($session->getLibelleTypeSession()=='B' && ! $sv->isNouvelle($version)) {
+            $version_prec = $version->versionPrecedente();
+            if ($version_prec->getAnneeSession() == $version->getAnneeSession()) {
+                $toomuch  = $sv -> is_demande_toomuch($version_prec->getAttrHeures(), $version->getDemHeures());
+            }
+        }
+        $rapport_1 = $sp -> getRapport($projet, $version->getAnneeSession() - 1);
+        $rapport   = $sp -> getRapport($projet, $version->getAnneeSession());
+
+        $formation = $sv->buildFormations($version);
+
+        if ($projet->getTypeProjet() == Projet::PROJET_SESS) {
+            $tmpl = 'projet/consulter_projet_sess.html.twig';
+        } else {
+            $tmpl = 'projet/consulter_projet_fil.html.twig';
+        }
+        
+        return $this->render(
+            $tmpl,
+            [
+                'warn_type'          => $warn_type,
+                'projet'             => $projet,
+                'loginname'          => $loginname,
+                'version_form'       => $session_form->createView(),
+                'version'            => $version,
+                'session'            => $session,
+                'menu'               => $menu,
+                'img_expose_1'       => $img_expose_1,
+                'img_expose_2'       => $img_expose_2,
+                'img_expose_3'       => $img_expose_3,
+                'img_justif_renou_1' => $img_justif_renou_1,
+                'img_justif_renou_2' => $img_justif_renou_2,
+                'img_justif_renou_3' => $img_justif_renou_3,
+                'conso_cpu'          => $sp->getConsoRessource($projet, 'cpu', $version->getAnneeSession()),
+                'conso_gpu'          => $sp->getConsoRessource($projet, 'gpu', $version->getAnneeSession()),
+                'rapport_1'          => $rapport_1,
+                'rapport'            => $rapport,
+                'document'           => $document,
+                'toomuch'            => $toomuch,
+                'formation'          => $formation
+            ]
+        );
+    }
+
+    // Consulter les projets de type 2 (projets test)
+    // PAS UTILISE
+    // TODO - Supprimer cette méthode !
+    private function consulterType2(Projet $projet, Version $version, $loginname, Request $request)
+    {
+        $sm = $this->sm;
+        $sp = $this->sp;
+        $ac = $this->ac;
+
+        if ($ac->isGranted('ROLE_ADMIN')) {
+            $menu[] = $sm->rallonge_creation($projet);
+        }
+        $menu[] = $sm->modifier_version($version);
+        $menu[] = $sm->envoyer_expert($version);
+        $menu[] = $sm->modifier_collaborateurs($version);
+
+        return $this->render(
+            'projet/consulter_projet_test.html.twig',
+            [
+            'projet'      => $projet,
+            'version'     => $version,
+            'session'     => $version->getSession(),
+            'consocalcul' => $sp->getConsoCalculVersion($version),
+            'quotacalcul' => $sp->getQuotaCalculVersion($version),
+            'conso_cpu'   => $sp->getConsoRessource($projet, 'cpu', $version->getAnneeSession()),
+            'conso_gpu'   => $sp->getConsoRessource($projet, 'gpu', $version->getAnneeSession()),
+            'menu'        => $menu,
+            ]
         );
     }
 }
