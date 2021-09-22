@@ -16,6 +16,10 @@ parameters:
     
     mesoc_address: 'CALMIP - Espace Clément Ader - 3 rue Caroline Aigle - 31400 TOULOUSE'
 
+    # Si false, on n'affiche pas la case login dans l'écran collaborateurs
+    # La gestion des mots de passe est elle aussi désactivée
+    coll_login: true
+
     # Si la demande en session A est supérieure à attrib_seuil_a (en hcpu), on surveille la demande en B
     attrib_seuil_a: 600000
     
@@ -53,7 +57,7 @@ parameters:
     fichier_attache: false
        
     # nb de pages max pour un rapport d'activité ou un fichier attaché
-    max_page_nb: 50
+    max_page_nb: 5
     
     # taille max du fichier de rapport d'activité ou fichier attaché
     # ATTENTION - Doit être en cohérence avec le paramètre post_max_size défini dans php.ini !
@@ -74,7 +78,7 @@ parameters:
     # Cette étape est utile si on a un comité d'attribution constitué,
     # car elle vient APRES la réunion: on attend la réunion ET l'entrée du commentaire de session
     # pour pour laisser les experts envoyer les expertises !
-    noedition_expertise: true
+    noedition_expertise: false
 
     # Fonctionnalité permettant d'affecter des heures spéciales pour l'été (en session B uniquement) #}
     heures_ete: true
@@ -131,7 +135,7 @@ parameters:
     dfct_directory: '%kernel.root_dir%/../data/dfct'
     
     # Heures fixes pour les projets tests
-    heures_projet_test: 50000
+    heures_projet_test: 5000
     
     # Seuil à partir duquel on ne peut plus créer de projet au fil de l'eau (ou "agile", ou "dynamique")
     prj_seuil_sess: 100000
