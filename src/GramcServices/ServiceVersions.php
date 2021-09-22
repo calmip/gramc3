@@ -274,14 +274,20 @@ class ServiceVersions
     // modifier login d'un collaborateur d'une version
     // Si le login passe à false, suppression du Loginname,
     // et suppression de la ligne correspondante si elle existe (mot de passe) dans la table user
-    public function modifierLogin(Version $version, Individu $individu, $login)
+    public function modifierLogin(Version $version, Individu $individu, $login, $clogin)
     {
         $em = $this->em;
+        if ($clogin==null) $clogin=false;
         foreach ($version->getCollaborateurVersion() as $item) {
             if ($item->getCollaborateur() == null) {
                 $this->sj->errorMessage('Version:modifierLogin collaborateur null pour CollaborateurVersion ' . $item);
             } elseif ($item->getCollaborateur()->isEqualTo($individu)) {
                 $item->setLogin($login);
+                $item->setClogin($clogin);
+
+                // On ne modifie pas le loginname ni ne supprime le mot de passe à ce stade
+                // C'est le boulot du supercalculateur via l'API (clearPAssword)
+                /*
                 if (! $login)
                 {
                     $loginname = $item->getLoginname();
@@ -292,7 +298,7 @@ class ServiceVersions
                             $em->remove($user);
                         }
                     }
-                }
+                }*/
                 $this->em->persist($item);
                 $this->em->flush();
             }

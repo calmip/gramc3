@@ -375,6 +375,58 @@ class AdminuxController extends AbstractController
     }
 
     /**
+      * clear loginname
+      *
+      * Efface le login name (en cas de fermeture d'un compte) pour le user passé en paramètres
+      *
+      * @Route("/users/clearloginname", name="clear_loginname", methods={"POST"})
+      * @Security("is_granted('ROLE_ADMIN')")
+      *
+      * Efface le loginname s'il existe, ne fait rien sinon
+      */
+
+    // curl --netrc -H "Content-Type: application/json" -X POST -d '{ "loginname": "toto" }' https://.../adminux/users/clearloginname
+
+    public function clearloginnameAction(Request $request, LoggerInterface $lg)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        if ($this->getParameter('noconso')==true) {
+            throw new AccessDeniedException("Accès interdit (parametre noconso)");
+        }
+
+        $content  = json_decode($request->getContent(), true);
+        if ($content == null) {
+            return new Response(json_encode('KO - Pas de donnees'));
+        }
+        if (empty($content['loginname'])) {
+            return new Response(json_encode('KO - Pas de nom de login'));
+        } else {
+            $loginname = $content['loginname'];
+        }
+
+        # Vérifie que ce loginname est connu
+        $cvs = $em->getRepository(User::class)->findByLoginname($loginname);
+        $cnt = count($cvs);
+        if ($cnt==0) {
+            return new Response(json_encode(['KO' => "No user '$loginname' found in any active version" ]));
+        }
+        elseif ($cnt > 1)
+        {
+            return new Response(json_encode(['KO' => "$cnt users '$loginname' found !"]));
+        }
+        else
+        {
+            # effacer le loginname
+            $cv = $cvs[0];
+            $cv->setLoginname(null);
+            $em->persist($cv);
+            $em->flush();
+        }
+        return new Response(json_encode('OK'));
+    }
+
+    /**
      * get versions non terminées
      *
      * @Route("/version/get", name="get_version", methods={"POST"})
@@ -717,7 +769,7 @@ class AdminuxController extends AbstractController
             if ($v != null) {
                 $collaborateurs = $v->getCollaborateurVersion();
                 foreach ($collaborateurs as $c) {
-                    if ($c->getLogin()) {
+                    //if ($c->getLogin()) {
                         $m = $c -> getCollaborateur() -> getMail();
                         if ($mail != null && strtolower($mail) != strtolower($m)) {
                             continue;
@@ -730,8 +782,13 @@ class AdminuxController extends AbstractController
                             $users[$m]['idIndividu'] = $c -> getCollaborateur() -> getIdIndividu();
                             $users[$m]['projets']    = [];
                         }
-                        $users[$m]['projets'][$p->getIdProjet()] = $c->getLoginname();
-                    }
+                        $ln = $c->getLoginname();
+                        $ln = $ln . ":" . ($c->getLogin()?1:0);
+                        $ln = $ln . ":" . ($c->getClogin()?1:0);
+                        
+                        $users[$m]['projets'][$p->getIdProjet()] = $ln;
+
+                    //}
                 }
             }
         }

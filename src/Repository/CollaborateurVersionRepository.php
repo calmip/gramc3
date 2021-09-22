@@ -85,7 +85,7 @@ class CollaborateurVersionRepository extends \Doctrine\ORM\EntityRepository
     }
 
     /*
-     * Renvoie true/false suivant que loginname est dans la table ou pas
+     * Renvoie true/false suivant que loginname est dans la table ou pas (toutes versions confondues)
      */
     public function existsLoginname($loginname)
     {
@@ -98,6 +98,21 @@ class CollaborateurVersionRepository extends \Doctrine\ORM\EntityRepository
         } else {
             return true;
         }
+    }
+
+    /*
+     * Renvoie le cv d'une version ACTIVE qui a le loginname passé en paramètre
+     * Normalement un tableau avec zéro ou 1 enregistrement (on ne vérifie pas)
+     */
+    public function findByLoginname($loginname)
+    {
+        $em = $this->getEntityManager();
+        $out= $em->createQuery('SELECT cv FROM App:CollaborateurVersion cv, App:Version v
+                                WHERE cv.loginname = :loginname AND cv.version = v AND v.etatVersion=:actif')
+        ->setParameter('loginname', $loginname)
+        ->setParameter('actif',Etat::ACTIF)
+        ->getResult();
+        return $out;
     }
     
     /*

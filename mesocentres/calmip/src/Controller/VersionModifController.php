@@ -978,6 +978,7 @@ class VersionModifController extends AbstractController
             } else {
                 $individuForm = new IndividuForm($collaborateur);
                 $individuForm->setLogin($item->getLogin());
+                $individuForm->setClogin($item->getClogin());
                 $individuForm->setResponsable($item->getResponsable());
                 if ($individuForm->getResponsable() == true) {
                     $dataR[] = $individuForm;
@@ -1191,7 +1192,7 @@ class VersionModifController extends AbstractController
             // Le formulaire correspond à un utilisateur existant
             if ($id != null) {
                 $individu = $em->getRepository(Individu::class)->find($id);
-            // Toujours null, donc plein de messages idiots dans le journal, puisque par ailleur ça marche !
+            // Toujours null, donc plein de messages idiots dans le journal, puisque par ailleurs ça marche !
                 // TODO y comprendre quelque chose !
                 //if( $individu_form->getMail() == null )
                 //{
@@ -1251,15 +1252,16 @@ class VersionModifController extends AbstractController
                     $collaborateurVersion   =   new CollaborateurVersion($individu);
                     $collaborateurVersion->setVersion($version);
                     $collaborateurVersion->setLogin($individu_form->getLogin());
+                    $collaborateurVersion->setClogin($individu_form->getClogin());
                     $em->persist($collaborateurVersion);
-                //$em->flush();
                 }
 
                 // modification d'un login et du labo du projet
                 else {
                     $sj->debugMessage(__METHOD__ . ':' . __LINE__ .' individu ' .
                         $individu . ' confirmé pour la version '.$version);
-                    $sv->modifierLogin($version, $individu, $individu_form->getLogin());
+
+                    $sv->modifierLogin($version, $individu, $individu_form->getLogin(), $individu_form->getClogin());
 
                     // modification du labo du projet
                     if ($version->isResponsable($individu)) {
@@ -1277,6 +1279,7 @@ class VersionModifController extends AbstractController
                 if ($individu != null) {
                     $collaborateurVersion   =   new CollaborateurVersion($individu);
                     $collaborateurVersion->setLogin($individu_form->getLogin());
+                    $collaborateurVersion->setClogin($individu_form->getClogin());
                     $collaborateurVersion->setVersion($version);
 
                     $sj->infoMessage(__METHOD__ . ':' . __LINE__ . ' nouvel utilisateur ' . $individu .
