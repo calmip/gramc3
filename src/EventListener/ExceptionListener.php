@@ -71,6 +71,13 @@ class ExceptionListener
     private $session;
     private $em;
 
+    // Si DEBUG == false, la plupart des erreurs redirigent vers la page d'accueil ou vers l'écran de connexion
+    // A POSITIONNER EN PROD !
+    // Si DEBUG == true, le traitement est interrompu pour renvoyer l'erreur - Intéressant en dev
+    //
+    
+    const DEBUG = true;
+    
     public function __construct($kernel_debug, RouterInterface $router, LoggerInterface $logger, ServiceJournal $sj, SessionInterface $session, EntityManagerInterface $em)
     {
         $this->kernel_debug = $kernel_debug;
@@ -91,8 +98,10 @@ class ExceptionListener
         // S'il y a une erreur sur la page d'accueil, décommenter ci-dessous
         // pour avoir des détails sur l'erreur
         // Mais en général, laisser commenté sinon grosses emmerdes en perspective !!!
-        //$response =  new Response( '<pre>' . $exception . '</pre>');
-        //return $response;
+        if (self::DEBUG) {
+            $response =  new Response( '<pre>' . $exception . '</pre>');
+            return $response;
+        }
 
         //$event->setResponse($response);
 
