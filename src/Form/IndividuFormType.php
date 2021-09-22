@@ -38,44 +38,72 @@ use App\Utils\IndividuForm;
 
 class IndividuFormType extends AbstractType
 {
+    private $coll_login;
+    private $nodata;
+
+    // Utilisation des paramètres coll_login et nodata
+    // On pourrait aussi passer par $options de buildForm, sauf que le formulaire est construit la plupart du temps par
+    // l'intermédiaire d'un CollectionType, et je ne sais pas comment passer les paramètres
+    public function __construct($coll_login, $nodata)
+    {
+        $this -> coll_login = $coll_login;
+        $this -> nodata = $nodata;
+    }
+
     /**
      * {@inheritdoc}
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        if ($this->coll_login == true)
+        {
+             $builder->add(
+                'login',
+                CheckboxType::class,
+                [
+                    'label'     => 'login',
+                    'required'  => false,
+                    'attr' => [ 'title' => 'Demander l\'ouverture d\'un compte' ]
+                ]
+            );
+        };
+        if ($this->nodata == false)
+        {
+             $builder->add(
+                'clogin',
+                CheckboxType::class,
+                [
+                    'label'     => 'données',
+                    'required'  => false,
+                    'attr' => [ 'title' => 'Demander un accès à la plateforme Callisto' ]
+                ]
+            );
+        };
         $builder->add(
-            'login',
-            CheckboxType::class,
-            [
-                'label'     =>  'login',
-                'required'  =>  false,
-            ]
-        )
-        ->add(
             'mail',
             TextType::class,
             [
-                'label'     =>  'email',
-                'attr'      =>  [ 'size' => '50' ],
-                'required'  =>  false,
+                'label'     => 'email',
+                'attr'      => [ 'size' => '50' ],
+                'required'  => false,
             ]
         )
         ->add(
             'prenom',
             TextType::class,
             [
-                'label'     =>  'prénom',
-                'attr'      =>  [ 'size' => '50' ],
-                'required'  =>  false,
+                'label'     => 'prénom',
+                'attr'      => [ 'size' => '50' ],
+                'required'  => false,
             ]
         )
         ->add(
             'nom',
             TextType::class,
             [
-                'label'     =>  'nom',
-                'attr'      =>  [ 'size' => '50' ],
-                'required'  =>  false,
+                'label'     => 'nom',
+                'attr'      => [ 'size' => '50' ],
+                'required'  => false,
             ]
         )
         ->add(

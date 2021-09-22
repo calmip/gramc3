@@ -268,9 +268,11 @@ Le laboratoire associé au projet est le laboratoire du responsable
 <table class="projet">
 <tbody>
     <tr>
-        <th>Login</th>
-        {% if version.etat==5 or version.etat == 23 %}
-        <th>User</th>
+        {% if coll_login %}
+            <th>Login</th>
+            {% if version.etat==5 or version.etat == 4 %}
+                <th>User</th>
+            {% endif %}
         {% endif %}
         <th>Prénom</th>
         <th>Nom</th>
@@ -282,15 +284,18 @@ Le laboratoire associé au projet est le laboratoire du responsable
 
     {% for user in version.CollaborateurVersion %}
     <tr>
+        {% if coll_login %}
         <td>{% if( user.login == true) %}Oui{% else %}Non{% endif %}</td>
-		{% if version.etat==5 or version.etat == 4 %}
-        <td>{% if (user.login == true) %}
-               {% if user.loginname==null %}
-                  <img src="{{ asset('icones/attention16.png') }}" alt="Compte non encore créé" title="compte non encore créé" />
-               {% else %}
-                  <tt>{{ user.loginname }}</tt>
-               {% endif %}
-            {% else %}  - {% endif %}</td>
+            {% if version.etat==5 or version.etat == 4 %}
+                <td>{% if (user.login == true) %}
+                       {% if user.loginname==null %}
+                          <img src="{{ asset('icones/attention16.png') }}" alt="Compte non encore créé" title="compte non encore créé" />
+                       {% else %}
+                          <tt>{{ user.loginname }}</tt>
+                       {% endif %}
+                    {% else %}  - {% endif %}
+                </td>
+            {% endif %}
         {% endif %}
         <td>{{ user.Collaborateur.prenom }}</td>
         <td>{{ user.Collaborateur.nom }}</td>

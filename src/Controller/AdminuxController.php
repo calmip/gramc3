@@ -770,14 +770,15 @@ class AdminuxController extends AbstractController
                         continue;
                     }
 
-                    $collaborateur  =  $collaborateurVersion->getCollaborateur() ;
+                    $collaborateur  = $collaborateurVersion->getCollaborateur() ;
                     if ($collaborateur != null) {
-                        $loginname  =   $collaborateurVersion->getLoginname();
-                        $prenom     =   $collaborateur->getPrenom();
-                        $nom        =   $collaborateur->getNom();
-                        $idIndividu =   $collaborateur->getIdIndividu();
-                        $mail       =   $collaborateur->getMail();
-                        $login      =   $collaborateurVersion->getLogin();
+                        $loginname  = $collaborateurVersion->getLoginname();
+                        $prenom     = $collaborateur->getPrenom();
+                        $nom        = $collaborateur->getNom();
+                        $idIndividu = $collaborateur->getIdIndividu();
+                        $mail       = $collaborateur->getMail();
+                        $login      = $collaborateurVersion->getLogin();
+                        $clogin     = $collaborateurVersion->getClogin();
                         $output[] =   [
                                 'idIndividu' => $idIndividu,
                                 'idProjet' =>$idProjet,
@@ -786,6 +787,7 @@ class AdminuxController extends AbstractController
                                 'nom' => $nom,
                                 'login' => $login,
                                 'loginname' => $loginname,
+                                'clogin' => $clogin,
                                 ];
                     }
                 }

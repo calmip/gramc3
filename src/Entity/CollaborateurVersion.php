@@ -55,6 +55,13 @@ class CollaborateurVersion
     private $login;
 
     /**
+     * @var boolean
+     *
+     * @ORM\Column(name="clogin", type="boolean", nullable=false)
+     */
+    private $clogin;
+
+    /**
      * @var string
      *
      * @ORM\Column(name="loginname", type="string", nullable=true,length=100 )
@@ -203,6 +210,29 @@ class CollaborateurVersion
         return $this->login;
     }
 
+    /**
+     * Set clogin
+     *
+     * @param boolean $clogin
+     *
+     * @return CollaborateurVersion
+     */
+    public function setClogin($clogin)
+    {
+        $this->clogin = $clogin;
+
+        return $this;
+    }
+
+    /**
+     * Get clogin
+     *
+     * @return boolean
+     */
+    public function getClogin()
+    {
+        return $this->clogin;
+    }
 
     /**
      * Set loginname

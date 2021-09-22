@@ -32,3 +32,5 @@ twig:
        max_size_doc: '%max_size_doc%'
        rapport_dactivite: '%rapport_dactivite%'
        fichier_attache: '%fichier_attache%'
+       coll_login: '%coll_login%'
+       

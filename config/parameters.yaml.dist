@@ -141,7 +141,7 @@ parameters:
     prj_seuil_sess: 100000
 
     # Nombre d'heures minimal pour un projet
-    prj_heures_mini: 50000
+    prj_heures_min: 50000
     
     # Différents mails
     mailadmin: admin.calmip@univ-toulouse.fr

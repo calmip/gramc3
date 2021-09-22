@@ -128,6 +128,9 @@ services:
         resource: '../src/Form/*'
         tags: ["form.type"]
 
+    App\Form\IndividuFormType:
+        arguments: [ "%coll_login%", "%nodata%" ]
+
     App\Validator\Constraints\PagesNumberValidator:
         arguments: [ "%max_page_nb%" ]
         tags: ["validator.constraint_validator" ]

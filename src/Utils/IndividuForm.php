@@ -39,6 +39,7 @@ use Doctrine\ORM\EntityManager;
 class IndividuForm
 {
     protected $login;
+    protected $clogin;
     protected $delete;
     protected $responsable;
 
@@ -87,6 +88,15 @@ class IndividuForm
     public function setLogin($login)
     {
         $this->login = $login;
+        return $this;
+    }
+    public function getClogin()
+    {
+        return $this->clogin;
+    }
+    public function setClogin($clogin)
+    {
+        $this->clogin = $clogin;
         return $this;
     }
 
