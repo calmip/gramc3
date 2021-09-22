@@ -6,8 +6,6 @@
 imports:
         - { resource: parameters.yaml }
 
-
-
 services:
     _defaults:
         public: false
@@ -114,7 +112,7 @@ services:
         arguments: [ "%max_rall%","%nodata%" ]
         
     App\GramcServices\ServiceNotifications:
-        arguments: [ "%mailfrom%" ]
+        arguments: [ "%mailfrom%","%noedition_expertise%" ]
 
     App\GramcServices\ServiceExperts\ServiceExperts:
         arguments: [ "%max_expertises_nb%" ]
@@ -122,8 +120,8 @@ services:
     App\GramcServices\ServiceExperts\ServiceExpertsRallonge:
         arguments: [ "%max_expertises_nb%" ]
 
-        #App\Controller\ExpertiseController:
-        #arguments: [ '%max_expertises_nb%' ]
+    App\Controller\ExpertiseController:
+        arguments: [ '%max_expertises_nb%' ]
 
     # Formulaires, validateurs
     App\Form\:

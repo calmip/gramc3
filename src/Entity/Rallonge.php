@@ -26,7 +26,6 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-//use App\App;
 use App\Utils\Etat;
 use App\Utils\Functions;
 use App\Interfaces\Demande;
@@ -61,6 +60,15 @@ class Rallonge implements Demande
      * @Assert\GreaterThanOrEqual(0,message="Vous ne pouvez pas demander un nombre d'heures négatif.")
      */
     private $demHeures;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="dem_heures_gpu", type="integer", nullable=true)
+     * @Assert\GreaterThan(0,message="Vous devez demander des heures.")
+     * @Assert\GreaterThanOrEqual(0,message="Vous ne pouvez pas demander un nombre d'heures négatif.")
+     */
+    private $demHeuresGpu;
 
     /**
      * @var integer
@@ -241,6 +249,30 @@ class Rallonge implements Demande
     public function getDemHeures()
     {
         return $this->demHeures;
+    }
+
+    /**
+     * Set demHeuresGpu
+     *
+     * @param integer $demHeuresGpu
+     *
+     * @return Rallonge
+     */
+    public function setDemHeuresGpu($demHeuresGpu)
+    {
+        $this->demHeuresGpu = $demHeuresGpu;
+
+        return $this;
+    }
+
+    /**
+     * Get demHeuresGpu
+     *
+     * @return integer
+     */
+    public function getDemHeuresGpu()
+    {
+        return $this->demHeuresGpu;
     }
 
     /**

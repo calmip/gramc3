@@ -71,7 +71,13 @@ parameters:
     nodata: false
     
     # Suppression d'une étape dans le workflow des sessions
+    # Cette étape est utile si on a un comité d'attribution constitué,
+    # car elle vient APRES la réunion: on attend la réunion ET l'entrée du commentaire de session
+    # pour pour laisser les experts envoyer les expertises !
     noedition_expertise: true
+
+    # Fonctionnalité permettant d'affecter des heures spéciales pour l'été (en session B uniquement) #}
+    heures_ete: true
     
     # Nombre max de rallonges par projet et par sessoin
     max_rall: 2
@@ -130,6 +136,9 @@ parameters:
     # Seuil à partir duquel on ne peut plus créer de projet au fil de l'eau (ou "agile", ou "dynamique")
     prj_seuil_sess: 100000
 
+    # Nombre d'heures minimal pour un projet
+    prj_heures_mini: 50000
+    
     # Différents mails
     mailadmin: admin.calmip@univ-toulouse.fr
     mailfrom: ne-pas-repondre@calmip.univ-toulouse.fr
@@ -166,4 +175,3 @@ parameters:
 
     # Pour crypter les cookies
     secret: '%env(APP_SECRET)%'
-

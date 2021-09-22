@@ -1638,7 +1638,6 @@ class ProjetController extends AbstractController
         return new Response($html);
     }
 
-
     /**
      * Finds and displays a projet entity.
      *

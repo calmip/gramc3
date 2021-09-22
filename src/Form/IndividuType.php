@@ -93,6 +93,7 @@ class IndividuType extends AbstractType
                     'multiple' => false,
                     'placeholder'   => '-- Indiquez le laboratoire',
                     'required'  => false,
+                    'choices'   => $this->em->getRepository(Laboratoire::class)->findAllSorted(),
                     'attr' => ['style' => 'width:20em'],
                     ]
                 );

@@ -32,4 +32,10 @@ namespace App\Repository;
  */
 class LaboratoireRepository extends \Doctrine\ORM\EntityRepository
 {
+    function findAllSorted()
+    {
+        $dql = 'SELECT l FROM App:Laboratoire l ORDER BY l.numeroLabo,l.acroLabo';
+        $query = $this->getEntityManager()->createQuery($dql);
+        return $query->getResult();
+    }
 }

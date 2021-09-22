@@ -81,21 +81,23 @@ use App\Form\ChoiceList\ExpertChoiceLoader;
  */
 class ExpertiseController extends AbstractController
 {
-    private $sn;
-    private $sj;
-    private $sp;
-    private $ss;
-    private $sd;
-    private $sv;
-    private $pw;
-    private $ff;
-    private $vl;
-    private $se;
-    private $tok;
-    private $ac;
+    private $max_expertises_nb = null;
+    private $sn = null;
+    private $sj = null;
+    private $sp = null;
+    private $ss = null;
+    private $sd = null;
+    private $sv = null;
+    private $pw = null;
+    private $ff = null;
+    private $vl = null;
+    private $se = null;
+    private $tok = null;
+    private $ac = null;
 
 
     public function __construct(
+        $max_expertises_nb,
         ServiceNotifications $sn,
         ServiceJournal $sj,
         ServiceProjets $sp,
@@ -109,6 +111,7 @@ class ExpertiseController extends AbstractController
         TokenStorageInterface $tok,
         AuthorizationCheckerInterface $ac
     ) {
+        $this->max_expertises_nb = $max_expertises_nb;
         $this->sn  = $sn;
         $this->sj  = $sj;
         $this->sp  = $sp;
@@ -591,6 +594,10 @@ class ExpertiseController extends AbstractController
     /**
      * L'expert vient de cliquer sur le bouton "Modifier expertise"
      * Il entre son expertise et éventuellement l'envoie
+     * La logique dépend de:
+     *            - paramètre $max_expertises_nb (1 ou >1)
+     *            - Est-ce un PROJET_FIL ou un PROJET_SESS ?
+     *            - Si $max_expertises_nb > 1: Suis-je PRESIDENT ou PAS ?
      *
      * @Route("/{id}/modifier", name="expertise_modifier")
      * @Method({"GET", "POST"})
@@ -598,6 +605,7 @@ class ExpertiseController extends AbstractController
      */
     public function modifierAction(Request $request, Expertise $expertise)
     {
+        $max_expertises_nb = $this->max_expertises_nb;
         $ss = $this->ss;
         $sv = $this->sv;
         $sp = $this->sp;
@@ -638,59 +646,65 @@ class ExpertiseController extends AbstractController
         // Version est-elle nouvelle ?
         $isnouvelle = $sv->isNouvelle($version);
 
-        // $peut_envoyer -> Si true, on autorise le bouton Envoyer
         $msg_explain = '';
         $projet      = $version -> getProjet();
         $projet_type = $projet  -> getTypeProjet();
         $etat_session= $session -> getEtatSession();
 
-        // Projets avec plusieurs expertises:
+        // Projets avec plusieurs expertises (si $max_expertises_nb > 1):
         //    Si je suis président, on va chercher ces expertises pour affichage
         //    On vérifie leur état (définitive ou pas)
+
         $autres_expertises = [];
         $toutes_definitives= true;
-        if ($ac->isGranted('ROLE_PRESIDENT')) {
-            $expertiseRepository = $em->getRepository(Expertise::class);
-            $autres_expertises   = $expertiseRepository -> findExpertisesForVersion($version, $moi);
-            foreach ($autres_expertises as $e) {
-                if (! $e->getDefinitif()) {
-                    $toutes_definitives = false;
-                    break;
+        if ($max_expertises_nb > 1)
+        {
+            if ($ac->isGranted('ROLE_PRESIDENT')) {
+                $expertiseRepository = $em->getRepository(Expertise::class);
+                $autres_expertises   = $expertiseRepository -> findExpertisesForVersion($version, $moi);
+                foreach ($autres_expertises as $e) {
+                    if (! $e->getDefinitif()) {
+                        $toutes_definitives = false;
+                        break;
+                    }
                 }
             }
         }
 
+        // $peut_envoyer -> Si true, on affiche le bouton Envoyer
         $peut_envoyer = false;
 
-        // Si je ne suis pas président je peux toujours envoyer mon expertise
-        // TODO - SEULEMENT S'IL Y A PLUSIEURS EXPERTS !
-        if ( !$ac->isGranted('ROLE_PRESIDENT') )
+        // Si $max_expertises_nb>1 et si je ne suis pas président
+        // je peux TOUJOURS envoyer mon expertise
+        if ( $max_expertises_nb>1 && !$ac->isGranted('ROLE_PRESIDENT') )
         {
             $peut_envoyer = true;
         }
+
+        // Si $max_expertises_nb vaut 1 OU si $max_expertises_nb > 1 MAIS que je suis président
+        // c'est plus compliqué        
         else
         {
-            // Je suis président !
             // Si le flag toutes_definitives est à false, on ne PEUT PAS ENVOYER l'expertise !
-            // Sinon ça dépend de la session et du type de projet
+            // Sinon ça dépend de l'état de la session et du type de projet
             if ($toutes_definitives==true)
             {
                 switch ($projet_type) {
+                    
                     // Si c'est un projet de type PROJET_SESS, le bouton ENVOYER n'est disponible
                     // QUE si la session est en états ATTENTE ou ACTIF
                     case Projet::PROJET_SESS:
                     if ($session -> getEtatSession() == Etat::EN_ATTENTE || $session -> getEtatSession() == Etat::ACTIF) {
                         $peut_envoyer = true;
-                    } else {
-                        $peut_envoyer = false;
-                    }
+                    };
                     break;
         
-                    // Sinon le bouton ENVOYER est toujours disponible
+                    // TODO - Supprimer les projets tests !
                     case Projet::PROJET_TEST:
                     $peut_envoyer = true;
                     break;
         
+                    // Pour un projet fil ENVOYER est toujours disponible
                     case Projet::PROJET_FIL:
                     $peut_envoyer = true;
                     break;
@@ -700,30 +714,39 @@ class ExpertiseController extends AbstractController
 
         // Création du formulaire
         $editForm = $this->createFormBuilder($expertise)
-        ->add('commentaireInterne', TextAreaType::class, [ 'required' => false ])
-        ->add(
-            'validation',
-            ChoiceType::class,
-            [
-        'multiple' => false,
-        'choices'   =>  [ 'Accepter' => 1, 'Refuser' => 0,],
-        'data' => 1
-        ],
-        );
+        ->add('commentaireInterne', TextAreaType::class, [ 'required' => false ]);
 
-        // Projet au fil de l'eau, le commentaire externe est réservé au président !
+        // S'il y a plusieurs expertises, le commentaire externe ET la validation sont réservés au président
         // On utilise un champ caché, de cette manière le formulaire sera valide
-        // TODO - commentaireExterne est true s'il y a 1 seule expertise !
-        //        Ne dépend PAS de PROJET_FIL ou PROJET_SESS
-        if ($ac->isGranted('ROLE_PRESIDENT')) {
+        if ($max_expertises_nb === 1) {
             $commentaireExterne = true;
-            $editForm->add('commentaireExterne', TextAreaType::class, [ 'required' => false ]);
-        } else {
-            $commentaireExterne = false;
-            $editForm->add('commentaireExterne', HiddenType::class, [ 'data' => 'Commentaire externe réservé au Comité' ]);
+        }
+        else {
+            if ($ac->isGranted('ROLE_PRESIDENT')) {
+                $commentaireExterne = true;
+            } else {
+                $commentaireExterne = false;
+            }
         }
 
-        // Par défaut on attribue les heures demandées !
+        if ($commentaireExterne) {
+            $editForm->add('commentaireExterne', TextAreaType::class, [ 'required' => false ])
+                     ->add(
+                            'validation',
+                            ChoiceType::class,
+                            [
+                                'multiple' => false,
+                                'choices'   =>  [ 'Accepter' => 1, 'Refuser' => 0,],
+                                'data' => 1
+                            ],
+                            );
+
+        } else {
+            $editForm->add('commentaireExterne', HiddenType::class, [ 'data' => 'Commentaire externe réservé au président' ])
+                     ->add('validation', HiddenType::class, [ 'data' => 1 ]);
+        }            
+
+        // Par défaut on attribue les heures demandées
         if ($expertise->getNbHeuresAtt() == 0) {
             $editForm->add('nbHeuresAtt', IntegerType::class, ['required'  =>  false, 'data' => $version->getDemHeures(), ]);
         } else {
@@ -731,7 +754,7 @@ class ExpertiseController extends AbstractController
         }
 
         // En session B mais SEULEMENT POUR LES PROJETS DE SESSION, on propose une attribution spéciale pour heures d'été
-        if ($projet_type == Projet::PROJET_SESS) {
+        if ($this->getParameter('heures_ete') && $session->getTypeSession() && $projet_type == Projet::PROJET_SESS) {
             if ($session->getTypeSession()) {
                 $editForm -> add('nbHeuresAttEte');
             }
@@ -791,12 +814,11 @@ class ExpertiseController extends AbstractController
             $toomuch      = $sv->is_demande_toomuch($attr_a, $dem_b);
         }
 
-        // LA SUITE DEPEND DU TYPE DE PROJET !
-        // Le workflow n'est pas le même suivant le type de projet, donc l'expertise non plus.
+        // MEME TEMPLATE POUR PROJET_SESS ET PROJET_FIL
         $twig = '';
         switch ($projet_type) {
         case Projet::PROJET_SESS:
-            $twig = 'expertise/modifier_projet_sess.html.twig';
+            $twig = 'expertise/modifier_projet_fil.html.twig';
             break;
         case Projet::PROJET_TEST:
             $twig = 'expertise/modifier_projet_test.html.twig';
@@ -804,7 +826,7 @@ class ExpertiseController extends AbstractController
         case Projet::PROJET_FIL:
             $twig = 'expertise/modifier_projet_fil.html.twig';
             break;
-    }
+        }
 
         // Dans le cas de projets tests, $expertises peut être vide même s'il y a un projet test dans la liste
         // (session B et projet test non expertisé en session A)
@@ -832,6 +854,9 @@ class ExpertiseController extends AbstractController
         // Rapport d'activité
         $rapport = $sp -> getRapport($projet, $version->getAnneeSession());
 
+        // Document attaché
+        $document = $sv->getDocument($version);
+
         return $this->render(
             $twig,
             [
@@ -850,7 +875,8 @@ class ExpertiseController extends AbstractController
             'toomuch'           => $toomuch,
             'prev'              => $prev,
             'next'              => $next,
-            'rapport'           => $rapport
+            'rapport'           => $rapport,
+            'document'          => $document
     ]
         );
     }
@@ -866,6 +892,7 @@ class ExpertiseController extends AbstractController
      */
     public function validationAction(Request $request, Expertise $expertise)
     {
+        $max_expertises_nb = $this->max_expertises_nb;
         $sn = $this->sn;
         $sj = $this->sj;
         $ac = $this->ac;
