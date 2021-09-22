@@ -94,22 +94,17 @@
     </tr>
     </tbody></table>
 
-	{% if norattachement==false %}
+    {% if norattachement==false %}
     <table class="projet"><tbody>
-	<tr>
+    <tr>
         <th class="horiz">{{ form_label( form.prjRattachement, "Rattachement du projet" ) }} </th>
         <td>{{ form_widget( form.prjRattachement ) }}</td>
     </tr>
     </tbody></table>
-	{% endif %}
-	
+    {% endif %}
+    
     <div class="message warning">Les heures sont comptées en heures normalisées</div>
     
-    {% if version.session.etatsession != 2 %}
-    <div class="message warning">Vous pouvez demander jusqu'à <strong>{{prj_seuil_sess}}</strong> heures normalisées. 
-    <br />Vous pourrez en demander davantage lors de la prochaine session d'attribution.</div>
-    {% endif %}
-
     <table class="projet"><tbody>
 
     <tr>
