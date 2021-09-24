@@ -776,26 +776,25 @@ class AdminuxController extends AbstractController
             if ($v != null) {
                 $collaborateurs = $v->getCollaborateurVersion();
                 foreach ($collaborateurs as $c) {
-                    //if ($c->getLogin()) {
-                        $m = $c -> getCollaborateur() -> getMail();
-                        if ($mail != null && strtolower($mail) != strtolower($m)) {
-                            continue;
-                        }
+                    $m = $c -> getCollaborateur() -> getMail();
+                    if ($mail != null && strtolower($mail) != strtolower($m)) {
+                        continue;
+                    }
 
-                        if (!isset($users[$m])) {
-                            $users[$m] = [];
-                            $users[$m]['nom']        = $c -> getCollaborateur() -> getNom();
-                            $users[$m]['prenom']     = $c -> getCollaborateur() -> getPrenom();
-                            $users[$m]['idIndividu'] = $c -> getCollaborateur() -> getIdIndividu();
-                            $users[$m]['projets']    = [];
-                        }
-                        $ln = $c->getLoginname();
-                        $ln = $ln . ":" . ($c->getLogin()?1:0);
-                        $ln = $ln . ":" . ($c->getClogin()?1:0);
-                        
-                        $users[$m]['projets'][$p->getIdProjet()] = $ln;
+                    if (!isset($users[$m])) {
+                        $users[$m] = [];
+                        $users[$m]['nom']        = $c -> getCollaborateur() -> getNom();
+                        $users[$m]['prenom']     = $c -> getCollaborateur() -> getPrenom();
+                        $users[$m]['idIndividu'] = $c -> getCollaborateur() -> getIdIndividu();
+                        $users[$m]['projets']    = [];
+                    }
 
-                    //}
+                    $prj_info = [];
+                    $prj_info['loginname'] = $c->getLoginname();
+                    $prj_info['login'] = $c->getLogin();
+                    $prj_info['clogin'] = $c->getClogin();
+                    
+                    $users[$m]['projets'][$p->getIdProjet()] = $prj_info;
                 }
             }
         }
