@@ -581,7 +581,8 @@ class AdminuxController extends AbstractController
         $r['idVersion']       = $v->getIdVersion();
         $r['etatVersion']     = $v->getEtatVersion();
         $r['etatProjet']      = $v->getProjet()->getEtatProjet();
-        $r['mail']            = $v->getResponsable()->getMail();
+        $resp = $v->getResponsable();
+        $r['mail']            = $resp == null ? null : $resp->getMail();
         $r['attrHeures']      = $attr;
         $r['sondVolDonnPerm'] = $v->getSondVolDonnPerm();
         // Pour le déboguage
