@@ -274,7 +274,7 @@ class ServiceVersions
     // modifier login d'un collaborateur d'une version
     // Si le login passe à false, suppression du Loginname,
     // et suppression de la ligne correspondante si elle existe (mot de passe) dans la table user
-    public function modifierLogin(Version $version, Individu $individu, $login, $clogin)
+    public function modifierLogin(Version $version, Individu $individu, $login=false, $clogin=false)
     {
         $em = $this->em;
         if ($clogin==null) $clogin=false;

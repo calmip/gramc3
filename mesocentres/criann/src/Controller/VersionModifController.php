@@ -1363,7 +1363,7 @@ class VersionModifController extends AbstractController
         if ($collaborateur_form->isSubmitted() && $collaborateur_form->isValid()) {
             // Un formulaire par individu
             $individu_forms =  $collaborateur_form->getData()['individus'];
-            $validated = static::validateIndividuForms($individu_forms);
+            $validated = $this->validateIndividuForms($individu_forms);
             if (! $validated) {
                 return $this->render(
                     'version/collaborateurs_invalides.html.twig',
@@ -1406,9 +1406,12 @@ class VersionModifController extends AbstractController
     ///////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Validation du formulaire des collaborateurs - Retourn true/false */
-    private static function validateIndividuForms($individu_forms, $definitif = false)
+     * Validation du formulaire des collaborateurs - Retourn true/false
+     ***/
+    private function validateIndividuForms($individu_forms, $definitif = false)
     {
+        $coll_login = $this->getParameter('coll_login');
+
         $one_login = false;
         foreach ($individu_forms as  $individu_form) {
             if ($individu_form->getLogin()) {
@@ -1426,8 +1429,12 @@ class VersionModifController extends AbstractController
         }
 
         // Personne n'a de login !
-        if ($definitif == true && $one_login == false) {
-            return false;
+        // Seulement si $coll_login est true
+
+        if ($coll_login) {
+            if ($definitif == true && $one_login == false) {
+                return false;
+            }
         }
 
         if ($individu_forms != []) {
@@ -1867,7 +1874,7 @@ class VersionModifController extends AbstractController
             }
         }
 
-        if (! static::validateIndividuForms(self::prepareCollaborateurs($version, $this->sj, $this->vl), true)) {
+        if (! $this->validateIndividuForms(self::prepareCollaborateurs($version, $this->sj, $this->vl), true)) {
             $todo[] = 'collabs';
         }
 
