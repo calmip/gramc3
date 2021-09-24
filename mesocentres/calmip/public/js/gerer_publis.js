@@ -1,41 +1,46 @@
-$(document).ready(function() {
-	// autocomplete sur les champs de class refbib
-	refbib_autocomplete();
+// SUPPRESSION de cette fonctionnalité
+$(document-SUPPR).ready(function() {
+    // autocomplete sur les champs de class refbib
+    refbib_autocomplete();
 
-	function refbib_autocomplete() {
-		$('.refbib').unbind('autocomplete').autocomplete({
-			delay: 500,
-			minLength : 4,
-			source : function(requete, reponse)
+    function refbib_autocomplete() {
+        //alert( $("input[id$='_publication_refbib'][type='text']").data("autocomplete"));
+        $('.refbib').unbind('autocomplete').autocomplete({
+            delay: 500,
+            minLength : 4,
+            source : function(requete, reponse)
             {
-				$.ajax({url: $("input[id$='_publication_refbib'][type='text']").data("autocomplete"),
-						type: "POST",
-						dataType: "json",
+                $.ajax({url: $("input[id$='_publication_refbib'][type='text']").data("autocomplete"),
+                        type: "POST",
+                        dataType: "json",
                         data: { 'autocomplete_form' : { 'refbib' :  requete.term } }, // structure compatible symfony
-						context: $(this),
-					   })
-					.done(function(data){
-						reponse(data); //alert( 'output = ' + data );
-					})
-					.fail(function(xhr, status, errorThrown) { alert (errorThrown); });
-			},
+                        context: $(this),
+                       })
+                    .done(function(data){
+                        //alert( 'output = ' + data );
+                        reponse(data); //
+                    })
+                    .fail(function(xhr, status, errorThrown) { alert (errorThrown); });
+            },
             select :  function(event, ui ) { complete_publication( ui.item.value, $(this) );}
-		});
-	};
+        });
+    };
 });
 
 function complete_publication( valeur, context )
 {
+    alert(valeur);
     $.ajax({
             url: $("input[id$='_publication_refbib'][type='text']").data("autocomplete"),
                    type: "POST",
                    dataType: "json",
-                   data: { 'appbundle_publication' : { 'refbib' :  valeur } }, // structure compatible symfony
+                   data: { 'app_publication' : { 'refbib' :  valeur } }, // structure compatible symfony
                    context: context,
                    converters: { 'text json': true},
                    })
             .done(function(data)
                 {
+                alert(data);
                 if( data != "\nnopubli" )
                     {
                     var input = '<div>' + data + '</div>';

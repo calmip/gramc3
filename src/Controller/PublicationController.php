@@ -74,6 +74,71 @@ class PublicationController extends AbstractController
     }
 
     /**
+     * Autocomplete publication
+     *
+     * @Route("/autocomplete", name="publication_autocomplete")
+     * @Security("is_granted('ROLE_DEMANDEUR')")
+     * @Method({"POST","GET"})
+     */
+    public function autocompleteAction(Request $request)
+    {
+        $sj = $this->sj;
+        $em = $this->getDoctrine()->getManager();
+
+        $sj->debugMessage('autocompleteAction ' .  print_r($_POST, true));
+        $form = $this->ff
+                    ->createNamedBuilder('autocomplete_form', FormType::class, [])
+                    ->add('refbib', TextType::class, [ 'required' => true, 'csrf_protection' => false])
+                    ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted()) { // nous ne pouvons pas ajouter $form->isValid() et nous ne savons pas pourquoi
+            if (array_key_exists('refbib', $form->getData())) {
+                $data   =   $em->getRepository(Publication::class)->liste_refbib_like($form->getData()['refbib']);
+            } else {
+                $data  =   [ ['refbib' => 'Problème avec AJAX dans PublicationController:autocompleteAction' ] ];
+            }
+
+            $output = [];
+            foreach ($data as $item) {
+                if (array_key_exists('refbib', $item)) {
+                    $output[]   =   $item['refbib'];
+                }
+            }
+
+            $response = new Response(json_encode($output));
+            $response->headers->set('Content-Type', 'application/json');
+            return $response;
+        }
+
+        // on complète le reste des informations
+
+        $publication    = new Publication();
+        $form = $this->createForm(PublicationType::class, $publication, ['csrf_protection' => false]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted()  && $form->isValid()) {
+            $publication = $em->getRepository(Publication::class)->findOneBy(['refbib' => $publication->getRefbib() ]);
+
+            if ($publication != null) {
+                return new Response(json_encode($publication));
+                //$form = $this->createForm(PublicationType::class, $publication, ['csrf_protection' => true]);
+                //return $this->render('publication/form.html.twig', [ 'form' => $form->createView() ]);
+            } else {
+                return  new Response('nopubli');
+            }
+        }
+        //return new Response( 'no form submitted' );
+
+        $form = $this->createForm(PublicationType::class, $publication, ['csrf_protection' => true]);
+
+        //return $this->render('publication/form.html.twig', [ 'form' => $form->createView() ]);
+
+        return new Response(json_encode('no form submitted'));
+    }
+
+    /**
      * Lists all publication entities.
      *
      * @Route("/", name="publication_index")
@@ -396,69 +461,5 @@ class PublicationController extends AbstractController
             ->setMethod('DELETE')
             ->getForm()
         ;
-    }
-
-    /**
-     * Autocomplete publication
-     *
-     * @Route("/autocomplete", name="publication_autocomplete")
-     * @Security("is_granted('ROLE_DEMANDEUR')")
-     * @Method({"POST","GET"})
-     */
-    public function autocompleteAction(Request $request)
-    {
-        $sj = $this->sj;
-        $em = $this->getDoctrine()->getManager();
-
-        $sj->debugMessage('autocompleteAction ' .  print_r($_POST, true));
-        $form = $this->ff
-                    ->createNamedBuilder('autocomplete_form', FormType::class, [])
-                    ->add('refbib', TextType::class, [ 'required' => true, 'csrf_protection' => false])
-                    ->getForm();
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted()) { // nous ne pouvons pas ajouter $form->isValid() et nous ne savons pas pourquoi
-            if (array_key_exists('refbib', $form->getData())) {
-                $data   =   $em->getRepository(Publication::class)->liste_refbib_like($form->getData()['refbib']);
-            } else {
-                $data  =   [ ['refbib' => 'Problème avec AJAX dans PublicationController:autocompleteAction' ] ];
-            }
-
-            $output = [];
-            foreach ($data as $item) {
-                if (array_key_exists('refbib', $item)) {
-                    $output[]   =   $item['refbib'];
-                }
-            }
-
-            $response = new Response(json_encode($output));
-            $response->headers->set('Content-Type', 'application/json');
-            return $response;
-        }
-
-        // on complète le reste des informations
-
-        $publication    = new Publication();
-        $form = $this->createForm(PublicationType::class, $publication, ['csrf_protection' => false]);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted()  && $form->isValid()) {
-            $publication = $em->getRepository(Publication::class)->findOneBy(['refbib' => $publication->getRefbib() ]);
-
-            if ($publication != null) {
-                $form = $this->createForm(PublicationType::class, $publication, ['csrf_protection' => true]);
-                return $this->render('publication/form.html.twig', [ 'form' => $form->createView() ]);
-            } else {
-                return  new Response('nopubli');
-            }
-        }
-        //return new Response( 'no form submitted' );
-
-        $form = $this->createForm(PublicationType::class, $publication, ['csrf_protection' => true]);
-
-        return $this->render('publication/form.html.twig', [ 'form' => $form->createView() ]);
-
-        return new Response(json_encode('no form submitted'));
     }
 }
