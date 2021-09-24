@@ -147,8 +147,9 @@ class CollaborateurVersion
 
     public function __construct(Individu $individu = null, Version $version = null)
     {
-        $this->login        =   false;
-        $this->responsable  =   false;
+        $this->login        = false;
+        $this->clogin       = false;
+        $this->responsable  = false;
 
         if ($individu != null) {
             $this->statut           =   $individu->getStatut();
