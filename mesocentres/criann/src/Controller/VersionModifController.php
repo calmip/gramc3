@@ -1523,7 +1523,12 @@ class VersionModifController extends AbstractController
                         $individu . ' ajouté à la version ' .$version);
                     $collaborateurVersion   =   new CollaborateurVersion($individu);
                     $collaborateurVersion->setVersion($version);
-                    $collaborateurVersion->setLogin($individu_form->getLogin());
+                    if ($this->getParameter('coll_login')) {
+                        $collaborateurVersion->setLogin($individu_form->getLogin());
+                    };
+                    if ($this->getParameter('nodata') == false) {
+                        $collaborateurVersion->setClogin($individu_form->getClogin());
+                    };
                     $em->persist($collaborateurVersion);
                 //$em->flush();
                 }
