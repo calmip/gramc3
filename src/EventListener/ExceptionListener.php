@@ -76,7 +76,7 @@ class ExceptionListener
     // Si DEBUG == true, le traitement est interrompu pour renvoyer l'erreur - Intéressant en dev
     //
     
-    const DEBUG = true;
+    const DEBUG = false;
     
     public function __construct($kernel_debug, RouterInterface $router, LoggerInterface $logger, ServiceJournal $sj, SessionInterface $session, EntityManagerInterface $em)
     {
