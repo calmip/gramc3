@@ -15,6 +15,7 @@
                 <th>Numéro de projet</th>
                 <td>{{ expertise.version.projet }}</td>
             </tr>
+            {% if max_expertises_nb == 1 or is_granted('ROLE_PRESIDENT') %}
             <tr>
                 <th>Validation</th>
                 <td>
@@ -27,6 +28,7 @@
                     </strong>
                 </td>
             </tr>
+            {% endif %}
             <tr>
                 <th>Heures attribuées</th>
                 <td>{{ expertise.nbHeuresAtt}}</td>
