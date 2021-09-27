@@ -698,6 +698,7 @@ class GramcSessionController extends AbstractController
         } else {
             $email = 'nom@labo.fr';
         }
+        
 
         $form = Functions::createFormBuilder($ff)
         ->add('mail', TextType::class, [ 'label' => 'Votre mail :', 'data' => $email ])
@@ -734,6 +735,9 @@ class GramcSessionController extends AbstractController
 
     /**
      * @Route("/nouveau_profil",name="nouveau_profil")
+     *
+     * TODO - Utiliser shibbHeadersToSession pour récupérer les headers directement depuis shibboleth,
+     *        et préremplir le formulaire
      */
     public function nouveau_profilAction(Request $request, LoggerInterface $lg)
     {
@@ -915,6 +919,44 @@ class GramcSessionController extends AbstractController
         $output = $request->getPathInfo() ;
         return new Response('<pre>' . $output . '</pre>');
     }
+
+    /*
+     * TODO - Déboguer et mettre cette fonction en service
+     *
+     ***/
+    private function shibbHeadersToSession(Request $request) {
+        $headers = ['mail', 'givenName', 'sn', 'displayName', 'cn', 'affiliation', 'primary-affiliation', 'eppn'];
+        $headers_values = [];
+    
+        $username_headers = ['REMOTE_USER', 'REDIRECT_REMOTE_USER'];
+        $username = getenv('REMOTE_USER') || null;
+        $server = $request->server;
+    
+        if (is_null($username)) {
+            foreach ($username_headers as $u) {
+                if ($server->has($u)) {
+                    $username = $server->get($u);
+                    break;
+                }
+            }
+        };
+
+        foreach($headers as $h) {
+            if ($request->headers->has($h)) {
+                $headers_values[$h] = $request->headers->get($h);
+            }
+        }
+
+        $session = $request->getSession();
+        $session->set('eppn', $username);
+        foreach($headers_values as $h => $v) {
+            $session->set($h, $v);
+        }
+    
+        return $headers_values;
+    }
+
+
 
     /**
      * @Route("/test_workflow")
