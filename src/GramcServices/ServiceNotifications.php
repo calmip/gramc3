@@ -95,9 +95,9 @@ class ServiceNotifications
         $twig         = $this->twig;
         $sujet_tmpl   = $twig->createTemplate($twig_sujet);
         $contenu_tmpl = $twig->createTemplate($twig_contenu);
-
-        $body       =   $twig->render($twig_contenu, $params);
-        $subject    =   $twig->render($twig_sujet, $params);
+        
+        $body       =   $twig->render($contenu_tmpl, $params);
+        $subject    =   $twig->render($sujet_tmpl, $params);
         $this->sendRawMessage($subject, $body, $users);
     }
 

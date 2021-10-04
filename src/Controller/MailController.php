@@ -87,9 +87,9 @@ class MailController extends AbstractController
     public function mailToResponsablesFicheAction(Request $request, Session $session)
     {
         $em = $this->getDoctrine()->getManager();
-        $sn = $this->get('App\GramcServices\ServiceNotifications');
-        $sj = $this->get('App\GramcServices\ServiceJournal');
-        $ff = $this->get('form.factory');
+        $sn = $this->sn;
+        $sj = $this->sj;
+        $ff = $this->ff;
 
         $nb_msg = 0;
         $sujet   = \file_get_contents(__DIR__."/../../../app/Resources/views/notification/mail_to_responsables_fiche-sujet.html.twig");
@@ -191,16 +191,19 @@ class MailController extends AbstractController
     public function mailToResponsablesAction(Request $request, Session $session)
     {
         $em = $this->getDoctrine()->getManager();
-        $sn = $this->get('App\GramcServices\ServiceNotifications');
-        $sj = $this->get('App\GramcServices\ServiceJournal');
-        $ff = $this->get('form.factory');
+        $sn = $this->sn;
+        $sj = $this->sj;
+        $ff = $this->ff;
 
         $nb_msg = 0;
-        $sujet   = \file_get_contents(__DIR__."/../../../app/Resources/views/notification/mail_to_responsables-sujet.html.twig");
-        $body    = \file_get_contents(__DIR__."/../../../app/Resources/views/notification/mail_to_responsables-contenu.html.twig");
+        $nb_projets = 0;
+
+        // On lit directement les templates pour laisser à l'admin la possibilité de les modifier !
+        $sujet   = \file_get_contents(__DIR__."/../../templates/notification/mail_to_responsables-sujet.html.twig");
+        $body    = \file_get_contents(__DIR__."/../../templates/notification/mail_to_responsables-contenu.html.twig");
+
         $sent    =   false;
         $responsables   =   $this->getResponsables($session);
-
         $form   =  Functions::createFormBuilder($ff)
                     ->add('texte', TextareaType::class, [
                         'label' => " ",
@@ -219,7 +222,7 @@ class MailController extends AbstractController
                 $individus[ $item['responsable']->getIdIndividu() ] = $item['responsable'];
                 $selform = $this->getSelForm($item['responsable']);
                 $selform->handleRequest($request);
-                if ($selform->getData()['sel']==false) {
+                if (empty($selform->getData()['sel'])) {
                     //$sj->debugMessage( __METHOD__ . $version->getIdVersion().' selection NON');
                     continue;
                 }
@@ -227,11 +230,12 @@ class MailController extends AbstractController
                     $sujet,
                     $body,
                     [ 'session' => $session,
-                                                  'projets' => $item['projets'],
-                                                  'responsable' => $item['responsable'] ],
+                      'projets' => $item['projets'],
+                      'responsable' => $item['responsable'] ],
                     [$item['responsable']]
                 );
                 $nb_msg++;
+                $nb_projets += count($item['projets']);
                 // DEBUG = Envoi d'un seul message
                  // break;
             }
@@ -240,11 +244,13 @@ class MailController extends AbstractController
         return $this->render(
             'mail/mail_to_responsables.html.twig',
             [
-        'sent'          =>  $sent,
-        'responsables'  =>  $responsables,
-        'session'       =>  $session,
-        'form'          =>  $form->createView(),
-        ]
+                'sent'          => $sent,
+                'nb_msg'        => $nb_msg,
+                'responsables'  => $responsables,
+                'nb_projets'    => $nb_projets,
+                'session'       => $session,
+                'form'          => $form->createView(),
+            ]
         );
     }
 
@@ -257,8 +263,8 @@ class MailController extends AbstractController
      ************************************************************/
     private function getResponsables(Session $session)
     {
-        $sp = $this->get('App\GramcServices\ServiceProjets');
-        $sj = $this->get('App\GramcServices\ServiceJournal');
+        $sp = $this->sp;
+        $sj = $this->sj;
         $em = $this->getDoctrine()->getManager();
 
         $type_session = $session->getLibelleTypeSession();
