@@ -337,7 +337,7 @@ class ProjetSpecController extends AbstractController
     {
         $menu   =   [];
         $menu['commentaire']    =   "Vous ne pouvez pas créer de nouveau projet test actuellement";
-        $menu['name']   =   'nouveau_projet';
+        $menu['name']   =   'avant_nouveau_projet';
         $menu['params'] =   [ 'type' =>  Projet::PROJET_FIL ];
         $menu['lien']   =   'Nouveau projet test';
         $menu['ok'] = false;
