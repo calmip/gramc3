@@ -102,7 +102,7 @@
         </div>
         
         {% if noconso==false %}
-            {% if  isNouvelle %}
+            {% if not isNouvelle %}
                 <div style="float:left">
                 <img id="bconso_1" class="bouton_poussoir conso" src="{{ asset('icones/conso64.png') }}"
                 alt="Consommation {{anneePrec}}" title="consommation {{anneePrec}}"
@@ -127,14 +127,6 @@
         <div class="message erreur">
             <h2>EXPERTISE DÉJÀ ENVOYEE</h2>
                 <p>Votre expertise a déjà été envoyée, vous ne pouvez plus la modifier.</p>
-        </div>
-    {# session en edition expertise #}
-    {% elseif( session.commGlobal!=null and not version.projet.isProjetTest)  %}
-        <div class="message info">
-            <h2>Commentaire de session</h2>
-                <p><em>Ce commentaire, écrit par le président du comité d'attribution, sera envoyé aux responsables des projets avec le résultat de votre expertise</em></p>
-                <hr />
-                <p>{{ session.commGlobal | e | nl2br}}</p>
         </div>
     {% endif %}
     

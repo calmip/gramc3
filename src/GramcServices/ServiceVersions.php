@@ -305,7 +305,7 @@ class ServiceVersions
     }
 
     /*******
-    * Retourne true si la version est nouvelle pour cette session
+    * Retourne true si la version correspond à un Nouveau projet
     *
     *      - session A -> On vérifie que l'année de création est la même que l'année de la session
     *      - session B -> En plus on vérifie qu'il n'y a pas eu une version en session A
