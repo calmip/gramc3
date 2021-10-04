@@ -1117,7 +1117,7 @@ class VersionController extends AbstractController
         }
         $filename = $annee . $version->getProjet()->getIdProjet() . ".pdf";
         $path     = $dir . '/' . $filename;
-
+        
         $rtn = $sf->televerserFichier($request, $dir, $filename);
 
         // Fichier téléversé avec succès -> On écrit dans la base de données
@@ -1233,7 +1233,7 @@ class VersionController extends AbstractController
         ]
         );
         if ($rapportActivite == null) {
-            $rapportActivite    = new RapportActivite($projet, $annee);
+            $rapportActivite = new RapportActivite($projet, $annee);
         }
 
 
