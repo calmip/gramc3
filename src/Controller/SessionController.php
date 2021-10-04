@@ -143,9 +143,8 @@ class SessionController extends AbstractController
             $menu[] = $sm->modifierSession();
             $menu[] = $sm->demarrerSaisie();
             $menu[] = $sm->terminerSaisie();
-            
             if ($this->getParameter('noedition_expertise')==false) {
-                // On saut une étape si ce paramètre est à true
+                // On saute une étape si ce paramètre est à true
                 $menu[] = $sm->envoyerExpertises();
             }
             $menu[] = $sm->activerSession();
@@ -153,9 +152,9 @@ class SessionController extends AbstractController
         return $this->render(
             'session/gerer.html.twig',
             [
-            'menu'     => $menu,
-            'sessions' => $sessions,
-    ]
+                'menu'     => $menu,
+                'sessions' => $sessions,
+            ]
         );
     }
 
@@ -242,7 +241,6 @@ class SessionController extends AbstractController
         if ($workflow->canExecute(Signal::DAT_FIN_DEM, $session_courante)) {
             $workflow->execute(Signal::DAT_FIN_DEM, $session_courante);
             $em->flush();
-            return $this->redirectToRoute('envoyer_expertises');
             return $this->redirectToRoute('gerer_sessions');
         } else {
             return $this->render(
