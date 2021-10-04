@@ -92,8 +92,8 @@ class MailController extends AbstractController
         $ff = $this->ff;
 
         $nb_msg = 0;
-        $sujet   = \file_get_contents(__DIR__."/../../../app/Resources/views/notification/mail_to_responsables_fiche-sujet.html.twig");
-        $body    = \file_get_contents(__DIR__."/../../../app/Resources/views/notification/mail_to_responsables_fiche-contenu.html.twig");
+        $sujet   = \file_get_contents(__DIR__."/../../templates/notification/mail_to_responsables_fiche-sujet.html.twig");
+        $body    = \file_get_contents(__DIR__."/../../templates/notification/mail_to_responsables_fiche-contenu.html.twig");
         $sent    =   false;
         $responsables   =   $this->getResponsablesFiche($session);
 
@@ -152,7 +152,7 @@ class MailController extends AbstractController
      ************************************************************/
     private function getResponsablesFiche(Session $session)
     {
-        $sj = $this->get('App\GramcServices\ServiceJournal');
+        $sj = $this->sj;
         $em = $this->getDoctrine()->getManager();
         $responsables = [];
 
