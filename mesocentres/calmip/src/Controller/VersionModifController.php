@@ -705,14 +705,7 @@ class VersionModifController extends AbstractController
         $em = $this->getDoctrine()->getManager();
 
         $heures_projet_test = $this->getParameter('heures_projet_test');
-
-        //if ($this->has('heures_projet_test')) {
-        //    $heures_projet_test = $this->getParameter('heures_projet_test');
-        //} else {
-        //    $heures_projet_test =  5000;
-        //}
-
-        //$version->setDemHeures($heures_projet_test);
+        
         $form_builder = $this->createFormBuilder($version)
         ->add('prjTitre', TextType::class, [ 'required'       =>  false ])
         ->add(
@@ -784,8 +777,9 @@ class VersionModifController extends AbstractController
         $valid = true;
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // on sauvegarde tout de même mais il semble que c'est déjà fait avant
-            //$version->setDemHeures($heures_projet_test);
+
+            // 
+            $version->setDemHeures($heures_projet_test);
  
             // Changement de type ou plafonnement de la demande en heures !
             $valid = $this->validDemHeures($version);
@@ -794,7 +788,9 @@ class VersionModifController extends AbstractController
             return $this->redirectToRoute('consulter_projet', ['id' => $version->getProjet()->getIdProjet(),'warn_type' => $valid ? 0:1 ]);
         }
 
-        //$version->setDemHeures($heures_projet_test);
+        // Les heures de projets tests sont fixes, donc pas dans le formulaire
+        $version->setDemHeures($heures_projet_test);
+        
         return $this->render(
             'version/modifier_projet_test.html.twig',
             [
