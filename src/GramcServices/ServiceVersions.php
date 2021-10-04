@@ -179,8 +179,8 @@ class ServiceVersions
             mkdir($dir);
             $this->sj->warningMessage("fig_directory " . $dir . " créé !");
         }
+        
         $dir  .= '/'. $version->getProjet()->getIdProjet();
-
         if (! is_dir($dir)) {
             if (file_exists($dir) && is_file($dir)) {
                 unlink($dir);
@@ -189,7 +189,6 @@ class ServiceVersions
         }
 
         $dir  .= '/'. $version->getIdVersion();
-
         if (! is_dir($dir)) {
             if (file_exists($dir) && is_file($dir)) {
                 unlink($dir);
@@ -369,7 +368,6 @@ class ServiceVersions
         }
 
         $file   =  $dir . '/' . $version->getSession()->getIdSession() . '/' . $version->getIdVersion() . '.pdf';
-
         if (file_exists($file) && ! is_dir($file)) {
             return $file;
         } else {
@@ -438,5 +436,27 @@ class ServiceVersions
             $formation[$f['acro']] = $f;
         }
         return $formation;
+    }
+
+    /*************************************************************
+     * Efface les données liées à une version de projet
+     *
+     *  - Les fichiers img_* et *.pdf du répertoire des figures
+     *  - Le fichier de signatures s'il existe
+     *  - N'EFFACE PAS LE RAPPORT D'ACTIVITE !
+     *    cf. ServiceProjets pour cela
+     *************************************************************/
+    public function effacerDonnees(Version $version)
+    {
+        // Les figures et les doc attachés
+        $img_dir = $this->imageDir($version);
+        array_map('unlink', glob("$img_dir/img*"));
+        array_map('unlink', glob("$img_dir/*.pdf"));
+
+        // Les signatures
+        $fiche = $this->getSigne($version);
+        if ( $fiche != null) {
+            unlink($fiche);
+        }
     }
 }

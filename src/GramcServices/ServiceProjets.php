@@ -1163,6 +1163,7 @@ class ServiceProjets
     }
 
     // supprimer les répertoires
+    // TODO - Revoir cette fonction, appelée uniquement pas oldAction (effacement des projets pour la RGPD)
     public function erase_directory($dir, $projet = 'none')
     {
         if (file_exists($dir) && is_dir($dir)) {
@@ -1186,6 +1187,7 @@ class ServiceProjets
             $this->sj->warningMessage(__FILE__ . ":" . __LINE__ . " répértoire " . $dir . " n'existe pas ou ce n'est pas un répértoire ");
         }
     }
+
 
     //////////////////////////////////////////////////////////////////////////////////////////
     //
