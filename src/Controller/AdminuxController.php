@@ -436,10 +436,10 @@ class AdminuxController extends AbstractController
     /**
      * get versions non terminées
      *
-     * @Route("/version/get", name="get_version", methods={"POST"})
+     * @Route("/versions/get", name="get_versions", methods={"POST"})
      * @Security("is_granted('ROLE_ADMIN')")
      * Exemples de données POST (fmt json):
-     * 			   ''
+     *                ''
      *             ou
      *             '{ "projet" : null,     "session" : null }' -> Toutes les VERSIONS ACTIVES quelque soit la session
      *
@@ -458,18 +458,19 @@ class AdminuxController extends AbstractController
      * Les versions renvoyées peuvent être dans n'importe quel état (sauf ANNULE) si "session" est spécifiée
      *
      * Données renvoyées (fmt json):
-     * 			    idProjet	P01234
-     * 				idSession	20A
-     * 				idVersion	20AP01234
-     * 				mail		mail du responsable de la version
-     * 				attrHeures	Heures cpu attribuées
-     * 				quota		Quota sur la machine
-     * 				gpfs		sondVolDonnPerm stockage permanent demandé (pas d'attribution pour le stockage)
+     *                 idProjet    P01234
+     *                 idSession    20A
+     *                 idVersion    20AP01234
+     *                 mail        mail du responsable de la version
+     *                 attrHeures    Heures cpu attribuées
+     *                 quota        Quota sur la machine
+     *                 gpfs        sondVolDonnPerm stockage permanent demandé (pas d'attribution pour le stockage)
      *
      */
-    // curl --netrc -H "Content-Type: application/json" -X POST -d '{ "projet": "P1234" }' https://.../adminux/version/get
+    // curl --netrc -H "Content-Type: application/json" -X POST -d '{ "projet": "P1234" }' https://.../adminux/versions/get
+    // TODO --------- VIRER CETTE FONCTION, REMPLACEE PAR projetsGetAction !!!
 
-    public function versionGetAction(Request $request)
+    public function versionsGetAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
         $sp = $this->sp;
@@ -594,10 +595,10 @@ class AdminuxController extends AbstractController
     /**
      * get projets non terminés
      *
-     * @Route("/projet/get", name="get_projet", methods={"POST"})
+     * @Route("/projets/get", name="get_projets", methods={"POST"})
      * @Security("is_granted('ROLE_ADMIN')")
      * Exemples de données POST (fmt json):
-     * 			   ''
+     *             ''
      *             ou
      *             '{ "projet" : null     }' -> Tous les projets non terminés
      *
@@ -612,18 +613,18 @@ class AdminuxController extends AbstractController
      *     - versionDerniere -> On renvoie les mêmes données que getVersion
      *
      * Données renvoyées pour versionActive et versionDerniere:
-     * 		 idProjet	P01234
-     * 		 idSession	20A
-     * 		 idVersion	20AP01234
-     * 		 mail		mail du responsable de la version
-     * 		 attrHeures	Heures cpu attribuées
-     * 		 quota		Quota sur la machine
-     * 		 gpfs		sondVolDonnPerm stockage permanent demandé (pas d'attribution pour le stockage)
+     *          idProjet    P01234
+     *          idSession   20A
+     *          idVersion   20AP01234
+     *          mail        mail du responsable de la version
+     *          attrHeures  Heures cpu attribuées
+     *          quota       Quota sur la machine
+     *          gpfs        sondVolDonnPerm stockage permanent demandé (pas d'attribution pour le stockage)
      *
      */
-    // curl --netrc -H "Content-Type: application/json" -X POST -d '{ "projet": "P1234" }' https://.../adminux/projet/get
+    // curl --netrc -H "Content-Type: application/json" -X POST -d '{ "projets": "P1234" }' https://.../adminux/projets/get
 
-    public function projetGetAction(Request $request)
+    public function projetsGetAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
         $sp = $this->sp;
@@ -666,13 +667,13 @@ class AdminuxController extends AbstractController
     }
 
     /**
-     * get users
+     * get utilisateurs
      *
-     * @Route("/users/get", name="get_users", methods={"POST"})
+     * @Route("/utilisateurs/get", name="get_utilisateurs", methods={"POST"})
      * @Security("is_granted('ROLE_ADMIN')")
      *
      * Exemples de données POST (fmt json):
-     * 			   ''
+     *             ''
      *             ou
      *             '{ "projet" : null,     "mail" : null }' -> Tous les collaborateurs avec login
      *
@@ -696,10 +697,10 @@ class AdminuxController extends AbstractController
      *             "toto@exemple.fr" : {
      *                  "idIndividu": 75,
      *                  "nom" : "Toto",
-     * 				    "prenom" : "Ernest",
+     *                  "prenom" : "Ernest",
      *                  "projets" : {
-     * 			           "P01234" : "toto",
-     *                     "P56789" : "etoto"
+     *                  "P01234" : "toto",
+     *                  "P56789" : "etoto"
      *                  }
      *              },
      *             "titi@exemple.fr": ...
@@ -707,9 +708,9 @@ class AdminuxController extends AbstractController
      *
      */
 
-    // curl --netrc -H "Content-Type: application/json" -X POST  -d '{ "projet" : "P1234", "mail" : null, "session" : "19A" }' https://.../adminux/users/get
+    // curl --netrc -H "Content-Type: application/json" -X POST  -d '{ "projet" : "P1234", "mail" : null, "session" : "19A" }' https://.../adminux/utilisateurs/get
 
-    public function usersGetAction(Request $request)
+    public function utilisateursGetAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
         $raw_content = $request->getContent();
@@ -728,7 +729,7 @@ class AdminuxController extends AbstractController
             $id_session = (isset($content['session'])) ? $content['session'] : null;
         }
 
-        //		$sessions  = $em->getRepository(Session::class)->get_sessions_non_terminees();
+        // $sessions  = $em->getRepository(Session::class)->get_sessions_non_terminees();
         $users = [];
         $projets   = [];
 
@@ -804,6 +805,164 @@ class AdminuxController extends AbstractController
         //return new Response(print_r($users,true));
         return new Response(json_encode($users));
     }
+
+    /**
+	 * get users
+	 *
+	 * @Route("/users/get", name="get_users", methods={"POST"})
+	 * @Security("is_granted('ROLE_ADMIN')")
+	 *
+	 * Exemples de données POST (fmt json):
+	 * 			   ''
+	 *             ou
+	 *             '{ "projet" : null,     "mail" : null }' -> Tous les collaborateurs avec login
+	 *
+	 *             '{ "projet" : "P01234" }'
+	 *             ou
+	 *             '{ "projet" : "P01234", "mail" : null }' -> Tous les collaborateurs avec login du projet P01234 (version ACTIVE)
+	 *
+	 *             '{ "mail" : "toto@exemple.fr"}
+	 *             ou
+	 *             '{ "projet" : null,     "mail" : "toto@exemple.fr"}' -> Tous les projets dans lesquels ce collaborateur a un login (version ACTIVE de chaque projet)
+	 *
+	 *             '{ "projet" : "P01234", "mail" : "toto@exemple.fr" }' -> rien ou toto si toto avait un login sur ce projet
+	 *
+	 * Par défaut on ne considère QUE les version actives de CHAQUE PROJET
+	 * MAIS si on AJOUTE un PARAMETRE "session" : "20A" on travaille sur la session passée en paramètres (ici 20A)
+	 *
+	 * On renvoie pour chaque projet, ou pour un projet donné, la liste des collaborateurs qui doivent avoir un login
+	 *
+	 * Données renvoyées (fmt json):
+	 * 
+	 *             "toto@exemple.fr" : {
+	 *                  "idIndividu": 75,
+	 *                  "nom" : "Toto",
+	 * 				    "prenom" : "Ernest",
+	 *                  "projets" : {
+	 * 			           "P01234" : "toto",
+	 *                     "P56789" : "etoto"
+	 *                  }
+	 *              },
+	 *             "titi@exemple.fr": ...
+	 *
+	 *
+	 */
+
+	// curl --netrc -H "Content-Type: application/json" -X POST  -d '{ "projet" : "P0044", "mail" : null, "session" : "19A" }' https://attribution-ressources-dev.calmip.univ-toulouse.fr/gramc2-manu/adminux/users/get
+
+    // TODO --------- VIRER CETTE FONCTION, REMPLACEE PAR utilisateursGetAction !!!
+	 public function usersGetAction(Request $request)
+	 {
+		$em = $this->getDoctrine()->getManager();
+		$raw_content = $request->getContent();
+		if ($raw_content == '' || $raw_content == '{}')
+		{
+			$content = null;
+		}
+		else
+		{
+			$content  = json_decode($request->getContent(),true);
+		}
+		if ($content == null)
+		{
+			$id_projet = null;
+			$id_session= null;
+			$mail      = null;
+		}
+		else
+		{
+			$id_projet  = (isset($content['projet'])) ? $content['projet'] : null;
+			$mail       = (isset($content['mail']))? $content['mail']: null;
+			$id_session = (isset($content['session']))? $content['session']: null;
+		}
+
+//		$sessions  = $em->getRepository(Session::class)->get_sessions_non_terminees();
+		$users = [];
+		$projets   = [];
+
+		// Tous les collaborateurs de tous les projets non terminés
+		if ($id_projet == null && $mail == null)
+		{
+			$projets = $em->getRepository(Projet::class)->findNonTermines();
+		}
+
+		// Tous les projets dans lesquels une personne donnée a un login
+		elseif ($id_projet == null)
+		{
+			$projets = $em->getRepository(Projet::class)->findNonTermines();
+		}
+
+		// Tous les collaborateurs d'un projet
+		elseif ($mail == null)
+		{
+			$p = $em->getRepository(Projet::class)->find($id_projet);
+			if ($p != null)
+			{
+				$projets[] = $p;
+			}
+		}
+
+		// Un collaborateur particulier d'un projet particulier
+		else
+		{
+			$p = $em->getRepository(Projet::class)->find($id_projet);
+			if ($p->getEtatProjet() != Etat::TERMINE)
+			{
+				$projets[] = $p;
+			}
+		}
+
+		//
+		// Construire le tableau $users:
+		//      toto@exemple.com => [ 'idIndividu' => 34, 'nom' => 'Toto', 'prenom' => 'Ernest', 'projets' => [ 'p0123' => 'toto', 'p456' => 'toto1' ] ]
+		//
+		foreach ($projets as $p)
+		{
+			// Si session non spécifiée, on prend la version active de chaque projet !
+			if ($id_session==null)
+			{
+				$v = $p->getVersionActive();
+			}
+
+			// Sinon, on prend la version de cette session... si elle existe
+			else
+			{
+				$id_version = $id_session . $p->getIdProjet();
+				$v          = $em->getRepository(Version::class)->find($id_version);
+			}
+
+			if ($v != null)
+			{
+				$collaborateurs = $v->getCollaborateurVersion();
+				foreach ($collaborateurs as $c)
+				{
+					if ($c->getLogin())
+					{
+						$m = $c -> getCollaborateur() -> getMail();
+						if ($mail != null && strtolower($mail) != strtolower($m))
+						{
+							continue;
+						}
+
+						if (!isset($users[$m]))
+						{
+							$users[$m] = [];
+							$users[$m]['nom']        = $c -> getCollaborateur() -> getNom();
+							$users[$m]['prenom']     = $c -> getCollaborateur() -> getPrenom();
+							$users[$m]['idIndividu'] = $c -> getCollaborateur() -> getIdIndividu();
+							$users[$m]['projets']    = [];
+						}
+						$users[$m]['projets'][$p->getIdProjet()] = $c->getLoginname();
+					}
+				}
+			}
+		}
+
+		// print_r est plus lisible pour le déboguage
+		//return new Response(print_r($users,true));
+		return new Response(json_encode($users));
+	 }
+
 
     /**
      * get loginname
