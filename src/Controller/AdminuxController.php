@@ -765,8 +765,12 @@ class AdminuxController extends AbstractController
         //
         foreach ($projets as $p) {
             // Si session non spécifiée, on prend la version active de chaque projet !
+            // Si pas de version activ, on prend la version dernière: c'est un projet en standby
             if ($id_session==null) {
                 $v = $p->getVersionActive();
+                if ($v==null) {
+                    $v = $p->getVersionDerniere();
+                }
             }
 
             // Sinon, on prend la version de cette session... si elle existe
