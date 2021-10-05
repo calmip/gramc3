@@ -120,7 +120,8 @@ class SessionController extends AbstractController
     {
         $sm = $this->sm;
         $sj = $this->sj;
-
+        $ss = $this->ss;
+        
         if ($sm->gerer_sessions()['ok'] == false) {
             $sj->throwException(__METHOD__ . ':' . __LINE__ . " Ecran interdit " .
         " parce que : " . $sm->gerer_sessions()['raison']);
@@ -138,6 +139,8 @@ class SessionController extends AbstractController
         } else {
             // Refait le calcul de la session courante sans se fier au cache
             $this->sss->remove('SessionCourante');
+            $etat_session = $ss->getSessionCourante()->getEtatSession();
+            $id_session = $ss->getSessionCourante()->getIdSession();
 
             $menu[] = $sm->ajouterSession();
             $menu[] = $sm->modifierSession();
@@ -154,6 +157,8 @@ class SessionController extends AbstractController
             [
                 'menu'     => $menu,
                 'sessions' => $sessions,
+                'etat_session' => $etat_session,
+                'id_session' => $id_session
             ]
         );
     }
