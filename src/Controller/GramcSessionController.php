@@ -633,7 +633,6 @@ class GramcSessionController extends AbstractController
                 $sj->debugMessage('REDIRECT_REMOTE_USER='.$server->get('REDIRECT_REMOTE_USER'));
                 $username =  $server->get('REDIRECT_REMOTE_USER');
             }
-
             $repository1 = $em->getRepository(Sso::class);
             $repository2 = $em->getRepository(Individu::class);
 
@@ -643,6 +642,9 @@ class GramcSessionController extends AbstractController
             } else { // nouvel utilisateur
                 $session = $request->getSession();
                 $session->set('eppn', $username);
+
+                // Récupérer les headers dans la session
+                $this->shibbHeadersToSession($request);
 
                 //return new Response('nouvel utilisateur');
                 return $this->redirectToRoute('nouveau_compte');
@@ -691,10 +693,16 @@ class GramcSessionController extends AbstractController
             // return new Response(' no eppn ' );
             return $this->redirectToRoute('accueil');
         }
-
+//dd(apache_request_headers());
         // vérifier si email est disponible dans $session
-        if ($request->getSession()->has('email')) {
-            $email = $request->getSession()->get('email');
+        if ($request->getSession()->has('mail')) {
+            $email = $request->getSession()->get('mail');
+
+        // vérifier si email est disponible dans les headers
+        } elseif ($request->headers->has('mail')) {
+            $email = $request->headers->get('mail');
+
+        // Adresse par défaut    
         } else {
             $email = 'nom@labo.fr';
         }
@@ -746,23 +754,28 @@ class GramcSessionController extends AbstractController
         $em = $this->getDoctrine()->getManager();
 
         // vérifier si eppn est disponible dans $session
-        if (! $request->getSession()->has('eppn')) { // une tentative de piratage
+        if (! $request->getSession()->has('eppn')) {
             $sj->warningMessage(__FILE__ . ":" . __LINE__ .  "Pas d'eppn pour le nouveau profil");
             return $this->redirectToRoute('accueil');
         }
 
         // vérifier si email est disponible dans $session
-        if (! $request->getSession()->has('email')) { // une tentative de piratage
+        if (! $request->getSession()->has('email')) {
             $sj->warningMessage(__FILE__ . ":" . __LINE__ . " Pas d'email pour le nouveau profil");
             //$lg->warning("No email at nouveau_profil", ['request' => $event->getRequest()]);
             return $this->redirectToRoute('accueil');
         }
 
         $individu = new Individu();
-        //echo '<pre>';
-        //var_dump(  $request->getSession() );
-        //echo '</pre>';
-        $individu->setMail($request->getSession()->get('email'));
+        $session = $request->getSession();
+
+        // Pour tester, car les comptes cru sur la fédération de test ne renvoient pas sn
+        // $session->set('sn','TOTO');
+        //dd($session);
+        $individu->setMail($session->get('email'));
+        if ($session->has('sn')) {
+            $individu->setNom($session->get('sn'));
+        }
 
         $form = $this->createForm(IndividuType::class, $individu, [ 'permanent' => true ]);
         $form->handleRequest($request);
@@ -921,34 +934,45 @@ class GramcSessionController extends AbstractController
     }
 
     /*
-     * TODO - Déboguer et mettre cette fonction en service
+     * Déposer dans la session les headers fournis par Shibboleth
+     * NOTE - On ne s'occupe pas de eppn, cela est déjà fait par auth_connexionAction
+     *        Côté Fédération, on doit envoyer les attributs correspondants
+     *        Conf Shibboleth: il faut modifier le fichier attribute-map.xml (ie décommenter quelques lignes
+     *        vers Other eduPerson attributes)
      *
      ***/
     private function shibbHeadersToSession(Request $request) {
-        $headers = ['mail', 'givenName', 'sn', 'displayName', 'cn', 'affiliation', 'primary-affiliation', 'eppn'];
+        $headers = ['mail', 'givenName', 'sn', 'displayName', 'cn', 'affiliation', 'primary-affiliation'];
         $headers_values = [];
-    
-        $username_headers = ['REMOTE_USER', 'REDIRECT_REMOTE_USER'];
-        $username = getenv('REMOTE_USER') || null;
-        $server = $request->server;
-    
-        if (is_null($username)) {
-            foreach ($username_headers as $u) {
-                if ($server->has($u)) {
-                    $username = $server->get($u);
-                    break;
-                }
-            }
-        };
 
+        // On recherche dans les headers
         foreach($headers as $h) {
             if ($request->headers->has($h)) {
                 $headers_values[$h] = $request->headers->get($h);
             }
         }
 
+        // On recherche dans les variables du serveur
+        $server = $request->server;
+        foreach($headers as $h) {
+            if (!isset($headers_values[$h])) {
+
+                // mail -> REDIRECT_mail
+                $k1 = 'REDIRECT_'.$h;
+                $k2 = 'HTTP_'.strtoupper($h);
+                if ($server->has($k1)) {
+                    $headers_values[$h] = $server->get($k1);
+                }
+
+                // mail -> HTTP_MAIL
+                elseif ($server->has($k2)) {
+                    $headers_values[$h] = $server->get($k2);
+                }
+                
+            }
+        }
+        
         $session = $request->getSession();
-        $session->set('eppn', $username);
         foreach($headers_values as $h => $v) {
             $session->set($h, $v);
         }
