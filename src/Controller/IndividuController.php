@@ -146,9 +146,10 @@ class IndividuController extends AbstractController
 
         $erreurs  =   [];
 
-        // utilisateur peu actif peut être effacé
+        // utilisateur peu actif et qui ne peut pas se connecter peut être effacé
         if ($CollaborateurVersion == null && $Expertise == null
-              && $Rallonge == null && $Session == null) {
+              && $Rallonge == null && $Session == null && count($Sso)==0) {
+
             foreach ($individu->getThematique() as $item) {
                 $em->persist($item);
                 $item->getExpert()->removeElement($individu);
@@ -170,19 +171,21 @@ class IndividuController extends AbstractController
             return $this->redirectToRoute('individu_gerer');
         }
 
-        // utilisateur actif doit être remplacé
-
+        // utilisateur actif ou qui peut se connecter doit être remplacé
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $mail  =   $form->getData()['mail'];
             $new_individu   =   $em->getRepository(Individu::class)->findOneBy(['mail'=>$mail]);
 
             if ($new_individu != null) {
+
+                // Supprimer les thématiques dont je suis expert, il faudra les recréer
                 foreach ($individu->getThematique() as $item) {
                     $em->persist($item);
                     $item->getExpert()->removeElement($individu);
                 }
 
+                // Les projets dont je suis collaborateur - Attention aux éventuels doublons
                 foreach ($CollaborateurVersion  as $item) {
                     if (! $item->getVersion()->isCollaborateur($new_individu)) {
                         $item->setCollaborateur($new_individu);
@@ -191,28 +194,43 @@ class IndividuController extends AbstractController
                     }
                 }
 
+                // On fait reprendre les Sso par le nouvel individu
+                $sso_de_new = $new_individu->getSso();
+                $array_eppn=[];
+                foreach ($new_individu->getSso() as $item) {
+                    $array_eppn[] = $item->getEppn();
+                }
+                foreach ($Sso  as $item) {
+                    if (!in_array($item->getEppn(),$array_eppn)) {
+                        $item->setIndividu($new_individu);
+                        $em->persist($item);
+                    } else {
+                        $em->remove($item);
+                    }
+                }
+
+                // Mes expertises
                 foreach ($Expertise  as $item) {
                     $item->setExpert($new_individu);
                 }
 
+                // Mes rallonges
                 foreach ($Rallonge  as $item) {
                     $item->setExpert($new_individu);
                 }
 
+                // Les entrées de journal (sinon on ne pourra pas supprimer l'ancien individu)
                 foreach ($Journal  as $item) {
                     $item->setIndividu($new_individu);
                 }
 
+                // ...
                 foreach ($Session  as $item) {
                     $item->setPresident($new_individu);
                 }
 
+                // On ne sait jamais
                 foreach ($CompteActivation  as $item) {
-                    $em->remove($item);
-                }
-
-
-                foreach ($Sso  as $item) {
                     $em->remove($item);
                 }
 
