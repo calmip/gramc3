@@ -687,7 +687,7 @@ class AdminuxController extends AbstractController
      *
      *             '{ "projet" : "P01234", "mail" : "toto@exemple.fr" }' -> rien ou toto si toto avait un login sur ce projet
      *
-     * Par défaut on ne considère QUE les version actives de CHAQUE PROJET
+     * Par défaut on ne considère QUE les versions actives et dernières de CHAQUE PROJET
      * MAIS si on AJOUTE un PARAMETRE "session" : "20A" on travaille sur la session passée en paramètres (ici 20A)
      *
      * On renvoie pour chaque projet, ou pour un projet donné, la liste des collaborateurs qui doivent avoir un login
@@ -728,10 +728,11 @@ class AdminuxController extends AbstractController
             $mail       = (isset($content['mail'])) ? $content['mail'] : null;
             $id_session = (isset($content['session'])) ? $content['session'] : null;
         }
+        //return new Response(json_encode([$id_projet,$id_session]));
 
         // $sessions  = $em->getRepository(Session::class)->get_sessions_non_terminees();
         $users = [];
-        $projets   = [];
+        $projets = [];
 
         // Tous les collaborateurs de tous les projets non terminés
         if ($id_projet == null && $mail == null) {
@@ -763,23 +764,47 @@ class AdminuxController extends AbstractController
         // Construire le tableau $users:
         //      toto@exemple.com => [ 'idIndividu' => 34, 'nom' => 'Toto', 'prenom' => 'Ernest', 'projets' => [ 'p0123' => 'toto', 'p456' => 'toto1' ] ]
         //
+        //$pdbg=[];
+        //foreach ($projets as $p) {
+            //$pdbg[] = $p->getIdProjet();
+        //};
+        //return new Response(json_encode($pdbg));
+
         foreach ($projets as $p) {
-            // Si session non spécifiée, on prend la version active de chaque projet !
-            // Si pas de version activ, on prend la version dernière: c'est un projet en standby
+            $id_projet = $p->getIdProjet();
+            
+            // Si session non spécifiée, on prend la version active ET dernière de chaque projet !
+            $vs = [];
+            $vs_labels = [];
             if ($id_session==null) {
-                $v = $p->getVersionActive();
-                if ($v==null) {
-                    $v = $p->getVersionDerniere();
+                if ($p->getVersionDerniere() == null) {
+                    $this->sj->warningMessage("ATTENTION - Projet $p SANS DERNIERE VERSION !");
+                    continue;   // oups, projet bizarre
+                } else {
+                    $vs[] = $p->getVersionDerniere();
+                    $vs_labels[] = 'derniere';
+                }
+                if ($p->getVersionActive() != null) {
+                    $vs[] = $p->getVersionActive();
+                    $vs_labels[] = 'active';
                 }
             }
 
             // Sinon, on prend la version de cette session... si elle existe
             else {
-                $id_version = $id_session . $p->getIdProjet();
-                $v          = $em->getRepository(Version::class)->find($id_version);
+                $id_version = $id_session . $id_projet;
+                $req        = $em->getRepository(Version::class)->findBy(['idVersion' =>$id_version]);
+                //return new Response(json_encode($req[0]));
+                if ($req != null) {
+                    $vs[] = $req[0];
+                    $vs_labels[] = $id_version;
+                }
             }
 
-            if ($v != null) {
+            // $vs contient 1 ou 2 versions
+            $i = 0; // i=0 -> version dernère, $i=1 -> version active
+            
+            foreach ($vs as $v) {
                 $collaborateurs = $v->getCollaborateurVersion();
                 foreach ($collaborateurs as $c) {
                     $m = $c -> getCollaborateur() -> getMail();
@@ -795,15 +820,29 @@ class AdminuxController extends AbstractController
                         $users[$m]['projets']    = [];
                     }
 
-                    $prj_info = [];
-                    $prj_info['loginname'] = $c->getLoginname();
-                    $prj_info['login'] = $c->getLogin();
-                    $prj_info['clogin'] = $c->getClogin();
+                    if ( isset($users[$m]['projets'][$id_projet])) {
+                        $prj_info = $users[$m]['projets'][$id_projet];
+                    } else {
+                        $prj_info = [];
+                    }
                     
-                    $users[$m]['projets'][$p->getIdProjet()] = $prj_info;
+                    if ($c->getLoginname() != null && !isset($prj_info['loginname'])) {
+                        $prj_info['loginname'] = $c->getLoginname();
+                    }
+
+                    $v_info = [];
+                    $v_info['version'] = $v->getIdVersion();
+                    $v_info['login'] = $c->getLogin();
+                    $v_info['clogin'] = $c->getClogin();
+
+                    $prj_info[$vs_labels[$i]] = $v_info;
+
+                    $users[$m]['projets'][$id_projet] = $prj_info;
                 }
+                $i += 1;
             }
         }
+
 
         // print_r est plus lisible pour le déboguage
         //return new Response(print_r($users,true));
