@@ -348,7 +348,7 @@ class GramcSessionController extends AbstractController
             return $this->redirectToRoute('accueil');
         }
         $old_individu = clone $individu;
-        $form = $this->createForm(IndividuType::class, $individu);
+        $form = $this->createForm(IndividuType::class, $individu, ['mail' => false ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
