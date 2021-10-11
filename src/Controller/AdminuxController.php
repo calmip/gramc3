@@ -826,10 +826,10 @@ class AdminuxController extends AbstractController
                         $prj_info = [];
                     }
                     
-                    if ($c->getLoginname() != null && !isset($prj_info['loginname'])) {
+                    if (!isset($prj_info['loginname'])) {
                         $prj_info['loginname'] = $c->getLoginname();
                     }
-
+                    
                     $v_info = [];
                     $v_info['version'] = $v->getIdVersion();
                     $v_info['login'] = $c->getLogin();
