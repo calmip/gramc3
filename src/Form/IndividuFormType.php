@@ -61,9 +61,9 @@ class IndividuFormType extends AbstractType
                 'login',
                 CheckboxType::class,
                 [
-                    'label'     => 'login',
+                    'label'     => 'login calcul',
                     'required'  => false,
-                    'attr' => [ 'title' => 'Demander l\'ouverture d\'un compte' ]
+                    'attr' => [ 'title' => 'Demander l\'ouverture d\'un compte sur le supercalculateur' ]
                 ]
             );
         };
@@ -73,7 +73,7 @@ class IndividuFormType extends AbstractType
                 'clogin',
                 CheckboxType::class,
                 [
-                    'label'     => 'données',
+                    'label'     => 'accès callisto',
                     'required'  => false,
                     'attr' => [ 'title' => 'Demander un accès à la plateforme Callisto' ]
                 ]

@@ -114,7 +114,6 @@ function opacity(context)
     $("input[id$='_delete'][type='checkbox']", context.parent() .parent() ).unbind('change')
     .change(function()
     {
-        alert('here');
         if( $(this).prop('checked') )
         {
             //$(this).parent().parent().find(":not([id$='_delete']):not([id$='_id'])").prop('disabled', true);
