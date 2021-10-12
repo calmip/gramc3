@@ -186,20 +186,20 @@ class AdminuxController extends AbstractController
 
         $content  = json_decode($request->getContent(), true);
         if ($content == null) {
-            return new Response(json_encode('KO - Pas de données'));
+            return new Response(json_encode(['KO' => 'Pas de données']));
         }
         if (empty($content['loginname'])) {
-            return new Response(json_encode('KO - Pas de nom de login'));
+            return new Response(json_encode(['KO' => 'Pas de nom de login']));
         } else {
             $loginname = $content['loginname'];
         }
         if (empty($content['projet'])) {
-            return new Response(json_encode('KO - Pas de projet'));
+            return new Response(json_encode(['KO' => 'Pas de projet']));
         } else {
             $idProjet = $content['projet'];
         }
         if (empty($content['idIndividu'])) {
-            return new Response(json_encode('KO - Pas de idIndividu'));
+            return new Response(json_encode(['KO' => 'Pas de idIndividu']));
         } else {
             $idIndividu = $content['idIndividu'];
         }
@@ -237,7 +237,7 @@ class AdminuxController extends AbstractController
                             $old_loginname = $collaborateurVersion->getLoginname();
                             $user = $em->getRepository(User::class)->findBy([ 'loginname' => $old_loginname ]);
                             if ($user != null) {
-                                return new Response(json_encode('KO - Commencez par appeler clearpassword'));
+                                return new Response(json_encode(['KO' => 'Commencez par appeler clearpassword']));
                             }
                         }
                         $collaborateurVersion->setLoginname($loginname);
@@ -250,7 +250,7 @@ class AdminuxController extends AbstractController
             }
         }
         if ($i > 0 ) {
-            return new Response(json_encode("OK - $i versions modifiees"));
+            return new Response(json_encode(['OK' => "$i versions modifiees"]));
         } else {
             return new Response(json_encode(['KO' => 'Mauvais projet ou mauvais idIndividu !' ]));
         }
@@ -280,22 +280,22 @@ class AdminuxController extends AbstractController
 
         $content  = json_decode($request->getContent(), true);
         if ($content == null) {
-            return new Response(json_encode('KO - Pas de données'));
+            return new Response(json_encode(['KO' => 'Pas de données']));
         }
         if (empty($content['loginname'])) {
-            return new Response(json_encode('KO - Pas de nom de login'));
+            return new Response(json_encode(['KO' => 'Pas de nom de login']));
         } else {
             $loginname = $content['loginname'];
         }
 
         if (empty($content['password'])) {
-            return new Response(json_encode('KO - Pas de mot de passe'));
+            return new Response(json_encode(['KO' => 'Pas de mot de passe']));
         } else {
             $password = $content['password'];
         }
 
         if (empty($content['cpassword'])) {
-            return new Response(json_encode('KO - Pas de version cryptée du mot de passe'));
+            return new Response(json_encode(['KO' => 'Pas de version cryptée du mot de passe']));
         } else {
             $cpassword = $content['cpassword'];
         }
@@ -331,7 +331,7 @@ class AdminuxController extends AbstractController
             $em->persist($user);
             $em->flush($user);
             //Functions::sauvegarder( null, $em, $lg );
-            return new Response(json_encode('OK'));
+            return new Response(json_encode(['OK' => '']));
         }
     }
 
@@ -359,10 +359,10 @@ class AdminuxController extends AbstractController
 
         $content  = json_decode($request->getContent(), true);
         if ($content == null) {
-            return new Response(json_encode('KO - Pas de donnees'));
+            return new Response(json_encode(['KO' => 'Pas de donnees']));
         }
         if (empty($content['loginname'])) {
-            return new Response(json_encode('KO - Pas de nom de login'));
+            return new Response(json_encode(['KO' => 'Pas de nom de login']));
         } else {
             $loginname = $content['loginname'];
         }
@@ -383,7 +383,7 @@ class AdminuxController extends AbstractController
             $em->remove($user);
             $em->flush();
         }
-        return new Response(json_encode('OK'));
+        return new Response(json_encode(['OK' => '']));
     }
 
     /**
@@ -411,10 +411,10 @@ class AdminuxController extends AbstractController
 
         $content  = json_decode($request->getContent(), true);
         if ($content == null) {
-            return new Response(json_encode('KO - Pas de donnees'));
+            return new Response(json_encode(['KO' => 'Pas de donnees']));
         }
         if (empty($content['loginname'])) {
-            return new Response(json_encode('KO - Pas de nom de login'));
+            return new Response(json_encode(['KO' => 'Pas de nom de login']));
         } else {
             $loginname = $content['loginname'];
         }
@@ -443,7 +443,7 @@ class AdminuxController extends AbstractController
             $em->persist($cv);
             $em->flush();
         }
-        return new Response(json_encode('OK'));
+        return new Response(json_encode(['OK' => '']));
     }
 
     /**
@@ -601,7 +601,7 @@ class AdminuxController extends AbstractController
         $r['sondVolDonnPerm'] = $v->getSondVolDonnPerm();
         // Pour le déboguage
         // if ($r['quota'] != $r['attrHeures']) $r['attention']="INCOHERENCE";
-        $r['quota']			  = $sp->getConsoRessource($v->getProjet(), 'cpu', $annee)[1];
+        $r['quota']              = $sp->getConsoRessource($v->getProjet(), 'cpu', $annee)[1];
         return $r;
     }
 
@@ -635,7 +635,7 @@ class AdminuxController extends AbstractController
      *          gpfs        sondVolDonnPerm stockage permanent demandé (pas d'attribution pour le stockage)
      *
      */
-    // curl --netrc -H "Content-Type: application/json" -X POST -d '{ "projets": "P1234" }' https://.../adminux/projets/get
+    // curl --netrc -H "Content-Type: application/json" -X POST -d '{ "projet": "P1234" }' https://.../adminux/projets/get
 
     public function projetsGetAction(Request $request)
     {
@@ -656,14 +656,18 @@ class AdminuxController extends AbstractController
         if ($id_projet == null) {
             $projets = $rep->findNonTermines();
         } else {
-            $projets[] = $rep->findOneBy(["idProjet" => $id_projet]);
+            $p = $rep->findOneBy(["idProjet" => $id_projet]);
+            if ($p != null) {
+                $projets[] = $p;
+            }
         }
 
         foreach ($projets as $p) {
             $data = [];
-            $data['idProjet']      = $p->getIdProjet();
-            $data['etatProjet']    = $p->getEtat();
-            $data['metaEtat']      = $sp->getMetaEtat($p);
+            $data['idProjet']   = $p->getIdProjet();
+            $data['etatProjet'] = $p->getEtat();
+            $data['metaEtat']   = $sp->getMetaEtat($p);
+            $data['typeProjet'] = $p->getTypeProjet();
             $va = ($p->getVersionActive()!=null) ? $p->getVersionActive() : null;
             $vb = ($p->getVersionDerniere()!=null) ? $p->getVersionDerniere() : null;
             $v_data = [];
@@ -864,161 +868,161 @@ class AdminuxController extends AbstractController
     }
 
     /**
-	 * get users
-	 *
-	 * @Route("/users/get", name="get_users", methods={"POST"})
-	 * @Security("is_granted('ROLE_ADMIN')")
-	 *
-	 * Exemples de données POST (fmt json):
-	 * 			   ''
-	 *             ou
-	 *             '{ "projet" : null,     "mail" : null }' -> Tous les collaborateurs avec login
-	 *
-	 *             '{ "projet" : "P01234" }'
-	 *             ou
-	 *             '{ "projet" : "P01234", "mail" : null }' -> Tous les collaborateurs avec login du projet P01234 (version ACTIVE)
-	 *
-	 *             '{ "mail" : "toto@exemple.fr"}
-	 *             ou
-	 *             '{ "projet" : null,     "mail" : "toto@exemple.fr"}' -> Tous les projets dans lesquels ce collaborateur a un login (version ACTIVE de chaque projet)
-	 *
-	 *             '{ "projet" : "P01234", "mail" : "toto@exemple.fr" }' -> rien ou toto si toto avait un login sur ce projet
-	 *
-	 * Par défaut on ne considère QUE les version actives de CHAQUE PROJET
-	 * MAIS si on AJOUTE un PARAMETRE "session" : "20A" on travaille sur la session passée en paramètres (ici 20A)
-	 *
-	 * On renvoie pour chaque projet, ou pour un projet donné, la liste des collaborateurs qui doivent avoir un login
-	 *
-	 * Données renvoyées (fmt json):
-	 * 
-	 *             "toto@exemple.fr" : {
-	 *                  "idIndividu": 75,
-	 *                  "nom" : "Toto",
-	 * 				    "prenom" : "Ernest",
-	 *                  "projets" : {
-	 * 			           "P01234" : "toto",
-	 *                     "P56789" : "etoto"
-	 *                  }
-	 *              },
-	 *             "titi@exemple.fr": ...
-	 *
-	 *
-	 */
+     * get users
+     *
+     * @Route("/users/get", name="get_users", methods={"POST"})
+     * @Security("is_granted('ROLE_ADMIN')")
+     *
+     * Exemples de données POST (fmt json):
+     *                ''
+     *             ou
+     *             '{ "projet" : null,     "mail" : null }' -> Tous les collaborateurs avec login
+     *
+     *             '{ "projet" : "P01234" }'
+     *             ou
+     *             '{ "projet" : "P01234", "mail" : null }' -> Tous les collaborateurs avec login du projet P01234 (version ACTIVE)
+     *
+     *             '{ "mail" : "toto@exemple.fr"}
+     *             ou
+     *             '{ "projet" : null,     "mail" : "toto@exemple.fr"}' -> Tous les projets dans lesquels ce collaborateur a un login (version ACTIVE de chaque projet)
+     *
+     *             '{ "projet" : "P01234", "mail" : "toto@exemple.fr" }' -> rien ou toto si toto avait un login sur ce projet
+     *
+     * Par défaut on ne considère QUE les version actives de CHAQUE PROJET
+     * MAIS si on AJOUTE un PARAMETRE "session" : "20A" on travaille sur la session passée en paramètres (ici 20A)
+     *
+     * On renvoie pour chaque projet, ou pour un projet donné, la liste des collaborateurs qui doivent avoir un login
+     *
+     * Données renvoyées (fmt json):
+     * 
+     *             "toto@exemple.fr" : {
+     *                  "idIndividu": 75,
+     *                  "nom" : "Toto",
+     *                     "prenom" : "Ernest",
+     *                  "projets" : {
+     *                        "P01234" : "toto",
+     *                     "P56789" : "etoto"
+     *                  }
+     *              },
+     *             "titi@exemple.fr": ...
+     *
+     *
+     */
 
-	// curl --netrc -H "Content-Type: application/json" -X POST  -d '{ "projet" : "P0044", "mail" : null, "session" : "19A" }' https://attribution-ressources-dev.calmip.univ-toulouse.fr/gramc2-manu/adminux/users/get
+    // curl --netrc -H "Content-Type: application/json" -X POST  -d '{ "projet" : "P0044", "mail" : null, "session" : "19A" }' https://attribution-ressources-dev.calmip.univ-toulouse.fr/gramc2-manu/adminux/users/get
 
     // TODO --------- VIRER CETTE FONCTION, REMPLACEE PAR utilisateursGetAction !!!
-	 public function usersGetAction(Request $request)
-	 {
-		$em = $this->getDoctrine()->getManager();
-		$raw_content = $request->getContent();
-		if ($raw_content == '' || $raw_content == '{}')
-		{
-			$content = null;
-		}
-		else
-		{
-			$content  = json_decode($request->getContent(),true);
-		}
-		if ($content == null)
-		{
-			$id_projet = null;
-			$id_session= null;
-			$mail      = null;
-		}
-		else
-		{
-			$id_projet  = (isset($content['projet'])) ? $content['projet'] : null;
-			$mail       = (isset($content['mail']))? $content['mail']: null;
-			$id_session = (isset($content['session']))? $content['session']: null;
-		}
+     public function usersGetAction(Request $request)
+     {
+        $em = $this->getDoctrine()->getManager();
+        $raw_content = $request->getContent();
+        if ($raw_content == '' || $raw_content == '{}')
+        {
+            $content = null;
+        }
+        else
+        {
+            $content  = json_decode($request->getContent(),true);
+        }
+        if ($content == null)
+        {
+            $id_projet = null;
+            $id_session= null;
+            $mail      = null;
+        }
+        else
+        {
+            $id_projet  = (isset($content['projet'])) ? $content['projet'] : null;
+            $mail       = (isset($content['mail']))? $content['mail']: null;
+            $id_session = (isset($content['session']))? $content['session']: null;
+        }
 
-//		$sessions  = $em->getRepository(Session::class)->get_sessions_non_terminees();
-		$users = [];
-		$projets   = [];
+//        $sessions  = $em->getRepository(Session::class)->get_sessions_non_terminees();
+        $users = [];
+        $projets   = [];
 
-		// Tous les collaborateurs de tous les projets non terminés
-		if ($id_projet == null && $mail == null)
-		{
-			$projets = $em->getRepository(Projet::class)->findNonTermines();
-		}
+        // Tous les collaborateurs de tous les projets non terminés
+        if ($id_projet == null && $mail == null)
+        {
+            $projets = $em->getRepository(Projet::class)->findNonTermines();
+        }
 
-		// Tous les projets dans lesquels une personne donnée a un login
-		elseif ($id_projet == null)
-		{
-			$projets = $em->getRepository(Projet::class)->findNonTermines();
-		}
+        // Tous les projets dans lesquels une personne donnée a un login
+        elseif ($id_projet == null)
+        {
+            $projets = $em->getRepository(Projet::class)->findNonTermines();
+        }
 
-		// Tous les collaborateurs d'un projet
-		elseif ($mail == null)
-		{
-			$p = $em->getRepository(Projet::class)->find($id_projet);
-			if ($p != null)
-			{
-				$projets[] = $p;
-			}
-		}
+        // Tous les collaborateurs d'un projet
+        elseif ($mail == null)
+        {
+            $p = $em->getRepository(Projet::class)->find($id_projet);
+            if ($p != null)
+            {
+                $projets[] = $p;
+            }
+        }
 
-		// Un collaborateur particulier d'un projet particulier
-		else
-		{
-			$p = $em->getRepository(Projet::class)->find($id_projet);
-			if ($p->getEtatProjet() != Etat::TERMINE)
-			{
-				$projets[] = $p;
-			}
-		}
+        // Un collaborateur particulier d'un projet particulier
+        else
+        {
+            $p = $em->getRepository(Projet::class)->find($id_projet);
+            if ($p->getEtatProjet() != Etat::TERMINE)
+            {
+                $projets[] = $p;
+            }
+        }
 
-		//
-		// Construire le tableau $users:
-		//      toto@exemple.com => [ 'idIndividu' => 34, 'nom' => 'Toto', 'prenom' => 'Ernest', 'projets' => [ 'p0123' => 'toto', 'p456' => 'toto1' ] ]
-		//
-		foreach ($projets as $p)
-		{
-			// Si session non spécifiée, on prend la version active de chaque projet !
-			if ($id_session==null)
-			{
-				$v = $p->getVersionActive();
-			}
+        //
+        // Construire le tableau $users:
+        //      toto@exemple.com => [ 'idIndividu' => 34, 'nom' => 'Toto', 'prenom' => 'Ernest', 'projets' => [ 'p0123' => 'toto', 'p456' => 'toto1' ] ]
+        //
+        foreach ($projets as $p)
+        {
+            // Si session non spécifiée, on prend la version active de chaque projet !
+            if ($id_session==null)
+            {
+                $v = $p->getVersionActive();
+            }
 
-			// Sinon, on prend la version de cette session... si elle existe
-			else
-			{
-				$id_version = $id_session . $p->getIdProjet();
-				$v          = $em->getRepository(Version::class)->find($id_version);
-			}
+            // Sinon, on prend la version de cette session... si elle existe
+            else
+            {
+                $id_version = $id_session . $p->getIdProjet();
+                $v          = $em->getRepository(Version::class)->find($id_version);
+            }
 
-			if ($v != null)
-			{
-				$collaborateurs = $v->getCollaborateurVersion();
-				foreach ($collaborateurs as $c)
-				{
-					if ($c->getLogin())
-					{
-						$m = $c -> getCollaborateur() -> getMail();
-						if ($mail != null && strtolower($mail) != strtolower($m))
-						{
-							continue;
-						}
+            if ($v != null)
+            {
+                $collaborateurs = $v->getCollaborateurVersion();
+                foreach ($collaborateurs as $c)
+                {
+                    if ($c->getLogin())
+                    {
+                        $m = $c -> getCollaborateur() -> getMail();
+                        if ($mail != null && strtolower($mail) != strtolower($m))
+                        {
+                            continue;
+                        }
 
-						if (!isset($users[$m]))
-						{
-							$users[$m] = [];
-							$users[$m]['nom']        = $c -> getCollaborateur() -> getNom();
-							$users[$m]['prenom']     = $c -> getCollaborateur() -> getPrenom();
-							$users[$m]['idIndividu'] = $c -> getCollaborateur() -> getIdIndividu();
-							$users[$m]['projets']    = [];
-						}
-						$users[$m]['projets'][$p->getIdProjet()] = $c->getLoginname();
-					}
-				}
-			}
-		}
+                        if (!isset($users[$m]))
+                        {
+                            $users[$m] = [];
+                            $users[$m]['nom']        = $c -> getCollaborateur() -> getNom();
+                            $users[$m]['prenom']     = $c -> getCollaborateur() -> getPrenom();
+                            $users[$m]['idIndividu'] = $c -> getCollaborateur() -> getIdIndividu();
+                            $users[$m]['projets']    = [];
+                        }
+                        $users[$m]['projets'][$p->getIdProjet()] = $c->getLoginname();
+                    }
+                }
+            }
+        }
 
-		// print_r est plus lisible pour le déboguage
-		//return new Response(print_r($users,true));
-		return new Response(json_encode($users));
-	 }
+        // print_r est plus lisible pour le déboguage
+        //return new Response(print_r($users,true));
+        return new Response(json_encode($users));
+     }
 
 
     /**
