@@ -804,8 +804,9 @@ class GramcSessionController extends AbstractController
                 );
             }
 
+            // On est automatiquement connecté en sortant de cet écran
             return $this->redirectToRoute('connexionshiblogin');
-            return $this->redirectToRoute('accueil');
+            //return $this->redirectToRoute('accueil');
         }
 
         return $this->render('default/nouveau_profil.html.twig', array( 'mail' => $request->getSession()->get('mail'), 'form' => $form->createView()));

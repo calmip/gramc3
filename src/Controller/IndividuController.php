@@ -52,8 +52,9 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
-// pour remplacer un utilisateur par un autre
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
+// pour remplacer un utilisateur par un autre
 use App\Entity\CollaborateurVersion;
 use App\Entity\CompteActivation;
 use App\Entity\Expertise;
@@ -116,15 +117,10 @@ class IndividuController extends AbstractController
         $sj = $this->sj;
         $ff = $this->ff;
 
+        $session = $request->getSession();
+
         $form = $ff
             ->createNamedBuilder('autocomplete_form', FormType::class, [])
-            ->add(
-                'mail',
-                TextType::class,
-                [
-                'required' => false, 'csrf_protection' => false
-                ]
-            )
             ->add(
                 'submit',
                 SubmitType::class,
@@ -134,6 +130,25 @@ class IndividuController extends AbstractController
             )
             ->getForm();
 
+        // si on vient de modify, on préremplit le champ puis on retire new_mail de la session
+        if ($session->has('new_mail')) {
+            $form->add(
+                'mail',
+                TextType::class,
+                [
+                'required' => false, 'csrf_protection' => false, 'attr' => ['value' => $session->get('new_mail')],
+                ]
+            );
+            $session->remove('new_mail');
+        } else {
+            $form->add(
+                'mail',
+                TextType::class,
+                [
+                'required' => false, 'csrf_protection' => false,
+                ]
+            );
+        }
 
         $CollaborateurVersion       =   $em->getRepository(CollaborateurVersion::class)->findBy(['collaborateur' => $individu]);
         $CompteActivation           =   $em->getRepository(CompteActivation ::class)->findBy(['individu' => $individu]);
@@ -420,15 +435,38 @@ class IndividuController extends AbstractController
      */
     public function modifyAction(Request $request, Individu $individu)
     {
+        $em = $this->getDoctrine()->getManager();
+        $repos = $em->getRepository(Individu::class);
+        
         $editForm = $this->createForm('App\Form\IndividuType', $individu);
 
+        $session = $request->getSession();
+        //$current_mail = $session->get('current_mail');
+        
         $editForm->handleRequest($request);
-
         if ($editForm->isSubmitted() /*&& $editForm->isValid()*/) {
-            $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirectToRoute('individu_gerer');
+            $exc = false;
+            try
+            {
+                $em->flush();
+            }
+            catch (UniqueConstraintViolationException $e)
+            {
+                //dd("merde");
+                $exc = true;
+            };
+
+            // Si exception, aller vers l'écran de remplacement
+            if ( $exc) {
+                $session->set('new_mail', $individu->getMail());
+                return $this->redirectToRoute('remplacer_utilisateur', ['id' => $individu->getIdIndividu()]);
+            } else {
+                return $this->redirectToRoute('individu_gerer');
+            }
         }
+
+        //$session->set('current_mail',$individu->getMail());
 
         return $this->render(
             'individu/modif.html.twig',
@@ -936,7 +974,11 @@ class IndividuController extends AbstractController
             foreach ($users as $individu) {
                 if (preg_match($pattern, $individu->getMail())) {
                     $individus[] = $individu;
-                }
+                } elseif (preg_match($pattern, $individu->getNom())) {
+                    $individus[] = $individu;
+                } elseif (preg_match($pattern, $individu->getMail())) {
+                    $individus[] = $individu;
+                };
             }
         } else {
             $individus = $em->getRepository(Individu::class)->getActiveUsers();
