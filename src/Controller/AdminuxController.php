@@ -168,6 +168,7 @@ class AdminuxController extends AbstractController
      * set loginname
      *
      * @Route("/users/setloginname", name="set_loginname", methods={"POST"})
+     * @Route("/utilisateurs/setloginname", name="set_loginname", methods={"POST"})
      * @Security("is_granted('ROLE_ADMIN')")
      *
      * Positionne le loginname du user demandé dans la version active ou EN_ATTENTE du projet demandé
@@ -219,15 +220,18 @@ class AdminuxController extends AbstractController
         }
 
         $versions = $projet->getVersion();
+        $i=0;
         foreach ($versions as $version) {
+            //echo $version->getIdVersion()."\n";
             if ($version->getEtatVersion() == Etat::ACTIF             ||
                 $version->getEtatVersion() == Etat::ACTIF_TEST        ||
+                $version->getEtatVersion() == Etat::NOUVELLE_VERSION_DEMANDEE ||
                 $version->getEtatVersion() == Etat::EN_ATTENTE
               ) {
                 foreach ($version->getCollaborateurVersion() as $collaborateurVersion) {
                     $collaborateur  =  $collaborateurVersion->getCollaborateur() ;
                     if ($collaborateur != null && $collaborateur->isEqualTo($individu)) {
-                        // Pas de pb pour écraser un loginnma précédent
+                        // Pas de pb pour écraser un loginname précédent
                         // A moins qu'il ait déjà un mot de passe !
                         if ($collaborateurVersion->getLoginname() != null) {
                             $old_loginname = $collaborateurVersion->getLoginname();
@@ -238,18 +242,25 @@ class AdminuxController extends AbstractController
                         }
                         $collaborateurVersion->setLoginname($loginname);
                         Functions::sauvegarder($collaborateurVersion, $em);
-                        return new Response(json_encode('OK'));
+                        $i += 1;
+//                        return new Response(json_encode($collaborateurVersion->getVersion() . ' OK'));
+                        break;
                     }
                 }
             }
         }
-        return new Response(json_encode(['KO' => 'Mauvais projet ou mauvais idIndividu !' ]));
+        if ($i > 0 ) {
+            return new Response(json_encode("OK - $i versions modifiees"));
+        } else {
+            return new Response(json_encode(['KO' => 'Mauvais projet ou mauvais idIndividu !' ]));
+        }
     }
 
     /**
       * set password
       *
       * @Route("/users/setpassword", name="set_password", methods={"POST"})
+      * @Route("/utilisateurs/setpassword", name="set_password", methods={"POST"})
       * @Security("is_granted('ROLE_ADMIN')")
 
       * Positionne le mot de passe du user demandé, à condition que ce user existe dans la table collaborateurVersion
@@ -330,6 +341,7 @@ class AdminuxController extends AbstractController
       * Efface le mot de passe temporaire pour le user passé en paramètres
       *
       * @Route("/users/clearpassword", name="clear_password", methods={"POST"})
+      * @Route("/utilisateurs/clearpassword", name="clear_password", methods={"POST"})
       * @Security("is_granted('ROLE_ADMIN')")
       *
       * Efface le mot de passe du user demandé
@@ -381,6 +393,7 @@ class AdminuxController extends AbstractController
       * Efface aussi le mot de passe s'il y en a un
       *
       * @Route("/users/clearloginname", name="clear_loginname", methods={"POST"})
+      * @Route("/utilisateurs/clearloginname", name="clear_loginname", methods={"POST"})
       * @Security("is_granted('ROLE_ADMIN')")
       *
       * Efface le loginname s'il existe, ne fait rien sinon
@@ -841,6 +854,7 @@ class AdminuxController extends AbstractController
                 }
                 $i += 1;
             }
+
         }
 
 
@@ -1105,8 +1119,9 @@ class AdminuxController extends AbstractController
      * Si le mot de passe est expiré, renvoie null
      *
      * @Route("/users/checkpassword", name="check_password", methods={"GET"})
+     * @Route("/utilisateurs/checkpassword", name="check_password", methods={"GET"})
      *
-     * curl --netrc -H "Content-Type: application/json" https://.../adminux/users/checkpassword
+     * curl --netrc -H "Content-Type: application/json" https://.../adminux/utilisateurs/checkpassword
      *
      */
     public function checkPasswordAction(Request $request, LoggerInterface $lg)
