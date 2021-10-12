@@ -976,7 +976,7 @@ class IndividuController extends AbstractController
                     $individus[] = $individu;
                 } elseif (preg_match($pattern, $individu->getNom())) {
                     $individus[] = $individu;
-                } elseif (preg_match($pattern, $individu->getMail())) {
+                } elseif (preg_match($pattern, $individu->getPrenom())) {
                     $individus[] = $individu;
                 };
             }
