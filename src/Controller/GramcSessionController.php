@@ -691,8 +691,10 @@ class GramcSessionController extends AbstractController
             // return new Response(' no eppn ' );
             return $this->redirectToRoute('accueil');
         }
+
+
         $eppn = $request->getSession()->get('eppn');
-        
+
         // vérifier si email est disponible dans $session, sinon on redirige sur accueil avec un message dans le journal
         if ($request->getSession()->has('mail')) {
             $email = $request->getSession()->get('mail');
@@ -708,6 +710,20 @@ class GramcSessionController extends AbstractController
             return $this->redirectToRoute('accueil');
         }
 
+        // $eppn = 'toto';
+        // Mauvais eppn - Pas d'ouverture de compte
+        if (!$this->isEmail($eppn)) {
+            $sj->warningMessage(__FILE__ . ":" . __LINE__ . " eppn défectueux pour le nouveau compte (eppn=$eppn, mail=$email)");
+            return $this->redirectToRoute('accueil');
+        };
+
+        // $email = "";
+        // Mauvaise adresse - Pas d'ouverture de compte
+        if (!$this->isEmail($email)) {
+            $sj->warningMessage(__FILE__ . ":" . __LINE__ . " Adresse mail défectueuse pour le nouveau compte (eppn=$eppn, mail=$email)");
+            return $this->redirectToRoute('accueil');
+        };
+
         $form = Functions::createFormBuilder($ff)
         ->add('save', SubmitType::class, ['label' => 'Continuer'])
         ->getForm();
@@ -722,6 +738,15 @@ class GramcSessionController extends AbstractController
         return $this->render('default/nouveau_compte.html.twig', [ 'mail' => $email , 'eppn' => $eppn, 'form' => $form->createView()]);    
     }
 
+    private function isEmail(string $email) {
+        $regex = '/^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9-]+\.)+([a-zA-Z0-9]{2,10})+$/';
+        if (preg_match($regex, $email)==1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
     /**
      * @Route("/nouveau_profil",name="nouveau_profil")
      *
