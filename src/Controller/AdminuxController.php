@@ -684,6 +684,167 @@ class AdminuxController extends AbstractController
     }
 
     /**
+     * get versions non terminées
+     *
+     * @Route("/version/get", name="get_version", methods={"POST"})
+     * @Security("is_granted('ROLE_ADMIN')")
+     * Exemples de données POST (fmt json):
+     *                ''
+     *             ou
+     *             '{ "projet" : null,     "session" : null }' -> Toutes les VERSIONS ACTIVES quelque soit la session
+     *
+     *             '{ "projet" : "P01234" }'
+     *             ou
+     *             '{ "projet" : "P01234", "session" : null }' -> LA VERSION ACTIVE du projet P01234
+     *
+     *             '{ "session" : "20A"}
+     *             ou
+     *             '{ "projet" : null,     "session" : "20A"}' -> Toutes les versions de la session 20A
+     *
+     *             '{ "projet" : "P01234", "session" : "20A"}' -> La version 20AP01234
+     *
+     * Donc on renvoie une ou plusieurs versions appartenant à différentes sessions, mais une ou zéro versions par projet
+     * Les versions renvoyées peuvent être en état: ACTIF, EN_ATTENTE, NOUVELLE_VERSION_DEMANDEE si "session" vaut null
+     * Les versions renvoyées peuvent être dans n'importe quel état (sauf ANNULE) si "session" est spécifiée
+     *
+     * Données renvoyées (fmt json):
+     *                 idProjet    P01234
+     *                 idSession    20A
+     *                 idVersion    20AP01234
+     *                 mail        mail du responsable de la version
+     *                 attrHeures    Heures cpu attribuées
+     *                 quota        Quota sur la machine
+     *                 gpfs        sondVolDonnPerm stockage permanent demandé (pas d'attribution pour le stockage)
+     *
+     */
+     public function versionGetAction(Request $request)
+     {
+        $em = $this->getDoctrine()->getManager();
+        $sp = $this->sp;
+        $versions = [];
+
+        $content  = json_decode($request->getContent(),true);
+        if ($content == null)
+        {
+            $id_projet = null;
+            $id_session= null;
+        }
+        else
+        {
+            $id_projet  = (isset($content['projet'])) ? $content['projet'] : null;
+            $id_session = (isset($content['session']))? $content['session']: null;
+        }
+
+        $v_tmp = [];
+        // Tous les projets actifs
+        if ($id_projet == null && $id_session == null)
+        {
+            $sessions = $em->getRepository(Session::class)->get_sessions_non_terminees();
+            foreach ($sessions as $sess)
+            {
+                //$versions = $em->getRepository(Version::class)->findSessionVersionsActives($sess);
+                $v_tmp = array_merge($v_tmp,$em->getRepository(Version::class)->findSessionVersions($sess));
+            }
+        }
+
+        // Tous les projets d'une session particulière  (on filtre les projets annulés)
+        elseif ($id_projet == null)
+        {
+            $sess  = $em->getRepository(Session::class)->find($id_session);
+            $v_tmp = $em->getRepository(Version::class)->findSessionVersions($sess);
+        }
+
+        // La version active d'un projet donné
+        elseif ($id_session == null)
+        {
+            $projet = $em->getRepository(Projet::class)->find($id_projet);
+            if ($projet != null) $v_tmp[]= $projet->getVersionActive();
+        }
+
+        // Une version particulière
+        else
+        {
+            $projet = $em->getRepository(Projet::class)->find($id_projet);
+            $sess  = $em->getRepository(Session::class)->find($id_session);
+            $v_tmp[] = $em->getRepository(Version::class)->findOneVersion($sess,$projet);
+        }
+
+        // SEULEMENT si session n'est pas spécifié: On ne garde que les versions actives... ou presque actives
+        if ( $id_session == null )
+        {
+            $etats = [Etat::ACTIF, Etat::EN_ATTENTE, Etat::NOUVELLE_VERSION_DEMANDEE, Etat::ACTIF_TEST];
+            foreach ($v_tmp as $v)
+            {
+                if ($v == null) continue;
+                if ($v->getSession()->getEtatSession() != Etat::TERMINE)
+                {
+                    if (in_array($v->getEtatVersion(),$etats,true))
+                    //if ($v->getProjet()->getMetaEtat() === 'ACCEPTE' || $v->getProjet()->getMetaEtat() === 'NONRENOUVELE')
+                    {
+                        $versions[] = $v;
+                    }
+                }
+            }
+        }
+
+        // Si la session est spécifiée: On renvoie la version demandée, quelque soit son état
+        // On renvoie aussi l'état de la version et l'état de la session
+        else
+        {
+            $versions = $v_tmp;
+        }
+
+        $retour = [];
+        foreach ($versions as $v)
+        {
+            if ($v==null) continue;
+            $annee = 2000 + $v->getSession()->getAnneeSession();
+            $attr  = $v->getAttrHeures() - $v->getPenalHeures();
+            foreach ($v->getRallonge() as $r)
+            {
+                $attr += $r->getAttrHeures();
+            }
+
+            // Pour une session de type B = Aller chercher la version de type A correspondante et ajouter les attributions
+            // TODO - Des fonctions de haut niveau (au niveau projet par exemple) ?
+            if ($v->getSession()->getTypeSession())
+            {
+                $id_va = $v->getAutreIdVersion();
+                $va = $em->getRepository(Version::class)->find($id_va);
+                if ($va != null)
+                {
+                    $attr += $va->getAttrHeures();
+                    $attr -= $va->getPenalHeures();
+                    foreach ($va->getRallonge() as $r)
+                    {
+                        $attr += $r->getAttrHeures();
+                    }
+                }
+            }
+            $r = [];
+            $r['idProjet']        = $v->getProjet()->getIdProjet();
+            $r['idSession']       = $v->getSession()->getIdSession();
+            $r['idVersion']       = $v->getIdVersion();
+            $r['etatVersion']     = $v->getEtatVersion();
+            $r['etatProjet']      = $v->getProjet()->getEtatProjet();
+            $r['mail']            = $v->getResponsable()->getMail();
+            $r['attrHeures']      = $attr;
+            $r['sondVolDonnPerm'] = $v->getSondVolDonnPerm();
+            $r['quota']              = $sp->getConsoRessource($v->getProjet(),'cpu',$annee)[1];
+            // Pour le déboguage
+            // if ($r['quota'] != $r['attrHeures']) $r['attention']="INCOHERENCE";
+
+            $retour[] = $r;
+            //$retour[] = $v->getIdVersion();
+        };
+
+        // print_r est plus lisible pour le déboguage
+        // return new Response(print_r($retour,true));
+        return new Response(json_encode($retour));
+
+     }
+
+    /**
      * get utilisateurs
      *
      * @Route("/utilisateurs/get", name="get_utilisateurs", methods={"POST"})
