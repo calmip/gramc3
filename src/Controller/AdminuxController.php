@@ -1264,6 +1264,10 @@ class AdminuxController extends AbstractController
         // projets à problème
         $msg = "";
         foreach ($projets as $p) {
+            // On ne s'occupe pas des projets terminés ou annulés
+            // TODO - Tester sur l'état plutôt que sur le meta état,
+            //        le méta état est censé être fait SEULEMENT pour l'affichage !
+            if ( $p['metaetat'] == "TERMINE" ) continue;
             if ($p['attrib'] != $p['q']) {
                 $msg .= $p['p']->getIdProjet() . "\t" . $p['attrib'] . "\t\t" . $p["q"] . "\n";
             }
