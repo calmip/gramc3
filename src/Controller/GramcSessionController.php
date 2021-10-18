@@ -695,6 +695,9 @@ class GramcSessionController extends AbstractController
 
         $eppn = $request->getSession()->get('eppn');
 
+        // tests !
+        // $eppn = "";
+
         // vérifier si email est disponible dans $session, sinon on redirige sur accueil avec un message dans le journal
         if ($request->getSession()->has('mail')) {
             $email = $request->getSession()->get('mail');
@@ -712,7 +715,8 @@ class GramcSessionController extends AbstractController
 
         // $eppn = 'toto';
         // Mauvais eppn - Pas d'ouverture de compte
-        if (!$this->isEmail($eppn)) {
+        // On ne vérifie que la présence de l'eppn, pas sa conformité
+        if ($eppn === "") {
             $sj->warningMessage(__FILE__ . ":" . __LINE__ . " eppn défectueux pour le nouveau compte (eppn=$eppn, mail=$email)");
             return $this->redirectToRoute('accueil');
         };
@@ -739,8 +743,8 @@ class GramcSessionController extends AbstractController
     }
 
     private function isEmail(string $email) {
-        $regex = '/^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9-]+\.)+([a-zA-Z0-9]{2,10})+$/';
-        if (preg_match($regex, $email)==1) {
+        $regex = '/^[a-z0-9_%.+-]+@[a-z0-9.-]+\.[a-z]{2,}$/';
+        if (preg_match($regex, strtolower($email))==1) {
             return true;
         } else {
             return false;
@@ -786,6 +790,19 @@ class GramcSessionController extends AbstractController
             }
         } else {
             $flg_ind = true;
+        }
+
+        // TESTS !
+        // $session->set('givenName','ursule');
+        // $session->set('sn','Dupont');
+        
+        // Préremplissage du formulaire si la fédération nous a envoyé l'info !
+        if ($session->has('givenName')) {
+            $individu->setPrenom($session->get('givenName'));
+        }
+        
+        if ($session->has('sn')) {
+            $individu->setNom($session->get('sn'));
         }
 
         $form = $this->createForm(IndividuType::class, $individu, [ 'mail' => false ]);
