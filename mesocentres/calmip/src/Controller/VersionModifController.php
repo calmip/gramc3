@@ -362,25 +362,25 @@ class VersionModifController extends AbstractController
         return $this->render(
             'version/modifier_projet_sess.html.twig',
             [
-        'session' => $session,
-            'form'      => $form->createView(),
-            'version'   => $version,
-            'img_expose_1'   => $image_forms['img_expose_1']->createView(),
-            'img_expose_2'   => $image_forms['img_expose_2']->createView(),
-            'img_expose_3'   => $image_forms['img_expose_3']->createView(),
-            'imageExp1'    => $this->image('img_expose_1', $version),
-            'imageExp2'    => $this->image('img_expose_2', $version),
-            'imageExp3'    => $this->image('img_expose_3', $version),
-            'img_justif_renou_1'    =>  $image_forms['img_justif_renou_1']->createView(),
-            'img_justif_renou_2'    =>  $image_forms['img_justif_renou_2']->createView(),
-            'img_justif_renou_3'    =>  $image_forms['img_justif_renou_3']->createView(),
-            'imageJust1'    =>   $this->image('img_justif_renou_1', $version),
-            'imageJust2'    =>   $this->image('img_justif_renou_2', $version),
-            'imageJust3'    =>   $this->image('img_justif_renou_3', $version),
-            'collaborateur_form' => $collaborateur_form->createView(),
-            'todo'          => static::versionValidate($version, $sj, $em, $sval, $this->getParameter('nodata')),
-            'renouvellement'    => $renouvellement,
-        'nb_form'       => $nb_form
+                'session' => $session,
+                'form'      => $form->createView(),
+                'version'   => $version,
+                'img_expose_1'   => $image_forms['img_expose_1']->createView(),
+                'img_expose_2'   => $image_forms['img_expose_2']->createView(),
+                'img_expose_3'   => $image_forms['img_expose_3']->createView(),
+                'imageExp1'    => $this->image('img_expose_1', $version),
+                'imageExp2'    => $this->image('img_expose_2', $version),
+                'imageExp3'    => $this->image('img_expose_3', $version),
+                'img_justif_renou_1'    =>  $image_forms['img_justif_renou_1']->createView(),
+                'img_justif_renou_2'    =>  $image_forms['img_justif_renou_2']->createView(),
+                'img_justif_renou_3'    =>  $image_forms['img_justif_renou_3']->createView(),
+                'imageJust1'    =>   $this->image('img_justif_renou_1', $version),
+                'imageJust2'    =>   $this->image('img_justif_renou_2', $version),
+                'imageJust3'    =>   $this->image('img_justif_renou_3', $version),
+                'collaborateur_form' => $collaborateur_form->createView(),
+                'todo'          => static::versionValidate($version, $sj, $em, $sval, $this->getParameter('nodata')),
+                'renouvellement'    => $renouvellement,
+                'nb_form'       => $nb_form
             ]
         );
     }
@@ -418,8 +418,8 @@ class VersionModifController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
         $form
-    ->add('prjTitre', TextType::class, [ 'required'       =>  false ])
-    ->add(
+        ->add('prjTitre', TextType::class, [ 'required'       =>  false ])
+        ->add(
         'prjThematique',
         EntityType::class,
         [
@@ -434,7 +434,7 @@ class VersionModifController extends AbstractController
 
         if ($this->getParameter('norattachement')==false) {
             $form
-        ->add(
+            ->add(
             'prjRattachement',
             EntityType::class,
             [
@@ -449,12 +449,12 @@ class VersionModifController extends AbstractController
         );
         };
         $form
-    ->add('demHeures', IntegerType::class, [ 'required'       => false,'attr' => ['min' => $this->getParameter('prj_heures_min')]])
-    ->add('prjFinancement', TextType::class, [ 'required'     => false ])
-    ->add('prjGenciCentre', TextType::class, [ 'required' => false ])
-    ->add('prjGenciMachines', TextType::class, [ 'required' => false ])
-    ->add('prjGenciHeures', TextType::class, [ 'required' => false ])
-    ->add('prjGenciDari', TextType::class, [ 'required'   => false ]);
+        ->add('demHeures', IntegerType::class, [ 'required'       => false,'attr' => ['min' => $this->getParameter('prj_heures_min')]])
+        ->add('prjFinancement', TextType::class, [ 'required'     => false ])
+        ->add('prjGenciCentre', TextType::class, [ 'required' => false ])
+        ->add('prjGenciMachines', TextType::class, [ 'required' => false ])
+        ->add('prjGenciHeures', TextType::class, [ 'required' => false ])
+        ->add('prjGenciDari', TextType::class, [ 'required'   => false ]);
 
         /* Pour un renouvellement, ajouter la justification du renouvellement */
         if (count($version->getProjet()->getVersion()) > 1) {
@@ -705,14 +705,7 @@ class VersionModifController extends AbstractController
         $em = $this->getDoctrine()->getManager();
 
         $heures_projet_test = $this->getParameter('heures_projet_test');
-
-        //if ($this->has('heures_projet_test')) {
-        //    $heures_projet_test = $this->getParameter('heures_projet_test');
-        //} else {
-        //    $heures_projet_test =  5000;
-        //}
-
-        //$version->setDemHeures($heures_projet_test);
+        
         $form_builder = $this->createFormBuilder($version)
         ->add('prjTitre', TextType::class, [ 'required'       =>  false ])
         ->add(
@@ -784,8 +777,9 @@ class VersionModifController extends AbstractController
         $valid = true;
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // on sauvegarde tout de même mais il semble que c'est déjà fait avant
-            //$version->setDemHeures($heures_projet_test);
+
+            // 
+            $version->setDemHeures($heures_projet_test);
  
             // Changement de type ou plafonnement de la demande en heures !
             $valid = $this->validDemHeures($version);
@@ -794,7 +788,9 @@ class VersionModifController extends AbstractController
             return $this->redirectToRoute('consulter_projet', ['id' => $version->getProjet()->getIdProjet(),'warn_type' => $valid ? 0:1 ]);
         }
 
-        //$version->setDemHeures($heures_projet_test);
+        // Les heures de projets tests sont fixes, donc pas dans le formulaire
+        $version->setDemHeures($heures_projet_test);
+        
         return $this->render(
             'version/modifier_projet_test.html.twig',
             [
@@ -1528,7 +1524,7 @@ class VersionModifController extends AbstractController
             $todo[] = 'gpu';
         }
 
-		// TODO - Automatiser cela avec le formulaire !
+        // TODO - Automatiser cela avec le formulaire !
         if ($version->getProjet()->getTypeProjet()==Projet::PROJET_SESS) {
             if ($version->getPrjExpose() == null) {
                 $todo[] = 'prj_expose';
@@ -1567,41 +1563,41 @@ class VersionModifController extends AbstractController
             };
 
             // Partage de données
-	        if ($nodata == false) {		// Stockage de données
-	            if ($version->getSondVolDonnPerm() == null) {
-	                $todo[] = 'sond_vol_donn_perm';
-	            } elseif ($version->getSondJustifDonnPerm() == null
-	            &&  $version->getSondVolDonnPerm() != '< 1To'
-	            &&  $version->getSondVolDonnPerm() != '1 To'
-	            &&  $version->getSondVolDonnPerm() !=  'je ne sais pas') {
-	                $todo[] = 'sond_justif_donn_perm';
-	            }
-	
-	            if ($version->getDataMetaDataFormat() == null) {
-	                $todo[] = 'Format de métadonnées';
-	            }
-	            if ($version->getDataNombreDatasets() == null) {
-	                $todo[] = 'Nombre de jeux de données';
-	            }
-	            if ($version->getDataTailleDatasets() == null) {
-	                $todo[] = 'Taille de chaque jeu de données';
-	            }
-	        }
-	       
-			if ($version->typeSession()  == 'A' ) {
-	            $version_precedente = $version->versionPrecedente();
-	            if ($version_precedente != null) {
-	                $rapportActivite = $em->getRepository(RapportActivite::class)->findOneBy(
-	                    [
-	                    'projet' => $version_precedente->getProjet(),
-	                    'annee' => $version_precedente->getAnneeSession(),
-	                ]
-	                );
-	                if ($rapportActivite == null) {
-	                    $todo[] = 'rapport_activite';
-	                }
-	            }
-			}
+            if ($nodata == false) {		// Stockage de données
+                if ($version->getSondVolDonnPerm() == null) {
+                    $todo[] = 'sond_vol_donn_perm';
+                } elseif ($version->getSondJustifDonnPerm() == null
+                &&  $version->getSondVolDonnPerm() != '< 1To'
+                &&  $version->getSondVolDonnPerm() != '1 To'
+                &&  $version->getSondVolDonnPerm() !=  'je ne sais pas') {
+                    $todo[] = 'sond_justif_donn_perm';
+                }
+    
+                if ($version->getDataMetaDataFormat() == null) {
+                    $todo[] = 'Format de métadonnées';
+                }
+                if ($version->getDataNombreDatasets() == null) {
+                    $todo[] = 'Nombre de jeux de données';
+                }
+                if ($version->getDataTailleDatasets() == null) {
+                    $todo[] = 'Taille de chaque jeu de données';
+                }
+            }
+           
+            if ($version->typeSession()  == 'A' ) {
+                $version_precedente = $version->versionPrecedente();
+                if ($version_precedente != null) {
+                    $rapportActivite = $em->getRepository(RapportActivite::class)->findOneBy(
+                        [
+                        'projet' => $version_precedente->getProjet(),
+                        'annee' => $version_precedente->getAnneeSession(),
+                    ]
+                    );
+                    if ($rapportActivite == null) {
+                        $todo[] = 'rapport_activite';
+                    }
+                }
+            }
         }
 
         if (! $this->validateIndividuForms(self::prepareCollaborateurs($version, $this->sj, $this->vl), true)) {

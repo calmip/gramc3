@@ -52,8 +52,9 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
-// pour remplacer un utilisateur par un autre
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
+// pour remplacer un utilisateur par un autre
 use App\Entity\CollaborateurVersion;
 use App\Entity\CompteActivation;
 use App\Entity\Expertise;
@@ -116,15 +117,10 @@ class IndividuController extends AbstractController
         $sj = $this->sj;
         $ff = $this->ff;
 
+        $session = $request->getSession();
+
         $form = $ff
             ->createNamedBuilder('autocomplete_form', FormType::class, [])
-            ->add(
-                'mail',
-                TextType::class,
-                [
-                'required' => false, 'csrf_protection' => false
-                ]
-            )
             ->add(
                 'submit',
                 SubmitType::class,
@@ -134,6 +130,25 @@ class IndividuController extends AbstractController
             )
             ->getForm();
 
+        // si on vient de modify, on préremplit le champ puis on retire new_mail de la session
+        if ($session->has('new_mail')) {
+            $form->add(
+                'mail',
+                TextType::class,
+                [
+                'required' => false, 'csrf_protection' => false, 'attr' => ['value' => $session->get('new_mail')],
+                ]
+            );
+            $session->remove('new_mail');
+        } else {
+            $form->add(
+                'mail',
+                TextType::class,
+                [
+                'required' => false, 'csrf_protection' => false,
+                ]
+            );
+        }
 
         $CollaborateurVersion       =   $em->getRepository(CollaborateurVersion::class)->findBy(['collaborateur' => $individu]);
         $CompteActivation           =   $em->getRepository(CompteActivation ::class)->findBy(['individu' => $individu]);
@@ -146,9 +161,10 @@ class IndividuController extends AbstractController
 
         $erreurs  =   [];
 
-        // utilisateur peu actif peut être effacé
+        // utilisateur peu actif et qui ne peut pas se connecter peut être effacé
         if ($CollaborateurVersion == null && $Expertise == null
-              && $Rallonge == null && $Session == null) {
+              && $Rallonge == null && $Session == null && count($Sso)==0) {
+
             foreach ($individu->getThematique() as $item) {
                 $em->persist($item);
                 $item->getExpert()->removeElement($individu);
@@ -170,19 +186,21 @@ class IndividuController extends AbstractController
             return $this->redirectToRoute('individu_gerer');
         }
 
-        // utilisateur actif doit être remplacé
-
+        // utilisateur actif ou qui peut se connecter doit être remplacé
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $mail  =   $form->getData()['mail'];
             $new_individu   =   $em->getRepository(Individu::class)->findOneBy(['mail'=>$mail]);
 
             if ($new_individu != null) {
+
+                // Supprimer les thématiques dont je suis expert, il faudra les recréer
                 foreach ($individu->getThematique() as $item) {
                     $em->persist($item);
                     $item->getExpert()->removeElement($individu);
                 }
 
+                // Les projets dont je suis collaborateur - Attention aux éventuels doublons
                 foreach ($CollaborateurVersion  as $item) {
                     if (! $item->getVersion()->isCollaborateur($new_individu)) {
                         $item->setCollaborateur($new_individu);
@@ -191,28 +209,43 @@ class IndividuController extends AbstractController
                     }
                 }
 
+                // On fait reprendre les Sso par le nouvel individu
+                $sso_de_new = $new_individu->getSso();
+                $array_eppn=[];
+                foreach ($new_individu->getSso() as $item) {
+                    $array_eppn[] = $item->getEppn();
+                }
+                foreach ($Sso  as $item) {
+                    if (!in_array($item->getEppn(),$array_eppn)) {
+                        $item->setIndividu($new_individu);
+                        $em->persist($item);
+                    } else {
+                        $em->remove($item);
+                    }
+                }
+
+                // Mes expertises
                 foreach ($Expertise  as $item) {
                     $item->setExpert($new_individu);
                 }
 
+                // Mes rallonges
                 foreach ($Rallonge  as $item) {
                     $item->setExpert($new_individu);
                 }
 
+                // Les entrées de journal (sinon on ne pourra pas supprimer l'ancien individu)
                 foreach ($Journal  as $item) {
                     $item->setIndividu($new_individu);
                 }
 
+                // ...
                 foreach ($Session  as $item) {
                     $item->setPresident($new_individu);
                 }
 
+                // On ne sait jamais
                 foreach ($CompteActivation  as $item) {
-                    $em->remove($item);
-                }
-
-
-                foreach ($Sso  as $item) {
                     $em->remove($item);
                 }
 
@@ -402,15 +435,38 @@ class IndividuController extends AbstractController
      */
     public function modifyAction(Request $request, Individu $individu)
     {
+        $em = $this->getDoctrine()->getManager();
+        $repos = $em->getRepository(Individu::class);
+        
         $editForm = $this->createForm('App\Form\IndividuType', $individu);
 
+        $session = $request->getSession();
+        //$current_mail = $session->get('current_mail');
+        
         $editForm->handleRequest($request);
-
         if ($editForm->isSubmitted() /*&& $editForm->isValid()*/) {
-            $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirectToRoute('individu_gerer');
+            $exc = false;
+            try
+            {
+                $em->flush();
+            }
+            catch (UniqueConstraintViolationException $e)
+            {
+                //dd("merde");
+                $exc = true;
+            };
+
+            // Si exception, aller vers l'écran de remplacement
+            if ( $exc) {
+                $session->set('new_mail', $individu->getMail());
+                return $this->redirectToRoute('remplacer_utilisateur', ['id' => $individu->getIdIndividu()]);
+            } else {
+                return $this->redirectToRoute('individu_gerer');
+            }
         }
+
+        //$session->set('current_mail',$individu->getMail());
 
         return $this->render(
             'individu/modif.html.twig',
@@ -918,7 +974,11 @@ class IndividuController extends AbstractController
             foreach ($users as $individu) {
                 if (preg_match($pattern, $individu->getMail())) {
                     $individus[] = $individu;
-                }
+                } elseif (preg_match($pattern, $individu->getNom())) {
+                    $individus[] = $individu;
+                } elseif (preg_match($pattern, $individu->getPrenom())) {
+                    $individus[] = $individu;
+                };
             }
         } else {
             $individus = $em->getRepository(Individu::class)->getActiveUsers();

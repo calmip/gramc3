@@ -41,7 +41,9 @@
                         <li>Entrer un commentaire à destination du responsable du projet</li>
                         <li>Proposer une attribution (en heures cpu normalisées)</li>
                         <li>Cliquer sur le bouton <strong>Enregistrer</strong> ou <strong>Fermer</strong> pour enregistrer un brouillon de votre expertise</li>
+                        {% if peut_envoyer %}
                         <li><strong>N'oubliez pas de Cliquer sur le bouton <strong>Envoyer</strong></strong> pour envoyer votre expertise au comité d'attribution</li>
+                        {% endif %}
                     </ul>
                 </p>
         {% endif %}
@@ -71,6 +73,20 @@
             </tr>
         </tbody>
     </table>
+    {% if( expertise.definitif == true ) %}
+        <div class="message erreur">
+            <h2>EXPERTISE DÉJÀ ENVOYEE</h2>
+                <p>Votre expertise a déjà été envoyée, vous ne pouvez plus la modifier.</p>
+        </div>
+    {% endif %}
+    
+    {% if not peut_envoyer %}
+        <div class="message warning">
+            <h2>EXPERTISE EN EDITION SEULEMENT</h2>
+                <p>Pour l'instant vous ne pouvez pas envoyer votre expertise.
+                Vous pouvez cependant l'éditer et la sauvegarder</p>
+        </div>
+    {% endif %}
 
     <div id="menu_expertiser" class="center" style="width:500px;margin-bottom:20px">
         <div style="float:left">
@@ -100,9 +116,8 @@
             <img class="bouton_poussoir" src="{{ asset('icones/publis.png') }}" alt="Publications" title="Publications associées au projet {{version.projet.idProjet}}" />
         </a><br /><small><strong>Publications</small></strong>
         </div>
-        
         {% if noconso==false %}
-            {% if  isNouvelle %}
+            {% if not isNouvelle %}
                 <div style="float:left">
                 <img id="bconso_1" class="bouton_poussoir conso" src="{{ asset('icones/conso64.png') }}"
                 alt="Consommation {{anneePrec}}" title="consommation {{anneePrec}}"
@@ -119,32 +134,11 @@
                 {% endif %}
             {% endif %}
         {% endif %}
+        
     </div>
+    <hr class="retour" />
 
    {{ form_start(edit_form) }}
-
-    {% if( expertise.definitif == true ) %}
-        <div class="message erreur">
-            <h2>EXPERTISE DÉJÀ ENVOYEE</h2>
-                <p>Votre expertise a déjà été envoyée, vous ne pouvez plus la modifier.</p>
-        </div>
-    {# session en edition expertise #}
-    {% elseif( session.commGlobal!=null and not version.projet.isProjetTest)  %}
-        <div class="message info">
-            <h2>Commentaire de session</h2>
-                <p><em>Ce commentaire, écrit par le président du comité d'attribution, sera envoyé aux responsables des projets avec le résultat de votre expertise</em></p>
-                <hr />
-                <p>{{ session.commGlobal | e | nl2br}}</p>
-        </div>
-    {% endif %}
-    
-    {% if not peut_envoyer %}
-        <div class="message warning">
-            <h2>EXPERTISE EN EDITION SEULEMENT</h2>
-                <p>Pour l'instant vous ne pouvez pas envoyer votre expertise.
-                Vous pouvez cependant l'éditer et la sauvegarder</p>
-        </div>
-    {% endif %}
 
     {% for expertise in autres_expertises %}
     <table  class="projet">

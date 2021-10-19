@@ -213,7 +213,7 @@ class VersionController extends AbstractController
     }
 
     /**
-     * Supprimer version
+     * Supprimer version (en base de données et dans le répertoire data)
      *
      * @Route("/{id}/supprimer/{rtn}", defaults= {"rtn" = "X" }, name="version_supprimer" )
      * @Security("is_granted('ROLE_DEMANDEUR')")
@@ -224,6 +224,7 @@ class VersionController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
         $sm = $this->sm;
+        $sv = $this->sv;
         $sj = $this->sj;
 
         // ACL
@@ -280,6 +281,9 @@ class VersionController extends AbstractController
             }
         }
 
+        // suppression des fichiers liés à la version
+        $sv->effacerDonnees($version);
+        
         //return $this->redirectToRoute( 'projet_accueil' );
         // Il faudrait plutôt revenir là d'où on vient !
         if ($rtn == "X") {
@@ -1113,7 +1117,7 @@ class VersionController extends AbstractController
         }
         $filename = $annee . $version->getProjet()->getIdProjet() . ".pdf";
         $path     = $dir . '/' . $filename;
-
+        
         $rtn = $sf->televerserFichier($request, $dir, $filename);
 
         // Fichier téléversé avec succès -> On écrit dans la base de données
@@ -1229,7 +1233,7 @@ class VersionController extends AbstractController
         ]
         );
         if ($rapportActivite == null) {
-            $rapportActivite    = new RapportActivite($projet, $annee);
+            $rapportActivite = new RapportActivite($projet, $annee);
         }
 
 

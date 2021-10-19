@@ -243,52 +243,10 @@ class ProjetSpecController extends AbstractController
                 $u     = $user_repo->findOneBy(['loginname' => $login]);
                 if ($u==null) {
                     $passwd = null;
-                    $pwd_expir  = null;
-                } else {
-                    $passwd    = $u->getPassword();
-                    $pwd_expir = $u->getPassexpir();
-                }
-            } else {
-                $login  = 'nologin';
-                $passwd = null;
-                $pwd_expir = null;
-            }
-
-            $projets_collab[] =
-        [
-        'projet'    => $projet,
-        'conso'     => $sp->getConsoCalculP($projet),
-        'rallonges' => $rallonges,
-        'cpt_rall'  => $cpt_rall,
-                'meta_etat' => $sp->getMetaEtat($projet),
-        'login'     => $login,
-        'passwd'    => $passwd,
-        'pwd_expir' => $pwd_expir
-        ];
-        }
-
-        // projets collaborateurs
-        $projets_collab  = [];
-        foreach ($list_projets_collab as $projet) {
-            $versionActive = $sp->versionActive($projet);
-
-            if ($versionActive != null) {
-                $rallonges = $versionActive ->getRallonge();
-                $cpt_rall  = count($rallonges->toArray());
-            } else {
-                $rallonges = null;
-                $cpt_rall  = 0;
-            }
-
-            $cv    = $cv_repo->findOneBy(['version' => $versionActive, 'collaborateur' => $individu]);
-            if ($cv != null) {
-                $login = $cv->getLoginname()==null ? 'nologin' : $cv->getLoginname();
-                $u     = $user_repo->findOneBy(['loginname' => $login]);
-                if ($u==null) {
-                    $passwd = null;
                     $pwd_expir = null;
                 } else {
                     $passwd = $u->getPassword();
+                    $passwd    = Functions::simpleDecrypt($passwd);
                     $pwd_expir = $u->getPassexpir();
                 }
             } else {
@@ -379,7 +337,7 @@ class ProjetSpecController extends AbstractController
     {
         $menu   =   [];
         $menu['commentaire']    =   "Vous ne pouvez pas créer de nouveau projet test actuellement";
-        $menu['name']   =   'nouveau_projet';
+        $menu['name']   =   'avant_nouveau_projet';
         $menu['params'] =   [ 'type' =>  Projet::PROJET_FIL ];
         $menu['lien']   =   'Nouveau projet test';
         $menu['ok'] = false;

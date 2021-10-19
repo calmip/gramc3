@@ -348,7 +348,7 @@ class GramcSessionController extends AbstractController
             return $this->redirectToRoute('accueil');
         }
         $old_individu = clone $individu;
-        $form = $this->createForm(IndividuType::class, $individu);
+        $form = $this->createForm(IndividuType::class, $individu, ['mail' => false ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -633,7 +633,6 @@ class GramcSessionController extends AbstractController
                 $sj->debugMessage('REDIRECT_REMOTE_USER='.$server->get('REDIRECT_REMOTE_USER'));
                 $username =  $server->get('REDIRECT_REMOTE_USER');
             }
-
             $repository1 = $em->getRepository(Sso::class);
             $repository2 = $em->getRepository(Individu::class);
 
@@ -643,6 +642,9 @@ class GramcSessionController extends AbstractController
             } else { // nouvel utilisateur
                 $session = $request->getSession();
                 $session->set('eppn', $username);
+
+                // Récupérer les headers dans la session
+                $this->shibbHeadersToSession($request);
 
                 //return new Response('nouvel utilisateur');
                 return $this->redirectToRoute('nouveau_compte');
@@ -674,10 +676,8 @@ class GramcSessionController extends AbstractController
         }
     }
 
-
-    // TODO - Il y a du code dupliqué entre nouveau_compte et nouveau_profil !
     /**
-    * @Route("/nouveau_compte",name="nouveau_compte")
+    * @Route("/nouveau_compte", name="nouveau_compte")
     */
     public function nouveau_compteAction(Request $request, LoggerInterface $lg)
     {
@@ -692,52 +692,68 @@ class GramcSessionController extends AbstractController
             return $this->redirectToRoute('accueil');
         }
 
-        // vérifier si email est disponible dans $session
-        if ($request->getSession()->has('email')) {
-            $email = $request->getSession()->get('email');
+
+        $eppn = $request->getSession()->get('eppn');
+
+        // tests !
+        // $eppn = "";
+
+        // vérifier si email est disponible dans $session, sinon on redirige sur accueil avec un message dans le journal
+        if ($request->getSession()->has('mail')) {
+            $email = $request->getSession()->get('mail');
+
+        // vérifier si email est disponible dans les headers
+        } elseif ($request->headers->has('mail')) {
+            $email = $request->headers->get('mail');
+            $request->getSession()->set('mail',$email);
+
+        // Pas d'adresse = Pas d'ouverture de compte
         } else {
-            $email = 'nom@labo.fr';
+            $sj->warningMessage(__FILE__ . ":" . __LINE__ . " Pas d'adresse mail pour le nouveau compte (eppn = $eppn");
+            return $this->redirectToRoute('accueil');
         }
-        
+
+        // $eppn = 'toto';
+        // Mauvais eppn - Pas d'ouverture de compte
+        // On ne vérifie que la présence de l'eppn, pas sa conformité
+        if ($eppn === "") {
+            $sj->warningMessage(__FILE__ . ":" . __LINE__ . " eppn défectueux pour le nouveau compte (eppn=$eppn, mail=$email)");
+            return $this->redirectToRoute('accueil');
+        };
+
+        // $email = "";
+        // Mauvaise adresse - Pas d'ouverture de compte
+        if (!$this->isEmail($email)) {
+            $sj->warningMessage(__FILE__ . ":" . __LINE__ . " Adresse mail défectueuse pour le nouveau compte (eppn=$eppn, mail=$email)");
+            return $this->redirectToRoute('accueil');
+        };
 
         $form = Functions::createFormBuilder($ff)
-        ->add('mail', TextType::class, [ 'label' => 'Votre mail :', 'data' => $email ])
-        ->add('save', SubmitType::class, ['label' => 'Connexion'])
-        ->add('reset', ResetType::class, ['label' => 'Effacer'])
+        ->add('save', SubmitType::class, ['label' => 'Continuer'])
         ->getForm();
 
         $form->handleRequest($request);
 
+        // On a cliqué sur "Continuer": on continue vers la page de profil !
         if ($form->get('save')->isClicked() && $form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $repository = $this->getDoctrine()->getRepository('App:Individu');
-
-            $email = $form->getData()['mail'];
-            $request->getSession()->set('email', $email);
-
-            if ($individu = $repository->findOneBy(['mail' =>  $email ])) { // user existe déjà
-                $this->mail_activation($request, $individu);
-
-                return $this->render('default/email_activation.html.twig');
-            //return new Response('<pre> Activation done </pre>');
-                //$this->get('logger')->info("New eppn added : " . $request->getSession()->get('eppn'),
-                //            array('request' => $request) );
-                //return new Response(' user added ' );
-                //return $this->redirectToRoute('accueil');
-            } else {
-                // activation du compte à faire
-                return $this->redirectToRoute('nouveau_profil');
-            }
-            return $this->render('default/nouveau_profil.html.twig', [ 'mail' => $email , 'form' => $form2->createView() ]);
-        }
-        return $this->render('default/nouveau_compte.html.twig', array( 'form' => $form->createView()));
+            return $this->redirectToRoute('nouveau_profil');
+        };
+        
+        return $this->render('default/nouveau_compte.html.twig', [ 'mail' => $email , 'eppn' => $eppn, 'form' => $form->createView()]);    
     }
 
+    private function isEmail(string $email) {
+        $regex = '/^[a-z0-9_%.+-]+@[a-z0-9.-]+\.[a-z]{2,}$/';
+        if (preg_match($regex, strtolower($email))==1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
     /**
      * @Route("/nouveau_profil",name="nouveau_profil")
      *
-     * TODO - Utiliser shibbHeadersToSession pour récupérer les headers directement depuis shibboleth,
-     *        et préremplir le formulaire
      */
     public function nouveau_profilAction(Request $request, LoggerInterface $lg)
     {
@@ -745,86 +761,100 @@ class GramcSessionController extends AbstractController
         $sj = $this->sj;
         $em = $this->getDoctrine()->getManager();
 
+        $session = $request->getSession();
+
         // vérifier si eppn est disponible dans $session
-        if (! $request->getSession()->has('eppn')) { // une tentative de piratage
+        if (! $session->has('eppn')) {
             $sj->warningMessage(__FILE__ . ":" . __LINE__ .  "Pas d'eppn pour le nouveau profil");
             return $this->redirectToRoute('accueil');
+        } else {
+            $eppn = $session->get('eppn');
         }
 
         // vérifier si email est disponible dans $session
-        if (! $request->getSession()->has('email')) { // une tentative de piratage
+        if (! $session->has('mail')) {
             $sj->warningMessage(__FILE__ . ":" . __LINE__ . " Pas d'email pour le nouveau profil");
-            //$lg->warning("No email at nouveau_profil", ['request' => $event->getRequest()]);
             return $this->redirectToRoute('accueil');
+        } else {
+            $mail = $session->get('mail');
         }
 
-        $individu = new Individu();
-        //echo '<pre>';
-        //var_dump(  $request->getSession() );
-        //echo '</pre>';
-        $individu->setMail($request->getSession()->get('email'));
+        // Est-ce qu'il y a déjà un compte avec cette adresse ?
+        $individu = $em->getRepository(Individu::class)->findOneBy(['mail' => $mail]);
+        if ($individu === null) {
+            $flg_ind = false;
+            $individu = new Individu();
+            $individu->setMail($session->get('mail'));
+            if ($session->has('sn')) {
+                $individu->setNom($session->get('sn'));
+            }
+        } else {
+            $flg_ind = true;
+        }
 
-        $form = $this->createForm(IndividuType::class, $individu, [ 'permanent' => true ]);
+        // TESTS !
+        // $session->set('givenName','ursule');
+        // $session->set('sn','Dupont');
+        
+        // Préremplissage du formulaire si la fédération nous a envoyé l'info !
+        if ($session->has('givenName')) {
+            $individu->setPrenom($session->get('givenName'));
+        }
+        
+        if ($session->has('sn')) {
+            $individu->setNom($session->get('sn'));
+        }
+
+        $form = $this->createForm(IndividuType::class, $individu, [ 'mail' => false ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            //$old_individu = $em->getRepository(Individu::class)->findOneBy( ['mail' => $request->getSession()->get('email') ] );
-            $old_individu = $em->getRepository(Individu::class)->findOneBy(['mail' => $individu->getMail() ]);
-            if ($old_individu != null) {
-                $sj->noticeMessage(__FILE__ .':' . __LINE__ . " Utilisateur " . $individu->getMail() . " existe déjà");
-                $this->mail_activation($request, $old_individu);
-                return $this->render('default/email_activation.html.twig');
-                //$sj->debugMessage(__FILE__ .':' . __LINE__ . ' old_individu = ' . Functions::show($old_individu) );
-                return new Response('<pre> Impossible de créer cet utilisateur </pre>');
+            $em->persist($individu);
+
+            $sso = new Sso();
+            $sso->setEppn($eppn);
+            $sso->setIndividu($individu);
+            $em->persist($sso);
+
+            $em->flush();
+
+            if ($flg_ind) {
+                $sj->infoMessage(__METHOD__ .':' . __LINE__ . " Nouvel eppn pour $mail = $eppn");
             } else {
-                /* Envoi d'un mail d'activation à l'utilisateur */
-                $em = $this->getDoctrine()->getManager();
-                $em->persist($individu);
-                $em->flush();
-                $this->mail_activation($request, $individu);
-                $sj->infoMessage(__METHOD__ .':' . __LINE__ . " Nouvel utilisateur " . $individu->getMail() . " créé");
-                return $this->render('default/email_activation.html.twig');
-                //return new Response('<pre> Activation effectuée </pre>');
-            }
-        }
-        return $this->render('default/nouveau_profil.html.twig', array( 'email' => $request->getSession()->get('email'), 'form' => $form->createView()));
-    }
+                $sj->infoMessage(__METHOD__ .':' . __LINE__ . " Nouvel utilisateur créé: $eppn -> $mail");
+            };
 
-    private function mail_activation(Request $request, $individu)
-    {
-        $sj = $this->sj;
-        $sn = $this->sn;
-
-        $key = md5(random_int(1, 10000000000) . microtime());
-        $compteactivation = new CompteActivation();
-        $compteactivation->setIndividu($individu);
-        $compteactivation->setKey($key);
-        $em = $this->getDoctrine()->getManager();
-        $em->persist($compteactivation);
-        $em->flush();
-
-        // envoi de mail
-
-        $session = $request->getSession();
-        $twig_sujet   = 'notification/activation-sujet.html.twig';
-        $twig_contenu = 'notification/activation-contenu.html.twig';
-        $sn -> sendMessage($twig_sujet, $twig_contenu, [ 'key' => $key, 'user' => $individu ], [$session->get('email')]);
-        $sj->infoMessage(__METHOD__ .':' . __LINE__ . ' Activation GRAMC  pour ' .  $session->get('email').  ' envoyé (key=' . $key .')');
-
-        /* Envoi d'une notification aux admins dans le cas où il s'agit d'un compte CRU */
-        $eppn = $request->getSession()->get('eppn');
-        //$sj->debugMessage(__FILE__ .':' . __LINE__ . ' coucou ' . $eppn);
-        if (strpos($eppn, 'sac.cru.fr') !== false) {
-            //$sj->debugMessage(__FILE__ .':' . __LINE__ . ' Demande de COMPTE CRU - '.$eppn);
-            $dest = $sn->mailUsers(['A']);
+            // Envoyer un mail de bienvenue à ce nouvel utilisateur
+            $dest   = [ $mail ];
+            $etab   = preg_replace('/.*@/', '', $eppn);
             $sn->sendMessage(
-                "notification/compte_ouvert_pour_admin-sujet.html.twig",
-                "notification/compte_ouvert_pour_admin-contenu.html.twig",
-                [ 'individu' => $individu, 'eppn' => $eppn ],
+                "notification/compte_ouvert-sujet.html.twig",
+                "notification/compte_ouvert-contenu.html.twig",
+                [ 'individu' => $individu, 'etab' => $etab, 'eppn' => $eppn ],
                 $dest
             );
+
+            // si c'est un compte cru, envoyer un mail aux admins
+            if (strpos($eppn, 'sac.cru.fr') !== false) {
+                //$sj->debugMessage(__FILE__ .':' . __LINE__ . ' Demande de COMPTE CRU - '.$eppn);
+                $dest = $sn->mailUsers(['A']);
+                $sn->sendMessage(
+                    "notification/compte_ouvert_pour_admin-sujet.html.twig",
+                    "notification/compte_ouvert_pour_admin-contenu.html.twig",
+                    [ 'individu' => $individu, 'eppn' => $eppn, 'mail' => $mail ],
+                    $dest
+                );
+            }
+
+            // On est automatiquement connecté en sortant de cet écran
+            return $this->redirectToRoute('connexionshiblogin');
+            //return $this->redirectToRoute('accueil');
         }
+
+        return $this->render('default/nouveau_profil.html.twig', array( 'mail' => $request->getSession()->get('mail'), 'form' => $form->createView()));
+
     }
+
 
     /**
     * @Route("/erreur_login", name="erreur_login")
@@ -921,34 +951,45 @@ class GramcSessionController extends AbstractController
     }
 
     /*
-     * TODO - Déboguer et mettre cette fonction en service
+     * Déposer dans la session les headers fournis par Shibboleth
+     * NOTE - On ne s'occupe pas de eppn, cela est déjà fait par auth_connexionAction
+     *        Côté Fédération, on doit envoyer les attributs correspondants
+     *        Conf Shibboleth: il faut modifier le fichier attribute-map.xml (ie décommenter quelques lignes
+     *        vers Other eduPerson attributes)
      *
      ***/
     private function shibbHeadersToSession(Request $request) {
-        $headers = ['mail', 'givenName', 'sn', 'displayName', 'cn', 'affiliation', 'primary-affiliation', 'eppn'];
+        $headers = ['mail', 'givenName', 'sn', 'displayName', 'cn', 'affiliation', 'primary-affiliation'];
         $headers_values = [];
-    
-        $username_headers = ['REMOTE_USER', 'REDIRECT_REMOTE_USER'];
-        $username = getenv('REMOTE_USER') || null;
-        $server = $request->server;
-    
-        if (is_null($username)) {
-            foreach ($username_headers as $u) {
-                if ($server->has($u)) {
-                    $username = $server->get($u);
-                    break;
-                }
-            }
-        };
 
+        // On recherche dans les headers
         foreach($headers as $h) {
             if ($request->headers->has($h)) {
                 $headers_values[$h] = $request->headers->get($h);
             }
         }
 
+        // On recherche dans les variables du serveur
+        $server = $request->server;
+        foreach($headers as $h) {
+            if (!isset($headers_values[$h])) {
+
+                // mail -> REDIRECT_mail
+                $k1 = 'REDIRECT_'.$h;
+                $k2 = 'HTTP_'.strtoupper($h);
+                if ($server->has($k1)) {
+                    $headers_values[$h] = $server->get($k1);
+                }
+
+                // mail -> HTTP_MAIL
+                elseif ($server->has($k2)) {
+                    $headers_values[$h] = $server->get($k2);
+                }
+                
+            }
+        }
+        
         $session = $request->getSession();
-        $session->set('eppn', $username);
         foreach($headers_values as $h => $v) {
             $session->set($h, $v);
         }

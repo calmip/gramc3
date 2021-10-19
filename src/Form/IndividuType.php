@@ -68,8 +68,10 @@ class IndividuType extends AbstractType
         if ($options['user'] == true) {
             $builder
                 ->add('nom', TextType::class, [ 'label' => 'Nom:'])
-                ->add('prenom', TextType::class, [ 'label' => 'Prénom'])
-                ->add('mail', EmailType::class);
+                ->add('prenom', TextType::class, [ 'label' => 'Prénom']);
+                if ($options['mail'] == true) {
+                    $builder->add('mail', EmailType::class);
+                }
         }
 
         if ($options['admin'] == true) {
@@ -178,11 +180,12 @@ class IndividuType extends AbstractType
         $resolver->setDefaults(
             [
             'data_class'    => 'App\Entity\Individu',
-            'admin'         =>  false,
-            'user'          =>  true,
-            'submit'        =>  true,
-            'thematique'    =>  false,
-            'permanent'     =>  false,
+            'admin'         => false,
+            'user'          => true,
+            'submit'        => true,
+            'thematique'    => false,
+            'permanent'     => false,
+            'mail'          => true,
             ]
         );
     }

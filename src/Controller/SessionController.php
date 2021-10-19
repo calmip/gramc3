@@ -120,7 +120,8 @@ class SessionController extends AbstractController
     {
         $sm = $this->sm;
         $sj = $this->sj;
-
+        $ss = $this->ss;
+        
         if ($sm->gerer_sessions()['ok'] == false) {
             $sj->throwException(__METHOD__ . ':' . __LINE__ . " Ecran interdit " .
         " parce que : " . $sm->gerer_sessions()['raison']);
@@ -138,14 +139,15 @@ class SessionController extends AbstractController
         } else {
             // Refait le calcul de la session courante sans se fier au cache
             $this->sss->remove('SessionCourante');
+            $etat_session = $ss->getSessionCourante()->getEtatSession();
+            $id_session = $ss->getSessionCourante()->getIdSession();
 
             $menu[] = $sm->ajouterSession();
             $menu[] = $sm->modifierSession();
             $menu[] = $sm->demarrerSaisie();
             $menu[] = $sm->terminerSaisie();
-            
             if ($this->getParameter('noedition_expertise')==false) {
-                // On saut une étape si ce paramètre est à true
+                // On saute une étape si ce paramètre est à true
                 $menu[] = $sm->envoyerExpertises();
             }
             $menu[] = $sm->activerSession();
@@ -153,9 +155,11 @@ class SessionController extends AbstractController
         return $this->render(
             'session/gerer.html.twig',
             [
-            'menu'     => $menu,
-            'sessions' => $sessions,
-    ]
+                'menu'     => $menu,
+                'sessions' => $sessions,
+                'etat_session' => $etat_session,
+                'id_session' => $id_session
+            ]
         );
     }
 
@@ -242,8 +246,6 @@ class SessionController extends AbstractController
         if ($workflow->canExecute(Signal::DAT_FIN_DEM, $session_courante)) {
             $workflow->execute(Signal::DAT_FIN_DEM, $session_courante);
             $em->flush();
-            return $this->redirectToRoute('envoyer_expertises');
-            return $this->redirectToRoute('gerer_sessions');
         } else {
             return $this->render(
                 'default/error.html.twig',
@@ -253,7 +255,27 @@ class SessionController extends AbstractController
                 ]
             );
         }
+
+        // Si le paramètre noedition_expertise vaut true, on saute une étape dans le workflow !
+        if ($this->getParameter('noedition_expertise')==true)
+        {
+            if ($workflow->canExecute(Signal::CLK_ATTR_PRS, $session_courante)) {
+                $workflow->execute(Signal::CLK_ATTR_PRS, $session_courante);
+                $em->flush();
+            } else {
+                return $this->render(
+                    'default/error.html.twig',
+                    [
+                    'message'   => 'Impossible terminer la saisie',
+                    'titre'     =>  'Erreur',
+                    ]
+                );
+            };
+        }
+                
+        return $this->redirectToRoute('gerer_sessions');
     }
+    
     /**
       * Avant changement d'état de la version
       *

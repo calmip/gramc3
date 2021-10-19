@@ -925,12 +925,11 @@ class ExpertiseController extends AbstractController
             }
 
             // Bouton Confirmer
-            // Si projet au fil de l'eau mais qu'on n'est pas président, on n'envoie pas de signal
+            // S'il y a plusieurs experts et qu'on n'est pas président, on n'envoie pas de signal
             // Dans tous les autres cas on envoie un signal CLK_VAL_EXP_XXX
-            // TODO - Même problème que ci-dessus - Le discriminant n'est PAS file de l'eau/session
-            //        C'est le nombre d'expertises !
-            $type_projet = $expertise->getVersion()->getProjet()->getTypeProjet();
-            if ($ac->isGranted('ROLE_PRESIDENT')) {
+            //$type_projet = $expertise->getVersion()->getProjet()->getTypeProjet();
+            $max_expertises_nb = $this->getParameter('max_expertises_nb');
+            if ($max_expertises_nb==1 || $ac->isGranted('ROLE_PRESIDENT')) {
                 $expertise->getVersion()->setAttrHeures($expertise->getNbHeuresAtt());
                 $expertise->getVersion()->setAttrHeuresEte($expertise->getNbHeuresAttEte());
                 $expertise->getVersion()->setAttrAccept($expertise->getValidation());
@@ -976,6 +975,7 @@ class ExpertiseController extends AbstractController
             return $this->redirectToRoute('expertise_liste');
         }
 
+        // On n'a pas soumis le formulaire
         // LA SUITE DEPEND DU TYPE DE PROJET !
         // Le workflow n'est pas le même suivant le type de projet, donc l'expertise non plus.
 
