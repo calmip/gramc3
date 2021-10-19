@@ -362,9 +362,11 @@ class ProjetSpecController extends AbstractController
         //}
 
         // manu, 11 juin 2019: tout le monde peut créer un projet test. Vraiment ???
-        //elseif( ! $this->peut_creer_projets() )
-        //    $menu['raison'] = "Vous n'avez pas le droit de créer un projet test, peut-être faut-il mettre à jour votre profil ?";
-        if ($etat_session != Etat::ACTIF) {
+        // manu, Octobre 2021: ben non si on autorise ici ça va coincer plus tard !
+        if( ! $user->peut_creer_projets() ) {
+            $menu['raison'] = "Vous n'avez pas le droit de créer un projet test, peut-être faut-il mettre à jour votre profil ?";
+            return $menu;
+        } elseif ($etat_session != Etat::ACTIF) {
             $menu['raison'] = "Il n'est pas possible de créer un projet test en période d'attribution";
             return $menu;
         }
