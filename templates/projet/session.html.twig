@@ -235,9 +235,10 @@
             <th title="Nouveaux projets">N</th>
             <th></th>
             <th>N°</th>
+            <th>Type</th>
             <th>&nbsp;</th>
             <th title="Etat">E</th>
-            <th>titre</th>
+            <th>Titre</th>
             <th>Thématique</th>
             <th>Rattachement</th>
             <th>dari</th>
@@ -271,7 +272,7 @@
             	<a class="fermeture" href="{{ path('fermer_projet', { 'id': version.projet.idProjet }) }}" title="Fermer le projet">
                 	<img src="{{ asset('icones/process-stop.png') }}" alt="Fermer" />
             	</a>
-            	{% elseif( version.libelleEtat == 'EDITION_EXPERTISE' and session.libelleEtat == 'EDITION_DEMANDE' ) %}
+            	{% elseif( version.libelleEtat == 'EDITION_EXPERTISE') %}
             	<a class="arriere" href="{{ path('back_version', { 'id': version.idVersion }) }}" title="Revenir en édition">
                 	<img src="{{ asset('icones/back.png') }}" alt="En arrière" />
             	</a>
@@ -279,7 +280,7 @@
             	<a class="arriere" href="{{ path('back_version', { 'id': version.idVersion }) }}" title="Revenir en édition">
                 	<img src="{{ asset('icones/back.png') }}" alt="En arrière" />
             	</a>
-            	{% elseif( version.libelleEtat == 'EDITION_DEMANDE' and session.libelleEtat == 'EDITION_DEMANDE') %}
+            	{% elseif( version.libelleEtat == 'EDITION_DEMANDE') %}
             	<a href="{{ path('fwd_version', { 'id': version.idVersion }) }}" title="Envoyer pour expertise">
                 	<img src="{{ asset('icones/forward.png') }}" alt="En avant" />
             	</a>
@@ -292,6 +293,7 @@
             	{% endif %}
             </td>
             <td>{{ version.projet.idProjet }}</td>
+            <td><strong>{{ version.projet.libelletype }}</strong></td>
             <td>
                 <a href="{{ path('consulter_version', { 'id': version.projet.idProjet, 'version': version.idVersion }) }}" title="Consulter le projet">
                 <img src="{{ asset('icones/consulter.png') }}" alt="Consulter" /></a>

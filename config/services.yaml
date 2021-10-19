@@ -1,0 +1,145 @@
+---
+
+# Learn more about services, parameters and containers at
+# https://symfony.com/doc/current/service_container.html
+# https://symfony.com/doc/current/service_container/import.html
+imports:
+        - { resource: parameters.yaml }
+
+services:
+    _defaults:
+        public: false
+        autowire: true
+        autoconfigure: true
+
+    #    service_name:
+    #        class: App\Directory\ClassName
+    #        arguments: ["@another_service_name", "plain_value", "%parameter_name%"]
+     
+    # Tous les controleurs sont des services, ils peuvent utiliser la dependency injection
+    App\Controller\:
+        resource: '../src/Controller/*'
+        tags: [controller.service_arguments]
+
+    # TODO - Il faut déclarer ce repository, pas les autres: POURQUOI ?
+    App\Repository\FormationRepository:
+        autowire: true
+        tags: ['doctrine.repository_service']
+
+    # La plupart des services gramc sont dans le répertoire GramcServices
+    App\GramcServices\:
+        resource: '../src/GramcServices/*'
+        exclude: '../src/GramcServices/Workflow/*'
+
+    # Workflows
+    # Seuls certains objets définis dans le répertoire Workflows sont des services
+    App\GramcServices\Workflow\:
+        resource: '../src/GramcServices/Workflow/*/*Workflow.php'
+        
+    app.gramc_user_provider:
+        class: App\Security\User\GramcUserProvider
+
+    app.user_checker:
+        class: App\Security\User\UserChecker
+
+    App\Security\User\UserChecker: '@app.user_checker'
+    
+     # cf https://stackoverflow.com/questions/47613979/symfony-3-4-0-could-not-find-any-fixture-services-to-load
+    # makes classes in src/AppBundle/DataFixtures available to be used as services
+    # and have a tag that allows actions to type-hint services
+    App\DataFixtures\:
+        resource: '../src/DataFixtures'
+        tags: ['doctrine.fixture.orm']
+
+    App\EventListener\ExceptionListener:
+        arguments: ["%kernel.debug%"]
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception }
+
+    # Evenements Doctrine lorsqu'on met à jour une version
+    App\EventListener\VersionStamp:
+        tags:
+            - # these are the options required to define the entity listener
+                name: 'doctrine.orm.entity_listener'
+                event: 'preUpdate'
+                entity: 'App\Entity\Version'
+
+    App\EventListener\ProjetDerniereVersion:
+        tags:
+            - # these are the options required to define the entity listener
+                name: 'doctrine.orm.entity_listener'
+                event: 'postPersist'
+                entity: 'App\Entity\Version'
+            -   name: 'doctrine.orm.entity_listener'
+                event: 'postRemove'
+                entity: 'App\Entity\Version'
+            -   name: 'doctrine.orm.entity_listener'
+                event: 'postUpdate'
+                entity: 'App\Entity\Version'
+
+    # SERVICES GRAMC
+    App\GramcServices\GramcDate:
+        arguments: ["%recup_printemps_d%","%recup_printemps_f%",
+                    "%recup_automne_d%",  "%recup_automne_f%"]
+
+    App\GramcServices\DonneesFacturation:
+        arguments: ['%dfct_directory%']
+
+    App\GramcServices\GramcGraf\Calcul:
+        arguments: ['ressources_conso_group','ressources_conso_user']
+     
+    App\GramcServices\GramcGraf\Stockage:
+        arguments: ['ressources_conso_group','ressources_conso_user']
+
+    App\GramcServices\GramcGraf\CalculTous:
+        arguments: ['ressources_conso_group','ressources_conso_user']
+     
+    App\GramcServices\ServiceSessions:
+        arguments: ['%recup_attrib_seuil%','%recup_conso_seuil%','%recup_attrib_quant%']
+ 
+    App\GramcServices\ServiceProjets:
+        arguments: ["%prj_prefix%",
+                    "%ressources_conso_group%",
+                    "%signature_directory%",
+                    "%rapport_directory%",
+                    "%fig_directory%",
+                    "%dfct_directory%"]
+
+    App\GramcServices\ServiceVersions:
+        arguments: [ '%attrib_seuil_a%', "%prj_prefix%", "%fig_directory%", "%signature_directory%" ]
+        
+    App\GramcServices\ServiceMenus:
+        arguments: [ "%max_rall%","%nodata%" ]
+        
+    App\GramcServices\ServiceNotifications:
+        arguments: [ "%mailfrom%","%noedition_expertise%" ]
+
+    App\GramcServices\ServiceExperts\ServiceExperts:
+        arguments: [ "%max_expertises_nb%" ]
+
+    App\GramcServices\ServiceExperts\ServiceExpertsRallonge:
+        arguments: [ "%max_expertises_nb%" ]
+
+    App\Controller\ExpertiseController:
+        arguments: [ '%max_expertises_nb%' ]
+
+    # Formulaires, validateurs
+    App\Form\:
+        resource: '../src/Form/*'
+        tags: ["form.type"]
+
+    App\Form\IndividuFormType:
+        arguments: [ "%coll_login%", "%nodata%" ]
+
+    App\Validator\Constraints\PagesNumberValidator:
+        arguments: [ "%max_page_nb%" ]
+        tags: ["validator.constraint_validator" ]
+        
+    # Commandes
+    app.gramc.sendamail:
+        class: App\Command\Sendamail
+        #arguments: ["@twig","@app.gramc.ServiceNotifications"]
+        arguments: ["%kernel.environment%"]
+        tags: ["console.command"]
+    App\Command\Sendamail: '@app.gramc.sendamail'
+        

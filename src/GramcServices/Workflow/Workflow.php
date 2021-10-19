@@ -32,34 +32,33 @@ use App\GramcServices\ServiceSessions;
 
 use Doctrine\ORM\EntityManagerInterface;
 
-
 /***********************************************************************************************
  * Workflow - Implémente des changements d'état entre objets
  *            Workflow est une classe abstraite, seules ses classes dérivées sont utilisables
  *            Il y a une classe dérivée par type d'objet (Projet, Version, Session, Rallonge)
  *            Workflow contient un tableau d'objets de type State décrivant les états de l'objet
- * 
+ *
  **********************************************************************/
-abstract class Workflow 
+abstract class Workflow
 {
     protected $states             = [];	// Contient les objets State encapsulés par ce workflow
     protected $workflowIdentifier = null;
 
-	/*************************
-	 * Le constructeur = Sera surchargé par les classes dérivées afin 
-	 * de mettre les transitions possibles
-	 ******************************************/
-	protected $em = null;
-	protected $sn = null;
-	protected $sj = null;
-	protected $ss = null;
-	
+    /*************************
+     * Le constructeur = Sera surchargé par les classes dérivées afin
+     * de mettre les transitions possibles
+     ******************************************/
+    protected $em = null;
+    protected $sn = null;
+    protected $sj = null;
+    protected $ss = null;
+
     public function __construct(ServiceNotifications $sn, ServiceJournal $sj, ServiceSessions $ss, EntityManagerInterface $em)
     {
-		$this->sn                 = $sn;
-		$this->sj                 = $sj;
-		$this->ss                 = $ss;
-		$this->em                 = $em;
+        $this->sn                 = $sn;
+        $this->sj                 = $sj;
+        $this->ss                 = $ss;
+        $this->em                 = $em;
         $this->workflowIdentifier = get_class($this);
     }
 
@@ -68,128 +67,131 @@ abstract class Workflow
         return $this->workflowIdentifier;
     }
 
-    public  function getWorkflowIdentifier()
+    public function getWorkflowIdentifier()
     {
         $reflect = new \ReflectionClass($this);
         return $reflect->getShortName();
     }
 
-	/***********************************************
-	 * Renvoie l'état de l'objet $object sous forme numérique (cf. Utils/Etat.php)
-	 ************************************************************************/
+    /***********************************************
+     * Renvoie l'état de l'objet $object sous forme numérique (cf. Utils/Etat.php)
+     ************************************************************************/
     protected function getObjectState($object)
     {
-        if( $object == null )
-           $this->sj->errorMessage(__METHOD__  . ":" . __LINE__ . " getObjectState on object null"); 
-        elseif( method_exists($object, 'getObjectState' )  )
-            return $object->getObjectState( $this->workflowIdentifier );
-        else
-            $this->sj->errorMessage(__METHOD__ . ":" . __LINE__ . " getObjectState n'existe pas pour la class ". get_class($object) );
-     }
+        if ($object == null) {
+            $this->sj->errorMessage(__METHOD__  . ":" . __LINE__ . " getObjectState on object null");
+        } elseif (method_exists($object, 'getObjectState')) {
+            return $object->getObjectState($this->workflowIdentifier);
+        } else {
+            $this->sj->errorMessage(__METHOD__ . ":" . __LINE__ . " getObjectState n'existe pas pour la class ". get_class($object));
+        }
+    }
 
-    /************************************************* 
+    /*************************************************
      * Ajoute un état avec ses transitions - Appelé par les constructeurs des classes filles
-     * 
+     *
      * params: $stateConstant Un entier représentant l'état
      * params: $transition_array Tableau associatif représentant les transitions possibles
      *           key est un Entier représentant le signal (cf. Utils/Signal.php)
      *           val est un objet qui dérive de Transition
-     * 
+     *
      *******************************************************************/
-    protected function addState($stateConstant,$transition_array)
+    protected function addState($stateConstant, $transition_array)
     {
-        $this->addStateObject( $stateConstant, new State( $stateConstant, $transition_array) );
-        
-        foreach ($transition_array as $t)
-        {
-			$t->setServices($this->sn, $this->sj, $this->ss, $this->em);
-		}
+        $this->addStateObject($stateConstant, new State($stateConstant, $transition_array));
+
+        foreach ($transition_array as $t) {
+            $t->setServices($this->sn, $this->sj, $this->ss, $this->em);
+        }
         return $this;
     }
 
     /*************************************************
      * Crée un objet State avec ses transitions, et l'ajoute au workflow
      * Fonction privée appelée par addState
-     * 
+     *
      * params: $stateConstant l'entier représentant l'état
      * params: $stateObject L'état (objet State)
-     * 
+     *
      ***/
-    private function addStateObject($stateConstant,State $stateObject)
+    private function addStateObject($stateConstant, State $stateObject)
     {
         $this->states[$stateConstant] = $stateObject;
     }
 
-	/*************************************************
-	 * Renvoie l'objet $state associé à $stateConstant
-	 * Fonction privée appelée par execute
-	 * 
-	 * params: $stateConstant Nombre entier représentant un état (cf. Utils/Etat.php)
-	 * 
-	 * Return: le $state ou null s'il n'existe pas
-	 *************************************************/
-    public  function getState($stateConstant)
+    /*************************************************
+     * Renvoie l'objet $state associé à $stateConstant
+     * Fonction privée appelée par execute
+     *
+     * params: $stateConstant Nombre entier représentant un état (cf. Utils/Etat.php)
+     *
+     * Return: le $state ou null s'il n'existe pas
+     *************************************************/
+    public function getState($stateConstant)
     {
-        if( isset( $this->states[$stateConstant] ))
+        if (isset($this->states[$stateConstant])) {
             return $this->states[$stateConstant];
-        else
-			return null;    
-    }    
+        } else {
+            return null;
+        }
+    }
 
-	/**************************************************
-	 * Execute la transition $transition_code sur l'object $object
-	 * 
+    /**************************************************
+     * Execute la transition $transition_code sur l'object $object
+     *
      * params: $transition_code Un signal (entier), cf Utils/Signal.php
      *         $object Un objet sur lequel agit le workflow
-     * 
+     *
      * return: true si l'état est dans le workflow et si la transition est possible
      *         false sinon
      **************************************************************/
-    public function execute($transition_code, $object) 
+    public function execute($transition_code, $object)
     {
-        if( $object == null )
-		{
-            $this->sj->warningMessage(__METHOD__ ." on a null object dans " . $workflowIdentifier );
+        if ($object == null) {
+            $this->sj->warningMessage(__METHOD__ ." on a null object dans " . $this->workflowIdentifier);
             return  false;
-		}
-        $state = $this->getObjectState($object); 
+        }
+        $state = $this->getObjectState($object);
 
-        if ( $this->hasState( $state )) return $this->getState($state)->execute($transition_code,$object);
-        else 
-        {
-            $this->sj->warningMessage(__METHOD__ .  ":" . __LINE__ . " état " . Etat::getLibelle( $state )
-                    . "(" . $state . ") n'existe pas dans " . $this->getWorkflowIdentifier() );
+        if ($this->hasState($state)) {
+            return $this->getState($state)->execute($transition_code, $object);
+        } else {
+            $this->sj->warningMessage(__METHOD__ .  ":" . __LINE__ . " état " . Etat::getLibelle($state)
+                    . "(" . $state . ") n'existe pas dans " . $this->getWorkflowIdentifier());
             return false;
         }
     }
 
     /***************************************************
      * Renvoie true/false selon que la transition est possible ou pas
-     * 
+     *
      * params: $transition_code Un signal (entier), cf Utils/Signal.php
      *         $object Un objet sur lequel agit le workflow
-     * 
+     *
      * return: true si l'état est dans le workflow et si la transition est possible
      *         false sinon
      **************************************************************/
-    public function canExecute($transition_code,$object)
+    public function canExecute($transition_code, $object)
     {
         $state = $this->getObjectState($object);
-        if ($this->hasState($state)) return $this->states[$state]->canExecute($transition_code,$object);
-        else                         return false;
+        if ($this->hasState($state)) {
+            return $this->states[$state]->canExecute($transition_code, $object);
+        } else {
+            return false;
+        }
     }
 
-    public function hasState( $state )
+    public function hasState($state)
     {
-        return isset( $this->states[$state] );
+        return isset($this->states[$state]);
     }
 
     public function __toString()
     {
         $output = "workflow(" . $this->getWorkflowIdentifier() . ":";
-        foreach ( $this->states as $state ) $output .= $state->__toString().',';
+        foreach ($this->states as $state) {
+            $output .= $state->__toString().',';
+        }
         return $output . ")";
-
     }
-}    
-    
+}

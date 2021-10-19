@@ -34,7 +34,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-
 /**
  * Metathematique controller.
  *
@@ -42,12 +41,12 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class MetaThematiqueController extends AbstractController
 {
-	private $ac;
-		
-	public function __construct (AuthorizationCheckerInterface $ac)
-	{
-		$this->ac  = $ac;
-	}
+    private $ac;
+
+    public function __construct(AuthorizationCheckerInterface $ac)
+    {
+        $this->ac  = $ac;
+    }
 
     /**
      * Lists all metaThematique entities.
@@ -72,18 +71,19 @@ class MetaThematiqueController extends AbstractController
      * @Security("is_granted('ROLE_OBS')")
      */
     public function gererAction()
-	{
-		$ac = $this->ac;
-		$em = $this->getDoctrine()->getManager();
+    {
+        $ac = $this->ac;
+        $em = $this->getDoctrine()->getManager();
 
-		$menu = $ac->isGranted('ROLE_ADMIN')?[ ['ok' => true,'name' => 'ajouter_metaThematique' ,'lien' => 'Ajouter une metathématique','commentaire'=> 'Ajouter une metathématique'] ]: [];
-        return $this->render( 'metathematique/liste.html.twig',
+        $menu = $ac->isGranted('ROLE_ADMIN') ? [ ['ok' => true,'name' => 'ajouter_metaThematique' ,'lien' => 'Ajouter une metathématique','commentaire'=> 'Ajouter une metathématique'] ] : [];
+        return $this->render(
+            'metathematique/liste.html.twig',
             [
             'menu' => $menu,
-            'metathematiques' => $em->getRepository('App:MetaThematique')->findBy( [],['libelle' => 'ASC'])
+            'metathematiques' => $em->getRepository('App:MetaThematique')->findBy([], ['libelle' => 'ASC'])
             ]
-		);
-	}
+        );
+    }
 
     /**
      * Creates a new metaThematique entity.
@@ -107,7 +107,8 @@ class MetaThematiqueController extends AbstractController
             return $this->redirectToRoute('gerer_metaThematiques');
         }
 
-        return $this->render('metathematique/ajouter.html.twig',
+        return $this->render(
+            'metathematique/ajouter.html.twig',
             [
             'menu' => [ [
                         'ok' => true,
@@ -117,7 +118,8 @@ class MetaThematiqueController extends AbstractController
                         ] ],
             'metaThematique' => $metaThematique,
             'edit_form' => $form->createView(),
-            ]);
+            ]
+        );
     }
 
     /**
@@ -144,19 +146,22 @@ class MetaThematiqueController extends AbstractController
      */
     public function modifyAction(Request $request, MetaThematique $thematique)
     {
-        $editForm = $this->createForm('App\Form\MetaThematiqueType', $thematique,
+        $editForm = $this->createForm(
+            'App\Form\MetaThematiqueType',
+            $thematique,
             [
             'modifier'  => true,
-            ]);
+            ]
+        );
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            
             $this->getDoctrine()->getManager()->flush();
             return $this->redirectToRoute('gerer_metaThematiques');
         }
 
-        return $this->render('metathematique/modif.html.twig',
+        return $this->render(
+            'metathematique/modif.html.twig',
             [
             'menu' => [ [
                         'ok' => true,
@@ -166,7 +171,8 @@ class MetaThematiqueController extends AbstractController
                         ] ],
             'metathematique' => $thematique,
             'edit_form' => $editForm->createView(),
-            ]);
+            ]
+        );
     }
     /**
      * Finds and displays a metaThematique entity.

@@ -72,6 +72,17 @@
         </div>
     {% endif %}
 
+    {% if Sso | length > 0 %}
+        <div class="message info">
+        <h3>Informations de connexion (eppn)</h3>
+        <p>
+        {% for item in Sso%}
+        {{item.eppn }}
+        {% endfor %}
+        </p>
+        </div>
+    {% endif %}
+    
     <div class="center" >
     {{ form_start(form) }}
     {{ form_widget(form, { 'attr': { 'class': 'mail ui-autocomplete-input', 'size' : '70' ,'data-mail_autocomplete': path('mail_autocomplete') }}) }}

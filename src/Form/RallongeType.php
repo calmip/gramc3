@@ -35,12 +35,21 @@ class RallongeType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('etatRallonge')->add('demHeures')->add('attrHeures')->add('prjJustifRallonge')
-            ->add('attrAccept')->add('idRallonge')->add('version')
-            ->add('nbHeuresAtt')->add('commentaireInterne')->add('commentaireExterne')->add('validation')->add('expert')
-            ;
+        $builder->add('etatRallonge')
+                ->add('demHeures')
+                ->add('demHeuresGpu')
+                ->add('attrHeures')
+                ->add('prjJustifRallonge')
+                ->add('attrAccept')
+                ->add('idRallonge')
+                ->add('version')
+                ->add('nbHeuresAtt')
+                ->add('commentaireInterne')
+                ->add('commentaireExterne')
+                ->add('validation')
+                ->add('expert');
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -58,6 +67,4 @@ class RallongeType extends AbstractType
     {
         return 'appbundle_rallonge';
     }
-
-
 }

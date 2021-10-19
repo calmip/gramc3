@@ -37,7 +37,7 @@ class SsoType extends AbstractType
     {
         $builder->add('eppn')->add('individu')        ;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -55,6 +55,4 @@ class SsoType extends AbstractType
     {
         return 'appbundle_sso';
     }
-
-
 }

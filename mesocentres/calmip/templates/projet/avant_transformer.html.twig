@@ -1,0 +1,30 @@
+{% extends 'default/base.html.twig' %}
+{% import "default/macros.html.twig" as gramcmacros %}
+
+{% block body %}
+
+<section>
+    <div class="message warning">
+        <h2>Transformez votre projet test {{ projet }} </h2>
+        <p>Votre test est-il concluant ?</p>
+        <p>Si oui, nous vous proposons de transformer votre projet test en projet de session, cela vous permettra de bénéficier d'un plus
+        grand volant d'heures de calcul, d'un espace de stockage pérenne pour les données de votre projet, etc.</p>
+
+        <p>Attention, si votre projet devient un projet de session:</p>
+        
+        <ul>
+            <li>Nous vous demanderons un <strong>formulaire plus conséquent</strong></li>
+            <li>Nous vous demanderons chaque année un <strong>rapport d'activité</strong> du travail écoulé (fichier pdf de 5 pages max) </li>
+            <li>votre projet sera évalué par le <strong>comité d'attribution</strong></li>
+        </ul>
+    </div>
+</section>
+
+<nav>
+    <ul>
+        <li><a class="lien_actif" href="{{ path('transformer', {'projet' : projet }) }}" title="Transformer en projet de session">On y va !</a></li>
+        <li><a class="lien_actif" href="{{ path('consulter_projet', {'id' : projet }) }}" title="On ne transforme pas">Retour au projet</a></li>
+    </ul>
+</nav>
+
+{% endblock body %}

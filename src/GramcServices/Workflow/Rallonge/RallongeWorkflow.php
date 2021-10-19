@@ -43,67 +43,98 @@ class RallongeWorkflow extends Workflow
 
     public function __construct(ServiceNotifications $sn, ServiceJournal $sj, ServiceSessions $ss, EntityManagerInterface $em)
     {
-        if( $this->workflowIdentifier != null ) return;
+        if ($this->workflowIdentifier != null) {
+            return;
+        }
         parent::__construct($sn, $sj, $ss, $em);
 
         $this
-            ->addState( Etat::CREE_ATTENTE ,
+            ->addState(
+                Etat::CREE_ATTENTE,
                 [
-                Signal::CLK_DEMANDE      => new RallongeTransition(Etat::EDITION_DEMANDE, Signal::CLK_DEMANDE,
-							                [ 'R' => 'creation_rallonge_pour_demandeur']),
+                Signal::CLK_DEMANDE      => new RallongeTransition(
+                    Etat::EDITION_DEMANDE,
+                    Signal::CLK_DEMANDE,
+                    [ 'R' => 'creation_rallonge_pour_demandeur']
+                ),
                 Signal::CLK_SESS_FIN     => new RallongeTransition(Etat::ANNULE, Signal::CLK_SESS_FIN),
                 Signal::CLK_FERM         => new RallongeTransition(Etat::ANNULE, Signal::CLK_FERM),
-                ])
-            ->addState( Etat::EDITION_DEMANDE,
+                ]
+            )
+            ->addState(
+                Etat::EDITION_DEMANDE,
                 [
-                Signal::CLK_VAL_DEM      => new RallongeTransition(Etat::EDITION_EXPERTISE, Signal::CLK_VAL_DEM,
-							                [ 'R' => 'depot_rallonge_pour_demandeur',
-							                  'A' => 'depot_rallonge_pour_admin',
-							                  'P' => 'depot_rallonge_pour_president']),
+                Signal::CLK_VAL_DEM      => new RallongeTransition(
+                    Etat::EDITION_EXPERTISE,
+                    Signal::CLK_VAL_DEM,
+                    [ 'R' => 'depot_rallonge_pour_demandeur',
+                                              'A' => 'depot_rallonge_pour_admin',
+                                              'P' => 'depot_rallonge_pour_president']
+                ),
                 Signal::CLK_SESS_FIN     => new RallongeTransition(Etat::ANNULE, Signal::CLK_SESS_FIN),
                 Signal::CLK_FERM         => new RallongeTransition(Etat::ANNULE, Signal::CLK_FERM),
-                ])
-            ->addState( Etat::EDITION_EXPERTISE,
+                ]
+            )
+            ->addState(
+                Etat::EDITION_EXPERTISE,
                 [
-                Signal::CLK_VAL_EXP_OK  =>  new RallongeTransition(Etat::EN_ATTENTE, Signal::CLK_VAL_EXP_OK,
-							                [ 'A' => 'expertise_rallonge_pour_admin',
-							                  'E' => 'expertise_rallonge_pour_expert',
-							                  'P' => 'expertise_rallonge_pour_president']),
-                Signal::CLK_VAL_EXP_KO  =>  new RallongeTransition(Etat::EN_ATTENTE, Signal::CLK_VAL_EXP_KO,
-						                    [ 'A' => 'expertise_rallonge_pour_admin',
-							                  'E' => 'expertise_rallonge_pour_expert',
-							                  'P' => 'expertise_rallonge_pour_president']),
+                Signal::CLK_VAL_EXP_OK  =>  new RallongeTransition(
+                    Etat::EN_ATTENTE,
+                    Signal::CLK_VAL_EXP_OK,
+                    [ 'A' => 'expertise_rallonge_pour_admin',
+                                              'E' => 'expertise_rallonge_pour_expert',
+                                              'P' => 'expertise_rallonge_pour_president']
+                ),
+                Signal::CLK_VAL_EXP_KO  =>  new RallongeTransition(
+                    Etat::EN_ATTENTE,
+                    Signal::CLK_VAL_EXP_KO,
+                    [ 'A' => 'expertise_rallonge_pour_admin',
+                                              'E' => 'expertise_rallonge_pour_expert',
+                                              'P' => 'expertise_rallonge_pour_president']
+                ),
                 Signal::CLK_DESAFFECTER =>  new RallongeTransition(Etat::DESAFFECTE, Signal::CLK_DESAFFECTER),
-                Signal::CLK_AFFECTER    =>  new NoTransition(0,0),
+                Signal::CLK_AFFECTER    =>  new NoTransition(0, 0),
                 Signal::CLK_SESS_FIN     => new RallongeTransition(Etat::ANNULE, Signal::CLK_SESS_FIN),
                 Signal::CLK_FERM         => new RallongeTransition(Etat::ANNULE, Signal::CLK_FERM),
-                ])
-            ->addState( Etat::EN_ATTENTE,
+                ]
+            )
+            ->addState(
+                Etat::EN_ATTENTE,
                 [
-                Signal::CLK_VAL_PRS     =>  new RallongeTransition(Etat::ACTIF, Signal::CLK_VAL_PRS,
-							                [ 'R' => 'expertise_rallonge_finale_pour_demandeur',
-							                  'A' => 'expertise_rallonge_finale_pour_admin',
-							                  'E' => 'expertise_rallonge_finale_pour_expert',
-							                  'P' => 'expertise_rallonge_finale_pour_president']),
+                Signal::CLK_VAL_PRS     =>  new RallongeTransition(
+                    Etat::ACTIF,
+                    Signal::CLK_VAL_PRS,
+                    [ 'R' => 'expertise_rallonge_finale_pour_demandeur',
+                                              'A' => 'expertise_rallonge_finale_pour_admin',
+                                              'E' => 'expertise_rallonge_finale_pour_expert',
+                                              'P' => 'expertise_rallonge_finale_pour_president']
+                ),
                 Signal::CLK_SESS_FIN     => new RallongeTransition(Etat::ANNULE, Signal::CLK_SESS_FIN),
                 Signal::CLK_FERM         => new RallongeTransition(Etat::ANNULE, Signal::CLK_FERM),
-                ])
-            ->addState( Etat::ACTIF,
+                ]
+            )
+            ->addState(
+                Etat::ACTIF,
                 [
                 Signal::CLK_SESS_FIN     => new RallongeTransition(Etat::TERMINE, Signal::CLK_SESS_FIN),
                 Signal::CLK_FERM         => new RallongeTransition(Etat::TERMINE, Signal::CLK_FERM),
-                ])
+                ]
+            )
 
-            ->addState( Etat::TERMINE,
+            ->addState(
+                Etat::TERMINE,
                 [
-                Signal::CLK_SESS_FIN     => new NoTransition(0,0),
-                Signal::CLK_FERM         => new NoTransition(0,0),
-                ])
+                Signal::CLK_SESS_FIN     => new NoTransition(0, 0),
+                Signal::CLK_FERM         => new NoTransition(0, 0),
+                ]
+            )
 
-            ->addState( Etat::ANNULE,
+            ->addState(
+                Etat::ANNULE,
                 [
                 Signal::CLK_SESS_FIN     => new RallongeTransition(Etat::TERMINE, Signal::CLK_SESS_FIN),
                 Signal::CLK_FERM         => new RallongeTransition(Etat::TERMINE, Signal::CLK_FERM),
-                ]);
+                ]
+            );
     }
 }

@@ -57,9 +57,15 @@ class MetaThematique
      */
     private $thematique;
 
-    public function __toString(){ return $this->getLibelle(); }    
-    public function getId(){ return $this->getIdMetaThematique(); }
-    
+    public function __toString()
+    {
+        return $this->getLibelle();
+    }
+    public function getId()
+    {
+        return $this->getIdMetaThematique();
+    }
+
     /**
      * Constructor
      */

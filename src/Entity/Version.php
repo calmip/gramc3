@@ -59,7 +59,7 @@ class Version implements Demande
     /**
      * @var string
      *
-     * @ORM\Column(name="prj_titre", type="string", length=150, nullable=true)
+     * @ORM\Column(name="prj_titre", type="string", length=500, nullable=true)
      */
     private $prjTitre = '';
 
@@ -69,6 +69,13 @@ class Version implements Demande
      * @ORM\Column(name="dem_heures", type="integer", nullable=true)
      */
     private $demHeures = '0';
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="dem_heures_gpu", type="integer", nullable=true)
+     */
+    private $demHeuresGpu = '0';
 
     /**
      * @var integer
@@ -298,6 +305,27 @@ class Version implements Demande
     /**
      * @var string
      *
+     * @ORM\Column(name="code_vol_donn_usr", type="string", length=15, nullable=true)
+     */
+    private $codeVolDonnUsr = '';
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="code_nb_fich_tmp", type="string", length=15, nullable=true)
+     */
+    private $codeNbFichTmp = '';
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="code_nb_fich_perm", type="string", length=15, nullable=true)
+     */
+    private $codeNbFichPerm = '';
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="dem_logiciels", type="text", length=65535, nullable=true)
      */
     private $demLogiciels ='';
@@ -308,6 +336,13 @@ class Version implements Demande
      * @ORM\Column(name="dem_bib", type="text", length=65535, nullable=true)
      */
     private $demBib ='';
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="dem_autres", type="text", length=65535, nullable=true)
+     */
+    private $demAutres ='';
 
     /**
      * @var string
@@ -350,6 +385,76 @@ class Version implements Demande
      * @ORM\Column(name="dem_form_autres", type="text", length=65535, nullable=true)
      */
     private $demFormAutres = '';
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="dem_form_0", type="integer", nullable=true)
+     */
+    private $demForm0 = '';
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="dem_form_1", type="integer", nullable=true)
+     */
+    private $demForm1 = '';
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="dem_form_2", type="integer", nullable=true)
+     */
+    private $demForm2 = '';
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="dem_form_3", type="integer", nullable=true)
+     */
+    private $demForm3 = '';
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="dem_form_4", type="integer", nullable=true)
+     */
+    private $demForm4 = '';
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="dem_form_5", type="integer", nullable=true)
+     */
+    private $demForm5 = '';
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="dem_form_6", type="integer", nullable=true)
+     */
+    private $demForm6 = '';
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="dem_form_7", type="integer", nullable=true)
+     */
+    private $demForm7 = '';
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="dem_form_8", type="integer", nullable=true)
+     */
+    private $demForm8 = '';
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="dem_form_9", type="integer", nullable=true)
+     */
+    private $demForm9 = '';
 
     /**
      * @var boolean
@@ -551,13 +656,13 @@ class Version implements Demande
      * })
      */
     private $projet;
-    
+
     /// Ajout Callisto: Septembre 2019
     /**
      * @var \App\Entity\dataMetaDataFormat
      *
      * @ORM\Column(name="data_metadataformat", type="string", length=15, nullable=true)
-	 *
+     *
      */
     private $dataMetaDataFormat;
 
@@ -565,14 +670,14 @@ class Version implements Demande
      * @var \App\Entity\dataTailleDatasets
      *
      * @ORM\Column(name="data_tailledatasets", type="string", length=15, nullable=true)
-	 *
+     *
      */
     private $dataTailleDatasets;
     /**
      * @var \App\Entity\dataNombreDatasets
      *
      * @ORM\Column(name="data_nombredatasets", type="string", length=15, nullable=true)
-	 *
+     *
      */
     private $dataNombreDatasets;
 
@@ -590,9 +695,8 @@ class Version implements Demande
     public function setVersionActive()
     // on ne sait pas si cela marche parce que l'on ne s'en sert pas
     {
-	    if( $this->etatVersion == Etat::ACTIF && $this->projet != null )
-        {
-            $this->projet->setVersionActive( $this);
+        if ($this->etatVersion == Etat::ACTIF && $this->projet != null) {
+            $this->projet->setVersionActive($this);
         }
     }
 
@@ -601,13 +705,20 @@ class Version implements Demande
     */
     private function convertCodeLanguage()
     {
-	    $codeLangage = $this->getCodeLangage();
-	    if( $codeLangage !=  null )
-        {
-	        if( preg_match('/Fortran/',$codeLangage) )    $this->setCodeFor( true );
-	        if( preg_match('/C,/',$codeLangage)  )        $this->setCodeC( true );
-	        if( preg_match('/C++/',$codeLangage)  )       $this->setCodeCpp( true );
-	        if( preg_match('/Autre/',$codeLangage) )      $this->setCodeAutre( true );
+        $codeLangage = $this->getCodeLangage();
+        if ($codeLangage !=  null) {
+            if (preg_match('/Fortran/', $codeLangage)) {
+                $this->setCodeFor(true);
+            }
+            if (preg_match('/C,/', $codeLangage)) {
+                $this->setCodeC(true);
+            }
+            if (preg_match('/C++/', $codeLangage)) {
+                $this->setCodeCpp(true);
+            }
+            if (preg_match('/Autre/', $codeLangage)) {
+                $this->setCodeAutre(true);
+            }
         }
     }
 
@@ -616,16 +727,16 @@ class Version implements Demande
     */
     public function prePersist()
     {
-		$this->convertCodeLanguage();
-	}
+        $this->convertCodeLanguage();
+    }
 
     /**
     * @ORM\PreUpdate
     */
     public function preUpdate()
     {
-		$this->convertCodeLanguage();
-	}
+        $this->convertCodeLanguage();
+    }
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -665,7 +776,10 @@ class Version implements Demande
 
     ///////////////////////////////////////////////////////////
 
-    public function __toString()    {   return (string)$this->getIdVersion();   }
+    public function __toString()
+    {
+        return (string)$this->getIdVersion();
+    }
 
     /////////////////////////////////////////////////////////////////
 
@@ -696,8 +810,11 @@ class Version implements Demande
 
         return $this;
     }
-	public function setEtat($etatVersion) { return $this->setEtatVersion(); }
-	
+    public function setEtat($etatVersion)
+    {
+        return $this->setEtatVersion($etatVersion);
+    }
+
     /**
      * Get etatVersion
      *
@@ -782,6 +899,30 @@ class Version implements Demande
     }
 
     /**
+     * Set demHeuresGpu
+     *
+     * @param integer $demHeuresGpu
+     *
+     * @return Version
+     */
+    public function setDemHeuresGpu($demHeuresGpu)
+    {
+        $this->demHeuresGpu = $demHeuresGpu;
+
+        return $this;
+    }
+
+    /**
+     * Get demHeuresGpu
+     *
+     * @return integer
+     */
+    public function getDemHeuresGpu()
+    {
+        return $this->demHeuresGpu;
+    }
+
+    /**
      * Set attrHeures
      *
      * @param integer $attrHeures
@@ -818,7 +959,7 @@ class Version implements Demande
 
         return $this;
     }
-    
+
     /**
      * Get prjSousThematique
      *
@@ -866,7 +1007,7 @@ class Version implements Demande
         return $this;
     }
 
-	/**
+    /**
      * Get dataNombreDatasets
      *
      * @return string
@@ -1593,6 +1734,78 @@ class Version implements Demande
     }
 
     /**
+     * Set codeVolDonnUsr
+     *
+     * @param string $codeVolDonnUsr
+     *
+     * @return Version
+     */
+    public function setCodeVolDonnUsr($codeVolDonnUsr)
+    {
+        $this->codeVolDonnUsr = $codeVolDonnUsr;
+
+        return $this;
+    }
+
+    /**
+     * Get codeVolDonnUsr
+     *
+     * @return string
+     */
+    public function getCodeVolDonnUsr()
+    {
+        return $this->codeVolDonnUsr;
+    }
+
+    /**
+     * Set codeNbFichTmp
+     *
+     * @param string $codeNbFichTmp
+     *
+     * @return Version
+     */
+    public function setCodeNbFichTmp($codeNbFichTmp)
+    {
+        $this->codeNbFichTmp = $codeNbFichTmp;
+
+        return $this;
+    }
+
+    /**
+     * Get codeNbFichTmp
+     *
+     * @return string
+     */
+    public function getCodeNbFichTmp()
+    {
+        return $this->codeNbFichTmp;
+    }
+
+    /**
+     * Set codeNbFichPerm
+     *
+     * @param string $codeNbFichPerm
+     *
+     * @return Version
+     */
+    public function setCodeNbFichPerm($codeNbFichPerm)
+    {
+        $this->codeNbFichPerm = $codeNbFichPerm;
+
+        return $this;
+    }
+
+    /**
+     * Get codeNbFichPerm
+     *
+     * @return string
+     */
+    public function getCodeNbFichPerm()
+    {
+        return $this->codeNbFichPerm;
+    }
+
+    /**
      * Set demLogiciels
      *
      * @param string $demLogiciels
@@ -1631,7 +1844,31 @@ class Version implements Demande
     }
 
     /**
-     * Get demBib
+     * Get demAutres
+     *
+     * @return string
+     */
+    public function getDemAutres()
+    {
+        return $this->demAutres;
+    }
+
+    /**
+     * Set demAutres
+     *
+     * @param string $demAutres
+     *
+     * @return Version
+     */
+    public function setDemAutres($demAutres)
+    {
+        $this->demAutres = $demAutres;
+
+        return $this;
+    }
+
+    /**
+     * Get demAutres
      *
      * @return string
      */
@@ -2005,6 +2242,246 @@ class Version implements Demande
     }
 
     /**
+     * Set demForm0
+     *
+     * @param boolean $demForm0
+     *
+     * @return Version
+     */
+    public function setDemForm0($demForm0)
+    {
+        $this->demForm0 = $demForm0;
+
+        return $this;
+    }
+
+    /**
+     * Get demForm0
+     *
+     * @return boolean
+     */
+    public function getDemForm0()
+    {
+        return $this->demForm0;
+    }
+
+    /**
+     * Set demForm1
+     *
+     * @param boolean $demForm1
+     *
+     * @return Version
+     */
+    public function setDemForm1($demForm1)
+    {
+        $this->demForm1 = $demForm1;
+
+        return $this;
+    }
+
+    /**
+     * Get demForm1
+     *
+     * @return boolean
+     */
+    public function getDemForm1()
+    {
+        return $this->demForm1;
+    }
+
+    /**
+     * Set demForm2
+     *
+     * @param boolean $demForm2
+     *
+     * @return Version
+     */
+    public function setDemForm2($demForm2)
+    {
+        $this->demForm2 = $demForm2;
+
+        return $this;
+    }
+
+    /**
+     * Get demForm2
+     *
+     * @return boolean
+     */
+    public function getDemForm2()
+    {
+        return $this->demForm2;
+    }
+
+    /**
+     * Set demForm3
+     *
+     * @param boolean $demForm3
+     *
+     * @return Version
+     */
+    public function setDemForm3($demForm3)
+    {
+        $this->demForm3 = $demForm3;
+
+        return $this;
+    }
+
+    /**
+     * Get demForm3
+     *
+     * @return boolean
+     */
+    public function getDemForm3()
+    {
+        return $this->demForm3;
+    }
+
+    /**
+     * Set demForm4
+     *
+     * @param boolean $demForm4
+     *
+     * @return Version
+     */
+    public function setDemForm4($demForm4)
+    {
+        $this->demForm4 = $demForm4;
+
+        return $this;
+    }
+
+    /**
+     * Get demForm4
+     *
+     * @return boolean
+     */
+    public function getDemForm4()
+    {
+        return $this->demForm4;
+    }
+
+    /**
+     * Set demForm5
+     *
+     * @param boolean $demForm5
+     *
+     * @return Version
+     */
+    public function setDemForm5($demForm5)
+    {
+        $this->demForm5 = $demForm5;
+
+        return $this;
+    }
+
+    /**
+     * Get demForm5
+     *
+     * @return boolean
+     */
+    public function getDemForm5()
+    {
+        return $this->demForm5;
+    }
+
+    /**
+     * Set demForm6
+     *
+     * @param boolean $demForm6
+     *
+     * @return Version
+     */
+    public function setDemForm6($demForm6)
+    {
+        $this->demForm6 = $demForm6;
+
+        return $this;
+    }
+
+    /**
+     * Get demForm6
+     *
+     * @return boolean
+     */
+    public function getDemForm6()
+    {
+        return $this->demForm6;
+    }
+
+    /**
+     * Set demForm7
+     *
+     * @param boolean $demForm7
+     *
+     * @return Version
+     */
+    public function setDemForm7($demForm7)
+    {
+        $this->demForm7 = $demForm7;
+
+        return $this;
+    }
+
+    /**
+     * Get demForm7
+     *
+     * @return boolean
+     */
+    public function getDemForm7()
+    {
+        return $this->demForm7;
+    }
+
+    /**
+     * Set demForm8
+     *
+     * @param boolean $demForm8
+     *
+     * @return Version
+     */
+    public function setDemForm8($demForm8)
+    {
+        $this->demForm8 = $demForm8;
+
+        return $this;
+    }
+
+    /**
+     * Get demForm8
+     *
+     * @return boolean
+     */
+    public function getDemForm8()
+    {
+        return $this->demForm8;
+    }
+
+    /**
+     * Set demForm9
+     *
+     * @param boolean $demForm9
+     *
+     * @return Version
+     */
+    public function setDemForm9($demForm9)
+    {
+        $this->demForm9 = $demForm9;
+
+        return $this;
+    }
+
+    /**
+     * Get demForm9
+     *
+     * @return boolean
+     */
+    public function getDemForm9()
+    {
+        return $this->demForm9;
+    }
+
+    /**
      * Set libelleThematique
      *
      * @param string $libelleThematique
@@ -2340,21 +2817,21 @@ class Version implements Demande
         return $this->idVersion;
     }
 
-	/****
-	 * Get AutreIdVersion
-	 *
-	 * 	19AP01234 => 19BP01234
-	 *  19BP01234 => 19AP01234
-	 *
-	 * @return string
-	 *
-	 */
-	public function getAutreIdVersion()
-	{
-		$id = $this->getIdVersion();
-		$id[2] = ($id[2]==='A')?'B':'A';
-		return $id;
-	}
+    /****
+     * Get AutreIdVersion
+     *
+     * 	19AP01234 => 19BP01234
+     *  19BP01234 => 19AP01234
+     *
+     * @return string
+     *
+     */
+    public function getAutreIdVersion()
+    {
+        $id = $this->getIdVersion();
+        $id[2] = ($id[2]==='A') ? 'B' : 'A';
+        return $id;
+    }
 
     /**
      * Set CGU
@@ -2605,10 +3082,10 @@ class Version implements Demande
         return $this->expertise;
     }
 
-	/***************************************************
-	 * Fonctions utiles pour la class Workflow
-	 * Autre nom pour getEtatVersion/setEtatVersion !
-	 ***************************************************/
+    /***************************************************
+     * Fonctions utiles pour la class Workflow
+     * Autre nom pour getEtatVersion/setEtatVersion !
+     ***************************************************/
     public function getObjectState()
     {
         return $this->getEtatVersion();
@@ -2633,44 +3110,49 @@ class Version implements Demande
      */
     public function getResponsable()
     {
-        foreach( $this->getCollaborateurVersion() as $item )
-                if( $item->getResponsable() == true )
-                    return $item->getCollaborateur();
+        foreach ($this->getCollaborateurVersion() as $item) {
+            if ($item->getResponsable() == true) {
+                return $item->getCollaborateur();
+            }
+        }
         return null;
     }
 
     public function getResponsables()
     {
         $responsables   = [];
-        foreach( $this->getCollaborateurVersion() as $item )
-                if( $item->getResponsable() == true )
-                     $responsables[] = $item->getCollaborateur();
+        foreach ($this->getCollaborateurVersion() as $item) {
+            if ($item->getResponsable() == true) {
+                $responsables[] = $item->getCollaborateur();
+            }
+        }
         return $responsables;
     }
 
     /*****************************************************
      * Renvoie les collaborateurs de la version
-     * 
+     *
      * $moi_aussi           == true : je peux être dans la liste éventuellement
      * $seulement_eligibles == true : Individu permanent et d'un labo régional à la fois
      * $moi                 == Individu connecté, qui est $moi (utile seulement si $moi_aussi est false)
-     * 
+     *
      ************************************************************/
-    public function getCollaborateurs($moi_aussi=true, $seulement_eligibles=false, Individu $moi=null )
+    public function getCollaborateurs($moi_aussi=true, $seulement_eligibles=false, Individu $moi=null)
     {
         $collaborateurs = [];
-        foreach( $this->getCollaborateurVersion() as $item )
-		{
+        foreach ($this->getCollaborateurVersion() as $item) {
             $collaborateur   =  $item->getCollaborateur();
-            if( $collaborateur == null )
-			{
+            if ($collaborateur == null) {
                 //$sj->errorMessage("Version:getCollaborateur : collaborateur null pour CollaborateurVersion ". $item->getId() );
                 continue;
-			}
-            if( $moi_aussi == false && $collaborateur->isEqualTo( $moi ) ) continue;
-            if( $seulement_eligibles == false || ( $collaborateur->isPermanent() && $collaborateur->isFromLaboRegional() ) )
+            }
+            if ($moi_aussi == false && $collaborateur->isEqualTo($moi)) {
+                continue;
+            }
+            if ($seulement_eligibles == false || ($collaborateur->isPermanent() && $collaborateur->isFromLaboRegional())) {
                 $collaborateurs[] = $collaborateur;
-		}
+            }
+        }
         return $collaborateurs;
     }
 
@@ -2682,9 +3164,11 @@ class Version implements Demande
      */
     public function getLabo()
     {
-        foreach( $this->getCollaborateurVersion() as $item )
-                if( $item->getResponsable() == true )
-                    return $item->getLabo();
+        foreach ($this->getCollaborateurVersion() as $item) {
+            if ($item->getResponsable() == true) {
+                return $item->getLabo();
+            }
+        }
         return null;
     }
 
@@ -2709,52 +3193,64 @@ class Version implements Demande
     public function getExpert()
     {
         $expertise =  $this->getOneExpertise();
-        if( $expertise == null )
+        if ($expertise == null) {
             return null;
-        else
+        } else {
             return $expertise->getExpert();
+        }
     }
 
     // pour notifications ou affichage
     public function getExperts()
     {
         $experts    =   [];
-        foreach( $this->getExpertise() as $item )
+        foreach ($this->getExpertise() as $item) {
             $experts[]  =  $item ->getExpert();
+        }
         return $experts;
     }
 
     public function hasExpert()
     {
         $expertise =  $this->getOneExpertise();
-        if( $expertise == null ) return false;
+        if ($expertise == null) {
+            return false;
+        }
 
         $expert = $expertise->getExpert();
-        if( $expert != null )
+        if ($expert != null) {
             return true;
-        else
+        } else {
             return false;
+        }
     }
 
     // pour notifications
     public function getExpertsThematique()
     {
-    $thematique = $this->getPrjThematique();
-    if( $thematique == null) return null;
-    else return $thematique->getExpert();
+        $thematique = $this->getPrjThematique();
+        if ($thematique == null) {
+            return null;
+        } else {
+            return $thematique->getExpert();
+        }
     }
 
     public function getDemHeuresRallonge()
     {
         $demHeures  = 0;
-        foreach( $this->getRallonge() as $rallonge ) $demHeures   +=  $rallonge->getDemHeures();
+        foreach ($this->getRallonge() as $rallonge) {
+            $demHeures   +=  $rallonge->getDemHeures();
+        }
         return $demHeures;
     }
 
     public function getAttrHeuresRallonge()
     {
         $attrHeures  = 0;
-        foreach( $this->getRallonge() as $rallonge ) $attrHeures   +=  $rallonge->getAttrHeures();
+        foreach ($this->getRallonge() as $rallonge) {
+            $attrHeures   +=  $rallonge->getAttrHeures();
+        }
         return $attrHeures;
     }
 
@@ -2765,22 +3261,22 @@ class Version implements Demande
 
     public function getLibelleEtat()
     {
-        return Etat::getLibelle( $this->getEtatVersion() );
+        return Etat::getLibelle($this->getEtatVersion());
     }
     public function getTitreCourt()
     {
         $titre = $this->getPrjTitre();
 
-        if( strlen( $titre ) <= 20 )
+        if (strlen($titre) <= 20) {
             return $titre;
-        else
-            return substr( $titre, 0, 20 ) . "...";
-
+        } else {
+            return substr($titre, 0, 20) . "...";
+        }
     }
 
     public function getAcroLaboratoire()
     {
-        return preg_replace('/^\s*([^\s]+)\s+(.*)$/','${1}',$this->getPrjLLabo() );
+        return preg_replace('/^\s*([^\s]+)\s+(.*)$/', '${1}', $this->getPrjLLabo());
     }
 
     /*
@@ -2788,67 +3284,78 @@ class Version implements Demande
      */
 //    public function getConsoCalcul()
 //    {
-//		$projet = $this->getProjet();
-//		$annee  = $this->getAnneeSession();
-//		return $projet->getConsoCalcul($annee);
-//	}
+    //		$projet = $this->getProjet();
+    //		$annee  = $this->getAnneeSession();
+    //		return $projet->getConsoCalcul($annee);
+    //	}
 
     /*
      * Raccourci vers getQuota du projet
      */
 //    public function getQuota()
 //    {
-//		$projet = $this->getProjet();
-//		$annee  = $this->getAnneeSession();
-//		return $projet->getQuota($annee);
-//	}
+    //		$projet = $this->getProjet();
+    //		$annee  = $this->getAnneeSession();
+    //		return $projet->getQuota($annee);
+    //	}
 
-	/*
-	 * Nombre d'heures demandées, en comptant les rallonges
-	 */
-	public function getDemHeuresTotal()
-	{
-		return $this->getDemHeures() + $this->getDemHeuresRallonge();
-	}
-	 
-	/*
-	 * Nombred'heures attribuées, en comptant les rallonges et les pénalités
-	 */
-	public function getAttrHeuresTotal()
-	{
-		$h = $this->getAttrHeures() + $this->getAttrHeuresRallonge() - $this->getPenalHeures();
-		return $h<0?0:$h;
-	}
+    /*
+     * Nombre d'heures demandées, en comptant les rallonges
+     */
+    public function getDemHeuresTotal()
+    {
+        return $this->getDemHeures() + $this->getDemHeuresRallonge();
+    }
+
+    /*
+     * Nombred'heures attribuées, en comptant les rallonges et les pénalités
+     */
+    public function getAttrHeuresTotal()
+    {
+        $h = $this->getAttrHeures() + $this->getAttrHeuresRallonge() - $this->getPenalHeures();
+        return $h<0 ? 0 : $h;
+    }
 
     // calcul de la consommation à partir de la table Consommation juste pour une session
     // TODOCONSOMMATION - Est  utilisé seulement pour les statistiques
-//	public function getConsoSession()
-//	{
-//		Functions::warningMessage(__FILE__ . ":" . __LINE__ . " getConsoSession n'est pas écrit");
-//		return 0;
-//	}
+    //	public function getConsoSession()
+    //	{
+    //		Functions::warningMessage(__FILE__ . ":" . __LINE__ . " getConsoSession n'est pas écrit");
+    //		return 0;
+    //	}
 
     // MetaEtat d'une version (et du projet associé)
     // Ne sert que pour l'affichage des états de version
-	public function getMetaEtat()
-	{
+    public function getMetaEtat()
+    {
         $etat_version   =   $this->getEtatVersion();
 
-        if     ( $etat_version == Etat::ACTIF             ) return 'ACTIF';
-        elseif ( $etat_version == Etat::ACTIF_TEST        ) return 'ACTIF';
-        elseif ( $etat_version == Etat::NOUVELLE_VERSION_DEMANDEE ) return 'PRESQUE TERMINE';
-        elseif ( $etat_version == Etat::ANNULE            ) return 'ANNULE';
-        elseif ( $etat_version == Etat::EDITION_DEMANDE   ) return 'EDITION';
-        elseif ( $etat_version == Etat::EDITION_TEST      ) return 'EDITION';
-        elseif ( $etat_version == Etat::EDITION_EXPERTISE ) return 'EXPERTISE';
-        elseif ( $etat_version == Etat::EXPERTISE_TEST    ) return 'EXPERTISE';
-        elseif ( $etat_version == Etat::EN_ATTENTE        ) return 'EN ATTENTE';
-        elseif ( $etat_version == Etat::TERMINE           ) 
-        {
-			if ($this->getAttrAccept() == true) return 'TERMINE';
-			else                                return 'REFUSE';
-		}
-		return 'INCONNU';
+        if ($etat_version == Etat::ACTIF) {
+            return 'ACTIF';
+        } elseif ($etat_version == Etat::ACTIF_TEST) {
+            return 'ACTIF';
+        } elseif ($etat_version == Etat::NOUVELLE_VERSION_DEMANDEE) {
+            return 'PRESQUE TERMINE';
+        } elseif ($etat_version == Etat::ANNULE) {
+            return 'ANNULE';
+        } elseif ($etat_version == Etat::EDITION_DEMANDE) {
+            return 'EDITION';
+        } elseif ($etat_version == Etat::EDITION_TEST) {
+            return 'EDITION';
+        } elseif ($etat_version == Etat::EDITION_EXPERTISE) {
+            return 'EXPERTISE';
+        } elseif ($etat_version == Etat::EXPERTISE_TEST) {
+            return 'EXPERTISE';
+        } elseif ($etat_version == Etat::EN_ATTENTE) {
+            return 'EN ATTENTE';
+        } elseif ($etat_version == Etat::TERMINE) {
+            if ($this->getAttrAccept() == true) {
+                return 'TERMINE';
+            } else {
+                return 'REFUSE';
+            }
+        }
+        return 'INCONNU';
     }
 
     //
@@ -2857,66 +3364,72 @@ class Version implements Demande
 
     public function isCollaborateur(Individu $individu)
     {
-        if( $individu == null ) return false;
+        if ($individu == null) {
+            return false;
+        }
 
-        foreach( $this->getCollaborateurVersion() as $item )
-            if($item->getCollaborateur() == null )
+        foreach ($this->getCollaborateurVersion() as $item) {
+            if ($item->getCollaborateur() == null)
                 //$sj->errorMessage('Version:isCollaborateur collaborateur null pour CollaborateurVersion ' . $item);
-                ;
-            elseif( $item->getCollaborateur()->isEqualTo($individu ) )
-                return true;
+                ; elseif ($item->getCollaborateur()->isEqualTo($individu)) {
+                    return true;
+                }
+        }
 
         return false;
     }
 
     public function isResponsable(Individu $individu)
     {
-        if( $individu == null ) return false;
+        if ($individu == null) {
+            return false;
+        }
 
-        foreach( $this->getCollaborateurVersion() as $item )
-            if($item->getCollaborateur() == null )
+        foreach ($this->getCollaborateurVersion() as $item) {
+            if ($item->getCollaborateur() == null)
                 //$sj->errorMessage('Version:isCollaborateur collaborateur null pour CollaborateurVersion ' . $item);
-                ;
-            elseif( $item->getCollaborateur()->isEqualTo($individu ) && $item->getResponsable() == true )
-                return true;
+                ; elseif ($item->getCollaborateur()->isEqualTo($individu) && $item->getResponsable() == true) {
+                    return true;
+                }
+        }
 
         return false;
     }
 
     public function isExpertDe(Individu $individu)
     {
-        if( $individu == null ) return false;
+        if ($individu == null) {
+            return false;
+        }
 
-        foreach( $this->getExpertise() as $expertise )
-		{
-			$expert =  $expertise->getExpert();
+        foreach ($this->getExpertise() as $expertise) {
+            $expert =  $expertise->getExpert();
 
-			if( $expert == null )
-				//$sj->errorMessage("Version:isExpert Expert null dans l'expertise " . $item);
-				;
-			elseif( $expert->isEqualTo($individu) )
-				return true;
-		}
+            if ($expert == null)
+                //$sj->errorMessage("Version:isExpert Expert null dans l'expertise " . $item);
+                ; elseif ($expert->isEqualTo($individu)) {
+                    return true;
+                }
+        }
         return false;
     }
 
     public function isExpertThematique(Individu $individu)
     {
-        if( $individu == null ) return false;
+        if ($individu == null) {
+            return false;
+        }
 
         ////$sj->debugMessage(__METHOD__ . " thematique : " . Functions::show($thematique) );
 
-		$thematique = $this->getPrjThematique();
-		if( $thematique != null )
-		{
-			foreach( $thematique->getExpert() as $expert )
-			{
-				if( $expert->isEqualTo($individu) )
-				{
-					return true;
-				}
-			}
-		}
+        $thematique = $this->getPrjThematique();
+        if ($thematique != null) {
+            foreach ($thematique->getExpert() as $expert) {
+                if ($expert->isEqualTo($individu)) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -2924,7 +3437,7 @@ class Version implements Demande
 
     public function typeSession()
     {
-        return substr( $this->getIdVersion(), 2, 1 );
+        return substr($this->getIdVersion(), 2, 1);
     }
 
     ////////////////////////////////////
@@ -2935,12 +3448,17 @@ class Version implements Demande
         // La fonction versionPrecedente1() renvoie pour de vrai la version précédente
         // TODO - Supprimer cette fonction, ou la renommer
         $versions   =  $this->getProjet()->getVersion();
-        if ( count( $versions ) <= 1 ) return null;
+        if (count($versions) <= 1) {
+            return null;
+        }
 
         $versions   =   $versions->toArray();
-        usort($versions,
-                function(Version $b, Version $a){ return strcmp( $a->getIdVersion(), $b->getIdVersion()); }
-                );
+        usort(
+            $versions,
+            function (Version $b, Version $a) {
+                return strcmp($a->getIdVersion(), $b->getIdVersion());
+            }
+        );
 
         //$sj->debugMessage( __METHOD__ .':'. __LINE__ . " version ID 0 1 = " . $versions[0]." " . $versions[1] );
         return $versions[1];
@@ -2950,16 +3468,16 @@ class Version implements Demande
     {
         $versions   =  $this->getProjet()->getVersion() -> toArray();
         // On trie les versions dans l'ordre croissant
-        usort($versions,
-            function(Version $a, Version $b){ return strcmp( $a->getIdVersion(), $b->getIdVersion()); }
+        usort(
+            $versions,
+            function (Version $a, Version $b) {
+                return strcmp($a->getIdVersion(), $b->getIdVersion());
+            }
         );
-        $k = array_search($this->getIdVersion(),$versions);
-        if ($k===false || $k===0)
-        {
+        $k = array_search($this->getIdVersion(), $versions);
+        if ($k===false || $k===0) {
             return null;
-        }
-        else
-        {
+        } else {
             return $versions[$k-1];
         }
     }
@@ -2967,144 +3485,156 @@ class Version implements Demande
 
     //////////////////////////////////////////////
 
+    /*
+     * TODO - Serait mieux dans ServiceVersions
+     *        Session 22A -> Renvoie la dernière année où il y a eu une version
+     *                       (normalement 2021)
+     *
+     *
+     *************************************/
     public function anneeRapport()
     {
         $anneeRapport = 0;
-        $myAnnee    =  substr( $this->getIdVersion(), 0, 2 );
-        foreach( $this->getProjet()->getVersion() as $version )
-        {
-            $annee = substr( $version->getIdVersion(), 0, 2 );
-            if( $annee < $myAnnee )
-                $anneeRapport = max( $annee, $anneeRapport );
+        $myAnnee    =  substr($this->getIdVersion(), 0, 2);
+        foreach ($this->getProjet()->getVersion() as $version) {
+            $annee = substr($version->getIdVersion(), 0, 2);
+            if ($annee < $myAnnee) {
+                $anneeRapport = max($annee, $anneeRapport);
+            }
         }
 
-        if( $anneeRapport < 10 && $anneeRapport > 0 )
+        if ($anneeRapport < 10 && $anneeRapport > 0) {
             return '200' . $anneeRapport ;
-        elseif( $anneeRapport >= 10 )
+        } elseif ($anneeRapport >= 10) {
             return '20' . $anneeRapport ;
-        else
+        } else {
             return '0';
+        }
     }
 
 
     ///////////////////////////////////////////////
 
-	/*********
-	* Renvoie l'expertise 0 si elle existe, null sinon
-	***************/
+    /*********
+    * Renvoie l'expertise 0 si elle existe, null sinon
+    ***************/
     public function getOneExpertise()
     {
-	    $expertises =   $this->getExpertise()->toArray();
-	    if( $expertises !=  null )
-		{
-	        //$expertise  =   current( $expertises );
-	        $expertise = $expertises[0];
+        $expertises =   $this->getExpertise()->toArray();
+        if ($expertises !=  null) {
+            //$expertise  =   current( $expertises );
+            $expertise = $expertises[0];
 
-	        //Functions::debugMessage(__METHOD__ . " expertise = " . Functions::show( $expertise )
-	        //    . " expertises = " . Functions::show( $expertises ));
-	        return $expertise;
-		}
-	    else
-		{
-	        //Functions::noticeMessage(__METHOD__ . " version " . $this . " n'a pas d'expertise !");
-	        return null;
-		}
+            //Functions::debugMessage(__METHOD__ . " expertise = " . Functions::show( $expertise )
+            //    . " expertises = " . Functions::show( $expertises ));
+            return $expertise;
+        } else {
+            //Functions::noticeMessage(__METHOD__ . " version " . $this . " n'a pas d'expertise !");
+            return null;
+        }
     }
 
     //////////////////////////////////////////////////
 
     public function getFullAnnee()
     {
-	    return '20' . substr( $this->getIdVersion(), 0, 2 );
+        return '20' . substr($this->getIdVersion(), 0, 2);
     }
 
     //////////////////////////////////////////////////
 
     public function isProjetTest()
     {
-    $projet =   $this->getProjet();
-    if( $projet == null )
-        {
-        //$sj->errorMessage(__METHOD__ . ":" . __LINE__ . " version " . $this . " n'est pas associée à un projet !");
-        return false;
+        $projet =   $this->getProjet();
+        if ($projet == null) {
+            //$sj->errorMessage(__METHOD__ . ":" . __LINE__ . " version " . $this . " n'est pas associée à un projet !");
+            return false;
+        } else {
+            return $projet->isProjetTest();
         }
-    else
-        return $projet->isProjetTest();
     }
 
     ///////////////////////////////////////////////////
 
     public function isEdited()
     {
-    $etat   =   $this->getEtatVersion();
-    return $etat == Etat::EDITION_DEMANDE || $etat == Etat::EDITION_TEST;
+        $etat   =   $this->getEtatVersion();
+        return $etat == Etat::EDITION_DEMANDE || $etat == Etat::EDITION_TEST;
     }
 
     ///////////////////////////////////////////////////
 
-////    public function getData()
-////    {
+    ////    public function getData()
+    ////    {
 
     //if( $this->getIdVersion()== '18BP18045' )
     //    //$sj->debugMessage(__METHOD__ . ":" . __LINE__ . " La politique de la version " . $this->getIdVersion() . " est (" . $this->getPolitique() .")");
     //return App::getPolitique( $this->getPolitique() )->getData( $this );
 
-////    if( $this->getPolitique() == Politique::POLITIQUE || Politique::getLibelle( $this->getPolitique() ) == 'UNKNOWN' )
-////        $politique = Politique::DEFAULT_POLITIQUE;
-////    else
-////       $politique = $this->getPolitique();
+    ////    if( $this->getPolitique() == Politique::POLITIQUE || Politique::getLibelle( $this->getPolitique() ) == 'UNKNOWN' )
+    ////        $politique = Politique::DEFAULT_POLITIQUE;
+    ////    else
+    ////       $politique = $this->getPolitique();
 
     //if( $this->getPolitique() == 2 )
     //    //$sj->debugMessage(__METHOD__ . ":" . __LINE__ . " La politique de la version " . $this->getIdVersion() . " est (" . $this->getPolitique() .")");
 
     //return App::getPolitique( $this->getPolitique() )->getData( $this );
-////    return App::getPolitique( $politique )->getData( $this );
-////    }
+    ////    return App::getPolitique( $politique )->getData( $this );
+    ////    }
 
     ////////////////////////////////////////////
 
     public function getAcroEtablissement()
     {
-    $responsable = $this->getResponsable();
-    if( $responsable == null ) return "";
+        $responsable = $this->getResponsable();
+        if ($responsable == null) {
+            return "";
+        }
 
-    $etablissement  =   $responsable->getEtab();
-    if( $etablissement == null ) return "";
+        $etablissement  =   $responsable->getEtab();
+        if ($etablissement == null) {
+            return "";
+        }
 
-    return $etablissement->__toString();
+        return $etablissement->__toString();
     }
 
     ////////////////////////////////////////////
 
     public function getAcroThematique()
     {
-    $thematique = $this->getPrjThematique();
-    if( $thematique == null )
-        return "sans thématique";
-    else
-        return $thematique->__toString();
+        $thematique = $this->getPrjThematique();
+        if ($thematique == null) {
+            return "sans thématique";
+        } else {
+            return $thematique->__toString();
+        }
     }
     ////////////////////////////////////////////
 
     public function getAcroMetaThematique()
     {
-    $thematique = $this->getPrjThematique();
-    if( $thematique == null ) return "sans thématique";
+        $thematique = $this->getPrjThematique();
+        if ($thematique == null) {
+            return "sans thématique";
+        }
 
-    $metathematique =   $thematique->getMetaThematique();
-    if( $metathematique == null )
-        return $thematique->__toString() . " sans métathématique";
-    else
-        return  $thematique->getMetaThematique()->__toString();
+        $metathematique =   $thematique->getMetaThematique();
+        if ($metathematique == null) {
+            return $thematique->__toString() . " sans métathématique";
+        } else {
+            return  $thematique->getMetaThematique()->__toString();
+        }
     }
 
     /////////////////////////////////////////////////////
     public function getEtat()
     {
-		return $this->getEtatVersion();
-	}
-	public function getId()
-	{
-		return $this->getIdVersion();
-	}
+        return $this->getEtatVersion();
+    }
+    public function getId()
+    {
+        return $this->getIdVersion();
+    }
 }

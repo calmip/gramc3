@@ -62,7 +62,10 @@ class Sso
     {
         return $this->eppn;
     }
-    public function getId() { return $this->getEppn(); }
+    public function getId()
+    {
+        return $this->getEppn();
+    }
 
     /**
      * Set eppn

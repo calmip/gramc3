@@ -69,7 +69,7 @@ class CompteActivation
     */
     public function setInitialMajStamp()
     {
-    $this->stamp = new \DateTime();
+        $this->stamp = new \DateTime();
     }
 
     /////////////////////////////////////

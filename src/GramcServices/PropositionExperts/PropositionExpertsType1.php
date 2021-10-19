@@ -28,7 +28,6 @@ use App\Entity\Version;
 use App\Entity\Projet;
 use App\Entity\CollaborateurVersion;
 
-
 /***********************************************************************************************
  * PropositionExpertsType1 - Propose un expert, pour les projets de type 1 (liés à une session)
  *        - Si c'est un renouvellement on cherche dans les versions précédentes
@@ -38,54 +37,49 @@ use App\Entity\CollaborateurVersion;
  *        - Sinon
  *               - On prend les experts liés à la thématique
  *               - On gère les conflits d'intérêts
- * 
+ *
  **********************************************************************/
 class PropositionExpertsType1 extends PropositionExperts
 {
-	public function getProposition(Version $version)
-	{
-		$rattachement = $version -> getPrjRattachement();
-		
-		if ($version->getPrjRattachement() == null)
-		{
-			// Les exclus sont les collaborateurs actuels du projet
-		    $exclus = $this->em->getRepository(CollaborateurVersion::class)->getCollaborateurs( $version );
-		} else {
-			// pas d'exclus
-			$exclus = [];
-		}
+    public function getProposition(Version $version)
+    {
+        $rattachement = $version -> getPrjRattachement();
 
-	    // Si possible on reprend l'expert de la version précédente
-	    $expert = $this -> getExpertVersionPrecedente($version, $exclus);
-	    if ($expert != null) return $expert;
-	    
-		// Expert pas trouvé dans les versions précédentes, on cherche dans les experts de rattachement ou de thématique
-		if ($rattachement != null)
-		{
-		    $experts = $rattachement->getExpert();
-		    if( $experts == null  )
-	        {
-		        $this->sj->warningMessage(__METHOD__  .  ":" . __LINE__ ." rattachement " . $rattachement . " n'a pas d'expert !" );
-		        return null;
-	        }
-		}
-		else
-		{
-		    $thematique = $version->getPrjThematique();
-		    if( $thematique == null )
-	        {
-		        $this->sj->errorMessage(__METHOD__ ." version " . $version->getIdVersion() . " n'a pas de thématique !" );
-		        return null;
-	        }
-	
-		    $experts = $thematique->getExpert();
-		    if( $experts == null  )
-	        {
-		        $this->sj->warningMessage(__METHOD__  .  ":" . __LINE__ ." thematique " . $thematique . " n'a pas d'expert !" );
-	        }
-		}
-		
-		$expert = $this->getExpertDisponible($experts, $exclus);
-		return $expert;		
-	}
+        if ($version->getPrjRattachement() == null) {
+            // Les exclus sont les collaborateurs actuels du projet
+            $exclus = $this->em->getRepository(CollaborateurVersion::class)->getCollaborateurs($version);
+        } else {
+            // pas d'exclus
+            $exclus = [];
+        }
+
+        // Si possible on reprend l'expert de la version précédente
+        $expert = $this -> getExpertVersionPrecedente($version, $exclus);
+        if ($expert != null) {
+            return $expert;
+        }
+
+        // Expert pas trouvé dans les versions précédentes, on cherche dans les experts de rattachement ou de thématique
+        if ($rattachement != null) {
+            $experts = $rattachement->getExpert();
+            if ($experts == null) {
+                $this->sj->warningMessage(__METHOD__  .  ":" . __LINE__ ." rattachement " . $rattachement . " n'a pas d'expert !");
+                return null;
+            }
+        } else {
+            $thematique = $version->getPrjThematique();
+            if ($thematique == null) {
+                $this->sj->errorMessage(__METHOD__ ." version " . $version->getIdVersion() . " n'a pas de thématique !");
+                return null;
+            }
+
+            $experts = $thematique->getExpert();
+            if ($experts == null) {
+                $this->sj->warningMessage(__METHOD__  .  ":" . __LINE__ ." thematique " . $thematique . " n'a pas d'expert !");
+            }
+        }
+
+        $expert = $this->getExpertDisponible($experts, $exclus);
+        return $expert;
+    }
 }

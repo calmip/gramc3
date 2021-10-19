@@ -6,7 +6,6 @@
 *.bkp
 *.tar
 *.tgz
-var
 var.*
 data/*
 *#
@@ -17,15 +16,15 @@ src/cache/*
 
 /app/config/parameters.yml
 /app/config/parameters.*.yml
-services.yaml
+parameters.yaml
 /build/
 /phpunit.xml
-/var/*
+!/var/CACHEDIR.TAG
 !/var/cache
 /var/cache/*
 !var/cache/.gitkeep
-!/var/logs
-/var/logs/*
+!/var/log
+/var/log/*
 !var/logs/.gitkeep
 !/var/sessions
 /var/sessions/*
@@ -34,6 +33,7 @@ services.yaml
 /web/bundles/
 /mesocentres/**/banniere.png
 /mesocentres/**/favicon.ico
+config/packages/security.yaml
 
 altermeso
 config/adresses.txt
@@ -43,3 +43,6 @@ adminer\.php
 
 public/index.php
 
+vendor/**
+tools/phpstan/**
+tools/php-cs-fixer/**

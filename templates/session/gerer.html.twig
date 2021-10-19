@@ -6,18 +6,44 @@
     {% import "default/macros.html.twig" as gramcmacros %}
     {{ gramcmacros.menu(menu) }}
 
+    <div class="message info">
+    {% if etat_session == 1 %}
+    <p class="centrage"><strong>La session {{ id_session }} sera bientôt ouverte</strong></p>
+
+    {% elseif etat_session == 2 %}
+    <p class="centrage"><strong>Session {{id_session}}: Les demandeurs peuvent se connecter et renouveler leurs projets, ou créer de nouveaux projets</strong></p>
+    
+    {% elseif etat_session == 3 %}
+        <p class="centrage"><strong>
+            Session {{id_session}}: Les experts peuvent se connecter et sauvegarder leurs commentaires
+            {% if max_expertises_nb > 1 %} Le président peut envoyer les expertises aux utilisateurs {% endif %}
+        </strong></p>
+    
+    {% elseif etat_session == 4 %}
+    <p class="centrage"><strong>Les experts doivent envoyer leurs commentaires.
+    {% if max_expertises_nb > 1 %} Le président pourra alors envoyer les expertises aux utilisateurs {% endif %}
+    </strong></p>
+    
+
+    {% elseif etat_session == 5 %}
+    <p class="centrage"><strong>La session {{id_session}} est Active, les utilisateurs peuvent calculer</strong></p>
+    {% else %}
+    <p class="centrage"><strong>oooooops ? session courante = {{ id_session }} - (mauvais) état = {{ etat_session }}</strong></p>
+    {% endif %}
+    </div>
+    
     <table id="sessions">
         <thead>
             <tr>
-                <th>id</th>
+                <th rowspan="2">id</th>
                 <th>début</th>
                 <th>fin</th>
-                <th>Heures/année</th></th>
-                <th>président</th>
-                <th>projets</th>
-                <th>heures attribuées</th>
-                <th>état</th>
+                <th rowspan="2">Heures/année</th></th>
+                <th rowspan="2">projets</th>
+                <th rowspan="2">heures attribuées</th>
+                <th rowspan="2">état</th>
             </tr>
+            <tr><th colspan="2"><small>de la saisie des demandes</small></td></tr>
         </thead>
         <tbody>
         {% for session in sessions %}
@@ -26,7 +52,6 @@
                 <td>{% if session.dateDebutSession %}{{ session.dateDebutSession|date('Y-m-d') }}{% endif %}</td>
                 <td>{% if session.dateFinSession %}{{ session.dateFinSession|date('Y-m-d') }}{% endif %}</td>
                 <td>{{ session.hparannee }}</td>
-                <td>{{ session.president }}</td>
                 <td>{{ session.version|length }}</td>
                 <td>{{ session.heuresAttribuees }}</th>
                 <td>{{ session.libelleEtat }}</td>

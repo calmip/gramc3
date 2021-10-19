@@ -37,12 +37,16 @@ class Sendamail extends Command
     // the name of the command (the part after "bin/console")
     protected static $defaultName = 'app:send-a-mail';
 
-	public function __construct( $env, \Twig\Environment $twig, ServiceNotifications $sn)
+    private $env;
+    private $twig;
+    private $sn;
+
+    public function __construct($env, \Twig\Environment $twig, ServiceNotifications $sn)
     {
         // best practices recommend to call the parent constructor first and
         // then set your own properties. That wouldn't work in this case
         // because configure() needs the properties set in this constructor
-        
+
         $this->env  = $env;
         $this->sn   = $sn;
         $this->twig = $twig;
@@ -52,9 +56,9 @@ class Sendamail extends Command
 
     protected function configure()
     {
-		$this->setDescription('Envoyer un mail');
-		$this->setHelp('Envoyer un mail pour tester le système de mail');
-		$this->addArgument('dest', InputArgument::REQUIRED, 'Adresse destinataire');
+        $this->setDescription('Envoyer un mail');
+        $this->setHelp('Envoyer un mail pour tester le système de mail');
+        $this->addArgument('dest', InputArgument::REQUIRED, 'Adresse destinataire');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -65,15 +69,15 @@ class Sendamail extends Command
         // of the command.
 
         // return this if there was no problem running the command
-        
+
         $sn   = $this->sn;
         $twig = $this->twig;
-		$env  = $this->env;
-		
+        $env  = $this->env;
+
         $address = $input->getArgument('dest');
-   		$twig_sujet   = $twig->createTemplate("Essai d'envoi de mails par gramc3");
-		$twig_contenu = $twig->createTemplate("Bonjour " . $address . "\nPour essayer le système de mail en environnement ".$env."\nGramc\n");
-		$sn -> sendMessage(  $twig_sujet, $twig_contenu, [], [$address]);
+        $twig_sujet   = $twig->createTemplate("Essai d'envoi de mails par gramc3");
+        $twig_contenu = $twig->createTemplate("Bonjour " . $address . "\nPour essayer le système de mail en environnement ".$env."\nGramc\n");
+        $sn -> sendMessage($twig_sujet, $twig_contenu, [], [$address]);
         $output->writeln('mail envoyé à '.$address);
         return 0;
 

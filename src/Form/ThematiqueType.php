@@ -43,12 +43,13 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class ThematiqueType extends AbstractType
 {
+    private $em;
 
-	public function __construct (EntityManagerInterface $em)
-	{
-		$this -> em = $em;
-	}
-	
+    public function __construct(EntityManagerInterface $em)
+    {
+        $this -> em = $em;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -57,25 +58,28 @@ class ThematiqueType extends AbstractType
         $builder
             ->add('libelleThematique')
             ->add('metaThematique')
-            ->add('expert', EntityType::class,
+            ->add(
+                'expert',
+                EntityType::class,
                 [
                 'multiple' => true,
-                'expanded' => true, 
+                'expanded' => true,
                 'class' => 'App:Individu',
                 'choices' =>  $options['experts'],
-                ]);
+                ]
+            );
 
-        if( $options['modifier'] == true )
+        if ($options['modifier'] == true) {
             $builder
-                ->add('submit',SubmitType::class, ['label' => 'modifier' ])
-                ->add('reset',ResetType::class, ['label' => 'reset' ]);
-                
-        elseif ( $options['ajouter'] == true )
+                ->add('submit', SubmitType::class, ['label' => 'modifier' ])
+                ->add('reset', ResetType::class, ['label' => 'reset' ]);
+        } elseif ($options['ajouter'] == true) {
             $builder
-                ->add('submit',SubmitType::class, ['label' => 'ajouter' ])
-                ->add('reset',ResetType::class, ['label' => 'reset' ]);
+                ->add('submit', SubmitType::class, ['label' => 'ajouter' ])
+                ->add('reset', ResetType::class, ['label' => 'reset' ]);
+        }
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -87,7 +91,8 @@ class ThematiqueType extends AbstractType
             'modifier' => false,
             'ajouter'  => false,
             'experts'  => $this->em->getRepository(Individu::class)->findAll(),
-            ]);
+            ]
+        );
     }
 
     /**
@@ -97,6 +102,4 @@ class ThematiqueType extends AbstractType
     {
         return 'appbundle_thematique';
     }
-
-
 }

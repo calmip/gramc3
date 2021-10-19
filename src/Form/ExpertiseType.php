@@ -35,9 +35,16 @@ class ExpertiseType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('validation')->add('nbHeuresAtt')->add('commentaireInterne')->add('commentaireExterne')->add('definitif')->add('nbHeuresAttEte')->add('version')->add('expert')        ;
+        $builder->add('validation')
+                ->add('nbHeuresAtt')
+                ->add('commentaireInterne')
+                ->add('commentaireExterne')
+                ->add('definitif')
+                ->add('nbHeuresAttEte')
+                ->add('version')
+                ->add('expert');
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -55,6 +62,4 @@ class ExpertiseType extends AbstractType
     {
         return 'appbundle_expertise';
     }
-
-
 }

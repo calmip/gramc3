@@ -165,7 +165,7 @@ class CommentaireExpert
         return $this->expert;
     }
 
-        /**
+    /**
      * Set majStamp
      *
      * @param \DateTime $majStamp
@@ -188,5 +188,4 @@ class CommentaireExpert
     {
         return $this->majStamp;
     }
-
 }

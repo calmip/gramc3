@@ -50,13 +50,13 @@ class Statut
      */
     private $libelleStatut;
 
-     /**
-     * @var boolean
-     *
-     * @ORM\Column(name="permanent", type="boolean", nullable=false)
-     */
+    /**
+    * @var boolean
+    *
+    * @ORM\Column(name="permanent", type="boolean", nullable=false)
+    */
     private $permanent = false;
-    
+
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
@@ -66,8 +66,14 @@ class Statut
 
     //////////////////////////////////////////////////////
 
-    public function __toString()    {   return $this->getLibelleStatut();   }
-    public function getId()         {   return $this->getIdStatut();        }
+    public function __toString()
+    {
+        return $this->getLibelleStatut();
+    }
+    public function getId()
+    {
+        return $this->getIdStatut();
+    }
 
     /**
      * Set idStatut
@@ -84,7 +90,7 @@ class Statut
     }
 
     //////////////////////////////////////////////////
-    
+
     /**
      * Constructor
      */
@@ -101,7 +107,7 @@ class Statut
     {
         return $this->idStatut;
     }
-    
+
     /**
      * Set libelleStatut
      *
@@ -169,8 +175,9 @@ class Statut
      */
     public function addIndividu(\App\Entity\Individu $individu)
     {
-        if (!$this->individu->contains($individu))
+        if (!$this->individu->contains($individu)) {
             $this->individu[] = $individu;
+        }
 
         return $this;
     }
@@ -194,5 +201,4 @@ class Statut
     {
         return $this->individu;
     }
-
 }

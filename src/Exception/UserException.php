@@ -25,30 +25,29 @@
 namespace App\Exception;
 
 use Symfony\Component\Security\Core\User\UserInterface;
+
 //use Symfony\Component\Security\Core\Exception\AccountStatusException;
 //use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 class UserException extends \RuntimeException
 //class UserException extends AuthenticationException
 {
+    private $user = null;
 
-private     $user = null;
-    
-public function __construct(UserInterface $user, $message = null )
+    public function __construct(UserInterface $user, $message = null)
     {
-        parent::__construct( $message );
+        parent::__construct($message);
         $this->user = $user;
     }
 
-public function getUser()
+    public function getUser()
     {
         return $this->user;
     }
 
-public function setUser(UserInterface $user)
+    public function setUser(UserInterface $user)
     {
         $this->user = $user;
         return $this;
     }
-
 }

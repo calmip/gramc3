@@ -37,7 +37,7 @@ class ParamType extends AbstractType
     {
         $builder->add('cle')->add('val')        ;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -55,6 +55,4 @@ class ParamType extends AbstractType
     {
         return 'appbundle_param';
     }
-
-
 }

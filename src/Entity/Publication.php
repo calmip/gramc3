@@ -75,14 +75,17 @@ class Publication
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\ManyToMany(targetEntity="App\Entity\Projet", mappedBy="publi")
-     * 
+     *
      */
     private $projet;
 
     ////////////////////////////////////////////////////////////////////////
 
-    public function __toString(){ return $this->getRefbib(); }
-    
+    public function __toString()
+    {
+        return $this->getRefbib();
+    }
+
     /**
      * Get id
      *
@@ -210,7 +213,7 @@ class Publication
 
     /**
      * Set idPubli
-     * 
+     *
      * @param integer $id
      * @return Publication
      */
@@ -228,9 +231,10 @@ class Publication
      * @return Publication
      */
     public function addProjet(\App\Entity\Projet $projet)
-    {   
-        if( ! $this->projet->contains( $projet ) )
+    {
+        if (! $this->projet->contains($projet)) {
             $this->projet[] = $projet;
+        }
 
         return $this;
     }
@@ -254,24 +258,22 @@ class Publication
     {
         return $this->projet;
     }
-    
+
     ///////////////////////////////////////////////////////////
-    
+
     /**
      * Get doi, cleaned
      *************************************/
     public function getDoiCleaned()
     {
-		$doi = $this->getDoi();
-		$prf = 'https://doi.org/';
-		
-		if (! empty($doi))
-		{
-			if (str_starts_with($doi,$prf))
-			{
-				$doi = substr ( $doi, strlen($prf) );
-			}
-		}
-		return $doi;
-	}
+        $doi = $this->getDoi();
+        $prf = 'https://doi.org/';
+
+        if (! empty($doi)) {
+            if (str_starts_with($doi, $prf)) {
+                $doi = substr($doi, strlen($prf));
+            }
+        }
+        return $doi;
+    }
 }

@@ -41,32 +41,33 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class RattachementController extends AbstractController
 {
-	private $ac;
-		
-	public function __construct (AuthorizationCheckerInterface $ac)
-	{
-		$this->ac  = $ac;
-	}
-	
-   /**
-     * @Route("/gerer",name="gerer_rattachements" )
-     * @Security("is_granted('ROLE_OBS')")
-     */
-    public function gererAction()
-	{
-		$ac = $this->ac;
-		$em = $this->getDoctrine()->getManager();
-		
-		// Si on n'est pas admin on n'a pas accès au menu
-		$menu = $ac->isGranted('ROLE_ADMIN')?[ ['ok' => true,'name' => 'ajouter_rattachement' ,'lien' => 'Ajouter un rattachement','commentaire'=> 'Ajouter un rattachement'] ] : [];
+    private $ac;
 
-        return $this->render( 'rattachement/liste.html.twig',
+    public function __construct(AuthorizationCheckerInterface $ac)
+    {
+        $this->ac  = $ac;
+    }
+
+    /**
+      * @Route("/gerer",name="gerer_rattachements" )
+      * @Security("is_granted('ROLE_OBS')")
+      */
+    public function gererAction()
+    {
+        $ac = $this->ac;
+        $em = $this->getDoctrine()->getManager();
+
+        // Si on n'est pas admin on n'a pas accès au menu
+        $menu = $ac->isGranted('ROLE_ADMIN') ? [ ['ok' => true,'name' => 'ajouter_rattachement' ,'lien' => 'Ajouter un rattachement','commentaire'=> 'Ajouter un rattachement'] ] : [];
+
+        return $this->render(
+            'rattachement/liste.html.twig',
             [
             'menu' => $menu,
-            'rattachements' => $em->getRepository('App:Rattachement')->findBy( [],['libelleRattachement' => 'ASC'])
+            'rattachements' => $em->getRepository('App:Rattachement')->findBy([], ['libelleRattachement' => 'ASC'])
             ]
-		);
-	}
+        );
+    }
 
     /**
      * Creates a new rattachement entity.
@@ -77,13 +78,16 @@ class RattachementController extends AbstractController
      */
     public function newAction(Request $request)
     {
-		$em = $this->getDoctrine()->getManager();
+        $em = $this->getDoctrine()->getManager();
         $rattachement = new Rattachement();
-        $form = $this->createForm('App\Form\RattachementType', $rattachement,
+        $form = $this->createForm(
+            'App\Form\RattachementType',
+            $rattachement,
             [
             'ajouter' => true,
-            'experts'   => $em->getRepository(Individu::class)->findBy(['expert' => true ] ),
-            ]);
+            'experts'   => $em->getRepository(Individu::class)->findBy(['expert' => true ]),
+            ]
+        );
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -94,7 +98,8 @@ class RattachementController extends AbstractController
             return $this->redirectToRoute('gerer_rattachements');
         }
 
-        return $this->render('rattachement/ajouter.html.twig',
+        return $this->render(
+            'rattachement/ajouter.html.twig',
             [
             'menu' => [ [
                         'ok' => true,
@@ -104,7 +109,8 @@ class RattachementController extends AbstractController
                         ] ],
             'rattachement' => $rattachement,
             'edit_form' => $form->createView(),
-            ]);
+            ]
+        );
     }
     /**
      * Displays a form to edit an existing rattachement entity.
@@ -115,12 +121,15 @@ class RattachementController extends AbstractController
      */
     public function modifyAction(Request $request, Rattachement $rattachement)
     {
-		$em = $this->getDoctrine()->getManager();
-        $editForm = $this->createForm('App\Form\RattachementType', $rattachement,
+        $em = $this->getDoctrine()->getManager();
+        $editForm = $this->createForm(
+            'App\Form\RattachementType',
+            $rattachement,
             [
             'modifier'  => true,
-            'experts'   => $em->getRepository(Individu::class)->findBy(['expert' => true ] ),
-            ]);
+            'experts'   => $em->getRepository(Individu::class)->findBy(['expert' => true ]),
+            ]
+        );
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
@@ -129,7 +138,8 @@ class RattachementController extends AbstractController
             return $this->redirectToRoute('gerer_rattachements');
         }
 
-        return $this->render('rattachement/modif.html.twig',
+        return $this->render(
+            'rattachement/modif.html.twig',
             [
             'menu' => [ [
                         'ok' => true,
@@ -139,7 +149,8 @@ class RattachementController extends AbstractController
                         ] ],
             'rattachement' => $rattachement,
             'edit_form' => $editForm->createView(),
-            ]);
+            ]
+        );
     }
 
     /**
@@ -156,5 +167,4 @@ class RattachementController extends AbstractController
         $em->flush($rattachement);
         return $this->redirectToRoute('gerer_rattachements');
     }
-
 }

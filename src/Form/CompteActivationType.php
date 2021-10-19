@@ -37,7 +37,7 @@ class CompteActivationType extends AbstractType
     {
         $builder->add('stamp')->add('key')->add('individu')        ;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -55,6 +55,4 @@ class CompteActivationType extends AbstractType
     {
         return 'appbundle_compteactivation';
     }
-
-
 }

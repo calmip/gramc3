@@ -35,12 +35,6 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @Assert\Expression("this.getNbHeuresAttEte() <= this.getNbHeuresAtt()",
  *      message="Vous ne pouvez pas attribuer plus d'heures pour l'été que pour la session.")
  *
- * @Assert\Expression("this.getNbHeuresAtt() == 0  or  this.getValidation() == 1",
- *      message="Vous ne pouvez pas attribuer des heures et les refuser à la fois")
- *
- * @Assert\Expression("this.getNbHeuresAtt() > 0  or  this.getValidation() != 1",
- *      message="Si vous ne voulez pas attribuer des heures pour cette session, choisissez ""Refuser pour cette session""")
- *
  */
 class Expertise
 {

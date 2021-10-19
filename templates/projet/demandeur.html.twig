@@ -10,65 +10,76 @@
 
 {% macro ligne_projet(item) %}
 {% import "projet/macros_graphiques.html.twig" as macros_graphiques %}
-	<tr>
-		<td>{{ macros_graphiques.meta_etat_graphique(item.meta_etat) }}</td>
-		<td><a href="{{ path('consulter_projet', { 'id': item.projet.idProjet })}}" title="Ouvrir le projet {{ item.projet.idProjet }}"><img class="bouton_poussoir" src="{{ asset('icones/modifier.png') }}" alt="Modifier" /></a>{% if( item.projet.derniereVersion.isEdited ) %}&nbsp;<a href="{{ path('version_avant_supprimer', { 'id': item.projet.derniereVersion.idVersion })}}" title="Supprimer le projet {{ item.projet.idProjet }}"><img class="bouton_poussoir" src="{{ asset('icones/poubelle16.png') }}" alt="Supprimer" /></a>{% endif %}</td>
-		<td>{{ item.projet.idProjet }}</td>
-		{% if noconso==false %}<td rowspan="{{ item.cpt_rall + 1 }}"><tt>{% if item.login == 'nologin' %} - {% else %} {{item.login}} {% endif %}</tt>
-		{% if item.passwd != null %}<img id="bouton_{{item.projet}}" class="bouton_poussoir right cadenas" src="{{ asset('icones/cadenas.png') }}" alt="Donnez-moi mon mot de passe" title="Donnez-moi mon mot de passe" /></a> {% endif %}</td>{% endif %}
-		<td rowspan="{{ item.cpt_rall + 1 }}">{{ item.projet.titre }}</td>
-		{% if noconso==false %}
-		<td rowspan="{{ item.cpt_rall + 1 }}">{{ item.conso |number_format(1)}}&nbsp;%</td>
-		<td class='cellule_canvas' rowspan="{{ item.cpt_rall + 1 }}">
-			<canvas id="canvas_{{ item.projet.idProjet }}" class="canvas_conso" width="110" height="25"></canvas>
-		</td>
-		<td rowspan="{{ item.cpt_rall + 1 }}">
-			<img id="bconso_{{ item.projet.idProjet }}"  class="bouton_poussoir conso" src="{{ asset('icones/courbe.png') }}"
-			title="Evolution de la consommation" alt="Evolution de la consommation"
-			data-href="{{ absolute_url(path('projet_conso', { 'id': item.projet.idProjet, 'loginname': item.login, 'annee' : item.projet.derniereVersion.getFullAnnee() })) }}"/>
-		</td>
-		<input id="conso_{{ item.projet.idProjet }}" value="{{ item.conso |number_format(1)}}" type="hidden">
-		{% endif %}
-	</tr>
+    <tr>
+        <td>{{ macros_graphiques.meta_etat_graphique(item.meta_etat) }}</td>
+        <td><a href="{{ path('consulter_projet', { 'id': item.projet.idProjet })}}" title="Ouvrir le projet {{ item.projet.idProjet }}"><img class="bouton_poussoir" src="{{ asset('icones/modifier.png') }}" alt="Modifier" /></a>{% if( item.projet.derniereVersion.isEdited ) %}&nbsp;<a href="{{ path('version_avant_supprimer', { 'id': item.projet.derniereVersion.idVersion })}}" title="Supprimer le projet {{ item.projet.idProjet }}"><img class="bouton_poussoir" src="{{ asset('icones/poubelle16.png') }}" alt="Supprimer" /></a>{% endif %}</td>
+        <td>{{ item.projet.idProjet }}</td>
+        {% if noconso==false %}<td rowspan="{{ item.cpt_rall + 1 }}"><tt>{% if item.login == 'nologin' %} - {% else %} {{item.login}} {% endif %}</tt>
+        {% if item.passwd != null %}<img id="bouton_{{item.projet}}" class="bouton_poussoir right cadenas" src="{{ asset('icones/cadenas.png') }}" alt="Donnez-moi mon mot de passe" title="Donnez-moi mon mot de passe" /></a> {% endif %}</td>{% endif %}
+        <td rowspan="{{ item.cpt_rall + 1 }}">{{ item.projet.titre }}</td>
+        {% if noconso==false %}
+        <td rowspan="{{ item.cpt_rall + 1 }}">{{ item.conso |number_format(1)}}&nbsp;%</td>
+        <td class='cellule_canvas' rowspan="{{ item.cpt_rall + 1 }}">
+            <canvas id="canvas_{{ item.projet.idProjet }}" class="canvas_conso" width="110" height="25"></canvas>
+        </td>
+        <td rowspan="{{ item.cpt_rall + 1 }}">
+            <img id="bconso_{{ item.projet.idProjet }}"  class="bouton_poussoir conso" src="{{ asset('icones/courbe.png') }}"
+            title="Evolution de la consommation" alt="Evolution de la consommation"
+            data-href="{{ absolute_url(path('projet_conso', { 'id': item.projet.idProjet, 'loginname': item.login, 'annee' : item.projet.derniereVersion.getFullAnnee() })) }}"/>
+        </td>
+        <input id="conso_{{ item.projet.idProjet }}" value="{{ item.conso |number_format(1)}}" type="hidden">
+        {% endif %}
+    </tr>
 
-	{% set num_rallonge = 1 %}
-	{% for rallonge in item.rallonges %}
-	<tr>
-		<td>{{ macros_graphiques.meta_etat_graphique(rallonge.getMetaEtat() ) }}</td>
-		<td>
-			<a href="{{ path('rallonge_consulter', { 'id': rallonge.idRallonge })}}"
-			{% if rallonge.getMetaEtat() == 'EDITION' %}
-				title="Modifier cette rallonge" ><img class="bouton_poussoir" src="{{ asset('icones/modifier.png') }}" alt="Modifier"  />
-			{% else %}
-				title="Consulter cette rallonge" ><img class="bouton_poussoir" src="{{ asset('icones/consulter.png') }}" alt="Consulter" />
-			{% endif %}
-			</a>
-		</td>
-		<td>
-			{% if num_rallonge == 1 %}
-				<strong>Rallonge</strong>
-			{% else %}
-				<strong>Rallonge {{ num_rallonge }}</strong>
-			{% endif %}
-		</td>
-		{% set num_rallonge = num_rallonge + 1 %}
-	</tr>
-	{% endfor %}
+    {% set num_rallonge = 1 %}
+    {% for rallonge in item.rallonges %}
+    <tr>
+        <td>{{ macros_graphiques.meta_etat_graphique(rallonge.getMetaEtat() ) }}</td>
+        <td>
+            <a href="{{ path('rallonge_consulter', { 'id': rallonge.idRallonge })}}"
+            {% if rallonge.getMetaEtat() == 'EDITION' %}
+                title="Modifier cette rallonge" ><img class="bouton_poussoir" src="{{ asset('icones/modifier.png') }}" alt="Modifier"  />
+            {% else %}
+                title="Consulter cette rallonge" ><img class="bouton_poussoir" src="{{ asset('icones/consulter.png') }}" alt="Consulter" />
+            {% endif %}
+            </a>
+        </td>
+        <td>
+            {% if num_rallonge == 1 %}
+                <strong>Rallonge</strong>
+            {% else %}
+                <strong>Rallonge {{ num_rallonge }}</strong>
+            {% endif %}
+        </td>
+        {% set num_rallonge = num_rallonge + 1 %}
+    </tr>
+    {% endfor %}
 
 {% endmacro ligne_projet %}
 
 {% macro fenetre_pwd(item) %}
 {% if item.passwd != null %}
 <div id="dialog_{{item.projet}}" class="invisible_if_no_js">
-	<h2>Vos identifiants pour le projet {{item.projet}}</h2>
-	<p>Vos identifiants pour le projet {{item.projet}} figurent ci-dessous:</p>
-	<ul>
-		<li>Nom d'utilisateur: <tt>{{item.login}}</tt></li>
-		<li>Mot de passe: <tt>{{item.passwd}}</tt></li>
-	</ul>
-	
-	<p>Vous devez maintenant vous connecter <strong>avant le {{item.pwd_expir|date('d/m/Y')}}</strong> sur le supercalculateur en utilisant les identifiants ci-dessus, puis <strong>changer votre mot de passe</strong>. Pour cela: bla bla	
-	</p>
+    <h2>Vos identifiants pour le projet {{item.projet}}</h2>
+    <p>Vos identifiants pour le projet {{item.projet}} figurent ci-dessous:</p>
+    <ul>
+        <li>Nom d'utilisateur: <tt><strong>{{item.login}}</strong></tt></li>
+        <li>Mot de passe: <tt><strong>{{item.passwd}}</strong></tt></li>
+    </ul>
+    
+    <p>Vous devez maintenant vous connecter <strong>avant le {{item.pwd_expir|date('d/m/Y')}}</strong> sur le supercalculateur en utilisant les identifiants ci-dessus, puis <strong>changer votre mot de passe</strong>.
+    Pour cela:
+    <ol>
+        <li>Connectez-vous sur Olympe</li>
+        <li>Tapez:<pre>
+ssh olympelogin1
+passwd
+</pre>
+        </li>
+        <li>Une fois le changement effectué, déconnectez-vous</li>
+        <li>Le mot de passe sera mis à jour dans les 10 minutes.</li>
+    </ol>
+    </p>
 </div>
 {% endif %}
 {% endmacro fenetre_pwd %}
@@ -120,7 +131,7 @@
 </table>
 
 {% for item in  projets_resp %}
-	 {{ thismacro.fenetre_pwd(item) }}
+     {{ thismacro.fenetre_pwd(item) }}
 {% endfor %}
 
 {%  endif %}
@@ -152,7 +163,7 @@
 
 </table>
 {% for item in  projets_collab %}
-	 {{ thismacro.fenetre_pwd(item) }}
+     {{ thismacro.fenetre_pwd(item) }}
 {% endfor %}
 
 {%  endif %}
@@ -212,10 +223,6 @@ Les autres utilisateurs doivent se rapprocher de leur équipe de recherche.
 Il n'est possible de demander des ressources sur {{mesoc}} que pendant une session d'attribution.
 </div>
 {% endif %}
-
-<div class="message info">
-En-dehors des sessions d'attribution, il est possible de créer un <strong>projet test</strong> (5000h max)
-</div>
 
 </section>
 {% endblock body %}

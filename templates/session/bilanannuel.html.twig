@@ -25,6 +25,12 @@
 
     <br />
 
+    <form action="{{ path('bilan_annuel_users_csv', {'annee': annee }) }}">
+        <input type="submit" value="Bilan par utilisateur {{ annee }} en csv" />
+    </form>
+
+    <br />
+
     <form action="{{ path('projet_resumes', {'annee': annee }) }}">
         <input type="submit" value="Afficher les résumés des projets de l'année {{ annee }}" />
     </form>

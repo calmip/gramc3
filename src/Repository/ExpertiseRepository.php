@@ -23,6 +23,7 @@
  **/
 
 namespace App\Repository;
+
 use App\Utils\Etat;
 
 use App\Entity\Session;
@@ -38,82 +39,89 @@ use App\Entity\Version;
  */
 class ExpertiseRepository extends \Doctrine\ORM\EntityRepository
 {
-public function countExpertises($expert)
+    public function countExpertises($expert)
     {
-    return $this->getEntityManager()
-         ->createQuery
-        ('SELECT count(e) FROM App:Expertise e JOIN App:Version v WHERE ( v.etatVersion = :edition_expertise  AND e.version = v AND e.expert = :expert )')
-        ->setParameter('edition_expertise', Etat::getEtat('EDITION_EXPERTISE') )
-        ->setParameter('expert', $expert )
+        return $this->getEntityManager()
+         ->createQuery('SELECT count(e) FROM App:Expertise e JOIN App:Version v WHERE ( v.etatVersion = :edition_expertise  AND e.version = v AND e.expert = :expert )')
+        ->setParameter('edition_expertise', Etat::getEtat('EDITION_EXPERTISE'))
+        ->setParameter('expert', $expert)
         ->getSingleScalarResult();
     }
 
 
-public function findExpertisesByThematique(Thematique $thematique, Session $session)
-{
-    //$dql  =   'SELECT e FROM App:Expertise e';
-    //$dql .=  " INNER JOIN App:Version v WITH e.version = v ";
-    //$dql .=  " WHERE ( v.session = :session AND v.prjThematique = :thematique )";
-    //$dql .=  " GROUP BY v.prjThematique";
+    public function findExpertisesByThematique(Thematique $thematique, Session $session)
+    {
+        //$dql  =   'SELECT e FROM App:Expertise e';
+        //$dql .=  " INNER JOIN App:Version v WITH e.version = v ";
+        //$dql .=  " WHERE ( v.session = :session AND v.prjThematique = :thematique )";
+        //$dql .=  " GROUP BY v.prjThematique";
 
-	$dql  = 'SELECT e FROM App:Expertise e, App:Version v';
-	$dql .= ' WHERE ( v.session = :session AND v.prjThematique = :thematique )';
-    return $this->getEntityManager()
-         ->createQuery( $dql )
-         ->setParameter('session', $session )
-         ->setParameter('thematique', $thematique )
+        $dql  = 'SELECT e FROM App:Expertise e, App:Version v';
+        $dql .= ' WHERE ( v.session = :session AND v.prjThematique = :thematique )';
+        return $this->getEntityManager()
+         ->createQuery($dql)
+         ->setParameter('session', $session)
+         ->setParameter('thematique', $thematique)
          ->getResult();
-}
+    }
 
-public function findExpertisesByThematiqueForAllSessions(Thematique $thematique)
-{
-    $dql     =   'SELECT e FROM App:Expertise e';
-    $dql    .=  " INNER JOIN App:Version v WITH e.version = v ";
-    $dql    .=  " WHERE ( v.prjThematique = :thematique ) ";
+    public function findExpertisesByThematiqueForAllSessions(Thematique $thematique)
+    {
+        $dql     =   'SELECT e FROM App:Expertise e';
+        $dql    .=  " INNER JOIN App:Version v WITH e.version = v ";
+        $dql    .=  " WHERE ( v.prjThematique = :thematique ) ";
 
-    return $this->getEntityManager()
-         ->createQuery( $dql )
-         ->setParameter('thematique', $thematique )
+        return $this->getEntityManager()
+         ->createQuery($dql)
+         ->setParameter('thematique', $thematique)
          ->getResult();
-}
+    }
 
-// 14-10-2020 -> Ne garde que les expertises pour lesquelles definitif vaut 0
-public function findExpertisesByExpert(Individu $expert, Session $session)
-{
-    $dql     =   'SELECT e FROM App:Expertise e';
-    $dql    .=  " INNER JOIN App:Version v WITH e.version = v ";
-    $dql    .=  " WHERE ( v.session = :session AND e.expert = :expert AND e.definitif = 0 ) ";
+    // 14-10-2020 -> Ne garde que les expertises pour lesquelles definitif vaut 0
+    public function findExpertisesByExpert(Individu $expert, Session $session)
+    {
+        $dql     =   'SELECT e FROM App:Expertise e';
+        $dql    .=  " INNER JOIN App:Version v WITH e.version = v ";
+        $dql    .=  " WHERE ( v.session = :session AND e.expert = :expert AND e.definitif = 0 ) ";
 
-    return $this->getEntityManager()
-         ->createQuery( $dql )
-         ->setParameter('session', $session )
-         ->setParameter('expert', $expert )
+        return $this->getEntityManager()
+         ->createQuery($dql)
+         ->setParameter('session', $session)
+         ->setParameter('expert', $expert)
          ->getResult();
-}
+    }
 
-public function findExpertisesByExpertForAllSessions(Individu $expert)
-{
-    $dql     =   'SELECT e FROM App:Expertise e';
-    $dql    .=  " INNER JOIN App:Version v WITH e.version = v ";
-    $dql    .=  " WHERE ( e.expert = :expert ) ";
+    // Les expertises liées à un expert, toutes session confondues
+    // Seulement les non définitives si $non_def vaut true
+    public function findExpertisesByExpertForAllSessions(Individu $expert, $non_def=false)
+    {
+        $dql  = "SELECT e FROM App:Expertise e";
+        $dql .= " INNER JOIN App:Version v WITH e.version = v ";
+        $dql .= " WHERE ( e.expert = :expert AND v.etatVersion != :annule";
+        if ($non_def) {
+            $dql .= " AND e.definitif = 0 ) ";
+        }
+        else
+        {
+            $dql .= " )";
+        }        
 
-    return $this->getEntityManager()
-         ->createQuery( $dql )
-         ->setParameter('expert', $expert )
+        return $this->getEntityManager()
+         ->createQuery($dql)
+         ->setParameter('expert', $expert)
+         ->setParameter('annule', Etat::ANNULE)
          ->getResult();
-}
+    }
 
-// Renvoie toutes les expertises sur une version donnée, SAUF celle de $expert
-public function findExpertisesForVersion(Version $version,$expert)
-{
-	$dql     =   'SELECT e FROM App:Expertise e WHERE e.version = :version AND e.expert != :expert ORDER BY e.id';
+    // Renvoie toutes les expertises sur une version donnée, SAUF celle de $expert
+    public function findExpertisesForVersion(Version $version, $expert)
+    {
+        $dql     =   'SELECT e FROM App:Expertise e WHERE e.version = :version AND e.expert != :expert ORDER BY e.id';
 
-    return $this->getEntityManager()
-         ->createQuery( $dql )
-         ->setParameter('version', $version )
-         ->setParameter('expert', $expert )
+        return $this->getEntityManager()
+         ->createQuery($dql)
+         ->setParameter('version', $version)
+         ->setParameter('expert', $expert)
          ->getResult();
-}
-
-
+    }
 }

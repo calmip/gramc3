@@ -37,7 +37,7 @@ class RapportActiviteType extends AbstractType
     {
         $builder->add('annee')->add('nomFichier')->add('taille')->add('filedata')->add('projet')        ;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -55,6 +55,4 @@ class RapportActiviteType extends AbstractType
     {
         return 'appbundle_rapportactivite';
     }
-
-
 }

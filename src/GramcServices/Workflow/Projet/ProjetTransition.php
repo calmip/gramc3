@@ -35,8 +35,6 @@ use App\Entity\Projet;
 use App\Entity\Version;
 use App\GramcServices\Workflow\Version\VersionWorkflow;
 
-
-
 class ProjetTransition extends Transition
 {
     private static $execute_en_cours = false;
@@ -44,31 +42,32 @@ class ProjetTransition extends Transition
     ////////////////////////////////////////////////////
     public function canExecute($projet)
     {
-        if ( ! $projet instanceof Projet ) throw new \InvalidArgumentException;
+        if (! $projet instanceof Projet) {
+            throw new \InvalidArgumentException();
+        }
 
-		// Pour éviter une boucle infinie entre projet et version !
-		if (self::$execute_en_cours) return true;
-		else                         self::$execute_en_cours = true;
+        // Pour éviter une boucle infinie entre projet et version !
+        if (self::$execute_en_cours) {
+            return true;
+        } else {
+            self::$execute_en_cours = true;
+        }
 
         $rtn    =   true;
-		if (Transition::FAST == false && $this->getPropageSignal())
-		{
-			$versionWorkflow = new VersionWorkflow($this->sn, $this->sj, $this->ss, $this->em);
-			foreach( $projet->getVersion() as $version )
-			{
-				if( $version->getEtatVersion() != Etat::TERMINE && $version->getEtatVersion() != Etat::ANNULE )
-				{
-					$output = $versionWorkflow->canExecute( $this->getSignal(), $version );
-					if( $output != true )
-					{
-						$this->sj->warningMessage(__METHOD__ . ':' . __LINE__ . " Version " . $version . "  ne passe pas en état "
-							. Etat::getLibelle( $version->getEtatVersion() ) . " signal = " . Signal::getLibelle( $this->getSignal() ));
-					}
-					$rtn = $rtn && $output;
-				}
-			}
-		}
-		self::$execute_en_cours = false;
+        if (Transition::FAST == false && $this->getPropageSignal()) {
+            $versionWorkflow = new VersionWorkflow($this->sn, $this->sj, $this->ss, $this->em);
+            foreach ($projet->getVersion() as $version) {
+                if ($version->getEtatVersion() != Etat::TERMINE && $version->getEtatVersion() != Etat::ANNULE) {
+                    $output = $versionWorkflow->canExecute($this->getSignal(), $version);
+                    if ($output != true) {
+                        $this->sj->warningMessage(__METHOD__ . ':' . __LINE__ . " Version " . $version . "  ne passe pas en état "
+                            . Etat::getLibelle($version->getEtatVersion()) . " signal = " . Signal::getLibelle($this->getSignal()));
+                    }
+                    $rtn = $rtn && $output;
+                }
+            }
+        }
+        self::$execute_en_cours = false;
         return $rtn;
     }
 
@@ -76,35 +75,39 @@ class ProjetTransition extends Transition
     // Transmet le signal aux versions du projet qui ne sont ni annulées ni terminées
 
     public function execute($projet)
-    {		
-		if ( !$projet instanceof Projet ) throw new \InvalidArgumentException;
-		if (Transition::DEBUG) $this->sj->debugMessage( ">>> " . __FILE__ . ":" . __LINE__ . " $this $projet");
-		
-		// Pour éviter une boucle infinie entre projet et version !
-		if (self::$execute_en_cours) return true;
-		self::$execute_en_cours = true;
+    {
+        if (!$projet instanceof Projet) {
+            throw new \InvalidArgumentException();
+        }
+        if (Transition::DEBUG) {
+            $this->sj->debugMessage(">>> " . __FILE__ . ":" . __LINE__ . " $this $projet");
+        }
 
-		$rtn = true;
-		if ($this->getPropageSignal())
-		{
-	        $versionWorkflow = new VersionWorkflow($this->sn, $this->sj, $this->ss, $this->em);
-	        foreach( $projet->getVersion() as $version )
-	        {
-	            if( $version->getEtatVersion() != Etat::TERMINE && $version->getEtatVersion() != Etat::ANNULE )
-				{
-	                $return = $versionWorkflow->execute( $this->getSignal(), $version );
-	                $rtn = Functions::merge_return( $rtn, $return );
-				}
-			}
-		}
+        // Pour éviter une boucle infinie entre projet et version !
+        if (self::$execute_en_cours) {
+            return true;
+        }
+        self::$execute_en_cours = true;
 
-		// Change l'état du projet
-		$this->changeEtat($projet);
+        $rtn = true;
+        if ($this->getPropageSignal()) {
+            $versionWorkflow = new VersionWorkflow($this->sn, $this->sj, $this->ss, $this->em);
+            foreach ($projet->getVersion() as $version) {
+                if ($version->getEtatVersion() != Etat::TERMINE && $version->getEtatVersion() != Etat::ANNULE) {
+                    $return = $versionWorkflow->execute($this->getSignal(), $version);
+                    $rtn = Functions::merge_return($rtn, $return);
+                }
+            }
+        }
 
-		self::$execute_en_cours = false;
-		if (Transition::DEBUG) $this->sj->debugMessage( "<<< " . __FILE__ . ":" . __LINE__ . " rtn = " . Functions::show($rtn));
+        // Change l'état du projet
+        $this->changeEtat($projet);
+
+        self::$execute_en_cours = false;
+        if (Transition::DEBUG) {
+            $this->sj->debugMessage("<<< " . __FILE__ . ":" . __LINE__ . " rtn = " . Functions::show($rtn));
+        }
 
         return $rtn;
     }
-
 }

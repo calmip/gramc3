@@ -28,42 +28,38 @@ use App\Entity\Param;
 use Doctrine\ORM\EntityManagerInterface;
 
 /* Ce service est utilisé pour renvoyer les paramètres stocqués dans la table Param
- * Ces paramètres peuvent être modifiés par l'interface graphique, ce qui n'est pas le cas 
+ * Ces paramètres peuvent être modifiés par l'interface graphique, ce qui n'est pas le cas
  * des paramètres du fichier parameter.yml
- * 
+ *
  */
-class ServiceParam 
+class ServiceParam
 {
-	public function __construct(EntityManagerInterface $em)
-	{
-		$this->em             = $em;
-	}
+    private $em;
 
-	/* Renvoie la valeur du paramètre s'il existe, null sinon */
+    public function __construct(EntityManagerInterface $em)
+    {
+        $this->em             = $em;
+    }
+
+    /* Renvoie la valeur du paramètre s'il existe, null sinon */
     public function getParameter($parameter)
     {
-		$param = $this->em->getRepository(Param::class)->findOneBy ( [ 'cle' => $parameter ] );
-		if ($param == null)
-		{
-			return null;
-		}
-		else
-		{
-			return $param->getVal();
-		}
-	}
+        $param = $this->em->getRepository(Param::class)->findOneBy([ 'cle' => $parameter ]);
+        if ($param == null) {
+            return null;
+        } else {
+            return $param->getVal();
+        }
+    }
 
-	/* renvoie true/false suivant que le paramètre existe ou pas */
+    /* renvoie true/false suivant que le paramètre existe ou pas */
     public function hasParameter($parameter)
     {
-		$param = $this->getParameter($parameter);
-		if ($param==null)
-		{
-			return false;
-		}
-		else
-		{
-			return true;
-		}
-	}
+        $param = $this->getParameter($parameter);
+        if ($param==null) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 }

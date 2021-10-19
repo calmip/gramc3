@@ -32,15 +32,15 @@ namespace App\Repository;
  */
 class PublicationRepository extends \Doctrine\ORM\EntityRepository
 {
-
     public function liste_refbib_like($refbib)
     {
-        if(  is_string( $refbib ) && strlen( $refbib ) > 2 )
+        if (is_string($refbib) && strlen($refbib) > 2) {
             return $this->getEntityManager()
             ->createQuery("SELECT p.refbib FROM App:Publication p WHERE p.refbib LIKE :key")
-            ->setParameter('key', '%' . $refbib .'%' )
+            ->setParameter('key', '%' . $refbib .'%')
             ->getResult();
-        else
+        } else {
             return [];
+        }
     }
 }

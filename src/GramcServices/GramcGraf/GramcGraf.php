@@ -23,21 +23,21 @@
 
 namespace App\GramcServices\GramcGraf;
 
-include_once (__DIR__.'/../../../jpgraph/JpGraph.php');
+include_once(__DIR__.'/../../../jpgraph/JpGraph.php');
 use App\GramcServices\ServiceJournal;
 
 abstract class GramcGraf
 {
-	protected $ressources_conso_group;
-	protected $ressources_conso_user;
-	protected $sj;
-	
-	public function __construct($ressources_conso_group,$ressources_conso_user, ServiceJournal $sj)
-	{
-		$this->ressources_conso_group = $ressources_conso_group;
-		$this->ressources_conso_user  = $ressources_conso_user;
-		$this->sj                     = $sj;
-	}
+    protected $ressources_conso_group;
+    protected $ressources_conso_user;
+    protected $sj;
+
+    public function __construct($ressources_conso_group, $ressources_conso_user, ServiceJournal $sj)
+    {
+        $this->ressources_conso_group = $ressources_conso_group;
+        $this->ressources_conso_user  = $ressources_conso_user;
+        $this->sj                     = $sj;
+    }
 
     /*
      * Le code utilisateur:
@@ -48,7 +48,6 @@ abstract class GramcGraf
      *   - Appelle createImage
      *
      */
-    abstract public function createStructuredData(\DateTime $debut,\Datetime $fin,$db_data);
+    abstract public function createStructuredData(\DateTime $debut, \Datetime $fin, $db_data);
     abstract public function createImage($structured_data, $ressource);
-
 }

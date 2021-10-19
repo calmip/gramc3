@@ -37,123 +37,160 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class VersionWorkflow extends Workflow
 {
-
     public function __construct(ServiceNotifications $sn, ServiceJournal $sj, ServiceSessions $ss, EntityManagerInterface $em)
     {
         $this->workflowIdentifier   = get_class($this);
         parent::__construct($sn, $sj, $ss, $em);
 
         $this
-            ->addState( Etat::CREE_ATTENTE,
+            ->addState(
+                Etat::CREE_ATTENTE,
                 [
                 Signal::CLK_DEMANDE     => new VersionTransition(Etat::EDITION_DEMANDE, Signal::CLK_DEMANDE),
-                Signal::CLK_TEST        => new VersionTransition(Etat::EDITION_TEST   , Signal::CLK_TEST),
-                Signal::CLK_SESS_DEB    => new VersionTransition(Etat::TERMINE        , Signal::CLK_SESS_DEB),
-                Signal::CLK_SESS_FIN    => new VersionTransition(Etat::TERMINE        , Signal::CLK_SESS_FIN),
-                Signal::CLK_FERM        => new VersionTransition(Etat::TERMINE        , Signal::CLK_FERM),
-                ])
-            ->addState( Etat::EDITION_TEST, // projet test
+                Signal::CLK_TEST        => new VersionTransition(Etat::EDITION_TEST, Signal::CLK_TEST),
+                Signal::CLK_SESS_DEB    => new VersionTransition(Etat::TERMINE, Signal::CLK_SESS_DEB),
+                Signal::CLK_SESS_FIN    => new VersionTransition(Etat::TERMINE, Signal::CLK_SESS_FIN),
+                Signal::CLK_FERM        => new VersionTransition(Etat::TERMINE, Signal::CLK_FERM),
+                ]
+            )
+            ->addState(Etat::EDITION_TEST, // projet test
                 [
-                Signal::CLK_VAL_DEM     => new VersionTransition(Etat::EXPERTISE_TEST , Signal::CLK_VAL_DEM, 
-                                           [ 'R' => 'depot_projet_test_pour_demandeur',
+                Signal::CLK_VAL_DEM     => new VersionTransition(
+                    Etat::EXPERTISE_TEST,
+                    Signal::CLK_VAL_DEM,
+                    [ 'R' => 'depot_projet_test_pour_demandeur',
                                              'A' => 'depot_projet_test_pour_admin',
-                                             'P' => 'depot_projet_test_pour_president' ]),
-                Signal::CLK_FERM        => new VersionTransition(Etat::TERMINE        , Signal::CLK_FERM),
-                Signal::CLK_DEMANDE     => new VersionTransition(Etat::TERMINE        , Signal::CLK_DEMANDE),
-                Signal::CLK_SESS_DEB    => new NoTransition(0,0),
-                Signal::CLK_SESS_FIN    => new VersionTransition(Etat::TERMINE        , Signal::CLK_SESS_FIN, []),
+                                             'P' => 'depot_projet_test_pour_president' ]
+                ),
+                Signal::CLK_FERM        => new VersionTransition(Etat::TERMINE, Signal::CLK_FERM),
+                Signal::CLK_DEMANDE     => new VersionTransition(Etat::TERMINE, Signal::CLK_DEMANDE),
+                Signal::CLK_SESS_DEB    => new NoTransition(0, 0),
+                Signal::CLK_SESS_FIN    => new VersionTransition(Etat::TERMINE, Signal::CLK_SESS_FIN, []),
                 ])
-            ->addState( Etat::ACTIF_TEST,
+            ->addState(
+                Etat::ACTIF_TEST,
                 [
-                Signal::CLK_SESS_DEB    => new NoTransition(0,0),
+                Signal::CLK_SESS_DEB    => new NoTransition(0, 0),
                 Signal::CLK_SESS_FIN    => new VersionTransition(Etat::TERMINE, Signal::CLK_SESS_FIN, [], true),
-                Signal::CLK_VAL_EXP_OK  => new NoTransition(0,0),
-                Signal::CLK_FERM        => new VersionTransition(Etat::TERMINE, Signal::CLK_FERM,     [], true),
-                Signal::CLK_VAL_EXP_KO  => new NoTransition(0,0),
-                Signal::CLK_VAL_EXP_CONT=> new NoTransition(0,0),
-                Signal::CLK_VAL_DEM     => new NoTransition(0,0),
-                Signal::CLK_ARR         => new NoTransition(0,0),
-                Signal::CLK_DEMANDE     => new NoTransition(0,0),
-                ])
-            ->addState( Etat::EXPERTISE_TEST, 
+                Signal::CLK_VAL_EXP_OK  => new NoTransition(0, 0),
+                Signal::CLK_FERM        => new VersionTransition(Etat::TERMINE, Signal::CLK_FERM, [], true),
+                Signal::CLK_VAL_EXP_KO  => new NoTransition(0, 0),
+                Signal::CLK_VAL_EXP_CONT=> new NoTransition(0, 0),
+                Signal::CLK_VAL_DEM     => new NoTransition(0, 0),
+                Signal::CLK_ARR         => new NoTransition(0, 0),
+                Signal::CLK_DEMANDE     => new NoTransition(0, 0),
+                ]
+            )
+            ->addState(
+                Etat::EXPERTISE_TEST,
                 [
-                Signal::CLK_VAL_EXP_OK  => new VersionTransition(Etat::ACTIF_TEST     , Signal::CLK_VAL_EXP_OK,
-                                           [ 'R' => 'expertise', 
-                                             'E' => 'expertise_pour_expert', 
-                                             'A' => 'expertise_pour_admin' ]),
-                Signal::CLK_VAL_EXP_KO  => new VersionTransition(Etat::TERMINE        , Signal::CLK_VAL_EXP_KO,
-                                           [ 'E' => 'expertise_pour_expert', 
-                                             'A' => 'expertise_pour_admin', 
-                                             'P' => 'expertise_refusee' ],  Signal::CLK_VAL_EXP_KO ),
-                Signal::CLK_FERM        => new VersionTransition(Etat::TERMINE        , Signal::CLK_FERM),
-                Signal::CLK_ARR         => new VersionTransition(Etat::EDITION_TEST   , Signal::CLK_ARR),
-                Signal::CLK_DEMANDE     => new VersionTransition(Etat::TERMINE        , Signal::CLK_DEMANDE),
-                Signal::CLK_SESS_DEB    => new NoTransition(0,0),
-                Signal::CLK_SESS_FIN    => new VersionTransition(Etat::TERMINE        , Signal::CLK_SESS_FIN),
-                ])
-            ->addState( Etat::EDITION_DEMANDE,
+                Signal::CLK_VAL_EXP_OK  => new VersionTransition(
+                    Etat::ACTIF_TEST,
+                    Signal::CLK_VAL_EXP_OK,
+                    [ 'R' => 'expertise',
+                                             'E' => 'expertise_pour_expert',
+                                             'A' => 'expertise_pour_admin' ]
+                ),
+                Signal::CLK_VAL_EXP_KO  => new VersionTransition(
+                    Etat::TERMINE,
+                    Signal::CLK_VAL_EXP_KO,
+                    [ 'E' => 'expertise_pour_expert',
+                                             'A' => 'expertise_pour_admin',
+                                             'P' => 'expertise_refusee' ],
+                    Signal::CLK_VAL_EXP_KO
+                ),
+                Signal::CLK_FERM        => new VersionTransition(Etat::TERMINE, Signal::CLK_FERM),
+                Signal::CLK_ARR         => new VersionTransition(Etat::EDITION_TEST, Signal::CLK_ARR),
+                Signal::CLK_DEMANDE     => new VersionTransition(Etat::TERMINE, Signal::CLK_DEMANDE),
+                Signal::CLK_SESS_DEB    => new NoTransition(0, 0),
+                Signal::CLK_SESS_FIN    => new VersionTransition(Etat::TERMINE, Signal::CLK_SESS_FIN),
+                ]
+            )
+            ->addState(
+                Etat::EDITION_DEMANDE,
                 [
-                Signal::CLK_VAL_DEM     => new VersionTransition(Etat::EDITION_EXPERTISE, Signal::CLK_VAL_DEM,
-                                           [ 'R' => 'depot_pour_demandeur', 
+                Signal::CLK_VAL_DEM     => new VersionTransition(
+                    Etat::EDITION_EXPERTISE,
+                    Signal::CLK_VAL_DEM,
+                    [ 'R' => 'depot_pour_demandeur',
                                              'A' => 'depot_pour_experts',
-                                             'ET' => 'depot_pour_experts']),
+                                             'ET' => 'depot_pour_experts']
+                ),
                 Signal::CLK_SESS_DEB    => new VersionTransition(Etat::TERMINE, Signal::CLK_SESS_DEB),
                 Signal::CLK_SESS_FIN    => new VersionTransition(Etat::TERMINE, Signal::CLK_SESS_FIN),
                 Signal::CLK_FERM        => new VersionTransition(Etat::TERMINE, Signal::CLK_FERM),
                 Signal::CLK_DEMANDE     => new VersionTransition(Etat::TERMINE, Signal::CLK_DEMANDE),
-                ])
-            ->addState( Etat::EDITION_EXPERTISE,
+                ]
+            )
+            ->addState(
+                Etat::EDITION_EXPERTISE,
                 [
-                Signal::CLK_VAL_EXP_OK  => new VersionTransition(Etat::EN_ATTENTE, Signal::CLK_VAL_EXP_OK,
-                                           [ 'R' => 'expertise',
+                Signal::CLK_VAL_EXP_OK  => new VersionTransition(
+                    Etat::EN_ATTENTE,
+                    Signal::CLK_VAL_EXP_OK,
+                    [ 'R' => 'expertise',
                                              'E' => 'expertise_pour_expert',
-                                             'A' => 'expertise_pour_admin' ]),
-                Signal::CLK_VAL_EXP_KO  => new VersionTransition(Etat::TERMINE   , Signal::CLK_VAL_EXP_KO,   
-                                           [ 'E' => 'expertise_pour_expert', 
-                                             'A' => 'expertise_pour_admin', 
-                                             'P' => 'expertise_refusee' ] ),
-                Signal::CLK_VAL_EXP_CONT=> new VersionTransition(Etat::TERMINE   , Signal::CLK_VAL_EXP_CONT,
-                                           [ 'R' => 'expertise',
-                                             'E' => 'expertise_pour_expert', 
-                                             'A' => 'expertise_pour_admin' ] ),
-                Signal::CLK_SESS_DEB    => new NoTransition(0,0),
-                Signal::CLK_SESS_FIN    => new VersionTransition(Etat::TERMINE   , Signal::CLK_SESS_FIN),
-                Signal::CLK_FERM        => new VersionTransition(Etat::TERMINE   , Signal::CLK_FERM),
-                Signal::CLK_ARR         => new VersionTransition(Etat::EDITION_DEMANDE, Signal::CLK_ARR),
-                Signal::CLK_DEMANDE     => new VersionTransition(Etat::TERMINE   , Signal::CLK_DEMANDE),
-                ])
-            ->addState( Etat::EN_ATTENTE,
-                [
-                Signal::CLK_SESS_DEB    => new VersionTransition(Etat::ACTIF  , Signal::CLK_SESS_DEB),
+                                             'A' => 'expertise_pour_admin' ]
+                ),
+                Signal::CLK_VAL_EXP_KO  => new VersionTransition(
+                    Etat::TERMINE,
+                    Signal::CLK_VAL_EXP_KO,
+                    [ 'E' => 'expertise_pour_expert',
+                                             'A' => 'expertise_pour_admin',
+                                             'P' => 'expertise_refusee' ]
+                ),
+                Signal::CLK_VAL_EXP_CONT=> new VersionTransition(
+                    Etat::TERMINE,
+                    Signal::CLK_VAL_EXP_CONT,
+                    [ 'R' => 'expertise',
+                                             'E' => 'expertise_pour_expert',
+                                             'A' => 'expertise_pour_admin' ]
+                ),
+                Signal::CLK_SESS_DEB    => new NoTransition(0, 0),
                 Signal::CLK_SESS_FIN    => new VersionTransition(Etat::TERMINE, Signal::CLK_SESS_FIN),
                 Signal::CLK_FERM        => new VersionTransition(Etat::TERMINE, Signal::CLK_FERM),
-                ])
-            ->addState( Etat::ACTIF,
+                Signal::CLK_ARR         => new VersionTransition(Etat::EDITION_DEMANDE, Signal::CLK_ARR),
+                Signal::CLK_DEMANDE     => new VersionTransition(Etat::TERMINE, Signal::CLK_DEMANDE),
+                ]
+            )
+            ->addState(
+                Etat::EN_ATTENTE,
                 [
-                Signal::CLK_SESS_DEB    => new NoTransition(0,0),
+                Signal::CLK_SESS_DEB    => new VersionTransition(Etat::ACTIF, Signal::CLK_SESS_DEB),
+                Signal::CLK_SESS_FIN    => new VersionTransition(Etat::TERMINE, Signal::CLK_SESS_FIN),
+                Signal::CLK_FERM        => new VersionTransition(Etat::TERMINE, Signal::CLK_FERM),
+                ]
+            )
+            ->addState(
+                Etat::ACTIF,
+                [
+                Signal::CLK_SESS_DEB    => new NoTransition(0, 0),
                 Signal::CLK_SESS_FIN    => new VersionTransition(Etat::TERMINE, Signal::CLK_SESS_FIN, [], true),
                 Signal::CLK_VAL_EXP_OK  => new VersionTransition(Etat::NOUVELLE_VERSION_DEMANDEE, Signal::CLK_VAL_EXP_OK),
-                Signal::CLK_FERM        => new VersionTransition(Etat::TERMINE, Signal::CLK_FERM,     [], true),
-                Signal::CLK_VAL_EXP_KO  => new NoTransition(0,0),
-                Signal::CLK_VAL_EXP_CONT=> new NoTransition(0,0),
-                Signal::CLK_VAL_DEM     => new NoTransition(0,0),
-                Signal::CLK_ARR         => new NoTransition(0,0),
-                Signal::CLK_DEMANDE     => new NoTransition(0,0),
-                ])
-             ->addState( Etat::NOUVELLE_VERSION_DEMANDEE, // quand une autre version est EN_ATTENTE
+                Signal::CLK_FERM        => new VersionTransition(Etat::TERMINE, Signal::CLK_FERM, [], true),
+                Signal::CLK_VAL_EXP_KO  => new NoTransition(0, 0),
+                Signal::CLK_VAL_EXP_CONT=> new NoTransition(0, 0),
+                Signal::CLK_VAL_DEM     => new NoTransition(0, 0),
+                Signal::CLK_ARR         => new NoTransition(0, 0),
+                Signal::CLK_DEMANDE     => new NoTransition(0, 0),
+                ]
+            )
+             ->addState(Etat::NOUVELLE_VERSION_DEMANDEE, // quand une autre version est EN_ATTENTE
                 [
                 // Si on reçoit SESS_DEB dans cet état, on FERME la version
                 Signal::CLK_SESS_DEB    => new VersionTransition(Etat::TERMINE, Signal::CLK_SESS_FIN, [], true),
                 Signal::CLK_SESS_FIN    => new VersionTransition(Etat::TERMINE, Signal::CLK_SESS_FIN, [], true),
-                Signal::CLK_FERM        => new VersionTransition(Etat::TERMINE, Signal::CLK_FERM,     [], true),
+                Signal::CLK_FERM        => new VersionTransition(Etat::TERMINE, Signal::CLK_FERM, [], true),
                 ])
-             ->addState( Etat::TERMINE,
-                [
-                Signal::CLK_SESS_DEB    => new NoTransition(0,0),
-                Signal::CLK_SESS_FIN    => new NoTransition(0,0),
-                Signal::CLK_FERM        => new NoTransition(0,0),
-                ])
-            ->addState( Etat::ANNULE, // provisoire
+             ->addState(
+                 Etat::TERMINE,
+                 [
+                Signal::CLK_SESS_DEB    => new NoTransition(0, 0),
+                Signal::CLK_SESS_FIN    => new NoTransition(0, 0),
+                Signal::CLK_FERM        => new NoTransition(0, 0),
+                ]
+             )
+            ->addState(Etat::ANNULE, // provisoire
                 [
                 Signal::CLK_SESS_DEB    => new VersionTransition(Etat::TERMINE, Signal::CLK_SESS_DEB),
                 Signal::CLK_SESS_FIN    => new VersionTransition(Etat::TERMINE, Signal::CLK_SESS_FIN),

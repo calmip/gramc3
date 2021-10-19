@@ -28,7 +28,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * User
  *
- * @ORM\Table(name="user", uniqueConstraints={@ORM\UniqueConstraint(name="loginname", 
+ * @ORM\Table(name="user", uniqueConstraints={@ORM\UniqueConstraint(name="loginname",
  *                         columns={"loginname"})},
  *                         indexes={@ORM\Index(name="loginname", columns={"loginname"})})
  * @ORM\Entity(repositoryClass="App\Repository\CollaborateurVersionRepository")
@@ -52,6 +52,13 @@ class User
     private $password;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="cpassword", type="string", nullable=true,length=200 )
+     */
+    private $cpassword;
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column(name="pass_expiration", type="datetime", nullable=true)
@@ -60,23 +67,23 @@ class User
 
     public function __toString()
     {
-	    $output = '{';
-	    $output .= 'loginname=' . $this->getLoginname() .'}';
-	    return $output;
+        $output = '{';
+        $output .= 'loginname=' . $this->getLoginname() .'}';
+        return $output;
     }
 
-    public function __construct(Individu $individu = null, Version $version = null )
+    public function __construct()
     {
-	    $this->password  = null;
-	    $this->passexpir = null;
+        $this->password  = null;
+        $this->passexpir = null;
     }
-    
+
     /**
      * Set loginname
      *
      * @param string $loginname
      *
-     * @return CollaborateurVersion
+     * @return User
      */
     public function setLoginname($loginname)
     {
@@ -100,7 +107,7 @@ class User
      *
      * @param string $password
      *
-     * @return CollaborateurVersion
+     * @return User
      */
     public function setPassword($password)
     {
@@ -120,11 +127,35 @@ class User
     }
 
     /**
+     * Set cpassword
+     *
+     * @param string $cpassword
+     *
+     * @return User
+     */
+    public function setCpassword($cpassword)
+    {
+        $this->cpassword = $cpassword;
+
+        return $this;
+    }
+
+    /**
+     * Get cpassword
+     *
+     * @return string
+     */
+    public function getCpassword()
+    {
+        return $this->cpassword;
+    }
+
+    /**
      * Set passexpir
      *
      * @param \DateTime $passexpir
      *
-     * @return CollaborateurVersion
+     * @return User
      */
     public function setPassexpir($passexpir)
     {

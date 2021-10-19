@@ -40,13 +40,12 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class LaboratoireController extends AbstractController
 {
-	
-	private $ac;
-		
-	public function __construct (AuthorizationCheckerInterface $ac)
-	{
-		$this->ac  = $ac;
-	}
+    private $ac;
+
+    public function __construct(AuthorizationCheckerInterface $ac)
+    {
+        $this->ac  = $ac;
+    }
 
     /**
      * Lists all laboratoire entities.
@@ -69,27 +68,28 @@ class LaboratoireController extends AbstractController
      * @Security("is_granted('ROLE_OBS')")
      */
     public function gererAction()
-	{
-		$ac = $this->ac;
-		$em = $this->getDoctrine()->getManager();
-		
-		// Si on n'est pas admin on n'a pas accès au menu
-		$menu = $ac->isGranted('ROLE_ADMIN')?[ ['ok' => true,'name' => 'ajouter_laboratoire' ,'lien' => 'Ajouter un laboratoire','commentaire'=> 'Ajouter un laboratoire'] ]:[];
+    {
+        $ac = $this->ac;
+        $em = $this->getDoctrine()->getManager();
 
-        return $this->render( 'laboratoire/liste.html.twig',
+        // Si on n'est pas admin on n'a pas accès au menu
+        $menu = $ac->isGranted('ROLE_ADMIN') ? [ ['ok' => true,'name' => 'ajouter_laboratoire' ,'lien' => 'Ajouter un laboratoire','commentaire'=> 'Ajouter un laboratoire'] ] : [];
+
+        return $this->render(
+            'laboratoire/liste.html.twig',
             [
             'menu' => $menu,
-            'laboratoires' => $em->getRepository('App:Laboratoire')->findBy( [],['numeroLabo' => 'ASC'])
+            'laboratoires' => $em->getRepository('App:Laboratoire')->findBy([], ['numeroLabo' => 'ASC'])
             ]
-            );
-	}
+        );
+    }
 
     /**
      * Creates a new laboratoire entity.
      *
      * @Route("/new", name="laboratoire_new")
      * @Route("/ajouter", name="ajouter_laboratoire")
-	 * @Security("is_granted('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
     public function newAction(Request $request)
@@ -106,7 +106,8 @@ class LaboratoireController extends AbstractController
             return $this->redirectToRoute('gerer_laboratoires');
         }
 
-        return $this->render('laboratoire/ajouter.html.twig',
+        return $this->render(
+            'laboratoire/ajouter.html.twig',
             [
             'menu' => [ [
                         'ok' => true,
@@ -117,14 +118,14 @@ class LaboratoireController extends AbstractController
             'laboratoire' => $laboratoire,
             'form' => $form->createView(),
             ]
-         );
+        );
     }
 
     /**
      * Finds and displays a laboratoire entity.
      *
      * @Route("/{id}/show", name="laboratoire_show")
-	 * @Security("is_granted('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function showAction(Laboratoire $laboratoire)
@@ -141,7 +142,7 @@ class LaboratoireController extends AbstractController
      * Displays a form to edit an existing laboratoire entity.
      *
      * @Route("/{id}/edit", name="laboratoire_edit")
-	 * @Security("is_granted('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
     public function editAction(Request $request, Laboratoire $laboratoire)
@@ -167,7 +168,7 @@ class LaboratoireController extends AbstractController
      * Displays a form to edit an existing laboratoire entity.
      *
      * @Route("/{id}/modify", name="modifier_laboratoire")
-	 * @Security("is_granted('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
     public function modifyAction(Request $request, Laboratoire $laboratoire)
@@ -182,7 +183,8 @@ class LaboratoireController extends AbstractController
             return $this->redirectToRoute('gerer_laboratoires');
         }
 
-        return $this->render('laboratoire/modif.html.twig',
+        return $this->render(
+            'laboratoire/modif.html.twig',
             [
             'menu' => [ [
                         'ok' => true,
@@ -193,14 +195,15 @@ class LaboratoireController extends AbstractController
             'laboratoire' => $laboratoire,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
-            ]);
+            ]
+        );
     }
 
     /**
      * Deletes a laboratoire entity.
      *
      * @Route("/{id}/supprimer", name="supprimer_laboratoire")
-	 * @Security("is_granted('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method("GET")
      */
     public function supprimerAction(Request $request, Laboratoire $laboratoire)
@@ -215,7 +218,7 @@ class LaboratoireController extends AbstractController
      * Deletes a laboratoire entity.
      *
      * @Route("/{id}/delete", name="laboratoire_delete")
-	 * @Security("is_granted('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @Method("DELETE")
      */
     public function deleteAction(Request $request, Laboratoire $laboratoire)

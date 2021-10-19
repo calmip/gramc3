@@ -38,35 +38,77 @@ use App\Utils\IndividuForm;
 
 class IndividuFormType extends AbstractType
 {
+    private $coll_login;
+    private $nodata;
+
+    // Utilisation des paramètres coll_login et nodata
+    // On pourrait aussi passer par $options de buildForm, sauf que le formulaire est construit la plupart du temps par
+    // l'intermédiaire d'un CollectionType, et je ne sais pas comment passer les paramètres
+    public function __construct($coll_login, $nodata)
+    {
+        $this -> coll_login = $coll_login;
+        $this -> nodata = $nodata;
+    }
+
     /**
      * {@inheritdoc}
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-    $builder->add('login', CheckboxType::class,
+        if ($this->coll_login == true)
+        {
+             $builder->add(
+                'login',
+                CheckboxType::class,
+                [
+                    'label'     => 'login calcul',
+                    'required'  => false,
+                    'attr' => [ 'title' => 'Demander l\'ouverture d\'un compte sur le supercalculateur' ]
+                ]
+            );
+        };
+        if ($this->nodata == false)
+        {
+             $builder->add(
+                'clogin',
+                CheckboxType::class,
+                [
+                    'label'     => 'accès callisto',
+                    'required'  => false,
+                    'attr' => [ 'title' => 'Demander un accès à la plateforme Callisto' ]
+                ]
+            );
+        };
+        $builder->add(
+            'mail',
+            TextType::class,
             [
-                'label'     =>  'login',
-                'required'  =>  false,
-            ])
-        ->add('mail', TextType::class,
+                'label'     => 'email',
+                'attr'      => [ 'size' => '50' ],
+                'required'  => false,
+            ]
+        )
+        ->add(
+            'prenom',
+            TextType::class,
             [
-                'label'     =>  'email',
-                'attr'      =>  [ 'size' => '50' ],
-                'required'  =>  false,
-            ])
-        ->add('prenom', TextType::class,
+                'label'     => 'prénom',
+                'attr'      => [ 'size' => '50' ],
+                'required'  => false,
+            ]
+        )
+        ->add(
+            'nom',
+            TextType::class,
             [
-                'label'     =>  'prénom',
-                'attr'      =>  [ 'size' => '50' ],
-                'required'  =>  false,
-            ])
-        ->add('nom', TextType::class,
-            [
-                'label'     =>  'nom',
-                'attr'      =>  [ 'size' => '50' ],
-                'required'  =>  false,
-            ])
-        ->add('statut', EntityType ::class,
+                'label'     => 'nom',
+                'attr'      => [ 'size' => '50' ],
+                'required'  => false,
+            ]
+        )
+        ->add(
+            'statut',
+            EntityType ::class,
             [
                 'label'      => 'statut',
                 'multiple'   => false,
@@ -74,8 +116,11 @@ class IndividuFormType extends AbstractType
                 'required'   => false,
                 'class'      => 'App:Statut',
                 'placeholder' => '-- Indiquez le statut',
-            ])
-        ->add('laboratoire', EntityType ::class,
+            ]
+        )
+        ->add(
+            'laboratoire',
+            EntityType ::class,
             [
                 'label'     => 'laboratoire',
                 'multiple'  => false,
@@ -83,8 +128,11 @@ class IndividuFormType extends AbstractType
                 'required'   => false,
                 'class'     => 'App:Laboratoire',
                 'placeholder' => '-- Indiquez le laboratoire',
-            ])
-        ->add('etablissement', EntityType ::class,
+            ]
+        )
+        ->add(
+            'etablissement',
+            EntityType ::class,
             [
                 'label'     => 'établissement',
                 'multiple'  => false,
@@ -92,19 +140,26 @@ class IndividuFormType extends AbstractType
                 'required'   => false,
                 'class'     => 'App:Etablissement',
                 'placeholder' => "-- Indiquez l'établissment",
-            ])
-        ->add('delete', CheckboxType::class,
+            ]
+        )
+        ->add(
+            'delete',
+            CheckboxType::class,
             [
                 'label'     =>  'supprimer',
                 'required'  =>  false,
-            ])
-        ->add('id', HiddenType::class,
+            ]
+        )
+        ->add(
+            'id',
+            HiddenType::class,
             [
-               
-            ])
-        ;    
+
+            ]
+        )
+        ;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -113,9 +168,10 @@ class IndividuFormType extends AbstractType
         $resolver->setDefaults(
             [
             'data_class' => 'App\Utils\IndividuForm',
-            ]);
+            ]
+        );
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -123,5 +179,4 @@ class IndividuFormType extends AbstractType
     {
         return 'Individu';
     }
-
 }

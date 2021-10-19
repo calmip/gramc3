@@ -29,58 +29,52 @@ use App\Utils\Functions;
 class Calcul extends GramcGraf
 {
     /* Génère les données "StructuredData" qui seront utilisées par dessineConsoHeures
-	 * afin de faire le graphique de consommation des heures cpu+gpu pour un projet
-	 *
-	 * TODO - les noms de ressources 'cpu' et 'gpu' sont hardcodés
-	 *        Il faudrait utiliser la valeur du champ 'ress' de la variable protégée
-	 *        ressources_conso_group['1']['ress'] -> 'cpu,gpu'
-	 *        (code à généraliser !)
-	 *
-	 * $debut, $fin = dates de début et fin
-	 * $db_data     = Le retour de la requête sql sur la table consommation
+     * afin de faire le graphique de consommation des heures cpu+gpu pour un projet
      *
-	 * Retourne stuctured_data, c-a-d un array:
-	 *     key = timestamp
-	 *     val = [ 'cpu' => $conso_cpu, 'gpu' => $conso_gpu, 'quota' => $quota ]
-	 * Les champs 'cpu','gpu',quota' sont TOUS optionnels
+     * TODO - les noms de ressources 'cpu' et 'gpu' sont hardcodés
+     *        Il faudrait utiliser la valeur du champ 'ress' de la variable protégée
+     *        ressources_conso_group['1']['ress'] -> 'cpu,gpu'
+     *        (code à généraliser !)
+     *
+     * $debut, $fin = dates de début et fin
+     * $db_data     = Le retour de la requête sql sur la table consommation
+     *
+     * Retourne stuctured_data, c-a-d un array:
+     *     key = timestamp
+     *     val = [ 'cpu' => $conso_cpu, 'gpu' => $conso_gpu, 'quota' => $quota ]
+     * Les champs 'cpu','gpu',quota' sont TOUS optionnels
      */
-	public function createStructuredData(\DateTime $date_debut, \DateTime $date_fin, $db_data)
-	{
+    public function createStructuredData(\DateTime $date_debut, \DateTime $date_fin, $db_data)
+    {
         $structured_data = [];
         $debut = $date_debut->getTimestamp();
         $fin   = $date_fin->getTimestamp();
 
-		// Par exemple la conso de 2021 alors qu'on est en 2020 !
-		if ($db_data == null)
-		{
-			$db_data = [];
-		}
-		
+        // Par exemple la conso de 2021 alors qu'on est en 2020 !
+        if ($db_data == null) {
+            $db_data = [];
+        }
+
         // Si pas de données (nouveau projet par ex) on les crée artificiellement
-        if (count($db_data) === 0)
-        {
+        if (count($db_data) === 0) {
             $structured_data[$debut]['quota'] = 1;
             $structured_data[$fin]['quota'] = 1;
-        }
-        else
-        {
-            foreach( $db_data as $item )
-            {
+        } else {
+            foreach ($db_data as $item) {
                 $key = $item->getDate()->getTimestamp();
-                if( $key < $debut || $key > $fin ) continue;
-
-                if ( array_key_exists ( $key , $structured_data ) )
-                {
-                    $structured_data[$key][$item->getRessource()] = $item->getConso();
-					$quota1 = $structured_data[$key]['quota'];
-					$quota2 = $item->getQuota();
-					if( $quota1 != $quota2 )
-					{
-						$this->sj->errorMessage( __METHOD__ . ':' . __LINE__ . ' incohérence dans les quotas, date = ' .  $item->getDate()->format("d F Y") . "$quota1=$quota1 quota2=$quota2");
-					}
+                if ($key < $debut || $key > $fin) {
+                    continue;
                 }
-                else
-                {
+
+                if (array_key_exists($key, $structured_data)) {
+                    $structured_data[$key][$item->getRessource()] = $item->getConso();
+                    $quota1 = $structured_data[$key]['quota'];
+                    $quota2 = $item->getQuota();
+                    // si l'un des deux quotas est null il n'y a pas d'incohérence, mais une donnée manquante
+                    if ($quota1 != $quota2 && $quota1*$quota2 != 0) {
+                        $this->sj->errorMessage(__METHOD__ . ':' . __LINE__ . ' incohérence dans les quotas, date = ' .  $item->getDate()->format("d F Y") . "$quota1=$quota1 quota2=$quota2");
+                    }
+                } else {
                     $data = [$item->getRessource() => $item->getConso(), 'quota' => $item->getQuota()];
                     $structured_data[$key] = $data;
                 }
@@ -88,26 +82,31 @@ class Calcul extends GramcGraf
         }
 
         // Remplissage des trous gpu et cpu et calcul des valeurs normalisees
-        foreach( $structured_data as $key => $item )
-        {
-            if ( ! array_key_exists ( 'gpu' ,   $item ) ) $structured_data[$key]['gpu'] = 0;
-            if ( ! array_key_exists ( 'cpu' ,   $item ) ) $structured_data[$key]['cpu'] = 0;
-            if ( ! array_key_exists ( 'quota' , $item ) ) $structured_data[$key]['quota'] = 0;
+        foreach ($structured_data as $key => $item) {
+            if (! array_key_exists('gpu', $item)) {
+                $structured_data[$key]['gpu'] = 0;
+            }
+            if (! array_key_exists('cpu', $item)) {
+                $structured_data[$key]['cpu'] = 0;
+            }
+            if (! array_key_exists('quota', $item)) {
+                $structured_data[$key]['quota'] = 0;
+            }
             $structured_data[$key]['norm'] = $structured_data[$key]['cpu'] + $structured_data[$key]['gpu'];
         }
 
         return $structured_data;
-	}
+    }
 
-   /* Affichage du graphique de la conso horaire d'un projet ou de la totale
-    *
-    * params = $structures_data (retour de createStructuredData)
-    *          $ressource (inutilisé)
-    *
-    * return = Un tableau de deux éléments:
-    *             - L'image en base64
-    *             - La taille de l'image produite (en octets)
-    */
+    /* Affichage du graphique de la conso horaire d'un projet ou de la totale
+     *
+     * params = $structures_data (retour de createStructuredData)
+     *          $ressource (inutilisé)
+     *
+     * return = Un tableau de deux éléments:
+     *             - L'image en base64
+     *             - La taille de l'image produite (en octets)
+     */
     public function createImage($structured_data, $ressource=null)
     {
         // Test s'il y a cpu ou gpu
@@ -115,9 +114,15 @@ class Calcul extends GramcGraf
         $no_gpu   = true;
         $no_quota = true;
 
-        if (array_sum(array_column($structured_data,'cpu'))  >0) $no_cpu   = false;
-        if (array_sum(array_column($structured_data,'gpu'))  >0) $no_gpu   = false;
-        if (array_sum(array_column($structured_data,'quota'))>0) $no_quota = false;
+        if (array_sum(array_column($structured_data, 'cpu'))  >0) {
+            $no_cpu   = false;
+        }
+        if (array_sum(array_column($structured_data, 'gpu'))  >0) {
+            $no_gpu   = false;
+        }
+        if (array_sum(array_column($structured_data, 'quota'))>0) {
+            $no_quota = false;
+        }
 
         // création des tables
         $cpu = [];
@@ -126,16 +131,17 @@ class Calcul extends GramcGraf
         $quota = [];
         $norm = [];
 
-		$quotamax = 0;
-        foreach( $structured_data as $key => $item )
-        {
+        $quotamax = 0;
+        foreach ($structured_data as $key => $item) {
             $xdata[]    =   $key;
             $cpu[]      =   $structured_data[$key]['cpu'];
             $gpu[]      =   $structured_data[$key]['gpu'];
             $norm[]    =   $structured_data[$key]['norm'];
             $quota[]    =   $structured_data[$key]['quota'];
             $first = false;
-            if ($structured_data[$key]['quota']>$quotamax) $quotamax = $structured_data[$key]['quota'];
+            if ($structured_data[$key]['quota']>$quotamax) {
+                $quotamax = $structured_data[$key]['quota'];
+            }
         }
 
         JpGraph::load();
@@ -144,19 +150,19 @@ class Calcul extends GramcGraf
 
 
         // Create the new graph
-        $graph = new \Graph(640,400);
+        $graph = new \Graph(640, 400);
 
         //$graph = new \Graph(600,400);
         // Slightly larger than normal margins at the bottom to have room for
         // the x-axis labels and at left to have room for y-axis labels
-        $graph->SetMargin(100,40,40,170);
+        $graph->SetMargin(100, 40, 40, 170);
 
         // Fix the Y-scale to go between [0,$quotamax] and use date for the x-axis
-        $graph->SetScale('datlin',0,1.05*$quotamax);
+        $graph->SetScale('datlin', 0, 1.05*$quotamax);
         //$graph->SetScale('datlin');
         $graph->xaxis->scale->SetDateFormat("d-m-y");
 
-        $graph->SetTickDensity( \TICKD_SPARSE, \TICKD_SPARSE );
+        $graph->SetTickDensity(\TICKD_SPARSE, \TICKD_SPARSE);
         //$graph->xaxis->scale->AdjustForDST(false);
         $graph->xaxis->scale->SetDateAlign(\DAYADJ_1);
         //$graph->xaxis->scale->ticks->Set(8,2);
@@ -164,13 +170,12 @@ class Calcul extends GramcGraf
         // Set the angle for the labels to 90 degrees
         $graph->xaxis->SetLabelAngle(90);
 
-		// The Y scale - between 0 and 1.1*$quotamax
-//		$graph->SetYScale('1','lin','0','60600');
+        // The Y scale - between 0 and 1.1*$quotamax
+        //		$graph->SetYScale('1','lin','0','60600');
 
 
-        if( $no_cpu == false )
-        {
-            $line = new \LinePlot($cpu,$xdata);
+        if ($no_cpu == false) {
+            $line = new \LinePlot($cpu, $xdata);
             $line->SetLegend('CPU');
             //$line->SetFillColor('lightblue@0.5');
             $line->SetColor("green");
@@ -178,72 +183,68 @@ class Calcul extends GramcGraf
             $graph->Add($line);
         }
 
-        if( $no_gpu == false )
-        {
-            $line = new \LinePlot($gpu,$xdata);
+        if ($no_gpu == false) {
+            $line = new \LinePlot($gpu, $xdata);
             $line->SetLegend('GPU');
             //$line->SetFillColor('lightblue@0.5');
             $line->SetColor("blue");
             $graph->Add($line);
         }
 
-        if( $no_gpu == false && $no_cpu  == false )
-        {
-            $line = new \LinePlot($norm,$xdata);
+        if ($no_gpu == false && $no_cpu  == false) {
+            $line = new \LinePlot($norm, $xdata);
             $line->SetLegend('GPU + CPU');
             //$line->SetFillColor('lightblue@0.5');
             $line->SetColor("black");
             $graph->Add($line);
             $line->SetWeight(3);
-
         }
 
-        if( $no_quota == false )
-        {
-            $line = new \LinePlot($quota,$xdata);
+        if ($no_quota == false) {
+            $line = new \LinePlot($quota, $xdata);
             $line->SetLegend('Quota');
             //$line->SetFillColor('lightblue@0.5');
             $line->SetColor("red");
             $graph->Add($line);
         }
 
-        $graph->legend->Pos( 0.05,0.05,"right" ,"center");
+        $graph->legend->Pos(0.05, 0.05, "right", "center");
         $graph->legend->SetColumns(4);
-		$graph->yaxis->title->Set('heures normalisées');
-		$graph->yaxis->SetTitlemargin(65);
-		$graph->xaxis->title->Set('date');
-		$graph->xaxis->SetTitlemargin(60);
+        $graph->yaxis->title->Set('heures normalisées');
+        $graph->yaxis->SetTitlemargin(65);
+        $graph->xaxis->title->Set('date');
+        $graph->xaxis->SetTitlemargin(60);
 
         ob_start();
         $graph->Stroke();
         $image_data = ob_get_contents();
         ob_end_clean();
 
-        $size = getimagesizefromstring ( $image_data );
-		return [ base64_encode($image_data), $size];
+        $size = getimagesizefromstring($image_data);
+        return [ base64_encode($image_data), $size];
     }
 
-   /* SEULEMENT POUR gramc 
-	* recherche de la remise à zéro dans les 20 premiers jours
-	* Normalement la conso en heures de calculs ne fait que grandir (sauf problème technique)
-	* Sauf qu'on remet les compteurs à zéro en début d'année
-	* Ici on détecte le jour de remise à zéro avant le 20 Janvier
-	* et on met à zéro tout ce qui précède
-	* Si vous remettez les compteurs à zéro après le 20 janvier, vous êtes mal
-	*/
+    /* SEULEMENT POUR gramc
+     * recherche de la remise à zéro dans les 20 premiers jours
+     * Normalement la conso en heures de calculs ne fait que grandir (sauf problème technique)
+     * Sauf qu'on remet les compteurs à zéro en début d'année
+     * Ici on détecte le jour de remise à zéro avant le 20 Janvier
+     * et on met à zéro tout ce qui précède
+     * Si vous remettez les compteurs à zéro après le 20 janvier, vous êtes mal
+     */
 
-	// Modifier $structured_data
+    // Modifier $structured_data
     public function resetConso(&$structured_data)
     {
         $remise_a_zero = null;
         $i = 20;
         $norm_precedente = 0;
 
-        foreach( $structured_data as $key => $item )
-        {
-            if ( $i < 0 )   break;
-            if ( $norm_precedente > $structured_data[$key]['norm'] )
-            {
+        foreach ($structured_data as $key => $item) {
+            if ($i < 0) {
+                break;
+            }
+            if ($norm_precedente > $structured_data[$key]['norm']) {
                 $remise_a_zero = $key;
                 break;
             }
@@ -252,46 +253,44 @@ class Calcul extends GramcGraf
         }
 
         // annulation avant la remise à zéro
-        foreach( $structured_data as $key => $item )
-        {
-            if ( $remise_a_zero == null || $key >= $remise_a_zero )   break;
+        foreach ($structured_data as $key => $item) {
+            if ($remise_a_zero == null || $key >= $remise_a_zero) {
+                break;
+            }
             $structured_data[$key]['gpu'] = $structured_data[$remise_a_zero]['gpu'];
             $structured_data[$key]['cpu'] = $structured_data[$remise_a_zero]['cpu'];
             $structured_data[$key]['quota'] = $structured_data[$remise_a_zero]['quota'];
             $structured_data[$key]['norm'] = $structured_data[$remise_a_zero]['norm'];
         }
-	}
+    }
 
-   /* Calcul de la dérivée, pour connaître la consommation journalière
-	* 
-	* On calcule la différence entre N et N-1 sauf sur quota.
-	* Si la différence est <0, on garde 0
-	* 
-	* TODO - les noms de ressources 'cpu' et 'gpu' sont hardcodés
-	*/
+    /* Calcul de la dérivée, pour connaître la consommation journalière
+     *
+     * On calcule la différence entre N et N-1 sauf sur quota.
+     * Si la différence est <0, on garde 0
+     *
+     * TODO - les noms de ressources 'cpu' et 'gpu' sont hardcodés
+     */
     public function derivConso(&$structured_data)
     {
-		$conso_precedente = ['cpu'=>0,'gpu'=>0, 'key'=>0];
-		$cp               = [];
-		$prems            = true;
-		$jour             = 24 * 3600;
-        foreach( $structured_data as $key => $item )
-        {
-			$cp = $conso_precedente;
-			$conso_precedente['gpu'] = $structured_data[$key]['gpu'];
-			$conso_precedente['cpu'] = $structured_data[$key]['cpu'];
-			$conso_precedente['key'] = $key;
-			if ($prems)
-			{
-				$prems = false;
-				continue;
-			}
+        $conso_precedente = ['cpu'=>0,'gpu'=>0, 'key'=>0];
+        $cp               = [];
+        $prems            = true;
+        $jour             = 24 * 3600;
+        foreach ($structured_data as $key => $item) {
+            $cp = $conso_precedente;
+            $conso_precedente['gpu'] = $structured_data[$key]['gpu'];
+            $conso_precedente['cpu'] = $structured_data[$key]['cpu'];
+            $conso_precedente['key'] = $key;
+            if ($prems) {
+                $prems = false;
+                continue;
+            }
 
-	
-			$deltat = ($key - $cp['key']) / $jour;		// Le temps en jours (en principe 1)
-			$structured_data[$key]['gpu'] = ($structured_data[$key]['gpu'] < $cp['gpu']) ? 0 : ($structured_data[$key]['gpu'] - $cp['gpu']) / $deltat;
-			$structured_data[$key]['cpu'] = ($structured_data[$key]['cpu'] < $cp['cpu']) ? 0 : ($structured_data[$key]['cpu'] - $cp['cpu']) / $deltat;
-		}
-	}
+
+            $deltat = ($key - $cp['key']) / $jour;		// Le temps en jours (en principe 1)
+            $structured_data[$key]['gpu'] = ($structured_data[$key]['gpu'] < $cp['gpu']) ? 0 : ($structured_data[$key]['gpu'] - $cp['gpu']) / $deltat;
+            $structured_data[$key]['cpu'] = ($structured_data[$key]['cpu'] < $cp['cpu']) ? 0 : ($structured_data[$key]['cpu'] - $cp['cpu']) / $deltat;
+        }
+    }
 }
-

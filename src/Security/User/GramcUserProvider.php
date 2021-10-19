@@ -23,6 +23,7 @@
  **/
 
 // src/App/Security/User/GramcUserProvider.php
+
 namespace App\Security\User;
 
 use App\Entity\Individu;
@@ -34,11 +35,10 @@ use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
-class GramcUserProvider  implements UserProviderInterface
+class GramcUserProvider implements UserProviderInterface
 {
-
     private $em;
-    
+
     public function __construct(EntityManagerInterface $em)
     {
         $this->em = $em;
@@ -48,13 +48,15 @@ class GramcUserProvider  implements UserProviderInterface
     public function loadUserByUsername($username)
     {
         $repository = $this->em->getRepository(Sso::class);
-        if( $sso = $repository->findOneByEppn($username) )
-           return $sso->getIndividu();
-           
+        if ($sso = $repository->findOneByEppn($username)) {
+            return $sso->getIndividu();
+        }
+
         $repository = $this->em->getRepository(Individu::class);
-        if( $individu =  $repository->findOneBy( ['idIndividu' => $username]) )
+        if ($individu =  $repository->findOneBy(['idIndividu' => $username])) {
             return $individu;
-            
+        }
+
         throw new UsernameNotFoundException(
             sprintf('eppn or idIndividu
              "%s" does not exist.', $username)
@@ -74,6 +76,6 @@ class GramcUserProvider  implements UserProviderInterface
 
     public function supportsClass($class)
     {
-		return preg_match( '/App\\\Entity\\\Individu$/', $class) === 1;
+        return preg_match('/App\\\Entity\\\Individu$/', $class) === 1;
     }
 }

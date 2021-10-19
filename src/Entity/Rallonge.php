@@ -26,7 +26,6 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-//use App\App;
 use App\Utils\Etat;
 use App\Utils\Functions;
 use App\Interfaces\Demande;
@@ -61,6 +60,15 @@ class Rallonge implements Demande
      * @Assert\GreaterThanOrEqual(0,message="Vous ne pouvez pas demander un nombre d'heures négatif.")
      */
     private $demHeures;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="dem_heures_gpu", type="integer", nullable=true)
+     * @Assert\GreaterThan(0,message="Vous devez demander des heures.")
+     * @Assert\GreaterThanOrEqual(0,message="Vous ne pouvez pas demander un nombre d'heures négatif.")
+     */
+    private $demHeuresGpu;
 
     /**
      * @var integer
@@ -152,16 +160,15 @@ class Rallonge implements Demande
 
     /**
     * @ORM\PostLoad
-    * 
+    *
     * TODO - Ce truc est une bidouille immonde à supprimer ASAP
     */
     public function convert()
     {
-     if( $this->getEtatRallonge() == Etat::ACTIF && $this->getAttrHeures() == null )
-     {
-        $this->setAttrHeures( $this->getNbHeuresAtt() );
-        //Functions::infoMessage(__METHOD__ . ':' . __LINE__ . ' Fixture partielle de Rallonge ' . $this->getIdRallonge() );
-     }
+        if ($this->getEtatRallonge() == Etat::ACTIF && $this->getAttrHeures() == null) {
+            $this->setAttrHeures($this->getNbHeuresAtt());
+            //Functions::infoMessage(__METHOD__ . ':' . __LINE__ . ' Fixture partielle de Rallonge ' . $this->getIdRallonge() );
+        }
     }
 
     ////////////////////////////////////////////////////////
@@ -179,8 +186,14 @@ class Rallonge implements Demande
     /////////////////////////////////////////////////////////////////////////////
 
 
-    public function getId(){ return $this->getIdRallonge(); }
-    public function __toString(){ return $this->getIdRallonge(); }
+    public function getId()
+    {
+        return $this->getIdRallonge();
+    }
+    public function __toString()
+    {
+        return $this->getIdRallonge();
+    }
 
     ////////////////////////////////////////////////////////////////////////////
 
@@ -199,7 +212,10 @@ class Rallonge implements Demande
 
         return $this;
     }
-	public function setEtat($etatVersion) { return $this->setEtatVersion(); }
+    public function setEtat($etatRallonge)
+    {
+        return $this->setEtatRallonge($etatRallonge);
+    }
 
     /**
      * Get etatRallonge
@@ -233,6 +249,30 @@ class Rallonge implements Demande
     public function getDemHeures()
     {
         return $this->demHeures;
+    }
+
+    /**
+     * Set demHeuresGpu
+     *
+     * @param integer $demHeuresGpu
+     *
+     * @return Rallonge
+     */
+    public function setDemHeuresGpu($demHeuresGpu)
+    {
+        $this->demHeuresGpu = $demHeuresGpu;
+
+        return $this;
+    }
+
+    /**
+     * Get demHeuresGpu
+     *
+     * @return integer
+     */
+    public function getDemHeuresGpu()
+    {
+        return $this->demHeuresGpu;
     }
 
     /**
@@ -456,30 +496,6 @@ class Rallonge implements Demande
     }
 
     /**
-     * Set rallonge
-     *
-     * @param \App\Entity\Rallonge
-     *
-     * @return Rallonge
-     */
-    public function setRallonge($rallonge)
-    {
-        $this->rallonge = $rallonge;
-
-        return $this;
-    }
-
-    /**
-     * Get rallonge
-     *
-     * @return \App\Entity\Rallonge
-     */
-    public function getRallonge()
-    {
-        return $this->rallonge;
-    }
-
-    /**
      * Set expert
      *
      * @param \App\Entity\Individu $expert
@@ -503,10 +519,10 @@ class Rallonge implements Demande
         return $this->expert;
     }
 
-	/***************************************************
-	 * Fonctions utiles pour la class Workflow
-	 * Autre nom pour getEtatRallonge/setEtatRallonge !
-	 ***************************************************/
+    /***************************************************
+     * Fonctions utiles pour la class Workflow
+     * Autre nom pour getEtatRallonge/setEtatRallonge !
+     ***************************************************/
     public function getObjectState()
     {
         return $this->getEtatRallonge();
@@ -520,21 +536,23 @@ class Rallonge implements Demande
     public function getResponsables()
     {
         $version = $this->getVersion();
-        if( $version != null )
+        if ($version != null) {
             return $version->getResponsables();
-        else
+        } else {
             return [];
+        }
     }
 
     // pour notifications
     public function getOneExpert()
     {
         $expert = $this->getExpert();
-        if( $expert == null )
+        if ($expert == null) {
             return null;
-        else
+        } else {
             //return $expert[0];
             return $expert;
+        }
     }
 
     // pour notifications
@@ -546,33 +564,46 @@ class Rallonge implements Demande
     // pour notifications
     public function getExpertsThematique()
     {
-    $version    =   $this->getVersion();
-    if( $version    ==  null    ) return [];
+        $version    =   $this->getVersion();
+        if ($version    ==  null) {
+            return [];
+        }
 
-    $thematique = $version->getThematique();
-    if( $thematique == null) return [];
-    else return $thematique->getExpert();
+        $thematique = $version->getThematique();
+        if ($thematique == null) {
+            return [];
+        } else {
+            return $thematique->getExpert();
+        }
     }
 
     //////////////////////////////
-	// TODO - Mettre cette fonction dans ServiceRallonge 
+    // TODO - Mettre cette fonction dans ServiceRallonge
     public function getMetaEtat()
     {
-    $etat = $this->getEtatRallonge();
-    if      (   $etat    ==  Etat::EDITION_DEMANDE    )     return  'EDITION';
-    elseif  (   $etat    ==  Etat::EDITION_EXPERTISE  )     return  'EXPERTISE';
-    elseif  (   $etat    ==  Etat::DESAFFECTE  )            return  'EXPERTISE';
-    elseif  (   $etat    ==  Etat::EN_ATTENTE  )            return  'ATTENTE';
-    elseif  (   $this->getAttrAccept() == true )            return  'ACCEPTE';
-    elseif  (   $this->getAttrAccept() == false )           return  'REFUSE';
-    else    return '';
+        $etat = $this->getEtatRallonge();
+        if ($etat    ==  Etat::EDITION_DEMANDE) {
+            return  'EDITION';
+        } elseif ($etat    ==  Etat::EDITION_EXPERTISE) {
+            return  'EXPERTISE';
+        } elseif ($etat    ==  Etat::DESAFFECTE) {
+            return  'EXPERTISE';
+        } elseif ($etat    ==  Etat::EN_ATTENTE) {
+            return  'ATTENTE';
+        } elseif ($this->getAttrAccept() == true) {
+            return  'ACCEPTE';
+        } elseif ($this->getAttrAccept() == false) {
+            return  'REFUSE';
+        } else {
+            return '';
+        }
     }
 
     //////////////
 
     public function getLibelleEtatRallonge()
     {
-    return Etat::getLibelle( $this->getEtatRallonge() );
+        return Etat::getLibelle($this->getEtatRallonge());
     }
 
     ////////////////////////////////////////////////////////////////////////
@@ -580,36 +611,36 @@ class Rallonge implements Demande
 
     public function isExpertDe(Individu $individu)
     {
-        if( $individu == null ) return false;
+        if ($individu == null) {
+            return false;
+        }
 
         $expert = $this->getExpert();
 
-        if( $expert == null )
-        {
+        if ($expert == null) {
             //Functions::warningMessage(__METHOD__ . ":" . __LINE__ . " rallonge " . $this->__toString() . " n'a pas d'expert ");
             return false;
-        }
-        elseif( $expert->isEqualTo($individu) )
+        } elseif ($expert->isEqualTo($individu)) {
             return true;
-
-        else
+        } else {
             return false;
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////
 
     public function isFinalisable()
     {
-    if( $this->getEtatRallonge() == Etat::EN_ATTENTE )
-        return true;
-    else
-        return false;
+        if ($this->getEtatRallonge() == Etat::EN_ATTENTE) {
+            return true;
+        } else {
+            return false;
+        }
     }
-    
+
     ////////////////////////////////////////////////////////////////////////
-	public function getEtat()
+    public function getEtat()
     {
-		return $this->getEtatRallonge();
-	}
-		
+        return $this->getEtatRallonge();
+    }
 }

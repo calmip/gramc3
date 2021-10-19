@@ -41,7 +41,7 @@ use App\Form\IndividuType;
 use App\Entity\Individu;
 use App\Entity\Scalar;
 use App\Entity\Sso;
-use App\Entity\Compteactivation;
+use App\Entity\CompteActivation;
 use App\Entity\Journal;
 
 use App\Utils\Functions;
@@ -81,73 +81,74 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 use Twig\Environment;
 
-
-function redirection_externe($url)
-{
-    $controller = new Controller();
-    return $controller->redirect($url);
-}
+//function redirection_externe($url)
+//{
+//    $controller = new Controller();
+//    return $controller->redirect($url);
+//}
 
 
 /////////////////////////////////////////////////////
 
 class GramcSessionController extends AbstractController
 {
-	private $sn;
-	private $sj;
-	private $sm;
-	private $sp;
-	private $ss;
-	private $pe1;
-	private $pe2;
-	private $sd;
-	private $sv;
-	private $pw;
-	private $ff;
-	private $vl;
-	private $tok;
-	private $sss;
-	private $uc;
-	private $ac;
-	
-	
-	public function __construct (ServiceNotifications $sn,
-								 ServiceJournal $sj,
-								 ServiceMenus $sm,
-								 ServiceProjets $sp,
-								 ServiceSessions $ss,
-								 PropositionExpertsType1 $pe1,
-								 PropositionExpertsType2 $pe2,
-								 GramcDate $sd,
-								 ServiceVersions $sv,
-								 ProjetWorkflow $pw,
-								 FormFactoryInterface $ff,
-								 ValidatorInterface $vl,
-								 TokenStorageInterface $ts,
-								 SessionInterface $sss,
-								 UserChecker $uc,
- 								 AuthorizationCheckerInterface $ac,
- 								 Environment $tw
-								 )
-	{
-		$this->sn  = $sn;
-		$this->sj  = $sj;
-		$this->sm  = $sm;
-		$this->sp  = $sp;
-		$this->ss  = $ss;
-		$this->pe1 = $pe1;
-		$this->pe2 = $pe2;
-		$this->sd  = $sd;
-		$this->sv  = $sv;
-		$this->pw  = $pw;
-		$this->ff  = $ff;
-		$this->vl  = $vl;
-		$this->ts  = $ts;
-		$this->sss = $sss;
-		$this->uc  = $uc;
-		$this->ac  = $ac;
-		$this->tw  = $tw;
-	}
+    private $sn;
+    private $sj;
+    private $sm;
+    private $sp;
+    private $ss;
+    private $pe1;
+    private $pe2;
+    private $sd;
+    private $sv;
+    private $pw;
+    private $ff;
+    private $vl;
+    private $ts;
+    private $tok;
+    private $sss;
+    private $uc;
+    private $ac;
+    private $tw;
+
+
+    public function __construct(
+        ServiceNotifications $sn,
+        ServiceJournal $sj,
+        ServiceMenus $sm,
+        ServiceProjets $sp,
+        ServiceSessions $ss,
+        PropositionExpertsType1 $pe1,
+        PropositionExpertsType2 $pe2,
+        GramcDate $sd,
+        ServiceVersions $sv,
+        ProjetWorkflow $pw,
+        FormFactoryInterface $ff,
+        ValidatorInterface $vl,
+        TokenStorageInterface $ts,
+        SessionInterface $sss,
+        UserChecker $uc,
+        AuthorizationCheckerInterface $ac,
+        Environment $tw
+    ) {
+        $this->sn  = $sn;
+        $this->sj  = $sj;
+        $this->sm  = $sm;
+        $this->sp  = $sp;
+        $this->ss  = $ss;
+        $this->pe1 = $pe1;
+        $this->pe2 = $pe2;
+        $this->sd  = $sd;
+        $this->sv  = $sv;
+        $this->pw  = $pw;
+        $this->ff  = $ff;
+        $this->vl  = $vl;
+        $this->ts  = $ts;
+        $this->sss = $sss;
+        $this->uc  = $uc;
+        $this->ac  = $ac;
+        $this->tw  = $tw;
+    }
 
     /**
      * @Route("/admin/accueil",name="admin_accueil")
@@ -156,7 +157,7 @@ class GramcSessionController extends AbstractController
 
     public function adminAccueilAction()
     {
-		$sm      = $this->sm;
+        $sm      = $this->sm;
         $menu1[] = $sm->individu_gerer();
 
         $menu2[] = $sm->gerer_sessions();
@@ -167,16 +168,18 @@ class GramcSessionController extends AbstractController
         $menu3[] = $sm->projet_session();
         $menu3[] = $sm->projet_annee();
         $menu3[] = $sm->projet_tous();
-        $menu3[] = $sm->projet_donnees();
+        if ($this->getParameter('nodata')==false) {
+            $menu3[] = $sm->projet_donnees();
+        }
         $menu3[] = $sm->televersement_generique();
 
-		if ($this->getParameter('norattachement')==false)
-		{
-	        $menu4[] = $sm->rattachements();
-		}
+        if ($this->getParameter('norattachement')==false) {
+            $menu4[] = $sm->rattachements();
+        }
         $menu4[] = $sm->thematiques();
         $menu4[] = $sm->metathematiques();
         $menu4[] = $sm->laboratoires();
+        $menu4[] = $sm->formations();
 
         $menu5[] = $sm->bilan_annuel();
         $menu5[] = $sm->statistiques();
@@ -184,14 +187,13 @@ class GramcSessionController extends AbstractController
 
         $menu6[] = $sm->connexions();
         $menu6[] = $sm->journal();
-        if ( $this->getParameter('kernel.debug'))
-        {
-			$menu6[] = $sm->avancer();
-		}
-		$menu6[] = $sm->info();
+        if ($this->getParameter('kernel.debug')) {
+            $menu6[] = $sm->avancer();
+        }
+        $menu6[] = $sm->info();
         $menu6[] = $sm->nettoyer();
 
-        return $this->render('default/accueil_admin.html.twig',['menu1' => $menu1,
+        return $this->render('default/accueil_admin.html.twig', ['menu1' => $menu1,
                                                                 'menu2' => $menu2,
                                                                 'menu3' => $menu3,
                                                                 'menu4' => $menu4,
@@ -207,112 +209,118 @@ class GramcSessionController extends AbstractController
         return $this->render('default/mentions.html.twig');
     }
 
-     /**
-     * @Route("/aide", name="aide" )
-     */
+    /**
+    * @Route("/aide", name="aide" )
+    */
     public function aideAction()
     {
         return $this->render('default/aide.html.twig');
     }
 
-     /**
-     * @Route("/", name="accueil" )
-     *
-     */
+    /**
+    * @Route("/", name="accueil" )
+    *
+    */
     public function accueilAction()
-	{
-		$sm     = $this->sm;
-		$ss     = $this->ss;
-		$session= $ss->getSessionCourante();
-		
-		// Si true, cet utilisateur n'est ni expert ni admin ni président !
-		$seulement_demandeur=true;
-		
-		$menu   = [];
-		$m = $sm->demandeur();
-		if ($m['ok'] == false)
-		{
-			// Même pas demandeur !
-			$seulement_demandeur = false;
-		}
-		$menu[] = $m;
-		
-		$m = $sm->expert();
-		if ($m['ok'])
-		{
-			$seulement_demandeur = false;
-		}
-		$menu[] = $m;
-		
-		$m = $sm->administrateur();
-		if ($m['ok'])
-		{
-			$seulement_demandeur = false;
-		}
-		$menu[] = $m;
-		
-		$m = $sm->president();
-		if ($m['ok'])
-		{
-			$seulement_demandeur = false;
-		}
-		$menu[] = $m;
-		$menu[] = $sm->aide();
+    {
+        $sm     = $this->sm;
+        $ss     = $this->ss;
+        $session= $ss->getSessionCourante();
 
-		if ($seulement_demandeur)
-		{
-			return $this->redirectToRoute('projet_accueil');
-		}
-		else
-		{
-	        return $this->render('default/accueil.html.twig', 
-								['menu' => $menu, 
-								 'projet_test' => $sm->nouveau_projet_test()['ok'],
-								 'session' => $session ]);
-		}
-	}
+        // Lors de l'installation, aucune session n'existe: redirection
+        // vers l'écran de création de session, le seul qui fonctionne !
+        if ($session == null) {
+            if ($this->ac->isGranted('ROLE_ADMIN')) {
+                return $this->redirectToRoute('gerer_sessions');
+            }
+            return $this->redirectToRoute('projet_accueil');
+        }
+
+        // Si true, cet utilisateur n'est ni expert ni admin ni président !
+        $seulement_demandeur=true;
+
+        $menu   = [];
+        $m = $sm->demandeur();
+        if ($m['ok'] == false) {
+            // Même pas demandeur !
+            $seulement_demandeur = false;
+        }
+        $menu[] = $m;
+
+        $m = $sm->expert();
+        if ($m['ok']) {
+            $seulement_demandeur = false;
+        }
+        $menu[] = $m;
+
+        $m = $sm->administrateur();
+        if ($m['ok']) {
+            $seulement_demandeur = false;
+        }
+        $menu[] = $m;
+
+        $m = $sm->president();
+        if ($m['ok']) {
+            $seulement_demandeur = false;
+        }
+        $menu[] = $m;
+        $menu[] = $sm->aide();
+
+        if ($seulement_demandeur) {
+            return $this->redirectToRoute('projet_accueil');
+        } else {
+            // juin 2021 -> Suppression des projets tests
+            return $this->render(
+                'default/accueil.html.twig',
+                ['menu' => $menu,
+         //'projet_test' => $sm->nouveau_projet_test()['ok'],
+         'projet_test' => false,
+         'session' => $session ]
+            );
+        }
+    }
 
     /**
      * @Route("/president", name="president_accueil" )
      * @Security("is_granted('ROLE_PRESIDENT')")
      */
     public function presidentAccueilAction()
-	{
- 		$sm     = $this->sm;
+    {
+        $sm     = $this->sm;
         $menu[] = $sm->affectation();
-        $menu[] = $sm->commSess();
-	    $menu[] = $sm->affectation_rallonges();
-        $menu[] = $sm->affectation_test();
+        
+        if ($this->getParameter('noedition_expertise')==false) {
+            $menu[] = $sm->commSess();
+        }
+        $menu[] = $sm->affectation_rallonges();
+        /* $menu[] = $sm->affectation_test(); */
         return $this->render('default/president.html.twig', ['menu' => $menu]);
-	}
+    }
 
     /**
      * @Route("/deconnexion",name="deconnexion")
      **/
     public function deconnexionAction(Request $request)
     {
-		$sj    = $this->sj;
-		$ac    = $this->ac;
-		$token = $this->ts->getToken();
-		$sss   = $this->sss; 
+        $sj    = $this->sj;
+        $ac    = $this->ac;
+        $token = $this->ts->getToken();
+        $sss   = $this->sss;
 
-        if( $ac->isGranted('ROLE_PREVIOUS_ADMIN') )
-		{
+        if ($ac->isGranted('ROLE_PREVIOUS_ADMIN')) {
             $sudo_url = $sss->get('sudo_url');
             //$sj->debugMessage(__METHOD__ . " sudo_url = " . $sudo_url );
             $userChecker = $this->uc;
-            $real_user   = $sss->get('real_user' );
-            $userChecker->checkPostAuth( $real_user );
-            $sj->infoMessage(__METHOD__ . ":" . __LINE__ . " déconnexion d'un utilisateur en SUDO vers " . $real_user );
-            return new RedirectResponse(  $sudo_url . '?_switch_user=_exit' );
-            //return $this->redirectToRoute('accueil',[ '_switch_user' => '_exit' ]);
-		}
-        elseif ($ac->isGranted('IS_AUTHENTICATED_FULLY'))
-		{
-            $sj->infoMessage(__METHOD__ . ":" . __LINE__ .  " déconnexion de l'utilisateur " . $token->getUser() );
+            $real_user   = $sss->get('real_user');
+            $userChecker->checkPostAuth($real_user);
+            $sj->infoMessage(__METHOD__ . ":" . __LINE__ . " déconnexion d'un utilisateur en SUDO vers " . $real_user);
+            return new RedirectResponse($sudo_url . '?_switch_user=_exit');
+        //return $this->redirectToRoute('accueil',[ '_switch_user' => '_exit' ]);
+        } elseif ($ac->isGranted('IS_AUTHENTICATED_FULLY')) {
+            $sj->infoMessage(__METHOD__ . ":" . __LINE__ .  " déconnexion de l'utilisateur " . $token->getUser());
             $request->getSession()->invalidate();
             session_destroy();
-		}
+        }
         return $this->redirectToRoute('deconnected');
     }
 
@@ -322,47 +330,49 @@ class GramcSessionController extends AbstractController
     **/
     public function deconnexion_showAction(Request $request)
     {
-	    return $this->render('default/deconnexion.html.twig');
+        return $this->render('default/deconnexion.html.twig');
     }
 
     /**
     * @Route("/profil",name="profil")
-    * @Security("is_granted('ROLE_DEMANDEUR')") 
+    * @Security("is_granted('ROLE_DEMANDEUR')")
 
     **/
     public function profilAction(Request $request)
     {
-		$sj = $this->sj;
+        $sj = $this->sj;
 
         $individu = $this->ts->getToken()->getUser();
 
-        if( $individu == 'anon.' || ! ($individu instanceof Individu)  )
-        {
+        if ($individu == 'anon.' || ! ($individu instanceof Individu)) {
             return $this->redirectToRoute('accueil');
         }
         $old_individu = clone $individu;
-        $form = $this->createForm(IndividuType::class, $individu);
+        $form = $this->createForm(IndividuType::class, $individu, ['mail' => false ]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid())
-        {
-            if( $old_individu->isPermanent() != $individu->isPermanent() && $individu->isPermanent() == false )
-                 $sj->warningMessage(__METHOD__ . ':' . __LINE__ . " " . $individu . " cesse d'être permanent !!");
+        if ($form->isSubmitted() && $form->isValid()) {
+            if ($old_individu->isPermanent() != $individu->isPermanent() && $individu->isPermanent() == false) {
+                $sj->warningMessage(__METHOD__ . ':' . __LINE__ . " " . $individu . " cesse d'être permanent !!");
+            }
 
-             if( $old_individu->isFromLaboRegional() != $individu->isFromLaboRegional() && $individu->isFromLaboRegional() == false )
-                 $sj->warningMessage(__METHOD__ . ':' . __LINE__ . " " . $individu . " cesse d'être d'un labo regional !!");
+            if ($old_individu->isFromLaboRegional() != $individu->isFromLaboRegional() && $individu->isFromLaboRegional() == false) {
+                $sj->warningMessage(__METHOD__ . ':' . __LINE__ . " " . $individu . " cesse d'être d'un labo regional !!");
+            }
 
             $new_statut = $individu->getStatut();
             $old_statut = $old_individu->getStatut();
-            if( $new_statut != $old_statut )
+            if ($new_statut != $old_statut) {
                 $sj->noticeMessage(__METHOD__ . ':' . __LINE__ . " " . $individu . " a changé son statut de " . $old_statut
-                . " vers " . $new_statut );
+                . " vers " . $new_statut);
+            }
 
             $new_laboratoire = $individu->getLabo();
             $old_laboratoire = $old_individu->getLabo();
-            if( $new_laboratoire != $old_laboratoire )
+            if ($new_laboratoire != $old_laboratoire) {
                 $sj->noticeMessage(__METHOD__ . ':' . __LINE__ . " " . $individu . " a changé son laboratoire de " . $old_laboratoire
-                . " vers " . $new_laboratoire );
+                . " vers " . $new_laboratoire);
+            }
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($individu);
@@ -376,52 +386,54 @@ class GramcSessionController extends AbstractController
     /**
      *
      * Connexion en debug (c-a-d pas d'authentification
-     *  
+     *
      * @Route("/connexion_dbg",name="connexion_dbg")
      **/
     public function connectiondbgAction(Request $request)
     {
-		$sj         = $this->sj;
-		$token      = $this->ts->getToken();
-		$em         = $this->getDoctrine()->getManager();
-		$repository = $em->getRepository(Individu::class);
-		
-		// Bizarre...
-		// echo "coucou " . (int) $this->has('kernel.debug');
-		// echo "coucou " . (int) $this->getParameter('kernel.debug');
-		if ( $this->getParameter('kernel.debug') === false )
-		//if ( ! $this->container->hasParameter('kernel.debug') || $this->getParameter('kernel.debug') == false )
-		{
-			$sj->warningMessage(__METHOD__ . ':' . __LINE__ .' tentative de se connecter avec debug en production');
+        $sj         = $this->sj;
+        $token      = $this->ts->getToken();
+        $em         = $this->getDoctrine()->getManager();
+        $repository = $em->getRepository(Individu::class);
+
+        // Bizarre...
+        // echo "coucou " . (int) $this->has('kernel.debug');
+        // echo "coucou " . (int) $this->getParameter('kernel.debug');
+        if ($this->getParameter('kernel.debug') === false) {
+            //if ( ! $this->container->hasParameter('kernel.debug') || $this->getParameter('kernel.debug') == false )
+            $sj->warningMessage(__METHOD__ . ':' . __LINE__ .' tentative de se connecter avec debug en production');
             return $this->redirectToRoute('accueil');
-		}
+        }
 
-        $user = new Individu();
-        $mail = $user->getMail();
+        $u = new Individu();
+        //$mail = $user->getMail();
 
-        $experts    = $repository->findBy( ['expert'   => true ] );
-        $admins     = $repository->findBy( ['admin'    => true ] );
-        $obs        = $repository->findby( ['obs'      => true ] );
-        $sysadmins  = $repository->findby( ['sysadmin' => true ] );
-        $responsables   = static::elements( $repository->getCollaborateurs(true) );
-        
+        $experts    = $repository->findBy(['expert'   => true ]);
+        $admins     = $repository->findBy(['admin'    => true ]);
+        $obs        = $repository->findby(['obs'      => true ]);
+        $sysadmins  = $repository->findby(['sysadmin' => true ]);
+        $responsables   = static::elements($repository->getCollaborateurs(true));
+
         $moi            = $token->getUser();
-        $collaborateurs = static::elements( $repository->getCollaborateurs(false, false, $moi) );
-        $users          = array_unique( array_merge( $admins, $experts, $obs, $sysadmins, $responsables , $collaborateurs) );
+        $collaborateurs = static::elements($repository->getCollaborateurs(false, false, $moi));
+        $users          = array_unique(array_merge($admins, $experts, $obs, $sysadmins, $responsables, $collaborateurs));
         sort($users);
 
-        $form = $this->createFormBuilder($user )
-	        ->add('mail', EntityType::class,
-	            [
-		            'multiple' => false,
-		            'placeholder' => 'Choisissez',
-		            'class' => 'App:Individu',
-		            'choices' => $users,
-		            //'choice_label' => function($user){ return $user->getPrenom() . ' ' . $user->getNom(); }
-	            ])
-			->add('save', SubmitType::class, ['label' => 'Connexion'])
-			->add('reset',ResetType::class,  ['label' => 'Effacer'])
-			->getForm();
+        $form = $this->createFormBuilder($u)
+            ->add(
+                'mail',
+                EntityType::class,
+                [
+                    'multiple' => false,
+                    'placeholder' => 'Choisissez',
+                    'class' => 'App:Individu',
+                    'choices' => $users,
+                    //'choice_label' => function($user){ return $user->getPrenom() . ' ' . $user->getNom(); }
+                ]
+            )
+            ->add('save', SubmitType::class, ['label' => 'Connexion'])
+            ->add('reset', ResetType::class, ['label' => 'Effacer'])
+            ->getForm();
 
         $form->handleRequest($request);
 
@@ -430,11 +442,12 @@ class GramcSessionController extends AbstractController
         //    $m = $user->getMail();
         //    }
 
-        if ($form->isSubmitted() )
-		{
-            $user  = $repository->findOneByMail($user->getMail()->getMail() );
+        if ($form->isSubmitted()) {
+            // TODO - Particulièrement laid et incompréhensible !
+            //        php-stan (level -2) renvoie une erreur et pourtant ça marche
+            $user  = $repository->findOneByMail($u->getMail()->getMail());
             $roles = $user->getRoles();
-            $token = new UsernamePasswordToken($user, null, 'main', $roles );
+            $token = new UsernamePasswordToken($user, null, 'main', $roles);
 
             //$userChecker = new UserChecker();
             $userChecker = $this->uc;
@@ -447,13 +460,14 @@ class GramcSessionController extends AbstractController
             $userChecker->checkPostAuth($user);
             $sj->infoMessage(__METHOD__ . ":" . __LINE__ . " connexion DBG de l'utilisateur " . $user);
 
-            if( $request->getSession()->has('url') )
-                return $this->redirect( $request->getSession()->get('url') );
-            else
+            if ($request->getSession()->has('url')) {
+                return $this->redirect($request->getSession()->get('url'));
+            } else {
                 return $this->redirectToRoute('accueil');
-		}
+            }
+        }
 
-        return $this->render('default/connexion_dbg.html.twig', [ 'form' => $form->createView() ]  );
+        return $this->render('default/connexion_dbg.html.twig', [ 'form' => $form->createView() ]);
     }
 
     /**
@@ -461,56 +475,61 @@ class GramcSessionController extends AbstractController
     * @Route("/login/activation/{key}")
     **/
 
-    public function activationAction(Request $request,$key)
+    public function activationAction(Request $request, $key)
     {
-		$em = $this->getDoctrine()->getManager();
-		$sn = $this->sn;
-		$sj = $this->sj;
+        $em = $this->getDoctrine()->getManager();
+        $sn = $this->sn;
+        $sj = $this->sj;
 
-		$server = $request->server;
-		if(  $server->has('REMOTE_USER') || $server->has('REDIRECT_REMOTE_USER') )
-	    {
-		    $eppn = "";
-			if( $server->has('REMOTE_USER') ) $eppn =  $server->get('REMOTE_USER');
-			if( $server->has('REDIRECT_REMOTE_USER') ) $eppn =  $server->get('REDIRECT_REMOTE_USER');
+        $server = $request->server;
+        if ($server->has('REMOTE_USER') || $server->has('REDIRECT_REMOTE_USER')) {
+            $eppn = "";
+            if ($server->has('REMOTE_USER')) {
+                $eppn =  $server->get('REMOTE_USER');
+            }
+            if ($server->has('REDIRECT_REMOTE_USER')) {
+                $eppn =  $server->get('REDIRECT_REMOTE_USER');
+            }
 
-			$em = $this->getDoctrine()->getManager();
+            $em = $this->getDoctrine()->getManager();
 
-			$compteactivation = $this->getDoctrine()
-				->getRepository('App:CompteActivation')
-				->findOneBy( ['key' => $key ] );
+            $compteactivation = $this->getDoctrine()
+                ->getRepository(CompteActivation::class)
+                ->findOneBy(['key' => $key ]);
 
-			if( !  $compteactivation )
-				   return new Response('<pre> Activation error for this key </pre>');
+            if (!  $compteactivation) {
+                return new Response('<pre> Activation error for this key </pre>');
+            }
 
-			$sso = new Sso();
-			$sso->setEppn( $eppn );
-			$individu = $compteactivation->getIndividu();
-			$sso->setIndividu( $individu );
+            $sso = new Sso();
+            $sso->setEppn($eppn);
+            $individu = $compteactivation->getIndividu();
+            $sso->setIndividu($individu);
 
-			$em->remove($compteactivation);
+            $em->remove($compteactivation);
 
-			if( $em->getRepository(Sso::class)->findOneBy( [ 'eppn' => $eppn ] ) == null )
-				$em->persist($sso);
-			else
-				$sj->noticeMessage( __FILE__ . ":" . __LINE__ . "  " . $eppn . " existe déjà");
+            if ($em->getRepository(Sso::class)->findOneBy([ 'eppn' => $eppn ]) == null) {
+                $em->persist($sso);
+            } else {
+                $sj->noticeMessage(__FILE__ . ":" . __LINE__ . "  " . $eppn . " existe déjà");
+            }
 
-			$em->flush();
+            $em->flush();
 
-			// Envoyer un mail de bienvenue à ce nouvel utilisateur
-			$dest   = [ $individu->getMail() ];
-			$etab   = preg_replace('/.*@/','',$eppn);
-			$sn->sendMessage( "notification/compte_ouvert-sujet.html.twig",
-							  "notification/compte_ouvert-contenu.html.twig",
-							  [ 'individu' => $individu, 'etab' => $etab ],
-							  $dest );
+            // Envoyer un mail de bienvenue à ce nouvel utilisateur
+            $dest   = [ $individu->getMail() ];
+            $etab   = preg_replace('/.*@/', '', $eppn);
+            $sn->sendMessage(
+                "notification/compte_ouvert-sujet.html.twig",
+                "notification/compte_ouvert-contenu.html.twig",
+                [ 'individu' => $individu, 'etab' => $etab ],
+                $dest
+            );
 
-			return $this->redirectToRoute('connexion');
-		}
-		else
-		{
-			return new Response('<pre> Activation error - no eppn </pre>');
-		}
+            return $this->redirectToRoute('connexion');
+        } else {
+            return new Response('<pre> Activation error - no eppn </pre>');
+        }
     }
 
 
@@ -522,41 +541,45 @@ class GramcSessionController extends AbstractController
 
     public function loginAction(Request $request)
     {
-		$sj = $this->sj;
-		$ff = $this->ff;
+        $sj = $this->sj;
+        $ff = $this->ff;
 
-		$form = Functions::createFormBuilder($ff)
-	            ->add('data', ChoiceType::class,
-                [
+        $form = Functions::createFormBuilder($ff)
+                ->add(
+                    'data',
+                    ChoiceType::class,
+                    [
                  'choices' => $this->getParameter('IDPprod')
                  ]
-                 )
-            ->add('connect', SubmitType::class, ['label' => 'Connexion'] )
+                )
+            ->add('connect', SubmitType::class, ['label' => 'Connexion'])
             ->getForm();
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid())
-        {
+        if ($form->isSubmitted() && $form->isValid()) {
             $url    =   $request->getSchemeAndHttpHost();
             $url    .= '/Shibboleth.sso/Login?target=';
             //$url    .=   $this->generateUrl('connexionshiblogin');
             //$url    .= '/gramce-milos/login';
             $url    .= $this->generateUrl('connexionshiblogin');
-            
+
             //$url = $this->generateUrl('connexionshib', [] , UrlGeneratorInterface::ABSOLUTE_URL);
             //$url = $url .  $this->generateUrl('accueil', [] , UrlGeneratorInterface::ABSOLUTE_URL);
 
 
-            if (  $form->getData()['data'] != 'WAYF' )
+            if ($form->getData()['data'] != 'WAYF') {
                 $url = $url . '&providerId=' . $form->getData()['data'];
+            }
 
             $sj->debugMessage(__FILE__. ":" . __LINE__ . " URL shiblogin = " . $url);
 
             return $this->redirect($url);
         }
 
-        return $this->render('default/login.html.twig',   [ 'form' => $form->createView(), ]
+        return $this->render(
+            'default/login.html.twig',
+            [ 'form' => $form->createView(), ]
         );
     }
 
@@ -586,256 +609,257 @@ class GramcSessionController extends AbstractController
      * @Route("/connexion")
      */
     public function auth_connexionAction(Request $request)
-	{
-		$sj = $this->sj;
-		$ac = $this->ac;
+    {
+        $sj = $this->sj;
+        $ac = $this->ac;
 
         $sj->infoMessage("shiblogin d'un utilisateur");
-		$em = $this->getDoctrine()->getManager();
-		
-        /*
-        if( $request->getSession()->has('url') )
-            return $this->redirect( $request->getSession()->get('url') );
-        else
-            return $this->redirectToRoute('index');
-        */
-        $individu = $this->ts->getToken()->getUser(); // OK si l'authentification remote_user de symfony
-        //$sj->debugMessage("coucou ".$individu." REMOTE USER = ".getenv('REMOTE_USER'));
-        //
-        // utilisé si on n'utilise pas l'authentification remote_user de symfony
-        //
-		//$individu='anon.';
-        if( $individu == 'anon.' || ! ($individu instanceof Individu)
-		|| ! $ac->isGranted('IS_AUTHENTICATED_FULLY')
-		)
-		{
-            $server = $request->server;
-            if( ( $username = getenv('REMOTE_USER') ) || $server->has('REMOTE_USER') || $server->has('REDIRECT_REMOTE_USER') )
-			{
-				if( $server->has('REMOTE_USER') ) $username =  $server->get('REMOTE_USER');
-				if( $server->has('REDIRECT_REMOTE_USER') ) $username =  $server->get('REDIRECT_REMOTE_USER');
+        $em = $this->getDoctrine()->getManager();
 
-				$repository1 = $em->getRepository(Sso::class);
-				$repository2 = $em->getRepository(Individu::class);
 
-				if( $sso = $repository1->findOneByEppn($username) )
-						{
-						$individu = $sso->getIndividu();
-						}
-				elseif ( $individu = $repository2->find($username) )
-						{ // seulement en mode testing
-						}
-				else
-					{ // nouvel utilisateur
-					$session = $request->getSession();
-					$session->set('eppn', $username);
+        // PAS BO
+        //$myfile = fopen("/tmp/testfile.txt", "w");
+        //fwrite($myfile, print_r($request->headers->keys(),true));
+        //fclose($myfile);
 
-					//return new Response('nouvel utilisateur');
-					return $this->redirectToRoute('nouveau_compte');
-					}
+        //$sj->debugMessage("Shib infos = ".$request->headers->get('affiliation').' '.$request->headers->get('eppn').' ');
+        $server = $request->server;
+        if (($username = getenv('REMOTE_USER')) || $server->has('REMOTE_USER') || $server->has('REDIRECT_REMOTE_USER')) {
+            if ($server->has('REMOTE_USER')) {
+                $sj->debugMessage('REMOTE_USER='.$server->get('REMOTE_USER'));
+                $username =  $server->get('REMOTE_USER');
+            }
+            if ($server->has('REDIRECT_REMOTE_USER')) {
+                $sj->debugMessage('REDIRECT_REMOTE_USER='.$server->get('REDIRECT_REMOTE_USER'));
+                $username =  $server->get('REDIRECT_REMOTE_USER');
+            }
+            $repository1 = $em->getRepository(Sso::class);
+            $repository2 = $em->getRepository(Individu::class);
 
-				// authentification manuelle sans remote_user de symfony
-				//$userChecker = new UserChecker();
-	            $userChecker = $this->uc;
-				$userChecker->checkPreAuth($individu);
+            if ($sso = $repository1->findOneByEppn($username)) {
+                $individu = $sso->getIndividu();
+            } elseif ($individu = $repository2->find($username)) { // seulement en mode testing
+            } else { // nouvel utilisateur
+                $session = $request->getSession();
+                $session->set('eppn', $username);
 
-				$token = new UsernamePasswordToken($individu, null, 'main', $individu->getRoles() );
-				$session = $request->getSession();
+                // Récupérer les headers dans la session
+                $this->shibbHeadersToSession($request);
 
-				$this->ts->setToken($token);
-				$session->set('_security_main', serialize($token));
+                //return new Response('nouvel utilisateur');
+                return $this->redirectToRoute('nouveau_compte');
+            }
 
-				$userChecker->checkPostAuth($individu);
-				//return new Response("<pre> manual login ".print_r($_SESSION,true)."</pre>");
+            // authentification manuelle sans remote_user de symfony
+            //$userChecker = new UserChecker();
+            $userChecker = $this->uc;
+            $userChecker->checkPreAuth($individu);
 
-			} //  if( $server->has('REMOTE_USER') )
-			else
-			{ // no REMOTE_USER
-				//return new Response("<pre> no login ".print_r($_SESSION,true)."</pre>");
-				return $this->redirectToRoute('deconnexion');
-			} //  if( $server->has('REMOTE_USER') )
+            $token = new UsernamePasswordToken($individu, null, 'main', $individu->getRoles());
+            $session = $request->getSession();
 
-		  } // if  ( $individu == 'anon.' || ! ($individu instanceof Individu)  )
+            $this->ts->setToken($token);
+            $session->set('_security_main', serialize($token));
+
+            $userChecker->checkPostAuth($individu);
+        } //  if( $server->has('REMOTE_USER') )
+        else { // no REMOTE_USER
+            return $this->redirectToRoute('deconnexion');
+        } //  if( $server->has('REMOTE_USER') )
 
         $sj->infoMessage("Controller : connexion d'un utilisateur");
 
-        if( $request->getSession()->has('url') )
-        {
-			return $this->redirect( $request->getSession()->get('url') );
-		}
-		else
-		{
-			return $this->redirectToRoute('accueil');
-		}
-	}
+        if ($request->getSession()->has('url')) {
+            return $this->redirect($request->getSession()->get('url'));
+        } else {
+            return $this->redirectToRoute('accueil');
+        }
+    }
 
-
-	// TODO - Il y a du code dupliqué entre nouveau_compte et nouveau_profil !
-     /**
-     * @Route("/nouveau_compte",name="nouveau_compte")
-     */
+    /**
+    * @Route("/nouveau_compte", name="nouveau_compte")
+    */
     public function nouveau_compteAction(Request $request, LoggerInterface $lg)
     {
-		$sj = $this->sj;
-		$ff = $this->ff;
+        $sj = $this->sj;
+        $ff = $this->ff;
 
         // vérifier si eppn est disponible dans $session
-        if( ! $request->getSession()->has('eppn') )
-		{ // une tentative de piratage
-			$sj->warningMessage(__FILE__ . ":" . __LINE__ . " No eppn pour le nouveau_compte");
-			$lg->warning("No eppn at nouveau_compte", [ 'request' => $request ] );
-			// return new Response(' no eppn ' );
-			return $this->redirectToRoute('accueil');
-		}
+        if (! $request->getSession()->has('eppn')) { // une tentative de piratage
+            $sj->warningMessage(__FILE__ . ":" . __LINE__ . " No eppn pour le nouveau_compte");
+            $lg->warning("No eppn at nouveau_compte", [ 'request' => $request ]);
+            // return new Response(' no eppn ' );
+            return $this->redirectToRoute('accueil');
+        }
 
-		// vérifier si email est disponible dans $session
-		if( $request->getSession()->has('email')  )
-		{
-			$email = $request->getSession()->get('email');
-		}
-		else
-		{
-			$email = 'nom@labo.fr';
-		}
+
+        $eppn = $request->getSession()->get('eppn');
+
+        // tests !
+        // $eppn = "";
+
+        // vérifier si email est disponible dans $session, sinon on redirige sur accueil avec un message dans le journal
+        if ($request->getSession()->has('mail')) {
+            $email = $request->getSession()->get('mail');
+
+        // vérifier si email est disponible dans les headers
+        } elseif ($request->headers->has('mail')) {
+            $email = $request->headers->get('mail');
+            $request->getSession()->set('mail',$email);
+
+        // Pas d'adresse = Pas d'ouverture de compte
+        } else {
+            $sj->warningMessage(__FILE__ . ":" . __LINE__ . " Pas d'adresse mail pour le nouveau compte (eppn = $eppn");
+            return $this->redirectToRoute('accueil');
+        }
+
+        // $eppn = 'toto';
+        // Mauvais eppn - Pas d'ouverture de compte
+        // On ne vérifie que la présence de l'eppn, pas sa conformité
+        if ($eppn === "") {
+            $sj->warningMessage(__FILE__ . ":" . __LINE__ . " eppn défectueux pour le nouveau compte (eppn=$eppn, mail=$email)");
+            return $this->redirectToRoute('accueil');
+        };
+
+        // $email = "";
+        // Mauvaise adresse - Pas d'ouverture de compte
+        if (!$this->isEmail($email)) {
+            $sj->warningMessage(__FILE__ . ":" . __LINE__ . " Adresse mail défectueuse pour le nouveau compte (eppn=$eppn, mail=$email)");
+            return $this->redirectToRoute('accueil');
+        };
 
         $form = Functions::createFormBuilder($ff)
-        ->add('mail', TextType::class , [ 'label' => 'Votre mail :', 'data' => $email ])
-        ->add('save', SubmitType::class,    ['label' => 'Connexion'])
-        ->add('reset',ResetType::class,     ['label' => 'Effacer'])
+        ->add('save', SubmitType::class, ['label' => 'Continuer'])
         ->getForm();
 
         $form->handleRequest($request);
 
-        if ($form->get('save')->isClicked() && $form->isSubmitted() && $form->isValid() )
-		{
-            $em = $this->getDoctrine()->getManager();
-            $repository = $this->getDoctrine()->getRepository('App:Individu');
-
-            $email = $form->getData()['mail'];
-            $request->getSession()->set('email',$email );
-
-            if( $individu = $repository->findOneBy( ['mail' =>  $email ] ) )
-			{ // user existe déjà
-                $this->mail_activation($request, $individu);
-                
-                return $this->render('default/email_activation.html.twig');
-                //return new Response('<pre> Activation done </pre>');
-                //$this->get('logger')->info("New eppn added : " . $request->getSession()->get('eppn'),
-                //            array('request' => $request) );
-                //return new Response(' user added ' );
-                //return $this->redirectToRoute('accueil');
-			}
-            else
-			{
-		        // activation du compte à faire
-                return $this->redirectToRoute('nouveau_profil');
-			}
-            return $this->render('default/nouveau_profil.html.twig', [ 'mail' => $email , 'form' => $form2->createView() ]  );
-		}
-        return $this->render('default/nouveau_compte.html.twig', array( 'form' => $form->createView())  );
-
+        // On a cliqué sur "Continuer": on continue vers la page de profil !
+        if ($form->get('save')->isClicked() && $form->isSubmitted() && $form->isValid()) {
+            return $this->redirectToRoute('nouveau_profil');
+        };
+        
+        return $this->render('default/nouveau_compte.html.twig', [ 'mail' => $email , 'eppn' => $eppn, 'form' => $form->createView()]);    
     }
 
+    private function isEmail(string $email) {
+        $regex = '/^[a-z0-9_%.+-]+@[a-z0-9.-]+\.[a-z]{2,}$/';
+        if (preg_match($regex, strtolower($email))==1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
     /**
      * @Route("/nouveau_profil",name="nouveau_profil")
+     *
      */
     public function nouveau_profilAction(Request $request, LoggerInterface $lg)
     {
-		$sn = $this->sn;
-		$sj = $this->sj;
-		$em = $this->getDoctrine()->getManager();
-		
-	    // vérifier si eppn est disponible dans $session
-	    if( ! $request->getSession()->has('eppn')  )
-		{ // une tentative de piratage
-			$sj->warningMessage(__FILE__ . ":" . __LINE__ .  "Pas d'eppn pour le nouveau profil");
-			return $this->redirectToRoute('accueil');
-		}
+        $sn = $this->sn;
+        $sj = $this->sj;
+        $em = $this->getDoctrine()->getManager();
 
-		// vérifier si email est disponible dans $session
-		if( ! $request->getSession()->has('email')  )
-		{ // une tentative de piratage
-			$sj->warningMessage(__FILE__ . ":" . __LINE__ . " Pas d'email pour le nouveau profil");
-			$lg->warning("No email at nouveau_profil",['request' => $event->getRequest()]);
-			return $this->redirectToRoute('accueil');
-		}
+        $session = $request->getSession();
 
-	    $individu = new Individu();
-	    //echo '<pre>';
-	    //var_dump(  $request->getSession() );
-	    //echo '</pre>';
-	    $individu->setMail( $request->getSession()->get('email') );
-	
-	    $form = $this->createForm(IndividuType::class, $individu, [ 'permanent' => true ]);
-	    $form->handleRequest($request);
-	
-	    if ($form->isSubmitted() && $form->isValid())
-	    {
-	        //$old_individu = $em->getRepository(Individu::class)->findOneBy( ['mail' => $request->getSession()->get('email') ] );
-	        $old_individu = $em->getRepository(Individu::class)->findOneBy( ['mail' => $individu->getMail() ] );
-	        if( $old_individu != null )
-	        {
-	            $sj->noticeMessage(__FILE__ .':' . __LINE__ . " Utilisateur " . $individu->getMail() . " existe déjà");
-	            $this->mail_activation($request,$old_individu );
-	            return $this->render('default/email_activation.html.twig');
-	            //$sj->debugMessage(__FILE__ .':' . __LINE__ . ' old_individu = ' . Functions::show($old_individu) );
-	            return new Response('<pre> Impossible de créer cet utilisateur </pre>');
-	        }
-	        else
-	        {
-	            /* Envoi d'un mail d'activation à l'utilisateur */
-	            $em = $this->getDoctrine()->getManager();
-	            $em->persist($individu);
-	            $em->flush();
-	            $this->mail_activation($request, $individu);
-	            $sj->infoMessage(__METHOD__ .':' . __LINE__ . " Nouvel utilisateur " . $individu->getMail() . " créé");
-	            return $this->render('default/email_activation.html.twig');
-	            //return new Response('<pre> Activation effectuée </pre>');
-	            }
-	        }
-        return $this->render('default/nouveau_profil.html.twig', array( 'email' => $request->getSession()->get('email'), 'form' => $form->createView())  );
+        // vérifier si eppn est disponible dans $session
+        if (! $session->has('eppn')) {
+            $sj->warningMessage(__FILE__ . ":" . __LINE__ .  "Pas d'eppn pour le nouveau profil");
+            return $this->redirectToRoute('accueil');
+        } else {
+            $eppn = $session->get('eppn');
+        }
+
+        // vérifier si email est disponible dans $session
+        if (! $session->has('mail')) {
+            $sj->warningMessage(__FILE__ . ":" . __LINE__ . " Pas d'email pour le nouveau profil");
+            return $this->redirectToRoute('accueil');
+        } else {
+            $mail = $session->get('mail');
+        }
+
+        // Est-ce qu'il y a déjà un compte avec cette adresse ?
+        $individu = $em->getRepository(Individu::class)->findOneBy(['mail' => $mail]);
+        if ($individu === null) {
+            $flg_ind = false;
+            $individu = new Individu();
+            $individu->setMail($session->get('mail'));
+            if ($session->has('sn')) {
+                $individu->setNom($session->get('sn'));
+            }
+        } else {
+            $flg_ind = true;
+        }
+
+        // TESTS !
+        // $session->set('givenName','ursule');
+        // $session->set('sn','Dupont');
+        
+        // Préremplissage du formulaire si la fédération nous a envoyé l'info !
+        if ($session->has('givenName')) {
+            $individu->setPrenom($session->get('givenName'));
+        }
+        
+        if ($session->has('sn')) {
+            $individu->setNom($session->get('sn'));
+        }
+
+        $form = $this->createForm(IndividuType::class, $individu, [ 'mail' => false ]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->persist($individu);
+
+            $sso = new Sso();
+            $sso->setEppn($eppn);
+            $sso->setIndividu($individu);
+            $em->persist($sso);
+
+            $em->flush();
+
+            if ($flg_ind) {
+                $sj->infoMessage(__METHOD__ .':' . __LINE__ . " Nouvel eppn pour $mail = $eppn");
+            } else {
+                $sj->infoMessage(__METHOD__ .':' . __LINE__ . " Nouvel utilisateur créé: $eppn -> $mail");
+            };
+
+            // Envoyer un mail de bienvenue à ce nouvel utilisateur
+            $dest   = [ $mail ];
+            $etab   = preg_replace('/.*@/', '', $eppn);
+            $sn->sendMessage(
+                "notification/compte_ouvert-sujet.html.twig",
+                "notification/compte_ouvert-contenu.html.twig",
+                [ 'individu' => $individu, 'etab' => $etab, 'eppn' => $eppn ],
+                $dest
+            );
+
+            // si c'est un compte cru, envoyer un mail aux admins
+            if (strpos($eppn, 'sac.cru.fr') !== false) {
+                //$sj->debugMessage(__FILE__ .':' . __LINE__ . ' Demande de COMPTE CRU - '.$eppn);
+                $dest = $sn->mailUsers(['A']);
+                $sn->sendMessage(
+                    "notification/compte_ouvert_pour_admin-sujet.html.twig",
+                    "notification/compte_ouvert_pour_admin-contenu.html.twig",
+                    [ 'individu' => $individu, 'eppn' => $eppn, 'mail' => $mail ],
+                    $dest
+                );
+            }
+
+            // On est automatiquement connecté en sortant de cet écran
+            return $this->redirectToRoute('connexionshiblogin');
+            //return $this->redirectToRoute('accueil');
+        }
+
+        return $this->render('default/nouveau_profil.html.twig', array( 'mail' => $request->getSession()->get('mail'), 'form' => $form->createView()));
+
     }
 
-    private function mail_activation(Request $request, $individu)
-    {
-		$sj = $this->sj;
-		$sn = $this->sn;
-		
-		$key = md5( random_int(1,10000000000) . microtime() );
-		$compteactivation = new Compteactivation();
-		$compteactivation->setIndividu($individu);
-		$compteactivation->setKey( $key );
-		$em = $this->getDoctrine()->getManager();
-		$em->persist($compteactivation);
-		$em->flush();
 
-		// envoi de mail
-
-		$session = $request->getSession();
-		$twig_sujet   = $this->tw->createTemplate('Activation de votre compte Gramc');
-		$twig_contenu = $this->tw->createTemplate("Bonjour\nPour activer votre compte sur gramc, merci de visiter cette url:\n {{ url('activation') }}/{{ key }} \nL'équipe CALMIP");
-		$sn -> sendMessage(  $twig_sujet, $twig_contenu, [ 'key' => $key ], [$session->get('email')]);
-		$sj->infoMessage(__METHOD__ .':' . __LINE__ . ' Activation GRAMC  pour ' .  $session->get('email').  ' envoyé (key=' . $key .')' );
-		
-		/* Envoi d'une notification aux admins dans le cas où il s'agit d'un compte CRU */
-		$eppn = $request->getSession()->get('eppn');
-		//$sj->debugMessage(__FILE__ .':' . __LINE__ . ' coucou ' . $eppn);
-		if (strpos($eppn ,'sac.cru.fr') !== false) 
-		{
-            //$sj->debugMessage(__FILE__ .':' . __LINE__ . ' Demande de COMPTE CRU - '.$eppn);
-			$dest = $sn->mailUsers( ['A'] );
-			$sn->sendMessage( "notification/compte_ouvert_pour_admin-sujet.html.twig",
-							  "notification/compte_ouvert_pour_admin-contenu.html.twig",
-							  [ 'individu' => $individu, 'eppn' => $eppn ],
-							  $dest );
-		}
-     }
-
-
-     /**
-     * @Route("/erreur_login", name="erreur_login")
-     * @Method({"GET"})
-     */
+    /**
+    * @Route("/erreur_login", name="erreur_login")
+    * @Method({"GET"})
+    */
     public function erreurLoginAction(Request $request)
     {
         return $this->render('default/erreur_login.html.twig');
@@ -855,18 +879,19 @@ class GramcSessionController extends AbstractController
 
     private static function elements($array)
     {
-    $date = new \DateTime();
-    mt_srand( $date->setTime(0,0,0)->getTimestamp() );
-    $output=[];
+        $date = new \DateTime();
+        mt_srand($date->setTime(0, 0, 0)->getTimestamp());
+        $output=[];
 
-    for( $i = 1; $i < 6; $i++ )
-        {
-        if( count( $array ) < 1 ) return $output;
-        $index  =   mt_rand(0, count( $array ) - 1 );
-        $output[]   =  $array[ $index ];
-        array_splice( $array, $index, 1 );
+        for ($i = 1; $i < 6; $i++) {
+            if (count($array) < 1) {
+                return $output;
+            }
+            $index  =   mt_rand(0, count($array) - 1);
+            $output[]   =  $array[ $index ];
+            array_splice($array, $index, 1);
         }
-    return $output;
+        return $output;
     }
 
     /**
@@ -875,27 +900,27 @@ class GramcSessionController extends AbstractController
      */
     public function connexionsAction(Request $request)
     {
-		$em = $this->getDoctrine()->getManager();
-		$sj = $this->sj;
+        $em = $this->getDoctrine()->getManager();
+        $sj = $this->sj;
 
-		$connexions = Functions::getConnexions($em, $sj);
-	    return $this->render('default/connexions.html.twig', [ 'connexions' => $connexions ] );
+        $connexions = Functions::getConnexions($em, $sj);
+        return $this->render('default/connexions.html.twig', [ 'connexions' => $connexions ]);
     }
 
-	/**
-	 * @Route("/phpinfo", name="phpinfo")
-	 * @Method({"GET"})
-	 * @Security("is_granted('ROLE_ADMIN')")
+    /**
+     * @Route("/phpinfo", name="phpinfo")
+     * @Method({"GET"})
+     * @Security("is_granted('ROLE_ADMIN')")
      *********************************************/
-     public function infoAction(Request $request)
-     {
-		ob_start();
-		phpinfo();
-		$info = ob_get_clean(); 
-		return $this->render('default/phpinfo.html.twig', [ 'info' => $info ]);
-	 }
+    public function infoAction(Request $request)
+    {
+        ob_start();
+        phpinfo();
+        $info = ob_get_clean();
+        return $this->render('default/phpinfo.html.twig', [ 'info' => $info ]);
+    }
 
-///////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -906,8 +931,8 @@ class GramcSessionController extends AbstractController
 
     public function md5Action()
     {
-        $salt = random_int(1,10000000000) . microtime();
-        $key = md5( $salt );
+        $salt = random_int(1, 10000000000) . microtime();
+        $key = md5($salt);
         return new Response('<pre>' . $salt . ' '. $key . '</pre>');
     }
 
@@ -919,11 +944,60 @@ class GramcSessionController extends AbstractController
     public function uri(Request $request)
     {
         $IDPprod    =   $this->getParameter('IDPprod');
-        return new Response( Functions::show($IDPprod) );
+        return new Response(Functions::show($IDPprod));
         $output = $request->getUri();
         $output = $request->getPathInfo() ;
         return new Response('<pre>' . $output . '</pre>');
     }
+
+    /*
+     * Déposer dans la session les headers fournis par Shibboleth
+     * NOTE - On ne s'occupe pas de eppn, cela est déjà fait par auth_connexionAction
+     *        Côté Fédération, on doit envoyer les attributs correspondants
+     *        Conf Shibboleth: il faut modifier le fichier attribute-map.xml (ie décommenter quelques lignes
+     *        vers Other eduPerson attributes)
+     *
+     ***/
+    private function shibbHeadersToSession(Request $request) {
+        $headers = ['mail', 'givenName', 'sn', 'displayName', 'cn', 'affiliation', 'primary-affiliation'];
+        $headers_values = [];
+
+        // On recherche dans les headers
+        foreach($headers as $h) {
+            if ($request->headers->has($h)) {
+                $headers_values[$h] = $request->headers->get($h);
+            }
+        }
+
+        // On recherche dans les variables du serveur
+        $server = $request->server;
+        foreach($headers as $h) {
+            if (!isset($headers_values[$h])) {
+
+                // mail -> REDIRECT_mail
+                $k1 = 'REDIRECT_'.$h;
+                $k2 = 'HTTP_'.strtoupper($h);
+                if ($server->has($k1)) {
+                    $headers_values[$h] = $server->get($k1);
+                }
+
+                // mail -> HTTP_MAIL
+                elseif ($server->has($k2)) {
+                    $headers_values[$h] = $server->get($k2);
+                }
+                
+            }
+        }
+        
+        $session = $request->getSession();
+        foreach($headers_values as $h => $v) {
+            $session->set($h, $v);
+        }
+    
+        return $headers_values;
+    }
+
+
 
     /**
      * @Route("/test_workflow")

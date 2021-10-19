@@ -34,8 +34,8 @@ use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Sso controller.
- * 
- * @Security("is_granted('ROLE_ADMIN')") 
+ *
+ * @Security("is_granted('ROLE_ADMIN')")
  * @Route("sso")
  */
 class SsoController extends AbstractController

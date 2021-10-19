@@ -8,7 +8,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\ResetType;
 
-
 class CommentaireExpertType extends AbstractType
 {
     /**
@@ -16,17 +15,14 @@ class CommentaireExpertType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-		if ( $options['only_comment']==true)
-		{
-	        $builder
-	        	->add('commentaire')
-	        	->add('submit',SubmitType::class, ['label' => 'Valider' ])
-                ->add('reset',ResetType::class, ['label' => 'reset' ]);
-		}
-		else
-		{
-	        $builder->add('commentaire')->add('annee')->add('majStamp')->add('expert');
-		}
+        if ($options['only_comment']==true) {
+            $builder
+                ->add('commentaire')
+                ->add('submit', SubmitType::class, ['label' => 'Valider' ])
+                ->add('reset', ResetType::class, ['label' => 'reset' ]);
+        } else {
+            $builder->add('commentaire')->add('annee')->add('majStamp')->add('expert');
+        }
     }
 
     /**
@@ -47,6 +43,4 @@ class CommentaireExpertType extends AbstractType
     {
         return 'appbundle_commentaireexpert';
     }
-
-
 }
