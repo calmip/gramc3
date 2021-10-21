@@ -314,7 +314,6 @@ class RallongeController extends AbstractController
 
         $editForm = $this->createFormBuilder($rallonge)
             ->add('demHeures', IntegerType::class, [ 'required'       =>  false ])
-            ->add('demHeuresGpu', IntegerType::class, [ 'required'       =>  false ])
             ->add('prjJustifRallonge', TextAreaType::class, [ 'required'       =>  false ])
             ->add('enregistrer', SubmitType::class, ['label' => 'Enregistrer' ])
             ->add('fermer', SubmitType::class, ['label' => 'Fermer' ])

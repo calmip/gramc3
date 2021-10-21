@@ -37,7 +37,6 @@ class RallongeType extends AbstractType
     {
         $builder->add('etatRallonge')
                 ->add('demHeures')
-                ->add('demHeuresGpu')
                 ->add('attrHeures')
                 ->add('prjJustifRallonge')
                 ->add('attrAccept')
