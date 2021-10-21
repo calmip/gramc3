@@ -101,10 +101,23 @@ class CollaborateurVersionRepository extends \Doctrine\ORM\EntityRepository
     }
 
     /*
-     * Renvoie le cv d'une version ACTIVE qui a le loginname passé en paramètre
-     * Normalement un tableau avec zéro ou 1 enregistrement (on ne vérifie pas)
+     * Renvoie les cv qui ont le loginname passé en paramètre
      */
     public function findByLoginname($loginname)
+    {
+        $em = $this->getEntityManager();
+        $out= $em->createQuery('SELECT cv FROM App:CollaborateurVersion cv
+                                WHERE cv.loginname = :loginname')
+        ->setParameter('loginname', $loginname)
+        ->getResult();
+        return $out;
+    }
+    
+    /*
+     * Renvoie les cv d'une version ACTIVE qui a le loginname passé en paramètre
+     * Normalement un tableau avec zéro ou 1 enregistrement (on ne vérifie pas)
+     */
+    public function findByLoginname_AJETER($loginname)
     {
         $em = $this->getEntityManager();
         $out= $em->createQuery('SELECT cv FROM App:CollaborateurVersion cv, App:Version v
@@ -114,7 +127,7 @@ class CollaborateurVersionRepository extends \Doctrine\ORM\EntityRepository
         ->getResult();
         return $out;
     }
-    
+
     /*
      * Renvoie la liste des cv dont le loginname est non nul, pour une année donnée
      */

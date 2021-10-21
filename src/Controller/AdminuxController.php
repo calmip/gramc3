@@ -399,7 +399,7 @@ class AdminuxController extends AbstractController
       * Efface le loginname s'il existe, ne fait rien sinon
       */
 
-    // curl --netrc -H "Content-Type: application/json" -X POST -d '{ "loginname": "toto" }' https://.../adminux/users/clearloginname
+    // curl --netrc -H "Content-Type: application/json" -X POST -d '{ "loginname": "toto" }' https://.../adminux/utilisateurs/clearloginname
 
     public function clearloginnameAction(Request $request, LoggerInterface $lg)
     {
@@ -425,10 +425,10 @@ class AdminuxController extends AbstractController
         if ($cnt==0) {
             return new Response(json_encode(['KO' => "No user '$loginname' found in any active version" ]));
         }
-        elseif ($cnt > 1)
-        {
-            return new Response(json_encode(['KO' => "$cnt users '$loginname' found !"]));
-        }
+        //elseif ($cnt > 1)
+        //{
+        //    return new Response(json_encode(['KO' => "$cnt users '$loginname' found !"]));
+        //}
         else
         {
             # Cherche et efface le mot de passe au besoin
@@ -438,9 +438,10 @@ class AdminuxController extends AbstractController
             }
             
             # efface le loginname
-            $cv = $cvs[0];
-            $cv->setLoginname(null);
-            $em->persist($cv);
+            foreach ( $cvs as $cv) {
+                $cv->setLoginname(null);
+                $em->persist($cv);
+            }
             $em->flush();
         }
         return new Response(json_encode(['OK' => '']));
@@ -865,10 +866,13 @@ class AdminuxController extends AbstractController
      *
      *             '{ "projet" : "P01234", "mail" : "toto@exemple.fr" }' -> rien ou toto si toto avait un login sur ce projet
      *
-     * Par défaut on ne considère QUE les versions actives et dernières de CHAQUE PROJET
+     * Par défaut on ne considère QUE les version actives et dernières de chaque projet non terminé
      * MAIS si on AJOUTE un PARAMETRE "session" : "20A" on travaille sur la session passée en paramètres (ici 20A)
+     * (on ne considère PAS les projets tests (type==2))
      *
-     * On renvoie pour chaque projet, ou pour un projet donné, la liste des collaborateurs qui doivent avoir un login
+     * On renvoie pour chaque version considérée, la liste des collaborateurs
+     * tels que loginname != null (login créé, peut-être à supprimer si login==false),
+     * OU loginname=null mais login==true ou clogin==true (login à créer)
      *
      * Données renvoyées (fmt json):
      *
@@ -951,7 +955,7 @@ class AdminuxController extends AbstractController
         foreach ($projets as $p) {
             $id_projet = $p->getIdProjet();
             
-            // Si session non spécifiée, on prend la version active ET dernière de chaque projet !
+            // Si session non spécifiée, on prend toutes les versions de chaque projet !
             $vs = [];
             $vs_labels = [];
             if ($id_session==null) {
@@ -966,6 +970,14 @@ class AdminuxController extends AbstractController
                     $vs[] = $p->getVersionActive();
                     $vs_labels[] = 'active';
                 }
+
+                // Toutes les versions
+                foreach ($p->getVersion() as $v) {
+                    // ne pas compter deux fois les versions dernière + active
+                    if (in_array($v,$vs)) continue;
+                    $vs[] = $v;
+                    $vs_labels[] = $v->getIdVersion();
+                }
             }
 
             // Sinon, on prend la version de cette session... si elle existe
@@ -979,14 +991,20 @@ class AdminuxController extends AbstractController
                 }
             }
 
-            // $vs contient 1 ou 2 versions
+            // $vs contient au moins une version
             $i = 0; // i=0 -> version dernère, $i=1 -> version active
-            
             foreach ($vs as $v) {
                 $collaborateurs = $v->getCollaborateurVersion();
                 foreach ($collaborateurs as $c) {
                     $m = $c -> getCollaborateur() -> getMail();
+
+                    // si on a spécifié un mail, ne retenir que celui-la
                     if ($mail != null && strtolower($mail) != strtolower($m)) {
+                        continue;
+                    }
+
+                    // Pas de login demandé ni de login enregistré
+                    if ($c->getLogin()==false && $c->getClogin()==false && $c->getLoginname()==null) {
                         continue;
                     }
 
@@ -1012,7 +1030,8 @@ class AdminuxController extends AbstractController
                     $v_info['version'] = $v->getIdVersion();
                     $v_info['login'] = $c->getLogin();
                     $v_info['clogin'] = $c->getClogin();
-
+                    $v_info['loginname'] = $c->getLoginname();
+                    
                     $prj_info[$vs_labels[$i]] = $v_info;
 
                     $users[$m]['projets'][$id_projet] = $prj_info;
