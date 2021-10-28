@@ -399,7 +399,7 @@ class AdminuxController extends AbstractController
       * Efface le loginname s'il existe, ne fait rien sinon
       */
 
-    // curl --netrc -H "Content-Type: application/json" -X POST -d '{ "loginname": "toto" }' https://.../adminux/utilisateurs/clearloginname
+    // curl --netrc -H "Content-Type: application/json" -X POST -d '{ "loginname": "toto", "projet":"P1234" }' https://.../adminux/utilisateurs/clearloginname
 
     public function clearloginnameAction(Request $request, LoggerInterface $lg)
     {
@@ -418,30 +418,45 @@ class AdminuxController extends AbstractController
         } else {
             $loginname = $content['loginname'];
         }
+        if (empty($content['projet'])) {
+            return new Response(json_encode(['KO' => 'Pas de projet']));
+        } else {
+            $idProjet = $content['projet'];
+        }
 
         # Vérifie que ce loginname est connu
         $cvs = $em->getRepository(User::class)->findByLoginname($loginname);
         $cnt = count($cvs);
+        //return new Response(json_encode($cvs));
         if ($cnt==0) {
             return new Response(json_encode(['KO' => "No user '$loginname' found in any active version" ]));
         }
-        //elseif ($cnt > 1)
-        //{
-        //    return new Response(json_encode(['KO' => "$cnt users '$loginname' found !"]));
-        //}
         else
         {
-            # Cherche et efface le mot de passe au besoin
-            $user = $em->getRepository(User::class)->findOneBy(['loginname' => $loginname]);
-            if ($user!=null) {
-                $em->remove($user);
+            # On supprime le username dans TOUTES les versions du projet demandé
+            # Si le username existe dans d'autres projets, on le garde dans ces projets, on garde aussi le mot de passe !
+            $keepPwd = false;
+            foreach ($cvs as $cv) {
+                if ($cv->getVersion()->getProjet()->getIdProjet() == $idProjet) {
+                    $cv->setLoginname(null);
+                    $em->persist($cv);
+                }
+                else {
+                    $keepPwd = true;
+                    continue;
+                }                    
             }
-            
-            # efface le loginname
-            foreach ( $cvs as $cv) {
-                $cv->setLoginname(null);
-                $em->persist($cv);
+
+            # Cherche et efface le mot de passe au besoin...
+            # ... SAUF si $keepPwd est true !
+
+            if ($keepPwd == false) {
+                $user = $em->getRepository(User::class)->findOneBy(['loginname' => $loginname]);
+                if ($user!=null) {
+                    $em->remove($user);
+                }
             }
+                        
             $em->flush();
         }
         return new Response(json_encode(['OK' => '']));
