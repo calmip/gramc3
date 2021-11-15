@@ -104,7 +104,7 @@ class ServiceForms
             [
         'mimeTypes'=> [ 'application/pdf' ],
         'mimeTypesMessage'=>' Le fichier doit être un fichier pdf. ',
-        'maxSize' => "2048k",
+        'maxSize' => "4196k",
         'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
         'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
         ]
