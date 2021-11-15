@@ -763,7 +763,11 @@ class VersionController extends AbstractController
         $ff = $this->ff;
         $em = $this->getdoctrine()->getManager();
 
-        ////$this->MenuACL($sm->envoyer_expert($version), "Impossible d'envoyer la version " . $version->getIdVersion() . " à l'expert", __METHOD__, __LINE__);
+        if ($sm->envoyer_expert($version)['ok'] == false) {
+        $sj->throwException(__METHOD__ . ":" . __LINE__ .
+            " impossible d'envoyer en expertise parce que " . $sm->envoyer_expert($version)['raison']);
+        }
+        //$this->MenuACL($sm->envoyer_expert($version), "Impossible d'envoyer la version " . $version->getIdVersion() . " à l'expert", __METHOD__, __LINE__);
 
         $projet  = $version->getProjet();
         $session = $version->getSession();
