@@ -27,7 +27,7 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -54,8 +54,8 @@ class JournalController extends AbstractController
     /**
      * Lists all Journal entities.
      *
-     * @Route("/list", name="journal_list")
-     * @Method({"GET", "POST"})
+     * @Route("/list", name="journal_list", methods={"GET","POST"})
+     * Method({"GET", "POST"})
      */
     public function listAction(Request $request)
     {
@@ -76,8 +76,8 @@ class JournalController extends AbstractController
      * Lists all Journal entities.
      * CRUD
      *
-     * @Route("/", name="journal_index")
-     * @Method({"GET", "POST"})
+     * @Route("/", name="journal_index", methods={"GET","POST"})
+     * Method({"GET", "POST"})
      */
 
     public function indexAction(Request $request)
@@ -97,8 +97,8 @@ class JournalController extends AbstractController
     /**
      * Creates a new journal entity.
      *
-     * @Route("/new", name="journal_new")
-     * @Method({"GET", "POST"})
+     * @Route("/new", name="journal_new", methods={"GET","POST"})
+     * Method({"GET", "POST"})
      */
     public function newAction(Request $request)
     {
@@ -123,8 +123,8 @@ class JournalController extends AbstractController
     /**
      * Finds and displays a journal entity.
      *
-     * @Route("/{id}", name="journal_show")
-     * @Method("GET")
+     * @Route("/{id}", name="journal_show", methods={"GET"})
+     * Method("GET")
      */
     public function showAction(Journal $journal)
     {
@@ -139,8 +139,8 @@ class JournalController extends AbstractController
     /**
      * Displays a form to edit an existing journal entity.
      *
-     * @Route("/{id}/edit", name="journal_edit")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/edit", name="journal_edit", methods={"GET","POST"})
+     * Method({"GET", "POST"})
      */
     public function editAction(Request $request, Journal $journal)
     {
@@ -164,8 +164,8 @@ class JournalController extends AbstractController
     /**
      * Deletes a journal entity.
      *
-     * @Route("/{id}", name="journal_delete")
-     * @Method("DELETE")
+     * @Route("/{id}", name="journal_delete", methods={"DELETE"})
+     * Method("DELETE")
      */
     public function deleteAction(Request $request, Journal $journal)
     {

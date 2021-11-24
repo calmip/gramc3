@@ -56,7 +56,7 @@ use App\GramcServices\GramcGraf\Calcul;
 use Psr\Log\LoggerInterface;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -155,8 +155,8 @@ class ProjetController extends AbstractController
     /**
      * Lists all projet entities.
      *
-     * @Route("/", name="projet_index")
-     * @Method("GET")
+     * @Route("/", name="projet_index", methods={"GET"})
+     * Method("GET")
      * @Security("is_granted('ROLE_OBS')")
      */
     public function indexAction()
@@ -174,8 +174,8 @@ class ProjetController extends AbstractController
      * Delete old data.
      *
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Route("/old", name="projet_nettoyer")
-     * @Method({"GET","POST"})
+     * @Route("/old", name="projet_nettoyer", methods={"GET","POST"})
+     * Method({"GET","POST"})
      */
     public function oldAction(Request $request)
     {
@@ -406,8 +406,8 @@ class ProjetController extends AbstractController
     /**
      * Projets par session en CSV
      *
-     * @Route("/{id}/session_csv", name="projet_session_csv")
-     * @Method({"GET","POST"})
+     * @Route("/{id}/session_csv", name="projet_session_csv", methods={"GET","POST"})
+     * Method({"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
     public function sessionCSVAction(Session $session)
@@ -469,8 +469,8 @@ class ProjetController extends AbstractController
     /**
      * Lists all projet entities.
      *
-     * @Route("/tous_csv", name="projet_tous_csv")
-     * @Method({"GET","POST"})
+     * @Route("/tous_csv", name="projet_tous_csv", methods={"GET","POST"})
+     * Method({"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
     public function tousCSVAction()
@@ -527,8 +527,8 @@ class ProjetController extends AbstractController
      * fermer un projet
      *
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Route("/{id}/fermer", name="fermer_projet")
-     * @Method({"GET","POST"})
+     * @Route("/{id}/fermer", name="fermer_projet", methods={"GET","POST"})
+     * Method({"GET","POST"})
      */
     public function fermerAction(Projet $projet, Request $request)
     {
@@ -556,8 +556,8 @@ class ProjetController extends AbstractController
      * Conserver un projet en standby
      *
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Route("/{id}/nepasterminer", name="nepasterminer_projet")
-     * @Method({"GET"})
+     * @Route("/{id}/nepasterminer", name="nepasterminer_projet", methods={"GET"})
+     * Method({"GET"})
      */
     public function nepasterminerAction(Projet $projet, Request $request)
     {
@@ -578,8 +578,8 @@ class ProjetController extends AbstractController
      * Permettre la fermeture d'un projet
      *
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Route("/{id}/onpeutterminer", name="onpeutterminer_projet")
-     * @Method({"GET","POST"})
+     * @Route("/{id}/onpeutterminer", name="onpeutterminer_projet", methods={"GET","POST"})
+     * Method({"GET","POST"})
      */
     public function onpeutterminerAction(Projet $projet, Request $request)
     {
@@ -600,8 +600,8 @@ class ProjetController extends AbstractController
      * back une version
      *
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Route("/{id}/back", name="back_version")
-     * @Method({"GET","POST"})
+     * @Route("/{id}/back", name="back_version", methods={"GET","POST"})
+     * Method({"GET","POST"})
      */
     public function backAction(Version $version, Request $request)
     {
@@ -637,8 +637,8 @@ class ProjetController extends AbstractController
      * à la place du responsable
      *
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Route("/{id}/fwd", name="fwd_version")
-     * @Method({"GET","POST"})
+     * @Route("/{id}/fwd", name="fwd_version", methods={"GET","POST"})
+     * Method({"GET","POST"})
      */
     public function fwdAction(Version $version, Request $request, LoggerInterface $lg)
     {
@@ -670,8 +670,8 @@ class ProjetController extends AbstractController
     /**
      * Liste tous les projets qui ont une version lors de cette session
      *
-     * @Route("/session", name="projet_session")
-     * @Method({"GET","POST"})
+     * @Route("/session", name="projet_session", methods={"GET","POST"})
+     * Method({"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
     public function sessionAction(Request $request)
@@ -885,8 +885,8 @@ class ProjetController extends AbstractController
      * Param : $annee
      *
      * @Security("is_granted('ROLE_OBS')")
-     * @Route("/{annee}/resumes", name="projet_resumes")
-     * @Method({"GET","POST"})
+     * @Route("/{annee}/resumes", name="projet_resumes", methods={"GET","POST"})
+     * Method({"GET","POST"})
      *
      */
     public function resumesAction($annee)
@@ -957,8 +957,8 @@ class ProjetController extends AbstractController
      *
      * Liste tous les projets qui ont une version cette annee
      *
-     * @Route("/annee", name="projet_annee")
-     * @Method({"GET","POST"})
+     * @Route("/annee", name="projet_annee", methods={"GET","POST"})
+     * Method({"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
 
@@ -1012,8 +1012,8 @@ class ProjetController extends AbstractController
      * NB - Utile pour Calmip, si c'est inutile pour les autres mesoc il faudra
      *      mettre cette fonction ailleurs !
      *
-     * @Route("/donnees", name="projet_donnees")
-     * @Method({"GET","POST"})
+     * @Route("/donnees", name="projet_donnees", methods={"GET","POST"})
+     * Method({"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
 
@@ -1039,8 +1039,8 @@ class ProjetController extends AbstractController
     /**
      * Données en CSV
      *
-     * @Route("{annee}/donnees_csv", name="projet_donnees_csv")
-     * @Method({"GET","POST"})
+     * @Route("{annee}/donnees_csv", name="projet_donnees_csv", methods={"GET","POST"})
+     * Method({"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
     public function donneesCSVAction($annee)
@@ -1117,8 +1117,8 @@ class ProjetController extends AbstractController
     /**
      * Projets de l'année en CSV
      *
-     * @Route("/{annee}/annee_csv", name="projet_annee_csv")
-     * @Method({"GET","POST"})
+     * @Route("/{annee}/annee_csv", name="projet_annee_csv", methods={"GET","POST"})
+     * Method({"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
     public function anneeCSVAction($annee)
@@ -1185,8 +1185,8 @@ class ProjetController extends AbstractController
     /**
      * download rapport
      * @Security("is_granted('ROLE_DEMANDEUR') or is_granted('ROLE_OBS')")
-     * @Route("/{id}/rapport/{annee}", defaults={"annee"=0}, name="rapport")
-     * @Method("GET")
+     * @Route("/{id}/rapport/{annee}", defaults={"annee"=0}, name="rapport", methods={"GET"})
+     * Method("GET")
      */
     public function rapportAction(Version $version, Request $request, $annee)
     {
@@ -1217,9 +1217,9 @@ class ProjetController extends AbstractController
     /**
      * download signature
      *
-     * @Route("/{id}/signature", name="signature")
+     * @Route("/{id}/signature", name="signature", methods={"GET"})
      * @Security("is_granted('ROLE_OBS')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function signatureAction(Version $version, Request $request)
     {
@@ -1230,9 +1230,9 @@ class ProjetController extends AbstractController
     /**
      * download doc attaché
      *
-     * @Route("/{id}/document", name="document")
+     * @Route("/{id}/document", name="document", methods={"GET"})
      * @Security("is_granted('ROLE_DEMANDEUR') or is_granted('ROLE_OBS')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function documentAction(Version $version, Request $request)
     {
@@ -1243,8 +1243,8 @@ class ProjetController extends AbstractController
     /**
      * Lists all projet entities.
      *
-     * @Route("/tous", name="projet_tous")
-     * @Method("GET")
+     * @Route("/tous", name="projet_tous", methods={"GET"})
+     * Method("GET")
      * @Security("is_granted('ROLE_OBS')")
      */
     public function tousAction()
@@ -1304,8 +1304,8 @@ class ProjetController extends AbstractController
      * Lists all projet entities.
      *
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Route("/gerer", name="gerer_projets")
-     * @Method("GET")
+     * @Route("/gerer", name="gerer_projets", methods={"GET"})
+     * Method("GET")
      */
     public function gererAction()
     {
@@ -1320,8 +1320,8 @@ class ProjetController extends AbstractController
     /**
      * Creates a new projet entity.
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Route("/new", name="projet_new")
-     * @Method({"GET", "POST"})
+     * @Route("/new", name="projet_new", methods={"GET","POST"})
+     * Method({"GET", "POST"})
      */
     public function newAction(Request $request)
     {
@@ -1346,8 +1346,8 @@ class ProjetController extends AbstractController
     /**
      * Envoie un écran de mise en garde avant de créer un nouveau projet
      *
-     * @Route("/avant_nouveau/{type}", name="avant_nouveau_projet")
-     * @Method({"GET", "POST"})
+     * @Route("/avant_nouveau/{type}", name="avant_nouveau_projet", methods={"GET","POST"})
+     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      *
      */
@@ -1384,8 +1384,8 @@ class ProjetController extends AbstractController
     /**
      * Création d'un nouveau projet
      *
-     * @Route("/nouveau/{type}", name="nouveau_projet")
-     * @Method({"GET", "POST"})
+     * @Route("/nouveau/{type}", name="nouveau_projet", methods={"GET","POST"})
+     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      *
      */
@@ -1480,8 +1480,10 @@ class ProjetController extends AbstractController
      *    Affiche un menu permettant de choisir quelle consommation on veut voir afficher
      *
      *
-     * @Route("/{id}/conso/{annee}/annee/{loginname}/loginname", name="projet_conso", defaults={"loginname" = "nologin"})
-     * @Method("GET")
+     * @Route("/{id}/conso/{annee}/annee/{loginname}/loginname", name="projet_conso",
+     *        defaults={"loginname" = "nologin"},
+     *        methods={"GET"})
+     * Method("GET")
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
 
@@ -1521,8 +1523,9 @@ class ProjetController extends AbstractController
      *
      * @Route("/{id}/projet/{utype}/utype/{ress_id}/ress_id/{loginname}/loginname/{annee}/annee/conso_ressource",
      *         defaults={"loginname" = "nologin"},
-     *         name="projet_conso_ressource")
-     * @Method("GET")
+     *         name="projet_conso_ressource",
+     *         methods={"GET"})
+     * Method("GET")
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
 
@@ -1602,8 +1605,8 @@ class ProjetController extends AbstractController
     /**
      * Affichage graphique de la consommation de TOUS les projets
      *
-     * @Route("/{ressource/{ressource}/tousconso/{annee}/{mois}", name="tous_projets_conso")
-     * @Method("GET")
+     * @Route("/{ressource/{ressource}/tousconso/{annee}/{mois}", name="tous_projets_conso", methods={"GET"})
+     * Method("GET")
      * @Security("is_granted('ROLE_ADMIN')")
      */
 
@@ -1641,8 +1644,8 @@ class ProjetController extends AbstractController
     /**
      * Finds and displays a projet entity.
      *
-     * @Route("/modele", name="telecharger_modele")
-     * @Method("GET")
+     * @Route("/modele", name="telecharger_modele", methods={"GET"})
+     * Method("GET")
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function telechargerModeleAction()

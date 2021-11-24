@@ -26,7 +26,7 @@ namespace App\Controller;
 
 use App\Entity\Templates;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -43,8 +43,8 @@ class TemplatesController extends AbstractController
     /**
      * Lists all template entities.
      *
-     * @Route("/", name="templates_index")
-     * @Method("GET")
+     * @Route("/", name="templates_index",methods={"GET"})
+     * Method("GET")
      */
     public function indexAction()
     {
@@ -60,8 +60,8 @@ class TemplatesController extends AbstractController
     /**
      * Creates a new template entity.
      *
-     * @Route("/new", name="templates_new")
-     * @Method({"GET", "POST"})
+     * @Route("/new", name="templates_new",methods={"GET","POST"})
+     * Method({"GET", "POST"})
      */
     public function newAction(Request $request)
     {
@@ -86,8 +86,8 @@ class TemplatesController extends AbstractController
     /**
      * Finds and displays a template entity.
      *
-     * @Route("/{id}", name="templates_show")
-     * @Method("GET")
+     * @Route("/{id}", name="templates_show",methods={"GET"})
+     * Method("GET")
      */
     public function showAction(Templates $template)
     {
@@ -102,8 +102,8 @@ class TemplatesController extends AbstractController
     /**
      * Displays a form to edit an existing template entity.
      *
-     * @Route("/{id}/edit", name="templates_edit")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/edit", name="templates_edit",methods={"GET","POST"})
+     * Method({"GET", "POST"})
      */
     public function editAction(Request $request, Templates $template)
     {
@@ -127,8 +127,8 @@ class TemplatesController extends AbstractController
     /**
      * Deletes a template entity.
      *
-     * @Route("/{id}", name="templates_delete")
-     * @Method("DELETE")
+     * @Route("/{id}", name="templates_delete",methods={"DELETE"})
+     * Method("DELETE")
      */
     public function deleteAction(Request $request, Templates $template)
     {

@@ -57,7 +57,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 
 use Symfony\Component\HttpFoundation\Request;
@@ -129,8 +129,8 @@ class VersionModifController extends AbstractController
      * Appelé par le bouton Envoyer à l'expert: si la demande est incomplète
      * on envoie un éran pour la compléter. Sinon on passe à envoyer à l'expert
      *
-     * @Route("/{id}/avant_modifier", name="avant_modifier_version")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/avant_modifier", name="avant_modifier_version",methods={"GET","POST"})
+     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function avantModifierVersionAction(Request $request, Version $version)
@@ -164,8 +164,8 @@ class VersionModifController extends AbstractController
      *      1/ D'abord une partie générique (images, collaborateurs)
      *      2/ Ensuite on appelle modifierTypeX, car le formulaire dépend du type de projet
      *
-     * @Route("/{id}/modifier", name="modifier_version")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/modifier", name="modifier_version",methods={"GET","POST"})
+     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function modifierAction(Request $request, Version $version, $renouvellement = false, LoggerInterface $lg)
@@ -992,8 +992,8 @@ class VersionModifController extends AbstractController
      * Avant de modifier les collaborateurs d'une version.
      * On demande de quelle version il s'agit !
      *
-     * @Route("/{id}/avant_collaborateurs", name="avant_modifier_collaborateurs")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/avant_collaborateurs", name="avant_modifier_collaborateurs",methods={"GET","POST"})
+     * Method({"GET", "POST"})
      * @Security("has_role('ROLE_DEMANDEUR')")
      */
     public function avantModifierCollaborateursAction(Version $version, Request $request)
@@ -1037,8 +1037,8 @@ class VersionModifController extends AbstractController
     /**
      * Modifier les collaborateurs d'une version.
      *
-     * @Route("/{id}/collaborateurs", name="modifier_collaborateurs")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/collaborateurs", name="modifier_collaborateurs",methods={"GET","POST"})
+     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function modifierCollaborateursAction(Version $version, Request $request)
@@ -1311,9 +1311,9 @@ class VersionModifController extends AbstractController
     /**
      * Demande de partage stockage ou partage des données
      *
-     * @Route("/{id}/donnees", name="donnees")
+     * @Route("/{id}/donnees", name="donnees",methods={"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function donneesAction(Request $request, Version $version)
     {
@@ -1389,9 +1389,9 @@ class VersionModifController extends AbstractController
     /**
      * Displays a form to edit an existing version entity.
      *
-     * @Route("/{id}/renouveler", name="renouveler_version")
+     * @Route("/{id}/renouveler", name="renouveler_version",methods={"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function renouvellementAction(Request $request, Version $version, LoggerInterface $lg)
     {

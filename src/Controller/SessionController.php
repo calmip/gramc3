@@ -46,7 +46,7 @@ use App\Utils\Signal;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 
 use Symfony\Component\HttpFoundation\Request;
@@ -96,8 +96,8 @@ class SessionController extends AbstractController
      * Lists all session entities.
      *
      * @security("is_granted('ROLE_ADMIN')")
-     * @Route("/", name="session_index")
-     * @Method("GET")
+     * @Route("/", name="session_index",methods={"GET"})
+     * Method("GET")
      */
     public function indexAction()
     {
@@ -113,8 +113,8 @@ class SessionController extends AbstractController
      * Lists all session entities.
      *
      * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_PRESIDENT')")
-     * @Route("/gerer", name="gerer_sessions")
-     * @Method("GET")
+     * @Route("/gerer", name="gerer_sessions",methods={"GET"})
+     * Method("GET")
      */
     public function gererAction()
     {
@@ -168,9 +168,9 @@ class SessionController extends AbstractController
     /**
      * Creates a new session entity.
      *
-     * @Route("/ajouter", name="ajouter_session")
+     * @Route("/ajouter", name="ajouter_session",methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function ajouterAction(Request $request)
     {
@@ -183,9 +183,9 @@ class SessionController extends AbstractController
 
     /**
      *
-     * @Route("/{id}/modify", name="modifier_session")
+     * @Route("/{id}/modify", name="modifier_session",methods={"GET","POST"})
      * @security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function modifyAction(Request $request, Session $session)
     {
@@ -228,9 +228,9 @@ class SessionController extends AbstractController
 
     /**
      *
-     * @Route("/terminer_saisie", name="terminer_saisie")
+     * @Route("/terminer_saisie", name="terminer_saisie",methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
      // On vient de cliquer sur le bouton Expertises
     public function terminerSaisieAction(Request $request)
@@ -279,9 +279,12 @@ class SessionController extends AbstractController
     /**
       * Avant changement d'état de la version
       *
-      * @Route("/avant_changer_etat/{rtn}/{ctrl}", name="session_avant_changer_etat", defaults= {"rtn" = "X" })
+      * @Route("/avant_changer_etat/{rtn}/{ctrl}",
+      *        name="session_avant_changer_etat",
+      *        defaults= {"rtn" = "X" },
+      *        methods={"GET"})
       * @Security("is_granted('ROLE_ADMIN')")
-      * @Method("GET")
+      * Method("GET")
       *
       */
     public function avantActiverAction($rtn, $ctrl)
@@ -305,9 +308,9 @@ class SessionController extends AbstractController
 
     /**
      *
-     * @Route("/activer", name="activer_session")
+     * @Route("/activer", name="activer_session",methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function activerAction(Request $request)
     {
@@ -387,9 +390,9 @@ class SessionController extends AbstractController
 
     /**
      *
-     * @Route("/envoyer_expertises", name="envoyer_expertises")
+     * @Route("/envoyer_expertises", name="envoyer_expertises",methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_PRESIDENT')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function envoyerExpertisesAction(Request $request)
     {
@@ -418,9 +421,9 @@ class SessionController extends AbstractController
     /**
      *
      *
-     * @Route("/demarrer_saisie", name="demarrer_saisie")
+     * @Route("/demarrer_saisie", name="demarrer_saisie",methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
      // On vient de cliquer sur le bouton Demandes
     public function demarrerSaisieAction(Request $request)
@@ -452,9 +455,9 @@ class SessionController extends AbstractController
     /**
      * Creates a new session entity.
      *
-     * @Route("/new", name="session_new")
+     * @Route("/new", name="session_new",methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function newAction(Request $request)
     {
@@ -480,8 +483,8 @@ class SessionController extends AbstractController
      * Finds and displays a session entity.
      *
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Route("/{id}/show", name="session_show")
-     * @Method("GET")
+     * @Route("/{id}/show", name="session_show",methods={"GET"})
+     * Method("GET")
      */
     public function showAction(Session $session)
     {
@@ -497,8 +500,8 @@ class SessionController extends AbstractController
      * Meme chose que show, mais présenté "à la gramc"
      *
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Route("/{id}/consulter", name="consulter_session")
-     * @Method("GET")
+     * @Route("/{id}/consulter", name="consulter_session",methods={"GET"})
+     * Method("GET")
      */
     public function consulterAction(Session $session)
     {
@@ -515,8 +518,8 @@ class SessionController extends AbstractController
      * Displays a form to edit an existing session entity.
      *
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Route("/{id}/edit", name="session_edit")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/edit", name="session_edit",methods={"GET","POST"})
+     * Method({"GET", "POST"})
      */
     public function editAction(Request $request, Session $session)
     {
@@ -539,9 +542,9 @@ class SessionController extends AbstractController
 
     /**
      *
-     * @Route("/commentaires", name="session_commentaires")
+     * @Route("/commentaires", name="session_commentaires",methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function commentairesAction(Request $request)
     {
@@ -591,9 +594,9 @@ class SessionController extends AbstractController
 
     /**
      *
-     * @Route("/bilan", name="bilan_session")
+     * @Route("/bilan", name="bilan_session",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
-     * @Method({"GET","POST"})
+     * Method({"GET","POST"})
      */
     public function bilanAction(Request $request)
     {
@@ -647,9 +650,9 @@ class SessionController extends AbstractController
 
     /**
      *
-     * @Route("/bilan_annuel", name="bilan_annuel")
+     * @Route("/bilan_annuel", name="bilan_annuel",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
-     * @Method({"GET","POST"})
+     * Method({"GET","POST"})
      */
     public function bilanAnnuelAction(Request $request)
     {
@@ -672,9 +675,9 @@ class SessionController extends AbstractController
     /**
      *
      *
-     * @Route("/{id}/questionnaire_csv", name="questionnaire_csv")
+     * @Route("/{id}/questionnaire_csv", name="questionnaire_csv",methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function questionnaireCsvAction(Request $request, Session $session)
     {
@@ -758,9 +761,9 @@ class SessionController extends AbstractController
 
     /**
      *
-     * @Route("/{annee}/bilan_annuel_csv", name="bilan_annuel_csv")
+     * @Route("/{annee}/bilan_annuel_csv", name="bilan_annuel_csv",methods={"GET"})
      * @Security("is_granted('ROLE_OBS')")
-     * @Method("GET")
+     * Method("GET")
      *
      */
     public function bilanAnnuelCsvAction(Request $request, $annee)
@@ -804,9 +807,9 @@ class SessionController extends AbstractController
         }
 
         // Les totaux
-        $tq  = 0;		// Le total des quotas
-        $tm  = [0,0,0,0,0,0,0,0,0,0,0,0];		// La conso totale par mois
-        $tttl= 0;		// Le total de la conso
+        $tq  = 0;        // Le total des quotas
+        $tm  = [0,0,0,0,0,0,0,0,0,0,0,0];        // La conso totale par mois
+        $tttl= 0;        // Le total de la conso
 
         // Calcul du csv, ligne par ligne
         foreach ($id_projets as $id_projet => $paire) {
@@ -876,9 +879,9 @@ class SessionController extends AbstractController
 
     /**
      *
-     * @Route("/{annee}/bilan_annuel_labo_csv", name="bilan_annuel_labo_csv")
+     * @Route("/{annee}/bilan_annuel_labo_csv", name="bilan_annuel_labo_csv",methods={"GET"})
      * @Security("is_granted('ROLE_OBS')")
-     * @Method("GET")
+     * Method("GET")
      *
      */
     public function bilanLaboCsvAction(Request $request, $annee)
@@ -912,9 +915,9 @@ class SessionController extends AbstractController
 
     /**
      *
-     * @Route("/{annee}/bilan_annuel_users_csv", name="bilan_annuel_users_csv")
+     * @Route("/{annee}/bilan_annuel_users_csv", name="bilan_annuel_users_csv",methods={"GET"})
      * @Security("is_granted('ROLE_OBS')")
-     * @Method("GET")
+     * Method("GET")
      *
      */
     public function bilanUserCsvAction(Request $request, $annee)
@@ -930,31 +933,31 @@ class SessionController extends AbstractController
         // On les copie dans un tableau $users, indexé par le loginname
         $users = [];
         foreach ($cvs as $cv) {
-			// On peut avoir deux fois le même CollaborateurVersion (sessions A et B)
-			$loginname = $cv->getLoginname();
-			if (isset ($users[$loginname])) {
-				continue;
-			}
-			
-			$u = [];
-			$u['indiv'] = $cv->getCollaborateur();
-			$u['hcpu'] = $sp->getConsoRessource($cv, 'cpu', $annee)[0];
-		    $u['hgpu'] = $sp->getConsoRessource($cv, 'gpu', $annee)[0];
-		    $users[$loginname] = $u;
-		}
+            // On peut avoir deux fois le même CollaborateurVersion (sessions A et B)
+            $loginname = $cv->getLoginname();
+            if (isset ($users[$loginname])) {
+                continue;
+            }
+            
+            $u = [];
+            $u['indiv'] = $cv->getCollaborateur();
+            $u['hcpu'] = $sp->getConsoRessource($cv, 'cpu', $annee)[0];
+            $u['hgpu'] = $sp->getConsoRessource($cv, 'gpu', $annee)[0];
+            $users[$loginname] = $u;
+        }
 
-		// Calcul de csv
-		foreach ($users as $loginname => $u) {
-			$ligne = [];
-			$ligne[] = $u['indiv']->getNom();
-			$ligne[] = $u['indiv']->getPrenom();
-			$ligne[] = $loginname;
-			$ligne[] = $u['indiv']->getMail();
-			$ligne[] = $u['indiv']->getStatut();
-			$ligne[] = $u['hcpu'];
-			$ligne[] = $u['hgpu'];
-			$sortie .= join("\t", $ligne) . "\n";
-		}
+        // Calcul de csv
+        foreach ($users as $loginname => $u) {
+            $ligne = [];
+            $ligne[] = $u['indiv']->getNom();
+            $ligne[] = $u['indiv']->getPrenom();
+            $ligne[] = $loginname;
+            $ligne[] = $u['indiv']->getMail();
+            $ligne[] = $u['indiv']->getStatut();
+            $ligne[] = $u['hcpu'];
+            $ligne[] = $u['hgpu'];
+            $sortie .= join("\t", $ligne) . "\n";
+        }
         return Functions::csv($sortie, 'bilan_annuel_par_utilisateur'.$annee.'.csv');
     }
 
@@ -963,8 +966,8 @@ class SessionController extends AbstractController
      * Génère le bilan de session au format CSV
      *
      * @Security("is_granted('ROLE_OBS')")
-     * @Route("/{id}/bilan_csv", name="bilan_session_csv")
-     * @Method("GET")
+     * @Route("/{id}/bilan_csv", name="bilan_session_csv",methods={"GET"})
+     * Method("GET")
      */
     public function bilanCsvAction(Request $request, Session $session)
     {

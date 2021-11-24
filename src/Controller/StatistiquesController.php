@@ -42,7 +42,7 @@ use App\GramcServices\ServiceSessions;
 
 use App\Utils\Functions;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -88,9 +88,9 @@ class StatistiquesController extends AbstractController
     }
 
     /**
-     * @Route("/symfony", name="homepage")
+     * @Route("/symfony", name="homepage",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
-     * @Method({"GET","POST"})
+     * Method({"GET","POST"})
      */
     public function homepageAction(Request $request)
     {
@@ -103,7 +103,7 @@ class StatistiquesController extends AbstractController
     }
 
     /**
-      * @Route("/{annee}", name="statistiques")
+      * @Route("/{annee}", name="statistiques",methods={"GET"})
       * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
       */
     public function indexAction(Request $request, $annee=null)
@@ -233,7 +233,7 @@ class StatistiquesController extends AbstractController
 
 
     /**
-     * @Route("/{annee}/repartition", name="statistiques_repartition")
+     * @Route("/{annee}/repartition", name="statistiques_repartition",methods={"GET"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
     public function repartitionAction(Request $request, $annee)
@@ -311,7 +311,7 @@ class StatistiquesController extends AbstractController
     }
 
     /**
-     * @Route("/{annee}/collaborateur", name="statistiques_collaborateur")
+     * @Route("/{annee}/collaborateur", name="statistiques_collaborateur",methods={"GET"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
     public function collaborateurAction(Request $request, $annee)
@@ -597,7 +597,7 @@ class StatistiquesController extends AbstractController
     }
 
     /**
-     * @Route("/{annee}/laboratoire", name="statistiques_laboratoire")
+     * @Route("/{annee}/laboratoire", name="statistiques_laboratoire",methods={"GET"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
     public function laboratoireAction(Request $request, $annee)
@@ -606,7 +606,7 @@ class StatistiquesController extends AbstractController
     }
 
     /**
-     * @Route("/{annee}/etablissement", name="statistiques_etablissement")
+     * @Route("/{annee}/etablissement", name="statistiques_etablissement",methods={"GET"})
      * @Security("is_granted('ROLE_OBS')")
      */
     public function etablissementAction(Request $request, $annee)
@@ -615,7 +615,7 @@ class StatistiquesController extends AbstractController
     }
 
     /**
-     * @Route("/{annee}/thematique", name="statistiques_thematique")
+     * @Route("/{annee}/thematique", name="statistiques_thematique",methods={"GET"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
     public function thematiqueAction(Request $request, $annee)
@@ -624,7 +624,7 @@ class StatistiquesController extends AbstractController
     }
 
     /**
-     * @Route("/{annee}/metathematique", name="statistiques_metathematique")
+     * @Route("/{annee}/metathematique", name="statistiques_metathematique",methods={"GET"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
     public function metathematiqueAction(Request $request, $annee)
@@ -653,7 +653,7 @@ class StatistiquesController extends AbstractController
     }
 
     /**
-     * @Route("/{annee}/metathematique_csv", name="statistiques_métathématique_csv")
+     * @Route("/{annee}/metathematique_csv", name="statistiques_métathématique_csv",methods={"GET"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
     public function metathematiqueCSVAction(Request $request, $annee)
@@ -662,7 +662,7 @@ class StatistiquesController extends AbstractController
     }
 
     /**
-     * @Route("/{annee}/thematique_csv", name="statistiques_thématique_csv")
+     * @Route("/{annee}/thematique_csv", name="statistiques_thématique_csv",methods={"GET"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
     public function thematiqueCSVAction(Request $request, $annee)
@@ -671,7 +671,7 @@ class StatistiquesController extends AbstractController
     }
 
     /**
-     * @Route("/{annee}/laboratoire_csv", name="statistiques_laboratoire_csv")
+     * @Route("/{annee}/laboratoire_csv", name="statistiques_laboratoire_csv",methods={"GET"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
     public function laboratoireCSVAction(Request $request, $annee)
@@ -680,7 +680,7 @@ class StatistiquesController extends AbstractController
     }
 
     /**
-     * @Route("/{annee}/etablissement_csv", name="statistiques_établissement_csv")
+     * @Route("/{annee}/etablissement_csv", name="statistiques_établissement_csv",methods={"GET"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
     public function etablissementCSVAction(Request $request, $annee)

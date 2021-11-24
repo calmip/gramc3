@@ -27,7 +27,7 @@ namespace App\Controller;
 use Psr\Log\LoggerInterface;
 
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -151,7 +151,7 @@ class GramcSessionController extends AbstractController
     }
 
     /**
-     * @Route("/admin/accueil",name="admin_accueil")
+     * @Route("/admin/accueil",name="admin_accueil", methods={"GET"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
     **/
 
@@ -202,7 +202,7 @@ class GramcSessionController extends AbstractController
     }
 
     /**
-     * @Route("/mentions_legales", name="mentions_legales" )
+     * @Route("/mentions_legales", name="mentions_legales", methods={"GET"} )
      */
     public function mentionsAction()
     {
@@ -210,7 +210,7 @@ class GramcSessionController extends AbstractController
     }
 
     /**
-    * @Route("/aide", name="aide" )
+    * @Route("/aide", name="aide", methods={"GET"} )
     */
     public function aideAction()
     {
@@ -218,7 +218,7 @@ class GramcSessionController extends AbstractController
     }
 
     /**
-    * @Route("/", name="accueil" )
+    * @Route("/", name="accueil", methods={"GET"} )
     *
     */
     public function accueilAction()
@@ -281,7 +281,7 @@ class GramcSessionController extends AbstractController
     }
 
     /**
-     * @Route("/president", name="president_accueil" )
+     * @Route("/president", name="president_accueil", methods={"GET"} )
      * @Security("is_granted('ROLE_PRESIDENT')")
      */
     public function presidentAccueilAction()
@@ -298,7 +298,7 @@ class GramcSessionController extends AbstractController
     }
 
     /**
-     * @Route("/deconnexion",name="deconnexion")
+     * @Route("/deconnexion",name="deconnexion", methods={"GET"})
      **/
     public function deconnexionAction(Request $request)
     {
@@ -326,7 +326,7 @@ class GramcSessionController extends AbstractController
 
 
     /**
-    * @Route("/deconnected", name="deconnected")
+    * @Route("/deconnected", name="deconnected", methods={"GET"})
     **/
     public function deconnexion_showAction(Request $request)
     {
@@ -334,7 +334,7 @@ class GramcSessionController extends AbstractController
     }
 
     /**
-    * @Route("/profil",name="profil")
+    * @Route("/profil",name="profil", methods={"GET","POST"})
     * @Security("is_granted('ROLE_DEMANDEUR')")
 
     **/
@@ -387,7 +387,7 @@ class GramcSessionController extends AbstractController
      *
      * Connexion en debug (c-a-d pas d'authentification
      *
-     * @Route("/connexion_dbg",name="connexion_dbg")
+     * @Route("/connexion_dbg",name="connexion_dbg", methods={"GET","POST"})
      **/
     public function connectiondbgAction(Request $request)
     {
@@ -471,8 +471,8 @@ class GramcSessionController extends AbstractController
     }
 
     /**
-    * @Route("/login/activation",name="activation")
-    * @Route("/login/activation/{key}")
+    * @Route("/login/activation",name="activation", methods={"GET"})
+    * @Route("/login/activation/{key}", methods={"GET"})
     **/
 
     public function activationAction(Request $request, $key)
@@ -534,9 +534,9 @@ class GramcSessionController extends AbstractController
 
 
     /**
-     * @Route("/login_choice", name="connexion")
+     * @Route("/login_choice", name="connexion", methods={"GET","POST"})
      *
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
 
     public function loginAction(Request $request)
@@ -585,8 +585,8 @@ class GramcSessionController extends AbstractController
 
 
     /**
-     * @Route("/login", name="shiblogin")
-     * @Method({"GET"})
+     * @Route("/login", name="shiblogin", methods={"GET"})
+     * Method({"GET"})
      */
     /*public function shibloginAction(Request $request)
     {
@@ -605,8 +605,8 @@ class GramcSessionController extends AbstractController
 
 
     /**
-     * @Route("/login/connexion", name="connexionshiblogin")
-     * @Route("/connexion")
+     * @Route("/login/connexion", name="connexionshiblogin", methods={"GET"})
+     * @Route("/connexion", methods={"GET"})
      */
     public function auth_connexionAction(Request $request)
     {
@@ -677,7 +677,7 @@ class GramcSessionController extends AbstractController
     }
 
     /**
-    * @Route("/nouveau_compte", name="nouveau_compte")
+    * @Route("/nouveau_compte", name="nouveau_compte", methods={"GET"})
     */
     public function nouveau_compteAction(Request $request, LoggerInterface $lg)
     {
@@ -752,7 +752,7 @@ class GramcSessionController extends AbstractController
     }
     
     /**
-     * @Route("/nouveau_profil",name="nouveau_profil")
+     * @Route("/nouveau_profil",name="nouveau_profil", methods={"GET","POST"})
      *
      */
     public function nouveau_profilAction(Request $request, LoggerInterface $lg)
@@ -857,8 +857,8 @@ class GramcSessionController extends AbstractController
 
 
     /**
-    * @Route("/erreur_login", name="erreur_login")
-    * @Method({"GET"})
+    * @Route("/erreur_login", name="erreur_login", methods={"GET"})
+    * Method({"GET"})
     */
     public function erreurLoginAction(Request $request)
     {
@@ -866,10 +866,10 @@ class GramcSessionController extends AbstractController
     }
 
     /**
-     * @Route("/exception_index", name="exception_index")
-     * @Route("/index", name="index")
-     * @Route("/accueil_demandeur", name="accueil_demandeur")
-     * @Method({"GET"})
+     * @Route("/exception_index", name="exception_index", methods={"GET"})
+     * @Route("/index", name="index", methods={"GET"})
+     * @Route("/accueil_demandeur", name="accueil_demandeur", methods={"GET"})
+     * Method({"GET"})
      */
     public function exceptionIndexAction(Request $request)
     {
@@ -895,7 +895,7 @@ class GramcSessionController extends AbstractController
     }
 
     /**
-     * @Route("/connexions", name="connexions")
+     * @Route("/connexions", name="connexions", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function connexionsAction(Request $request)
@@ -908,8 +908,8 @@ class GramcSessionController extends AbstractController
     }
 
     /**
-     * @Route("/phpinfo", name="phpinfo")
-     * @Method({"GET"})
+     * @Route("/phpinfo", name="phpinfo", methods={"GET"})
+     * Method({"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
      *********************************************/
     public function infoAction(Request $request)
@@ -925,7 +925,7 @@ class GramcSessionController extends AbstractController
 
 
     /**
-     * @Route("/md5")
+     * @Route("/md5", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
      **/
 
@@ -937,7 +937,7 @@ class GramcSessionController extends AbstractController
     }
 
     /**
-     * @Route("/uri")
+     * @Route("/uri", methods={"GET"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      **/
 

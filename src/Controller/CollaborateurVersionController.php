@@ -26,7 +26,7 @@ namespace App\Controller;
 
 use App\Entity\CollaborateurVersion;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -43,8 +43,8 @@ class CollaborateurVersionController extends AbstractController
     /**
      * Lists all collaborateurVersion entities.
      *
-     * @Route("/", name="collaborateurversion_index")
-     * @Method("GET")
+     * @Route("/", name="collaborateurversion_index", methods={"GET"})
+     * Method("GET")
      */
     public function indexAction()
     {
@@ -60,8 +60,8 @@ class CollaborateurVersionController extends AbstractController
     /**
      * Creates a new collaborateurVersion entity.
      *
-     * @Route("/new", name="collaborateurversion_new")
-     * @Method({"GET", "POST"})
+     * @Route("/new", name="collaborateurversion_new", methods={"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function newAction(Request $request)
     {
@@ -86,8 +86,8 @@ class CollaborateurVersionController extends AbstractController
     /**
      * Finds and displays a collaborateurVersion entity.
      *
-     * @Route("/{id}", name="collaborateurversion_show")
-     * @Method("GET")
+     * @Route("/{id}", name="collaborateurversion_show", methods={"GET"})
+     * Method("GET")
      */
     public function showAction(CollaborateurVersion $collaborateurVersion)
     {
@@ -102,8 +102,8 @@ class CollaborateurVersionController extends AbstractController
     /**
      * Displays a form to edit an existing collaborateurVersion entity.
      *
-     * @Route("/{id}/edit", name="collaborateurversion_edit")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/edit", name="collaborateurversion_edit", methods={"GET","POST"})
+     * Method({"GET", "POST"})
      */
     public function editAction(Request $request, CollaborateurVersion $collaborateurVersion)
     {
@@ -127,8 +127,8 @@ class CollaborateurVersionController extends AbstractController
     /**
      * Deletes a collaborateurVersion entity.
      *
-     * @Route("/{id}", name="collaborateurversion_delete")
-     * @Method("DELETE")
+     * @Route("/{id}", name="collaborateurversion_delete", methods={"DELETE"})
+     * Method("DELETE")
      */
     public function deleteAction(Request $request, CollaborateurVersion $collaborateurVersion)
     {

@@ -45,7 +45,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Psr\Log\LoggerInterface;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -82,7 +82,7 @@ class WorkflowController extends AbstractController
     /**
      * entry.
      *
-     * @Route("/", name="workflow_index")
+     * @Route("/", name="workflow_index",methods={"GET","POST"})
      * Method({"GET", "POST"})
      */
     public function indexAction(Request $request, LoggerInterface $lg)
@@ -191,8 +191,8 @@ class WorkflowController extends AbstractController
 
     /**
     *
-    * @Route("/{id}/modify", name="worklow_modifier_session")
-    * @Method({"GET", "POST"})
+    * @Route("/{id}/modify", name="worklow_modifier_session",methods={"GET","POST"})
+    * Method({"GET", "POST"})
     */
     public function modifySessionAction(Request $request, Session $session, LoggerInterface $lg)
     {
@@ -284,8 +284,8 @@ class WorkflowController extends AbstractController
 
     /**
      *
-     * @Route("/{id}/signal", name="workflow_signal_projet")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/signal", name="workflow_signal_projet",methods={"GET","POST"})
+     * Method({"GET", "POST"})
      */
     public function signalProjetAction(Request $request, Projet $projet, LoggerInterface $lg)
     {
@@ -481,8 +481,8 @@ class WorkflowController extends AbstractController
 
     /**
     *
-    * @Route("/{id}/reset", name="workflow_reset_version")
-    * @Method({"GET", "POST"})
+    * @Route("/{id}/reset", name="workflow_reset_version",methods={"GET","POST"})
+    * Method({"GET", "POST"})
     */
     public function resetVersionAction(Request $request, Version $version, LoggerInterface $lg)
     {
