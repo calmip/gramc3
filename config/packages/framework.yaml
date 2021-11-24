@@ -9,6 +9,7 @@ framework:
     # cf. https://symfony.com/doc/4.4/session.html#configuration
     session:
         #handler_id: null
+        storage_factory_id: session.storage.factory.native
         handler_id: "session.handler.native_file"
         cookie_secure: auto
         cookie_samesite: lax
