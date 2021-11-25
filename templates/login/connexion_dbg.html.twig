@@ -5,12 +5,13 @@
 
     {% block body %}
     
-    <div id="section"><h2>Connexion à la plateforme</h2>
+    <div id="section">
+        <h2>Connexion à la plateforme</h2>
     <div class="message info"><h2>ATTENTION</h2>
     <strong><em>Authentification uniquement pour debug</em></strong></div>
     
     {{ form_start(form) }}
-    Votre adresse mail: {{ form_widget(form.mail) }}
+    
     {{ form_end(form) }}
     
     {% endblock %}

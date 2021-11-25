@@ -118,10 +118,10 @@ class ExceptionListener
 
         elseif( $exception instanceof NotFoundHttpException )
         {
-            // uniquement en production nous redirigeons vers la page 'index' - pas de log
+            // uniquement en production nous redirigeons vers la page 'accueil' - pas de log
             if( $this->kernel_debug == false )
             {
-                $response =  new RedirectResponse($this->router->generate('index') );
+                $response =  new RedirectResponse($this->router->generate('accueil') );
                 $event->setResponse($response); 
             }
         }
@@ -140,7 +140,7 @@ class ExceptionListener
            // uniquement en production nous redirigeons vers la page 'index'
            if( $this->kernel_debug == false )
            {
-                $response =  new RedirectResponse($this->router->generate('index') );
+                $response =  new RedirectResponse($this->router->generate('accueil') );
                 $event->setResponse($response); 
            }
             

@@ -35,16 +35,20 @@ services:
     # Seuls certains objets définis dans le répertoire Workflows sont des services
     App\GramcServices\Workflow\:
         resource: '../src/GramcServices/Workflow/*/*Workflow.php'
-        
-    app.gramc_user_provider:
-        class: App\Security\User\GramcUserProvider
 
-    app.user_checker:
-        class: App\Security\User\UserChecker
-
-    App\Security\User\UserChecker: '@app.user_checker'
+    # Securité
+    App\Security\:
+        resource: '../src/Security/*'
     
-     # cf https://stackoverflow.com/questions/47613979/symfony-3-4-0-could-not-find-any-fixture-services-to-load
+    #app.gramc_user_provider:
+    #    class: App\Security\GramcUserProvider
+
+    #app.user_checker:
+    #    class: App\Security\User\UserChecker
+
+    #App\Security\User\UserChecker: '@app.user_checker'
+    
+    # cf https://stackoverflow.com/questions/47613979/symfony-3-4-0-could-not-find-any-fixture-services-to-load
     # makes classes in src/AppBundle/DataFixtures available to be used as services
     # and have a tag that allows actions to type-hint services
     App\DataFixtures\:
@@ -123,7 +127,7 @@ services:
     App\Controller\ExpertiseController:
         arguments: [ '%max_expertises_nb%' ]
 
-    # Formulaires, validateurs
+    # Formulaires, validateurs, securité
     App\Form\:
         resource: '../src/Form/*'
         tags: ["form.type"]
@@ -134,7 +138,11 @@ services:
     App\Validator\Constraints\PagesNumberValidator:
         arguments: [ "%max_page_nb%" ]
         tags: ["validator.constraint_validator" ]
-        
+
+    App\Security\GramcAuthenticator:
+        arguments:
+            $knl_debug: '%kernel.debug%'
+    
     # Commandes
     app.gramc.sendamail:
         class: App\Command\Sendamail
