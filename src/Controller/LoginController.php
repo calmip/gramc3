@@ -9,14 +9,12 @@ use App\Entity\Individu;
 use App\Entity\Journal;
 
 use App\GramcServices\ServiceJournal;
-//use App\GramcServices\ServiceNotificationsGramce;
 
 
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -26,6 +24,9 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Login controller.
@@ -39,13 +40,17 @@ class LoginController extends AbstractController
     //const NOTIFICATION_NO_MAIL   = 102;
     //const NOTIFICATION_AUTH_PB   = 103;
     
-    private $sj;
-    private $ff;
+    private $sj = null;
+    private $ff = null;
+    private $ac = null;
+    private $ts = null;
     
-    public function __construct(ServiceJournal $sj, FormFactoryInterface $ff)
+    public function __construct(ServiceJournal $sj, FormFactoryInterface $ff, AuthorizationCheckerInterface $ac, TokenStorageInterface $ts)
     {
         $this->sj = $sj;
         $this->ff = $ff;
+        $this->ac = $ac;
+        $this->ts = $ts;
     }
 
     /** 
@@ -62,26 +67,37 @@ class LoginController extends AbstractController
             return $this->redirectToRoute('accueil');
     }
 
-    /** 
-     * @Route("/deconnect", name="deconnexion",methods={"GET"})
-     * Method({"GET"})
-     */
+    /**
+     * @Route("/deconnexion",name="deconnexion", methods={"GET"})
+     *
+     * Si on est en sudo, revient en normal, sinon invalide la session
+     * NOTE - NE PAS renseigner logout: dans security.yaml !
+     * 
+     **/
     public function deconnexionAction(Request $request)
     {
-        // controller can be blank: it will never be executed!
-        throw new \Exception('Don\'t forget to activate logout in security.yaml');
-        //return $this->redirectToRoute('deconnected');
-    }
+        $sj = $this->sj;
+        $ac = $this->ac;
+        $ts = $this->ts;
+        $session = $request->getSession();
 
-    /** 
-     * @Route("/deconnected", name="deconnected",methods={"GET"})
-     * Method({"GET"})
-     */
+        // En sudo: on revient à l'utilisateur précédent
+        if ($ac->isGranted('IS_IMPERSONATOR'))
+        {
+            $sudo_url = $session->get('sudo_url');
+            $real_user = $ts->getToken()->getOriginalToken()->getUser();
+            $sj->infoMessage(__METHOD__ . ":" . __LINE__ . " déconnexion d'un utilisateur en SUDO vers " . $real_user);
+            return new RedirectResponse($sudo_url . '?_switch_user=_exit');
+            
+        }
 
-     // TODO - Personnaliser le processus de logout - Pour l'instant je ne sais pas faire
-    public function deconnectedAction(Request $request)
-    {
-        return $this->render('login/deconnected.html.twig');
+        // Pas sudo: on remet token et session à zéro
+        elseif ($ac->isGranted('IS_AUTHENTICATED_FULLY')) {
+            $sj->infoMessage(__METHOD__ . ":" . __LINE__ .  " déconnexion de l'utilisateur " . $ts->getToken()->getUser());
+            $ts->setToken(null);
+            $session->invalidate();
+            return $this->render('default/deconnexion.html.twig');
+        }
     }
 
     /** 
@@ -192,5 +208,28 @@ class LoginController extends AbstractController
         }
                          
         return $this->render('login/connexion_dbg.html.twig', array( 'form' => $form->createView())  );
+    }
+
+    /**
+     * Sudo (l'admin change d'identité)
+     *
+     * @Route("/{id}/sudo", name="sudo", methods={"GET"})
+     * @Security("is_granted('ROLE_ADMIN')")
+     * Method("GET")
+     */
+    public function sudoAction(Request $request, Individu $individu)
+    {
+        $sj = $this->sj;
+        $ac = $this->ac;
+        if (! $ac->isGranted('IS_IMPERSONATOR')) {
+            $session = $request->getSession();
+            $sudo_url = $request->headers->get('referer');
+            $session->set('sudo_url',$sudo_url);
+            $sj->infoMessage("Controller : connexion de l'utilisateur " . $individu . ' en SUDO ');
+            return new RedirectResponse($this->generateUrl('accueil', [ '_switch_user' => $individu->getId() ]));
+        } else {
+            $sj->warningMessage("Controller : connexion de l'utilisateur " . $individu . ' déjà en SUDO !');
+            return $this->redirectToRoute('individu_gerer');
+        }
     }
 }

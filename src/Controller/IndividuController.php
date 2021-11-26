@@ -773,27 +773,6 @@ class IndividuController extends AbstractController
     }
 
     /**
-     * Sudo (l'admin change d'identité)
-     *
-     * @Route("/{id}/sudo", name="sudo", methods={"GET"})
-     * @Security("is_granted('ROLE_ADMIN')")
-     * Method("GET")
-     */
-    public function sudoAction(Request $request, Individu $individu)
-    {
-        $sj = $this->sj;
-        $ac = $this->ac;
-
-        if (! $ac->isGranted('ROLE_PREVIOUS_ADMIN')) {
-            $sj->infoMessage("Controller : connexion de l'utilisateur " . $individu . ' en SUDO ');
-            return new RedirectResponse($this->generateUrl('accueil', [ '_switch_user' => $individu->getId() ]));
-        } else {
-            $sj->warningMessage("Controller : connexion de l'utilisateur " . $individu . ' déjà en SUDO !');
-            return $this->redirectToRoute('individu_gerer');
-        }
-    }
-
-    /**
      * Affecter l'utilisateur à une ou des thematiques
      *
      * @Route("/{id}/thematique", name="choisir_thematique", methods={"GET","POST"})

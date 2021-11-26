@@ -298,42 +298,6 @@ class GramcSessionController extends AbstractController
     }
 
     /**
-     * Route("/deconnexion",name="deconnexion", methods={"GET"})
-     **/
-    public function deconnexionAction(Request $request)
-    {
-        $sj    = $this->sj;
-        $ac    = $this->ac;
-        $token = $this->ts->getToken();
-        $sss   = $this->sss;
-
-        if ($ac->isGranted('ROLE_PREVIOUS_ADMIN')) {
-            $sudo_url = $sss->get('sudo_url');
-            //$sj->debugMessage(__METHOD__ . " sudo_url = " . $sudo_url );
-            $userChecker = $this->uc;
-            $real_user   = $sss->get('real_user');
-            $userChecker->checkPostAuth($real_user);
-            $sj->infoMessage(__METHOD__ . ":" . __LINE__ . " déconnexion d'un utilisateur en SUDO vers " . $real_user);
-            return new RedirectResponse($sudo_url . '?_switch_user=_exit');
-        //return $this->redirectToRoute('accueil',[ '_switch_user' => '_exit' ]);
-        } elseif ($ac->isGranted('IS_AUTHENTICATED_FULLY')) {
-            $sj->infoMessage(__METHOD__ . ":" . __LINE__ .  " déconnexion de l'utilisateur " . $token->getUser());
-            $request->getSession()->invalidate();
-            session_destroy();
-        }
-        return $this->redirectToRoute('deconnected');
-    }
-
-
-    /**
-    * Route("/deconnected", name="deconnected", methods={"GET"})
-    **/
-    public function deconnexion_showAction(Request $request)
-    {
-        return $this->render('default/deconnexion.html.twig');
-    }
-
-    /**
     * @Route("/profil",name="profil", methods={"GET","POST"})
     * @Security("is_granted('ROLE_DEMANDEUR')")
 
@@ -562,16 +526,6 @@ class GramcSessionController extends AbstractController
             return $this->redirectToRoute('connexionshiblogin');
         }
         return $this->render('default/nouveau_profil.html.twig', array( 'mail' => $request->getSession()->get('mail'), 'form' => $form->createView()));
-    }
-
-
-    /**
-    * Route("/erreur_login", name="erreur_login", methods={"GET"})
-    * Method({"GET"})
-    */
-    public function erreurLoginAction(Request $request)
-    {
-        return $this->render('default/erreur_login.html.twig');
     }
 
     /**
