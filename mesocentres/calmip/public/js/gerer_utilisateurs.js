@@ -1,37 +1,37 @@
 $( document ).ready(function() {
 
-	/* Expert */
-	// Sera connecté au click des liens Expert et Activation
-	function click_expactiv(event) {
-		event.preventDefault();
+    /* Expert */
+    // Sera connecté au click des liens Expert et Activation
+    function click_expactiv(event) {
+        event.preventDefault();
         h = $(this).attr("href");
         h += "&ajax=1";
-		
+        
         $.ajax({url: h,
                 type: "GET",
                 context: $(this)})
-			.done(
-				function(data){
-					tr = $(this).parent().parent();
-					tr.html(data);
+            .done(
+                function(data){
+                    tr = $(this).parent().parent();
+                    tr.html(data);
 
-					// pb de perf si on clique plusieurs fois (pour supprimer 4 à 5 experts par exemple)
-					// --> je mets une classe provisoire au tr (clicked) et je ne sélectionne que les enfants de cette classe
-					// --> on ne repasse ainsi que sur les éléments qu'on vient de cliquer !
-					// --> A la fin je vire la classe
-					tr.addClass("clicked");
-					$( "tr.clicked a.modification" ).click(click_modification);
-					$( "tr.clicked a.suppression" ).click(click_suppression);
-					$( "tr.clicked a.activation" ).click(click_expactiv);
-					$( "tr.clicked a.expert" ).click(click_expactiv);
-					$( "tr.clicked a.admin" ).click(click_expactiv);
-					$( "tr.clicked a.obs" ).click(click_expactiv);
+                    // pb de perf si on clique plusieurs fois (pour supprimer 4 à 5 experts par exemple)
+                    // --> je mets une classe provisoire au tr (clicked) et je ne sélectionne que les enfants de cette classe
+                    // --> on ne repasse ainsi que sur les éléments qu'on vient de cliquer !
+                    // --> A la fin je vire la classe
+                    tr.addClass("clicked");
+                    $( "tr.clicked a.modification" ).click(click_modification);
+                    $( "tr.clicked a.suppression" ).click(click_suppression);
+                    $( "tr.clicked a.activation" ).click(click_expactiv);
+                    $( "tr.clicked a.expert" ).click(click_expactiv);
+                    $( "tr.clicked a.admin" ).click(click_expactiv);
+                    $( "tr.clicked a.obs" ).click(click_expactiv);
                     $( "tr.clicked a.sysadmin" ).click(click_expactiv);
-					tr.removeClass("clicked");
-				})
-			.fail(function(xhr, status, errorThrown) { alert (errorThrown); });
-	};
-	
+                    tr.removeClass("clicked");
+                })
+            .fail(function(xhr, status, errorThrown) { alert (errorThrown); });
+    };
+    
     /* Suppression */
     // Sera connecté au click des liens de suppression
     function click_suppression (event ) {
@@ -130,19 +130,19 @@ $( document ).ready(function() {
                  // connecter à nouveau, à cause de la nouvelle ligne !
                  $( "a.activation" ).click(click_expactiv);
                  $( "a.suppression" ).click(click_suppression);
-                 $( "a.modification" ).click(click_modification);
-				 $( "a.expert" ).click(click_expactiv);
+                 //$( "a.modification" ).click(click_modification);
+                 $( "a.expert" ).click(click_expactiv);
              } else  if (ajout_detect_regex.test(data)) {
                  formulaire_profil.dialog("close");
                  ligne = $( "#utilisateurs" ).children().first();
                  ligne.before(data);
-				 //alert(data);
+                 //alert(data);
 
                  // connecter à nouveau, à cause de la nouvelle ligne !
                  $( "a.activation" ).click(click_expactiv);
                  $( "a.suppression" ).click(click_suppression);
-                 $( "a.modification" ).click(click_modification);
-				 $( "a.expert" ).click(click_expactiv);
+                 //$( "a.modification" ).click(click_modification);
+                 $( "a.expert" ).click(click_expactiv);
              } else {
                  alert ('comprends rien '+data);
              }
@@ -151,15 +151,15 @@ $( document ).ready(function() {
     };
 
     // Connecter aux fonctions click lors de l'initialisation
-    $( "a.modification" ).click(click_modification);
-	// Pas d'ajax pour la suppression, car en cas d'erreur (si la personne a des projets)
-	// la redirection ne se fait pas
-	// Il faudra arranger ça, mais pour l'instant on vire l'ajax
-	//    $( "a.suppression" ).click(click_suppression);
+    //////////////$( "a.modification" ).click(click_modification);
+    // Pas d'ajax pour la suppression, car en cas d'erreur (si la personne a des projets)
+    // la redirection ne se fait pas
+    // Il faudra arranger ça, mais pour l'instant on vire l'ajax
+    //    $( "a.suppression" ).click(click_suppression);
     $( "a.activation" ).click(click_expactiv);
     $( "a.expert" ).click(click_expactiv);
-	$( "a.admin").click(click_expactiv);
+    $( "a.admin").click(click_expactiv);
     $( "a.obs" ).click(click_expactiv);
-	$( "a.sysadmin").click(click_expactiv);
+    $( "a.sysadmin").click(click_expactiv);
     $( "#ajout" ) .click(click_ajout);
 });

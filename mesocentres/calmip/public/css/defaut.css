@@ -169,6 +169,12 @@ table#profil td select,table#profil td input {
     width: 20em;
 }
 
+/* Le formulaire eppn associé */
+div#eppn {
+    margin: 0 auto;
+    width: 30%;
+}
+
 /* Le formulaire de profil horizontal */
 table#profil_horiz {
     font-size: .8em;

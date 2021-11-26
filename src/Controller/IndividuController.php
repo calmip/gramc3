@@ -27,6 +27,15 @@ namespace App\Controller;
 use App\Entity\Individu;
 use App\Entity\Thematique;
 use App\Entity\Rattachement;
+use App\Entity\CollaborateurVersion;
+use App\Entity\CompteActivation;
+use App\Entity\Expertise;
+use App\Entity\Journal;
+use App\Entity\Rallonge;
+use App\Entity\Session;
+use App\Entity\Sso;
+use App\Entity\Version;
+
 use App\Utils\Functions;
 
 use App\GramcServices\ServiceJournal;
@@ -54,15 +63,6 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
-// pour remplacer un utilisateur par un autre
-use App\Entity\CollaborateurVersion;
-use App\Entity\CompteActivation;
-use App\Entity\Expertise;
-use App\Entity\Journal;
-use App\Entity\Rallonge;
-use App\Entity\Session;
-use App\Entity\Sso;
-use App\Entity\Version;
 
 /**
  * Individu controller.
@@ -161,9 +161,9 @@ class IndividuController extends AbstractController
 
         $erreurs  =   [];
 
-        // utilisateur peu actif et qui ne peut pas se connecter peut être effacé
+        // utilisateur peu actif peut être effacé même s'il peut se connecter'
         if ($CollaborateurVersion == null && $Expertise == null
-              && $Rallonge == null && $Session == null && count($Sso)==0) {
+              && $Rallonge == null && $Session == null) {
 
             foreach ($individu->getThematique() as $item) {
                 $em->persist($item);
@@ -412,11 +412,11 @@ class IndividuController extends AbstractController
     /**
     * Modifier profil
     *
-    * @Route("/{id}/modifier_profil", name="modifier_profil", methods={"GET"})
-    * @Security("is_granted('ROLE_ADMIN')")
+    * Route("/{id}/modifier_profil", name="modifier_profil", methods={"GET"})
+    * Security("is_granted('ROLE_ADMIN')")
     * Method("GET")
     */
-    public function modifierProfilAction(Request $request, Individu $individu)
+    /*public function modifierProfilAction(Request $request, Individu $individu)
     {
         $individu->setAdmin(true);
         $em = $this->getDoctrine()->getManager();
@@ -424,7 +424,7 @@ class IndividuController extends AbstractController
         $em->flush($individu);
 
         return $this->render('individu/ligne.html.twig', [ 'individu' => $individu ]);
-    }
+    }*/
 
     /**
      * Displays a form to edit an existing individu entity.
@@ -438,13 +438,11 @@ class IndividuController extends AbstractController
         $em = $this->getDoctrine()->getManager();
         $repos = $em->getRepository(Individu::class);
         
-        $editForm = $this->createForm('App\Form\IndividuType', $individu);
-
+        $formInd = $this->createForm('App\Form\IndividuType', $individu);
         $session = $request->getSession();
-        //$current_mail = $session->get('current_mail');
         
-        $editForm->handleRequest($request);
-        if ($editForm->isSubmitted() /*&& $editForm->isValid()*/) {
+        $formInd->handleRequest($request);
+        if ($formInd->isSubmitted() /*&& $editForm->isValid()*/) {
 
             $exc = false;
             try
@@ -466,13 +464,61 @@ class IndividuController extends AbstractController
             }
         }
 
+        $ssos = $individu->getSso();
+        $ssos_old = clone $ssos;
+        //dd($ssos->toArray());
+        $formEppn = $this->createFormBuilder($individu)
+            ->add(
+                'Sso',
+                EntityType::class,
+                [
+                'multiple' => true,
+                'expanded' => true,
+                'class' => 'App:Sso',
+                'choices' => $individu->getSso(),
+                'choice_label' => function ($s) { return $s->getEppn(); },
+                'choice_value' => function ($t) { return $t; },
+                ]
+            )
+            ->add('submit', SubmitType::class, ['label' => 'modifier' ])
+            ->add('reset', ResetType::class, ['label' => 'reset' ])
+            ->getForm();
+
+        $formEppn->handleRequest($request);
+
+        if ($formEppn->isSubmitted() && $formEppn->isValid()) {
+            //dd($individu->getSso());
+            //dd($ssos_old);
+            //dd($formEppn['Sso']->getData());
+            /*
+             * 0 1 2, 0 2 clicked => ne reste que 0 2
+             * */
+
+            // foreach ($formEppn['Sso']->getData() as $s) {
+                 //dd($s);
+                 //$ssos_ttl->removeElement($s);
+            // }
+            // dd($ssos_ttl);
+            foreach ($ssos_old as $s) {
+                if ( !$ssos->contains($s)) {
+                    //$individu->removeSso($s);
+                    $em->remove($s);
+                }
+            }
+            $em->flush();
+
+            
+             
+        }
+
         //$session->set('current_mail',$individu->getMail());
 
         return $this->render(
             'individu/modif.html.twig',
             [
             'individu' => $individu,
-            'form' => $editForm->createView(),
+            'formInd' => $formInd->createView(),
+            'formEppn' => $formEppn->createView(),
             ]
         );
     }
@@ -757,10 +803,10 @@ class IndividuController extends AbstractController
 
         $individu->setDesactive(true);
 
-        $ssos = $individu->getSso();
-        foreach ($ssos as $sso) {
-            $em->remove($sso);
-        }
+        //$ssos = $individu->getSso();
+        //foreach ($ssos as $sso) {
+        //    $em->remove($sso);
+        //}
 
         $em->persist($individu);
         $em->flush($individu);
@@ -840,6 +886,70 @@ class IndividuController extends AbstractController
             'individu' => $individu,
             'form' => $form->createView(),
         ]
+        );
+    }
+
+    /**
+     * Supprimer un ou plusieurs eppn de cet utilisateur
+     *
+     * @Route("/{id}/eppn", name="gere_eppn", methods={"GET","POST"})
+     * @Security("is_granted('ROLE_ADMIN')")
+     * Method({"GET", "POST"})
+     */
+    public function eppnAction(Request $request, Individu $individu)
+    {
+        $em   = $this->getDoctrine()->getManager();
+        $ssos = $individu->getSso();
+        $form = $this->createFormBuilder($individu)
+            ->add(
+                'eppn',
+                EntityType::class,
+                [
+                'multiple' => true,
+                'expanded' => true,
+                'class' => 'App:Sso',
+                'choices' => $ssos
+                ]
+            )
+            ->add('submit', SubmitType::class, ['label' => 'modifier' ])
+            ->add('reset', ResetType::class, ['label' => 'reset' ])
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // thématiques && Doctrine ManyToMany
+            $all_thematiques = $em->getRepository(Thematique::class)->findAll();
+            $my_thematiques = $individu->getThematique();
+
+            foreach ($all_thematiques as $thematique) {
+                if ($my_thematiques->contains($thematique)) {
+                    $thematique->addExpert($individu);
+                } else {
+                    $thematique->removeExpert($individu);
+                }
+            }
+
+            // rattachement && Doctrine ManyToMany
+            $all_ratt = $em->getRepository(Rattachement::class)->findAll();
+            $my_ratt = $individu->getRattachement();
+
+            foreach ($all_ratt as $ratt) {
+                if ($my_ratt->contains($ratt)) {
+                    $ratt->addExpert($individu);
+                } else {
+                    $ratt->removeExpert($individu);
+                }
+            }
+            $em->flush();
+        }
+
+        return $this->render(
+            'individu/thematique.html.twig',
+            [
+            'individu' => $individu,
+            'form' => $form->createView(),
+            ]
         );
     }
 

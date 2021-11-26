@@ -92,7 +92,6 @@ class GramcAuthenticator extends AbstractAuthenticator
             {
                 // Récupérer les headers dans la session
                 $this->shibbHeadersToSession($request);
-
                 throw new UsernameNotFoundException();
             }
             $individu = $sso->getIndividu();
