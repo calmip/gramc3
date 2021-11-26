@@ -529,18 +529,6 @@ class GramcSessionController extends AbstractController
     }
 
     /**
-     * @Route("/exception_index", name="exception_index", methods={"GET"})
-     * @Route("/index", name="index", methods={"GET"})
-     * @Route("/accueil_demandeur", name="accueil_demandeur", methods={"GET"})
-     * Method({"GET"})
-     */
-    public function exceptionIndexAction(Request $request)
-    {
-        // sans haut et bas
-        return $this->render('default/exception_index.html.twig');
-    }
-
-    /**
      * @Route("/connexions", name="connexions", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
