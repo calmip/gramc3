@@ -364,7 +364,6 @@ class GramcSessionController extends AbstractController
             return $this->redirectToRoute('accueil');
         }
 
-
         $eppn = $request->getSession()->get('eppn');
 
         // tests !
@@ -454,14 +453,23 @@ class GramcSessionController extends AbstractController
         // Est-ce qu'il y a déjà un compte avec cette adresse ?
 
         $individu = $em->getRepository(Individu::class)->findOneBy(['mail' => $mail]);
-        if ($individu === null) {
+        if ($individu === null)
+        {
             $flg_ind = false;
             $individu = new Individu();
             $individu->setMail($session->get('mail'));
-            if ($session->has('sn')) {
+            if ($session->has('sn'))
+            {
                 $individu->setNom($session->get('sn'));
             }
-        } else {
+        }
+        else
+        {
+            if ($individu->getDesactive())
+            {
+                $sj->errorMessage(__METHOD__ .':' . __LINE__ . " $individu est désactivé - eppn $eppn refusé !");
+                return $this->redirectToRoute('accueil');
+            }
             $flg_ind = true;
         }
 
@@ -477,6 +485,7 @@ class GramcSessionController extends AbstractController
         if ($session->has('sn')) {
             $individu->setNom($session->get('sn'));
         }
+
 
         $form = $this->createForm(IndividuType::class, $individu, [ 'mail' => false ]);
         $form->handleRequest($request);

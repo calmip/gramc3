@@ -1,6 +1,6 @@
 {% extends 'default/base.html.twig' %}
 
-{% form_theme form with ['form_table_layout.html.twig', _self] %}
+{% form_theme formInd with ['form_table_layout.html.twig', _self] %}
 
 
 {# ################################################################################################### #}
@@ -24,30 +24,9 @@
 
 {% block _appbundle_individu_labo_widget %}
 {{ block('choice_widget') }}
-
-    <div class="message info">
-        <em>Si votre laboratoire ne figure pas dans la liste,
-            <a href="mailto:{{ mailadmin }}?Subject=Nouveau%20laboratoire%20à%20introduire%20dans%20gramc%20!&amp;body=Bonjour
-            %0D%0AMerci%20d'ajouter%20à%20la%20base%20de%20données%20le%20laboratoire%20suivant:
-            %0D%0ASIGLE:%20
-            %0D%0ANOM%20COMPLET:
-            %0D%0ACordialement,">
-            <strong> cliquez ici</strong></a>
-            pour faire la demande
-        </em>, ou envoyez un courriel à {{ mailadmin }}
-    </div>
 {% endblock  %}
 
 {# ################################################################################################### #}
-
-{% block header %}
-{% endblock header %}
-
-{% block footer %}
-{% endblock footer %}
-
-{% block fil_ariane %}
-{% endblock fil_ariane %}
 
 {% block body %}
 
@@ -55,11 +34,21 @@
     <p><em>Veuillez s'il vous plait renseigner tous les champs</em></p>
 
     {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-    <div id=profil>
-    {{ form_start(form) }}
-    {{ form_widget(form) }}
-    {{ form_end(form) }}
+    <div id="profil">
+    {{ form_start(formInd) }}
+    {{ form_widget(formInd) }}
+    {{ form_end(formInd) }}
     </div>
     {% endif %}
 
+    <h2>Suppression d'un eppn</h2>
+
+    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+    <div id="eppn">
+    {{ form_start(formEppn) }}
+    {{ form_widget(formEppn) }}
+    {{ form_end(formEppn) }}
+    </div>
+    {% endif %}
+    
 {% endblock %}
