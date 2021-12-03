@@ -74,7 +74,6 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -110,7 +109,6 @@ class ProjetController extends AbstractController
     private $pw;
     private $ff;
     private $token;
-    private $sss;
     private $tw;
     private $ac;
 
@@ -128,7 +126,6 @@ class ProjetController extends AbstractController
         ProjetWorkflow $pw,
         FormFactoryInterface $ff,
         TokenStorageInterface $tok,
-        SessionInterface $sss,
         Environment $tw,
         AuthorizationCheckerInterface $ac
     ) {
@@ -145,7 +142,6 @@ class ProjetController extends AbstractController
         $this->pw  = $pw;
         $this->ff  = $ff;
         $this->token= $tok->getToken();
-        $this->sss = $sss;
         $this->tw  = $tw;
         $this->ac  = $ac;
     }
@@ -1394,7 +1390,6 @@ class ProjetController extends AbstractController
         $sd = $this->sd;
         $sm = $this->sm;
         $ss = $this->ss;
-        $sss= $this->sss;
         $sp = $this->sp;
         $sv = $this->sv;
         $sj = $this->sj;
@@ -1403,7 +1398,7 @@ class ProjetController extends AbstractController
 
         // Si changement d'état de la session alors que je suis connecté !
            // + contournement d'un problème lié à Doctrine
-        $sss->remove('SessionCourante'); // remove cache
+        $request->getSession()->remove('SessionCourante'); // remove cache
 
         // NOTE - Pour ce controleur, on identifie les types par un chiffre (voir Entity/Projet.php)
         $m = $sm->nouveau_projet("$type");

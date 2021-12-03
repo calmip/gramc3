@@ -70,7 +70,6 @@ class SessionController extends AbstractController
     private $ss;
     private $sd;
     private $sw;
-    private $sss;
 
     public function __construct(
         ServiceJournal $sj,
@@ -79,8 +78,7 @@ class SessionController extends AbstractController
         ServiceProjets $sp,
         ServiceSessions $ss,
         GramcDate $sd,
-        SessionWorkflow $sw,
-        SessionInterface $sss
+        SessionWorkflow $sw
     ) {
         $this->sj = $sj;
         $this->sm = $sm;
@@ -89,7 +87,6 @@ class SessionController extends AbstractController
         $this->ss = $ss;
         $this->sd = $sd;
         $this->sw = $sw;
-        $this->sss= $sss;
     }
 
     /**
@@ -138,7 +135,7 @@ class SessionController extends AbstractController
                         ];
         } else {
             // Refait le calcul de la session courante sans se fier au cache
-            $this->sss->remove('SessionCourante');
+            $request->getSession()->remove('SessionCourante');
             $etat_session = $ss->getSessionCourante()->getEtatSession();
             $id_session = $ss->getSessionCourante()->getIdSession();
 
@@ -191,7 +188,7 @@ class SessionController extends AbstractController
     {
         $sd = $this->sd;
         $em = $this->getDoctrine()->getManager();
-        $this->sss->remove('SessionCourante');
+        $request->getSession()->remove('SessionCourante');
         $debut = $sd;
         $fin   = $sd->getNew();
         $fin->add(\DateInterval::createFromDateString('0 months'));
@@ -238,7 +235,7 @@ class SessionController extends AbstractController
         $ss = $this->ss;
         $em = $this->getDoctrine()->getManager();
 
-        $this->sss->remove('SessionCourante');
+        $request->getSession()->remove('SessionCourante');
 
         $session_courante = $ss->getSessionCourante();
         $workflow = $this->sw;
@@ -320,7 +317,7 @@ class SessionController extends AbstractController
         $sj = $this->sj;
 
         // Suppression du cache, du coup toutes les personnes connectées seront virées
-        $this->sss->remove('SessionCourante');
+        $request->getSession()->remove('SessionCourante');
 
         $session_courante      = $ss->getSessionCourante();
         $etat_session_courante = $session_courante->getEtatSession();
@@ -399,7 +396,7 @@ class SessionController extends AbstractController
         $ss = $this->ss;
         $em = $this->getDoctrine()->getManager();
 
-        $this->sss->remove('SessionCourante');
+        $request->getSession()->remove('SessionCourante');
         $session_courante = $ss->getSessionCourante();
         $workflow = $this->sw;
 
@@ -431,7 +428,7 @@ class SessionController extends AbstractController
         $ss = $this->ss;
         $em = $this->getDoctrine()->getManager();
 
-        $this->sss->remove('SessionCourante'); // remove cache
+        $request->getSession()->remove('SessionCourante'); // remove cache
 
         $session_courante       = $ss->getSessionCourante();
         //return new Response( $session_courante->getIdSession() );
@@ -551,7 +548,7 @@ class SessionController extends AbstractController
         $sm = $this->sm;
         $ss = $this->ss;
 
-        $this->sss->remove('SessionCourante'); // remove cache
+        $request->getSession()->remove('SessionCourante'); // remove cache
 
         $session_courante      = $ss->getSessionCourante();
         $etat_session_courante = $session_courante->getEtatSession();

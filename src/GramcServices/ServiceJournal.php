@@ -29,7 +29,6 @@ use App\Entity\Journal;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -42,7 +41,6 @@ use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationExceptio
 class ServiceJournal
 {
     private $rs;
-    private $ss;
     private $log;
     private $token;
     private $ac;
@@ -52,14 +50,12 @@ class ServiceJournal
     // request_stack, session,logger, security.token_storage,doc
     public function __construct(
         RequestStack $rs,
-        SessionInterface $ss,
         LoggerInterface $log,
         TokenStorageInterface $tok,
         AuthorizationCheckerInterface $ac,
         EntityManagerInterface $em
     ) {
         $this->rs    = $rs;
-        $this->ss    = $ss;
         $this->log   = $log;
         $this->token = $tok->getToken();
         $this->ac    = $ac;
@@ -79,7 +75,6 @@ class ServiceJournal
     private function journalMessage($message, $niveau)
     {
         $rs    = $this->rs;
-        $ss    = $this->ss;
         $log   = $this->log;
         $token = $this->token;
         $em    = $this->em;
@@ -96,7 +91,7 @@ class ServiceJournal
             $journal->setIndividu(null);
         }
 
-        $journal->setGramcSessId($ss->getId());
+        $journal->setGramcSessId($rs->getCurrentRequest()->getSession()->getId());
 
         if ($rs->getMasterRequest() != null
         && $rs->getMasterRequest()->getClientIp() != null) {

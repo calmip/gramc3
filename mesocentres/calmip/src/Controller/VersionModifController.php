@@ -98,7 +98,6 @@ class VersionModifController extends AbstractController
     private $pw;
     private $ff;
     private $vl;
-    private $sss;
     private $tw;
 
     public function __construct(
@@ -110,7 +109,6 @@ class VersionModifController extends AbstractController
         ProjetWorkflow $pw,
         FormFactoryInterface $ff,
         ValidatorInterface $vl,
-        SessionInterface $sss,
         Environment $tw
     ) {
         $this->sj  = $sj;
@@ -121,7 +119,6 @@ class VersionModifController extends AbstractController
         $this->pw  = $pw;
         $this->ff  = $ff;
         $this->vl  = $vl;
-        $this->sss = $sss;
         $this->tw = $tw;
     }
 

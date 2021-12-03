@@ -104,7 +104,6 @@ class ProjetSpecController extends AbstractController
     private $pw;
     private $ff;
     private $token;
-    private $sss;
     private $tw;
     private $ac;
 
@@ -122,7 +121,6 @@ class ProjetSpecController extends AbstractController
         ProjetWorkflow $pw,
         FormFactoryInterface $ff,
         TokenStorageInterface $tok,
-        SessionInterface $sss,
         Environment $tw,
         AuthorizationCheckerInterface $ac
     ) {
@@ -139,7 +137,6 @@ class ProjetSpecController extends AbstractController
         $this->pw  = $pw;
         $this->ff  = $ff;
         $this->token= $tok->getToken();
-        $this->sss = $sss;
         $this->tw  = $tw;
         $this->ac  = $ac;
     }

@@ -102,7 +102,6 @@ class VersionModifController extends AbstractController
     private $pw = null;
     private $ff = null;
     private $vl = null;
-    private $sss = null;
     private $tw = null;
     private $tok = null;
 
@@ -116,7 +115,6 @@ class VersionModifController extends AbstractController
         ProjetWorkflow $pw,
         FormFactoryInterface $ff,
         ValidatorInterface $vl,
-        SessionInterface $sss,
         Environment $tw,
         TokenStorageInterface $tok
     ) {
@@ -129,7 +127,6 @@ class VersionModifController extends AbstractController
         $this->pw  = $pw;
         $this->ff  = $ff;
         $this->vl  = $vl;
-        $this->sss = $sss;
         $this->tw = $tw;
         $this->tok= $tok;
     }

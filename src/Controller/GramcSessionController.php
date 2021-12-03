@@ -68,7 +68,6 @@ use Symfony\Component\Form\Extension\Core\Type\ResetType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -80,13 +79,6 @@ use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 use Twig\Environment;
-
-//function redirection_externe($url)
-//{
-//    $controller = new Controller();
-//    return $controller->redirect($url);
-//}
-
 
 /////////////////////////////////////////////////////
 
@@ -106,7 +98,6 @@ class GramcSessionController extends AbstractController
     private $vl;
     private $ts;
     private $tok;
-    private $sss;
     private $uc;
     private $ac;
     private $tw;
@@ -126,8 +117,6 @@ class GramcSessionController extends AbstractController
         FormFactoryInterface $ff,
         ValidatorInterface $vl,
         TokenStorageInterface $ts,
-        SessionInterface $sss,
-        //UserChecker $uc,
         AuthorizationCheckerInterface $ac,
         Environment $tw
     ) {
@@ -144,8 +133,6 @@ class GramcSessionController extends AbstractController
         $this->ff  = $ff;
         $this->vl  = $vl;
         $this->ts  = $ts;
-        $this->sss = $sss;
-        //$this->uc  = $uc;
         $this->ac  = $ac;
         $this->tw  = $tw;
     }

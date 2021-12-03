@@ -101,7 +101,6 @@ class VersionController extends AbstractController
     private $ff;
     private $vl;
     private $tok;
-    private $sss;
     private $pdf;
 
 
@@ -119,7 +118,6 @@ class VersionController extends AbstractController
         FormFactoryInterface $ff,
         ValidatorInterface $vl,
         TokenStorageInterface $tok,
-        SessionInterface $sss,
         Pdf $pdf
     ) {
         $this->sn  = $sn;
@@ -135,7 +133,6 @@ class VersionController extends AbstractController
         $this->ff  = $ff;
         $this->vl  = $vl;
         $this->tok = $tok;
-        $this->sss = $sss;
         $this->pdf = $pdf;
     }
 
@@ -618,11 +615,10 @@ class VersionController extends AbstractController
         $sj = $this->sj;
         $sv = $this->sv;
         $ff = $this->ff;
-        $sss= $this->sss;
         $token = $this->tok->getToken();
 
         // Si changement d'état de la session alors que je suis connecté !
-        $sss->remove('SessionCourante'); // remove cache
+        $request->getSession()->remove('SessionCourante'); // remove cache
 
         // ACL
         $moi = $token->getUser();
