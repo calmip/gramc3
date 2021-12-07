@@ -1244,7 +1244,7 @@ class ServiceMenus
 
     public function nettoyer()
     {
-        $menu['name']            = 'projet_nettoyer';
+        $menu['name']            = 'rgpd';
         $menu['lien']            = "Nettoyage pour conformité au RGPD";
         $menu['commentaire']     = "Vous ne pouvez pas supprimer les projets ou les utilisateurs anciens";
         $menu['ok']              = false;

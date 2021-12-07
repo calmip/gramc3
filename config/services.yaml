@@ -150,4 +150,7 @@ services:
         arguments: ["%kernel.environment%"]
         tags: ["console.command"]
     App\Command\Sendamail: '@app.gramc.sendamail'
-        
+
+    App\Command\Rgpd:
+        tags: ["console.command"]
+

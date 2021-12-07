@@ -265,4 +265,22 @@ class ComptaRepository extends \Doctrine\ORM\EntityRepository
 
         return $db_data;
     }
+
+    /***********
+     * Supprime les TOUS les enregistrements compta de $loginame et qui sont datés
+     * AVANT $date.
+     *********************************/
+    public function removeLoginname($loginname, \Datetime $date)
+    {
+        $em = $this->getEntityManager();
+        $rvl = $em->createQuery(
+            'DELETE FROM App:Compta c
+             WHERE c.loginname = :loginname
+             AND c.date < :date')
+             ->setParameter('loginname', $loginname)
+             ->setParameter('date', $date)
+             ->getResult();
+        return $rvl;
+    }
+    
 }

@@ -91,7 +91,10 @@ class ServiceJournal
             $journal->setIndividu(null);
         }
 
-        $journal->setGramcSessId($rs->getCurrentRequest()->getSession()->getId());
+        if ($rs->getCurrentRequest() != null)
+        {
+            $journal->setGramcSessId($rs->getCurrentRequest()->getSession()->getId());
+        }
 
         if ($rs->getMasterRequest() != null
         && $rs->getMasterRequest()->getClientIp() != null) {
