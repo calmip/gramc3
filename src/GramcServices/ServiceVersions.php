@@ -426,15 +426,30 @@ class ServiceVersions
 
         $formations_all = $em -> getRepository(Formation::class) -> getFormationsPourVersion();
         $formation = [];
+
+        $all_empty = true;
+        if ( ! empty($version->getDemFormAutresAutres())) {
+            $all_empty = false;
+        }
         foreach ($formations_all as $fa) {
+            $nb = $fa->getNumeroForm();
             $f = [];
-            $f['nb']  = $fa->getNumeroForm();
+            $f['nb']  = $nb;
             $f['nom'] = $fa->getNomForm();
             $f['acro']= $fa->getAcroForm();
-            $f['rep'] = $form_ver[$f['nb']];
-            //$formation[] = $f;
+            $f['rep'] = $form_ver[$nb];
+            if (! empty($f['rep'])) {
+                $all_empty = false;
+            }
             $formation[$f['acro']] = $f;
         }
+        // En espérant qu'il n'y a pas de formation avec ALL_EMPTY comme acronyme !
+        $f = [];
+        $f['nb'] = 10;
+        $f['nom'] = "ERREUR - Cette colonne ne devrait pas être affichée";
+        $f['acro']= "ALL_EMPTY";
+        $f['rep'] = $all_empty;
+        $formation['ALL_EMPTY'] = $f;
         return $formation;
     }
 

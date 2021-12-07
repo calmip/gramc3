@@ -575,7 +575,9 @@ Le laboratoire associé au projet est le laboratoire du responsable
 <tbody>
     <th colspan="1">Intitulé</th><th>Nombre de personnes intéressées</th>
     {% for f in formation %}
-    <tr><th class="horiz">{{f.nom}}</th><td>{{f.rep}}</td></tr>
+        {% if f.acro != 'ALL_EMPTY' %}
+            <tr><th class="horiz">{{f.nom}}</th><td>{{f.rep}}</td></tr>
+        {% endif %}
     {% endfor %}
 </tbody>
 </table>
