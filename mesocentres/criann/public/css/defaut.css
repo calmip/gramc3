@@ -184,6 +184,9 @@ table#profil_horiz td input {
 table#profil_horiz tr td.resp {
     background-color: black;
 }
+table#profil_horiz tr td.suppr {
+    background: repeating-linear-gradient(45deg, grey, black 2%, grey 7%);
+}
 
 /* formulaire de projet/expertise => Boutons sauvegarder etc. */
 /* Page affectation (presque) pareil */

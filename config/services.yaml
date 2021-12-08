@@ -18,6 +18,7 @@ services:
      
     # Tous les controleurs sont des services, ils peuvent utiliser la dependency injection
     App\Controller\:
+        #public: true
         resource: '../src/Controller/*'
         tags: [controller.service_arguments]
 

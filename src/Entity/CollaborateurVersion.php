@@ -50,6 +50,13 @@ class CollaborateurVersion
     /**
      * @var boolean
      *
+     * @ORM\Column(name="suppression", type="boolean", nullable=false)
+     */
+    private $suppression;
+
+    /**
+     * @var boolean
+     *
      * @ORM\Column(name="login", type="boolean", nullable=false)
      */
     private $login;
@@ -185,6 +192,30 @@ class CollaborateurVersion
     public function getResponsable()
     {
         return $this->responsable;
+    }
+
+    /**
+     * Set suppression
+     *
+     * @param boolean $suppression
+     *
+     * @return CollaborateurVersion
+     */
+    public function setSuppression($suppression)
+    {
+        $this->suppression = $suppression;
+
+        return $this;
+    }
+
+    /**
+     * Get suppression
+     *
+     * @return boolean
+     */
+    public function getSuppression()
+    {
+        return $this->suppression;
     }
 
     /**

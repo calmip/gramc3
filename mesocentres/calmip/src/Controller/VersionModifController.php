@@ -962,17 +962,19 @@ class VersionModifController extends AbstractController
 
         $dataR  =   [];    // Le responsable est seul dans ce tableau
         $dataNR =   [];    // Les autres collaborateurs
-        foreach ($version->getCollaborateurVersion() as $item) {
-            $collaborateur = $item->getCollaborateur();
-            if ($collaborateur == null) {
+        foreach ($version->getCollaborateurVersion() as $cv) {
+            $individu = $cv->getCollaborateur();
+            if ($individu == null) {
                 $sj->errorMessage("VersionController:modifierCollaborateurs : collaborateur null pour CollaborateurVersion ".
-                         $item->getId());
+                         $cv->getId());
                 continue;
             } else {
-                $individuForm = new IndividuForm($collaborateur);
-                $individuForm->setLogin($item->getLogin());
-                $individuForm->setClogin($item->getClogin());
-                $individuForm->setResponsable($item->getResponsable());
+                $individuForm = new IndividuForm($individu);
+                $individuForm->setLogin($cv->getLogin());
+                $individuForm->setClogin($cv->getClogin());
+                $individuForm->setResponsable($cv->getResponsable());
+                $individuForm->setDelete($cv->getSuppression());
+
                 if ($individuForm->getResponsable() == true) {
                     $dataR[] = $individuForm;
                 } else {
@@ -991,7 +993,7 @@ class VersionModifController extends AbstractController
      *
      * @Route("/{id}/avant_collaborateurs", name="avant_modifier_collaborateurs",methods={"GET","POST"})
      * Method({"GET", "POST"})
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @ Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function avantModifierCollaborateursAction(Version $version, Request $request)
     {
@@ -1235,7 +1237,14 @@ class VersionModifController extends AbstractController
             elseif ($individu != null && $individu_form->getDelete() == true) {
                 $sj->infoMessage(__METHOD__ . ':' . __LINE__ ." le collaborateur " .
                     $individu . " sera supprimé de la liste des collaborateurs de la version ".$version);
-                $sv->supprimerCollaborateur($version, $individu);
+                $sv->forceSuppression($version, $individu);
+            }
+
+            // Remise en selle d'un collaborateur marqué pour suppression
+            elseif ($individu != null && $individu_form->getDelete() == false) {
+                $sj->infoMessage(__METHOD__ . ':' . __LINE__ ." le collaborateur " .
+                    $individu . " est réintégré dans la liste des collaborateurs de la version ".$version);
+                $sv->noSuppression($version, $individu);
             }
 
             // L'individu existe déjà

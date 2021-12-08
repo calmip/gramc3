@@ -230,44 +230,70 @@ class ServiceVersions
     }
 
     /********************************************
+     * Trouver un collaborateur d'une version
+     *
+     * Renvoie soit null, soit le $cv correspondant à $individu
+     * 
+     **********************************************************/
+    private function TrouverCollaborateur(Version $version, Individu $individu)
+    {
+        $filteredCollection = $version
+                                ->getCollaborateurVersion()
+                                ->filter(function($cv) use ($individu) {
+                                    return $cv
+                                            ->getCollaborateur()
+                                            ->isEqualTo($individu);
+                                    });
+
+        // Normalement 0 ou 1 !
+        if (count($filteredCollection) >= 1)
+        {
+            return $filteredCollection->first();
+        } else {
+            return null;
+        }
+    }
+
+    /********************************************
      * Supprimer un collaborateur d'une version
      **********************************************************/
     public function supprimerCollaborateur(Version $version, Individu $individu)
     {
-        // POuRQUOI CE CODE NE MARCHE PAS ?
-        // Car removeCollaborateurVersion n'a pas l'air fabuleux
-        //$a_suppr = null;
-        //foreach( $version->getCollaborateurVersion() as $item )
-        //{
-        //if($item->getCollaborateur() != null )
-        //{
-        //if ($item->getCollaborateur()->isEqualTo($individu) )
-        //{
-        //$version->removeCollaborateurVersion($item);
-        //$a_suppr = $item;
-        //break;
-        //}
-        //}
-        //}
-        //if ($a_suppr != null)
-        //{
-        //$version->removeCollaborateurVersion($a_suppr);
-        //}
+        $em = $this->em;
+        $sj = $this->sj;
+        
+        $cv = $this->TrouverCollaborateur($version, $individu);
+        $sj->debugMessage("ServiceVersion:supprimerCollaborateur $cv -> $individu supprimé");
+        $em->remove($cv);
+        $em->flush();
+    }
 
-        // ET POURQUOI CE CODE MARCHE ?
-        foreach ($version->getCollaborateurVersion() as $item) {
-            if ($item->getCollaborateur() == null)
-            {
-                $this->sj->errorMessage('ServiceVersion:supprimerCollaborateur collaborateur null pour CollaborateurVersion ' . $item);
-            }
-            elseif ($item->getCollaborateur()->isEqualTo($individu))
-            {
-                $this->sj->debugMessage('ServiceVersion:supprimerCollaborateur ' . $item . ' supprimé pour '. $individu);
-                $this->em->persist($item);
-                $this->em->remove($item);
-                $this->em->flush();
-            }
-        }
+    /*********************************************************
+     * Forcer le flag Suppression d'un collaborateur/Version
+     **********************************************************/
+    public function forceSuppression( Version $version, Individu $individu)
+    {
+        $em = $this->em;
+        $sj = $this->sj;
+        
+        $cv = $this->TrouverCollaborateur($version, $individu);
+        $cv -> setSuppression(true);
+        $em->persist($cv);
+        $em->flush();
+    }
+
+    /*********************************************************
+     * Retirer le flag Suppression d'un collaborateur/Version
+     **********************************************************/
+    public function noSuppression( Version $version, Individu $individu)
+    {
+        $em = $this->em;
+        $sj = $this->sj;
+        
+        $cv = $this->TrouverCollaborateur($version, $individu);
+        $cv -> setSuppression(false);
+        $em->persist($cv);
+        $em->flush();
     }
 
     // modifier login d'un collaborateur d'une version
@@ -276,32 +302,29 @@ class ServiceVersions
     public function modifierLogin(Version $version, Individu $individu, $login=false, $clogin=false)
     {
         $em = $this->em;
+        $sj = $this->sj;
+        
         if ($clogin==null) $clogin=false;
-        foreach ($version->getCollaborateurVersion() as $item) {
-            if ($item->getCollaborateur() == null) {
-                $this->sj->errorMessage('Version:modifierLogin collaborateur null pour CollaborateurVersion ' . $item);
-            } elseif ($item->getCollaborateur()->isEqualTo($individu)) {
-                $item->setLogin($login);
-                $item->setClogin($clogin);
 
-                // On ne modifie pas le loginname ni ne supprime le mot de passe à ce stade
-                // C'est le boulot du supercalculateur via l'API (clearPAssword)
-                /*
-                if (! $login)
-                {
-                    $loginname = $item->getLoginname();
-                    if (! empty($loginname)) {
-                        $item->setLoginname(null);
-                        $user = $em->getRepository(User::class)->findOneBy(['loginname' => $loginname]);
-                        if ($user != null) {
-                            $em->remove($user);
-                        }
-                    }
-                }*/
-                $this->em->persist($item);
-                $this->em->flush();
+        $cv = $this->TrouverCollaborateur($version, $individu);
+        $cv->setLogin($login);
+        $cv->setClogin($clogin);
+        $this->em->persist($cv);
+        $this->em->flush();
+
+        /*
+        if (! $login)
+        {
+            $loginname = $item->getLoginname();
+            if (! empty($loginname)) {
+                $item->setLoginname(null);
+                $user = $em->getRepository(User::class)->findOneBy(['loginname' => $loginname]);
+                if ($user != null) {
+                    $em->remove($user);
+                }
             }
-        }
+        }*/
+        
     }
 
     /*******
