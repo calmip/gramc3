@@ -1046,6 +1046,7 @@ class AdminuxController extends AbstractController
                     $v_info['login'] = $c->getLogin();
                     $v_info['clogin'] = $c->getClogin();
                     $v_info['loginname'] = $c->getLoginname();
+                    $v_info['deleted'] = $c->getDeleted();
                     
                     $prj_info[$vs_labels[$i]] = $v_info;
 
