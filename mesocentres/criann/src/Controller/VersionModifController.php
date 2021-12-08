@@ -1722,6 +1722,14 @@ class VersionModifController extends AbstractController
 
                 $collaborateurVersions = $version->getCollaborateurVersion();
                 foreach ($collaborateurVersions as $collaborateurVersion) {
+
+                    // ne pas reprendre un collaborateur sans login et marqué comme supprimé
+                    // Attention un collaborateurVersion avec login = false mais loginname renseigné signifie ue le compte
+                    // n'a pas encore été détruit: dans ce cas on le reprends !'
+                    if ($collaborateurVersion->getDeleted() &&
+                        $collaborateurVersion->getClogin() === false &&
+                        $collaborateurVersion->getLoginname() === null ) continue;
+
                     $newCollaborateurVersion    = clone  $collaborateurVersion;
                     //$em->detach( $newCollaborateurVersion );
                     $newCollaborateurVersion->setVersion($new_version);
