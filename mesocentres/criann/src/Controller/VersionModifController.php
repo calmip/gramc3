@@ -1242,7 +1242,7 @@ class VersionModifController extends AbstractController
                 $individuForm->setLogin($cv->getLogin());
                 $individuForm->setClogin($cv->getClogin());
                 $individuForm->setResponsable($cv->getResponsable());
-                $individuForm->setDelete($cv->getSuppression());
+                $individuForm->setDelete($cv->getDeleted());
 
                 if ($individuForm->getResponsable() == true) {
                     $dataR[] = $individuForm;
@@ -1506,14 +1506,14 @@ class VersionModifController extends AbstractController
             elseif ($individu != null && $individu_form->getDelete() == true) {
                 $sj->infoMessage(__METHOD__ . ':' . __LINE__ ." le collaborateur " .
                     $individu . " sera supprimé de la liste des collaborateurs de la version ".$version);
-                $sv->forceSuppression($version, $individu);
+                $sv->forceDeleted($version, $individu);
             }
 
             // Remise en selle d'un collaborateur marqué pour suppression
             elseif ($individu != null && $individu_form->getDelete() == false) {
                 $sj->infoMessage(__METHOD__ . ':' . __LINE__ ." le collaborateur " .
                     $individu . " est réintégré dans la liste des collaborateurs de la version ".$version);
-                $sv->noSuppression($version, $individu);
+                $sv->noDeleted($version, $individu);
             }
 
             // L'individu existe déjà

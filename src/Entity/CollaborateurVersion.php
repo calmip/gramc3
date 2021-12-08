@@ -50,9 +50,9 @@ class CollaborateurVersion
     /**
      * @var boolean
      *
-     * @ORM\Column(name="suppression", type="boolean", nullable=false)
+     * @ORM\Column(name="deleted", type="boolean", nullable=false)
      */
-    private $suppression;
+    private $deleted;
 
     /**
      * @var boolean
@@ -195,27 +195,27 @@ class CollaborateurVersion
     }
 
     /**
-     * Set suppression
+     * Set deleted
      *
-     * @param boolean $suppression
+     * @param boolean $deleted
      *
      * @return CollaborateurVersion
      */
-    public function setSuppression($suppression)
+    public function setDeleted($deleted)
     {
-        $this->suppression = $suppression;
+        $this->deleted = $deleted;
 
         return $this;
     }
 
     /**
-     * Get suppression
+     * Get deleted
      *
      * @return boolean
      */
-    public function getSuppression()
+    public function getDeleted()
     {
-        return $this->suppression;
+        return $this->deleted;
     }
 
     /**

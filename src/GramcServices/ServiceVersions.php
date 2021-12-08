@@ -269,29 +269,29 @@ class ServiceVersions
     }
 
     /*********************************************************
-     * Forcer le flag Suppression d'un collaborateur/Version
+     * Forcer le flag Deleted d'un collaborateur/Version
      **********************************************************/
-    public function forceSuppression( Version $version, Individu $individu)
+    public function forceDeleted( Version $version, Individu $individu)
     {
         $em = $this->em;
         $sj = $this->sj;
         
         $cv = $this->TrouverCollaborateur($version, $individu);
-        $cv -> setSuppression(true);
+        $cv -> setDeleted(true);
         $em->persist($cv);
         $em->flush();
     }
 
     /*********************************************************
-     * Retirer le flag Suppression d'un collaborateur/Version
+     * Retirer le flag Deleted d'un collaborateur/Version
      **********************************************************/
-    public function noSuppression( Version $version, Individu $individu)
+    public function noDeleted( Version $version, Individu $individu)
     {
         $em = $this->em;
         $sj = $this->sj;
         
         $cv = $this->TrouverCollaborateur($version, $individu);
-        $cv -> setSuppression(false);
+        $cv -> setDeleted(false);
         $em->persist($cv);
         $em->flush();
     }
