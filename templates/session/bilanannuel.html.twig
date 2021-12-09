@@ -11,12 +11,12 @@
 
     <br />
 
-	{% if noconso==false %}
+    {% if noconso==false %}
     <form action="{{ path('bilan_annuel_csv', {'annee': annee }) }}">
         <input type="submit" value="Bilan annuel {{ annee }} en csv" />
     </form>
-	{% endif %}
-	
+    {% endif %}
+    
     <br />
 
     <form action="{{ path('bilan_annuel_labo_csv', {'annee': annee }) }}">
@@ -25,6 +25,12 @@
 
     <br />
 
+    <form action="{{ path('bilan_annuel_thema_csv', {'annee': annee }) }}">
+        <input type="submit" value="Bilan par thématique {{ annee }} en csv" />
+    </form>
+
+    <br />
+    
     <form action="{{ path('bilan_annuel_users_csv', {'annee': annee }) }}">
         <input type="submit" value="Bilan par utilisateur {{ annee }} en csv" />
     </form>
@@ -36,11 +42,11 @@
     </form>
 
     <br />
-	{% if avec_commentaires %}
-	    <form action="{{ path('commentaireexpert_liste', {'annee': annee }) }}">
-	        <input type="submit" value="Afficher les commentaires des experts pour l'année {{ annee }}" />
-	    </form>
-	{% endif %}
+    {% if avec_commentaires %}
+        <form action="{{ path('commentaireexpert_liste', {'annee': annee }) }}">
+            <input type="submit" value="Afficher les commentaires des experts pour l'année {{ annee }}" />
+        </form>
+    {% endif %}
 
 </section>
 

@@ -63,13 +63,13 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
  */
 class SessionController extends AbstractController
 {
-    private $sj;
-    private $sm;
-    private $sv;
-    private $sp;
-    private $ss;
-    private $sd;
-    private $sw;
+    private $sj = null;
+    private $sm = null;
+    private $sv = null;
+    private $sp = null;
+    private $ss = null;
+    private $sd = null;
+    private $sw = null;
 
     public function __construct(
         ServiceJournal $sj,
@@ -654,7 +654,16 @@ class SessionController extends AbstractController
     public function bilanAnnuelAction(Request $request)
     {
         $ss   = $this->ss;
-        $data = $ss->selectAnnee($request);
+        $sd   = $this->sd;
+        $annee = $sd->showYear();
+        $mois = $sd->showMonth();
+
+        if ($mois === "12")
+        {
+            $annee = strval(intval($annee) + 1);
+        }
+        
+        $data = $ss->selectAnnee($request,$annee);
         // TODO - Utiliser cette methode pour recuperer les paramètres:
         //        https://ourcodeworld.com/articles/read/1041/how-to-retrieve-specific-and-all-yaml-parameters-from-services-yaml-in-symfony-4
         $avec_commentaires = $this->getParameter('commentaires_experts_d');
@@ -908,6 +917,42 @@ class SessionController extends AbstractController
         }
 
         return Functions::csv($sortie, 'bilan_annuel_par_labo'.$annee.'.csv');
+    }
+
+        /**
+     *
+     * @Route("/{annee}/bilan_annuel_thema_csv", name="bilan_annuel_thema_csv",methods={"GET"})
+     * @Security("is_granted('ROLE_OBS')")
+     * Method("GET")
+     *
+     */
+    public function bilanThemaCsvAction(Request $request, $annee)
+    {
+        $entetes = ['Thématique','Nombre de projets','Heures demandées','Heures attribuées','Heure consommées','projets'];
+        $sortie  = join("\t", $entetes) . "\n";
+
+        $sp            = $this->sp;
+        $stats         = $sp->projetsParCritere($annee, 'getAcroThematique');
+        $acros         = $stats[0];
+        $num_projets   = $stats[1];
+        $liste_projets = $stats[2];
+        $dem_heures    = $stats[3];
+        $attr_heures   = $stats[4];
+        $conso         = $stats[5];
+
+        // Calcul du csv
+        foreach ($acros as $k) {
+            $ligne   = [];
+            $ligne[] = $k;
+            $ligne[] = $num_projets[$k];
+            $ligne[] = $dem_heures[$k];
+            $ligne[] = $attr_heures[$k];
+            $ligne[] = $conso[$k];
+            $ligne[] = implode(',', $liste_projets[$k]);
+            $sortie .= join("\t", $ligne) . "\n";
+        }
+
+        return Functions::csv($sortie, 'bilan_annuel_par_thematique'.$annee.'.csv');
     }
 
     /**
