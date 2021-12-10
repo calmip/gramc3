@@ -282,5 +282,20 @@ class ComptaRepository extends \Doctrine\ORM\EntityRepository
              ->getResult();
         return $rvl;
     }
+
+    /***********
+     * Supprime les TOUS les enregistrements compta de à une certaine date
+     *
+     *********************************/
+    public function removeDate(\Datetime $date)
+    {
+        $em = $this->getEntityManager();
+        $rvl = $em->createQuery(
+            'DELETE FROM App:Compta c WHERE c.date = :date'
+            )
+            ->setParameter('date', $date)
+            ->getResult();
+        return $rvl;
+    }
     
 }

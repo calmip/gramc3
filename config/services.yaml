@@ -155,3 +155,5 @@ services:
     App\Command\Rgpd:
         tags: ["console.command"]
 
+    App\Command\NettCompta:
+        tags: ["console.command"]
