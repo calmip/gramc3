@@ -157,3 +157,6 @@ services:
 
     App\Command\NettCompta:
         tags: ["console.command"]
+
+    App\Command\Brouillage:
+        tags: ["console.command"]
