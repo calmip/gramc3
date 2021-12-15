@@ -49,6 +49,7 @@ use App\Utils\IDP;
 
 use App\GramcServices\Workflow\Projet\ProjetWorkflow;
 use App\GramcServices\ServiceMenus;
+use App\GramcServices\ServicePhpSessions;
 use App\GramcServices\ServiceJournal;
 use App\GramcServices\ServiceNotifications;
 use App\GramcServices\ServiceProjets;
@@ -87,6 +88,7 @@ class GramcSessionController extends AbstractController
     private $sn;
     private $sj;
     private $sm;
+    private $sps;
     private $sp;
     private $ss;
     private $pe1;
@@ -107,6 +109,7 @@ class GramcSessionController extends AbstractController
         ServiceNotifications $sn,
         ServiceJournal $sj,
         ServiceMenus $sm,
+        ServicePhpSessions $sps,
         ServiceProjets $sp,
         ServiceSessions $ss,
         PropositionExpertsType1 $pe1,
@@ -123,6 +126,7 @@ class GramcSessionController extends AbstractController
         $this->sn  = $sn;
         $this->sj  = $sj;
         $this->sm  = $sm;
+        $this->sps = $sps;
         $this->sp  = $sp;
         $this->ss  = $ss;
         $this->pe1 = $pe1;
@@ -531,9 +535,10 @@ class GramcSessionController extends AbstractController
     public function connexionsAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
+        $sps = $this->sps;
         $sj = $this->sj;
 
-        $connexions = Functions::getConnexions($em, $sj);
+        $connexions = $sps->getConnexions();
         return $this->render('default/connexions.html.twig', [ 'connexions' => $connexions ]);
     }
 

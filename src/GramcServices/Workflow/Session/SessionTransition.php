@@ -25,11 +25,12 @@
 namespace App\GramcServices\Workflow\Session;
 
 use App\GramcServices\Workflow\Transition;
-//use App\App;
-use App\Utils\Functions;
-
 use App\GramcServices\Workflow\Projet\ProjetWorkflow;
 use App\GramcServices\Workflow\Version\VersionWorkflow;
+
+use App\GramcServices\ServicePhpSessions;
+
+use App\Utils\Functions;
 
 use App\Utils\Etat;
 use App\Utils\Signal;
@@ -77,7 +78,7 @@ class SessionTransition extends Transition
         // La transition n'a pas eu lieu
         // Cela est une sécurité afin de s'assurer que personne ne reste connecté, ne sachant pas que la session
         // a changé d'état !
-        if (Functions::clear_phpSessions()==false) {
+        if (ServicePhpSessions::clearPhpSessions()==false) {
             $rtn = false;
             $this->sj->errorMessage(__METHOD__ . ':' . __LINE__ . " clear_phpSessions renvoie false");
             return $rtn;

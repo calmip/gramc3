@@ -13,6 +13,7 @@ framework:
         handler_id: "session.handler.native_file"
         cookie_secure: auto
         cookie_samesite: lax
+        cookie_lifetime: 14400  # 4 heures
         save_path:   '%kernel.project_dir%/var/sessions/%kernel.environment%'
     
     #esi: true

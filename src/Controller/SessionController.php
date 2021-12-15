@@ -35,6 +35,7 @@ use App\GramcServices\ServiceVersions;
 use App\GramcServices\ServiceMenus;
 use App\GramcServices\ServiceProjets;
 use App\GramcServices\ServiceSessions;
+use App\GramcServices\ServicePhpSessions;
 use App\GramcServices\Workflow\Session\SessionWorkflow;
 
 use App\BilanSession\BilanSessionA;
@@ -65,6 +66,7 @@ class SessionController extends AbstractController
 {
     private $sj = null;
     private $sm = null;
+    private $sps = null;
     private $sv = null;
     private $sp = null;
     private $ss = null;
@@ -74,6 +76,7 @@ class SessionController extends AbstractController
     public function __construct(
         ServiceJournal $sj,
         ServiceMenus $sm,
+        ServicePhpSessions $sps,
         ServiceVersions $sv,
         ServiceProjets $sp,
         ServiceSessions $ss,
@@ -82,6 +85,7 @@ class SessionController extends AbstractController
     ) {
         $this->sj = $sj;
         $this->sm = $sm;
+        $this->sps = $sps;
         $this->sv = $sv;
         $this->sp = $sp;
         $this->ss = $ss;
@@ -113,7 +117,7 @@ class SessionController extends AbstractController
      * @Route("/gerer", name="gerer_sessions",methods={"GET"})
      * Method("GET")
      */
-    public function gererAction()
+    public function gererAction(Request $request)
     {
         $sm = $this->sm;
         $sj = $this->sj;
@@ -134,8 +138,9 @@ class SessionController extends AbstractController
                         'commentaire'=> 'Créer la PREMIERE session'
                         ];
         } else {
-            // Refait le calcul de la session courante sans se fier au cache
+            // On supprime de la session php la référence à la SessionCourante Gramc
             $request->getSession()->remove('SessionCourante');
+
             $etat_session = $ss->getSessionCourante()->getEtatSession();
             $id_session = $ss->getSessionCourante()->getIdSession();
 
@@ -188,7 +193,10 @@ class SessionController extends AbstractController
     {
         $sd = $this->sd;
         $em = $this->getDoctrine()->getManager();
+
+        // On supprime de la session php la référence à la SessionCourante Gramc
         $request->getSession()->remove('SessionCourante');
+        
         $debut = $sd;
         $fin   = $sd->getNew();
         $fin->add(\DateInterval::createFromDateString('0 months'));
@@ -235,6 +243,7 @@ class SessionController extends AbstractController
         $ss = $this->ss;
         $em = $this->getDoctrine()->getManager();
 
+        // On supprime de la session php la référence à la SessionCourante Gramc
         $request->getSession()->remove('SessionCourante');
 
         $session_courante = $ss->getSessionCourante();
@@ -286,12 +295,14 @@ class SessionController extends AbstractController
       */
     public function avantActiverAction($rtn, $ctrl)
     {
-        $ss         = $this->ss;
-        $sj         = $this->sj;
-        $em         = $this->getDoctrine()->getManager();
+        $ss  = $this->ss;
+        $sps = $this->sps;
+        $sj  = $this->sj;
+        $em  = $this->getDoctrine()->getManager();
 
-        $session    = $ss->getSessionCourante();
-        $connexions = Functions::getConnexions($em, $sj);
+        $session = $ss->getSessionCourante();
+        $connexions = $sps->getConnexions();
+        
         return $this->render(
             'session/avant_changer_etat.html.twig',
             [
@@ -313,11 +324,9 @@ class SessionController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
         $sd = $this->sd;
+        $sps = $this->sps;
         $ss = $this->ss;
         $sj = $this->sj;
-
-        // Suppression du cache, du coup toutes les personnes connectées seront virées
-        $request->getSession()->remove('SessionCourante');
 
         $session_courante      = $ss->getSessionCourante();
         $etat_session_courante = $session_courante->getEtatSession();
@@ -331,7 +340,7 @@ class SessionController extends AbstractController
 
         $workflow = $this->sw;
 
-        // On active une session A = Jusqu'à trois sessions renvoyées !
+        // On active une session A = trois signaux envoyés sur trois sessions différentes !
         if ($mois == 1 ||  $mois == 12) {
             if ($workflow->canExecute(Signal::CLK_SESS_DEB, $session_courante) && $etat_session_courante == Etat::EN_ATTENTE) {
                 // On termine les deux sessions A et B de l'année précédente
@@ -350,7 +359,7 @@ class SessionController extends AbstractController
             }
         }
 
-        // On active une session B = Jusqu'à deux sessions renvoyées
+        // On active une session B = deux signaux envoyés sur deux sessions différentes
         elseif ($mois == 6 ||  $mois == 7) {
             // manu - corrigé le 20 juillet 2021
             //if( $workflow->canExecute(Signal::CLK_SESS_DEB , $session_courante)  && $etat_session_courante == Etat::EN_ATTENTE )
@@ -396,13 +405,16 @@ class SessionController extends AbstractController
         $ss = $this->ss;
         $em = $this->getDoctrine()->getManager();
 
-        $request->getSession()->remove('SessionCourante');
         $session_courante = $ss->getSessionCourante();
         $workflow = $this->sw;
+
+        // On supprime de la session php la référence à la SessionCourante Gramc
+        $request->getSession()->remove('SessionCourante');
 
         if ($workflow->canExecute(Signal::CLK_ATTR_PRS, $session_courante)) {
             $workflow->execute(Signal::CLK_ATTR_PRS, $session_courante);
             $em->flush();
+
             return $this->redirectToRoute('gerer_sessions');
         } else {
             return $this->render(
@@ -426,17 +438,20 @@ class SessionController extends AbstractController
     public function demarrerSaisieAction(Request $request)
     {
         $ss = $this->ss;
+        $sps = $this->sps;
         $em = $this->getDoctrine()->getManager();
 
-        $request->getSession()->remove('SessionCourante'); // remove cache
+        // On supprime de la session php la référence à la SessionCourante Gramc
+        $request->getSession()->remove('SessionCourante');
 
         $session_courante       = $ss->getSessionCourante();
-        //return new Response( $session_courante->getIdSession() );
+
         $workflow = $this->sw;
 
         if ($workflow->canExecute(Signal::DAT_DEB_DEM, $session_courante)) {
             $workflow->execute(Signal::DAT_DEB_DEM, $session_courante);
             $em->flush();
+            
             return $this->redirectToRoute('gerer_sessions');
         } else {
             return $this->render(
@@ -539,6 +554,8 @@ class SessionController extends AbstractController
 
     /**
      *
+     * Entrée du commentaire de session par le président
+     * 
      * @Route("/commentaires", name="session_commentaires",methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
      * Method({"GET", "POST"})
@@ -548,7 +565,8 @@ class SessionController extends AbstractController
         $sm = $this->sm;
         $ss = $this->ss;
 
-        $request->getSession()->remove('SessionCourante'); // remove cache
+        // On supprime de la session php la référence à la SessionCourante Gramc
+        $request->getSession()->remove('SessionCourante');
 
         $session_courante      = $ss->getSessionCourante();
         $etat_session_courante = $session_courante->getEtatSession();
