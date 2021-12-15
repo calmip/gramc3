@@ -35,7 +35,7 @@ use App\Entity\Session;
 use App\Entity\CollaborateurVersion;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -129,8 +129,8 @@ class ExpertiseController extends AbstractController
     /**
      * Affectation des experts
      *
-     * @Route("/affectation_test", name="affectation_test")
-     * @Method({"GET", "POST"})
+     * @Route("/affectation_test", name="affectation_test", methods={"GET","POST"})
+     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_PRESIDENT')")
      */
     public function affectationTestAction(Request $request)
@@ -208,8 +208,8 @@ class ExpertiseController extends AbstractController
      * Affectation des experts
      *	  Affiche l'écran d'affectation des experts
      *
-     * @Route("/affectation", name="affectation")
-     * @Method({"GET", "POST"})
+     * @Route("/affectation", name="affectation", methods={"GET","POST"})
+     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_PRESIDENT')")
      */
     public function affectationAction(Request $request)
@@ -289,8 +289,8 @@ class ExpertiseController extends AbstractController
     /**
      * Lists all expertise entities.
      *
-     * @Route("/", name="expertise_index")
-     * @Method("GET")
+     * @Route("/", name="expertise_index", methods={"GET"})
+     * Method("GET")
      * @Security("is_granted('ROLE_PRESIDENT')")
      */
     public function indexAction()
@@ -325,8 +325,8 @@ class ExpertiseController extends AbstractController
      * Liste les expertises attribuées à un expert
      *       Aussi les anciennes expertises réalisées par cet expert
      *
-     * @Route("/liste", name="expertise_liste")
-     * @Method("GET")
+     * @Route("/liste", name="expertise_liste", methods={"GET"})
+     * Method("GET")
      * @Security("is_granted('ROLE_EXPERT')")
      */
     public function listeAction()
@@ -514,8 +514,8 @@ class ExpertiseController extends AbstractController
     /**
      * Creates a new expertise entity.
      *
-     * @Route("/new", name="expertise_new")
-     * @Method({"GET", "POST"})
+     * @Route("/new", name="expertise_new", methods={"GET","POST"})
+     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_PRESIDENT')")
      */
     public function newAction(Request $request)
@@ -541,8 +541,8 @@ class ExpertiseController extends AbstractController
     /**
      * Finds and displays a expertise entity.
      *
-     * @Route("/{id}", name="expertise_show")
-     * @Method("GET")
+     * @Route("/{id}", name="expertise_show", methods={"GET"})
+     * Method("GET")
      * @Security("is_granted('ROLE_PRESIDENT')")
      */
     public function showAction(Expertise $expertise)
@@ -558,8 +558,8 @@ class ExpertiseController extends AbstractController
     /**
      * Displays a form to edit an existing expertise entity.
      *
-     * @Route("/{id}/edit", name="expertise_edit")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/edit", name="expertise_edit", methods={"GET","POST"})
+     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_PRESIDENT')")
      */
     public function editAction(Request $request, Expertise $expertise)
@@ -599,8 +599,8 @@ class ExpertiseController extends AbstractController
      *            - Est-ce un PROJET_FIL ou un PROJET_SESS ?
      *            - Si $max_expertises_nb > 1: Suis-je PRESIDENT ou PAS ?
      *
-     * @Route("/{id}/modifier", name="expertise_modifier")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/modifier", name="expertise_modifier", methods={"GET","POST"})
+     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_EXPERT')")
      */
     public function modifierAction(Request $request, Expertise $expertise)
@@ -886,8 +886,8 @@ class ExpertiseController extends AbstractController
      * L'expert vient de cliquer sur le bouton "Envoyer expertise"
      * On lui envoie un écran de confirmation
      *
-     * @Route("/{id}/valider", name="expertise_validation")
-     * @Method({"GET","POST"})
+     * @Route("/{id}/valider", name="expertise_validation", methods={"GET","POST"})
+     * Method({"GET","POST"})
      * @Security("is_granted('ROLE_EXPERT')")
      */
     public function validationAction(Request $request, Expertise $expertise)
@@ -1006,8 +1006,8 @@ class ExpertiseController extends AbstractController
     /**
      * Deletes a expertise entity.
      *
-     * @Route("/{id}", name="expertise_delete")
-     * @Method("DELETE")
+     * @Route("/{id}", name="expertise_delete", methods={"GET"})
+     * Method("DELETE")
      * @Security("is_granted('ROLE_PRESIDENT')")
      */
     public function deleteAction(Request $request, Expertise $expertise)

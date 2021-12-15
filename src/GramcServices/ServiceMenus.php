@@ -1089,7 +1089,9 @@ class ServiceMenus
             $this->sj->warningMessage(__METHOD__ . ':' . __LINE__ ." Le responsable " . $this->token->getUser()
                 . " du projet " . $projet . " ne peut pas créer des projets");
         } elseif ($etatVersion ==  Etat::EDITION_EXPERTISE) {
-            $menu['raison'] = "Le projet a déjà été envoyé à l'expert !";
+		$menu['raison'] = "Le projet a déjà été envoyé à l'expert !";
+	} elseif ($isProjetTest == true) {
+		$menu['raison'] = "ATTENTION - PAS DE PROJETS TESTS ACTUELLEMENT - Adressez-vous au support";
         } elseif ($isProjetTest == true && $etatVersion ==  Etat::ANNULE) {
             $menu['raison'] = "Le projet test a été annulé !";
         } elseif ($isProjetTest == true && $etatVersion !=  Etat::EDITION_TEST) {
@@ -1242,7 +1244,7 @@ class ServiceMenus
 
     public function nettoyer()
     {
-        $menu['name']            = 'projet_nettoyer';
+        $menu['name']            = 'rgpd';
         $menu['lien']            = "Nettoyage pour conformité au RGPD";
         $menu['commentaire']     = "Vous ne pouvez pas supprimer les projets ou les utilisateurs anciens";
         $menu['ok']              = false;

@@ -119,8 +119,8 @@ class ServiceExperts
         if ($this->form_buttons==null) {
             $this->form_buttons =
                 $this->formFactory->createNamedBuilder('BOUTONS', FormType::class, null, ['csrf_protection' => false ])
-                     ->add("sub1", SubmitType::class, ['label' => 'Affecter les experts', 'attr' => ['title' => 'Les experts seront affectés incognito'] ])
-                     ->add("sub2", SubmitType::class, ['label' => 'Affecter et notifier les experts', 'attr' => ['title' => 'Les experts affectés recevront une notification par courriel'] ])
+                     ->add("sub1", SubmitType::class, ['label' => 'Affecter et notifier les experts', 'attr' => ['title' => 'Les experts affectés recevront une notification par courriel'] ])
+		     ->add("sub2", SubmitType::class, ['label' => 'Affecter les experts', 'attr' => ['title' => 'Les experts seront affectés mais ne recevront aucune notification'] ])
                      ->add("sub3", SubmitType::class, ['label' => 'Ajouter une expertise', 'attr' => ['title' => 'Ajouter un expert si possible'] ])
                      ->add("sub4", SubmitType::class, ['label' => 'Supp expertise sans expert', 'attr' => ['title' => 'ATTENTION - Risque de perte de données'] ])
                      ->getForm();
@@ -275,9 +275,9 @@ class ServiceExperts
                 $experts_affectes[] = $f->getData()['expert'];
             }
 
-            if ($form_buttons->get('sub1')->isClicked()) {
+            if ($form_buttons->get('sub2')->isClicked()) {
                 $this->affecterExpertsToDemande($experts_affectes, $demande);
-            } elseif ($form_buttons->get('sub2')->isClicked()) {
+            } elseif ($form_buttons->get('sub1')->isClicked()) {
                 $this->affecterExpertsToDemande($experts_affectes, $demande);
                 $this->addNotification($demande);
             } elseif ($form_buttons->get('sub3')->isClicked()) {
@@ -290,7 +290,7 @@ class ServiceExperts
             }
         }
 
-        if ($form_buttons->get('sub2')->isClicked()) {
+        if ($form_buttons->get('sub1')->isClicked()) {
             $this->notifierExperts();
         }
     }

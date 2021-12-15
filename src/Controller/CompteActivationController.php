@@ -26,7 +26,7 @@ namespace App\Controller;
 
 use App\Entity\CompteActivation;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -44,8 +44,8 @@ class CompteActivationController extends AbstractController
     /**
      * Lists all compteActivation entities.
      *
-     * @Route("/", name="compteactivation_index")
-     * @Method("GET")
+     * @Route("/", name="compteactivation_index", methods={"GET"})
+     * Method("GET")
      */
     public function indexAction()
     {
@@ -61,8 +61,8 @@ class CompteActivationController extends AbstractController
     /**
      * Creates a new compteActivation entity.
      *
-     * @Route("/new", name="compteactivation_new")
-     * @Method({"GET", "POST"})
+     * @Route("/new", name="compteactivation_new", methods={"GET","POST"})
+     * Method({"GET", "POST"})
      */
     public function newAction(Request $request)
     {
@@ -87,8 +87,8 @@ class CompteActivationController extends AbstractController
     /**
      * Finds and displays a compteActivation entity.
      *
-     * @Route("/{id}", name="compteactivation_show")
-     * @Method("GET")
+     * @Route("/{id}", name="compteactivation_show", methods={"GET"})
+     * Method("GET")
      */
     public function showAction(CompteActivation $compteActivation)
     {
@@ -103,8 +103,8 @@ class CompteActivationController extends AbstractController
     /**
      * Displays a form to edit an existing compteActivation entity.
      *
-     * @Route("/{id}/edit", name="compteactivation_edit")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/edit", name="compteactivation_edit", methods={"GET","POST"})
+     * Method({"GET", "POST"})
      */
     public function editAction(Request $request, CompteActivation $compteActivation)
     {
@@ -128,8 +128,8 @@ class CompteActivationController extends AbstractController
     /**
      * Deletes a compteActivation entity.
      *
-     * @Route("/{id}", name="compteactivation_delete")
-     * @Method("DELETE")
+     * @Route("/{id}", name="compteactivation_delete", methods={"DELETE"})
+     * Method("DELETE")
      */
     public function deleteAction(Request $request, CompteActivation $compteActivation)
     {

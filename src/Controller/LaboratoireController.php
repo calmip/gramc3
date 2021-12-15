@@ -28,7 +28,7 @@ use App\Entity\Laboratoire;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -50,9 +50,9 @@ class LaboratoireController extends AbstractController
     /**
      * Lists all laboratoire entities.
      *
-     * @Route("/", name="laboratoire_index")
+     * @Route("/", name="laboratoire_index", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function indexAction()
     {
@@ -64,7 +64,7 @@ class LaboratoireController extends AbstractController
     }
 
     /**
-     * @Route("/gerer",name="gerer_laboratoires" )
+     * @Route("/gerer",name="gerer_laboratoires", methods={"GET"} )
      * @Security("is_granted('ROLE_OBS')")
      */
     public function gererAction()
@@ -87,10 +87,10 @@ class LaboratoireController extends AbstractController
     /**
      * Creates a new laboratoire entity.
      *
-     * @Route("/new", name="laboratoire_new")
-     * @Route("/ajouter", name="ajouter_laboratoire")
+     * @Route("/new", name="laboratoire_new", methods={"GET","POST"})
+     * @Route("/ajouter", name="ajouter_laboratoire", methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function newAction(Request $request)
     {
@@ -124,9 +124,9 @@ class LaboratoireController extends AbstractController
     /**
      * Finds and displays a laboratoire entity.
      *
-     * @Route("/{id}/show", name="laboratoire_show")
+     * @Route("/{id}/show", name="laboratoire_show", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function showAction(Laboratoire $laboratoire)
     {
@@ -141,9 +141,9 @@ class LaboratoireController extends AbstractController
     /**
      * Displays a form to edit an existing laboratoire entity.
      *
-     * @Route("/{id}/edit", name="laboratoire_edit")
+     * @Route("/{id}/edit", name="laboratoire_edit", methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function editAction(Request $request, Laboratoire $laboratoire)
     {
@@ -167,9 +167,9 @@ class LaboratoireController extends AbstractController
     /**
      * Displays a form to edit an existing laboratoire entity.
      *
-     * @Route("/{id}/modify", name="modifier_laboratoire")
+     * @Route("/{id}/modify", name="modifier_laboratoire", methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function modifyAction(Request $request, Laboratoire $laboratoire)
     {
@@ -202,9 +202,9 @@ class LaboratoireController extends AbstractController
     /**
      * Deletes a laboratoire entity.
      *
-     * @Route("/{id}/supprimer", name="supprimer_laboratoire")
+     * @Route("/{id}/supprimer", name="supprimer_laboratoire", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function supprimerAction(Request $request, Laboratoire $laboratoire)
     {
@@ -217,9 +217,9 @@ class LaboratoireController extends AbstractController
     /**
      * Deletes a laboratoire entity.
      *
-     * @Route("/{id}/delete", name="laboratoire_delete")
+     * @Route("/{id}/delete", name="laboratoire_delete", methods={"DELETE"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("DELETE")
+     * Method("DELETE")
      */
     public function deleteAction(Request $request, Laboratoire $laboratoire)
     {

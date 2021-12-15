@@ -27,7 +27,7 @@ namespace App\Controller;
 use Psr\Log\LoggerInterface;
 
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -68,7 +68,6 @@ use Symfony\Component\Form\Extension\Core\Type\ResetType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -80,13 +79,6 @@ use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 use Twig\Environment;
-
-//function redirection_externe($url)
-//{
-//    $controller = new Controller();
-//    return $controller->redirect($url);
-//}
-
 
 /////////////////////////////////////////////////////
 
@@ -106,7 +98,6 @@ class GramcSessionController extends AbstractController
     private $vl;
     private $ts;
     private $tok;
-    private $sss;
     private $uc;
     private $ac;
     private $tw;
@@ -126,8 +117,6 @@ class GramcSessionController extends AbstractController
         FormFactoryInterface $ff,
         ValidatorInterface $vl,
         TokenStorageInterface $ts,
-        SessionInterface $sss,
-        UserChecker $uc,
         AuthorizationCheckerInterface $ac,
         Environment $tw
     ) {
@@ -144,14 +133,12 @@ class GramcSessionController extends AbstractController
         $this->ff  = $ff;
         $this->vl  = $vl;
         $this->ts  = $ts;
-        $this->sss = $sss;
-        $this->uc  = $uc;
         $this->ac  = $ac;
         $this->tw  = $tw;
     }
 
     /**
-     * @Route("/admin/accueil",name="admin_accueil")
+     * @Route("/admin/accueil",name="admin_accueil", methods={"GET"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
     **/
 
@@ -202,7 +189,7 @@ class GramcSessionController extends AbstractController
     }
 
     /**
-     * @Route("/mentions_legales", name="mentions_legales" )
+     * @Route("/mentions_legales", name="mentions_legales", methods={"GET"} )
      */
     public function mentionsAction()
     {
@@ -210,7 +197,7 @@ class GramcSessionController extends AbstractController
     }
 
     /**
-    * @Route("/aide", name="aide" )
+    * @Route("/aide", name="aide", methods={"GET"} )
     */
     public function aideAction()
     {
@@ -218,7 +205,7 @@ class GramcSessionController extends AbstractController
     }
 
     /**
-    * @Route("/", name="accueil" )
+    * @Route("/", name="accueil", methods={"GET"} )
     *
     */
     public function accueilAction()
@@ -281,7 +268,7 @@ class GramcSessionController extends AbstractController
     }
 
     /**
-     * @Route("/president", name="president_accueil" )
+     * @Route("/president", name="president_accueil", methods={"GET"} )
      * @Security("is_granted('ROLE_PRESIDENT')")
      */
     public function presidentAccueilAction()
@@ -298,43 +285,7 @@ class GramcSessionController extends AbstractController
     }
 
     /**
-     * @Route("/deconnexion",name="deconnexion")
-     **/
-    public function deconnexionAction(Request $request)
-    {
-        $sj    = $this->sj;
-        $ac    = $this->ac;
-        $token = $this->ts->getToken();
-        $sss   = $this->sss;
-
-        if ($ac->isGranted('ROLE_PREVIOUS_ADMIN')) {
-            $sudo_url = $sss->get('sudo_url');
-            //$sj->debugMessage(__METHOD__ . " sudo_url = " . $sudo_url );
-            $userChecker = $this->uc;
-            $real_user   = $sss->get('real_user');
-            $userChecker->checkPostAuth($real_user);
-            $sj->infoMessage(__METHOD__ . ":" . __LINE__ . " déconnexion d'un utilisateur en SUDO vers " . $real_user);
-            return new RedirectResponse($sudo_url . '?_switch_user=_exit');
-        //return $this->redirectToRoute('accueil',[ '_switch_user' => '_exit' ]);
-        } elseif ($ac->isGranted('IS_AUTHENTICATED_FULLY')) {
-            $sj->infoMessage(__METHOD__ . ":" . __LINE__ .  " déconnexion de l'utilisateur " . $token->getUser());
-            $request->getSession()->invalidate();
-            session_destroy();
-        }
-        return $this->redirectToRoute('deconnected');
-    }
-
-
-    /**
-    * @Route("/deconnected", name="deconnected")
-    **/
-    public function deconnexion_showAction(Request $request)
-    {
-        return $this->render('default/deconnexion.html.twig');
-    }
-
-    /**
-    * @Route("/profil",name="profil")
+    * @Route("/profil",name="profil", methods={"GET","POST"})
     * @Security("is_granted('ROLE_DEMANDEUR')")
 
     **/
@@ -383,301 +334,9 @@ class GramcSessionController extends AbstractController
         }
     }
 
-    /**
-     *
-     * Connexion en debug (c-a-d pas d'authentification
-     *
-     * @Route("/connexion_dbg",name="connexion_dbg")
-     **/
-    public function connectiondbgAction(Request $request)
-    {
-        $sj         = $this->sj;
-        $token      = $this->ts->getToken();
-        $em         = $this->getDoctrine()->getManager();
-        $repository = $em->getRepository(Individu::class);
-
-        // Bizarre...
-        // echo "coucou " . (int) $this->has('kernel.debug');
-        // echo "coucou " . (int) $this->getParameter('kernel.debug');
-        if ($this->getParameter('kernel.debug') === false) {
-            //if ( ! $this->container->hasParameter('kernel.debug') || $this->getParameter('kernel.debug') == false )
-            $sj->warningMessage(__METHOD__ . ':' . __LINE__ .' tentative de se connecter avec debug en production');
-            return $this->redirectToRoute('accueil');
-        }
-
-        $u = new Individu();
-        //$mail = $user->getMail();
-
-        $experts    = $repository->findBy(['expert'   => true ]);
-        $admins     = $repository->findBy(['admin'    => true ]);
-        $obs        = $repository->findby(['obs'      => true ]);
-        $sysadmins  = $repository->findby(['sysadmin' => true ]);
-        $responsables   = static::elements($repository->getCollaborateurs(true));
-
-        $moi            = $token->getUser();
-        $collaborateurs = static::elements($repository->getCollaborateurs(false, false, $moi));
-        $users          = array_unique(array_merge($admins, $experts, $obs, $sysadmins, $responsables, $collaborateurs));
-        sort($users);
-
-        $form = $this->createFormBuilder($u)
-            ->add(
-                'mail',
-                EntityType::class,
-                [
-                    'multiple' => false,
-                    'placeholder' => 'Choisissez',
-                    'class' => 'App:Individu',
-                    'choices' => $users,
-                    //'choice_label' => function($user){ return $user->getPrenom() . ' ' . $user->getNom(); }
-                ]
-            )
-            ->add('save', SubmitType::class, ['label' => 'Connexion'])
-            ->add('reset', ResetType::class, ['label' => 'Effacer'])
-            ->getForm();
-
-        $form->handleRequest($request);
-
-        //if ($form->get('save')->isClicked() )
-        //    {
-        //    $m = $user->getMail();
-        //    }
-
-        if ($form->isSubmitted()) {
-            // TODO - Particulièrement laid et incompréhensible !
-            //        php-stan (level -2) renvoie une erreur et pourtant ça marche
-            $user  = $repository->findOneByMail($u->getMail()->getMail());
-            $roles = $user->getRoles();
-            $token = new UsernamePasswordToken($user, null, 'main', $roles);
-
-            //$userChecker = new UserChecker();
-            $userChecker = $this->uc;
-            $userChecker->checkPreAuth($user);
-
-            $session = $request->getSession();
-            $this->ts->setToken($token);
-            $session->set('_security_main', serialize($token));
-
-            $userChecker->checkPostAuth($user);
-            $sj->infoMessage(__METHOD__ . ":" . __LINE__ . " connexion DBG de l'utilisateur " . $user);
-
-            if ($request->getSession()->has('url')) {
-                return $this->redirect($request->getSession()->get('url'));
-            } else {
-                return $this->redirectToRoute('accueil');
-            }
-        }
-
-        return $this->render('default/connexion_dbg.html.twig', [ 'form' => $form->createView() ]);
-    }
 
     /**
-    * @Route("/login/activation",name="activation")
-    * @Route("/login/activation/{key}")
-    **/
-
-    public function activationAction(Request $request, $key)
-    {
-        $em = $this->getDoctrine()->getManager();
-        $sn = $this->sn;
-        $sj = $this->sj;
-
-        $server = $request->server;
-        if ($server->has('REMOTE_USER') || $server->has('REDIRECT_REMOTE_USER')) {
-            $eppn = "";
-            if ($server->has('REMOTE_USER')) {
-                $eppn =  $server->get('REMOTE_USER');
-            }
-            if ($server->has('REDIRECT_REMOTE_USER')) {
-                $eppn =  $server->get('REDIRECT_REMOTE_USER');
-            }
-
-            $em = $this->getDoctrine()->getManager();
-
-            $compteactivation = $this->getDoctrine()
-                ->getRepository(CompteActivation::class)
-                ->findOneBy(['key' => $key ]);
-
-            if (!  $compteactivation) {
-                return new Response('<pre> Activation error for this key </pre>');
-            }
-
-            $sso = new Sso();
-            $sso->setEppn($eppn);
-            $individu = $compteactivation->getIndividu();
-            $sso->setIndividu($individu);
-
-            $em->remove($compteactivation);
-
-            if ($em->getRepository(Sso::class)->findOneBy([ 'eppn' => $eppn ]) == null) {
-                $em->persist($sso);
-            } else {
-                $sj->noticeMessage(__FILE__ . ":" . __LINE__ . "  " . $eppn . " existe déjà");
-            }
-
-            $em->flush();
-
-            // Envoyer un mail de bienvenue à ce nouvel utilisateur
-            $dest   = [ $individu->getMail() ];
-            $etab   = preg_replace('/.*@/', '', $eppn);
-            $sn->sendMessage(
-                "notification/compte_ouvert-sujet.html.twig",
-                "notification/compte_ouvert-contenu.html.twig",
-                [ 'individu' => $individu, 'etab' => $etab ],
-                $dest
-            );
-
-            return $this->redirectToRoute('connexion');
-        } else {
-            return new Response('<pre> Activation error - no eppn </pre>');
-        }
-    }
-
-
-    /**
-     * @Route("/login_choice", name="connexion")
-     *
-     * @Method({"GET", "POST"})
-     */
-
-    public function loginAction(Request $request)
-    {
-        $sj = $this->sj;
-        $ff = $this->ff;
-
-        $form = Functions::createFormBuilder($ff)
-                ->add(
-                    'data',
-                    ChoiceType::class,
-                    [
-                 'choices' => $this->getParameter('IDPprod')
-                 ]
-                )
-            ->add('connect', SubmitType::class, ['label' => 'Connexion'])
-            ->getForm();
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $url    =   $request->getSchemeAndHttpHost();
-            $url    .= '/Shibboleth.sso/Login?target=';
-            //$url    .=   $this->generateUrl('connexionshiblogin');
-            //$url    .= '/gramce-milos/login';
-            $url    .= $this->generateUrl('connexionshiblogin');
-
-            //$url = $this->generateUrl('connexionshib', [] , UrlGeneratorInterface::ABSOLUTE_URL);
-            //$url = $url .  $this->generateUrl('accueil', [] , UrlGeneratorInterface::ABSOLUTE_URL);
-
-
-            if ($form->getData()['data'] != 'WAYF') {
-                $url = $url . '&providerId=' . $form->getData()['data'];
-            }
-
-            $sj->debugMessage(__FILE__. ":" . __LINE__ . " URL shiblogin = " . $url);
-
-            return $this->redirect($url);
-        }
-
-        return $this->render(
-            'default/login.html.twig',
-            [ 'form' => $form->createView(), ]
-        );
-    }
-
-
-    /**
-     * @Route("/login", name="shiblogin")
-     * @Method({"GET"})
-     */
-    /*public function shibloginAction(Request $request)
-    {
-        //return new Response($request->server->get('REDIRECT_mail'));
-        //return new Response(print_r($request->server,true) );
-
-        $sj->infoMessage("shiblogin d'un utilisateur");
-
-        if( $request->getSession()->has('url') )
-            return $this->redirect( $request->getSession()->get('url') );
-        else
-            return $this->redirectToRoute('index');
-    }*/
-
-
-
-
-    /**
-     * @Route("/login/connexion", name="connexionshiblogin")
-     * @Route("/connexion")
-     */
-    public function auth_connexionAction(Request $request)
-    {
-        $sj = $this->sj;
-        $ac = $this->ac;
-
-        $sj->infoMessage("shiblogin d'un utilisateur");
-        $em = $this->getDoctrine()->getManager();
-
-
-        // PAS BO
-        //$myfile = fopen("/tmp/testfile.txt", "w");
-        //fwrite($myfile, print_r($request->headers->keys(),true));
-        //fclose($myfile);
-
-        //$sj->debugMessage("Shib infos = ".$request->headers->get('affiliation').' '.$request->headers->get('eppn').' ');
-        $server = $request->server;
-        if (($username = getenv('REMOTE_USER')) || $server->has('REMOTE_USER') || $server->has('REDIRECT_REMOTE_USER')) {
-            if ($server->has('REMOTE_USER')) {
-                $sj->debugMessage('REMOTE_USER='.$server->get('REMOTE_USER'));
-                $username =  $server->get('REMOTE_USER');
-            }
-            if ($server->has('REDIRECT_REMOTE_USER')) {
-                $sj->debugMessage('REDIRECT_REMOTE_USER='.$server->get('REDIRECT_REMOTE_USER'));
-                $username =  $server->get('REDIRECT_REMOTE_USER');
-            }
-            $repository1 = $em->getRepository(Sso::class);
-            $repository2 = $em->getRepository(Individu::class);
-
-            if ($sso = $repository1->findOneByEppn($username)) {
-                $individu = $sso->getIndividu();
-            } elseif ($individu = $repository2->find($username)) { // seulement en mode testing
-            } else { // nouvel utilisateur
-                $session = $request->getSession();
-                $session->set('eppn', $username);
-
-                // Récupérer les headers dans la session
-                $this->shibbHeadersToSession($request);
-
-                //return new Response('nouvel utilisateur');
-                return $this->redirectToRoute('nouveau_compte');
-            }
-
-            // authentification manuelle sans remote_user de symfony
-            //$userChecker = new UserChecker();
-            $userChecker = $this->uc;
-            $userChecker->checkPreAuth($individu);
-
-            $token = new UsernamePasswordToken($individu, null, 'main', $individu->getRoles());
-            $session = $request->getSession();
-
-            $this->ts->setToken($token);
-            $session->set('_security_main', serialize($token));
-
-            $userChecker->checkPostAuth($individu);
-        } //  if( $server->has('REMOTE_USER') )
-        else { // no REMOTE_USER
-            return $this->redirectToRoute('deconnexion');
-        } //  if( $server->has('REMOTE_USER') )
-
-        $sj->infoMessage("Controller : connexion d'un utilisateur");
-
-        if ($request->getSession()->has('url')) {
-            return $this->redirect($request->getSession()->get('url'));
-        } else {
-            return $this->redirectToRoute('accueil');
-        }
-    }
-
-    /**
-    * @Route("/nouveau_compte", name="nouveau_compte")
+    * @Route("/nouveau_compte", name="nouveau_compte", methods={"GET","POST"})
     */
     public function nouveau_compteAction(Request $request, LoggerInterface $lg)
     {
@@ -691,7 +350,6 @@ class GramcSessionController extends AbstractController
             // return new Response(' no eppn ' );
             return $this->redirectToRoute('accueil');
         }
-
 
         $eppn = $request->getSession()->get('eppn');
 
@@ -752,7 +410,7 @@ class GramcSessionController extends AbstractController
     }
     
     /**
-     * @Route("/nouveau_profil",name="nouveau_profil")
+     * @Route("/nouveau_profil",name="nouveau_profil", methods={"GET","POST"})
      *
      */
     public function nouveau_profilAction(Request $request, LoggerInterface $lg)
@@ -780,15 +438,25 @@ class GramcSessionController extends AbstractController
         }
 
         // Est-ce qu'il y a déjà un compte avec cette adresse ?
+
         $individu = $em->getRepository(Individu::class)->findOneBy(['mail' => $mail]);
-        if ($individu === null) {
+        if ($individu === null)
+        {
             $flg_ind = false;
             $individu = new Individu();
             $individu->setMail($session->get('mail'));
-            if ($session->has('sn')) {
+            if ($session->has('sn'))
+            {
                 $individu->setNom($session->get('sn'));
             }
-        } else {
+        }
+        else
+        {
+            if ($individu->getDesactive())
+            {
+                $sj->errorMessage(__METHOD__ .':' . __LINE__ . " $individu est désactivé - eppn $eppn refusé !");
+                return $this->redirectToRoute('accueil');
+            }
             $flg_ind = true;
         }
 
@@ -804,6 +472,7 @@ class GramcSessionController extends AbstractController
         if ($session->has('sn')) {
             $individu->setNom($session->get('sn'));
         }
+
 
         $form = $this->createForm(IndividuType::class, $individu, [ 'mail' => false ]);
         $form->handleRequest($request);
@@ -846,56 +515,17 @@ class GramcSessionController extends AbstractController
                 );
             }
 
-            // On est automatiquement connecté en sortant de cet écran
+            // On supprime ces données afin de refaire complètement le processus de connexion
+            $session = $request->getSession();
+            $session->remove('eppn');
+            $session->remove('mail');
             return $this->redirectToRoute('connexionshiblogin');
-            //return $this->redirectToRoute('accueil');
         }
-
         return $this->render('default/nouveau_profil.html.twig', array( 'mail' => $request->getSession()->get('mail'), 'form' => $form->createView()));
-
-    }
-
-
-    /**
-    * @Route("/erreur_login", name="erreur_login")
-    * @Method({"GET"})
-    */
-    public function erreurLoginAction(Request $request)
-    {
-        return $this->render('default/erreur_login.html.twig');
     }
 
     /**
-     * @Route("/exception_index", name="exception_index")
-     * @Route("/index", name="index")
-     * @Route("/accueil_demandeur", name="accueil_demandeur")
-     * @Method({"GET"})
-     */
-    public function exceptionIndexAction(Request $request)
-    {
-        // sans haut et bas
-        return $this->render('default/exception_index.html.twig');
-    }
-
-    private static function elements($array)
-    {
-        $date = new \DateTime();
-        mt_srand($date->setTime(0, 0, 0)->getTimestamp());
-        $output=[];
-
-        for ($i = 1; $i < 6; $i++) {
-            if (count($array) < 1) {
-                return $output;
-            }
-            $index  =   mt_rand(0, count($array) - 1);
-            $output[]   =  $array[ $index ];
-            array_splice($array, $index, 1);
-        }
-        return $output;
-    }
-
-    /**
-     * @Route("/connexions", name="connexions")
+     * @Route("/connexions", name="connexions", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function connexionsAction(Request $request)
@@ -908,8 +538,8 @@ class GramcSessionController extends AbstractController
     }
 
     /**
-     * @Route("/phpinfo", name="phpinfo")
-     * @Method({"GET"})
+     * @Route("/phpinfo", name="phpinfo", methods={"GET"})
+     * Method({"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
      *********************************************/
     public function infoAction(Request $request)
@@ -925,7 +555,7 @@ class GramcSessionController extends AbstractController
 
 
     /**
-     * @Route("/md5")
+     * @Route("/md5", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
      **/
 
@@ -937,7 +567,7 @@ class GramcSessionController extends AbstractController
     }
 
     /**
-     * @Route("/uri")
+     * @Route("/uri", methods={"GET"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      **/
 
@@ -949,89 +579,4 @@ class GramcSessionController extends AbstractController
         $output = $request->getPathInfo() ;
         return new Response('<pre>' . $output . '</pre>');
     }
-
-    /*
-     * Déposer dans la session les headers fournis par Shibboleth
-     * NOTE - On ne s'occupe pas de eppn, cela est déjà fait par auth_connexionAction
-     *        Côté Fédération, on doit envoyer les attributs correspondants
-     *        Conf Shibboleth: il faut modifier le fichier attribute-map.xml (ie décommenter quelques lignes
-     *        vers Other eduPerson attributes)
-     *
-     ***/
-    private function shibbHeadersToSession(Request $request) {
-        $headers = ['mail', 'givenName', 'sn', 'displayName', 'cn', 'affiliation', 'primary-affiliation'];
-        $headers_values = [];
-
-        // On recherche dans les headers
-        foreach($headers as $h) {
-            if ($request->headers->has($h)) {
-                $headers_values[$h] = $request->headers->get($h);
-            }
-        }
-
-        // On recherche dans les variables du serveur
-        $server = $request->server;
-        foreach($headers as $h) {
-            if (!isset($headers_values[$h])) {
-
-                // mail -> REDIRECT_mail
-                $k1 = 'REDIRECT_'.$h;
-                $k2 = 'HTTP_'.strtoupper($h);
-                if ($server->has($k1)) {
-                    $headers_values[$h] = $server->get($k1);
-                }
-
-                // mail -> HTTP_MAIL
-                elseif ($server->has($k2)) {
-                    $headers_values[$h] = $server->get($k2);
-                }
-                
-            }
-        }
-        
-        $session = $request->getSession();
-        foreach($headers_values as $h => $v) {
-            $session->set($h, $v);
-        }
-    
-        return $headers_values;
-    }
-
-
-
-    /**
-     * @Route("/test_workflow")
-     * @Security("is_granted('ROLE_ADMIN')")
-     * TODO - A réécrire
-     **/
-
-    //public function workflow(Request $request)
-    //{
-        //$session_workflow = new \App\Workflow\SessionWorkflow();
-        //$session = new \App\Entity\Session();
-        //$session->setEtatSession(\App\Utils\ETAT::ACTIF);
-
-        //$projet_workflow = new \App\Workflow\ProjetWorkflow();
-        //echo $projet_workflow;
-        //echo '*******************************************************************' ."\n";
-
-
-        //$version_workflow = new \App\Workflow\VersionWorkflow();
-        //echo $version_workflow;
-        //echo '*******************************************************************' ."\n";
-
-        //$projet_workflow = new \App\Workflow\ProjetWorkflow();
-        //echo $projet_workflow;
-        //echo '*******************************************************************' ."\n";
-
-        //$session_workflow = new \App\Workflow\SessionWorkflow();
-        //echo $session_workflow;
-        //echo '*******************************************************************' ."\n";
-
-
-
-        //if( $session_workflow->canExecute(\App\Utils\Signal::CLK_SESS_DEB, $session ) ) echo ' true '; else echo ' false ';
-        //if( $session_workflow->canExecute(\App\Utils\Signal::CLK_SESS_FIN, $session ) ) echo ' true '; else echo ' false ';
-        //return new Response();
-    //}
 }

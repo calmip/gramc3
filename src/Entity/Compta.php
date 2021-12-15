@@ -7,7 +7,9 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Compta
  *
- * @ORM\Table(name="compta", uniqueConstraints={@ORM\UniqueConstraint(name="item", columns={"date", "loginname", "ressource", "type" })})
+ * @ORM\Table(name="compta",
+ *            uniqueConstraints={@ORM\UniqueConstraint(name="item", columns={"date", "loginname", "ressource", "type" })},
+ *            indexes={@ORM\Index(name="loginname", columns={"loginname"})})
  * @ORM\Entity(repositoryClass="App\Repository\ComptaRepository")
  */
 class Compta

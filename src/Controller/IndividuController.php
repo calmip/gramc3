@@ -27,13 +27,22 @@ namespace App\Controller;
 use App\Entity\Individu;
 use App\Entity\Thematique;
 use App\Entity\Rattachement;
+use App\Entity\CollaborateurVersion;
+use App\Entity\CompteActivation;
+use App\Entity\Expertise;
+use App\Entity\Journal;
+use App\Entity\Rallonge;
+use App\Entity\Session;
+use App\Entity\Sso;
+use App\Entity\Version;
+
 use App\Utils\Functions;
 
 use App\GramcServices\ServiceJournal;
 use App\GramcServices\ServiceExperts\ServiceExperts;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -54,15 +63,6 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
-// pour remplacer un utilisateur par un autre
-use App\Entity\CollaborateurVersion;
-use App\Entity\CompteActivation;
-use App\Entity\Expertise;
-use App\Entity\Journal;
-use App\Entity\Rallonge;
-use App\Entity\Session;
-use App\Entity\Sso;
-use App\Entity\Version;
 
 /**
  * Individu controller.
@@ -92,9 +92,9 @@ class IndividuController extends AbstractController
     /**
      * Supprimer utilisateur
      *
-     * @Route("/{id}/supprimer", name="supprimer_utilisateur")
+     * @Route("/{id}/supprimer", name="supprimer_utilisateur", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function supprimerUtilisateurAction(Request $request, Individu $individu)
     {
@@ -107,9 +107,9 @@ class IndividuController extends AbstractController
     /**
      * Remplacer utilisateur: on a demandé la suppression d'un utilisateur qui a des projets, expertises etc
      *
-     * @Route("/{id}/remplacer", name="remplacer_utilisateur")
+     * @Route("/{id}/remplacer", name="remplacer_utilisateur", methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function remplacerUtilisateurAction(Request $request, Individu $individu)
     {
@@ -161,9 +161,9 @@ class IndividuController extends AbstractController
 
         $erreurs  =   [];
 
-        // utilisateur peu actif et qui ne peut pas se connecter peut être effacé
+        // utilisateur peu actif peut être effacé même s'il peut se connecter'
         if ($CollaborateurVersion == null && $Expertise == null
-              && $Rallonge == null && $Session == null && count($Sso)==0) {
+              && $Rallonge == null && $Session == null) {
 
             foreach ($individu->getThematique() as $item) {
                 $em->persist($item);
@@ -282,9 +282,9 @@ class IndividuController extends AbstractController
     /**
     * Deletes a individu entity (CRUD)
     *
-    * @Route("/{id}/delete", name="individu_delete")
+    * @Route("/{id}/delete", name="individu_delete", methods={"DELETE"})
     * @Security("is_granted('ROLE_ADMIN')")
-    * @Method("DELETE")
+    * Method("DELETE")
     */
     public function deleteAction(Request $request, Individu $individu)
     {
@@ -304,9 +304,9 @@ class IndividuController extends AbstractController
     /**
      * Lists all individu entities.
      *
-     * @Route("/", name="individu_index")
+     * @Route("/", name="individu_index", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function indexAction()
     {
@@ -322,9 +322,9 @@ class IndividuController extends AbstractController
     /**
      * Creates a new individu entity.
      *
-     * @Route("/new", name="individu_new")
+     * @Route("/new", name="individu_new", methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function newAction(Request $request)
     {
@@ -349,9 +349,9 @@ class IndividuController extends AbstractController
     /**
      * Finds and displays a individu entity.
      *
-     * @Route("/{id}/show", name="individu_show")
+     * @Route("/{id}/show", name="individu_show", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function showAction(Individu $individu)
     {
@@ -366,9 +366,9 @@ class IndividuController extends AbstractController
     /**
      * Displays a form to edit an existing individu entity.
      *
-     * @Route("/{id}/edit", name="individu_edit")
+     * @Route("/{id}/edit", name="individu_edit", methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function editAction(Request $request, Individu $individu)
     {
@@ -412,11 +412,11 @@ class IndividuController extends AbstractController
     /**
     * Modifier profil
     *
-    * @Route("/{id}/modifier_profil", name="modifier_profil")
-    * @Security("is_granted('ROLE_ADMIN')")
-    * @Method("GET")
+    * Route("/{id}/modifier_profil", name="modifier_profil", methods={"GET"})
+    * Security("is_granted('ROLE_ADMIN')")
+    * Method("GET")
     */
-    public function modifierProfilAction(Request $request, Individu $individu)
+    /*public function modifierProfilAction(Request $request, Individu $individu)
     {
         $individu->setAdmin(true);
         $em = $this->getDoctrine()->getManager();
@@ -424,27 +424,25 @@ class IndividuController extends AbstractController
         $em->flush($individu);
 
         return $this->render('individu/ligne.html.twig', [ 'individu' => $individu ]);
-    }
+    }*/
 
     /**
      * Displays a form to edit an existing individu entity.
      *
-     * @Route("/{id}/modify", name="individu_modify")
+     * @Route("/{id}/modify", name="individu_modify", methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function modifyAction(Request $request, Individu $individu)
     {
         $em = $this->getDoctrine()->getManager();
         $repos = $em->getRepository(Individu::class);
         
-        $editForm = $this->createForm('App\Form\IndividuType', $individu);
-
+        $formInd = $this->createForm('App\Form\IndividuType', $individu);
         $session = $request->getSession();
-        //$current_mail = $session->get('current_mail');
         
-        $editForm->handleRequest($request);
-        if ($editForm->isSubmitted() /*&& $editForm->isValid()*/) {
+        $formInd->handleRequest($request);
+        if ($formInd->isSubmitted() /*&& $editForm->isValid()*/) {
 
             $exc = false;
             try
@@ -466,13 +464,61 @@ class IndividuController extends AbstractController
             }
         }
 
+        $ssos = $individu->getSso();
+        $ssos_old = clone $ssos;
+        //dd($ssos->toArray());
+        $formEppn = $this->createFormBuilder($individu)
+            ->add(
+                'Sso',
+                EntityType::class,
+                [
+                'multiple' => true,
+                'expanded' => true,
+                'class' => 'App:Sso',
+                'choices' => $individu->getSso(),
+                'choice_label' => function ($s) { return $s->getEppn(); },
+                'choice_value' => function ($t) { return $t; },
+                ]
+            )
+            ->add('submit', SubmitType::class, ['label' => 'modifier' ])
+            ->add('reset', ResetType::class, ['label' => 'reset' ])
+            ->getForm();
+
+        $formEppn->handleRequest($request);
+
+        if ($formEppn->isSubmitted() && $formEppn->isValid()) {
+            //dd($individu->getSso());
+            //dd($ssos_old);
+            //dd($formEppn['Sso']->getData());
+            /*
+             * 0 1 2, 0 2 clicked => ne reste que 0 2
+             * */
+
+            // foreach ($formEppn['Sso']->getData() as $s) {
+                 //dd($s);
+                 //$ssos_ttl->removeElement($s);
+            // }
+            // dd($ssos_ttl);
+            foreach ($ssos_old as $s) {
+                if ( !$ssos->contains($s)) {
+                    //$individu->removeSso($s);
+                    $em->remove($s);
+                }
+            }
+            $em->flush();
+
+            
+             
+        }
+
         //$session->set('current_mail',$individu->getMail());
 
         return $this->render(
             'individu/modif.html.twig',
             [
             'individu' => $individu,
-            'form' => $editForm->createView(),
+            'formInd' => $formInd->createView(),
+            'formEppn' => $formEppn->createView(),
             ]
         );
     }
@@ -480,9 +526,9 @@ class IndividuController extends AbstractController
     /**
      * Ajouter un utilisateur
      *
-     * @Route("/ajouter", name="individu_ajouter")
+     * @Route("/ajouter", name="individu_ajouter", methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function ajouterAction(Request $request)
     {
@@ -511,9 +557,9 @@ class IndividuController extends AbstractController
     /**
      * Devenir Admin
      *
-     * @Route("/{id}/devenir_admin", name="devenir_admin")
+     * @Route("/{id}/devenir_admin", name="devenir_admin", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function devenirAdminAction(Request $request, Individu $individu)
     {
@@ -534,9 +580,9 @@ class IndividuController extends AbstractController
     /**
      * Cesser d'être Admin
      *
-     * @Route("/{id}/plus_admin", name="plus_admin")
+     * @Route("/{id}/plus_admin", name="plus_admin", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function plusAdminAction(Request $request, Individu $individu)
     {
@@ -555,9 +601,9 @@ class IndividuController extends AbstractController
     /**
     * Devenir Obs
     *
-    * @Route("/{id}/devenir_obs", name="devenir_obs")
+    * @Route("/{id}/devenir_obs", name="devenir_obs", methods={"GET"})
     * @Security("is_granted('ROLE_ADMIN')")
-    * @Method("GET")
+    * Method("GET")
     */
     public function devenirObsAction(Request $request, Individu $individu)
     {
@@ -577,9 +623,9 @@ class IndividuController extends AbstractController
     /**
      * Cesser d'être Obs
      *
-     * @Route("/{id}/plus_obs", name="plus_obs")
+     * @Route("/{id}/plus_obs", name="plus_obs", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function plusObsAction(Request $request, Individu $individu)
     {
@@ -598,9 +644,9 @@ class IndividuController extends AbstractController
     /**
     * Devenir Sysadmin
     *
-    * @Route("/{id}/devenir_sysadmin", name="devenir_sysadmin")
+    * @Route("/{id}/devenir_sysadmin", name="devenir_sysadmin", methods={"GET"})
     * @Security("is_granted('ROLE_ADMIN')")
-    * @Method("GET")
+    * Method("GET")
     */
     public function devenirSysadminAction(Request $request, Individu $individu)
     {
@@ -619,9 +665,9 @@ class IndividuController extends AbstractController
     /**
      * Cesser d'être Sysadmin
      *
-     * @Route("/{id}/plus_sysadmin", name="plus_sysadmin")
+     * @Route("/{id}/plus_sysadmin", name="plus_sysadmin", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function plusSysadminAction(Request $request, Individu $individu)
     {
@@ -640,9 +686,9 @@ class IndividuController extends AbstractController
     /**
      * Devenir President
      *
-     * @Route("/{id}/devenir_president", name="devenir_president")
+     * @Route("/{id}/devenir_president", name="devenir_president", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function devenirPresidentAction(Request $request, Individu $individu)
     {
@@ -661,9 +707,9 @@ class IndividuController extends AbstractController
     /**
      * Cesser d'être President
      *
-     * @Route("/{id}/plus_president", name="plus_president")
+     * @Route("/{id}/plus_president", name="plus_president", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function plusPresidentAction(Request $request, Individu $individu)
     {
@@ -682,9 +728,9 @@ class IndividuController extends AbstractController
     /**
      * Devenir Expert
      *
-     * @Route("/{id}/devenir_expert", name="devenir_expert")
+     * @Route("/{id}/devenir_expert", name="devenir_expert", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function devenirExpertAction(Request $request, Individu $individu)
     {
@@ -703,9 +749,9 @@ class IndividuController extends AbstractController
     /**
      * Cesser d'être Expert
      *
-     * @Route("/{id}/plus_expert", name="plus_expert")
+     * @Route("/{id}/plus_expert", name="plus_expert", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function plusExpertAction(Request $request, Individu $individu)
     {
@@ -726,9 +772,9 @@ class IndividuController extends AbstractController
     /**
     * Activer
     *
-    * @Route("/{id}/activer", name="activer_utilisateur")
+    * @Route("/{id}/activer", name="activer_utilisateur", methods={"GET"})
     * @Security("is_granted('ROLE_ADMIN')")
-    * @Method("GET")
+    * Method("GET")
     */
     public function activerAction(Request $request, Individu $individu)
     {
@@ -747,9 +793,9 @@ class IndividuController extends AbstractController
     /**
      * Desactiver utilisateur
      *
-     * @Route("/{id}/desactiver", name="desactiver_utilisateur")
+     * @Route("/{id}/desactiver", name="desactiver_utilisateur", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function desactiverAction(Request $request, Individu $individu)
     {
@@ -757,10 +803,10 @@ class IndividuController extends AbstractController
 
         $individu->setDesactive(true);
 
-        $ssos = $individu->getSso();
-        foreach ($ssos as $sso) {
-            $em->remove($sso);
-        }
+        //$ssos = $individu->getSso();
+        //foreach ($ssos as $sso) {
+        //    $em->remove($sso);
+        //}
 
         $em->persist($individu);
         $em->flush($individu);
@@ -773,32 +819,11 @@ class IndividuController extends AbstractController
     }
 
     /**
-     * Sudo (l'admin change d'identité)
-     *
-     * @Route("/{id}/sudo", name="sudo")
-     * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
-     */
-    public function sudoAction(Request $request, Individu $individu)
-    {
-        $sj = $this->sj;
-        $ac = $this->ac;
-
-        if (! $ac->isGranted('ROLE_PREVIOUS_ADMIN')) {
-            $sj->infoMessage("Controller : connexion de l'utilisateur " . $individu . ' en SUDO ');
-            return new RedirectResponse($this->generateUrl('accueil', [ '_switch_user' => $individu->getId() ]));
-        } else {
-            $sj->warningMessage("Controller : connexion de l'utilisateur " . $individu . ' déjà en SUDO !');
-            return $this->redirectToRoute('individu_gerer');
-        }
-    }
-
-    /**
      * Affecter l'utilisateur à une ou des thematiques
      *
-     * @Route("/{id}/thematique", name="choisir_thematique")
+     * @Route("/{id}/thematique", name="choisir_thematique", methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function thematiqueAction(Request $request, Individu $individu)
     {
@@ -865,11 +890,75 @@ class IndividuController extends AbstractController
     }
 
     /**
+     * Supprimer un ou plusieurs eppn de cet utilisateur
+     *
+     * @Route("/{id}/eppn", name="gere_eppn", methods={"GET","POST"})
+     * @Security("is_granted('ROLE_ADMIN')")
+     * Method({"GET", "POST"})
+     */
+    public function eppnAction(Request $request, Individu $individu)
+    {
+        $em   = $this->getDoctrine()->getManager();
+        $ssos = $individu->getSso();
+        $form = $this->createFormBuilder($individu)
+            ->add(
+                'eppn',
+                EntityType::class,
+                [
+                'multiple' => true,
+                'expanded' => true,
+                'class' => 'App:Sso',
+                'choices' => $ssos
+                ]
+            )
+            ->add('submit', SubmitType::class, ['label' => 'modifier' ])
+            ->add('reset', ResetType::class, ['label' => 'reset' ])
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // thématiques && Doctrine ManyToMany
+            $all_thematiques = $em->getRepository(Thematique::class)->findAll();
+            $my_thematiques = $individu->getThematique();
+
+            foreach ($all_thematiques as $thematique) {
+                if ($my_thematiques->contains($thematique)) {
+                    $thematique->addExpert($individu);
+                } else {
+                    $thematique->removeExpert($individu);
+                }
+            }
+
+            // rattachement && Doctrine ManyToMany
+            $all_ratt = $em->getRepository(Rattachement::class)->findAll();
+            $my_ratt = $individu->getRattachement();
+
+            foreach ($all_ratt as $ratt) {
+                if ($my_ratt->contains($ratt)) {
+                    $ratt->addExpert($individu);
+                } else {
+                    $ratt->removeExpert($individu);
+                }
+            }
+            $em->flush();
+        }
+
+        return $this->render(
+            'individu/thematique.html.twig',
+            [
+            'individu' => $individu,
+            'form' => $form->createView(),
+            ]
+        );
+    }
+
+    /**
      * Autocomplete: en lien avec l'autocomplete de jquery
      *
-     * @Route("/mail_autocomplete", name="mail_autocomplete")
+     * @Route("/mail_autocomplete", name="mail_autocomplete", methods={"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
-     * @Method({"POST","GET"})
+     * Method({"POST","GET"})
      */
     public function mailAutocompleteAction(Request $request)
     {
@@ -948,10 +1037,10 @@ class IndividuController extends AbstractController
     /**
      * Liste tous les individus
      *
-     * @Route("/gerer", name="individu_gerer")
-     * @Route("/liste")
+     * @Route("/gerer", name="individu_gerer", methods={"GET","POST"})
+     * @Route("/liste", methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET","POST"})
+     * Method({"GET","POST"})
      */
     public function gererAction(Request $request)
     {

@@ -29,6 +29,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\EquatableInterface;
 
 use App\Utils\Functions;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -39,7 +40,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity(repositoryClass="App\Repository\IndividuRepository")
  * @ORM\HasLifecycleCallbacks()
  */
-class Individu implements UserInterface, EquatableInterface
+class Individu implements UserInterface, EquatableInterface, PasswordAuthenticatedUserInterface
 {
     public const INCONNU       = 0;
     public const POSTDOC       = 1;
@@ -262,7 +263,7 @@ class Individu implements UserInterface, EquatableInterface
 
     ////////////////////////////////////////////////////////////////////////////
 
-    /* Pour verifier que deux classes sont égales, utiliser cet interface et pas == ! */
+    /* Pour verifier que deux objets sont égaux, utiliser cet interface et pas == ! */
     public function isEqualTo(UserInterface $user)
     {
         if ($user == null || !$user instanceof Individu) {
@@ -280,22 +281,16 @@ class Individu implements UserInterface, EquatableInterface
     {
         return $this->idIndividu;
     }
-    public function getUsername()
-    {
-        return $this->idIndividu;
-    }
 
-    public function getSalt()
-    {
-        return null;
-    }
-    public function getPassword()
-    {
-        return null;
-    }
-    public function eraseCredentials()
-    {
-    }
+    // implementation UserInterface
+    public function getUserIdentifier() { return $this->getId();}
+    public function getUsername() { return $this->getMail();}
+    public function getSalt()           { return null;}
+    public function getPassword(): ?string { return "";}
+    public function eraseCredentials() {}
+
+
+    ////////////////////////////////////////////////////////////////////////////
 
     /* LES ROLES DEFINIS DANS L'APPLICATION
      *     - ROLE_DEMANDEUR = Peut demander des ressoureces - Le minimum

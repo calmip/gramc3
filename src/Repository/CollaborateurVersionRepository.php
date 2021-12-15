@@ -133,23 +133,23 @@ class CollaborateurVersionRepository extends \Doctrine\ORM\EntityRepository
      */
     public function findAllUsers($annee) 
     {
-		$em = $this->getEntityManager();
-		
-		$ian = intval($annee);
-		$an = strval(($ian>2000) ? $ian-2000 : $ian);
+        $em = $this->getEntityManager();
+        
+        $ian = intval($annee);
+        $an = strval(($ian>2000) ? $ian-2000 : $ian);
 
-		// TODO - Une requête DQL avec un LIKE sur le id_version ce serait plus malin
-		//        Mais je ne sais pas faire !
-		$all_out = $em->createQuery('SELECT u FROM App:CollaborateurVersion u WHERE u.loginname IS NOT NULL')
-		->getResult();
-		
-		$out = [];
-		foreach ($all_out as $cv) {
-			$v_str = $cv->getVersion()->getIdVersion();
-			if (substr($v_str,0,2) === $an) {
-				$out[] = $cv;
-			}
-		}
-		return $out;
-	}
+        // TODO - Une requête DQL avec un LIKE sur le id_version ce serait plus malin
+        //        Mais je ne sais pas faire !
+        $all_out = $em->createQuery('SELECT u FROM App:CollaborateurVersion u WHERE u.loginname IS NOT NULL')
+        ->getResult();
+        
+        $out = [];
+        foreach ($all_out as $cv) {
+            $v_str = $cv->getVersion()->getIdVersion();
+            if (substr($v_str,0,2) === $an) {
+                $out[] = $cv;
+            }
+        }
+        return $out;
+    }
 }

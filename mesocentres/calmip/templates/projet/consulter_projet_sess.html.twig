@@ -138,10 +138,7 @@
 </div>
 {% endif %}
 
-{% if warn_type and session.etatsession == 2 %}
-coucou EDITION_DEMANDE
-{% endif %}
-{% if warn_type and session.etatsession != 2 %}
+{% if warn_type==1 and session.etatsession != 2 %}
 <div class="message warning"> <strong>ATTENTION</strong> - Vous ne pouvez demander plus de {{prj_seuil_sess}} heures actuellement. 
 Vous pourrez demander à nouveau des heures (sans limitation) lors de la prochaine session d'attribution.
 </div>
@@ -284,30 +281,32 @@ Le laboratoire associé au projet est le laboratoire du responsable
     </tr>
 
     {% for user in version.CollaborateurVersion %}
-    <tr>
-        {% if coll_login %}
-        <td>{% if( user.login == true) %}Oui{% else %}Non{% endif %}</td>
-            {% if version.etat==5 or version.etat == 4 %}
-                <td>{% if (user.login == true) %}
-                       {% if user.loginname==null %}
-                          <img src="{{ asset('icones/attention16.png') }}" alt="Compte non encore créé" title="compte non encore créé" />
-                       {% else %}
-                          <tt>{{ user.loginname }}</tt>
-                       {% endif %}
-                    {% else %}  - {% endif %}
-                </td>
+        {% if not user.deleted %}
+        <tr>
+            {% if coll_login %}
+            <td>{% if( user.login == true) %}Oui{% else %}Non{% endif %}</td>
+                {% if version.etat==5 or version.etat == 4 %}
+                    <td>{% if (user.login == true) %}
+                           {% if user.loginname==null %}
+                              <img src="{{ asset('icones/attention16.png') }}" alt="Compte non encore créé" title="compte non encore créé" />
+                           {% else %}
+                              <tt>{{ user.loginname }}</tt>
+                           {% endif %}
+                        {% else %}  - {% endif %}
+                    </td>
+                {% endif %}
             {% endif %}
+            {% if nodata==false %}
+                <td>{% if( user.clogin == true) %}Oui{% else %}Non{% endif %}</td>
+            {% endif %}
+            <td>{{ user.Collaborateur.prenom }}</td>
+            <td>{{ user.Collaborateur.nom }}</td>
+            <td>{{ user.Collaborateur.mail }}</td>
+            <td>{% if( not ( user.Collaborateur.statut == null ) ) %}{{ user.Collaborateur.statut }}{% endif %}</td>
+            <td>{% if( not ( user.Collaborateur.labo == null ) ) %}{{ user.Collaborateur.labo.getAcroLabo }}{% endif %}</td>
+            <td>{{ user.Collaborateur.etab }}</td>
+        </tr>
         {% endif %}
-        {% if nodata==false %}
-            <td>{% if( user.clogin == true) %}Oui{% else %}Non{% endif %}</td>
-        {% endif %}
-        <td>{{ user.Collaborateur.prenom }}</td>
-        <td>{{ user.Collaborateur.nom }}</td>
-        <td>{{ user.Collaborateur.mail }}</td>
-        <td>{% if( not ( user.Collaborateur.statut == null ) ) %}{{ user.Collaborateur.statut }}{% endif %}</td>
-        <td>{% if( not ( user.Collaborateur.labo == null ) ) %}{{ user.Collaborateur.labo.getAcroLabo }}{% endif %}</td>
-        <td>{{ user.Collaborateur.etab }}</td>
-    </tr>
     {% endfor %}
 </tbody>
 </table>

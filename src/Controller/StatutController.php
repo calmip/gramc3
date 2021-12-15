@@ -26,7 +26,7 @@ namespace App\Controller;
 
 use App\Entity\Statut;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -44,8 +44,8 @@ class StatutController extends AbstractController
     /**
      * Lists all statut entities.
      *
-     * @Route("/", name="statut_index")
-     * @Method("GET")
+     * @Route("/", name="statut_index",methods={"GET"})
+     * Method("GET")
      */
     public function indexAction()
     {
@@ -61,8 +61,8 @@ class StatutController extends AbstractController
     /**
      * Creates a new statut entity.
      *
-     * @Route("/new", name="statut_new")
-     * @Method({"GET", "POST"})
+     * @Route("/new", name="statut_new",methods={"GET","POST"})
+     * Method({"GET", "POST"})
      */
     public function newAction(Request $request)
     {
@@ -87,8 +87,8 @@ class StatutController extends AbstractController
     /**
      * Finds and displays a statut entity.
      *
-     * @Route("/{id}", name="statut_show")
-     * @Method("GET")
+     * @Route("/{id}", name="statut_show",methods={"GET"})
+     * Method("GET")
      */
     public function showAction(Statut $statut)
     {
@@ -103,8 +103,8 @@ class StatutController extends AbstractController
     /**
      * Displays a form to edit an existing statut entity.
      *
-     * @Route("/{id}/edit", name="statut_edit")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/edit", name="statut_edit",methods={"GET"})
+     * Method({"GET", "POST"})
      */
     public function editAction(Request $request, Statut $statut)
     {
@@ -128,8 +128,8 @@ class StatutController extends AbstractController
     /**
      * Deletes a statut entity.
      *
-     * @Route("/{id}", name="statut_delete")
-     * @Method("DELETE")
+     * @Route("/{id}", name="statut_delete",methods={"DELETE"})
+     * Method("DELETE")
      */
     public function deleteAction(Request $request, Statut $statut)
     {

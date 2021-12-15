@@ -50,6 +50,13 @@ class CollaborateurVersion
     /**
      * @var boolean
      *
+     * @ORM\Column(name="deleted", type="boolean", nullable=false)
+     */
+    private $deleted;
+
+    /**
+     * @var boolean
+     *
      * @ORM\Column(name="login", type="boolean", nullable=false)
      */
     private $login;
@@ -185,6 +192,30 @@ class CollaborateurVersion
     public function getResponsable()
     {
         return $this->responsable;
+    }
+
+    /**
+     * Set deleted
+     *
+     * @param boolean $deleted
+     *
+     * @return CollaborateurVersion
+     */
+    public function setDeleted($deleted)
+    {
+        $this->deleted = $deleted;
+
+        return $this;
+    }
+
+    /**
+     * Get deleted
+     *
+     * @return boolean
+     */
+    public function getDeleted()
+    {
+        return $this->deleted;
     }
 
     /**

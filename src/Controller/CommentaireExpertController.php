@@ -30,7 +30,7 @@ use App\GramcServices\ServiceJournal;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -88,9 +88,9 @@ class CommentaireExpertController extends AbstractController
     /**
     * Modification d'un commentaire par l'utilisateur connecté
     *
-    * @Route("/{id}/modif", name="commentaireexpert_modify")
+    * @Route("/{id}/modif", name="commentaireexpert_modify", methods={"GET","POST"})
     * @Security("is_granted('ROLE_EXPERT')")
-    * @Method({"GET", "POST"})
+    * Method({"GET", "POST"})
     ************************/
     public function modifyAction(Request $request, CommentaireExpert $commentaireExpert)
     {
@@ -214,9 +214,9 @@ class CommentaireExpertController extends AbstractController
     * Vérifie que le commentaire de l'année passée en paramètre et de la personne connectée
     * existe, et sinon le crée. Ensuite redirige vers le contrôleur de modification
     *
-    * @Route("/{annee}/cree-ou-modif", name="cree_ou_modif")
+    * @Route("/{annee}/cree-ou-modif", name="cree_ou_modif", methods={"GET","POST"})
     * @Security("is_granted('ROLE_EXPERT')")
-    * @Method({"GET", "POST"})
+    * Method({"GET", "POST"})
     **********/
     public function creeOuModifAction(Request $request, $annee)
     {
@@ -240,9 +240,9 @@ class CommentaireExpertController extends AbstractController
     /**
     * Liste tous les commentaires des experts pour une année
     *
-    * @Route("/{annee}/liste", name="commentaireexpert_liste")
+    * @Route("/{annee}/liste", name="commentaireexpert_liste", methods={"GET","POST"})
     * @Security("is_granted('ROLE_OBS')")
-    * @Method({"GET", "POST"})
+    * Method({"GET", "POST"})
     **********/
     public function listeAction(Request $request, $annee)
     {

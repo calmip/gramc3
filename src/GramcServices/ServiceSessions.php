@@ -162,7 +162,7 @@ class ServiceSessions
             $annee=$this->grdt->showYear();
         }
 
-        $choices = array_reverse(Functions::choicesYear(new \DateTime('2000-01-01'), $this->grdt, 0), true);
+        $choices = array_reverse(Functions::choicesYear(new \DateTime('2000-01-01'), new \DateTime($annee.'-01-01'), 0), true);
         $form    = Functions::createFormBuilder($this->ff, ['annee' => $annee ])
                     ->add(
                         'annee',

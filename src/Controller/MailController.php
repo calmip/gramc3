@@ -12,7 +12,7 @@
 namespace App\Controller;
 
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -79,9 +79,9 @@ class MailController extends AbstractController
     }
 
     /**
-     * @Route("/{id}/mail_to_responsables_fiche",name="mail_to_responsables_fiche")
+     * @Route("/{id}/mail_to_responsables_fiche",name="mail_to_responsables_fiche", methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_PRESIDENT')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
     **/
 
     public function mailToResponsablesFicheAction(Request $request, Session $session)
@@ -184,9 +184,9 @@ class MailController extends AbstractController
     }
 
     /**
-     * @Route("/{id}/mail_to_responsables",name="mail_to_responsables")
+     * @Route("/{id}/mail_to_responsables",name="mail_to_responsables", methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_PRESIDENT')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
     **/
     public function mailToResponsablesAction(Request $request, Session $session)
     {

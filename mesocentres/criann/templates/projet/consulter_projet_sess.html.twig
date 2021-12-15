@@ -283,6 +283,7 @@ Le laboratoire associé au projet est le laboratoire du responsable
     </tr>
 
     {% for user in version.CollaborateurVersion %}
+    {% if not user.deleted %}
     <tr>
         {% if coll_login %}
         <td>{% if( user.login == true) %}Oui{% else %}Non{% endif %}</td>
@@ -304,6 +305,7 @@ Le laboratoire associé au projet est le laboratoire du responsable
         <td>{% if( not ( user.Collaborateur.labo == null ) ) %}{{ user.Collaborateur.labo.getAcroLabo }}{% endif %}</td>
         <td>{{ user.Collaborateur.etab }}</td>
     </tr>
+    {% endif %}
     {% endfor %}
 </tbody>
 </table>

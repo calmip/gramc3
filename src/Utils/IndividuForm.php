@@ -36,6 +36,9 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use App\GramcServices\ServiceJournal;
 use Doctrine\ORM\EntityManager;
 
+/**************************************************************************
+ * Ce formulaire est utilisé par l'écran des collaborateurs - A chaque ligne correspond un IndividuForm
+ ************************************************************************/
 class IndividuForm
 {
     protected $login;
