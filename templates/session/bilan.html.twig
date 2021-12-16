@@ -107,26 +107,41 @@
                 <th>Numéro</th>
                 <th></th>
                 {% for label in form_labels %}
-                    <th><span title="{{label.nom}}">{{label.acro}}</span></th>
+                    {% if label.acro != 'ALL_EMPTY' %}
+                        <th><span title="{{label.nom}}">{{label.acro}}</span></th>
+                    {% endif %}
                 {% endfor %}
+                <th>Autres demandes</th>
             </tr>
         </thead>
+
         <tbody>
             {% for version in versions %}
+                {% if versions_suppl[version.idVersion]['formation']['ALL_EMPTY'].rep == false %}
+                    <tr>
+                        <td>{{version}}</td>
+                        <td>
+                        {% if version.projet != null and  version.projet.idProjet != null %}
+                            <a href="{{ path('consulter_projet', { 'id': version.projet.idProjet }) }}" title="Consulter le projet">
+                            <img src="{{ asset('icones/consulter.png') }}" alt="consulter" /></a>
+                        {% endif %}
+                        </td>
+                        {% for label in form_labels %}
+                            {% if label.acro != 'ALL_EMPTY' %}
+                                <td>{{versions_suppl[version.idVersion]['formation'][label.acro].rep}}</td>
+                            {% endif %}
+                        {% endfor %}
+                        <td>{{version.demFormAutresAutres}}</td>
+                    </tr>
+                    {% endif %}
+            {% endfor %}
             <tr>
-                <td>{{version}}</td>
-                <td>
-                {% if version.projet != null and  version.projet.idProjet != null %}
-                <a href="{{ path('consulter_projet', { 'id': version.projet.idProjet }) }}" title="Consulter le projet">
-                <img src="{{ asset('icones/consulter.png') }}" alt="consulter" /></a>
-                {% endif %}
-                </td>
-
-                {% for label in form_labels %}
-                <td>{{versions_suppl[version.idVersion]['formation'][label.acro].rep}}</td>
+                <th>TOTAL</th><td>&nbsp;</td>
+                {% for lbl,ttl in form_total %}
+                    {% if lbl != 'ALL_EMPTY' %}<td>{{ttl}}</td>{% endif %}
                 {% endfor %}
             </tr>
-            {% endfor %}            
+            
         </tbody>
         </table>
  
