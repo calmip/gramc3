@@ -1316,7 +1316,7 @@ class AdminuxController extends AbstractController
     }
 
     /**
-     * Vérifie la base de données, supprime les mots de passe temporaires "expirés"
+     * Vérifie la base de données, marque les mots de passe temporaires comme expirés
      * et renvoie les mots de passe cryptés (champ cpassword)
      * On pourra vérifier avec le mot de passe du supercalculateur et savoir s'il a été changé
      * Si le mot de passe est expiré, renvoie null
@@ -1341,18 +1341,21 @@ class AdminuxController extends AbstractController
         $sd     = $this->sd;
         $users  = $em->getRepository(User::class)->findAll();
         $rusers = [];
-        foreach ($users as $user) {
+        foreach ($users as $user)
+        {
             $u = [];
-            //echo ($user->getPassexpir()->format('Y-m-d')."   ".$sd->format('Y-m-d')."\n");
-            if ($user->getPassexpir() <= $sd) {
-                $u["loginname"] = $user->getLoginname();
-                $u["cpassword"] = null;
-            } else {
-                $u["loginname"] = $user->getLoginname();
-                $u["cpassword"] = $user->getCpassword();
+            // On marque le user comme expiré, mais on ne supprime rien
+            if ($user->getPassexpir()<=$sd && $user->getExpire()==false)
+            {
+                $user->setExpire(true);
+                $em->persist($user);
+                $em->flush();
             }
-            $rusers[] = $u;
+            $u["loginname"] = $user->getLoginname();
+            $u["cpassword"] = $user->getCpassword();
+            $u['expire'] = $user->getExpire();
         }
+        $rusers[] = $u;
         return new Response(json_encode($rusers));
     }
 }

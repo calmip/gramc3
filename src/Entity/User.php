@@ -59,6 +59,13 @@ class User
     private $cpassword;
 
     /**
+     * @var boolean
+     *
+     * @ORM\Column(name="expire", type="boolean", nullable=false)
+     */
+    private $expire;
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column(name="pass_expiration", type="datetime", nullable=true)
@@ -172,5 +179,29 @@ class User
     public function getPassexpir()
     {
         return $this->passexpir;
+    }
+
+    /**
+     * Set expire
+     *
+     * @param boolean $expire
+     *
+     * @return CollaborateurVersion
+     */
+    public function setExpire($expire)
+    {
+        $this->expire = $expire;
+
+        return $this;
+    }
+
+    /**
+     * Get expire
+     *
+     * @return boolean
+     */
+    public function getExpire()
+    {
+        return $this->expire;
     }
 }
