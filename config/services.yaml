@@ -28,11 +28,6 @@ services:
         resource: '../src/Controller/*'
         tags: [controller.service_arguments]
 
-    # TODO - Il faut déclarer ce repository, pas les autres: POURQUOI ?
-    App\Repository\FormationRepository:
-        autowire: true
-        tags: ['doctrine.repository_service']
-
     # La plupart des services gramc sont dans le répertoire GramcServices
     App\GramcServices\:
         resource: '../src/GramcServices/*'
@@ -47,21 +42,6 @@ services:
     App\Security\:
         resource: '../src/Security/*'
     
-    #app.gramc_user_provider:
-    #    class: App\Security\GramcUserProvider
-
-    #app.user_checker:
-    #    class: App\Security\User\UserChecker
-
-    #App\Security\User\UserChecker: '@app.user_checker'
-    
-    # cf https://stackoverflow.com/questions/47613979/symfony-3-4-0-could-not-find-any-fixture-services-to-load
-    # makes classes in src/AppBundle/DataFixtures available to be used as services
-    # and have a tag that allows actions to type-hint services
-    App\DataFixtures\:
-        resource: '../src/DataFixtures'
-        tags: ['doctrine.fixture.orm']
-
     App\EventListener\ExceptionListener:
         arguments: ["%kernel.debug%"]
         tags:

@@ -576,6 +576,9 @@ Le laboratoire associé au projet est le laboratoire du responsable
     {% for f in formation %}
     <tr><th class="horiz">{{f.nom}}</th><td>{{f.rep}}</td></tr>
     {% endfor %}
+    {% if version.demFormAutresAutres != null %}
+    <tr><th class="horiz">Autres demandes</th><td>{{version.demFormAutresAutres}} </td></tr>
+    {% endif %}
 </tbody>
 </table>
 
