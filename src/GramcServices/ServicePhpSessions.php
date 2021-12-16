@@ -103,23 +103,35 @@ class ServicePhpSessions
                 }
                 else
                 {
-                    //dd($_SESSION['_sf2_attributes']);
-                    if ( ! array_key_exists('_security_global_security_context', $_SESSION['_sf2_attributes']))
-                    {
-                        $individu = null;
-                    }
-                    else
+                    // Utilisateur du gui
+                    if (array_key_exists('_security_global_security_context', $_SESSION['_sf2_attributes']))
                     {
                         $secu_data = unserialize($_SESSION['_sf2_attributes']['_security_global_security_context']);
                         $individu = $secu_data->getUser();
+                        $rest_individu = null;
                     }
-                    if ($individu == null) {
+
+                    // Api REST - firewall calc - cf. security.yaml
+                    elseif (array_key_exists('_security_calc', $_SESSION['_sf2_attributes']))
+                    {
+                        $secu_data = unserialize($_SESSION['_sf2_attributes']['_security_calc']);
+                        //dd($secu_data);
+                        $individu = null;
+                        $rest_individu = $secu_data->getUser();
+                        //dd($rest_individu);
+                    }
+                    else
+                    {
+                        $individu = null;
+                        $rest_individu = null;                        
+                    }
+                    if ($individu == null && $rest_individu == null) {
                         $sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Problème d'individu ");
                     //dd($secu_data);
                     }
                     else
                     {
-                        $connexions[] = [ 'user' => $individu, 'minutes' => $min,'heures' => $heures ];
+                        $connexions[] = [ 'user' => $individu, 'rest_user' => $rest_individu, 'minutes' => $min, 'heures' => $heures ];
                     }
                 }
             }
