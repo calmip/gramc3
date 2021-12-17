@@ -46,18 +46,8 @@ use Doctrine\ORM\EntityManagerInterface;
  ******/
 class ServiceForms
 {
-    private $em;
-    private $vl;
-    private $ff;
-    private $sj;
-
-    public function __construct(ValidatorInterface $vl, FormFactoryInterface $ff, EntityManagerInterface $em, ServiceJournal $sj)
-    {
-        $this->vl = $vl;
-        $this->ff = $ff;
-        $this->em = $em;
-        $this->sj = $sj;
-    }
+    public function __construct(private ValidatorInterface $vl, private FormFactoryInterface $ff, private EntityManagerInterface $em, private ServiceJournal $sj)
+    {}
 
     /****
      * Appelle le service de validation sur les data par rapport à des contraintes
@@ -87,7 +77,7 @@ class ServiceForms
      * que de manière "normale"
      *
      * params = request
-     * 		dirname : répertoire de destination
+     *          dirname : répertoire de destination
      *          filename: nom définitif du fichier
      *
      * return = la form si pas encore soumise

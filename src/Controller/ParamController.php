@@ -28,7 +28,6 @@ use App\Entity\Param;
 use App\Utils\Functions;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
@@ -47,12 +46,7 @@ use Symfony\Component\Form\FormFactoryInterface;
  */
 class ParamController extends AbstractController
 {
-    private $ff;
-
-    public function __construct(FormFactoryInterface $ff)
-    {
-        $this->ff  = $ff;
-    }
+    public function __construct(private FormFactoryInterface $ff) {}
 
     /**
      * Lists all param entities.

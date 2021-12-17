@@ -23,7 +23,6 @@
 
 namespace App\GramcServices;
 
-//use Doctrine\ORM\EntityRepository;
 use App\Entity\Param;
 
 use App\GramcServices\ServiceJournal;

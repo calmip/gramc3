@@ -48,17 +48,8 @@ abstract class Workflow
      * Le constructeur = Sera surchargé par les classes dérivées afin
      * de mettre les transitions possibles
      ******************************************/
-    protected $em = null;
-    protected $sn = null;
-    protected $sj = null;
-    protected $ss = null;
-
-    public function __construct(ServiceNotifications $sn, ServiceJournal $sj, ServiceSessions $ss, EntityManagerInterface $em)
+    public function __construct(protected ServiceNotifications $sn, protected ServiceJournal $sj, protected ServiceSessions $ss, protected EntityManagerInterface $em)
     {
-        $this->sn                 = $sn;
-        $this->sj                 = $sj;
-        $this->ss                 = $ss;
-        $this->em                 = $em;
         $this->workflowIdentifier = get_class($this);
     }
 

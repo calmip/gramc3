@@ -28,7 +28,6 @@ use App\Entity\MetaThematique;
 use App\Entity\Thematique;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -41,12 +40,7 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class MetaThematiqueController extends AbstractController
 {
-    private $ac;
-
-    public function __construct(AuthorizationCheckerInterface $ac)
-    {
-        $this->ac  = $ac;
-    }
+    public function __construct(private AuthorizationCheckerInterface $ac) {}
 
     /**
      * Lists all metaThematique entities.

@@ -43,14 +43,7 @@ use Doctrine\ORM\EntityManagerInterface;
  **********************************************************************/
 abstract class PropositionExperts
 {
-    protected $sj;
-    protected $em;
-
-    public function __construct(ServiceJournal $sj, EntityManagerInterface $em)
-    {
-        $this -> sj = $sj;
-        $this -> em = $em;
-    }
+    public function __construct(protected ServiceJournal $sj, protected EntityManagerInterface $em) {}
 
     abstract public function getProposition(Version $version);
 

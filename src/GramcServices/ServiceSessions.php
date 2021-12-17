@@ -37,21 +37,18 @@ use Symfony\Component\Form\FormFactoryInterface;
 
 class ServiceSessions
 {
-    private $recup_attrib_seuil;
-    private $recup_conso_seuil;
-    private $recup_attrib_quant;
-    private $grdt;
-    private $ff;
-    private $em;
-    private $sessions_non_term;
+    private $recup_attrib_seuil = null;
+    private $recup_conso_seuil = null;
+    private $recup_attrib_quant =null;
+    private $sessions_non_term = null;
 
     public function __construct(
         $recup_attrib_seuil,
         $recup_conso_seuil,
         $recup_attrib_quant,
-        GramcDate $grdt,
-        FormFactoryInterface $ff,
-        EntityManagerInterface $em
+        private GramcDate $grdt,
+        private FormFactoryInterface $ff,
+        private EntityManagerInterface $em
     ) {
         $this->recup_attrib_seuil = intval($recup_attrib_seuil);
         $this->recup_conso_seuil  = intval($recup_conso_seuil);

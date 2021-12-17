@@ -50,52 +50,25 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class ServiceProjets
 {
-    private $prj_prefix;
-    private $ressources_conso_group;
-    private $signature_directory;
-    private $rapport_directory;
-    private $fig_directory;
-    private $dfct_directory;
-    private $grdt;
-    private $sv;
-    private $ss;
-    private $sj;
-    private $log;
-    private $sac;
-    private $token;
-    private $em;
+    private $token = null;
 
     public function __construct(
-        $prj_prefix,
-        $ressources_conso_group,
-        $signature_directory,
-        $rapport_directory,
-        $fig_directory,
-        $dfct_directory,
-        GramcDate $grdt,
-        ServiceVersions $sv,
-        ServiceSessions $ss,
-        ServiceJournal $sj,
-        LoggerInterface $log,
-        AuthorizationCheckerInterface $sac,
-        TokenStorageInterface $tok,
-        EntityManagerInterface $em
+        private $prj_prefix,
+        private $ressources_conso_group,
+        private $signature_directory,
+        private $rapport_directory,
+        private $fig_directory,
+        private $dfct_directory,
+        private GramcDate $grdt,
+        private ServiceVersions $sv,
+        private ServiceSessions $ss,
+        private ServiceJournal $sj,
+        private LoggerInterface $log,
+        private AuthorizationCheckerInterface $sac,
+        private TokenStorageInterface $tok,
+        private EntityManagerInterface $em
     ) {
-        $this->prj_prefix             = $prj_prefix;
-        $this->ressources_conso_group = $ressources_conso_group;
-        $this->signature_directory    = $signature_directory;
-        $this->rapport_directory      = $rapport_directory;
-        $this->fig_directory          = $fig_directory;
-        $this->dfct_directory         = $dfct_directory;
-
-        $this->grdt  = $grdt;
-        $this->sv    = $sv;
-        $this->ss    = $ss;
-        $this->sj    = $sj;
-        $this->log   = $log;
-        $this->sac   = $sac;
         $this->token = $tok->getToken();
-        $this->em    = $em;
     }
 
 

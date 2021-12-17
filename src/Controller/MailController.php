@@ -12,7 +12,6 @@
 namespace App\Controller;
 
 use Symfony\Component\Routing\Annotation\Route;
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -25,7 +24,6 @@ use App\Form\IndividuType;
 use App\Entity\Individu;
 use App\Entity\Scalar;
 use App\Entity\Sso;
-//use App\Entity\CompteActivation;
 use App\Entity\Journal;
 use App\Entity\Projet;
 use App\Entity\Version;
@@ -61,22 +59,12 @@ use Symfony\Component\Form\FormFactoryInterface;
  */
 class MailController extends AbstractController
 {
-    private $sn;
-    private $sj;
-    private $sp;
-    private $ff;
-
     public function __construct(
-        ServiceNotifications $sn,
-        ServiceJournal $sj,
-        ServiceProjets $sp,
-        FormFactoryInterface $ff
-    ) {
-        $this->sn  = $sn;
-        $this->sj  = $sj;
-        $this->sp  = $sp;
-        $this->ff  = $ff;
-    }
+        private ServiceNotifications $sn,
+        private ServiceJournal $sj,
+        private ServiceProjets $sp,
+        private FormFactoryInterface $ff
+    ) {}
 
     /**
      * @Route("/{id}/mail_to_responsables_fiche",name="mail_to_responsables_fiche", methods={"GET","POST"})

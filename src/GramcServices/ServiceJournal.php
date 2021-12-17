@@ -40,26 +40,19 @@ use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationExceptio
 
 class ServiceJournal
 {
-    private $rs;
-    private $log;
-    private $token;
-    private $ac;
-    private $em;
-
     // request_stack, session,logger, security.helper, doc
     // request_stack, session,logger, security.token_storage,doc
+
+    private $token = null;
+    
     public function __construct(
-        RequestStack $rs,
-        LoggerInterface $log,
-        TokenStorageInterface $tok,
-        AuthorizationCheckerInterface $ac,
-        EntityManagerInterface $em
+        private RequestStack $rs,
+        private LoggerInterface $log,
+        private TokenStorageInterface $tok,
+        private AuthorizationCheckerInterface $ac,
+        private EntityManagerInterface $em
     ) {
-        $this->rs    = $rs;
-        $this->log   = $log;
-        $this->token = $tok->getToken();
-        $this->ac    = $ac;
-        $this->em    = $em;
+        $this->token = $this->tok->getToken();
     }
 
     /**

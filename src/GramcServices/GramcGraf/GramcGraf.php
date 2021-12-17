@@ -28,16 +28,8 @@ use App\GramcServices\ServiceJournal;
 
 abstract class GramcGraf
 {
-    protected $ressources_conso_group;
-    protected $ressources_conso_user;
-    protected $sj;
-
-    public function __construct($ressources_conso_group, $ressources_conso_user, ServiceJournal $sj)
-    {
-        $this->ressources_conso_group = $ressources_conso_group;
-        $this->ressources_conso_user  = $ressources_conso_user;
-        $this->sj                     = $sj;
-    }
+    public function __construct(protected $ressources_conso_group, protected $ressources_conso_user, protected ServiceJournal $sj)
+    {}
 
     /*
      * Le code utilisateur:

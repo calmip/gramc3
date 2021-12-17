@@ -30,7 +30,6 @@ use App\GramcServices\ServiceJournal;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -50,17 +49,10 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
  */
 class CommentaireExpertController extends AbstractController
 {
-    private $sj;
-    private $tok;
-
-
     public function __construct(
-        ServiceJournal $sj,
-        TokenStorageInterface $tok
-    ) {
-        $this->sj  = $sj;
-        $this->tok = $tok->getToken();
-    }
+        private ServiceJournal $sj,
+        private TokenStorageInterface $tok
+    ) {}
 
     /**
      * Displays a form to edit an existing commentaireExpert entity.

@@ -64,34 +64,16 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
  */
 class SessionController extends AbstractController
 {
-    private $sj = null;
-    private $sm = null;
-    private $sps = null;
-    private $sv = null;
-    private $sp = null;
-    private $ss = null;
-    private $sd = null;
-    private $sw = null;
-
     public function __construct(
-        ServiceJournal $sj,
-        ServiceMenus $sm,
-        ServicePhpSessions $sps,
-        ServiceVersions $sv,
-        ServiceProjets $sp,
-        ServiceSessions $ss,
-        GramcDate $sd,
-        SessionWorkflow $sw
-    ) {
-        $this->sj = $sj;
-        $this->sm = $sm;
-        $this->sps = $sps;
-        $this->sv = $sv;
-        $this->sp = $sp;
-        $this->ss = $ss;
-        $this->sd = $sd;
-        $this->sw = $sw;
-    }
+        private ServiceJournal $sj,
+        private ServiceMenus $sm,
+        private ServicePhpSessions $sps,
+        private ServiceVersions $sv,
+        private ServiceProjets $sp,
+        private ServiceSessions $ss,
+        private GramcDate $sd,
+        private SessionWorkflow $sw
+    ) {}
 
     /**
      * Lists all session entities.

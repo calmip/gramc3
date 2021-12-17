@@ -67,45 +67,23 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class ServiceExperts
 {
-    protected $max_expertises_nb;
-    protected $formFactory;
-    protected $sn;
-    protected $sj;
-    protected $pe1;
-    protected $pe2;
-    protected $lg;
-    protected $em;
 
-    protected $notifications;
-    private $form_buttons;
-    private $thematiques;
-    private $rattachements;
-    private $demandes;
+    protected $notifications = null;
+    private $form_buttons = null;
+    private $thematiques = null;
+    private $rattachements = null;
+    private $demandes = null;
 
     public function __construct(
-        $max_expertises_nb,
-        FormFactoryInterface $ff,
-        ServiceNotifications $sn,
-        ServiceJournal $sj,
-        PropositionExpertsType1 $pe1,
-        PropositionExpertsType2 $pe2,
-        LoggerInterface $lg,
-        EntityManagerInterface $em
-    ) {
-        $this->max_expertises_nb = $max_expertises_nb;
-        $this->formFactory       = $ff;
-        $this->sn                = $sn;
-        $this->sj                = $sj;
-        $this->pe1               = $pe1;
-        $this->pe2               = $pe2;
-        $this->lg                = $lg;
-        $this->em                = $em;
-
-        $this->notifications     = []; // notifications à envoyer, mises en réserve
-        $this->form_buttons      = null;
-        $this->thematiques       = null;
-        $this->rattachements     = null;
-    }
+        protected $max_expertises_nb,
+        protected FormFactoryInterface $formFactory,
+        protected ServiceNotifications $sn,
+        protected ServiceJournal $sj,
+        protected PropositionExpertsType1 $pe1,
+        protected PropositionExpertsType2 $pe2,
+        protected LoggerInterface $lg,
+        protected EntityManagerInterface $em
+    ) {}
 
     // Garde en mémoire les demandes
     public function setDemandes($demandes)

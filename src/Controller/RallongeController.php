@@ -47,7 +47,6 @@ use App\AffectationExperts\AffectationExperts;
 use App\AffectationExperts\AffectationExpertsRallonge;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -61,45 +60,23 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
-//use App\App;
-
 /**
  * Rallonge controller.
  * @Route("rallonge")
  */
 class RallongeController extends AbstractController
 {
-    private $sj;
-    private $sm;
-    private $sp;
-    private $ss;
-    private $sr;
-    private $sv;
-    private $rw;
-    private $ff;
-    private $vl;
-
     public function __construct(
-        ServiceJournal $sj,
-        ServiceMenus $sm,
-        ServiceProjets $sp,
-        ServiceSessions $ss,
-        ServiceExpertsRallonge $sr,
-        ServiceVersions $sv,
-        RallongeWorkflow $rw,
-        FormFactoryInterface $ff,
-        ValidatorInterface $vl
-    ) {
-        $this->sj = $sj;
-        $this->sm = $sm;
-        $this->sp = $sp;
-        $this->ss = $ss;
-        $this->sr = $sr;
-        $this->sv = $sv;
-        $this->rw = $rw;
-        $this->ff = $ff;
-        $this->vl = $vl;
-    }
+        private ServiceJournal $sj,
+        private ServiceMenus $sm,
+        private ServiceProjets $sp,
+        private ServiceSessions $ss,
+        private ServiceExpertsRallonge $sr,
+        private ServiceVersions $sv,
+        private RallongeWorkflow $rw,
+        private FormFactoryInterface $ff,
+        private ValidatorInterface $vl
+    ) {}
 
     /**
      * A partir d'une rallonge, renvoie version, projet, session

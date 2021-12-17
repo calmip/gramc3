@@ -28,7 +28,6 @@ use App\Entity\Laboratoire;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -40,12 +39,7 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class LaboratoireController extends AbstractController
 {
-    private $ac;
-
-    public function __construct(AuthorizationCheckerInterface $ac)
-    {
-        $this->ac  = $ac;
-    }
+    public function __construct(private AuthorizationCheckerInterface $ac) {}
 
     /**
      * Lists all laboratoire entities.

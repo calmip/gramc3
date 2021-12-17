@@ -35,7 +35,6 @@ use App\GramcServices\ServiceSessions;
 use Psr\Log\LoggerInterface;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
@@ -53,25 +52,13 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
  */
 class PublicationController extends AbstractController
 {
-    private $sj;
-    private $ss;
-    private $ff;
-    private $token;
-    private $ac;
-
     public function __construct(
-        ServiceJournal $sj,
-        ServiceSessions $ss,
-        FormFactoryInterface $ff,
-        TokenStorageInterface $tok,
-        AuthorizationCheckerInterface $ac
-    ) {
-        $this->sj  = $sj;
-        $this->ss  = $ss;
-        $this->ff  = $ff;
-        $this->token= $tok->getToken();
-        $this->ac  = $ac;
-    }
+        private ServiceJournal $sj,
+        private ServiceSessions $ss,
+        private FormFactoryInterface $ff,
+        private TokenStorageInterface $tok,
+        private AuthorizationCheckerInterface $ac
+    ) {}
 
     /**
      * Autocomplete publication
