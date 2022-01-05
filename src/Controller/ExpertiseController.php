@@ -35,7 +35,6 @@ use App\Entity\Session;
 use App\Entity\CollaborateurVersion;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -81,49 +80,24 @@ use App\Form\ChoiceList\ExpertChoiceLoader;
  */
 class ExpertiseController extends AbstractController
 {
-    private $max_expertises_nb = null;
-    private $sn = null;
-    private $sj = null;
-    private $sp = null;
-    private $ss = null;
-    private $sd = null;
-    private $sv = null;
-    private $pw = null;
-    private $ff = null;
-    private $vl = null;
-    private $se = null;
-    private $tok = null;
-    private $ac = null;
-
-
+    private $token = null;
+    
     public function __construct(
-        $max_expertises_nb,
-        ServiceNotifications $sn,
-        ServiceJournal $sj,
-        ServiceProjets $sp,
-        ServiceSessions $ss,
-        GramcDate $sd,
-        ServiceVersions $sv,
-        ServiceExperts $se,
-        ProjetWorkflow $pw,
-        FormFactoryInterface $ff,
-        ValidatorInterface $vl,
-        TokenStorageInterface $tok,
-        AuthorizationCheckerInterface $ac
+        private $max_expertises_nb,
+        private ServiceNotifications $sn,
+        private ServiceJournal $sj,
+        private ServiceProjets $sp,
+        private ServiceSessions $ss,
+        private GramcDate $sd,
+        private ServiceVersions $sv,
+        private ServiceExperts $se,
+        private ProjetWorkflow $pw,
+        private FormFactoryInterface $ff,
+        private ValidatorInterface $vl,
+        private TokenStorageInterface $tok,
+        private AuthorizationCheckerInterface $ac
     ) {
-        $this->max_expertises_nb = $max_expertises_nb;
-        $this->sn  = $sn;
-        $this->sj  = $sj;
-        $this->sp  = $sp;
-        $this->ss  = $ss;
-        $this->sd  = $sd;
-        $this->sv  = $sv;
-        $this->se  = $se;
-        $this->pw  = $pw;
-        $this->ff  = $ff;
-        $this->vl  = $vl;
-        $this->tok = $tok->getToken();
-        $this->ac  = $ac;
+        $this->token = $tok->getToken();
     }
 
     /**
@@ -335,10 +309,10 @@ class ExpertiseController extends AbstractController
         $ss  = $this->ss;
         $sp  = $this->sp;
         $sj  = $this->sj;
-        $tok = $this->tok;
+        $token = $this->token;
         $em  = $this->getDoctrine()->getManager();
 
-        $moi = $tok->getUser();
+        $moi = $token->getUser();
         if (is_string($moi)) {
             $sj->throwException();
         }
@@ -612,11 +586,11 @@ class ExpertiseController extends AbstractController
         $sj = $this->sj;
         $ac = $this->ac;
         $sval = $this->vl;
-        $tok = $this->tok;
+        $token = $this->token;
         $em = $this->getDoctrine()->getManager();
 
         // ACL
-        $moi = $tok->getUser();
+        $moi = $token->getUser();
         if (is_string($moi)) {
             $sj->throwException(__METHOD__ . ":" . __LINE__ . " personne connecté");
         } elseif ($expertise->getExpert() == null) {
@@ -897,10 +871,10 @@ class ExpertiseController extends AbstractController
         $sj = $this->sj;
         $ac = $this->ac;
         $em = $this->getDoctrine()->getManager();
-        $tok = $this->tok;
+        $token = $this->token;
 
         // ACL
-        $moi = $tok->getUser();
+        $moi = $token->getUser();
         if (is_string($moi)) {
             $sj->throwException(__METHOD__ . ":" . __LINE__ . " personne connecté");
         } elseif ($expertise->getExpert() == null) {

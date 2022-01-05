@@ -27,7 +27,6 @@ namespace App\Controller;
 use Psr\Log\LoggerInterface;
 
 use Symfony\Component\Routing\Annotation\Route;
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -85,61 +84,24 @@ use Twig\Environment;
 
 class GramcSessionController extends AbstractController
 {
-    private $sn;
-    private $sj;
-    private $sm;
-    private $sps;
-    private $sp;
-    private $ss;
-    private $pe1;
-    private $pe2;
-    private $sd;
-    private $sv;
-    private $pw;
-    private $ff;
-    private $vl;
-    private $ts;
-    private $tok;
-    private $uc;
-    private $ac;
-    private $tw;
-
-
     public function __construct(
-        ServiceNotifications $sn,
-        ServiceJournal $sj,
-        ServiceMenus $sm,
-        ServicePhpSessions $sps,
-        ServiceProjets $sp,
-        ServiceSessions $ss,
-        PropositionExpertsType1 $pe1,
-        PropositionExpertsType2 $pe2,
-        GramcDate $sd,
-        ServiceVersions $sv,
-        ProjetWorkflow $pw,
-        FormFactoryInterface $ff,
-        ValidatorInterface $vl,
-        TokenStorageInterface $ts,
-        AuthorizationCheckerInterface $ac,
-        Environment $tw
-    ) {
-        $this->sn  = $sn;
-        $this->sj  = $sj;
-        $this->sm  = $sm;
-        $this->sps = $sps;
-        $this->sp  = $sp;
-        $this->ss  = $ss;
-        $this->pe1 = $pe1;
-        $this->pe2 = $pe2;
-        $this->sd  = $sd;
-        $this->sv  = $sv;
-        $this->pw  = $pw;
-        $this->ff  = $ff;
-        $this->vl  = $vl;
-        $this->ts  = $ts;
-        $this->ac  = $ac;
-        $this->tw  = $tw;
-    }
+        private ServiceNotifications $sn,
+        private ServiceJournal $sj,
+        private ServiceMenus $sm,
+        private ServicePhpSessions $sps,
+        private ServiceProjets $sp,
+        private ServiceSessions $ss,
+        private PropositionExpertsType1 $pe1,
+        private PropositionExpertsType2 $pe2,
+        private GramcDate $sd,
+        private ServiceVersions $sv,
+        private ProjetWorkflow $pw,
+        private FormFactoryInterface $ff,
+        private ValidatorInterface $vl,
+        private TokenStorageInterface $ts,
+        private AuthorizationCheckerInterface $ac,
+        private Environment $tw
+    ) {}
 
     /**
      * @Route("/admin/accueil",name="admin_accueil", methods={"GET"})

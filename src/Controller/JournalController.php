@@ -27,7 +27,6 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -44,12 +43,7 @@ use App\Form\SelectJournalType;
  */
 class JournalController extends AbstractController
 {
-    private $ff;
-
-    public function __construct(FormFactoryInterface $ff)
-    {
-        $this->ff  = $ff;
-    }
+    public function __construct(private FormFactoryInterface $ff) {}
 
     /**
      * Lists all Journal entities.

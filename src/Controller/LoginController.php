@@ -35,23 +35,11 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
  
 class LoginController extends AbstractController 
 {
-    //const NOTIFICATION_NEW_EPPN  = 100;
-    //const NOTIFICATION_CHGT_EPPN = 101;
-    //const NOTIFICATION_NO_MAIL   = 102;
-    //const NOTIFICATION_AUTH_PB   = 103;
-    
-    private $sj = null;
-    private $ff = null;
-    private $ac = null;
-    private $ts = null;
-    
-    public function __construct(ServiceJournal $sj, FormFactoryInterface $ff, AuthorizationCheckerInterface $ac, TokenStorageInterface $ts)
-    {
-        $this->sj = $sj;
-        $this->ff = $ff;
-        $this->ac = $ac;
-        $this->ts = $ts;
-    }
+    public function __construct(private ServiceJournal $sj,
+                                private FormFactoryInterface $ff,
+                                private AuthorizationCheckerInterface $ac,
+                                private TokenStorageInterface $ts)
+    {}
 
     /** 
      * @Route("/login", name="connexionshiblogin",methods={"GET"})

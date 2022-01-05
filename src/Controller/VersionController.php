@@ -48,7 +48,6 @@ use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 
 use Symfony\Component\HttpFoundation\Request;
@@ -88,53 +87,22 @@ use Knp\Snappy\Pdf;
  */
 class VersionController extends AbstractController
 {
-    private $sn;
-    private $sj;
-    private $sm;
-    private $sp;
-    private $ss;
-    private $sf;
-    private $sd;
-    private $sv;
-    private $se;
-    private $pw;
-    private $ff;
-    private $vl;
-    private $tok;
-    private $pdf;
-
-
     public function __construct(
-        ServiceNotifications $sn,
-        ServiceJournal $sj,
-        ServiceMenus $sm,
-        ServiceProjets $sp,
-        ServiceSessions $ss,
-        ServiceForms $sf,
-        GramcDate $sd,
-        ServiceVersions $sv,
-        ServiceExperts $se,
-        ProjetWorkflow $pw,
-        FormFactoryInterface $ff,
-        ValidatorInterface $vl,
-        TokenStorageInterface $tok,
-        Pdf $pdf
-    ) {
-        $this->sn  = $sn;
-        $this->sj  = $sj;
-        $this->sm  = $sm;
-        $this->sp  = $sp;
-        $this->ss  = $ss;
-        $this->sf  = $sf;
-        $this->sd  = $sd;
-        $this->sv  = $sv;
-        $this->se  = $se;
-        $this->pw  = $pw;
-        $this->ff  = $ff;
-        $this->vl  = $vl;
-        $this->tok = $tok;
-        $this->pdf = $pdf;
-    }
+        private ServiceNotifications $sn,
+        private ServiceJournal $sj,
+        private ServiceMenus $sm,
+        private ServiceProjets $sp,
+        private ServiceSessions $ss,
+        private ServiceForms $sf,
+        private GramcDate $sd,
+        private ServiceVersions $sv,
+        private ServiceExperts $se,
+        private ProjetWorkflow $pw,
+        private FormFactoryInterface $ff,
+        private ValidatorInterface $vl,
+        private TokenStorageInterface $tok,
+        private Pdf $pdf
+    ) {}
 
     /**
      * Lists all version entities.

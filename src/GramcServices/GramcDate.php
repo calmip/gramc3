@@ -42,39 +42,17 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class GramcDate extends GramcDateTime
 {
-    private $recup_printemps_d;
-    private $recup_printemps_f;
-    private $recup_automne_d;
-    private $recup_automne_f;
-    private $rpd;
-    private $rpf;
-    private $rad;
-    private $raf;
-    private $sp;
-    private $em;
-
     public function __construct(
-        $rpd,
-        $rpf,
-        $rad,
-        $raf,
-        ServiceParam $sp,
-        EntityManagerInterface $em
+        private $recup_printemps_d,
+        private $recup_printemps_f,
+        private $recup_automne_d,
+        private $recup_automne_f,
+        private ServiceParam $sp,
+        private EntityManagerInterface $em
     ) {
         parent::__construct($sp, $em);
-        $this->recup_printemps_d = $rpd;
-        $this->recup_printemps_f = $rpf;
-        $this->recup_automne_d   = $rad;
-        $this->recup_automne_f   = $raf;
-        $this->sp = $sp;
-        $this->em = $em;
         $this->setTime(0, 0, 0);
     }
-
-    //static public function get()
-    //{
-    //    return new GramcDate();
-    //}
 
     // retourne une nouvelle instance
     public function getNew()

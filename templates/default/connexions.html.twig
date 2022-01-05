@@ -79,19 +79,31 @@
     </tr>
 
     {% for item in connexions %}
-    {% if (item.user.desactive==true) %}
-    <tr class="alerte" title="CET UTILISATEUR EST DESACTIVE !!!">
-    {% else %}
-    <tr>
-    {% endif %}
-        <td>{{ item.user.prenom }}</td>
-        <td>{{ item.user.nom }}</td>
-        <td>{{ item.user.mail }}</td> 
-        <td>{% if( not ( item.user.admin == null ) ) %}<img src="{{ asset('icones/actif.png') }}" alt="vert" title="Administrateur" />{% endif %}</td> 
-        <td>{% if( not ( item.user.expert == null ) ) %}<img src="{{ asset('icones/actif.png') }}" alt="vert" title="Expert" />{% endif %}</td>
-        <td>{% if( not ( item.user.labo == null ) ) %}{{ item.user.labo.getAcroLabo }}{% endif %}</td>
-        <td>{{ item.heures }} : {{ item.minutes }}</td>
-    </tr>
+        {% if item.user != null %}
+            {% if (item.user.desactive==true) %}
+            <tr class="alerte" title="CET UTILISATEUR EST DESACTIVE !!!">
+            {% else %}
+            <tr>
+            {% endif %}
+                <td>{{ item.user.prenom }}</td>
+                <td>{{ item.user.nom }}</td>
+                <td>{{ item.user.mail }}</td> 
+                <td>{% if( not ( item.user.admin == null ) ) %}<img src="{{ asset('icones/actif.png') }}" alt="vert" title="Administrateur" />{% endif %}</td> 
+                <td>{% if( not ( item.user.expert == null ) ) %}<img src="{{ asset('icones/actif.png') }}" alt="vert" title="Expert" />{% endif %}</td>
+                <td>{% if( not ( item.user.labo == null ) ) %}{{ item.user.labo.getAcroLabo }}{% endif %}</td>
+                <td>{{ item.heures }} : {{ item.minutes }}</td>
+            </tr>
+        {% elseif item.rest_user != null %}
+            <tr>
+                <td> &nbsp;</td>
+                <td> &nbsp;</td>
+                <td>{{ item.rest_user.username }}</td> 
+                <td> &nbsp; </td>
+                <td> &nbsp; </td>
+                <td> &nbsp; </td>
+                <td>{{ item.heures }} : {{ item.minutes }}</td>
+            </tr>
+        {% endif %}
     {% endfor %}
 </tbody>
 </table>

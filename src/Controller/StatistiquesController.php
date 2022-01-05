@@ -42,7 +42,6 @@ use App\GramcServices\ServiceSessions;
 
 use App\Utils\Functions;
 
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -70,22 +69,12 @@ include_once(__DIR__.'/../../jpgraph/JpGraph.php');
  */
 class StatistiquesController extends AbstractController
 {
-    private $sj;
-    private $sm;
-    private $sp;
-    private $ss;
-
     public function __construct(
-        ServiceJournal $sj,
-        ServiceMenus $sm,
-        ServiceProjets $sp,
-        ServiceSessions $ss
-    ) {
-        $this->sj = $sj;
-        $this->sm = $sm;
-        $this->sp = $sp;
-        $this->ss = $ss;
-    }
+        private ServiceJournal $sj,
+        private ServiceMenus $sm,
+        private ServiceProjets $sp,
+        private ServiceSessions $ss
+    ) {}
 
     /**
      * @Route("/symfony", name="homepage",methods={"GET","POST"})

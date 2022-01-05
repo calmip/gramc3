@@ -42,7 +42,6 @@ use App\GramcServices\ServiceJournal;
 use App\GramcServices\ServiceExperts\ServiceExperts;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -71,23 +70,12 @@ use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
  */
 class IndividuController extends AbstractController
 {
-    private $sj = null;
-    private $se = null;
-    private $ff = null;
-    private $ac = null;
-
-
     public function __construct(
-        ServiceExperts $se,
-        ServiceJournal $sj,
-        FormFactoryInterface $ff,
-        AuthorizationCheckerInterface $ac
-    ) {
-        $this->se = $se;
-        $this->sj = $sj;
-        $this->ff = $ff;
-        $this->ac = $ac;
-    }
+        private ServiceExperts $se,
+        private ServiceJournal $sj,
+        private FormFactoryInterface $ff,
+        private AuthorizationCheckerInterface $ac
+    ) {}
 
     /**
      * Supprimer utilisateur

@@ -38,7 +38,6 @@
 
 namespace App\GramcServices;
 
-//use App\App;
 use App\Entity\Session;
 use App\Entity\Projet;
 use App\Entity\Rallonge;
@@ -61,47 +60,23 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class ServiceMenus
 {
-    private $max_rall;
-    private $nodata;
-    private $sv;
-    private $sp;
-    private $sj;
-    private $sw;
-    private $grdt;
-    private $sval;
-    private $ss;
-    private $token;
-    private $ac;
-    private $em;
-    private $sessions_non_term;
-
+    private $token = null;
+    
     public function __construct(
-        $max_rall,
-        $nodata,
-        ServiceVersions $sv,
-        ServiceProjets $sp,
-        ServiceJournal $sj,
-        SessionWorkflow $sw,
-        GramcDate $grdt,
-        ValidatorInterface $sval,
-        ServiceSessions $ss,
-        TokenStorageInterface $tok,
-        AuthorizationCheckerInterface $ac,
-        EntityManagerInterface $em
+        private $max_rall,
+        private $nodata,
+        private ServiceVersions $sv,
+        private ServiceProjets $sp,
+        private ServiceJournal $sj,
+        private SessionWorkflow $sw,
+        private GramcDate $grdt,
+        private ValidatorInterface $sval,
+        private ServiceSessions $ss,
+        private TokenStorageInterface $tok,
+        private AuthorizationCheckerInterface $ac,
+        private EntityManagerInterface $em
     ) {
-        $this->max_rall = $max_rall;
-        $this->nodata = $nodata;
-        $this->sp   = $sp;
-        $this->sv   = $sv;
-        $this->sj   = $sj;
-        $this->sw   = $sw;
-        $this->grdt = $grdt;
-        $this->sval = $sval;
-        $this->ss   = $ss;
-        $this->token= $tok->getToken();
-        $this->ac   = $ac;
-        $this->em   = $em;
-        $this->sessions_non_term = $em->getRepository(Session::class)->get_sessions_non_terminees();
+        $this->token = $this->tok->getToken();
     }
 
     /*******************
@@ -840,8 +815,7 @@ class ServiceMenus
             $menu['raison'] = "Le projet test a déjà été envoyé à l'expert !";
         } elseif ($isProjetSess && $version->getSession()->getEtatSession() != Etat::EDITION_DEMANDE) {
             $menu['raison'] = "Nous ne sommes pas en période de demandes de ressources";
-        }
-        if ($version->isCollaborateur($this->token->getUser()) == false) {
+        } elseif ($version->isCollaborateur($this->token->getUser()) == false) {
             $menu['raison']         = "Seul un collaborateur du projet peut modifier ou supprimer le projet";
         } elseif ($etatVersion !=  Etat::EDITION_DEMANDE && $etatVersion !=  Etat::EDITION_TEST) {
             $menu['raison'] = "Le projet n'est pas en mode d'édition";

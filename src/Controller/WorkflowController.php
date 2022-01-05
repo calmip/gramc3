@@ -45,7 +45,6 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Psr\Log\LoggerInterface;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -62,22 +61,12 @@ use Symfony\Component\Form\FormFactoryInterface;
  */
 class WorkflowController extends AbstractController
 {
-    private $sj;
-    private $pw;
-    private $sw;
-    private $ff;
-
     public function __construct(
-        ServiceJournal $sj,
-        ProjetWorkflow $pw,
-        SessionWorkflow $sw,
-        FormFactoryInterface $ff
-    ) {
-        $this->sj = $sj;
-        $this->pw = $pw;
-        $this->sw = $sw;
-        $this->ff = $ff;
-    }
+        private ServiceJournal $sj,
+        private ProjetWorkflow $pw,
+        private SessionWorkflow $sw,
+        private FormFactoryInterface $ff
+    ) { }
 
     /**
      * entry.

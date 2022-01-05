@@ -56,7 +56,6 @@ use App\GramcServices\GramcGraf\Calcul;
 use Psr\Log\LoggerInterface;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -96,57 +95,25 @@ function cmpProj($a, $b)
 
 class ProjetController extends AbstractController
 {
-    private $sj;
-    private $sm;
-    private $sp;
-    private $ss;
-    private $gcl;
-    private $gstk;
-    private $gall;
-    private $sd;
-    private $sv;
-    private $se;
-    private $pw;
-    private $ff;
-    private $token;
-    private $tw;
-    private $ac;
-
     public function __construct(
-        ServiceJournal $sj,
-        ServiceMenus $sm,
-        ServiceProjets $sp,
-        ServiceSessions $ss,
-        Calcul $gcl,
-        Stockage $gstk,
-        CalculTous $gall,
-        GramcDate $sd,
-        ServiceVersions $sv,
-        ServiceExperts $se,
-        ProjetWorkflow $pw,
-        FormFactoryInterface $ff,
-        TokenStorageInterface $tok,
-        Environment $tw,
-        AuthorizationCheckerInterface $ac
-    ) {
-        $this->sj  = $sj;
-        $this->sm  = $sm;
-        $this->sp  = $sp;
-        $this->ss  = $ss;
-        $this->gcl = $gcl;
-        $this->gstk= $gstk;
-        $this->gall= $gall;
-        $this->sd  = $sd;
-        $this->sv  = $sv;
-        $this->se  = $se;
-        $this->pw  = $pw;
-        $this->ff  = $ff;
-        $this->token= $tok->getToken();
-        $this->tw  = $tw;
-        $this->ac  = $ac;
-    }
+        private ServiceJournal $sj,
+        private ServiceMenus $sm,
+        private ServiceProjets $sp,
+        private ServiceSessions $ss,
+        private Calcul $gcl,
+        private Stockage $gstk,
+        private CalculTous $gall,
+        private GramcDate $sd,
+        private ServiceVersions $sv,
+        private ServiceExperts $se,
+        private ProjetWorkflow $pw,
+        private FormFactoryInterface $ff,
+        private TokenStorageInterface $tok,
+        private Environment $tw,
+        private AuthorizationCheckerInterface $ac
+    ) {}
 
-    private static $count;
+    //private static $count;
 
     /**
      * Lists all projet entities.

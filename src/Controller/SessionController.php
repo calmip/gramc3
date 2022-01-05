@@ -64,34 +64,16 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
  */
 class SessionController extends AbstractController
 {
-    private $sj = null;
-    private $sm = null;
-    private $sps = null;
-    private $sv = null;
-    private $sp = null;
-    private $ss = null;
-    private $sd = null;
-    private $sw = null;
-
     public function __construct(
-        ServiceJournal $sj,
-        ServiceMenus $sm,
-        ServicePhpSessions $sps,
-        ServiceVersions $sv,
-        ServiceProjets $sp,
-        ServiceSessions $ss,
-        GramcDate $sd,
-        SessionWorkflow $sw
-    ) {
-        $this->sj = $sj;
-        $this->sm = $sm;
-        $this->sps = $sps;
-        $this->sv = $sv;
-        $this->sp = $sp;
-        $this->ss = $ss;
-        $this->sd = $sd;
-        $this->sw = $sw;
-    }
+        private ServiceJournal $sj,
+        private ServiceMenus $sm,
+        private ServicePhpSessions $sps,
+        private ServiceVersions $sv,
+        private ServiceProjets $sp,
+        private ServiceSessions $ss,
+        private GramcDate $sd,
+        private SessionWorkflow $sw
+    ) {}
 
     /**
      * Lists all session entities.
@@ -340,9 +322,6 @@ class SessionController extends AbstractController
 
         $workflow = $this->sw;
 
-        // Supprimer toutes les sessions php, donc déloger les utilisateurs éventuellement connectés
-        $sps->clearPhpSessions();
-        
         // On active une session A = trois signaux envoyés sur trois sessions différentes !
         if ($mois == 1 ||  $mois == 12) {
             if ($workflow->canExecute(Signal::CLK_SESS_DEB, $session_courante) && $etat_session_courante == Etat::EN_ATTENTE) {
@@ -414,9 +393,6 @@ class SessionController extends AbstractController
         // On supprime de la session php la référence à la SessionCourante Gramc
         $request->getSession()->remove('SessionCourante');
 
-        // Supprimer toutes les sessions php, donc déloger les utilisateurs éventuellement connectés
-        $sps->clearPhpSessions();
-        
         if ($workflow->canExecute(Signal::CLK_ATTR_PRS, $session_courante)) {
             $workflow->execute(Signal::CLK_ATTR_PRS, $session_courante);
             $em->flush();
@@ -444,6 +420,7 @@ class SessionController extends AbstractController
     public function demarrerSaisieAction(Request $request)
     {
         $ss = $this->ss;
+        $sps = $this->sps;
         $em = $this->getDoctrine()->getManager();
 
         // On supprime de la session php la référence à la SessionCourante Gramc
@@ -573,9 +550,6 @@ class SessionController extends AbstractController
         $sm = $this->sm;
         $ss = $this->ss;
 
-        // Supprimer toutes les sessions php, donc déloger les utilisateurs éventuellement connectés
-        $sps->clearPhpSessions();
-        
         // On supprime de la session php la référence à la SessionCourante Gramc
         $request->getSession()->remove('SessionCourante');
 
@@ -639,10 +613,10 @@ class SessionController extends AbstractController
 
         // Juin 2021 - Suppression des projets test
         //$versions = $em->getRepository(Version::class)->findVersionsSessionTypeSess($session);
-        $versions_suppl = [];
-        foreach ($versions as $v) {
-            $versions_suppl[$v->getIdVersion()]['conso'] = $sp->getConsoCalculVersion($v);
-        }
+        //$versions_suppl = [];
+        //foreach ($versions as $v) {
+        //    $versions_suppl[$v->getIdVersion()]['conso'] = $sp->getConsoCalculVersion($v);
+        //}
 
         $versions_suppl = [];
         foreach ($versions as $v) {
@@ -651,17 +625,28 @@ class SessionController extends AbstractController
             $versions_suppl[$v->getIdVersion()]['formation'] = $f;
         }
         $form_labels = [];
+        $form_total = [];
         if (count($versions)>0) {
             $v0 = $versions[0];
             $formation = $versions_suppl[$v0->getIdVersion()]['formation'];
             foreach ($formation as $f) {
+                // cf. buildFormations ALL_EMPTY
+                if (is_bool($f)) continue;
                 $fl = [];
                 $fl['acro'] = $f['acro'];
                 $fl['nom']  = $f['nom'];
                 $form_labels[] = $fl;
+                $form_total[$f['acro']] = 0;
             }
         }
 
+        foreach ($versions as $v) {
+            $formation = $versions_suppl[$v->getIdVersion()]['formation'];
+            foreach ($formation as $f) {
+                if ($f['acro']=='ALL_EMPTY') continue;
+                $form_total[$f['acro']] += intval($f['rep']);
+            }
+        }
         return $this->render(
             'session/bilan.html.twig',
             [
@@ -669,7 +654,8 @@ class SessionController extends AbstractController
             'idSession' => $session->getIdSession(),
             'versions'  => $versions,
             'versions_suppl' => $versions_suppl,
-            'form_labels' => $form_labels
+            'form_labels' => $form_labels,
+            'form_total' => $form_total
         ]
         );
     }

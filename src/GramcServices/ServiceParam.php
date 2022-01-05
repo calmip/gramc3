@@ -23,7 +23,6 @@
 
 namespace App\GramcServices;
 
-//use Doctrine\ORM\EntityRepository;
 use App\Entity\Param;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -34,12 +33,7 @@ use Doctrine\ORM\EntityManagerInterface;
  */
 class ServiceParam
 {
-    private $em;
-
-    public function __construct(EntityManagerInterface $em)
-    {
-        $this->em             = $em;
-    }
+    public function __construct(private EntityManagerInterface $em) {}
 
     /* Renvoie la valeur du paramètre s'il existe, null sinon */
     public function getParameter($parameter)

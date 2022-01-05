@@ -23,11 +23,8 @@
 
 namespace App\GramcServices;
 
-//use Doctrine\ORM\EntityRepository;
 use App\Entity\Param;
-
 use App\GramcServices\ServiceJournal;
-
 use Doctrine\ORM\EntityManagerInterface;
 
 /*
@@ -35,14 +32,7 @@ use Doctrine\ORM\EntityManagerInterface;
  */
 class ServicePhpSessions
 {
-    private $em;
-    private $sj;
-
-    public function __construct(EntityManagerInterface $em, ServiceJournal $sj)
-    {
-        $this->em = $em;
-        $this->sj = $sj;
-    }
+    public function __construct(private EntityManagerInterface $em, private ServiceJournal $sj) {}
 
     /*******
      *
@@ -50,8 +40,12 @@ class ServicePhpSessions
      * Tant pis s'il y avait des fichiers autres que des fichiers de session symfony
      * (ils n'ont rien à faire ici de toute manière)
      *
+     * NOTE - Il s'agit d'une fonction statique car elle est appelée par
+     *        App\GramcServices\Workflow\Session\SessionTransition, qui n'EST PAS un service, du coup elle n'a
+     *        pas accès au service ServicePhpSessions.
+     *
      *****************************************/
-    public function clearPhpSessions()
+    static public function clearPhpSessions()
     {
         $dir = session_save_path();
         $scan = scandir($dir);
@@ -103,15 +97,38 @@ class ServicePhpSessions
                 session_decode($contents);
                 if (! array_key_exists('_sf2_attributes', $_SESSION)) {
                     $sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Une session autre que gramc3 !");
-                } else {
-                    //dd($_SESSION['_sf2_attributes']);
-                    $secu_data = unserialize($_SESSION['_sf2_attributes']['_security_global_security_context']);
-                    $individu = $secu_data->getUser();
-                    if ($individu == null) {
+                }
+                else
+                {
+                    // Utilisateur du gui
+                    if (array_key_exists('_security_global_security_context', $_SESSION['_sf2_attributes']))
+                    {
+                        $secu_data = unserialize($_SESSION['_sf2_attributes']['_security_global_security_context']);
+                        $individu = $secu_data->getUser();
+                        $rest_individu = null;
+                    }
+
+                    // Api REST - firewall calc - cf. security.yaml
+                    elseif (array_key_exists('_security_calc', $_SESSION['_sf2_attributes']))
+                    {
+                        $secu_data = unserialize($_SESSION['_sf2_attributes']['_security_calc']);
+                        //dd($secu_data);
+                        $individu = null;
+                        $rest_individu = $secu_data->getUser();
+                        //dd($rest_individu);
+                    }
+                    else
+                    {
+                        $individu = null;
+                        $rest_individu = null;                        
+                    }
+                    if ($individu == null && $rest_individu == null) {
                         $sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Problème d'individu ");
                     //dd($secu_data);
-                    } else {
-                        $connexions[] = [ 'user' => $individu, 'minutes' => $min,'heures' => $heures ];
+                    }
+                    else
+                    {
+                        $connexions[] = [ 'user' => $individu, 'rest_user' => $rest_individu, 'minutes' => $min, 'heures' => $heures ];
                     }
                 }
             }

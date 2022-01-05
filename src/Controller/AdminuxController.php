@@ -62,28 +62,14 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
  */
 class AdminuxController extends AbstractController
 {
-    private $sn;
-    private $sj;
-    private $sp;
-    private $ss;
-    private $sd;
-    private $sv;
-
     public function __construct(
-        ServiceNotifications $sn,
-        ServiceJournal $sj,
-        ServiceProjets $sp,
-        ServiceSessions $ss,
-        GramcDate $sd,
-        ServiceVersions $sv
-    ) {
-        $this->sn  = $sn;
-        $this->sj  = $sj;
-        $this->sp  = $sp;
-        $this->ss  = $ss;
-        $this->sd  = $sd;
-        $this->sv  = $sv;
-    }
+        private ServiceNotifications $sn,
+        private ServiceJournal $sj,
+        private ServiceProjets $sp,
+        private ServiceSessions $ss,
+        private GramcDate $sd,
+        private ServiceVersions $sv
+    ) {}
 
     /**
      * Met à jour les données de comptabilité à partir d'un unique fichier csv

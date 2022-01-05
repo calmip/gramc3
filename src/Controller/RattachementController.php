@@ -30,7 +30,6 @@ use App\Entity\Individu;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -41,12 +40,7 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class RattachementController extends AbstractController
 {
-    private $ac;
-
-    public function __construct(AuthorizationCheckerInterface $ac)
-    {
-        $this->ac  = $ac;
-    }
+    public function __construct(private AuthorizationCheckerInterface $ac) {}
 
     /**
       * @Route("/gerer",name="gerer_rattachements", methods={"GET"} )
