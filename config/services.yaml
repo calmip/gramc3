@@ -87,6 +87,9 @@ services:
      
     App\GramcServices\ServiceSessions:
         arguments: ['%recup_attrib_seuil%','%recup_conso_seuil%','%recup_attrib_quant%']
+
+    App\GramcServices\ServiceForms:
+        arguments: ['%max_size_doc%']
  
     App\GramcServices\ServiceProjets:
         arguments: ["%prj_prefix%",

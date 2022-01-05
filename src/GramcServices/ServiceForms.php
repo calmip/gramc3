@@ -46,7 +46,7 @@ use Doctrine\ORM\EntityManagerInterface;
  ******/
 class ServiceForms
 {
-    public function __construct(private ValidatorInterface $vl, private FormFactoryInterface $ff, private EntityManagerInterface $em, private ServiceJournal $sj)
+    public function __construct(private $max_size_doc, private ValidatorInterface $vl, private FormFactoryInterface $ff, private EntityManagerInterface $em, private ServiceJournal $sj)
     {}
 
     /****
@@ -89,12 +89,14 @@ class ServiceForms
     {
         $sj = $this->sj;
         $ff = $this->ff;
+        $max_size_doc = intval($this->max_size_doc);
+        $maxSize = strval(1024 * $max_size_doc) . 'k';
 
         $format_fichier = new \Symfony\Component\Validator\Constraints\File(
             [
         'mimeTypes'=> [ 'application/pdf' ],
         'mimeTypesMessage'=>' Le fichier doit être un fichier pdf. ',
-        'maxSize' => "4196k",
+        'maxSize' => $maxSize,
         'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
         'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
         ]

@@ -815,8 +815,7 @@ class ServiceMenus
             $menu['raison'] = "Le projet test a déjà été envoyé à l'expert !";
         } elseif ($isProjetSess && $version->getSession()->getEtatSession() != Etat::EDITION_DEMANDE) {
             $menu['raison'] = "Nous ne sommes pas en période de demandes de ressources";
-        }
-        if ($version->isCollaborateur($this->token->getUser()) == false) {
+        } elseif ($version->isCollaborateur($this->token->getUser()) == false) {
             $menu['raison']         = "Seul un collaborateur du projet peut modifier ou supprimer le projet";
         } elseif ($etatVersion !=  Etat::EDITION_DEMANDE && $etatVersion !=  Etat::EDITION_TEST) {
             $menu['raison'] = "Le projet n'est pas en mode d'édition";
