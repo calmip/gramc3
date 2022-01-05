@@ -144,7 +144,7 @@ class PublicationController extends AbstractController
     }
 
     /**
-     * @Route("/{id}/gerer",name="gerer_publications", methods={"GET"} )
+     * @Route("/{id}/gerer",name="gerer_publications", methods={"GET","POST"} )
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function gererAction(Projet $projet, Request $request, LoggerInterface $lg)
@@ -410,7 +410,7 @@ class PublicationController extends AbstractController
     public function supprimerAction(Request $request, Publication $publication, Projet $projet, LoggerInterface $lg)
     {
         $ac = $this->ac;
-        $token = $this->token;
+        $token = $this->tok->getToken();
         $sj = $this->sj;
         $em = $this->getdoctrine()->getManager();
 
