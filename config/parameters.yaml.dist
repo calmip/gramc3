@@ -163,19 +163,9 @@ parameters:
 #        'INPT - Institut National Polytechnique de Toulouse': 'https://idp.inp-toulouse.fr/idp/shibboleth'
         AUTRE: WAYF
 
-    # NE RIEN CHANGER A PARTIR DE POINT !!!!
-    # ======================================
-
     # Parametres de connexion du supercalculateur pour envoyer la consommation
     # voir .env.local
     password_consoupload: '%env(PASSWORD_CONSOUPLOAD)%'
     
-    # Paramétrage du système de mail
-    # voir .env.local
-    mailer_transport: '%env(MAILER_TRANSPORT)%'
-    mailer_host: '%env(MAILER_HOST)%'
-    mailer_user: '%env(MAILER_USER)%'
-    mailer_password: '%env(MAILER_PASSWORD)%'
-
     # Pour crypter les cookies
     secret: '%env(APP_SECRET)%'
