@@ -764,6 +764,9 @@ class RallongeController extends AbstractController
             $session2 = $sessions[1];
             $session  = $session2;
         }
+        else {
+            $session2 = null;
+        }
 
         $annee = $session->getAnneeSession();
 
