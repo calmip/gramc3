@@ -6,21 +6,21 @@
 Installations de paquets
 -----
 
-- fonctionne en php 7.4, validé avec mariadb 10.3
+- fonctionne en php 8.4 MINIMUM, validé avec mariadb 10.3
 
-- Installer apache/php 7.4 comme expliqué ici: https://sys-admin.fr/installation-php-7-4-sur-debian/
+- Installer apache/php 8.0 comme expliqué ici: https://sys-admin.fr/installation-php-7-4-sur-debian/
 - Modules php:
 ```
-apt-get install apache2 libapache2-mod-php7.4 php7.4-intl php7.4-cli php7.4-common php7.4-intl php7.4-json php7.4-opcache php7.4-readline php7.4-xml  php7.4-mysql php7.4-gd php7.4-intl
+apt install apache2 libapache2-mod-php8.0 php8.0-intl php8.0-cli php8.0-common php8.0-intl php-json php8.0-opcache php8.0-readline php8.0-xml  php8.0-mysql php8.0-gd php8.0-intl
 ```
 - Maria-db:
 ```
-apt-get install mariadb-client mariadb-server
+apt install mariadb-client mariadb-server
 ```
 - Image magick, polices et autres (pour les graphiques de consommation et la conversion html vers pdf):
 ```
-apt-get install imagemagick zip unzip
-apt-get install xfonts-75dpi xfonts-base xfonts-utils x11-common libfontenc1 xfonts-encodings
+apt install imagemagick zip unzip
+apt install xfonts-75dpi xfonts-base xfonts-utils x11-common libfontenc1 xfonts-encodings
 ```
 - Installer `wkhtmltopd` depuis https://wkhtmltopdf.org (disponible en .deb)
 
@@ -87,11 +87,11 @@ C'est dans ce répertoire que vont se trouver:
 Configuration, personnalisation:
 ----
 
-### Fichier services.yaml:
+### Fichier parameters.yaml:
 
 ```
 cd config
-cp services.yaml.dist services.yaml
+cp parameters.yaml.dist parameters.yaml
 ```
 
 Editer le fichier et paramétrer l'application:
@@ -112,7 +112,7 @@ Editez ce fichier et éventuellement commentez ou décommentez quelques lignes s
 
 ### Fichier adresses.txt:
 
-Ce fichier est propre à gramc3, il est utilisé uniquement en mode "développement". Il répertorie les adresses IP à partir desquelles il est possible d'utiliser gramc2.
+Ce fichier est propre à gramc3, il est utilisé uniquement en mode "développement". Il répertorie les adresses IP à partir desquelles il est possible d'utiliser gramc3.
 
 ~~~~
 cd config
@@ -140,12 +140,26 @@ chmod 400 .env.local
 
 Installation de symfony:
 ----
+Installer composer depuis https://getcomposer.org/
 
 Appeler composer avec les droits www-data:
 
 ~~~~
 mkdir vendor && chown www-data.www-data vendor
+./secu-off.bash
 sudo -u www-data php composer.phar --no-scripts install
+./secu-on.bash
+~~~~
+
+Configuration du mail:
+----
+Si vous avez un sendmail qui sait envoyer les mails, la config de .env.local est sans doute OK pour vous
+N'oubliez pas de renseigner MAILER_RECIPIENT pour ne pas envoyer des mails à n'importe qui lors des tests
+
+Pour tester la configuration:
+
+~~~~
+sudo -u www-data bin/console app:send-a-mail titi@toto.fr
 ~~~~
 
 Base de données:
@@ -153,7 +167,7 @@ Base de données:
 
 **Création d'une base de données et d'un utilisateur**
 
-Si vous utilisez mariadb, vous pouvez créer l'utilisateur et la base comme indiqué ici: https://www.monvps.fr/mariadb-creer-une-base-de-donnee-et-un-utilisateur-en-ligne-de-commande/
+Si vous utilisez mariadb, vous pouvez créer l'utilisateur et la base comme indiqué ici: https://www.security-helpzone.com/2016/05/15/developpement-sql-mysql-creer-un-utilisateur-et-lui-attribuer-des-droits/
 
 **Installation d'une base de donnees déjà en exploitation sur une instance de développement:**
 
@@ -189,8 +203,10 @@ Remplissage initial du cache:
 ----
 
 ~~~~
-sudo -u www-data php composer.phar install
+sudo -u www-data bin/console cache:clear
+sudo -u www-data bin/console cache:warm
 ~~~~
+Il ne doit pas y avoir de warning ou de message d'erreur. S'il y a des messages, c'est probableme dû à une variable non configurée dans .env.local !
 
 configuration apache2:
 ----
@@ -215,11 +231,26 @@ ln -s chemin/vers/gramc3/public gramc3
   composer.phar require symfony/apache-pack
   ```
 
+- Plutôt que d'utiliser le .htaccess, il est recommandé de copier-coller son contenu dans le fichier de configuration du virtualhost apache. Il est important de le mettre dans un <Location /gramc3></Location>:
+
+  ```
+  <Location /gramc3>
+     ...recopie de .htaccess
+  </Location>
+  ```
+- la variable d'environnement BASE doit être positionnée à gramc3, ce qui peut se faire (au niveau global) par la commande: BASE=/gramc3 dans le fichier /etc/apache2/envvars
+
+Sécuriser l'installation:
+----
+
+~~~~
+./secu-on.bash
+~~~~
+
 Fin de la configuration:
 -----
 
 - Se connecter à gramc avec un navigateur: cliquer sur `connection (dbg)`
-  **ATTENTION**: `app_dev.php` doit être activée dans la configuration apache ci-dessus
 - Utilisateur = `admin admin`
 
 #### En cas de problème:
