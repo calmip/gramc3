@@ -180,7 +180,7 @@ sudo -u www-data ./reload-db un-dump-de-la-bd.sql
 
 ~~~~
 cd reprise
-sudo -u www-data ./reload-db gramc2.sql.dist
+sudo -u www-data ./reload-db gramc3.sql.dist
 ~~~~
 
 La commande reload-db va effacer la base existante, recharger la base à partir du fichier sql, la mettre à niveau si besoin puis appliquer les "fixtures", ci-besoin.
@@ -274,9 +274,9 @@ CONFIGURATION DE SHIBBOLETH:
 
 - Installer quelques paquets supplémentaires:
 ~~~~
-  apt-get install libapache2-mod-shib2 liblog4shib1v5 libshibsp-plugins libshibsp7 shibboleth-sp2-common shibboleth-sp2-utils
+  apt install libapache2-mod-shib shibboleth-sp-common shibboleth-sp-utils
 ~~~~
-- Configuration apache Ajouter dans la section VirtualHost de gramc2:
+- Configuration apache Ajouter dans la section VirtualHost de gramc3:
   ~~~~
   # important pour pouvoir utiliser d'autres techniques d'authentification (cf. pour git)
   ShibCompatValidUser On
@@ -286,6 +286,7 @@ CONFIGURATION DE SHIBBOLETH:
        ShibRequestSetting requireSession 1
        ShibRequestSetting applicationId default
        Require shibboleth
+       ShibUseHeaders On
   </Location>
   ~~~~
 - Redémarrer apache:
@@ -293,9 +294,11 @@ CONFIGURATION DE SHIBBOLETH:
   systemctl restart apache2
   ~~~~
 
+
+
 OU EST LE CODE DE GRAMC ?
 =========================
-gramc2 est une application symfony, il repose donc sur le patron de conception MVC. Les principaux répertoires sont les suivants:
+gramc3 est une application symfony, il repose donc sur le patron de conception MVC. Les principaux répertoires sont les suivants:
 
         src                   Le code php de l'application
         src/Controller        Tous les contrôleurs (les points d'entrée de chaque requête)
@@ -306,7 +309,7 @@ gramc2 est une application symfony, il repose donc sur le patron de conception M
         src/GramcServices/Workflow  Les workflows de l'application (changement d'états des objets Projet, Version, Rallonge)
         src/Utils             Des trucs bien utiles
         src/DataFixtures      Mise à jour de la base de données lors des changements de version
-        src/XXX                         Le code php "extérieur" utilisé par gramc2
+        src/XXX                         Le code php "extérieur" utilisé par gramc3
 
 
         templates             Les vues, c'est-à-dire tous les affichages, écrits en html/twig
