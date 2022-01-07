@@ -74,25 +74,11 @@ class Rgpd extends Command
     // the name of the command (the part after "bin/console")
     protected static $defaultName = 'app:rgpd';
 
-  //  private $sn = null;
-    private $sd = null;
-    private $sp = null;
-    private $sv = null;
-    private $sj = null;
-    private $em = null;
-
-    public function __construct(/*ServiceNotifications $sn*/ GramcDate $sd, ServiceProjets $sp, ServiceVersions $sv, ServiceJournal $sj, EntityManagerInterface $em)
+    public function __construct(private GramcDate $sd, private ServiceProjets $sp, private ServiceVersions $sv, private ServiceJournal $sj, private EntityManagerInterface $em)
     {
         // best practices recommend to call the parent constructor first and
         // then set your own properties. That wouldn't work in this case
         // because configure() needs the properties set in this constructor
-
-    //    $this->sn   = $sn;
-        $this->sd = $sd;
-        $this->sp = $sp;
-        $this->sv = $sv;
-        $this->sj = $sj;
-        $this->em = $em;
 
         parent::__construct();
     }
