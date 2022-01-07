@@ -268,6 +268,10 @@ class Rgpd extends Command
             return 0;
         }
 
+        // On y va: on commence par écrire dans le journal
+        $sj->infoMessage("EXECUTION DE LA COMMANDE: rgpd $years");
+
+
         // effacer les données de compta
         $output->writeln("");
         $output->writeln("======");

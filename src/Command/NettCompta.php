@@ -110,6 +110,8 @@ class NettCompta extends Command
         $annee = intval($input->getArgument('year'));
         $anneeCourante = $sd->showYear();
 
+        $sj->infoMessage("EXECUTION DE LA COMMANDE: nettcompta $annee");
+
         if ($annee <= 2000 || $annee >= $anneeCourante)
         {
             $output->writeln("ERREUR - $annee doit être entre 2000 et $anneeCourante");
@@ -143,7 +145,7 @@ class NettCompta extends Command
             $i++;
         }
         $output->writeln("TERMINE - $k jours traités");
-        $sj->infoMessage("Comptabilité de l'année $annee: $k jours, et $ttl_cpt lignes supprimées");
+        $sj->infoMessage("Comptabilité de l'année $annee: $ttl_cpt lignes supprimées sur $k jours");
 
         return 0;
     }
