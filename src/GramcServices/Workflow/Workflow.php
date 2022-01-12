@@ -25,7 +25,7 @@
 namespace App\GramcServices\Workflow;
 
 use App\Utils\Functions;
-use App\Utils\Etat;
+use App\GramcServices\Etat;
 use App\GramcServices\ServiceNotifications;
 use App\GramcServices\ServiceJournal;
 use App\GramcServices\ServiceSessions;

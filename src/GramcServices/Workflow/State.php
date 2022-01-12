@@ -24,8 +24,8 @@
 
 namespace App\GramcServices\Workflow;
 
-use App\Utils\Signal;
-use App\Utils\Etat;
+use App\GramcServices\Signal;
+use App\GramcServices\Etat;
 
 /*****************
  * State - Une classe pour décrire l'ensemble des transitions possibles

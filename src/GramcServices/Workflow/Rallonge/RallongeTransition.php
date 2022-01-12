@@ -27,8 +27,8 @@ namespace App\GramcServices\Workflow\Rallonge;
 use App\GramcServices\Workflow\Transition;
 
 use App\Utils\Functions;
-use App\Utils\Etat;
-use App\Utils\Signal;
+use App\GramcServices\Etat;
+use App\GramcServices\Signal;
 use App\Entity\Rallonge;
 use App\GramcServices\Workflow\Rallonge\RallongeWorkflow;
 

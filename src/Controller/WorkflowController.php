@@ -32,8 +32,8 @@ use App\Entity\Thematique;
 
 use App\Utils\Functions;
 use App\Utils\Menu;
-use App\Utils\Etat;
-use App\Utils\Signal;
+use App\GramcServices\Etat;
+use App\GramcServices\Signal;
 use App\GramcServices\ServiceJournal;
 use App\GramcServices\Workflow\Projet\ProjetWorkflow;
 use App\GramcServices\Workflow\Version\VersionWorkflow;

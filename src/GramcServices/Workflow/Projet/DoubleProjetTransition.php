@@ -34,8 +34,8 @@ namespace App\GramcServices\Workflow\Projet;
 use App\GramcServices\Workflow\Transition;
 
 use App\Utils\Functions;
-use App\Utils\Etat;
-use App\Utils\Signal;
+use App\GramcServices\Etat;
+use App\GramcServices\Signal;
 use App\Entity\Projet;
 use App\Entity\Version;
 use App\GramcServices\Workflow\Version\VersionWorkflow;

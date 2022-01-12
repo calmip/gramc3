@@ -44,8 +44,8 @@ use App\Entity\Rallonge;
 use App\Entity\Version;
 use App\Entity\Individu;
 use App\Entity\RapportActivite;
-use App\Utils\Etat;
-use App\Utils\Signal;
+use App\GramcServices\Etat;
+use App\GramcServices\Signal;
 use App\Utils\Functions;
 use App\GramcServices\Workflow\Session\SessionWorkflow;
 

@@ -25,7 +25,7 @@ namespace App\GramcServices;
 
 use App\Entity\Session;
 use App\Utils\Functions;
-use App\Utils\Etat;
+use App\GramcServices\Etat;
 use App\GramcServices\GramcDate;
 
 use Doctrine\ORM\EntityManagerInterface;

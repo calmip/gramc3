@@ -35,7 +35,7 @@ use App\GramcServices\ServiceProjets;
 
 use App\Utils\Functions;
 use App\Utils\Menu;
-use App\Utils\Etat;
+use App\GramcServices\Etat;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;

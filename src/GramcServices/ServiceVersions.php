@@ -23,7 +23,7 @@
 
 namespace App\GramcServices;
 
-use App\Utils\Etat;
+use App\GramcServices\Etat;
 use App\Entity\Projet;
 use App\Entity\Version;
 use App\Entity\Session;

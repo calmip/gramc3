@@ -24,7 +24,7 @@
 namespace App\GramcServices;
 
 use App\GramcServices\GramcDate;
-use App\Utils\Etat;
+use App\GramcServices\Etat;
 
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;

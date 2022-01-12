@@ -36,7 +36,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 use App\Utils\Functions;
-use App\Utils\Etat;
+use App\GramcServices\Etat;
 
 use App\Entity\Projet;
 use App\Entity\Version;

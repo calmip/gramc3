@@ -22,7 +22,7 @@
  *            Nicolas Renon - Université Paul Sabatier - CALMIP
  **/
 
-namespace App\Utils;
+namespace App\GramcServices;
 
 class Etat
 {

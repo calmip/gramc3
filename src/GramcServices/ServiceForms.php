@@ -24,7 +24,7 @@
 namespace App\GramcServices;
 
 use App\GramcServices\GramcDate;
-use App\Utils\Etat;
+use App\GramcServices\Etat;
 use App\Validator\Constraints\PagesNumber;
 
 use Symfony\Component\Form\Extension\Core\Type\FormType;
