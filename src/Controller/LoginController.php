@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Utils\IDP;
+//use App\Utils\IDP;
 use App\Utils\Functions;
 use App\Entity\Scalar;
 use App\Entity\Individu;
@@ -62,7 +62,7 @@ class LoginController extends AbstractController
      * NOTE - NE PAS renseigner logout: dans security.yaml !
      * 
      **/
-    public function deconnexionAction(Request $request)
+    public function deconnexionAction(Request $request): Response
     {
         $sj = $this->sj;
         $ac = $this->ac;
@@ -85,6 +85,11 @@ class LoginController extends AbstractController
             $ts->setToken(null);
             $session->invalidate();
             return $this->render('default/deconnexion.html.twig');
+        }
+
+        // On a cliqué sur Déconnecter alors qu'on n'est pas connecté
+        else {
+            return new RedirectResponse($this->generateUrl('accueil'));
         }
     }
 
