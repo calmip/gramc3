@@ -38,6 +38,8 @@ use App\Entity\Version;
 
 use App\Utils\Functions;
 
+use App\Form\IndividuForm\IndividuForm;
+
 use App\GramcServices\ServiceJournal;
 use App\GramcServices\ServiceExperts\ServiceExperts;
 
@@ -981,7 +983,7 @@ class IndividuController extends AbstractController
 
         // on complète le reste des informations
 
-        $collaborateur    = new \App\Utils\IndividuForm();
+        $collaborateur    = new IndividuForm();
         $form = $this->createForm('App\Form\IndividuFormType', $collaborateur, ['csrf_protection' => false]);
         $form->handleRequest($request);
 

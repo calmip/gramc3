@@ -57,7 +57,7 @@ use Symfony\Component\HttpFoundation\File\File;
 use App\Utils\Functions;
 use App\GramcServices\Etat;
 use App\GramcServices\Signal;
-use App\Utils\IndividuForm;
+//use App\Utils\IndividuForm;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -74,7 +74,7 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use App\Form\IndividuFormType;
+//use App\Form\IndividuFormType;
 
 use App\Validator\Constraints\PagesNumber;
 

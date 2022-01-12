@@ -22,7 +22,7 @@
  *            Nicolas Renon - Université Paul Sabatier - CALMIP
  **/
 
-namespace App\Utils;
+namespace App\Form\IndividuForm;
 
 use     App\Entity\Statut;
 use     App\Entity\Etablissement;

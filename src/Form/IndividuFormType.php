@@ -34,7 +34,8 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
-use App\Utils\IndividuForm;
+//use App\Utils\IndividuForm;
+use App\Form\IndividuForm\IndividuForm;
 
 class IndividuFormType extends AbstractType
 {
@@ -167,7 +168,7 @@ class IndividuFormType extends AbstractType
     {
         $resolver->setDefaults(
             [
-            'data_class' => 'App\Utils\IndividuForm',
+            'data_class' => IndividuForm::class,
             ]
         );
     }
