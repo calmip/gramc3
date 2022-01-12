@@ -29,8 +29,8 @@ use App\GramcServices\Workflow\Transition;
 use App\GramcServices\ServiceJournal;
 use App\GramcServices\ServiceSessions;
 
-use App\Utils\Etat;
-use App\Utils\Signal;
+use App\GramcServices\Etat;
+use App\GramcServices\Signal;
 use App\GramcServices\Workflow\NoTransition;
 
 use App\GramcServices\ServiceNotifications;
@@ -41,7 +41,10 @@ class RallongeWorkflow extends Workflow
     protected $states             = [];
     protected $workflowIdentifier = null;
 
-    public function __construct(ServiceNotifications $sn, ServiceJournal $sj, ServiceSessions $ss, EntityManagerInterface $em)
+    public function __construct(ServiceNotifications $sn,
+                                ServiceJournal $sj,
+                                ServiceSessions $ss,
+                                EntityManagerInterface $em)
     {
         if ($this->workflowIdentifier != null) {
             return;

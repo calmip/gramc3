@@ -43,8 +43,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 use App\Utils\Functions;
 use App\Utils\Menu;
-use App\Utils\Etat;
-use App\Utils\Signal;
+use App\GramcServices\Etat;
+use App\GramcServices\Signal;
 use App\AffectationExperts\AffectationExperts;
 
 use App\GramcServices\Workflow\Projet\ProjetWorkflow;

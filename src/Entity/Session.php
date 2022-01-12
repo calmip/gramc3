@@ -27,7 +27,7 @@ namespace App\Entity;
 //use App\App;
 use Doctrine\ORM\Mapping as ORM;
 
-use App\Utils\Etat;
+use App\GramcServices\Etat;
 use App\Utils\Functions;
 
 /**

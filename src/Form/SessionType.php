@@ -41,7 +41,7 @@ use App\Entity\Journal;
 use App\Entity\Individu;
 
 use App\Utils\Functions;
-use App\Utils\Etat;
+use App\GramcServices\Etat;
 use App\GramcServices\GramcDate;
 
 use Doctrine\ORM\EntityManagerInterface;

@@ -22,11 +22,12 @@
  *            Nicolas Renon - Université Paul Sabatier - CALMIP
  **/
 
-namespace App\Utils;
+namespace App\GramcServices;
 
 class Etat
 {
     // etats
+    public const INVALIDE                  = 0;
     public const CREE_ATTENTE              = 1;
     public const EDITION_DEMANDE           = 2;
     public const EDITION_EXPERTISE         = 3;

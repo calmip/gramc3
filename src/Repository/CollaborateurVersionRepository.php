@@ -26,7 +26,7 @@ namespace App\Repository;
 
 use App\Entity\Version;
 use App\Entity\Projet;
-use App\Utils\Etat;
+use App\GramcServices\Etat;
 
 /**
  * CollaborateurversionRepository

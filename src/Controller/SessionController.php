@@ -42,8 +42,8 @@ use App\BilanSession\BilanSessionA;
 use App\BilanSession\BilanSessionB;
 
 use App\Utils\Functions;
-use App\Utils\Etat;
-use App\Utils\Signal;
+use App\GramcServices\Etat;
+use App\GramcServices\Signal;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;

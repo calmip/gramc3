@@ -34,7 +34,7 @@ use App\Form\ChoiceList\ExpertChoiceLoader;
 
 use App\Entity\Thematique;
 use App\Entity\Rattachement;
-use App\Utils\Etat;
+use App\GramcServices\Etat;
 use App\Utils\Functions;
 
 use App\GramcServices\ServiceJournal;

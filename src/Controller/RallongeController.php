@@ -40,8 +40,8 @@ use App\GramcServices\ServiceProjets;
 use App\GramcServices\ServiceSessions;
 use App\GramcServices\ServiceVersions;
 use App\GramcServices\Workflow\Rallonge\RallongeWorkflow;
-use App\Utils\Etat;
-use App\Utils\Signal;
+use App\GramcServices\Etat;
+use App\GramcServices\Signal;
 use App\Utils\Functions;
 use App\AffectationExperts\AffectationExperts;
 use App\AffectationExperts\AffectationExpertsRallonge;
@@ -763,6 +763,9 @@ class RallongeController extends AbstractController
         if (isset($sessions[1])) {
             $session2 = $sessions[1];
             $session  = $session2;
+        }
+        else {
+            $session2 = null;
         }
 
         $annee = $session->getAnneeSession();

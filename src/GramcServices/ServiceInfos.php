@@ -24,14 +24,14 @@
 namespace App\GramcServices;
 
 use App\GramcServices\GramcDate;
-use App\Utils\Etat;
+use App\GramcServices\Etat;
 
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
-const VERSION = "3.6.0D";
+const VERSION = "3.6.0";
 
 /*
  * Cette classe garde des informations pouvant être reprises par

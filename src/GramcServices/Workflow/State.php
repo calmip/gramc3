@@ -24,9 +24,8 @@
 
 namespace App\GramcServices\Workflow;
 
-//use App\App;
-use App\Utils\Signal;
-use App\Utils\Etat;
+use App\GramcServices\Signal;
+use App\GramcServices\Etat;
 
 /*****************
  * State - Une classe pour décrire l'ensemble des transitions possibles
@@ -45,16 +44,16 @@ class State
      * Le constructeur
      *
      * params:
-     * 		$stateIdentifier L'état de départ (un entier, cf. Utils/Etat.php)
+     *      $stateIdentifier L'état de départ (un entier, cf. Utils/Etat.php)
      *      $transitions     Un array de transitions (voir le format ci-dessus)
      **********************/
-    public function __construct($stateIdentifier, $transitions)
+    public function __construct(int $stateIdentifier, array $transitions)
     {
         $this->stateIdentifier = $stateIdentifier;
         $this->transitions = $transitions;
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         $output = " STATE{".Etat::getLibelle($this->stateIdentifier).' : ';
         foreach ($this->transitions as $key => $value) {
@@ -63,32 +62,13 @@ class State
         return $output . '}' ;
     }
 
-    //function addTransition($transitionConstant,$transitionObject)
-    //{
-    //$this->states[$transitionConstant] = $transitionObject;
-    //}
-
-    //public function getTransitions()
-    //{
-    //    return $this->transitions;
-    //}
-
-
-    //public function getTransition($name)
-    //{
-    //  if( isset( $this->transitions[$name] ) )
-    //      return $this->transitions[$name];
-    //  else
-    //      return null;
-    //}
-
     /******************
      * Existe-t-il une transition possible avec le signal $signal ?
      *
      * params = $signal     Le signal
      * return = true/false
      **********************************/
-    private function hasTransition($signal)
+    private function hasTransition(int $signal): bool
     {
         if (isset($this->transitions[$signal])) {
             return true;
@@ -105,7 +85,7 @@ class State
      *      $object = Un objet
      *
      ********************************/
-    public function canExecute($signal, $object)
+    public function canExecute(int $signal, object $object) : bool
     {
         if ($this->hasTransition($signal)) {
             return $this->transitions[$signal]->canExecute($object);
@@ -123,11 +103,11 @@ class State
      *      $object = Un objet associé
      *
      * return:
-     * 		true  = transition ok
-     * 		false = transition non effectuée, objet intact
+     *      true  = transition ok
+     *      false = transition non effectuée, objet intact
      *
      ********************************/
-    public function execute($signal, $object)
+    public function execute(int $signal, object $object): bool
     {
         if ($this->hasTransition($signal)) {
             //echo ' State['.$this->stateIdentifier .'] signal ' . $name . ' on ' . get_class ( $object ) . ' exécuté ';
@@ -139,9 +119,4 @@ class State
             return false;
         }
     }
-
-//    public function getStateIdentifier()
-//    {
-//        return $this->stateIdentifier();
-//    }
 }

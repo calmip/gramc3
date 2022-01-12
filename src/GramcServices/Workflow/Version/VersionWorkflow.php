@@ -29,15 +29,18 @@ use App\GramcServices\Workflow\NoTransition;
 use App\GramcServices\ServiceJournal;
 use App\GramcServices\ServiceSessions;
 
-use App\Utils\Etat;
-use App\Utils\Signal;
+use App\GramcServices\Etat;
+use App\GramcServices\Signal;
 
 use App\GramcServices\ServiceNotifications;
 use Doctrine\ORM\EntityManagerInterface;
 
 class VersionWorkflow extends Workflow
 {
-    public function __construct(ServiceNotifications $sn, ServiceJournal $sj, ServiceSessions $ss, EntityManagerInterface $em)
+    public function __construct(ServiceNotifications $sn,
+                                ServiceJournal $sj,
+                                ServiceSessions $ss,
+                                EntityManagerInterface $em)
     {
         $this->workflowIdentifier   = get_class($this);
         parent::__construct($sn, $sj, $ss, $em);
