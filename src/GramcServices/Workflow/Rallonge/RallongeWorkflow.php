@@ -41,7 +41,10 @@ class RallongeWorkflow extends Workflow
     protected $states             = [];
     protected $workflowIdentifier = null;
 
-    public function __construct(ServiceNotifications $sn, ServiceJournal $sj, ServiceSessions $ss, EntityManagerInterface $em)
+    public function __construct(ServiceNotifications $sn,
+                                ServiceJournal $sj,
+                                ServiceSessions $ss,
+                                EntityManagerInterface $em)
     {
         if ($this->workflowIdentifier != null) {
             return;

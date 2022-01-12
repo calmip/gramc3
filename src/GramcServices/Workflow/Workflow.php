@@ -48,7 +48,10 @@ abstract class Workflow
      * Le constructeur = Sera surchargé par les classes dérivées afin
      * de mettre les transitions possibles
      ******************************************/
-    public function __construct(protected ServiceNotifications $sn, protected ServiceJournal $sj, protected ServiceSessions $ss, protected EntityManagerInterface $em)
+    public function __construct(protected ServiceNotifications $sn,
+                                protected ServiceJournal $sj,
+                                protected ServiceSessions $ss,
+                                protected EntityManagerInterface $em)
     {
         $this->workflowIdentifier = get_class($this);
     }
@@ -67,14 +70,21 @@ abstract class Workflow
     /***********************************************
      * Renvoie l'état de l'objet $object sous forme numérique (cf. Utils/Etat.php)
      ************************************************************************/
-    protected function getObjectState($object)
+    protected function getObjectState(object $object): int
     {
-        if ($object == null) {
+        if ($object == null)
+        {
             $this->sj->errorMessage(__METHOD__  . ":" . __LINE__ . " getObjectState on object null");
-        } elseif (method_exists($object, 'getObjectState')) {
+            return Etat::INVALIDE;
+        }
+        elseif (method_exists($object, 'getObjectState'))
+        {
             return $object->getObjectState($this->workflowIdentifier);
-        } else {
+        }
+        else
+        {
             $this->sj->errorMessage(__METHOD__ . ":" . __LINE__ . " getObjectState n'existe pas pour la class ". get_class($object));
+            return Etat::INVALIDE;
         }
     }
 
@@ -87,7 +97,7 @@ abstract class Workflow
      *           val est un objet qui dérive de Transition
      *
      *******************************************************************/
-    protected function addState($stateConstant, $transition_array)
+    protected function addState(int $stateConstant, array $transition_array): self
     {
         $this->addStateObject($stateConstant, new State($stateConstant, $transition_array));
 
@@ -105,7 +115,7 @@ abstract class Workflow
      * params: $stateObject L'état (objet State)
      *
      ***/
-    private function addStateObject($stateConstant, State $stateObject)
+    private function addStateObject(int $stateConstant, State $stateObject): void
     {
         $this->states[$stateConstant] = $stateObject;
     }
@@ -118,11 +128,14 @@ abstract class Workflow
      *
      * Return: le $state ou null s'il n'existe pas
      *************************************************/
-    public function getState($stateConstant)
+    public function getState(int $stateConstant): State|null
     {
-        if (isset($this->states[$stateConstant])) {
+        if (isset($this->states[$stateConstant]))
+        {
             return $this->states[$stateConstant];
-        } else {
+        }
+        else
+        {
             return null;
         }
     }
@@ -136,17 +149,19 @@ abstract class Workflow
      * return: true si l'état est dans le workflow et si la transition est possible
      *         false sinon
      **************************************************************/
-    public function execute($transition_code, $object)
+    public function execute(int $transition_code, object $object): bool
     {
         if ($object == null) {
             $this->sj->warningMessage(__METHOD__ ." on a null object dans " . $this->workflowIdentifier);
             return  false;
         }
-        $state = $this->getObjectState($object);
 
+        $state = $this->getObjectState($object);
         if ($this->hasState($state)) {
             return $this->getState($state)->execute($transition_code, $object);
-        } else {
+        }
+
+        else {
             $this->sj->warningMessage(__METHOD__ .  ":" . __LINE__ . " état " . Etat::getLibelle($state)
                     . "(" . $state . ") n'existe pas dans " . $this->getWorkflowIdentifier());
             return false;
@@ -162,22 +177,23 @@ abstract class Workflow
      * return: true si l'état est dans le workflow et si la transition est possible
      *         false sinon
      **************************************************************/
-    public function canExecute($transition_code, $object)
+    public function canExecute(int $transition_code, object $object)
     {
         $state = $this->getObjectState($object);
         if ($this->hasState($state)) {
             return $this->states[$state]->canExecute($transition_code, $object);
+            
         } else {
             return false;
         }
     }
 
-    public function hasState($state)
+    public function hasState($state): bool
     {
         return isset($this->states[$state]);
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         $output = "workflow(" . $this->getWorkflowIdentifier() . ":";
         foreach ($this->states as $state) {

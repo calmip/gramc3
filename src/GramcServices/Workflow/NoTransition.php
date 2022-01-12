@@ -26,24 +26,21 @@ namespace App\GramcServices\Workflow;
 
 use App\GramcServices\Workflow\Transition;
 
-////use App\App;
-
-
 class NoTransition extends Transition
 {
-    public function __toString()
+    public function __toString(): string
     {
         return "NoTransition";
     }
 
     ////////////////////////////////////////////////////
-    public function canExecute($object)
+    public function canExecute(object $object): bool
     {
         return true;
     }
 
     ///////////////////////////////////////////////////////
-    public function execute($object)
+    public function execute(object $object): bool
     {
         return true;
     }

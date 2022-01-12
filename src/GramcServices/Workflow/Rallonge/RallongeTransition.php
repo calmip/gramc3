@@ -25,7 +25,7 @@
 namespace App\GramcServices\Workflow\Rallonge;
 
 use App\GramcServices\Workflow\Transition;
-//use App\App;
+
 use App\Utils\Functions;
 use App\Utils\Etat;
 use App\Utils\Signal;
@@ -36,23 +36,17 @@ class RallongeTransition extends Transition
 {
     ////////////////////////////////////////////////////
 
-    public function canExecute($rallonge)
-    {
-        if ($rallonge instanceof Rallonge) {
-            return true;
-        } else {
-            return false;
-        }
+    public function canExecute(object $rallonge): bool {
+        $rallonge instanceof Rallonge || throw new \InvalidArgumentException();
+        return true;
     }
 
     ///////////////////////////////////////////////////////
 
-    public function execute($rallonge)
+    public function execute(object $rallonge): bool
     {
-        if (!$rallonge instanceof Rallonge) {
-            throw new \InvalidArgumentException();
-        }
-
+        $rallonge instanceof Rallonge || throw new \InvalidArgumentException();
+        
         // Change l'état de la rallonge
         $this->changeEtat($rallonge);
 

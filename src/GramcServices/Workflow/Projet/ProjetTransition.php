@@ -25,7 +25,6 @@
 namespace App\GramcServices\Workflow\Projet;
 
 use App\GramcServices\Workflow\Transition;
-//use App\App;
 use App\Utils\Functions;
 
 use App\Utils\Etat;
@@ -40,11 +39,9 @@ class ProjetTransition extends Transition
     private static $execute_en_cours = false;
 
     ////////////////////////////////////////////////////
-    public function canExecute($projet)
+    public function canExecute(object $projet): bool
     {
-        if (! $projet instanceof Projet) {
-            throw new \InvalidArgumentException();
-        }
+        $projet instanceof Projet || throw new \InvalidArgumentException();
 
         // Pour éviter une boucle infinie entre projet et version !
         if (self::$execute_en_cours) {
@@ -74,11 +71,10 @@ class ProjetTransition extends Transition
     ///////////////////////////////////////////////////////
     // Transmet le signal aux versions du projet qui ne sont ni annulées ni terminées
 
-    public function execute($projet)
+    public function execute(object $projet): bool
     {
-        if (!$projet instanceof Projet) {
-            throw new \InvalidArgumentException();
-        }
+        $projet instanceof Projet || throw new \InvalidArgumentException();
+
         if (Transition::DEBUG) {
             $this->sj->debugMessage(">>> " . __FILE__ . ":" . __LINE__ . " $this $projet");
         }

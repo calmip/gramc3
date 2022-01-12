@@ -43,7 +43,10 @@ use Doctrine\ORM\EntityManagerInterface;
  ************************************************************************/
 class SessionWorkflow extends Workflow
 {
-    public function __construct(ServiceNotifications $sn, ServiceJournal $sj, ServiceSessions $ss, EntityManagerInterface $em)
+    public function __construct(ServiceNotifications $sn,
+                                ServiceJournal $sj,
+                                ServiceSessions $ss,
+                                EntityManagerInterface $em)
     {
         parent::__construct($sn, $sj, $ss, $em);
 
