@@ -41,7 +41,7 @@ class CommentaireExpert
      *
      * Commentaire général sur les projets expertisés cette année
      *
-     * @ORM\Column(name="commentaire", type="text", length=65535, nullable=false)
+     * @ORM\Column(name="commentaire", type="text", length=65535, nullable=true)
      */
     private $commentaire = "";
 

@@ -86,8 +86,9 @@ class CommentaireExpertController extends AbstractController
     ************************/
     public function modifyAction(Request $request, CommentaireExpert $commentaireExpert)
     {
+        $em = $this->getDoctrine()->getManager();
         $sj = $this->sj;
-        $token = $this->tok;
+        $token = $this->tok->getToken();
 
         // Chaque expert ne peut accéder qu'à son commentaire à lui
         $moi = $token->getUser();
@@ -95,14 +96,13 @@ class CommentaireExpertController extends AbstractController
             $sj->throwException(__METHOD__ . ':' . __LINE__ .' problème avec ACL');
         }
 
-        $em = $this->getDoctrine()->getManager();
         $editForm = $this->createForm('App\Form\CommentaireExpertType', $commentaireExpert, ["only_comment" => true]);
         $editForm->handleRequest($request);
 
+        $err = false;
         if ($editForm->isSubmitted() && $editForm->isValid()) {
             $commentaireExpert->setMajStamp(new \DateTime());
             $em->flush();
-            return $this->redirectToRoute('commentaireexpert_modify', array('id' => $commentaireExpert->getId()));
         }
 
         $menu = [];
@@ -167,40 +167,6 @@ class CommentaireExpertController extends AbstractController
     }
 
     /**
-     * Deletes a commentaireExpert entity.
-     *
-     */
-    public function deleteAction(Request $request, CommentaireExpert $commentaireExpert)
-    {
-        $form = $this->createDeleteForm($commentaireExpert);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->remove($commentaireExpert);
-            $em->flush();
-        }
-
-        return $this->redirectToRoute('commentaireexpert_index');
-    }
-
-    /**
-     * Creates a form to delete a commentaireExpert entity.
-     *
-     * @param CommentaireExpert $commentaireExpert The commentaireExpert entity
-     *
-     * @return \Symfony\Component\Form\Form The form
-     */
-    private function createDeleteForm(CommentaireExpert $commentaireExpert)
-    {
-        return $this->createFormBuilder()
-            ->setAction($this->generateUrl('commentaireexpert_delete', array('id' => $commentaireExpert->getId())))
-            ->setMethod('DELETE')
-            ->getForm()
-        ;
-    }
-
-    /**
     * Modification ou Création d'un commentaire par l'utilisateur connecté
     *
     * Vérifie que le commentaire de l'année passée en paramètre et de la personne connectée
@@ -212,7 +178,7 @@ class CommentaireExpertController extends AbstractController
     **********/
     public function creeOuModifAction(Request $request, $annee)
     {
-        $token = $this->tok;
+        $token = $this->tok->getToken();
         $em = $this->getDoctrine()->getManager();
 
         $moi = $token->getUser();

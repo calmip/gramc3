@@ -455,17 +455,28 @@ class ExpertiseController extends AbstractController
         // Commentaires
         // On propose aux experts du comité d'attribution (c-a-d ceux qui ont une thématique) d'entrer un commentaire sur l'année écoulée
         $mes_commentaires_flag = false;
-        $mes_commentaires_maj        = null;
-        if ($this->has('commentaires_experts_d') && count($mes_thematiques)>0) {
-            $mes_commentaires_flag = true;
+        $mes_commentaires_maj = null;
+        
+        try
+        {
             $mois = $sd->format('m');
             $annee= $sd->format('Y');
-            if ($mois>=$this->getParameter('commentaires_experts_d')) {
+
+            // si on est après mars 2022, on ouvre le commentaires pour 2022
+            if ($mois >= $this->getParameter('commentaires_experts_d'))
+            {
                 $mes_commentaires_maj = $annee;
-            } elseif ($mois<$this->getParameter('commentaires_experts_f')) {
+            }
+
+            // si on est avant mai 2022, on ouvre le commentaire pour 2021
+            elseif ($mois < $this->getParameter('commentaires_experts_f'))
+            {
                 $mes_commentaires_maj = $annee - 1;
             }
+            $mes_commentaires_flag = true;
         }
+        catch (\InvalidArgumentException $e) {};
+        
         $mes_commentaires = $em->getRepository('App:CommentaireExpert')->findBy(['expert' => $moi ]);
 
         ///////////////////////
