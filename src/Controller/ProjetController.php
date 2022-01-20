@@ -1101,7 +1101,7 @@ class ProjetController extends AbstractController
         $sm = $this->sm;
         $sj = $this->sj;
         $ss = $this->ss;
-        $token = $this->token;
+        $token = $this->tok->getToken();
 
         if ($sm->nouveau_projet($type)['ok'] == false) {
             $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de créer un nouveau projet parce que " . $sm->nouveau_projet($type)['raison']);
@@ -1142,7 +1142,7 @@ class ProjetController extends AbstractController
         $sp = $this->sp;
         $sv = $this->sv;
         $sj = $this->sj;
-        $token = $this->token;
+        $token = $this->tok->getToken();
         $em = $this->getDoctrine()->getManager();
 
         // Si changement d'état de la session alors que je suis connecté !
@@ -1168,17 +1168,18 @@ class ProjetController extends AbstractController
         $projet   = new Projet($type);
         $projet->setIdProjet($sp->NextProjetId($annee, $type));
         $projet->setNepasterminer(false);
+
         switch ($type) {
-        case Projet::PROJET_SESS:
-        case Projet::PROJET_FIL:
-        $projet->setEtatProjet(Etat::RENOUVELABLE);
-        break;
-        case Projet::PROJET_TEST:
-        $projet->setEtatProjet(Etat::NON_RENOUVELABLE);
-        break;
-        default:
-           $sj->throwException(__METHOD__ . ":" . __LINE__ . " mauvais type de projet " . Functions::show($type));
-    }
+            case Projet::PROJET_SESS:
+            case Projet::PROJET_FIL:
+                $projet->setEtatProjet(Etat::RENOUVELABLE);
+                break;
+            case Projet::PROJET_TEST:
+                $projet->setEtatProjet(Etat::NON_RENOUVELABLE);
+                break;
+            default:
+               $sj->throwException(__METHOD__ . ":" . __LINE__ . " mauvais type de projet " . Functions::show($type));
+        }
 
         // Ecriture du projet dans la BD
         $em->persist($projet);
@@ -1211,7 +1212,8 @@ class ProjetController extends AbstractController
         $collaborateurVersion = new CollaborateurVersion($moi);
         $collaborateurVersion->setVersion($version);
         $collaborateurVersion->setResponsable(true);
-
+        $collaborateurVersion->setDeleted(false);
+        
         // Ecriture de collaborateurVersion dans la BD
         $em->persist($collaborateurVersion);
         $em->flush();

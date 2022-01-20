@@ -29,7 +29,7 @@
 <p>
 {% if app.debug %}<strong>DEBUG </strong><em>Type du projet {{projet.id}} = <strong>{{ projet.typeprojet}}</strong> - Etat du projet {{projet.id }}= <strong>{{ projet.getEtatProjet }}</strong> - Etat de la version {{version.idVersion }}= <strong>{{ version.getEtatVersion }}</strong></em>{% endif %}<br />
 {% if version.majInd != null %}
-	<em>Dernière modification par {{ version.majInd }} le {{ version.majStamp|date('Y-m-d H:i:s') }}</em>
+    <em>Dernière modification par {{ version.majInd }} le {{ version.majStamp|date('Y-m-d H:i:s') }}</em>
 {% endif %}
 </p>
 
@@ -140,8 +140,8 @@ Le laboratoire associé au projet est le laboratoire du responsable
 <tbody>
     <tr>
         <th>Login</th>
-		{% if version.etat == 23 %}
-		<th>User</th>
+        {% if version.etat == 23 %}
+        <th>User</th>
         {% endif %}
         <th>Prénom</th>
         <th>Nom</th>
@@ -152,9 +152,10 @@ Le laboratoire associé au projet est le laboratoire du responsable
     </tr>
 
     {% for user in version.CollaborateurVersion %}
+    {% if not user.deleted %}
     <tr>
         <td>{% if( user.login == true) %}Oui{% else %}Non{% endif %}</td>
-		{% if version.etat==5 or version.etat == 23 %}
+        {% if version.etat==5 or version.etat == 23 %}
         <td>{% if (user.login == true) %}
                {% if user.loginname==null %}
                   <img src="{{ asset('icones/attention16.png') }}" alt="Compte non encore créé" title="compte non encore créé" />
@@ -170,6 +171,7 @@ Le laboratoire associé au projet est le laboratoire du responsable
         <td>{% if (user.Collaborateur.labo!=null) %}{{ user.Collaborateur.labo.getAcroLabo }}{% endif %}</td>
         <td>{{ user.Collaborateur.etab }}</td>
     </tr>
+    {% endif %}
     {% endfor %}
 </tbody>
 </table>

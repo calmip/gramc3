@@ -269,31 +269,20 @@ class ServiceVersions
     }
 
     /*********************************************************
-     * Forcer le flag Deleted d'un collaborateur/Version
+     * Synchroniser le flag Deleted d'un collaborateurVersion
      **********************************************************/
-    public function forceDeleted( Version $version, Individu $individu)
+    public function syncDeleted( Version $version, Individu $individu, bool $delete)
     {
         $em = $this->em;
         $sj = $this->sj;
         
         $cv = $this->TrouverCollaborateur($version, $individu);
-        $cv -> setDeleted(true);
-        $em->persist($cv);
-        $em->flush();
-    }
-
-    /*********************************************************
-     * Retirer le flag Deleted d'un collaborateur/Version
-     **********************************************************/
-    public function noDeleted( Version $version, Individu $individu)
-    {
-        $em = $this->em;
-        $sj = $this->sj;
-        
-        $cv = $this->TrouverCollaborateur($version, $individu);
-        $cv -> setDeleted(false);
-        $em->persist($cv);
-        $em->flush();
+        if ($cv->getDeleted() != $delete) {
+            $sj->debugMessage("ServiceVersion:syncDeleted !$delete => $delete");
+            $cv -> setDeleted($delete);
+            $em->persist($cv);
+            $em->flush();
+        }
     }
 
     // modifier login d'un collaborateur d'une version

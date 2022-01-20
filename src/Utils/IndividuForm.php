@@ -30,14 +30,14 @@ use     App\Entity\Laboratoire;
 use     App\Entity\Individu;
 use     App\Utils\Functions;
 
-//use Symfony\Component\Validator\Validator\TraceableValidator;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 use App\GramcServices\ServiceJournal;
 use Doctrine\ORM\EntityManager;
 
 /**************************************************************************
- * Ce formulaire est utilisé par l'écran des collaborateurs - A chaque ligne correspond un IndividuForm
+ * Ce formulaire est utilisé par l'écran des collaborateurs
+ * A chaque ligne correspond un IndividuForm
  ************************************************************************/
 class IndividuForm
 {
@@ -220,6 +220,9 @@ class IndividuForm
         return $individu;
     }
 
+    /*****
+     * Synchronise l'entité $individu à partir du formulaire
+     *****/
     public function modifyIndividu(Individu $individu, ServiceJournal $sj)
     {
         if ($individu != null) {
@@ -255,6 +258,7 @@ class IndividuForm
                                     $individu->getStatut() . " vers " . $this->getStatut());
                 $individu->setStatut($this->getStatut());
             }
+
         }
         return $individu;
     }
