@@ -392,7 +392,6 @@ class WorkflowController extends AbstractController
                                 'RENOUVELABLE'                  =>   Etat::RENOUVELABLE,
                                 'NON_RENOUVELABLE'              =>   Etat::NON_RENOUVELABLE,
                                 'EDITION_DEMANDE'               =>   Etat::EDITION_DEMANDE,
-                                'EDITION_TEST   '               =>   Etat::EDITION_TEST,
                                 'EDITION_EXPERTISE'             =>   Etat::EDITION_EXPERTISE,
                                 'EN_ATTENTE'                    =>   Etat::EN_ATTENTE,
                                 'ACTIF'                         =>   Etat::ACTIF,
@@ -433,7 +432,6 @@ class WorkflowController extends AbstractController
                     'choices' =>
                                 [
                                 'EDITION_DEMANDE'               =>   Etat::EDITION_DEMANDE,
-                                'EDITION_TEST'                  =>   Etat::EDITION_TEST,
                                 'EDITION_EXPERTISE'             =>   Etat::EDITION_EXPERTISE,
                                 'EN_ATTENTE'                    =>   Etat::EN_ATTENTE,
                                 'ACTIF'                         =>   Etat::ACTIF,
