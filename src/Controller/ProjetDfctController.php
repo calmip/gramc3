@@ -35,7 +35,7 @@ use App\GramcServices\GramcGraf\Calcul;
 use App\GramcServices\DonneesFacturation;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -89,8 +89,8 @@ class ProjetDfctController extends AbstractController
      * Appelé quand on clique sur le bouton € dans la page projets par année
      * Affiche les données de facturation actuelles
      *
-     * @Route("/{id}/dfctliste/{annee}", name="dfct_liste")
-     * @Method({"GET","POST"})
+     * @Route("/{id}/dfctliste/{annee}", name="dfct_liste", methods={"GET","POST"})
+     * Method({"GET","POST"})
      */
 
     public function dfctlisteAction(Projet $projet, $annee, Request $request)
@@ -180,8 +180,8 @@ class ProjetDfctController extends AbstractController
     /**
      * Téléchargement d'un pdf avec les données de facturation déjà émises
      *
-     * @Route("/{id}/dfctdl/{annee}/{nb}", name="dfct_dl_projet")
-     * @Method({"GET","POST"})
+     * @Route("/{id}/dfctdl/{annee}/{nb}", name="dfct_dl_projet", methods={"GET","POST"})
+     * Method({"GET","POST"})
      */
 
     public function downloaddfctAction(Projet $projet, $annee, $nb, Request $request)
@@ -202,8 +202,8 @@ class ProjetDfctController extends AbstractController
     /**
      * Génération du pdf contenant les données de facturation
      *
-     * @Route("/{id}/dfctgen/{fin_periode}", name="dfct_gen")
-     * @Method({"GET","POST"})
+     * @Route("/{id}/dfctgen/{fin_periode}", name="dfct_gen", methods={"GET","POST"})
+     * Method({"GET","POST"})
      */
     public function dfct_genAction(Projet $projet, \DateTime $fin_periode, Request $request)
     {

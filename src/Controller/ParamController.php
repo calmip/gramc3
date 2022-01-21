@@ -28,7 +28,6 @@ use App\Entity\Param;
 use App\Utils\Functions;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
@@ -47,18 +46,13 @@ use Symfony\Component\Form\FormFactoryInterface;
  */
 class ParamController extends AbstractController
 {
-    private $ff;
-
-    public function __construct(FormFactoryInterface $ff)
-    {
-        $this->ff  = $ff;
-    }
+    public function __construct(private FormFactoryInterface $ff) {}
 
     /**
      * Lists all param entities.
      *
-     * @Route("/", name="param_index")
-     * @Method("GET")
+     * @Route("/", name="param_index", methods={"GET"})
+     * Method("GET")
      */
     public function indexAction()
     {
@@ -74,8 +68,8 @@ class ParamController extends AbstractController
     /**
      * Creates a new param entity.
      *
-     * @Route("/new", name="param_new")
-     * @Method({"GET", "POST"})
+     * @Route("/new", name="param_new", methods={"GET","POST"})
+     * Method({"GET", "POST"})
      */
     public function newAction(Request $request)
     {
@@ -100,8 +94,8 @@ class ParamController extends AbstractController
     /**
      * Finds and displays a param entity.
      *
-     * @Route("/{id}/show", name="param_show")
-     * @Method("GET")
+     * @Route("/{id}/show", name="param_show", methods={"GET"})
+     * Method("GET")
      */
     public function showAction(Param $param)
     {
@@ -116,8 +110,8 @@ class ParamController extends AbstractController
     /**
      * Displays a form to edit an existing param entity.
      *
-     * @Route("/{id}/edit", name="param_edit")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/edit", name="param_edit", methods={"GET","POST"})
+     * Method({"GET", "POST"})
      */
     public function editAction(Request $request, Param $param)
     {
@@ -141,8 +135,8 @@ class ParamController extends AbstractController
     /**
      * Displays a form to edit an existing param entity.
      *
-     * @Route("/avancer", name="param_avancer")
-     * @Method({"GET", "POST"})
+     * @Route("/avancer", name="param_avancer", methods={"GET","POST"})
+     * Method({"GET", "POST"})
      */
     public function avancerAction(Request $request)
     {
@@ -196,8 +190,8 @@ class ParamController extends AbstractController
     /**
      * Deletes a param entity.
      *
-     * @Route("/{id}", name="param_delete")
-     * @Method("DELETE")
+     * @Route("/{id}", name="param_delete", methods={"DELETE"})
+     * Method("DELETE")
      */
     public function deleteAction(Request $request, Param $param)
     {

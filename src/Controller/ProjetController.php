@@ -56,7 +56,6 @@ use App\GramcServices\GramcGraf\Calcul;
 use Psr\Log\LoggerInterface;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -74,7 +73,6 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -97,66 +95,31 @@ function cmpProj($a, $b)
 
 class ProjetController extends AbstractController
 {
-    private $sj;
-    private $sm;
-    private $sp;
-    private $ss;
-    private $gcl;
-    private $gstk;
-    private $gall;
-    private $sd;
-    private $sv;
-    private $se;
-    private $pw;
-    private $ff;
-    private $token;
-    private $sss;
-    private $tw;
-    private $ac;
-
     public function __construct(
-        ServiceJournal $sj,
-        ServiceMenus $sm,
-        ServiceProjets $sp,
-        ServiceSessions $ss,
-        Calcul $gcl,
-        Stockage $gstk,
-        CalculTous $gall,
-        GramcDate $sd,
-        ServiceVersions $sv,
-        ServiceExperts $se,
-        ProjetWorkflow $pw,
-        FormFactoryInterface $ff,
-        TokenStorageInterface $tok,
-        SessionInterface $sss,
-        Environment $tw,
-        AuthorizationCheckerInterface $ac
-    ) {
-        $this->sj  = $sj;
-        $this->sm  = $sm;
-        $this->sp  = $sp;
-        $this->ss  = $ss;
-        $this->gcl = $gcl;
-        $this->gstk= $gstk;
-        $this->gall= $gall;
-        $this->sd  = $sd;
-        $this->sv  = $sv;
-        $this->se  = $se;
-        $this->pw  = $pw;
-        $this->ff  = $ff;
-        $this->token= $tok->getToken();
-        $this->sss = $sss;
-        $this->tw  = $tw;
-        $this->ac  = $ac;
-    }
+        private ServiceJournal $sj,
+        private ServiceMenus $sm,
+        private ServiceProjets $sp,
+        private ServiceSessions $ss,
+        private Calcul $gcl,
+        private Stockage $gstk,
+        private CalculTous $gall,
+        private GramcDate $sd,
+        private ServiceVersions $sv,
+        private ServiceExperts $se,
+        private ProjetWorkflow $pw,
+        private FormFactoryInterface $ff,
+        private TokenStorageInterface $tok,
+        private Environment $tw,
+        private AuthorizationCheckerInterface $ac
+    ) {}
 
-    private static $count;
+    //private static $count;
 
     /**
      * Lists all projet entities.
      *
-     * @Route("/", name="projet_index")
-     * @Method("GET")
+     * @Route("/", name="projet_index", methods={"GET"})
+     * Method("GET")
      * @Security("is_granted('ROLE_OBS')")
      */
     public function indexAction()
@@ -171,243 +134,25 @@ class ProjetController extends AbstractController
     }
 
     /**
-     * Delete old data.
+     * Rgpd !
      *
+     * Ne fait rien, affiche simplement la commande à exécuter
+     *
+     * 
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Route("/old", name="projet_nettoyer")
-     * @Method({"GET","POST"})
+     * @Route("/rgpd", name="rgpd", methods={"GET"})
+     * 
      */
-    public function oldAction(Request $request)
+    public function rgpdAction(Request $request)
     {
-        $sd = $this->sd;
-        $sj = $this->sj;
-        $sp = $this->sp;
-        $ff = $this->ff;
-        $em = $this->getDoctrine()->getManager();
-
-        $list = [];
-        $mauvais_projets = [];
-        static::$count = [];
-        $annees =   [];
-
-        $all_projets = $em->getRepository(Projet::class)->findAll();
-        foreach ($all_projets as $projet) {
-            $derniereVersion    =  $projet->derniereVersion();
-            if ($derniereVersion == null) {
-                $mauvais_projets[$projet->getIdProjet()]    =   $projet;
-                $annee = 0;
-            } else {
-                $annee = $projet->derniereVersion()->getAnneeSession();
-            }
-            $list[$annee][] = $projet;
-        }
-        foreach ($list as $annee => $projets) {
-            static::$count[$annee]  =   count($projets);
-            $annees[]       =   $annee;
-        }
-
-        asort($annees);
-        $form = Functions::createFormBuilder($ff)
-            ->add(
-                'annee',
-                ChoiceType::class,
-                [
-                    'required'  =>  false,
-                    'label'     => ' Année ',
-                    'choices'   =>  $annees,
-                    'choice_label' => function ($choiceValue, $key, $value) {
-                        return  $choiceValue . '  (' . ProjetController::$count[$choiceValue] . ' projets)';
-                    }
-                    ]
-            )
-        ->add('supprimer projets', SubmitType::class, ['label' => ""])
-        ->add('supprimer utilisateurs sans projet', SubmitType::class, ['label' => ""])
-        ->add('nettoyer le journal', SubmitType::class, ['label' => ""])
-        ->getForm();
-
-        $date = clone $sd;
-        $date->sub(\DateInterval::createFromDateString('1 year'));
-        $individus = $em->getRepository(Individu::class)->liste_avant($date);
-        $utilisateurs_a_effacer = $sp->utilisateurs_a_effacer($individus);
-        $individus_effaces = [];
-        $projets_effaces = [];
-        $old_journal = null;
-        $journal = false;
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid() && $form->get('supprimer utilisateurs sans projet')->isClicked()) {
-            $individus_effaces = $sp->effacer_utilisateurs($utilisateurs_a_effacer);
-            $utilisateurs_a_effacer = [];
-        //return new Response( Functions::show( $individus_effaces ) );
-        } elseif ($form->isSubmitted() && $form->isValid() && $form->get('nettoyer le journal')->isClicked()) {
-            if ($this->container->hasParameter('old_journal')) {
-                $old_journal = intval($this->getParameter('old_journal'));
-                if ($old_journal > 0) {
-                    $date = clone $sd;
-                    $date->sub(\DateInterval::createFromDateString($old_journal . ' year'));
-                    // return new Response( Functions::show( [$old_journal,$date] ) );
-                    $journal = $em->getRepository(Journal::class)->liste_avant($date);
-                    foreach ($journal as $item) {
-                        $em->remove($item);
-                    }
-                    $em->flush();
-                    $journal = true;
-                } else {
-                    $sj->errorMessage(__METHOD__ . ":" . __LINE__ . " La valeur du paramètre old_journal est " . $old_journal);
-                }
-            } else {
-                $sj->errorMessage(__METHOD__ . ":" . __LINE__ . " Le paramètre old_journal manque");
-            }
-        } elseif ($form->isSubmitted() && $form->isValid() && $form->get('supprimer projets')->isClicked()) {
-            $annee = $form->getData()['annee']; // par exemple 2014
-
-            $key = array_search($annee, $annees); // supprimer l'année de la liste du formulaire
-            if ($key !== false) {
-                unset($annees[$key]);
-            }
-
-            $individus = [];
-            foreach ($list[$annee] as $projet) {
-                foreach ($projet->getVersion() as $version) {
-                    foreach ($version->getCollaborateurs() as $collaborateur) {
-                        $individus[$collaborateur->getIdIndividu()]    =  $collaborateur;
-                    }
-                    foreach ($version->getExpertise() as $expertise) {
-                        if ($expertise->getExpert() != null) {
-                            $individus[$expertise->getExpert()->getIdIndividu()]    =  $expertise->getExpert();
-                        }
-                    }
-                    foreach ($version->getRallonge() as $rallonge) {
-                        if ($rallonge->getExpert() != null) {
-                            $individus[$rallonge->getExpert()->getIdIndividu()]    =  $rallonge->getExpert();
-                        }
-                    }
-                }
-            }
-
-            // effacer des structures
-            foreach ($list[$annee] as $projet) {
-                $em->persist($projet);
-                //$projet->setVersionDerniere( null );
-                //$projet->setVersionActive( null );
-                $em->flush();
-
-                // effacer des documents
-                $sp->erase_directory($this->getParameter('rapport_directory'), $projet);
-                $sp->erase_directory($this->getParameter('signature_directory'), $projet);
-                $sp->erase_directory($this->getParameter('fig_directory'), $projet);
-
-                //continue; //DEBUG
-
-                foreach ($projet->getVersion() as $version) {
-                    $em->persist($version);
-                    foreach ($version->getCollaborateurVersion() as $item) {
-                        $em->remove($item);
-                        //$em->flush();
-                    }
-
-                    foreach ($version->getExpertise() as $item) {
-                        $em->remove($item);
-                        //$em->flush();
-                    }
-                    /*
-                    $expertises = $em->getRepository(Expertise::class)->findBy(['version' => $version]);
-                    foreach( $expertises as $item )
-                        {
-                        $em->remove( $item );
-                        $em->flush();
-                        }
-                     */
-
-                    $em->remove($version);
-                }
-
-                $versions = $em->getRepository(Version::class)->findBy(['projet' => $projet]);
-                foreach ($versions as $item) {
-                    $em->remove($item);
-                }
-
-                $loginname = strtolower($projet->getIdProjet());
-                foreach ($em->getRepository(Compta::class)->findBy(['loginname' => $loginname]) as $item) {
-                    $em->remove($item);
-                }
-
-                foreach ($projet->getRapportActivite() as $rapport) {
-                    $em->remove($rapport);
-                }
-
-                /*
-                if( $projet->derniereVersion() != null )
-                    {
-                    $version = $projet->getVersionDerniere();
-                    $em->persist( $version );
-                    $em->remove( $version );
-                    }
-                */
-
-                //Functions::erase_parameter_directory( 'fig_directory', $projet->getIdProjet() );
-                $projets_effaces[] = $projet;
-                $sj->infoMessage('Le projet ' . $projet . ' a été effacé ');
-                $em->remove($projet);
-            }
-
-            //return new Response(Functions::show( $projets_effaces ) ); //DEBUG
-
-            $em->flush();
-
-            // effacer des anciens utilisateurs
-
-            $individus_effaces = $sp->effacer_utilisateurs($individus);
-
-            //return new Response( Functions::show( $individus_effaces ) );
-        }
-        //return new Response( Functions::show( $annees ) );
-
-        $form = Functions::createFormBuilder($ff)
-            ->add(
-                'annee',
-                ChoiceType::class,
-                [
-                    'required'  =>  false,
-                    'label'     => ' Année ',
-                    'choices'   =>  $annees,
-                    'choice_label' => function ($choiceValue, $key, $value) {
-                        return  $choiceValue . '  (' . ProjetController::$count[$choiceValue] . ' projets)';
-                    }
-                    ]
-            )
-        ->add('supprimer projets', SubmitType::class, ['label' => ""])
-        ->add('supprimer utilisateurs sans projet', SubmitType::class, ['label' => ""])
-        ->add('nettoyer le journal', SubmitType::class, ['label' => ""])
-        ->getForm();
-
-        return $this->render(
-            'projet/old.html.twig',
-            [
-            'annees' => $annees,
-            'count' => static::$count,
-            'projets'   =>  $list,
-            'projets_effaces'   => $projets_effaces,
-            'mauvais_projets'   =>  $mauvais_projets,
-            'utilisateurs_a_effacer'    => $utilisateurs_a_effacer,
-            'individus_effaces'    =>  $individus_effaces,
-            'form'  =>  $form->createView(),
-            'journal' => $journal,
-            'old_journal' => $old_journal,
-            ]
-        );
-
-        //return new Response( Functions::show( $mauvais_projets ) );
-    //return new Response( Functions::show( $count ) );
-    //return new Response( Functions::show( $list ) );
+        return $this->render('projet/rgpd.html.twig');
     }
 
     /**
      * Projets par session en CSV
      *
-     * @Route("/{id}/session_csv", name="projet_session_csv")
-     * @Method({"GET","POST"})
+     * @Route("/{id}/session_csv", name="projet_session_csv", methods={"GET","POST"})
+     * Method({"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
     public function sessionCSVAction(Session $session)
@@ -469,8 +214,8 @@ class ProjetController extends AbstractController
     /**
      * Lists all projet entities.
      *
-     * @Route("/tous_csv", name="projet_tous_csv")
-     * @Method({"GET","POST"})
+     * @Route("/tous_csv", name="projet_tous_csv", methods={"GET","POST"})
+     * Method({"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
     public function tousCSVAction()
@@ -527,8 +272,8 @@ class ProjetController extends AbstractController
      * fermer un projet
      *
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Route("/{id}/fermer", name="fermer_projet")
-     * @Method({"GET","POST"})
+     * @Route("/{id}/fermer", name="fermer_projet", methods={"GET","POST"})
+     * Method({"GET","POST"})
      */
     public function fermerAction(Projet $projet, Request $request)
     {
@@ -556,8 +301,8 @@ class ProjetController extends AbstractController
      * Conserver un projet en standby
      *
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Route("/{id}/nepasterminer", name="nepasterminer_projet")
-     * @Method({"GET"})
+     * @Route("/{id}/nepasterminer", name="nepasterminer_projet", methods={"GET"})
+     * Method({"GET"})
      */
     public function nepasterminerAction(Projet $projet, Request $request)
     {
@@ -578,8 +323,8 @@ class ProjetController extends AbstractController
      * Permettre la fermeture d'un projet
      *
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Route("/{id}/onpeutterminer", name="onpeutterminer_projet")
-     * @Method({"GET","POST"})
+     * @Route("/{id}/onpeutterminer", name="onpeutterminer_projet", methods={"GET","POST"})
+     * Method({"GET","POST"})
      */
     public function onpeutterminerAction(Projet $projet, Request $request)
     {
@@ -600,8 +345,8 @@ class ProjetController extends AbstractController
      * back une version
      *
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Route("/{id}/back", name="back_version")
-     * @Method({"GET","POST"})
+     * @Route("/{id}/back", name="back_version", methods={"GET","POST"})
+     * Method({"GET","POST"})
      */
     public function backAction(Version $version, Request $request)
     {
@@ -637,8 +382,8 @@ class ProjetController extends AbstractController
      * à la place du responsable
      *
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Route("/{id}/fwd", name="fwd_version")
-     * @Method({"GET","POST"})
+     * @Route("/{id}/fwd", name="fwd_version", methods={"GET","POST"})
+     * Method({"GET","POST"})
      */
     public function fwdAction(Version $version, Request $request, LoggerInterface $lg)
     {
@@ -670,8 +415,8 @@ class ProjetController extends AbstractController
     /**
      * Liste tous les projets qui ont une version lors de cette session
      *
-     * @Route("/session", name="projet_session")
-     * @Method({"GET","POST"})
+     * @Route("/session", name="projet_session", methods={"GET","POST"})
+     * Method({"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
     public function sessionAction(Request $request)
@@ -885,8 +630,8 @@ class ProjetController extends AbstractController
      * Param : $annee
      *
      * @Security("is_granted('ROLE_OBS')")
-     * @Route("/{annee}/resumes", name="projet_resumes")
-     * @Method({"GET","POST"})
+     * @Route("/{annee}/resumes", name="projet_resumes", methods={"GET","POST"})
+     * Method({"GET","POST"})
      *
      */
     public function resumesAction($annee)
@@ -957,8 +702,8 @@ class ProjetController extends AbstractController
      *
      * Liste tous les projets qui ont une version cette annee
      *
-     * @Route("/annee", name="projet_annee")
-     * @Method({"GET","POST"})
+     * @Route("/annee", name="projet_annee", methods={"GET","POST"})
+     * Method({"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
 
@@ -1012,8 +757,8 @@ class ProjetController extends AbstractController
      * NB - Utile pour Calmip, si c'est inutile pour les autres mesoc il faudra
      *      mettre cette fonction ailleurs !
      *
-     * @Route("/donnees", name="projet_donnees")
-     * @Method({"GET","POST"})
+     * @Route("/donnees", name="projet_donnees", methods={"GET","POST"})
+     * Method({"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
 
@@ -1039,8 +784,8 @@ class ProjetController extends AbstractController
     /**
      * Données en CSV
      *
-     * @Route("{annee}/donnees_csv", name="projet_donnees_csv")
-     * @Method({"GET","POST"})
+     * @Route("{annee}/donnees_csv", name="projet_donnees_csv", methods={"GET","POST"})
+     * Method({"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
     public function donneesCSVAction($annee)
@@ -1054,8 +799,8 @@ class ProjetController extends AbstractController
                     'titre',
                     'thématique',
                     'courriel du resp',
-                    'prénom',
                     'nom',
+                    'prenom',
                     'laboratoire',
                     'justif',
                     'demande',
@@ -1117,8 +862,8 @@ class ProjetController extends AbstractController
     /**
      * Projets de l'année en CSV
      *
-     * @Route("/{annee}/annee_csv", name="projet_annee_csv")
-     * @Method({"GET","POST"})
+     * @Route("/{annee}/annee_csv", name="projet_annee_csv", methods={"GET","POST"})
+     * Method({"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
     public function anneeCSVAction($annee)
@@ -1185,8 +930,8 @@ class ProjetController extends AbstractController
     /**
      * download rapport
      * @Security("is_granted('ROLE_DEMANDEUR') or is_granted('ROLE_OBS')")
-     * @Route("/{id}/rapport/{annee}", defaults={"annee"=0}, name="rapport")
-     * @Method("GET")
+     * @Route("/{id}/rapport/{annee}", defaults={"annee"=0}, name="rapport", methods={"GET"})
+     * Method("GET")
      */
     public function rapportAction(Version $version, Request $request, $annee)
     {
@@ -1217,9 +962,9 @@ class ProjetController extends AbstractController
     /**
      * download signature
      *
-     * @Route("/{id}/signature", name="signature")
+     * @Route("/{id}/signature", name="signature", methods={"GET"})
      * @Security("is_granted('ROLE_OBS')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function signatureAction(Version $version, Request $request)
     {
@@ -1230,9 +975,9 @@ class ProjetController extends AbstractController
     /**
      * download doc attaché
      *
-     * @Route("/{id}/document", name="document")
+     * @Route("/{id}/document", name="document", methods={"GET"})
      * @Security("is_granted('ROLE_DEMANDEUR') or is_granted('ROLE_OBS')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function documentAction(Version $version, Request $request)
     {
@@ -1243,8 +988,8 @@ class ProjetController extends AbstractController
     /**
      * Lists all projet entities.
      *
-     * @Route("/tous", name="projet_tous")
-     * @Method("GET")
+     * @Route("/tous", name="projet_tous", methods={"GET"})
+     * Method("GET")
      * @Security("is_granted('ROLE_OBS')")
      */
     public function tousAction()
@@ -1304,8 +1049,8 @@ class ProjetController extends AbstractController
      * Lists all projet entities.
      *
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Route("/gerer", name="gerer_projets")
-     * @Method("GET")
+     * @Route("/gerer", name="gerer_projets", methods={"GET"})
+     * Method("GET")
      */
     public function gererAction()
     {
@@ -1320,8 +1065,8 @@ class ProjetController extends AbstractController
     /**
      * Creates a new projet entity.
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Route("/new", name="projet_new")
-     * @Method({"GET", "POST"})
+     * @Route("/new", name="projet_new", methods={"GET","POST"})
+     * Method({"GET", "POST"})
      */
     public function newAction(Request $request)
     {
@@ -1346,8 +1091,8 @@ class ProjetController extends AbstractController
     /**
      * Envoie un écran de mise en garde avant de créer un nouveau projet
      *
-     * @Route("/avant_nouveau/{type}", name="avant_nouveau_projet")
-     * @Method({"GET", "POST"})
+     * @Route("/avant_nouveau/{type}", name="avant_nouveau_projet", methods={"GET","POST"})
+     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      *
      */
@@ -1356,7 +1101,7 @@ class ProjetController extends AbstractController
         $sm = $this->sm;
         $sj = $this->sj;
         $ss = $this->ss;
-        $token = $this->token;
+        $token = $this->tok->getToken();
 
         if ($sm->nouveau_projet($type)['ok'] == false) {
             $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de créer un nouveau projet parce que " . $sm->nouveau_projet($type)['raison']);
@@ -1384,8 +1129,8 @@ class ProjetController extends AbstractController
     /**
      * Création d'un nouveau projet
      *
-     * @Route("/nouveau/{type}", name="nouveau_projet")
-     * @Method({"GET", "POST"})
+     * @Route("/nouveau/{type}", name="nouveau_projet", methods={"GET","POST"})
+     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      *
      */
@@ -1394,16 +1139,15 @@ class ProjetController extends AbstractController
         $sd = $this->sd;
         $sm = $this->sm;
         $ss = $this->ss;
-        $sss= $this->sss;
         $sp = $this->sp;
         $sv = $this->sv;
         $sj = $this->sj;
-        $token = $this->token;
+        $token = $this->tok->getToken();
         $em = $this->getDoctrine()->getManager();
 
         // Si changement d'état de la session alors que je suis connecté !
            // + contournement d'un problème lié à Doctrine
-        $sss->remove('SessionCourante'); // remove cache
+        $request->getSession()->remove('SessionCourante'); // remove cache
 
         // NOTE - Pour ce controleur, on identifie les types par un chiffre (voir Entity/Projet.php)
         $m = $sm->nouveau_projet("$type");
@@ -1424,17 +1168,18 @@ class ProjetController extends AbstractController
         $projet   = new Projet($type);
         $projet->setIdProjet($sp->NextProjetId($annee, $type));
         $projet->setNepasterminer(false);
+
         switch ($type) {
-        case Projet::PROJET_SESS:
-        case Projet::PROJET_FIL:
-        $projet->setEtatProjet(Etat::RENOUVELABLE);
-        break;
-        case Projet::PROJET_TEST:
-        $projet->setEtatProjet(Etat::NON_RENOUVELABLE);
-        break;
-        default:
-           $sj->throwException(__METHOD__ . ":" . __LINE__ . " mauvais type de projet " . Functions::show($type));
-    }
+            case Projet::PROJET_SESS:
+            case Projet::PROJET_FIL:
+                $projet->setEtatProjet(Etat::RENOUVELABLE);
+                break;
+            case Projet::PROJET_TEST:
+                $projet->setEtatProjet(Etat::NON_RENOUVELABLE);
+                break;
+            default:
+               $sj->throwException(__METHOD__ . ":" . __LINE__ . " mauvais type de projet " . Functions::show($type));
+        }
 
         // Ecriture du projet dans la BD
         $em->persist($projet);
@@ -1467,7 +1212,8 @@ class ProjetController extends AbstractController
         $collaborateurVersion = new CollaborateurVersion($moi);
         $collaborateurVersion->setVersion($version);
         $collaborateurVersion->setResponsable(true);
-
+        $collaborateurVersion->setDeleted(false);
+        
         // Ecriture de collaborateurVersion dans la BD
         $em->persist($collaborateurVersion);
         $em->flush();
@@ -1480,8 +1226,10 @@ class ProjetController extends AbstractController
      *    Affiche un menu permettant de choisir quelle consommation on veut voir afficher
      *
      *
-     * @Route("/{id}/conso/{annee}/annee/{loginname}/loginname", name="projet_conso", defaults={"loginname" = "nologin"})
-     * @Method("GET")
+     * @Route("/{id}/conso/{annee}/annee/{loginname}/loginname", name="projet_conso",
+     *        defaults={"loginname" = "nologin"},
+     *        methods={"GET"})
+     * Method("GET")
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
 
@@ -1521,8 +1269,9 @@ class ProjetController extends AbstractController
      *
      * @Route("/{id}/projet/{utype}/utype/{ress_id}/ress_id/{loginname}/loginname/{annee}/annee/conso_ressource",
      *         defaults={"loginname" = "nologin"},
-     *         name="projet_conso_ressource")
-     * @Method("GET")
+     *         name="projet_conso_ressource",
+     *         methods={"GET"})
+     * Method("GET")
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
 
@@ -1602,8 +1351,8 @@ class ProjetController extends AbstractController
     /**
      * Affichage graphique de la consommation de TOUS les projets
      *
-     * @Route("/{ressource/{ressource}/tousconso/{annee}/{mois}", name="tous_projets_conso")
-     * @Method("GET")
+     * @Route("/{ressource/{ressource}/tousconso/{annee}/{mois}", name="tous_projets_conso", methods={"GET"})
+     * Method("GET")
      * @Security("is_granted('ROLE_ADMIN')")
      */
 
@@ -1641,8 +1390,8 @@ class ProjetController extends AbstractController
     /**
      * Finds and displays a projet entity.
      *
-     * @Route("/modele", name="telecharger_modele")
-     * @Method("GET")
+     * @Route("/modele", name="telecharger_modele", methods={"GET"})
+     * Method("GET")
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function telechargerModeleAction()

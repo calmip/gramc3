@@ -38,30 +38,16 @@ use Symfony\Component\Mime\Email;
 
 class ServiceNotifications
 {
-    private $mailfrom;
-    private $noedition_expertise;
-    private $twig;
-    private $token;
-    private $mailer;
-    private $sj;
-    private $em;
-
     public function __construct(
-        $mailfrom,
-        $noedition_expertise,
-        \Twig\Environment $twig,
-        TokenStorageInterface $tok,
-        MailerInterface $mailer,
-        ServiceJournal $sj,
-        EntityManagerInterface $em
+        private $mailfrom,
+        private $noedition_expertise,
+        private \Twig\Environment $twig,
+        private TokenStorageInterface $tok,
+        private MailerInterface $mailer,
+        private ServiceJournal $sj,
+        private EntityManagerInterface $em
     ) {
-        $this->mailfrom = $mailfrom;
-        $this->noedition_expertise = $noedition_expertise;
-        $this->twig     = $twig;
         $this->token    = $tok->getToken();
-        $this->mailer   = $mailer;
-        $this->sj       = $sj;
-        $this->em       = $em;
     }
 
     /*****

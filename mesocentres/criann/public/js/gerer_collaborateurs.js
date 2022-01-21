@@ -8,7 +8,9 @@ function()
 // collection =
 $(".collection").each(function()
     {
-    supprime_aff_collabs();
+    // Les collaborateurs ne sont plus supprimées tout de suite mais plutôt marqués comme deleted
+    // Du coup on n'utilise plus cette fonction
+    // supprime_aff_collabs();
     // ajout d'un compteur des lignes
     if(  $(".collection-contents",this).data("count") == 0 )
         $(".collection-contents",this).data("count", $(".collection-tbody",this).find('tr').length);

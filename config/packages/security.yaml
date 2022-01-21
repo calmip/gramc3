@@ -1,51 +1,67 @@
-# To get started with security, check out the documentation:
-# https://symfony.com/doc/current/security.html
 security:
+    # https://symfony.com/doc/current/security/experimental_authenticators.html
+    enable_authenticator_manager: true
 
-    # https://symfony.com/doc/current/security.html#b-configuring-how-users-are-loaded
+    # http://symfony.com/doc/current/book/security.html#where-do-users-come-from-user-providers
     providers:
-        gramc_provider:
-             id: app.gramc_user_provider
-                # if you're using multiple entity managers
-                # manager_name: customer
         in_memory:
             memory:
                 users:
                     consoupload:
                        password: '%env(PASSWORD_CONSOUPLOAD)%'
-                       roles: 'ROLE_ADMIN'
-        #user_provider:
-        #    id: app.user_provider
-    encoders:
+                       roles: 'ROLE_ADMIN' 
+        #users_in_memory: { memory: null }
+        gramc_provider:
+            #id: App\Security\GramcUserProvider
+            entity:
+                class: App\Entity\Individu
+                property: idIndividu
+                
+            
+    # pas d'encoder car pas de password on utilise la Fédération ESR pour se conneceter
+    password_hashers:
         Symfony\Component\Security\Core\User\User: plaintext
-
-
+        App\Entity\Individu: plaintext
+    
     firewalls:
         # disables authentication for assets and the profiler, adapt it according to your needs
         dev:
-            pattern: ^/(_(profiler|wdt)|css|icones|js)/
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+            # activate different ways to authenticate
 
-        consoupload:
+            # http_basic: ~
+            # http://symfony.com/doc/current/book/security.html#a-configuring-how-your-users-will-authenticate
+
+            # form_login: ~
+            # http://symfony.com/doc/current/cookbook/security/form_login_setup.html
+            
+        calc:
             pattern:   ^/adminux
             http_basic:
                   provider: in_memory
-
+                               
         main:
+            lazy: true
             pattern:    ^/
+            custom_authenticators:
+               - App\Security\GramcAuthenticator
+
             context: global_security_context
-            user_checker: app.user_checker
-            switch_user: true
-            provider: gramc_provider
-            #security: false
-            anonymous: ~
-            remote_user:
-                provider: gramc_provider
+
+            # https://symfony.com/doc/current/security/impersonating_user.html
+            switch_user:
+                 provider: gramc_provider
+
+            # activate different ways to authenticate
+            # https://symfony.com/doc/current/security.html#firewalls-authentication
+
             #logout:
-            #    path:   /deconnexion
-            #    target: /deconnected
+            #   path: deconnexion
 
+    # Easy way to control access for large sections of your site
+    # Note: Only the *first* access control that matches will be used
     access_control:
-       - { path: ^/none, roles: ROLE_DEMANDEUR }
-
-
+          - { path: ^/gramc3/login, roles: PUBLIC_ACCESS}
+        # - { path: ^/admin, roles: ROLE_ADMIN }
+        # - { path: ^/profile, roles: ROLE_USER }

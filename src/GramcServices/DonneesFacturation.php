@@ -24,46 +24,11 @@
 namespace App\GramcServices;
 
 use App\Entity\Projet;
-//use App\Entity\Version;
-//use App\Entity\Session;
-//use App\Entity\CollaborateurVersion;
-//use App\Entity\Thematique;
-//use App\Entity\Rattachement;
-////use App\Entity\Expertise;
-//use App\Entity\Individu;
-//use App\Entity\Sso;
-//use App\Entity\CompteActivation;
-//use App\Entity\Journal;
 use App\Entity\Compta;
 
-//use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
-//use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-
-//use Symfony\Component\HttpFoundation\Request;
-//use Symfony\Component\HttpFoundation\Response;
-//use Symfony\Component\HttpFoundation\RedirectResponse;
-
-////use App\App;
 use App\Utils\Functions;
-
-//use App\Utils\Menu;
-//use App\Utils\Etat;
-//use App\Utils\Signal;
-//use App\Utils\GramcDate;
-
-//use App\GramcGraf\Calcul;
-//use App\GramcGraf\CalculTous;
-//use App\GramcGraf\Stockage;
-
-//use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-//use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-//use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-//use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 /* Ce service est utilisé par la fonctionnalité données de facturation
  *
@@ -73,18 +38,8 @@ use App\Utils\Functions;
 
 class DonneesFacturation
 {
-    private $dfct_directory;
-    private $sp;
-    private $sj;
-    private $em;
-
-    public function __construct($dfct_directory, ServiceProjets $sp, ServiceJournal $sj, EntityManagerInterface $em)
-    {
-        $this->dfct_directory = $dfct_directory;
-        $this->sp             = $sp;
-        $this->sj             = $sj;
-        $this->em             = $em;
-    }
+    public function __construct(private $dfct_directory, private ServiceProjets $sp, private ServiceJournal $sj, private EntityManagerInterface $em)
+    { }
 
     /*
      * Construit le nom de répertoire à partir du projet, et de l'année

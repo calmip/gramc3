@@ -26,7 +26,6 @@ namespace App\Controller;
 
 use App\Entity\Sso;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -43,8 +42,8 @@ class SsoController extends AbstractController
     /**
      * Lists all sso entities.
      *
-     * @Route("/", name="sso_index")
-     * @Method("GET")
+     * @Route("/", name="sso_index",methods={"GET"})
+     * Method("GET")
      */
     public function indexAction()
     {
@@ -60,8 +59,8 @@ class SsoController extends AbstractController
     /**
      * Creates a new sso entity.
      *
-     * @Route("/new", name="sso_new")
-     * @Method({"GET", "POST"})
+     * @Route("/new", name="sso_new",methods={"GET","POST"})
+     * Method({"GET", "POST"})
      */
     public function newAction(Request $request)
     {
@@ -86,8 +85,8 @@ class SsoController extends AbstractController
     /**
      * Finds and displays a sso entity.
      *
-     * @Route("/{id}", name="sso_show")
-     * @Method("GET")
+     * @Route("/{id}", name="sso_show",methods={"GET"})
+     * Method("GET")
      */
     public function showAction(Sso $sso)
     {
@@ -102,8 +101,8 @@ class SsoController extends AbstractController
     /**
      * Displays a form to edit an existing sso entity.
      *
-     * @Route("/{id}/edit", name="sso_edit")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/edit", name="sso_edit",methods={"GET","POST"})
+     * Method({"GET", "POST"})
      */
     public function editAction(Request $request, Sso $sso)
     {
@@ -127,8 +126,8 @@ class SsoController extends AbstractController
     /**
      * Deletes a sso entity.
      *
-     * @Route("/{id}", name="sso_delete")
-     * @Method("DELETE")
+     * @Route("/{id}", name="sso_delete",methods={"DELETE"})
+     * Method("DELETE")
      */
     public function deleteAction(Request $request, Sso $sso)
     {

@@ -30,7 +30,6 @@ use App\Entity\Individu;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -41,15 +40,10 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class RattachementController extends AbstractController
 {
-    private $ac;
-
-    public function __construct(AuthorizationCheckerInterface $ac)
-    {
-        $this->ac  = $ac;
-    }
+    public function __construct(private AuthorizationCheckerInterface $ac) {}
 
     /**
-      * @Route("/gerer",name="gerer_rattachements" )
+      * @Route("/gerer",name="gerer_rattachements", methods={"GET"} )
       * @Security("is_granted('ROLE_OBS')")
       */
     public function gererAction()
@@ -72,9 +66,9 @@ class RattachementController extends AbstractController
     /**
      * Creates a new rattachement entity.
      *
-     * @Route("/ajouter", name="ajouter_rattachement")
+     * @Route("/ajouter", name="ajouter_rattachement", methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function newAction(Request $request)
     {
@@ -115,9 +109,9 @@ class RattachementController extends AbstractController
     /**
      * Displays a form to edit an existing rattachement entity.
      *
-     * @Route("/{id}/modify", name="modifier_rattachement")
+     * @Route("/{id}/modify", name="modifier_rattachement", methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function modifyAction(Request $request, Rattachement $rattachement)
     {
@@ -156,9 +150,9 @@ class RattachementController extends AbstractController
     /**
      * Deletes a rattachement entity.
      *
-     * @Route("/{id}/supprimer", name="supprimer_rattachement")
+     * @Route("/{id}/supprimer", name="supprimer_rattachement", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function supprimerAction(Request $request, Rattachement $rattachement)
     {

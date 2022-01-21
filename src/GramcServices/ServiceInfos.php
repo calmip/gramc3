@@ -31,7 +31,7 @@ use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
-const VERSION = "3.5.7";
+const VERSION = "3.6.0";
 
 /*
  * Cette classe garde des informations pouvant être reprises par
@@ -40,18 +40,14 @@ const VERSION = "3.5.7";
  ******/
 class ServiceInfos
 {
-    private $em;
-    private $sessions_non_terminees;
+    private $sessions_non_terminees = null;
     private $session_courante = null;
-    private $etat_session_courante;
-    private $libelle_etat_session_courante;
-    private $id_session_courante;
-    private $grdte;
+    private $etat_session_courante = null;
+    private $libelle_etat_session_courante = null;
+    private $id_session_courante = null;
 
-    public function __construct(GramcDate $gramc_date, EntityManagerInterface $em)
+    public function __construct(private GramcDate $grdte, private EntityManagerInterface $em)
     {
-        $this->em    = $em;
-        $this->grdte = $gramc_date;
         // un bogue obscur de symfony (lié à la console)
         try {
             $this->sessions_non_terminees =

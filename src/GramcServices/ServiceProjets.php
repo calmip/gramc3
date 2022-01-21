@@ -50,52 +50,25 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class ServiceProjets
 {
-    private $prj_prefix;
-    private $ressources_conso_group;
-    private $signature_directory;
-    private $rapport_directory;
-    private $fig_directory;
-    private $dfct_directory;
-    private $grdt;
-    private $sv;
-    private $ss;
-    private $sj;
-    private $log;
-    private $sac;
-    private $token;
-    private $em;
+    private $token = null;
 
     public function __construct(
-        $prj_prefix,
-        $ressources_conso_group,
-        $signature_directory,
-        $rapport_directory,
-        $fig_directory,
-        $dfct_directory,
-        GramcDate $grdt,
-        ServiceVersions $sv,
-        ServiceSessions $ss,
-        ServiceJournal $sj,
-        LoggerInterface $log,
-        AuthorizationCheckerInterface $sac,
-        TokenStorageInterface $tok,
-        EntityManagerInterface $em
+        private $prj_prefix,
+        private $ressources_conso_group,
+        private $signature_directory,
+        private $rapport_directory,
+        private $fig_directory,
+        private $dfct_directory,
+        private GramcDate $grdt,
+        private ServiceVersions $sv,
+        private ServiceSessions $ss,
+        private ServiceJournal $sj,
+        private LoggerInterface $log,
+        private AuthorizationCheckerInterface $sac,
+        private TokenStorageInterface $tok,
+        private EntityManagerInterface $em
     ) {
-        $this->prj_prefix             = $prj_prefix;
-        $this->ressources_conso_group = $ressources_conso_group;
-        $this->signature_directory    = $signature_directory;
-        $this->rapport_directory      = $rapport_directory;
-        $this->fig_directory          = $fig_directory;
-        $this->dfct_directory         = $dfct_directory;
-
-        $this->grdt  = $grdt;
-        $this->sv    = $sv;
-        $this->ss    = $ss;
-        $this->sj    = $sj;
-        $this->log   = $log;
-        $this->sac   = $sac;
         $this->token = $tok->getToken();
-        $this->em    = $em;
     }
 
 
@@ -1162,94 +1135,41 @@ class ServiceProjets
         return $versions;
     }
 
-    // supprimer les répertoires
-    // TODO - Revoir cette fonction, appelée uniquement pas oldAction (effacement des projets pour la RGPD)
-    public function erase_directory($dir, $projet = 'none')
-    {
-        if (file_exists($dir) && is_dir($dir)) {
-            $files = glob($dir . '*', GLOB_MARK);
-            foreach ($files as $file) {
-                if (is_dir($file)) {
-                    if (preg_match('/' .  $projet . '/', $file)) {
-                        static::erase_directory($file, '');
-                    } else {
-                        static::erase_directory($file, $projet);
-                    }
-                } elseif (preg_match('/' .  $projet . '/', $file)) {
-                    //static::debugMessage(__FILE__ . ":" . __LINE__ . " fichier " . $file . " est effacé ");
-                    unlink($file);
-                }
-            }
-            if (count(scandir($dir)) == 2) {
-                rmdir($dir);
-            }
-        } else {
-            $this->sj->warningMessage(__FILE__ . ":" . __LINE__ . " répértoire " . $dir . " n'existe pas ou ce n'est pas un répértoire ");
-        }
-    }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    //
-    // effacer utilisateurs
-    //
+    /*
+     * Effacer les utilisateurs qui n'ont pas de structures de données associées:
+     *         - Pas collaborateurs
+     *         - Pas d'expertises
+     *         - Pas de privilèges
+     */
 
     public function effacer_utilisateurs($individus = null)
     {
         $individus_effaces = [];
         $em = $this->em;
+        $repo_ind = $em->getRepository(Individu::class);
+        $repo_cv = $em->getRepository(CollaborateurVersion::class);
+        $repo_exp = $em->getRepository(Expertise::class);
 
+        $individus = $repo_ind->findAll();
         foreach ($individus as $individu) {
-            if (
-                $em->getRepository(CollaborateurVersion::class)->findOneBy([ 'collaborateur' => $individu ]) == null
-                &&
-                $em->getRepository(Expertise::class)->findOneBy([ 'expert' => $individu ]) == null
-                &&
-                $em->getRepository(Session::class)->findOneBy([ 'president' => $individu ]) == null
-                &&
-                $individu->getAdmin() == false && $individu->getExpert() == false && $individu->getPresident() == false
-                ) {
-                $individus_effaces[] = clone $individu;
+            if ( $individu -> getAdmin() ) continue;
+            if ( $individu -> getPresident() ) continue;
+            if ( $individu -> getObs() ) continue;
+            if ( $individu -> getExpert() ) continue;
+            
+            if ( ! ($repo_cv->findOneBy([ 'collaborateur' => $individu ]) === null)) continue;
+            if ( ! ($repo_exp->findOneBy([ 'expert' => $individu ]) === null)) continue;
 
-                foreach ($em->getRepository(Sso::class)->findBy(['individu' => $individu]) as $sso) {
-                    $em->remove($sso);
-                }
-
-                foreach ($em->getRepository(CompteActivation::class)->findBy(['individu' => $individu]) as $sso) {
-                    $em->remove($sso);
-                }
-
-                $this->sj->infoMessage("L'utilisateur " . $individu . ' a été effacé ');
-                $em->remove($individu);
+            $individus_effaces[] = clone $individu;
+            foreach ($em->getRepository(Sso::class)->findBy(['individu' => $individu]) as $sso) {
+                $em->remove($sso);
             }
+
+            $this->sj->infoMessage("L'individu " . $individu . ' a été effacé ');
+            $em->remove($individu);
         }
 
         $em->flush();
-        return $individus_effaces;
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    //
-    // utilisateurs à effacer
-    //
-    public function utilisateurs_a_effacer($individus = [])
-    {
-        $individus_effaces = [];
-        $em = $this->em;
-
-        foreach ($individus as $individu) {
-            if (
-                $em->getRepository(CollaborateurVersion::class)->findOneBy([ 'collaborateur' => $individu ]) == null
-                &&
-                $em->getRepository(Expertise::class)->findOneBy([ 'expert' => $individu ]) == null
-                &&
-                $em->getRepository(Session::class)->findOneBy([ 'president' => $individu ]) == null
-                &&
-                $individu->getAdmin() == false && $individu->getExpert() == false && $individu->getPresident() == false
-                ) {
-                $individus_effaces[] = $individu;
-            }
-        }
         return $individus_effaces;
     }
 

@@ -56,7 +56,7 @@ use App\GramcServices\GramcGraf\Calcul;
 use Psr\Log\LoggerInterface;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -105,7 +105,6 @@ class ProjetSpecController extends AbstractController
     private $pw;
     private $ff;
     private $token;
-    private $sss;
     private $tw;
     private $ac;
 
@@ -123,7 +122,6 @@ class ProjetSpecController extends AbstractController
         ProjetWorkflow $pw,
         FormFactoryInterface $ff,
         TokenStorageInterface $tok,
-        SessionInterface $sss,
         Environment $tw,
         AuthorizationCheckerInterface $ac
     ) {
@@ -140,7 +138,6 @@ class ProjetSpecController extends AbstractController
         $this->pw  = $pw;
         $this->ff  = $ff;
         $this->token= $tok->getToken();
-        $this->sss = $sss;
         $this->tw  = $tw;
         $this->ac  = $ac;
     }
@@ -148,9 +145,8 @@ class ProjetSpecController extends AbstractController
     /**
      * Montre les projets d'un utilisateur
      *
-     * @Route("/accueil", name="projet_accueil")
-     * @    Route("/accueil/", name="projet_accueil1")
-     * @Method("GET")
+     * @Route("/accueil", name="projet_accueil",methods={"GET"})
+     * Method("GET")
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function accueilAction()
@@ -379,11 +375,11 @@ class ProjetSpecController extends AbstractController
     /**
      * Affiche un projet avec un menu pour choisir la version
      *
-     * @Route("/{id}/consulter", name="consulter_projet")
-     * @Route("/{id}/consulter/{warn_type}", name="consulter_projet")
-     * @Route("/{id}/consulter/{version}", name="consulter_version")
+     * @Route("/{id}/consulter", name="consulter_projet",methods={"GET","POST"})
+     * @Route("/{id}/consulter/{warn_type}", name="consulter_projet",methods={"GET","POST"})
+     * @Route("/{id}/consulter/{version}", name="consulter_version",methods={"GET","POST"})
      * 
-     * @Method({"GET","POST"})
+     * Method({"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function consulterAction(Projet $projet, Version $version = null, Request $request, $warn_type=0)
@@ -675,8 +671,8 @@ class ProjetSpecController extends AbstractController
     /**
      * Envoie un écran d'explication avant de transformer un projet Fil (=test)
      *
-     * @Route("/avant_transformer/{projet}", name="avant_transformer")
-     * @Method({"GET", "POST"})
+     * @Route("/avant_transformer/{projet}", name="avant_transformer",methods={"GET","POST"})
+     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      *
      */
@@ -707,8 +703,8 @@ class ProjetSpecController extends AbstractController
     /**
      * Transforme un projet Fil (=Test) en projet de session
      *
-     * @Route("/transformer/{projet}", name="transformer")
-     * @Method({"GET", "POST"})
+     * @Route("/transformer/{projet}", name="transformer",methods={"GET","POST"})
+     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      *
      */

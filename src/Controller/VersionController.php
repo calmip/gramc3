@@ -48,7 +48,6 @@ use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 
 use Symfony\Component\HttpFoundation\Request;
@@ -88,62 +87,28 @@ use Knp\Snappy\Pdf;
  */
 class VersionController extends AbstractController
 {
-    private $sn;
-    private $sj;
-    private $sm;
-    private $sp;
-    private $ss;
-    private $sf;
-    private $sd;
-    private $sv;
-    private $se;
-    private $pw;
-    private $ff;
-    private $vl;
-    private $tok;
-    private $sss;
-    private $pdf;
-
-
     public function __construct(
-        ServiceNotifications $sn,
-        ServiceJournal $sj,
-        ServiceMenus $sm,
-        ServiceProjets $sp,
-        ServiceSessions $ss,
-        ServiceForms $sf,
-        GramcDate $sd,
-        ServiceVersions $sv,
-        ServiceExperts $se,
-        ProjetWorkflow $pw,
-        FormFactoryInterface $ff,
-        ValidatorInterface $vl,
-        TokenStorageInterface $tok,
-        SessionInterface $sss,
-        Pdf $pdf
-    ) {
-        $this->sn  = $sn;
-        $this->sj  = $sj;
-        $this->sm  = $sm;
-        $this->sp  = $sp;
-        $this->ss  = $ss;
-        $this->sf  = $sf;
-        $this->sd  = $sd;
-        $this->sv  = $sv;
-        $this->se  = $se;
-        $this->pw  = $pw;
-        $this->ff  = $ff;
-        $this->vl  = $vl;
-        $this->tok = $tok;
-        $this->sss = $sss;
-        $this->pdf = $pdf;
-    }
+        private ServiceNotifications $sn,
+        private ServiceJournal $sj,
+        private ServiceMenus $sm,
+        private ServiceProjets $sp,
+        private ServiceSessions $ss,
+        private ServiceForms $sf,
+        private GramcDate $sd,
+        private ServiceVersions $sv,
+        private ServiceExperts $se,
+        private ProjetWorkflow $pw,
+        private FormFactoryInterface $ff,
+        private ValidatorInterface $vl,
+        private TokenStorageInterface $tok,
+        private Pdf $pdf
+    ) {}
 
     /**
      * Lists all version entities.
      *
-     * @Route("/", name="version_index")
-     * @Method("GET")
+     * @Route("/", name="version_index",methods={"GET"})
+     * Method("GET")
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function indexAction()
@@ -160,8 +125,8 @@ class VersionController extends AbstractController
     /**
      * Creates a new version entity.
      *
-     * @Route("/new", name="version_new")
-     * @Method({"GET", "POST"})
+     * @Route("/new", name="version_new",methods={"GET","POST"})
+     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function newAction(Request $request)
@@ -187,9 +152,12 @@ class VersionController extends AbstractController
     /**
      * Supprimer version
      *
-     * @Route("/{id}/avant_supprimer/{rtn}", name="version_avant_supprimer", defaults= {"rtn" = "X" })
+     * @Route("/{id}/avant_supprimer/{rtn}",
+     *        name="version_avant_supprimer",
+     *        defaults= {"rtn" = "X" },
+     *        methods={"GET"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
-     * @Method("GET")
+     * Method("GET")
      *
      */
     public function avantSupprimerAction(Version $version, $rtn)
@@ -215,9 +183,9 @@ class VersionController extends AbstractController
     /**
      * Supprimer version (en base de données et dans le répertoire data)
      *
-     * @Route("/{id}/supprimer/{rtn}", defaults= {"rtn" = "X" }, name="version_supprimer" )
+     * @Route("/{id}/supprimer/{rtn}", defaults= {"rtn" = "X" }, name="version_supprimer",methods={"GET"} )
      * @Security("is_granted('ROLE_DEMANDEUR')")
-     * @Method("GET")
+     * Method("GET")
      *
      */
     public function supprimerAction(Version $version, $rtn)
@@ -298,8 +266,8 @@ class VersionController extends AbstractController
     /**
      * Finds and displays a version entity.
      *
-     * @Route("/{id}/show", name="version_show")
-     * @Method("GET")
+     * @Route("/{id}/show", name="version_show",methods={"GET"})
+     * Method("GET")
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function showAction(Version $version)
@@ -315,9 +283,9 @@ class VersionController extends AbstractController
     /**
      * Affiche au format pdf
      *
-     * @Route("/{id}/pdf", name="version_pdf")
+     * @Route("/{id}/pdf", name="version_pdf",methods={"GET"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function pdfAction(Version $version, Request $request)
     {
@@ -384,9 +352,9 @@ class VersionController extends AbstractController
     /**
      * Finds and displays a version entity.
      *
-     * @Route("/{id}/fiche_pdf", name="version_fiche_pdf")
+     * @Route("/{id}/fiche_pdf", name="version_fiche_pdf",methods={"GET"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function fichePdfAction(Version $version, Request $request)
     {
@@ -426,8 +394,8 @@ class VersionController extends AbstractController
     /**
      * Téléverser le rapport d'activité de l'année précedente
      *
-     * @Route("/{id}/televersement_fiche", name="version_televersement_fiche")
-     * @Method({"POST","GET"})
+     * @Route("/{id}/televersement_fiche", name="version_televersement_fiche",methods={"GET","POST"})
+     * Method({"POST","GET"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function televersementFicheAction(Request $request, Version $version)
@@ -540,8 +508,8 @@ class VersionController extends AbstractController
     /**
      * Displays a form to edit an existing version entity.
      *
-     * @Route("/{id}/edit", name="version_edit")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/edit", name="version_edit",methods={"GET","POST"})
+     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function editAction(Request $request, Version $version)
@@ -566,8 +534,8 @@ class VersionController extends AbstractController
     /**
      * Deletes a version entity.
      *
-     * @Route("/{id}", name="version_delete")
-     * @Method("DELETE")
+     * @Route("/{id}", name="version_delete",methods={"DELETE"})
+     * Method("DELETE")
      * @Security("is_granted('ROLE_ADMIN')")
      */
     /*    public function deleteAction(Request $request, Version $version)
@@ -604,8 +572,8 @@ class VersionController extends AbstractController
     /**
      * Changer le responsable d'une version.
      *
-     * @Route("/{id}/responsable", name="changer_responsable")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/responsable", name="changer_responsable",methods={"GET","POST"})
+     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function changerResponsableAction(Version $version, Request $request)
@@ -615,11 +583,10 @@ class VersionController extends AbstractController
         $sj = $this->sj;
         $sv = $this->sv;
         $ff = $this->ff;
-        $sss= $this->sss;
         $token = $this->tok->getToken();
 
         // Si changement d'état de la session alors que je suis connecté !
-        $sss->remove('SessionCourante'); // remove cache
+        $request->getSession()->remove('SessionCourante'); // remove cache
 
         // ACL
         $moi = $token->getUser();
@@ -724,8 +691,8 @@ class VersionController extends AbstractController
     /**
      * Mettre une pénalité sur une version (en GET par ajax)
      *
-     * @Route("/{id}/version/{penal}/penalite", name="penal_version")
-     * @Method({"GET"})
+     * @Route("/{id}/version/{penal}/penalite", name="penal_version",methods={"GET"})
+     * Method({"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function penalAction(Version $idversion, $penal)
@@ -752,8 +719,8 @@ class VersionController extends AbstractController
     /**
      * envoyer à l'expert
      *
-     * @Route("/{id}/avant_envoyer", name="avant_envoyer_expert")
-     * @Method({"GET","POST"})
+     * @Route("/{id}/avant_envoyer", name="avant_envoyer_expert",methods={"GET","POST"})
+     * Method({"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function avantEnvoyerAction(Version $version, Request $request, LoggerInterface $lg)
@@ -817,8 +784,8 @@ class VersionController extends AbstractController
     /**
      * envoyer à l'expert
      *
-     * @Route("/{id}/envoyer", name="envoyer_expert")
-     * @Method("GET")
+     * @Route("/{id}/envoyer", name="envoyer_expert",methods={"GET"})
+     * Method("GET")
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function envoyerAction(Version $version, Request $request, LoggerInterface $lg)
@@ -860,8 +827,8 @@ class VersionController extends AbstractController
     /**
      * Téléversements génériques de rapport d'activité ou de fiche projet
      *
-     * @Route("/televersement", name="televersement_generique")
-     * @Method({"POST","GET"})
+     * @Route("/televersement", name="televersement_generique",methods={"GET","POST"})
+     * Method({"POST","GET"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function televersementGeneriqueAction(Request $request)
@@ -1089,8 +1056,8 @@ class VersionController extends AbstractController
     /**
      * Téléverser le rapport d'actitivé
      *
-     * @Route("/{id}/rapport_annee/{annee}", defaults={"annee"=0}, name="televerser_rapport_annee")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/rapport_annee/{annee}", defaults={"annee"=0}, name="televerser_rapport_annee",methods={"GET","POST"})
+     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function televerserRapportAction(Version $version, Request $request, $annee)
@@ -1193,8 +1160,8 @@ class VersionController extends AbstractController
     /**
      * Téléverser un fichier attaché à une version
      *
-     * @Route("/{id}/fichier", name="televerser_fichier_attache")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/fichier", name="televerser_fichier_attache",methods={"GET","POST"})
+     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function televerserFichierAction(version $version, Request $request)

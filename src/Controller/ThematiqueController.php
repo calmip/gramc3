@@ -29,7 +29,6 @@ use App\Entity\Individu;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -41,19 +40,14 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class ThematiqueController extends AbstractController
 {
-    private $ac;
-
-    public function __construct(AuthorizationCheckerInterface $ac)
-    {
-        $this->ac  = $ac;
-    }
+    public function __construct(private AuthorizationCheckerInterface $ac) {}
 
     /**
      * Lists all thematique entities.
      *
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Route("/", name="thematique_index")
-     * @Method("GET")
+     * @Route("/", name="thematique_index",methods={"GET"})
+     * Method("GET")
      */
     public function indexAction()
     {
@@ -67,8 +61,8 @@ class ThematiqueController extends AbstractController
     }
 
     /**
-     * @Route("/gerer",name="gerer_thematiques" )
-     * @Security("is_granted('ROLE_OBS')")
+     * @Route("/gerer",name="gerer_thematiques",methods={"GET"} )
+     * Security("is_granted('ROLE_OBS')")
      */
     public function gererAction()
     {
@@ -90,10 +84,10 @@ class ThematiqueController extends AbstractController
     /**
      * Creates a new thematique entity.
      *
-     * @Route("/new", name="thematique_new")
-     * @Route("/ajouter", name="ajouter_thematique")
+     * @Route("/new", name="thematique_new",methods={"GET","POST"})
+     * @Route("/ajouter", name="ajouter_thematique",methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function newAction(Request $request)
     {
@@ -135,9 +129,9 @@ class ThematiqueController extends AbstractController
     /**
      * Deletes a thematique entity.
      *
-     * @Route("/{id}/supprimer", name="supprimer_thematique")
+     * @Route("/{id}/supprimer", name="supprimer_thematique",methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function supprimerAction(Request $request, Thematique $thematique)
     {
@@ -150,9 +144,9 @@ class ThematiqueController extends AbstractController
     /**
      * Displays a form to edit an existing laboratoire entity.
      *
-     * @Route("/{id}/modify", name="modifier_thematique")
+     * @Route("/{id}/modify", name="modifier_thematique",methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function modifyAction(Request $request, Thematique $thematique)
     {
@@ -190,9 +184,9 @@ class ThematiqueController extends AbstractController
     /**
      * Finds and displays a thematique entity.
      *
-     * @Route("/{id}", name="thematique_show")
+     * @Route("/{id}", name="thematique_show",methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function showAction(Thematique $thematique)
     {
@@ -207,9 +201,9 @@ class ThematiqueController extends AbstractController
     /**
      * Displays a form to edit an existing thematique entity.
      *
-     * @Route("/{id}/edit", name="thematique_edit")
+     * @Route("/{id}/edit", name="thematique_edit",methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function editAction(Request $request, Thematique $thematique)
     {
@@ -233,9 +227,9 @@ class ThematiqueController extends AbstractController
     /**
      * Deletes a thematique entity.
      *
-     * @Route("/{id}", name="thematique_delete")
+     * @Route("/{id}", name="thematique_delete",methods={"DELETE"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("DELETE")
+     * Method("DELETE")
      */
     public function deleteAction(Request $request, Thematique $thematique)
     {

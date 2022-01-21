@@ -28,7 +28,6 @@ use App\Entity\MetaThematique;
 use App\Entity\Thematique;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -41,19 +40,14 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class MetaThematiqueController extends AbstractController
 {
-    private $ac;
-
-    public function __construct(AuthorizationCheckerInterface $ac)
-    {
-        $this->ac  = $ac;
-    }
+    public function __construct(private AuthorizationCheckerInterface $ac) {}
 
     /**
      * Lists all metaThematique entities.
      *
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Route("/", name="metathematique_index")
-     * @Method("GET")
+     * @Route("/", name="metathematique_index", methods={"GET"})
+     * Method("GET")
      */
     public function indexAction()
     {
@@ -67,7 +61,7 @@ class MetaThematiqueController extends AbstractController
     }
 
     /**
-     * @Route("/gerer",name="gerer_metaThematiques" )
+     * @Route("/gerer",name="gerer_metaThematiques", methods={"GET"} )
      * @Security("is_granted('ROLE_OBS')")
      */
     public function gererAction()
@@ -88,10 +82,10 @@ class MetaThematiqueController extends AbstractController
     /**
      * Creates a new metaThematique entity.
      *
-     * @Route("/new", name="metathematique_new")
-     * @Route("/ajouter", name="ajouter_metaThematique")
+     * @Route("/new", name="metathematique_new", methods={"GET","POST"})
+     * @Route("/ajouter", name="ajouter_metaThematique", methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function newAction(Request $request)
     {
@@ -125,9 +119,9 @@ class MetaThematiqueController extends AbstractController
     /**
      * Deletes a thematique entity.
      *
-     * @Route("/{id}/supprimer", name="supprimer_metaThematique")
+     * @Route("/{id}/supprimer", name="supprimer_metaThematique", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function supprimerAction(Request $request, MetaThematique $thematique)
     {
@@ -140,9 +134,9 @@ class MetaThematiqueController extends AbstractController
     /**
      * Displays a form to edit an existing laboratoire entity.
      *
-     * @Route("/{id}/modify", name="modifier_metaThematique")
+     * @Route("/{id}/modify", name="modifier_metaThematique", methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function modifyAction(Request $request, MetaThematique $thematique)
     {
@@ -177,9 +171,9 @@ class MetaThematiqueController extends AbstractController
     /**
      * Finds and displays a metaThematique entity.
      *
-     * @Route("/{id}", name="metathematique_show")
+     * @Route("/{id}", name="metathematique_show", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function showAction(MetaThematique $metaThematique)
     {
@@ -194,9 +188,9 @@ class MetaThematiqueController extends AbstractController
     /**
      * Displays a form to edit an existing metaThematique entity.
      *
-     * @Route("/{id}/edit", name="metathematique_edit")
+     * @Route("/{id}/edit", name="metathematique_edit", methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function editAction(Request $request, MetaThematique $metaThematique)
     {
@@ -220,9 +214,9 @@ class MetaThematiqueController extends AbstractController
     /**
      * Deletes a metaThematique entity.
      *
-     * @Route("/{id}", name="metathematique_delete")
+     * @Route("/{id}", name="metathematique_delete", methods={"DELETE"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("DELETE")
+     * Method("DELETE")
      */
     public function deleteAction(Request $request, MetaThematique $metaThematique)
     {

@@ -53,11 +53,14 @@
                     {% if rows.vars.data.responsable is defined and rows.vars.data.responsable %} {# accès à la donnée via PHP #}
                         {% set resp = 'resp' %}{% else %}{% set resp = '' %}
                     {% endif %}
-                    <tr>
+                    {% if rows.vars.data.delete is defined and rows.vars.data.delete %} {# accès à la donnée via PHP #}
+                        {% set suppr = 'suppr' %}{% else %}{% set suppr = '' %}
+                    {% endif %}
+                   <tr>
                         {% set fieldNum = 1 %}
                         {% for row in rows %}
                             {% if "hidden"  not in row.vars.block_prefixes.1 %} {# important pour tester le type du champs #}
-                            <td class="collection-tbody-old  {{ resp }}">
+                            <td class="collection-tbody-old  {{resp}} {{suppr}}">
                             {% else %}
                             <td style="display:NONE">
                             {% endif %}

@@ -17,14 +17,16 @@ services:
     #        arguments: ["@another_service_name", "plain_value", "%parameter_name%"]
      
     # Tous les controleurs sont des services, ils peuvent utiliser la dependency injection
-    App\Controller\:
-        resource: '../src/Controller/*'
+    altermeso_controllers:
+        namespace: App\Controller\
+        resource: '../altermeso/src/Controller/*'
         tags: [controller.service_arguments]
 
-    # TODO - Il faut déclarer ce repository, pas les autres: POURQUOI ?
-    App\Repository\FormationRepository:
-        autowire: true
-        tags: ['doctrine.repository_service']
+    app_controllers:
+        namespace: App\Controller\
+        #public: true
+        resource: '../src/Controller/*'
+        tags: [controller.service_arguments]
 
     # La plupart des services gramc sont dans le répertoire GramcServices
     App\GramcServices\:
@@ -35,22 +37,11 @@ services:
     # Seuls certains objets définis dans le répertoire Workflows sont des services
     App\GramcServices\Workflow\:
         resource: '../src/GramcServices/Workflow/*/*Workflow.php'
-        
-    app.gramc_user_provider:
-        class: App\Security\User\GramcUserProvider
 
-    app.user_checker:
-        class: App\Security\User\UserChecker
-
-    App\Security\User\UserChecker: '@app.user_checker'
+    # Securité
+    App\Security\:
+        resource: '../src/Security/*'
     
-     # cf https://stackoverflow.com/questions/47613979/symfony-3-4-0-could-not-find-any-fixture-services-to-load
-    # makes classes in src/AppBundle/DataFixtures available to be used as services
-    # and have a tag that allows actions to type-hint services
-    App\DataFixtures\:
-        resource: '../src/DataFixtures'
-        tags: ['doctrine.fixture.orm']
-
     App\EventListener\ExceptionListener:
         arguments: ["%kernel.debug%"]
         tags:
@@ -96,6 +87,9 @@ services:
      
     App\GramcServices\ServiceSessions:
         arguments: ['%recup_attrib_seuil%','%recup_conso_seuil%','%recup_attrib_quant%']
+
+    App\GramcServices\ServiceForms:
+        arguments: ['%max_size_doc%']
  
     App\GramcServices\ServiceProjets:
         arguments: ["%prj_prefix%",
@@ -123,7 +117,7 @@ services:
     App\Controller\ExpertiseController:
         arguments: [ '%max_expertises_nb%' ]
 
-    # Formulaires, validateurs
+    # Formulaires, validateurs, securité
     App\Form\:
         resource: '../src/Form/*'
         tags: ["form.type"]
@@ -134,7 +128,11 @@ services:
     App\Validator\Constraints\PagesNumberValidator:
         arguments: [ "%max_page_nb%" ]
         tags: ["validator.constraint_validator" ]
-        
+
+    App\Security\GramcAuthenticator:
+        arguments:
+            $knl_debug: '%kernel.debug%'
+    
     # Commandes
     app.gramc.sendamail:
         class: App\Command\Sendamail
@@ -142,4 +140,12 @@ services:
         arguments: ["%kernel.environment%"]
         tags: ["console.command"]
     App\Command\Sendamail: '@app.gramc.sendamail'
-        
+
+    App\Command\Rgpd:
+        tags: ["console.command"]
+
+    App\Command\NettCompta:
+        tags: ["console.command"]
+
+    App\Command\Brouillage:
+        tags: ["console.command"]

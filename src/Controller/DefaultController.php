@@ -24,7 +24,6 @@
 
 namespace App\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -32,7 +31,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-//use App\App;
 use App\Entity\Projet;
 use App\Entity\Version;
 use App\Entity\Individu;
@@ -56,28 +54,14 @@ use JpGraph\JpGraph;
 
 class DefaultController extends AbstractController
 {
-    private $sn;
-    private $sj;
-    private $sm;
-    private $sp;
-    private $ss;
-    private $ff;
-
     public function __construct(
-        ServiceNotifications $sn,
-        ServiceJournal $sj,
-        ServiceMenus $sm,
-        ServiceProjets $sp,
-        ServiceSessions $ss,
-        FormFactoryInterface $ff
-    ) {
-        $this->sn = $sn;
-        $this->sj = $sj;
-        $this->sm = $sm;
-        $this->sp = $sp;
-        $this->ss = $ss;
-        $this->ff = $ff;
-    }
+        private ServiceNotifications $sn,
+        private ServiceJournal $sj,
+        private ServiceMenus $sm,
+        private ServiceProjets $sp,
+        private ServiceSessions $ss,
+        private FormFactoryInterface $ff
+    ) {}
 
     /**
       * @Route("/test", name="test")

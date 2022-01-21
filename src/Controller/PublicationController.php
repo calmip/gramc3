@@ -35,7 +35,6 @@ use App\GramcServices\ServiceSessions;
 use Psr\Log\LoggerInterface;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
@@ -53,32 +52,20 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
  */
 class PublicationController extends AbstractController
 {
-    private $sj;
-    private $ss;
-    private $ff;
-    private $token;
-    private $ac;
-
     public function __construct(
-        ServiceJournal $sj,
-        ServiceSessions $ss,
-        FormFactoryInterface $ff,
-        TokenStorageInterface $tok,
-        AuthorizationCheckerInterface $ac
-    ) {
-        $this->sj  = $sj;
-        $this->ss  = $ss;
-        $this->ff  = $ff;
-        $this->token= $tok->getToken();
-        $this->ac  = $ac;
-    }
+        private ServiceJournal $sj,
+        private ServiceSessions $ss,
+        private FormFactoryInterface $ff,
+        private TokenStorageInterface $tok,
+        private AuthorizationCheckerInterface $ac
+    ) {}
 
     /**
      * Autocomplete publication
      *
-     * @Route("/autocomplete", name="publication_autocomplete")
+     * @Route("/autocomplete", name="publication_autocomplete", methods={"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
-     * @Method({"POST","GET"})
+     * Method({"POST","GET"})
      */
     public function autocompleteAction(Request $request)
     {
@@ -141,8 +128,8 @@ class PublicationController extends AbstractController
     /**
      * Lists all publication entities.
      *
-     * @Route("/", name="publication_index")
-     * @Method("GET")
+     * @Route("/", name="publication_index", methods={"GET"})
+     * Method("GET")
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function indexAction()
@@ -157,7 +144,7 @@ class PublicationController extends AbstractController
     }
 
     /**
-     * @Route("/{id}/gerer",name="gerer_publications" )
+     * @Route("/{id}/gerer",name="gerer_publications", methods={"GET","POST"} )
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function gererAction(Projet $projet, Request $request, LoggerInterface $lg)
@@ -216,7 +203,7 @@ class PublicationController extends AbstractController
     }
 
     /**
-     * @Route("/{id}/consulter",name="consulter_publications" )
+     * @Route("/{id}/consulter",name="consulter_publications", methods={"GET"} )
      * @Security("is_granted('ROLE_EXPERT')")
      */
     public function consulterAction(Projet $projet, Request $request)
@@ -231,9 +218,9 @@ class PublicationController extends AbstractController
     }
 
     /**
-     * @Route("/annee",name="publication_annee" )
+     * @Route("/annee",name="publication_annee", methods={"GET","POST"} )
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function AnneeAction(Request $request)
     {
@@ -254,9 +241,9 @@ class PublicationController extends AbstractController
     }
 
     /**
-     * @Route("/{annee}/annee_csv",name="publication_annee_csv" )
+     * @Route("/{annee}/annee_csv",name="publication_annee_csv", methods={"GET","POST"} )
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function AnneeCsvAction($annee)
     {
@@ -288,8 +275,8 @@ class PublicationController extends AbstractController
     /**
      * Creates a new publication entity.
      *
-     * @Route("/new", name="publication_new")
-     * @Method({"GET", "POST"})
+     * @Route("/new", name="publication_new", methods={"GET","POST"})
+     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function newAction(Request $request)
@@ -315,8 +302,8 @@ class PublicationController extends AbstractController
     /**
      * Finds and displays a publication entity.
      *
-     * @Route("/{id}/show", name="publication_show")
-     * @Method("GET")
+     * @Route("/{id}/show", name="publication_show", methods={"GET"})
+     * Method("GET")
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function showAction(Publication $publication)
@@ -332,8 +319,8 @@ class PublicationController extends AbstractController
     /**
      * Displays a form to edit an existing publication entity.
      *
-     * @Route("/{id}/edit", name="publication_edit")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/edit", name="publication_edit", methods={"GET","POST"})
+     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function editAction(Request $request, Publication $publication)
@@ -359,9 +346,9 @@ class PublicationController extends AbstractController
     /**
      * Displays a form to edit an existing publication entity.
      *
-     * @Route("/{id}/{projet}/modify", name="modifier_publication")
+     * @Route("/{id}/{projet}/modify", name="modifier_publication", methods={"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function modifyAction(Request $request, Publication $publication, Projet $projet, LoggerInterface $lg)
     {
@@ -396,8 +383,8 @@ class PublicationController extends AbstractController
      * Deletes a publication entity.
      *
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Route("/{id}", name="publication_delete")
-     * @Method("DELETE")
+     * @Route("/{id}", name="publication_delete", methods={"DELETE"})
+     * Method("DELETE")
      */
     public function deleteAction(Request $request, Publication $publication)
     {
@@ -417,13 +404,13 @@ class PublicationController extends AbstractController
      * Deletes a publication entity.
      *
      * @Security("is_granted('ROLE_DEMANDEUR')")
-     * @Route("/{id}/{projet}/supprimer", name="supprimer_publication")
-     * @Method({ "GET","DELETE"})
+     * @Route("/{id}/{projet}/supprimer", name="supprimer_publication", methods={"GET","DELETE"})
+     * Method({ "GET","DELETE"})
      */
     public function supprimerAction(Request $request, Publication $publication, Projet $projet, LoggerInterface $lg)
     {
         $ac = $this->ac;
-        $token = $this->token;
+        $token = $this->tok->getToken();
         $sj = $this->sj;
         $em = $this->getdoctrine()->getManager();
 

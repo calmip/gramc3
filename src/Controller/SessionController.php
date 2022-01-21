@@ -35,6 +35,7 @@ use App\GramcServices\ServiceVersions;
 use App\GramcServices\ServiceMenus;
 use App\GramcServices\ServiceProjets;
 use App\GramcServices\ServiceSessions;
+use App\GramcServices\ServicePhpSessions;
 use App\GramcServices\Workflow\Session\SessionWorkflow;
 
 use App\BilanSession\BilanSessionA;
@@ -46,7 +47,7 @@ use App\Utils\Signal;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 
 use Symfony\Component\HttpFoundation\Request;
@@ -63,41 +64,23 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
  */
 class SessionController extends AbstractController
 {
-    private $sj;
-    private $sm;
-    private $sv;
-    private $sp;
-    private $ss;
-    private $sd;
-    private $sw;
-    private $sss;
-
     public function __construct(
-        ServiceJournal $sj,
-        ServiceMenus $sm,
-        ServiceVersions $sv,
-        ServiceProjets $sp,
-        ServiceSessions $ss,
-        GramcDate $sd,
-        SessionWorkflow $sw,
-        SessionInterface $sss
-    ) {
-        $this->sj = $sj;
-        $this->sm = $sm;
-        $this->sv = $sv;
-        $this->sp = $sp;
-        $this->ss = $ss;
-        $this->sd = $sd;
-        $this->sw = $sw;
-        $this->sss= $sss;
-    }
+        private ServiceJournal $sj,
+        private ServiceMenus $sm,
+        private ServicePhpSessions $sps,
+        private ServiceVersions $sv,
+        private ServiceProjets $sp,
+        private ServiceSessions $ss,
+        private GramcDate $sd,
+        private SessionWorkflow $sw
+    ) {}
 
     /**
      * Lists all session entities.
      *
      * @security("is_granted('ROLE_ADMIN')")
-     * @Route("/", name="session_index")
-     * @Method("GET")
+     * @Route("/", name="session_index",methods={"GET"})
+     * Method("GET")
      */
     public function indexAction()
     {
@@ -113,10 +96,10 @@ class SessionController extends AbstractController
      * Lists all session entities.
      *
      * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_PRESIDENT')")
-     * @Route("/gerer", name="gerer_sessions")
-     * @Method("GET")
+     * @Route("/gerer", name="gerer_sessions",methods={"GET"})
+     * Method("GET")
      */
-    public function gererAction()
+    public function gererAction(Request $request)
     {
         $sm = $this->sm;
         $sj = $this->sj;
@@ -137,8 +120,9 @@ class SessionController extends AbstractController
                         'commentaire'=> 'Créer la PREMIERE session'
                         ];
         } else {
-            // Refait le calcul de la session courante sans se fier au cache
-            $this->sss->remove('SessionCourante');
+            // On supprime de la session php la référence à la SessionCourante Gramc
+            $request->getSession()->remove('SessionCourante');
+
             $etat_session = $ss->getSessionCourante()->getEtatSession();
             $id_session = $ss->getSessionCourante()->getIdSession();
 
@@ -168,9 +152,9 @@ class SessionController extends AbstractController
     /**
      * Creates a new session entity.
      *
-     * @Route("/ajouter", name="ajouter_session")
+     * @Route("/ajouter", name="ajouter_session",methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function ajouterAction(Request $request)
     {
@@ -183,15 +167,18 @@ class SessionController extends AbstractController
 
     /**
      *
-     * @Route("/{id}/modify", name="modifier_session")
+     * @Route("/{id}/modify", name="modifier_session",methods={"GET","POST"})
      * @security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function modifyAction(Request $request, Session $session)
     {
         $sd = $this->sd;
         $em = $this->getDoctrine()->getManager();
-        $this->sss->remove('SessionCourante');
+
+        // On supprime de la session php la référence à la SessionCourante Gramc
+        $request->getSession()->remove('SessionCourante');
+        
         $debut = $sd;
         $fin   = $sd->getNew();
         $fin->add(\DateInterval::createFromDateString('0 months'));
@@ -228,9 +215,9 @@ class SessionController extends AbstractController
 
     /**
      *
-     * @Route("/terminer_saisie", name="terminer_saisie")
+     * @Route("/terminer_saisie", name="terminer_saisie",methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
      // On vient de cliquer sur le bouton Expertises
     public function terminerSaisieAction(Request $request)
@@ -238,7 +225,8 @@ class SessionController extends AbstractController
         $ss = $this->ss;
         $em = $this->getDoctrine()->getManager();
 
-        $this->sss->remove('SessionCourante');
+        // On supprime de la session php la référence à la SessionCourante Gramc
+        $request->getSession()->remove('SessionCourante');
 
         $session_courante = $ss->getSessionCourante();
         $workflow = $this->sw;
@@ -279,19 +267,24 @@ class SessionController extends AbstractController
     /**
       * Avant changement d'état de la version
       *
-      * @Route("/avant_changer_etat/{rtn}/{ctrl}", name="session_avant_changer_etat", defaults= {"rtn" = "X" })
+      * @Route("/avant_changer_etat/{rtn}/{ctrl}",
+      *        name="session_avant_changer_etat",
+      *        defaults= {"rtn" = "X" },
+      *        methods={"GET"})
       * @Security("is_granted('ROLE_ADMIN')")
-      * @Method("GET")
+      * Method("GET")
       *
       */
     public function avantActiverAction($rtn, $ctrl)
     {
-        $ss         = $this->ss;
-        $sj         = $this->sj;
-        $em         = $this->getDoctrine()->getManager();
+        $ss  = $this->ss;
+        $sps = $this->sps;
+        $sj  = $this->sj;
+        $em  = $this->getDoctrine()->getManager();
 
-        $session    = $ss->getSessionCourante();
-        $connexions = Functions::getConnexions($em, $sj);
+        $session = $ss->getSessionCourante();
+        $connexions = $sps->getConnexions();
+        
         return $this->render(
             'session/avant_changer_etat.html.twig',
             [
@@ -305,19 +298,17 @@ class SessionController extends AbstractController
 
     /**
      *
-     * @Route("/activer", name="activer_session")
+     * @Route("/activer", name="activer_session",methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function activerAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
         $sd = $this->sd;
+        $sps = $this->sps;
         $ss = $this->ss;
         $sj = $this->sj;
-
-        // Suppression du cache, du coup toutes les personnes connectées seront virées
-        $this->sss->remove('SessionCourante');
 
         $session_courante      = $ss->getSessionCourante();
         $etat_session_courante = $session_courante->getEtatSession();
@@ -331,7 +322,7 @@ class SessionController extends AbstractController
 
         $workflow = $this->sw;
 
-        // On active une session A = Jusqu'à trois sessions renvoyées !
+        // On active une session A = trois signaux envoyés sur trois sessions différentes !
         if ($mois == 1 ||  $mois == 12) {
             if ($workflow->canExecute(Signal::CLK_SESS_DEB, $session_courante) && $etat_session_courante == Etat::EN_ATTENTE) {
                 // On termine les deux sessions A et B de l'année précédente
@@ -350,7 +341,7 @@ class SessionController extends AbstractController
             }
         }
 
-        // On active une session B = Jusqu'à deux sessions renvoyées
+        // On active une session B = deux signaux envoyés sur deux sessions différentes
         elseif ($mois == 6 ||  $mois == 7) {
             // manu - corrigé le 20 juillet 2021
             //if( $workflow->canExecute(Signal::CLK_SESS_DEB , $session_courante)  && $etat_session_courante == Etat::EN_ATTENTE )
@@ -387,22 +378,25 @@ class SessionController extends AbstractController
 
     /**
      *
-     * @Route("/envoyer_expertises", name="envoyer_expertises")
+     * @Route("/envoyer_expertises", name="envoyer_expertises",methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_PRESIDENT')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function envoyerExpertisesAction(Request $request)
     {
         $ss = $this->ss;
         $em = $this->getDoctrine()->getManager();
 
-        $this->sss->remove('SessionCourante');
         $session_courante = $ss->getSessionCourante();
         $workflow = $this->sw;
+
+        // On supprime de la session php la référence à la SessionCourante Gramc
+        $request->getSession()->remove('SessionCourante');
 
         if ($workflow->canExecute(Signal::CLK_ATTR_PRS, $session_courante)) {
             $workflow->execute(Signal::CLK_ATTR_PRS, $session_courante);
             $em->flush();
+
             return $this->redirectToRoute('gerer_sessions');
         } else {
             return $this->render(
@@ -418,25 +412,31 @@ class SessionController extends AbstractController
     /**
      *
      *
-     * @Route("/demarrer_saisie", name="demarrer_saisie")
+     * @Route("/demarrer_saisie", name="demarrer_saisie",methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
      // On vient de cliquer sur le bouton Demandes
     public function demarrerSaisieAction(Request $request)
     {
         $ss = $this->ss;
+        $sps = $this->sps;
         $em = $this->getDoctrine()->getManager();
 
-        $this->sss->remove('SessionCourante'); // remove cache
+        // On supprime de la session php la référence à la SessionCourante Gramc
+        $request->getSession()->remove('SessionCourante');
 
         $session_courante       = $ss->getSessionCourante();
-        //return new Response( $session_courante->getIdSession() );
+
         $workflow = $this->sw;
 
+        // Supprimer toutes les sessions php, donc déloger les utilisateurs éventuellement connectés
+        $sps->clearPhpSessions();
+        
         if ($workflow->canExecute(Signal::DAT_DEB_DEM, $session_courante)) {
             $workflow->execute(Signal::DAT_DEB_DEM, $session_courante);
             $em->flush();
+            
             return $this->redirectToRoute('gerer_sessions');
         } else {
             return $this->render(
@@ -452,9 +452,9 @@ class SessionController extends AbstractController
     /**
      * Creates a new session entity.
      *
-     * @Route("/new", name="session_new")
+     * @Route("/new", name="session_new",methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function newAction(Request $request)
     {
@@ -480,8 +480,8 @@ class SessionController extends AbstractController
      * Finds and displays a session entity.
      *
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Route("/{id}/show", name="session_show")
-     * @Method("GET")
+     * @Route("/{id}/show", name="session_show",methods={"GET"})
+     * Method("GET")
      */
     public function showAction(Session $session)
     {
@@ -497,8 +497,8 @@ class SessionController extends AbstractController
      * Meme chose que show, mais présenté "à la gramc"
      *
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Route("/{id}/consulter", name="consulter_session")
-     * @Method("GET")
+     * @Route("/{id}/consulter", name="consulter_session",methods={"GET"})
+     * Method("GET")
      */
     public function consulterAction(Session $session)
     {
@@ -515,8 +515,8 @@ class SessionController extends AbstractController
      * Displays a form to edit an existing session entity.
      *
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Route("/{id}/edit", name="session_edit")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/edit", name="session_edit",methods={"GET","POST"})
+     * Method({"GET", "POST"})
      */
     public function editAction(Request $request, Session $session)
     {
@@ -539,16 +539,19 @@ class SessionController extends AbstractController
 
     /**
      *
-     * @Route("/commentaires", name="session_commentaires")
+     * Entrée du commentaire de session par le président
+     * 
+     * @Route("/commentaires", name="session_commentaires",methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function commentairesAction(Request $request)
     {
         $sm = $this->sm;
         $ss = $this->ss;
 
-        $this->sss->remove('SessionCourante'); // remove cache
+        // On supprime de la session php la référence à la SessionCourante Gramc
+        $request->getSession()->remove('SessionCourante');
 
         $session_courante      = $ss->getSessionCourante();
         $etat_session_courante = $session_courante->getEtatSession();
@@ -591,9 +594,9 @@ class SessionController extends AbstractController
 
     /**
      *
-     * @Route("/bilan", name="bilan_session")
+     * @Route("/bilan", name="bilan_session",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
-     * @Method({"GET","POST"})
+     * Method({"GET","POST"})
      */
     public function bilanAction(Request $request)
     {
@@ -659,14 +662,23 @@ class SessionController extends AbstractController
 
     /**
      *
-     * @Route("/bilan_annuel", name="bilan_annuel")
+     * @Route("/bilan_annuel", name="bilan_annuel",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
-     * @Method({"GET","POST"})
+     * Method({"GET","POST"})
      */
     public function bilanAnnuelAction(Request $request)
     {
         $ss   = $this->ss;
-        $data = $ss->selectAnnee($request);
+        $sd   = $this->sd;
+        $annee = $sd->showYear();
+        $mois = $sd->showMonth();
+
+        if ($mois === "12")
+        {
+            $annee = strval(intval($annee) + 1);
+        }
+        
+        $data = $ss->selectAnnee($request,$annee);
         // TODO - Utiliser cette methode pour recuperer les paramètres:
         //        https://ourcodeworld.com/articles/read/1041/how-to-retrieve-specific-and-all-yaml-parameters-from-services-yaml-in-symfony-4
         $avec_commentaires = $this->getParameter('commentaires_experts_d');
@@ -684,9 +696,9 @@ class SessionController extends AbstractController
     /**
      *
      *
-     * @Route("/{id}/questionnaire_csv", name="questionnaire_csv")
+     * @Route("/{id}/questionnaire_csv", name="questionnaire_csv",methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function questionnaireCsvAction(Request $request, Session $session)
     {
@@ -770,9 +782,9 @@ class SessionController extends AbstractController
 
     /**
      *
-     * @Route("/{annee}/bilan_annuel_csv", name="bilan_annuel_csv")
+     * @Route("/{annee}/bilan_annuel_csv", name="bilan_annuel_csv",methods={"GET"})
      * @Security("is_granted('ROLE_OBS')")
-     * @Method("GET")
+     * Method("GET")
      *
      */
     public function bilanAnnuelCsvAction(Request $request, $annee)
@@ -816,9 +828,9 @@ class SessionController extends AbstractController
         }
 
         // Les totaux
-        $tq  = 0;		// Le total des quotas
-        $tm  = [0,0,0,0,0,0,0,0,0,0,0,0];		// La conso totale par mois
-        $tttl= 0;		// Le total de la conso
+        $tq  = 0;        // Le total des quotas
+        $tm  = [0,0,0,0,0,0,0,0,0,0,0,0];        // La conso totale par mois
+        $tttl= 0;        // Le total de la conso
 
         // Calcul du csv, ligne par ligne
         foreach ($id_projets as $id_projet => $paire) {
@@ -888,9 +900,9 @@ class SessionController extends AbstractController
 
     /**
      *
-     * @Route("/{annee}/bilan_annuel_labo_csv", name="bilan_annuel_labo_csv")
+     * @Route("/{annee}/bilan_annuel_labo_csv", name="bilan_annuel_labo_csv",methods={"GET"})
      * @Security("is_granted('ROLE_OBS')")
-     * @Method("GET")
+     * Method("GET")
      *
      */
     public function bilanLaboCsvAction(Request $request, $annee)
@@ -922,11 +934,47 @@ class SessionController extends AbstractController
         return Functions::csv($sortie, 'bilan_annuel_par_labo'.$annee.'.csv');
     }
 
+        /**
+     *
+     * @Route("/{annee}/bilan_annuel_thema_csv", name="bilan_annuel_thema_csv",methods={"GET"})
+     * @Security("is_granted('ROLE_OBS')")
+     * Method("GET")
+     *
+     */
+    public function bilanThemaCsvAction(Request $request, $annee)
+    {
+        $entetes = ['Thématique','Nombre de projets','Heures demandées','Heures attribuées','Heure consommées','projets'];
+        $sortie  = join("\t", $entetes) . "\n";
+
+        $sp            = $this->sp;
+        $stats         = $sp->projetsParCritere($annee, 'getAcroThematique');
+        $acros         = $stats[0];
+        $num_projets   = $stats[1];
+        $liste_projets = $stats[2];
+        $dem_heures    = $stats[3];
+        $attr_heures   = $stats[4];
+        $conso         = $stats[5];
+
+        // Calcul du csv
+        foreach ($acros as $k) {
+            $ligne   = [];
+            $ligne[] = $k;
+            $ligne[] = $num_projets[$k];
+            $ligne[] = $dem_heures[$k];
+            $ligne[] = $attr_heures[$k];
+            $ligne[] = $conso[$k];
+            $ligne[] = implode(',', $liste_projets[$k]);
+            $sortie .= join("\t", $ligne) . "\n";
+        }
+
+        return Functions::csv($sortie, 'bilan_annuel_par_thematique'.$annee.'.csv');
+    }
+
     /**
      *
-     * @Route("/{annee}/bilan_annuel_users_csv", name="bilan_annuel_users_csv")
+     * @Route("/{annee}/bilan_annuel_users_csv", name="bilan_annuel_users_csv",methods={"GET"})
      * @Security("is_granted('ROLE_OBS')")
-     * @Method("GET")
+     * Method("GET")
      *
      */
     public function bilanUserCsvAction(Request $request, $annee)
@@ -942,31 +990,31 @@ class SessionController extends AbstractController
         // On les copie dans un tableau $users, indexé par le loginname
         $users = [];
         foreach ($cvs as $cv) {
-			// On peut avoir deux fois le même CollaborateurVersion (sessions A et B)
-			$loginname = $cv->getLoginname();
-			if (isset ($users[$loginname])) {
-				continue;
-			}
-			
-			$u = [];
-			$u['indiv'] = $cv->getCollaborateur();
-			$u['hcpu'] = $sp->getConsoRessource($cv, 'cpu', $annee)[0];
-		    $u['hgpu'] = $sp->getConsoRessource($cv, 'gpu', $annee)[0];
-		    $users[$loginname] = $u;
-		}
+            // On peut avoir deux fois le même CollaborateurVersion (sessions A et B)
+            $loginname = $cv->getLoginname();
+            if (isset ($users[$loginname])) {
+                continue;
+            }
+            
+            $u = [];
+            $u['indiv'] = $cv->getCollaborateur();
+            $u['hcpu'] = $sp->getConsoRessource($cv, 'cpu', $annee)[0];
+            $u['hgpu'] = $sp->getConsoRessource($cv, 'gpu', $annee)[0];
+            $users[$loginname] = $u;
+        }
 
-		// Calcul de csv
-		foreach ($users as $loginname => $u) {
-			$ligne = [];
-			$ligne[] = $u['indiv']->getNom();
-			$ligne[] = $u['indiv']->getPrenom();
-			$ligne[] = $loginname;
-			$ligne[] = $u['indiv']->getMail();
-			$ligne[] = $u['indiv']->getStatut();
-			$ligne[] = $u['hcpu'];
-			$ligne[] = $u['hgpu'];
-			$sortie .= join("\t", $ligne) . "\n";
-		}
+        // Calcul de csv
+        foreach ($users as $loginname => $u) {
+            $ligne = [];
+            $ligne[] = $u['indiv']->getNom();
+            $ligne[] = $u['indiv']->getPrenom();
+            $ligne[] = $loginname;
+            $ligne[] = $u['indiv']->getMail();
+            $ligne[] = $u['indiv']->getStatut();
+            $ligne[] = $u['hcpu'];
+            $ligne[] = $u['hgpu'];
+            $sortie .= join("\t", $ligne) . "\n";
+        }
         return Functions::csv($sortie, 'bilan_annuel_par_utilisateur'.$annee.'.csv');
     }
 
@@ -975,8 +1023,8 @@ class SessionController extends AbstractController
      * Génère le bilan de session au format CSV
      *
      * @Security("is_granted('ROLE_OBS')")
-     * @Route("/{id}/bilan_csv", name="bilan_session_csv")
-     * @Method("GET")
+     * @Route("/{id}/bilan_csv", name="bilan_session_csv",methods={"GET"})
+     * Method("GET")
      */
     public function bilanCsvAction(Request $request, Session $session)
     {

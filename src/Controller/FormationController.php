@@ -28,7 +28,6 @@ use App\Entity\Formation;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -40,15 +39,10 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class FormationController extends AbstractController
 {
-    private $ac;
-
-    public function __construct(AuthorizationCheckerInterface $ac)
-    {
-        $this->ac  = $ac;
-    }
+    public function __construct(private AuthorizationCheckerInterface $ac) {}
 
     /**
-     * @Route("/gerer",name="gerer_formations" )
+     * @Route("/gerer",name="gerer_formations", methods={"GET"} )
      * @Security("is_granted('ROLE_OBS')")
      */
     public function gererAction()
@@ -71,9 +65,9 @@ class FormationController extends AbstractController
     /**
      * Creates a new formation entity.
      *
-     * @Route("/ajouter", name="ajouter_formation")
+     * @Route("/ajouter", name="ajouter_formation", methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function newAction(Request $request)
     {
@@ -107,9 +101,9 @@ class FormationController extends AbstractController
     /**
      * Displays a form to edit an existing formation entity.
      *
-     * @Route("/{id}/modify", name="modifier_formation")
+     * @Route("/{id}/modify", name="modifier_formation", methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function modifyAction(Request $request, Formation $formation)
     {
@@ -142,10 +136,10 @@ class FormationController extends AbstractController
     /**
      * Deletes a formation entity.
      *
-     * @Route("/{id}/supprimer", name="supprimer_formation")
-     * @Route("/{id}/supprimer", name="formation_delete")
+     * @Route("/{id}/supprimer", name="supprimer_formation", methods={"GET"})
+     * @Route("/{id}/supprimer", name="formation_delete", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Method("GET")
+     * Method("GET")
      */
     public function supprimerAction(Request $request, Formation $formation)
     {

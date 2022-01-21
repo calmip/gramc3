@@ -48,14 +48,8 @@ restore_database($file_name);
 #           Pour savoir dans quelle configuration on se trouve, ce script essaie d'envoyer un mail à toto@exemple.fr
 #           Si on ne le reçoit pas, MEFIANCE !
 
-#echo "modif adresses mail\n";
-#modif_mail();
-
 echo "Appelle bin/console de Symfony\n";
 console_update();
-
-echo "Appelle bin/console fixtures de Symfony\n";
-fixtures();
 
 echo "Appelle /bin/console app:send-a-mail toto@exemple.fr, vérifiez que vous l'avez bien reçu !";
 envoie_mail_de_controle();

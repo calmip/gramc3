@@ -57,7 +57,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 
 use Symfony\Component\HttpFoundation\Request;
@@ -98,7 +98,6 @@ class VersionModifController extends AbstractController
     private $pw;
     private $ff;
     private $vl;
-    private $sss;
     private $tw;
 
     public function __construct(
@@ -110,7 +109,6 @@ class VersionModifController extends AbstractController
         ProjetWorkflow $pw,
         FormFactoryInterface $ff,
         ValidatorInterface $vl,
-        SessionInterface $sss,
         Environment $tw
     ) {
         $this->sj  = $sj;
@@ -121,7 +119,6 @@ class VersionModifController extends AbstractController
         $this->pw  = $pw;
         $this->ff  = $ff;
         $this->vl  = $vl;
-        $this->sss = $sss;
         $this->tw = $tw;
     }
 
@@ -129,8 +126,8 @@ class VersionModifController extends AbstractController
      * Appelé par le bouton Envoyer à l'expert: si la demande est incomplète
      * on envoie un éran pour la compléter. Sinon on passe à envoyer à l'expert
      *
-     * @Route("/{id}/avant_modifier", name="avant_modifier_version")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/avant_modifier", name="avant_modifier_version",methods={"GET","POST"})
+     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function avantModifierVersionAction(Request $request, Version $version)
@@ -164,8 +161,8 @@ class VersionModifController extends AbstractController
      *      1/ D'abord une partie générique (images, collaborateurs)
      *      2/ Ensuite on appelle modifierTypeX, car le formulaire dépend du type de projet
      *
-     * @Route("/{id}/modifier", name="modifier_version")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/modifier", name="modifier_version",methods={"GET","POST"})
+     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function modifierAction(Request $request, Version $version, $renouvellement = false, LoggerInterface $lg)
@@ -776,9 +773,8 @@ class VersionModifController extends AbstractController
         $form->handleRequest($request);
         $valid = true;
 
-        if ($form->isSubmitted() && $form->isValid()) {
-
-            // 
+        if ($form->isSubmitted() && $form->isValid())
+        {
             $version->setDemHeures($heures_projet_test);
  
             // Changement de type ou plafonnement de la demande en heures !
@@ -965,17 +961,19 @@ class VersionModifController extends AbstractController
 
         $dataR  =   [];    // Le responsable est seul dans ce tableau
         $dataNR =   [];    // Les autres collaborateurs
-        foreach ($version->getCollaborateurVersion() as $item) {
-            $collaborateur = $item->getCollaborateur();
-            if ($collaborateur == null) {
+        foreach ($version->getCollaborateurVersion() as $cv) {
+            $individu = $cv->getCollaborateur();
+            if ($individu == null) {
                 $sj->errorMessage("VersionController:modifierCollaborateurs : collaborateur null pour CollaborateurVersion ".
-                         $item->getId());
+                         $cv->getId());
                 continue;
             } else {
-                $individuForm = new IndividuForm($collaborateur);
-                $individuForm->setLogin($item->getLogin());
-                $individuForm->setClogin($item->getClogin());
-                $individuForm->setResponsable($item->getResponsable());
+                $individuForm = new IndividuForm($individu);
+                $individuForm->setLogin($cv->getLogin());
+                $individuForm->setClogin($cv->getClogin());
+                $individuForm->setResponsable($cv->getResponsable());
+                $individuForm->setDelete($cv->getDeleted());
+
                 if ($individuForm->getResponsable() == true) {
                     $dataR[] = $individuForm;
                 } else {
@@ -992,9 +990,9 @@ class VersionModifController extends AbstractController
      * Avant de modifier les collaborateurs d'une version.
      * On demande de quelle version il s'agit !
      *
-     * @Route("/{id}/avant_collaborateurs", name="avant_modifier_collaborateurs")
-     * @Method({"GET", "POST"})
-     * @Security("has_role('ROLE_DEMANDEUR')")
+     * @Route("/{id}/avant_collaborateurs", name="avant_modifier_collaborateurs",methods={"GET","POST"})
+     * Method({"GET", "POST"})
+     * @ Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function avantModifierCollaborateursAction(Version $version, Request $request)
     {
@@ -1037,8 +1035,8 @@ class VersionModifController extends AbstractController
     /**
      * Modifier les collaborateurs d'une version.
      *
-     * @Route("/{id}/collaborateurs", name="modifier_collaborateurs")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/collaborateurs", name="modifier_collaborateurs",methods={"GET","POST"})
+     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function modifierCollaborateursAction(Version $version, Request $request)
@@ -1194,15 +1192,8 @@ class VersionModifController extends AbstractController
             // Le formulaire correspond à un utilisateur existant
             if ($id != null) {
                 $individu = $em->getRepository(Individu::class)->find($id);
-            // Toujours null, donc plein de messages idiots dans le journal, puisque par ailleurs ça marche !
-                // TODO y comprendre quelque chose !
-                //if( $individu_form->getMail() == null )
-                //{
-                //	echo $sj->warningMessage($individu_form);
-                //	$sj->warningMessage(__METHOD__ . ':' . __LINE__ . " Utilisateur $individu: Pas de mail dans le firmulaire: zarbi !");
-                //}
             }
-
+            
             // On a renseigné le mail de l'utilisateur mais on n'a pas encore l'id: on recherche l'utilisateur !
             // Si $utilisateur == null, il faudra le créer (voir plus loin)
             elseif ($individu_form->getMail() != null) {
@@ -1222,25 +1213,24 @@ class VersionModifController extends AbstractController
             // Cas d'erreur qui ne devraient jamais se produire
             if ($individu == null && $id != null) {
                 $sj->errorMessage(__METHOD__ . ':' . __LINE__ .' idIndividu ' . $id . 'du formulaire ne correspond pas à un utilisateur');
-            } elseif (is_array($individu_form)) {
+            }
+
+            elseif (is_array($individu_form)) {
                 // TODO je ne vois pas le rapport
                 $sj->errorMessage(__METHOD__ . ':' . __LINE__ .' individu_form est array ' . Functions::show($individu_form));
-            } elseif (is_array($individu)) {
+            }
+
+            elseif (is_array($individu)) {
                 // TODO pareil un peu nawak
                 $sj->errorMessage(__METHOD__ . ':' . __LINE__ .' individu est array ' . Functions::show($individu));
-            } elseif ($individu != null && $individu_form->getMail() != null && $individu_form->getMail() != $individu->getMail()) {
+            }
+
+            elseif ($individu != null && $individu_form->getMail() != null && $individu_form->getMail() != $individu->getMail()) {
                 $sj->errorMessage(__METHOD__ . ':' . __LINE__ ." l'adresse mails de l'utilisateur " .
                     $individu . ' est incorrecte dans le formulaire :' . $individu_form->getMail() . ' != ' . $individu->getMail());
             }
 
             // --------------> Maintenant des cas réalistes !
-            // Suppression d'un collaborateur
-            elseif ($individu != null && $individu_form->getDelete() == true) {
-                $sj->infoMessage(__METHOD__ . ':' . __LINE__ ." le collaborateur " .
-                    $individu . " sera supprimé de la liste des collaborateurs de la version ".$version);
-                $sv->supprimerCollaborateur($version, $individu);
-            }
-
             // L'individu existe déjà
             elseif ($individu != null) {
                 // On modifie l'individu
@@ -1252,6 +1242,7 @@ class VersionModifController extends AbstractController
                     $sj->infoMessage(__METHOD__ . ':' . __LINE__ .' individu ' .
                         $individu . ' ajouté à la version ' .$version);
                     $collaborateurVersion   =   new CollaborateurVersion($individu);
+                    $collaborateurVersion->setDeleted(false);
                     $collaborateurVersion->setVersion($version);
                     if ($this->getParameter('coll_login')) {
                         $collaborateurVersion->setLogin($individu_form->getLogin());
@@ -1264,17 +1255,21 @@ class VersionModifController extends AbstractController
                     $em->persist($collaborateurVersion);
                 }
 
-                // modification d'un login et du labo du projet
+                // il était déjà collaborateur
                 else {
                     $sj->debugMessage(__METHOD__ . ':' . __LINE__ .' individu ' .
                         $individu . ' confirmé pour la version '.$version);
 
+                    // Modif éventuelle des cases de login
                     $sv->modifierLogin($version, $individu, $individu_form->getLogin(), $individu_form->getClogin());
 
                     // modification du labo du projet
                     if ($version->isResponsable($individu)) {
                         $sv->setLaboResponsable($version, $individu);
                     }
+
+                    // modification éventuelle du flag deleted
+                    $sv->syncDeleted($version, $individu, $individu_form->getDelete());
                 }
                 $em -> flush();
             }
@@ -1311,9 +1306,9 @@ class VersionModifController extends AbstractController
     /**
      * Demande de partage stockage ou partage des données
      *
-     * @Route("/{id}/donnees", name="donnees")
+     * @Route("/{id}/donnees", name="donnees",methods={"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function donneesAction(Request $request, Version $version)
     {
@@ -1389,9 +1384,9 @@ class VersionModifController extends AbstractController
     /**
      * Displays a form to edit an existing version entity.
      *
-     * @Route("/{id}/renouveler", name="renouveler_version")
+     * @Route("/{id}/renouveler", name="renouveler_version",methods={"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
-     * @Method({"GET", "POST"})
+     * Method({"GET", "POST"})
      */
     public function renouvellementAction(Request $request, Version $version, LoggerInterface $lg)
     {
@@ -1450,6 +1445,14 @@ class VersionModifController extends AbstractController
 
                 $collaborateurVersions = $version->getCollaborateurVersion();
                 foreach ($collaborateurVersions as $collaborateurVersion) {
+                    
+                    // ne pas reprendre un collaborateur sans login et marqué comme supprimé
+                    // Attention un collaborateurVersion avec login = false mais loginname renseigné signifie ue le compte
+                    // n'a pas encore été détruit: dans ce cas on le reprends !'
+                    if ($collaborateurVersion->getDeleted() &&
+                        $collaborateurVersion->getClogin() === false &&
+                        $collaborateurVersion->getLoginname() === null ) continue;
+
                     $newCollaborateurVersion    = clone  $collaborateurVersion;
                     //$em->detach( $newCollaborateurVersion );
                     $newCollaborateurVersion->setVersion($new_version);

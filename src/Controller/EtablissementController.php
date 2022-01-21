@@ -26,7 +26,6 @@ namespace App\Controller;
 
 use App\Entity\Etablissement;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -44,8 +43,8 @@ class EtablissementController extends AbstractController
     /**
      * Lists all etablissement entities.
      *
-     * @Route("/", name="etablissement_index")
-     * @Method("GET")
+     * @Route("/", name="etablissement_index", methods={"GET"})
+     * Method("GET")
      */
     public function indexAction()
     {
@@ -61,8 +60,8 @@ class EtablissementController extends AbstractController
     /**
      * Creates a new etablissement entity.
      *
-     * @Route("/new", name="etablissement_new")
-     * @Method({"GET", "POST"})
+     * @Route("/new", name="etablissement_new", methods={"GET","POST"})
+     * Method({"GET", "POST"})
      */
     public function newAction(Request $request)
     {
@@ -87,8 +86,8 @@ class EtablissementController extends AbstractController
     /**
      * Finds and displays a etablissement entity.
      *
-     * @Route("/{id}", name="etablissement_show")
-     * @Method("GET")
+     * @Route("/{id}", name="etablissement_show", methods={"GET"})
+     * Method("GET")
      */
     public function showAction(Etablissement $etablissement)
     {
@@ -103,8 +102,8 @@ class EtablissementController extends AbstractController
     /**
      * Displays a form to edit an existing etablissement entity.
      *
-     * @Route("/{id}/edit", name="etablissement_edit")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/edit", name="etablissement_edit", methods={"GET","POST"})
+     * Method({"GET", "POST"})
      */
     public function editAction(Request $request, Etablissement $etablissement)
     {
@@ -128,8 +127,8 @@ class EtablissementController extends AbstractController
     /**
      * Deletes a etablissement entity.
      *
-     * @Route("/{id}", name="etablissement_delete")
-     * @Method("DELETE")
+     * @Route("/{id}", name="etablissement_delete", methods={"DELETE"})
+     * Method("DELETE")
      */
     public function deleteAction(Request $request, Etablissement $etablissement)
     {
