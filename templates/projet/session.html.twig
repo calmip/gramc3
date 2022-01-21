@@ -58,13 +58,11 @@
     <tr>
         <th colspan="3">Etats des projets</th>
     </tr>
-    {% if( nombreAcceptes > 0 ) %}
     <tr>
-        <th>Projets acceptés</th>
-        <td>{{ nombreAcceptes }}</td>
+        <th>Projets Sess acceptés</th>
+        <td>{{ nombreAcceptesSess }}</td>
         <td><input type="checkbox" class="cb" id="accepte" checked="checked" /></td>
      </tr>
-     {% endif %}
      {% if( nombreTermines > 0 ) %}
      <tr>
         <th>Projets terminés</th>
@@ -86,59 +84,40 @@
         <td><input type="checkbox" class="cb" id="rapport_activite" checked="checked" /></td>
     </tr>
     {% endif %}
-    {% if(  nombreExperts > 0 ) %}
     <tr>
-        <th>Projets avec expert affecté</th>
-        <td>{{ nombreExperts }}</td>
-        <td><input type="checkbox" class="cb" id="avec_expert" checked="checked" /></td>
-    </tr>
-    {% endif %}
-
-    {% if( nombreEditionTest > 0 ) %}
-    <tr>
-        <th>Projets test en édition</th>
-        <td>{{ nombreEditionTest }}</td>
-        <td><input type="checkbox" class="cb" id="editionTest" checked="checked" /></td>
+        <th>Projets Fil acceptés</th>
+        <td>{{ nombreAcceptesFil }}</td>
+        <td><input type="checkbox" class="cb" id="accepteFil" checked="checked" /></td>
      </tr>
-     {% endif %}
-
-    {% if( nombreExpertiseTest > 0 ) %}
-    <tr>
-        <th>Projets test en expertise</th>
-        <td>{{ nombreExpertiseTest }}</td>
-        <td><input type="checkbox" class="cb" id="expertiseTest" checked="checked" /></td>
-     </tr>
-     {% endif %}
-
     {% if( nombreEditionFil > 0 ) %}
     <tr>
         <th>Projets Fil en édition</th>
         <td>{{ nombreEditionFil }}</td>
         <td><input type="checkbox" class="cb" id="editionFil" checked="checked" /></td>
-     </tr>
-     {% endif %}
+    </tr>
+    {% endif %}
 
     {% if( nombreExpertiseFil > 0 ) %}
     <tr>
         <th>Projets Fil en expertise</th>
         <td>{{ nombreExpertiseFil }}</td>
         <td><input type="checkbox" class="cb" id="expertiseFil" checked="checked" /></td>
-     </tr>
-     {% endif %}
+    </tr>
+    {% endif %}
 
-    {% if( nombreEdition > 0 ) %}
+    {% if( nombreEditionSess > 0 ) %}
     <tr>
         <th>Projets en édition</th>
-        <td>{{ nombreEdition }}</td>
-        <td><input type="checkbox" class="cb" id="edition" checked="checked" /></td>
+        <td>{{ nombreEditionSess }}</td>
+        <td><input type="checkbox" class="cb" id="editionSess" checked="checked" /></td>
      </tr>
      {% endif %}
 
-    {% if( nombreExpertise > 0 ) %}
+    {% if( nombreExpertiseSess > 0 ) %}
     <tr>
         <th>Projets en expertise</th>
-        <td>{{ nombreExpertise }}</td>
-        <td><input type="checkbox" class="cb" id="expertise" checked="checked" /></td>
+        <td>{{ nombreExpertiseSess }}</td>
+        <td><input type="checkbox" class="cb" id="expertiseSess" checked="checked" /></td>
      </tr>
      {% endif %}
 
@@ -186,6 +165,13 @@
         <td><input type="checkbox" class="cb" id="annule" checked="checked" /></td>
      </tr>
      {% endif %}
+    {% if(  nombreExperts > 0 ) %}
+    <tr>
+        <th>Projets avec expert affecté</th>
+        <td>{{ nombreExperts }}</td>
+        <td><input type="checkbox" class="cb" id="avec_expert" checked="checked" /></td>
+    </tr>
+    {% endif %}
 
 </table>
 
