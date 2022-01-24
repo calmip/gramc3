@@ -63,14 +63,14 @@
         {% if ( version.getExpert() == null ) %} 
             {% set cls=cls ~ "sansexperts " %}
         {% else %}
-            {% if (versions_suppl[version.idversion]['isnouvelle']) %} {% set cls=cls ~ "nouveau " %} {% else %} {% set cls=cls ~ "renouv " %} {% endif %}
+            {% if (serviceVersions.isnouvelle(version)) %} {% set cls=cls ~ "nouveau " %} {% else %} {% set cls=cls ~ "renouv " %} {% endif %}
             {% for e in version.expertise %}
             {% if e.expert != null %}
                 {% set cls=cls ~ e.expert.idIndividu %}
             {% endif %}
             {% endfor %}
         {% endif %}
-        {% if( versions_suppl[version.idversion]['isnouvelle'] ) %}
+        {% if( serviceVersions.isnouvelle(version) ) %}
         <td class="{{cls}}"><strong>N</strong></td>
         {% else %}
         <td class="{{cls}}">&nbsp;</td>
@@ -82,7 +82,7 @@
                     <img class="bouton_poussoir" src="{{ asset('icones/consulter.png') }}" alt="Consulter">
                     </a>
                 </td>
-                <td >{{ gramcmacros.metagraph(versions_suppl[version.idversion]['metaetat']) }}</td>
+                <td >{{ gramcmacros.metagraph(serviceProjets.metaetat(version.projet)) }}</td>
                 <td >
                     {{ gramcmacros.afftitre(version.prjtitre) }}
                 </td>
@@ -125,10 +125,10 @@
                 <span class="invisible">{% for e in version.expertise %}{{ e.expert}}{% endfor %}</span>
                     {# {{ form_start( forms[version.getIdVersion()] ) }} #}
                     {% for e in version.expertise %}
-		    {% if e.expert != null %}
+            {% if e.expert != null %}
                     <a class="sudo" href="{{ path('sudo',  { 'id': e.expert.id }) }}?" title="Changer d'identité">
                     <img class="bouton_poussoir" src="{{ asset('icones/sudo.png') }}" alt="Changer d'identité" /></a>
-		    {% if 'ROLE_PRESIDENT' in e.expert.roles %}<strong>{{e.expert}}</strong>{% else %}{{e.expert}}{% endif %}                    {% endif %}
+            {% if 'ROLE_PRESIDENT' in e.expert.roles %}<strong>{{e.expert}}</strong>{% else %}{{e.expert}}{% endif %}                    {% endif %}
             <br />
             {% endfor %}
                     {% for f in forms[version.getIdVersion()] %}{{ form_widget( f.expert, {'attr' : {'class' : 'bouton_affecter'}} ) }}<br />{% endfor %}
@@ -148,7 +148,7 @@
                 <td >{{ version.demHeures }}</td>
                 <td >{% if version.idVersion is defined and attHeures[version.idVersion] is defined %}{{ attHeures[version.idVersion] }}{% endif %}</td>
                 {% if noconso==false %}
-                <td >{{ versions_suppl[version.idversion]['consocalcul'] }}</td>
+                <td >{{ serviceProjets.getConsoCalculVersion(version) }}</td>
                 {% endif %}
             </tr>
             {% endfor %}

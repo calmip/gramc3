@@ -248,7 +248,7 @@
     {% for version in versions %}
     {% if( version != null and version.projet != null ) %}
         <tr>
-            {% if( versions_suppl[version.idVersion].isnouvelle ) %}
+            {% if( serviceVersions.isnouvelle(version) ) %}
                 <td class="nouveau"><strong>N</strong></td>
             {% else %}
                 <td class="renouv">&nbsp;</td>
@@ -289,7 +289,7 @@
                    <img class="bouton_poussoir" src="{{ asset('icones/poubelle16.png') }}" alt="Supprimer" /></a>
                 {% endif %}
                 {% if noconso==false %}
-                {% if( not versions_suppl[version.idVersion].isnouvelle ) %}
+                {% if( not serviceVersions.isnouvelle(version) ) %}
                     {% if version.typeSession=='A' %}
                         {% set annee_conso = version.anneeSession - 1 %}
                     {% else %}
@@ -303,7 +303,7 @@
 
 
             </td>
-                <td class="{{ versions_suppl[version.idVersion].metaetat | lower }}">{{ gramcmacros.metagraph(versions_suppl[version.idVersion].metaetat) }}</td>
+                <td class="{{ serviceProjets.metaetat(version.projet) | lower }}">{{ gramcmacros.metagraph(serviceProjets.metaetat(version.projet)) }}</td>
             <td>
                 {% if( version != null) %}
                     {{ gramcmacros.afftitre(version.prjtitre) }}
@@ -364,26 +364,27 @@
             </td>
             <td>{{ version.demHeures }}</td>
             <td>{{ version.attrHeures }}</td>
-            <td>{{ versions_suppl[version.idVersion].consocalcul }}</td>
-                {% if versions_suppl[version.idVersion].issigne %}
+            <td>{{ serviceProjets.getConsoCalculVersion(version) }}</td>
+                {% if serviceVersions.issigne(version) %}
                 <td class="prj_fiche_val">
                     <a href="{{ path('signature',  { 'id': version.idVersion }) }}?">
                     <img src="{{ asset('icones/pdf.png') }}" alt="Fichier pdf" /></a>
-                    <small>({{ versions_suppl[version.idVersion].sizesigne }}K)</small>
+                    <small>({{ serviceVersions.sizesigne(version) }}K)</small>
                 </td>
                 {% else %}
                 <td>-</td>
                 {% endif %}
             {% if( showRapport ==true ) %}
-                {% if( versions_suppl[version.idVersion].isnouvelle ) %}
+                {% set sizerapport = serviceProjets.sizerapport(version.projet,version.anneesession-1) %}
+                {% if( serviceVersions.isnouvelle(version) ) %}
                     <td  class="rapport_activite">N/A
-                {% elseif versions_suppl[version.idVersion].size_rapport == 0 %}
+                {% elseif sizerapport == 0 %}
                     <td>
                 {% else %}
                     <td  class="rapport_activite">
                     <a href="{{ path('rapport',  { 'id': version.idVersion }) }}?">
                     <img src="{{ asset('icones/pdf.png') }}" alt="Fichier pdf" /></a>
-                    <small>({{ versions_suppl[version.idVersion].size_rapport }}K)</small>
+                    <small>({{ sizerapport }}K)</small>
                 {% endif %}
                 </td>
             {% endif %}

@@ -107,7 +107,7 @@ class ExpertiseController extends AbstractController
      * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_PRESIDENT')")
      */
-    public function affectationTestAction(Request $request)
+    public function affectationTestAction_SUPPR(Request $request)
     {
         $ss = $this->ss;
         $sp = $this->sp;
@@ -229,18 +229,6 @@ class ExpertiseController extends AbstractController
         $stats         = $affectationExperts->getStats();
         $attHeures     = $affectationExperts->getAttHeures($versions);
 
-        $versions_suppl   = [];
-        foreach ($versions as $version) {
-            $id_version                  = $version->getIdVersion();
-            $projet                      = $version->getProjet();
-            $version_suppl               = [];
-            $version_suppl['metaetat']   = $sp->getMetaEtat($projet);
-            $version_suppl['consocalcul']= $sp->getConsoCalculVersion($version);
-            $version_suppl['isnouvelle'] = $sv->isNouvelle($version);
-
-            $versions_suppl[$id_version] = $version_suppl;
-        }
-
         $sessionForm      = $session_data['form']->createView();
         $titre            = "Affectation des experts aux projets de la session " . $session;
         return $this->render(
@@ -248,7 +236,6 @@ class ExpertiseController extends AbstractController
             [
             'titre'         => $titre,
             'versions'      => $versions,
-            'versions_suppl'=> $versions_suppl,
             'forms'         => $forms,
             'sessionForm'   => $sessionForm,
             'thematiques'   => $thematiques,

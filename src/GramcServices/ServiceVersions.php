@@ -38,22 +38,9 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class ServiceVersions
 {
-    private $attrib_seuil_a;
-    private $prj_prefix;
-    private $fig_directory;
-    private $signature_directory;
-    private $sj;
-    private $em;
-
-    public function __construct($attrib_seuil_a, $prj_prefix, $fig_directory, $signature_directory, ServiceJournal $sj, EntityManagerInterface $em)
+    public function __construct(private $attrib_seuil_a, private $prj_prefix, private $fig_directory, private $signature_directory, private ServiceJournal $sj, private EntityManagerInterface $em)
     {
-        $this->attrib_seuil_a      = intval($attrib_seuil_a);
-        $this->prj_prefix          = $prj_prefix;
-        $this->fig_directory       = $fig_directory;
-        $this->signature_directory = $signature_directory;
-
-        $this->sj = $sj;
-        $this->em = $em;
+        $this->attrib_seuil_a      = intval($this->attrib_seuil_a);
     }
 
     /*********

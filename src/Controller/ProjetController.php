@@ -483,23 +483,14 @@ class ProjetController extends AbstractController
         }
 
         //$items  =   [];
-        $versions_suppl = [];
         foreach ($versions as $version) {
             $id_version = $version->getIdVersion();
             $projet = $version->getProjet();
             $etat = $version->getEtatVersion();
             $type = $version->getProjet()->getTypeProjet();
-
-            $version_suppl                = [];
-            $version_suppl['metaetat']    = $sp->getMetaEtat($projet);
-            $version_suppl['consocalcul'] = $sp->getConsoCalculVersion($version);
-            $version_suppl['isnouvelle']  = $sv->isNouvelle($version);
-            $version_suppl['issigne']     = $sv->isSigne($version);
-            $version_suppl['sizesigne']   = $sv->getSizeSigne($version);
+            $metaetat = $sp->getMetaEtat($projet);
 
             $annee_rapport = $version->getAnneeSession()-1;
-            $version_suppl['rapport']     = $sp->getRapport($projet, $annee_rapport);
-            $version_suppl['size_rapport']= $sp->getSizeRapport($projet, $annee_rapport);
 
             //Modif Callisto Septembre 2019
             $typeMetadata = $version -> getDataMetaDataFormat();
@@ -531,7 +522,7 @@ class ProjetController extends AbstractController
             };
             
             //if( $version->getAttrAccept() ) $nombreAcceptes++;
-            if ($version_suppl['metaetat'] == 'ACCEPTE') {
+            if ($metaetat == 'ACCEPTE') {
                 if ($type == Projet::PROJET_FIL) {
                     $nombreAcceptesFil++;
                 }
@@ -581,8 +572,6 @@ class ProjetController extends AbstractController
             if ($etat == Etat::ANNULE) {
                 $nombreAnnule++;
             };
-
-            $versions_suppl[$id_version] = $version_suppl;
         }
 
         foreach ($thematiques as $thematique) {
@@ -608,7 +597,6 @@ class ProjetController extends AbstractController
             'idSession'           => $session->getIdSession(), // formulaire
             'session'             => $session,
             'versions'            => $versions,
-            'versions_suppl'      => $versions_suppl,
             'demHeures'           => $demHeures,
             'attrHeures'          => $attrHeures,
             'nombreProjets'       => $nombreProjets,
