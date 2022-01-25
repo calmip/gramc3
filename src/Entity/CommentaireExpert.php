@@ -78,7 +78,7 @@ class CommentaireExpert
      */
     private $expert;
 
-    public function __toString()
+    public function __toString(): string
     {
         return 'Commentaire '. $this->getId() . " par l'expert " . $this->getExpert();
     }
@@ -88,9 +88,9 @@ class CommentaireExpert
      *
      * @param integer $annee
      *
-     * @return Expertise
+     * @return comentaireExpert
      */
-    public function setAnnee($annee)
+    public function setAnnee($annee): self
     {
         $this->annee = $annee;
 
@@ -102,7 +102,7 @@ class CommentaireExpert
      *
      * @return integer
      */
-    public function getAnnee()
+    public function getAnnee(): int
     {
         return $this->annee;
     }
@@ -112,9 +112,9 @@ class CommentaireExpert
      *
      * @param string $commentaire
      *
-     * @return Expertise
+     * @return comentaireExpert
      */
-    public function setCommentaire($commentaire)
+    public function setCommentaire($commentaire): self
     {
         $this->commentaire = $commentaire;
 
@@ -126,7 +126,7 @@ class CommentaireExpert
      *
      * @return string
      */
-    public function getCommentaire()
+    public function getCommentaire(): string
     {
         return $this->commentaire;
     }
@@ -136,7 +136,7 @@ class CommentaireExpert
      *
      * @return integer
      */
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
@@ -146,9 +146,9 @@ class CommentaireExpert
      *
      * @param \App\Entity\Individu $idExpert
      *
-     * @return Expertise
+     * @return comentaireExpert
      */
-    public function setExpert(\App\Entity\Individu $expert = null)
+    public function setExpert(\App\Entity\Individu $expert = null): self
     {
         $this->expert = $expert;
 
@@ -160,7 +160,7 @@ class CommentaireExpert
      *
      * @return \App\Entity\Individu
      */
-    public function getExpert()
+    public function getExpert(): \App\Entity\Individu
     {
         return $this->expert;
     }
@@ -170,9 +170,9 @@ class CommentaireExpert
      *
      * @param \DateTime $majStamp
      *
-     * @return Version
+     * @return comentaireExpert
      */
-    public function setMajStamp($majStamp)
+    public function setMajStamp($majStamp): self
     {
         $this->majStamp = $majStamp;
 
@@ -184,7 +184,7 @@ class CommentaireExpert
      *
      * @return \DateTime
      */
-    public function getMajStamp()
+    public function getMajStamp(): \DateTime
     {
         return $this->majStamp;
     }
