@@ -45,7 +45,7 @@
                 <th>Responsable</th>
                 <th>Laboratoire</th>
                 <th>Langage</th>
-				<th>GPU</th>
+                <th>GPU</th>
                 <th>Nom du code</th>
                 <th>Licence du code</th>
                 <th>Heure/job</th>
@@ -74,7 +74,7 @@
             </td>
             <td>{{ version.demHeurestotal }}</td>
             <td>{{ version.attrHeurestotal }}</td>
-            <td>{{ versions_suppl[version.idVersion].conso }}</td>
+            <td>{{ serviceProjets.ConsoCalculVersion(version)}}</td>
             <td>{{ version.prjTitre }}</td>
             <td>{{ version.prjThematique }}</td>
             <td>{{ version.responsable }}</td>
@@ -117,7 +117,8 @@
 
         <tbody>
             {% for version in versions %}
-                {% if versions_suppl[version.idVersion]['formation']['ALL_EMPTY'].rep == false %}
+              {% set formation = serviceVersions.buildFormations(version) %}
+              {% if formation.ALL_EMPTY.rep == false %}
                     <tr>
                         <td>{{version}}</td>
                         <td>
@@ -128,7 +129,7 @@
                         </td>
                         {% for label in form_labels %}
                             {% if label.acro != 'ALL_EMPTY' %}
-                                <td>{{versions_suppl[version.idVersion]['formation'][label.acro].rep}}</td>
+                                <td>{{ formation[label.acro].rep }}</td>
                             {% endif %}
                         {% endfor %}
                         <td>{{version.demFormAutresAutres}}</td>

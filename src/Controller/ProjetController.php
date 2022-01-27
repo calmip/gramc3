@@ -439,14 +439,13 @@ class ProjetController extends AbstractController
         $nombreSignes   = 0;
         $nombreRapports = 0;
         $nombreExperts  = 0;
-        $nombreAcceptes = 0;
+        $nombreAcceptesSess = 0;
+        $nombreAcceptesFil = 0;
 
-        $nombreEditionTest   = 0;
-        $nombreExpertiseTest = 0;
         $nombreEditionFil    = 0;
         $nombreExpertiseFil  = 0;
-        $nombreEdition       = 0;
-        $nombreExpertise     = 0;
+        $nombreEditionSess   = 0;
+        $nombreExpertiseSess = 0;
         $nombreAttente       = 0;
         $nombreActif         = 0;
         $nombreNouvelleDem   = 0;
@@ -484,20 +483,14 @@ class ProjetController extends AbstractController
         }
 
         //$items  =   [];
-        $versions_suppl = [];
         foreach ($versions as $version) {
-            $id_version                   = $version->getIdVersion();
-            $projet                       = $version->getProjet();
-            $version_suppl                = [];
-            $version_suppl['metaetat']    = $sp->getMetaEtat($projet);
-            $version_suppl['consocalcul'] = $sp->getConsoCalculVersion($version);
-            $version_suppl['isnouvelle']  = $sv->isNouvelle($version);
-            $version_suppl['issigne']     = $sv->isSigne($version);
-            $version_suppl['sizesigne']   = $sv->getSizeSigne($version);
+            $id_version = $version->getIdVersion();
+            $projet = $version->getProjet();
+            $etat = $version->getEtatVersion();
+            $type = $version->getProjet()->getTypeProjet();
+            $metaetat = $sp->getMetaEtat($projet);
 
             $annee_rapport = $version->getAnneeSession()-1;
-            $version_suppl['rapport']     = $sp->getRapport($projet, $annee_rapport);
-            $version_suppl['size_rapport']= $sp->getSizeRapport($projet, $annee_rapport);
 
             //Modif Callisto Septembre 2019
             $typeMetadata = $version -> getDataMetaDataFormat();
@@ -505,79 +498,80 @@ class ProjetController extends AbstractController
             $tailleDatasets = $version -> getDataTailleDatasets();
             $demHeures  +=  $version->getDemHeures();
             $attrHeures +=  $version->getAttrHeures();
+            
             if ($sv->isNouvelle($version) == true) {
                 $nombreNouveaux++;
-            }
+            };
+            
             if ($version->getPrjThematique() != null) {
                 $statsThematique[$version->getPrjThematique()->getLibelleThematique()]++;
-            }
+            };
+            
             if ($version->getPrjRattachement() != null) {
                 $statsRattachement[$version->getPrjRattachement()->getLibelleRattachement()]++;
-            }
+            };
 
             if ($sv->isSigne($version)) {
                 $nombreSignes++;
-            }
+            };
             if ($sp->hasRapport($projet, $annee_rapport)) {
                 $nombreRapports++;
-            }
+            };
             if ($version->hasExpert()) {
                 $nombreExperts++;
-            }
+            };
+            
             //if( $version->getAttrAccept() ) $nombreAcceptes++;
-            if ($version_suppl['metaetat'] == 'ACCEPTE') {
-                $nombreAcceptes++;
-            }
+            if ($metaetat == 'ACCEPTE') {
+                if ($type == Projet::PROJET_FIL) {
+                    $nombreAcceptesFil++;
+                }
+                if ($type == Projet::PROJET_SESS) {
+                    $nombreAcceptesSess++;
+                }
+            };
+        
             if ($version->getProjet() != null && $version->getProjet()->getEtatProjet() == $termine) {
                 $nombreTermines++;
-            }
+            };
 
-            $etat = $version->getEtatVersion();
-            $type = $version->getProjet()->getTypeProjet();
-
-
-            // TODO Que c'est compliqué !
-            //      Plusieurs workflows => pas d'états différents
-            //      Utiliser un tableau
-            if ($type == Projet::PROJET_TEST) {
-                if ($etat == Etat::EDITION_TEST) {
-                    $nombreEditionTest++;
-                } elseif ($etat == Etat::EXPERTISE_TEST) {
-                    $nombreExpertiseTest++;
-                }
-            } elseif ($type == Projet::PROJET_FIL) {
-                if ($etat == Etat::EDITION_TEST) {
+            if ($type == Projet::PROJET_FIL) {
+                if ($etat == Etat::EDITION_DEMANDE) {
                     $nombreEditionFil++;
-                } elseif ($etat == Etat::EXPERTISE_TEST) {
+                };
+                if ($etat == Etat::EDITION_EXPERTISE) {
                     $nombreExpertiseFil++;
                 }
-            } elseif ($type == Projet::PROJET_SESS) {
+            };
+
+            if ($type == Projet::PROJET_SESS) {
                 if ($etat == Etat::EDITION_DEMANDE) {
-                    $nombreEdition++;
+                    $nombreEditionSess++;
                 } elseif ($etat == Etat::EDITION_EXPERTISE) {
-                    $nombreExpertise++;
+                    $nombreExpertiseSess++;
                 }
             };
 
             if ($etat == Etat::ACTIF) {
                 $nombreActif++;
-            } elseif ($etat == Etat::NOUVELLE_VERSION_DEMANDEE) {
-                $nombreNouvelleDem++;
-            } elseif ($etat == Etat::EN_ATTENTE) {
-                $nombreAttente++;
-            } elseif ($etat == Etat::TERMINE) {
-                $nombreTermine++;
-            } elseif ($etat == Etat::ANNULE) {
-                $nombreAnnule++;
+                    
             };
 
-            //$items[]    =
-            //        [
-            //        'version'       =>  $version,
-            //        'sizeSigne'     =>  $version->getSizeSigne(),
-            //        //'sizeRapport'   =>  $version->getSizeRapport(),//
-            //        ];
-            $versions_suppl[$id_version] = $version_suppl;
+            if ($etat == Etat::NOUVELLE_VERSION_DEMANDEE) {
+                $nombreNouvelleDem++;
+            };
+            
+            if ($etat == Etat::EN_ATTENTE) {
+                $nombreAttente++;
+            };
+            
+            if ($etat == Etat::TERMINE) {
+                $nombreTermine++;
+            };
+            
+            if ($etat == Etat::ANNULE) {
+                $nombreAnnule++;
+            };
         }
 
         foreach ($thematiques as $thematique) {
@@ -590,10 +584,8 @@ class ProjetController extends AbstractController
         return $this->render(
             'projet/session.html.twig',
             [
-            'nombreEditionTest'   => $nombreEditionTest,
-            'nombreExpertiseTest' => $nombreExpertiseTest,
-            'nombreEdition'       => $nombreEdition,
-            'nombreExpertise'     => $nombreExpertise,
+            'nombreEditionSess'   => $nombreEditionSess,
+            'nombreExpertiseSess' => $nombreExpertiseSess,
             'nombreAttente'       => $nombreAttente,
             'nombreActif'         => $nombreActif,
             'nombreNouvelleDem'   => $nombreNouvelleDem,
@@ -605,7 +597,6 @@ class ProjetController extends AbstractController
             'idSession'           => $session->getIdSession(), // formulaire
             'session'             => $session,
             'versions'            => $versions,
-            'versions_suppl'      => $versions_suppl,
             'demHeures'           => $demHeures,
             'attrHeures'          => $attrHeures,
             'nombreProjets'       => $nombreProjets,
@@ -617,7 +608,8 @@ class ProjetController extends AbstractController
             'nombreSignes'        => $nombreSignes,
             'nombreRapports'      => $nombreRapports,
             'nombreExperts'       => $nombreExperts,
-            'nombreAcceptes'      => $nombreAcceptes,
+            'nombreAcceptesSess'      => $nombreAcceptesSess,
+            'nombreAcceptesFil'   => $nombreAcceptesFil,
             'nombreTermines'      => $nombreTermines,
             'showRapport'         => (substr($session->getIdSession(), 2, 1) == 'A') ? true : false,
         ]
@@ -653,7 +645,7 @@ class ProjetController extends AbstractController
             $v = empty($p['vb']) ? $p['va'] : $p['vb'];
 
             // On saute les projets en édition !
-            if ($v->getEtatVersion() == Etat::EDITION_DEMANDE || $v->getEtatVersion() == Etat::EDITION_TEST) {
+            if ($v->getEtatVersion() == Etat::EDITION_DEMANDE) {
                 continue;
             }
             $thematique= $v->getPrjThematique();
@@ -799,8 +791,8 @@ class ProjetController extends AbstractController
                     'titre',
                     'thématique',
                     'courriel du resp',
-                    'prénom',
                     'nom',
+                    'prenom',
                     'laboratoire',
                     'justif',
                     'demande',
@@ -1101,7 +1093,7 @@ class ProjetController extends AbstractController
         $sm = $this->sm;
         $sj = $this->sj;
         $ss = $this->ss;
-        $token = $this->token;
+        $token = $this->tok->getToken();
 
         if ($sm->nouveau_projet($type)['ok'] == false) {
             $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de créer un nouveau projet parce que " . $sm->nouveau_projet($type)['raison']);
@@ -1142,7 +1134,7 @@ class ProjetController extends AbstractController
         $sp = $this->sp;
         $sv = $this->sv;
         $sj = $this->sj;
-        $token = $this->token;
+        $token = $this->tok->getToken();
         $em = $this->getDoctrine()->getManager();
 
         // Si changement d'état de la session alors que je suis connecté !
@@ -1168,17 +1160,7 @@ class ProjetController extends AbstractController
         $projet   = new Projet($type);
         $projet->setIdProjet($sp->NextProjetId($annee, $type));
         $projet->setNepasterminer(false);
-        switch ($type) {
-        case Projet::PROJET_SESS:
-        case Projet::PROJET_FIL:
         $projet->setEtatProjet(Etat::RENOUVELABLE);
-        break;
-        case Projet::PROJET_TEST:
-        $projet->setEtatProjet(Etat::NON_RENOUVELABLE);
-        break;
-        default:
-           $sj->throwException(__METHOD__ . ":" . __LINE__ . " mauvais type de projet " . Functions::show($type));
-    }
 
         // Ecriture du projet dans la BD
         $em->persist($projet);
@@ -1191,11 +1173,7 @@ class ProjetController extends AbstractController
         $version->setSession($session);
         $sv->setLaboResponsable($version, $token->getUser());
 
-        if ($type == Projet::PROJET_TEST) {
-            $version->setEtatVersion(Etat::EDITION_TEST);
-        } else {
-            $version->setEtatVersion(Etat::EDITION_DEMANDE);
-        }
+        $version->setEtatVersion(Etat::EDITION_DEMANDE);
 
         // Ecriture de la version dans la BD
         $em->persist($version);
@@ -1211,7 +1189,8 @@ class ProjetController extends AbstractController
         $collaborateurVersion = new CollaborateurVersion($moi);
         $collaborateurVersion->setVersion($version);
         $collaborateurVersion->setResponsable(true);
-
+        $collaborateurVersion->setDeleted(false);
+        
         // Ecriture de collaborateurVersion dans la BD
         $em->persist($collaborateurVersion);
         $em->flush();

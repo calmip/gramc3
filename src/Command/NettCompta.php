@@ -67,24 +67,11 @@ class NettCompta extends Command
     // the name of the command (the part after "bin/console")
     protected static $defaultName = 'app:nettcompta';
 
-    private $sd = null;
-    private $sp = null;
-    private $sv = null;
-    private $sj = null;
-    private $em = null;
-
-    public function __construct(GramcDate $sd, ServiceProjets $sp, ServiceVersions $sv, ServiceJournal $sj, EntityManagerInterface $em)
+    public function __construct(private GramcDate $sd, private ServiceProjets $sp, private ServiceVersions $sv, private ServiceJournal $sj, private EntityManagerInterface $em)
     {
         // best practices recommend to call the parent constructor first and
         // then set your own properties. That wouldn't work in this case
         // because configure() needs the properties set in this constructor
-
-        $this->sd = $sd;
-        $this->sp = $sp;
-        $this->sv = $sv;
-        $this->sj = $sj;
-        $this->em = $em;
-
         parent::__construct();
     }
 
@@ -109,6 +96,8 @@ class NettCompta extends Command
 
         $annee = intval($input->getArgument('year'));
         $anneeCourante = $sd->showYear();
+
+        $sj->infoMessage("EXECUTION DE LA COMMANDE: nettcompta $annee");
 
         if ($annee <= 2000 || $annee >= $anneeCourante)
         {
@@ -143,7 +132,7 @@ class NettCompta extends Command
             $i++;
         }
         $output->writeln("TERMINE - $k jours traités");
-        $sj->infoMessage("Comptabilité de l'année $annee: $k jours, et $ttl_cpt lignes supprimées");
+        $sj->infoMessage("Comptabilité de l'année $annee: $ttl_cpt lignes supprimées sur $k jours");
 
         return 0;
     }

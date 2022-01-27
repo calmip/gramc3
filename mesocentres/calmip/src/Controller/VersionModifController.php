@@ -770,9 +770,8 @@ class VersionModifController extends AbstractController
         $form->handleRequest($request);
         $valid = true;
 
-        if ($form->isSubmitted() && $form->isValid()) {
-
-            // 
+        if ($form->isSubmitted() && $form->isValid())
+        {
             $version->setDemHeures($heures_projet_test);
  
             // Changement de type ou plafonnement de la demande en heures !
@@ -1190,15 +1189,8 @@ class VersionModifController extends AbstractController
             // Le formulaire correspond à un utilisateur existant
             if ($id != null) {
                 $individu = $em->getRepository(Individu::class)->find($id);
-            // Toujours null, donc plein de messages idiots dans le journal, puisque par ailleurs ça marche !
-                // TODO y comprendre quelque chose !
-                //if( $individu_form->getMail() == null )
-                //{
-                //	echo $sj->warningMessage($individu_form);
-                //	$sj->warningMessage(__METHOD__ . ':' . __LINE__ . " Utilisateur $individu: Pas de mail dans le firmulaire: zarbi !");
-                //}
             }
-
+            
             // On a renseigné le mail de l'utilisateur mais on n'a pas encore l'id: on recherche l'utilisateur !
             // Si $utilisateur == null, il faudra le créer (voir plus loin)
             elseif ($individu_form->getMail() != null) {
@@ -1218,32 +1210,24 @@ class VersionModifController extends AbstractController
             // Cas d'erreur qui ne devraient jamais se produire
             if ($individu == null && $id != null) {
                 $sj->errorMessage(__METHOD__ . ':' . __LINE__ .' idIndividu ' . $id . 'du formulaire ne correspond pas à un utilisateur');
-            } elseif (is_array($individu_form)) {
+            }
+
+            elseif (is_array($individu_form)) {
                 // TODO je ne vois pas le rapport
                 $sj->errorMessage(__METHOD__ . ':' . __LINE__ .' individu_form est array ' . Functions::show($individu_form));
-            } elseif (is_array($individu)) {
+            }
+
+            elseif (is_array($individu)) {
                 // TODO pareil un peu nawak
                 $sj->errorMessage(__METHOD__ . ':' . __LINE__ .' individu est array ' . Functions::show($individu));
-            } elseif ($individu != null && $individu_form->getMail() != null && $individu_form->getMail() != $individu->getMail()) {
+            }
+
+            elseif ($individu != null && $individu_form->getMail() != null && $individu_form->getMail() != $individu->getMail()) {
                 $sj->errorMessage(__METHOD__ . ':' . __LINE__ ." l'adresse mails de l'utilisateur " .
                     $individu . ' est incorrecte dans le formulaire :' . $individu_form->getMail() . ' != ' . $individu->getMail());
             }
 
             // --------------> Maintenant des cas réalistes !
-            // Suppression d'un collaborateur
-            elseif ($individu != null && $individu_form->getDelete() == true) {
-                $sj->infoMessage(__METHOD__ . ':' . __LINE__ ." le collaborateur " .
-                    $individu . " sera supprimé de la liste des collaborateurs de la version ".$version);
-                $sv->forceDeleted($version, $individu);
-            }
-
-            // Remise en selle d'un collaborateur marqué pour suppression
-            elseif ($individu != null && $individu_form->getDelete() == false) {
-                $sj->infoMessage(__METHOD__ . ':' . __LINE__ ." le collaborateur " .
-                    $individu . " est réintégré dans la liste des collaborateurs de la version ".$version);
-                $sv->noDeleted($version, $individu);
-            }
-
             // L'individu existe déjà
             elseif ($individu != null) {
                 // On modifie l'individu
@@ -1255,6 +1239,7 @@ class VersionModifController extends AbstractController
                     $sj->infoMessage(__METHOD__ . ':' . __LINE__ .' individu ' .
                         $individu . ' ajouté à la version ' .$version);
                     $collaborateurVersion   =   new CollaborateurVersion($individu);
+                    $collaborateurVersion->setDeleted(false);
                     $collaborateurVersion->setVersion($version);
                     if ($this->getParameter('coll_login')) {
                         $collaborateurVersion->setLogin($individu_form->getLogin());
@@ -1267,17 +1252,21 @@ class VersionModifController extends AbstractController
                     $em->persist($collaborateurVersion);
                 }
 
-                // modification d'un login et du labo du projet
+                // il était déjà collaborateur
                 else {
                     $sj->debugMessage(__METHOD__ . ':' . __LINE__ .' individu ' .
                         $individu . ' confirmé pour la version '.$version);
 
+                    // Modif éventuelle des cases de login
                     $sv->modifierLogin($version, $individu, $individu_form->getLogin(), $individu_form->getClogin());
 
                     // modification du labo du projet
                     if ($version->isResponsable($individu)) {
                         $sv->setLaboResponsable($version, $individu);
                     }
+
+                    // modification éventuelle du flag deleted
+                    $sv->syncDeleted($version, $individu, $individu_form->getDelete());
                 }
                 $em -> flush();
             }

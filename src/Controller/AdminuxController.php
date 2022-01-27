@@ -717,8 +717,10 @@ class AdminuxController extends AbstractController
      *                 quota        Quota sur la machine
      *                 gpfs        sondVolDonnPerm stockage permanent demandé (pas d'attribution pour le stockage)
      *
+     * curl --netrc -H "Content-Type: application/json" -X POST  -d '{ "projet" : "P1234", "session" : "20A" }' https://.../adminux/version/get
+     *
      */
-     public function versionGetAction(Request $request)
+     public function versionGetAction(Request $request): Response
      {
         $em = $this->getDoctrine()->getManager();
         $sp = $this->sp;
@@ -843,6 +845,109 @@ class AdminuxController extends AbstractController
         // return new Response(print_r($retour,true));
         return new Response(json_encode($retour));
 
+     }
+
+    /**
+     * Changer le quota de la version active d'un projet
+     *
+     * @Route("/version/setquota", name="set_quota", methods={"POST"})
+     * @Security("is_granted('ROLE_ADMIN')")
+     * Exemples de données POST (fmt json):
+     *
+     *             '{ "projet" : "P01234", "session" : "20A", "quota" : "10000"}' -> La version 20AP01234 à condition que ce soit bien la version active !
+     *
+     * curl --netrc -H "Content-Type: application/json" -X POST  -d '{ "projet" : "P1234", "session" : "20A", "quota" : "10000" }' https://.../adminux/version/setquota
+     */
+     public function versionsetQuotaAction(Request $request): Response
+     {
+        $em = $this->getDoctrine()->getManager();
+        $sp = $this->sp;
+        $sj = $this->sj;
+
+        $content  = json_decode($request->getContent(),true);
+        if ($content == null)
+        {
+            return new Response(json_encode(['KO' => 'Pas de données']));
+        }
+
+        $idProjet  = (isset($content['projet'])) ? $content['projet'] : null;
+        $idSession = (isset($content['session']))? $content['session']: null;
+        $quota      = (isset($content['quota']))? $content['quota']: null;
+
+        if ($idProjet === null)
+        {
+            return new Response(json_encode(['KO' => 'Pas de projet spécifié']));
+        }
+        if ($idSession === null)
+        {
+            return new Response(json_encode(['KO' => 'Pas de session spécifié']));
+        }
+        if ($quota === null)
+        {
+            return new Response(json_encode(['KO' => 'Pas de quota spécifié']));
+        }
+        else
+        {
+            $quota = intval($quota);
+            if ($quota < 0)
+            {
+                return new Response(json_encode(['KO' => 'quota doit être un entier positif >= 0']));
+            }
+        }
+
+        $projet = $em->getRepository(Projet::class)->findOneBy(['idProjet' => $idProjet]);
+        if ($projet === null) {
+            return new Response(json_encode(['KO' => "Pas de projet $idProjet"]));
+        }
+
+        $session = $em->getRepository(Session::class)->findOneBy(['idSession' => $idSession]);
+        if ($session === null) {
+            return new Response(json_encode(['KO' => "Pas de session $idSession"]));
+        }
+
+        $idVersion = $idSession . $idProjet;
+        $version = $em->getRepository(Version::class)->findOneBy(['idVersion' => $idVersion]);
+        if ($version === null) {
+           return new Response(json_encode(['KO' => "Pas de version $idVersion"]));
+ 
+        }
+
+        $veract = $sp->versionActive($projet);
+        if ($veract != $version) {
+            $sj->errorMessage(__METHOD__ . ':' . __LINE__ . " La version active de $idProjet est $veract, on ne peut pas changer le quota de $idVersion");
+            return new Response(json_encode(['KO' => "La version active de $idProjet est $veract, on ne peut pas changer le quota de $idVersion"]));
+        }
+
+        // Toutes les vérifications sont terminées, on peut changer le quota
+        // Cela revient à écrire directement dans la table de conso, mais si la conso n'est pas chargée à ce moment
+        // On retourne avec une erreur !
+
+        $date = $this->sd;  // aujourd'hui
+        $ressource = "cpu"; // Calcul (cpu ou gpu))
+        $loginname = strtolower($idProjet); // Le projet traduit en groupe unix
+        $type = 2;                          // Un groupe, pas un utilisateur
+        $compta = $em->getRepository(Compta::class)->findOneBy(
+            [
+                'date'      => $date,
+                'ressource' => $ressource,
+                'loginname' => $loginname,
+                'type'      => $type
+            ]);
+
+        if ($compta === null) {
+            $str_date = $date->format("d/m/Y");
+            $sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Pas de données de consommation à la date du $str_date");
+            return new Response(json_encode(['KO' => "Pas de données de consommation à la date du $str_date"]));
+        }
+
+        $compta->setQuota($quota);
+        $em->persist($compta);
+        $em->flush();
+        
+        $sj->infoMessage(__METHOD__ . " Le quota de $idVersion est maintenant $quota");
+
+        // OK
+        return new Response(json_encode(['OK' => "Le quota de $idVersion est maintenant $quota"]));
      }
 
     /**
@@ -1316,6 +1421,8 @@ class AdminuxController extends AbstractController
     public function checkPasswordAction(Request $request, LoggerInterface $lg)
     {
         $em = $this->getdoctrine()->getManager();
+        $sj = $this->sj;
+        
         if ($this->getParameter('noconso')==true) {
             throw new AccessDeniedException("Accès interdit (paramètre noconso)");
         }
@@ -1336,6 +1443,7 @@ class AdminuxController extends AbstractController
                 $user->setExpire(true);
                 $em->persist($user);
                 $em->flush();
+                
             }
             $u["loginname"] = $user->getLoginname();
             $u["cpassword"] = $user->getCpassword();

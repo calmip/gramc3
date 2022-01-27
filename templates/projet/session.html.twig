@@ -58,13 +58,11 @@
     <tr>
         <th colspan="3">Etats des projets</th>
     </tr>
-    {% if( nombreAcceptes > 0 ) %}
     <tr>
-        <th>Projets acceptés</th>
-        <td>{{ nombreAcceptes }}</td>
+        <th>Projets Sess acceptés</th>
+        <td>{{ nombreAcceptesSess }}</td>
         <td><input type="checkbox" class="cb" id="accepte" checked="checked" /></td>
      </tr>
-     {% endif %}
      {% if( nombreTermines > 0 ) %}
      <tr>
         <th>Projets terminés</th>
@@ -86,59 +84,40 @@
         <td><input type="checkbox" class="cb" id="rapport_activite" checked="checked" /></td>
     </tr>
     {% endif %}
-    {% if(  nombreExperts > 0 ) %}
     <tr>
-        <th>Projets avec expert affecté</th>
-        <td>{{ nombreExperts }}</td>
-        <td><input type="checkbox" class="cb" id="avec_expert" checked="checked" /></td>
-    </tr>
-    {% endif %}
-
-    {% if( nombreEditionTest > 0 ) %}
-    <tr>
-        <th>Projets test en édition</th>
-        <td>{{ nombreEditionTest }}</td>
-        <td><input type="checkbox" class="cb" id="editionTest" checked="checked" /></td>
+        <th>Projets Fil acceptés</th>
+        <td>{{ nombreAcceptesFil }}</td>
+        <td><input type="checkbox" class="cb" id="accepteFil" checked="checked" /></td>
      </tr>
-     {% endif %}
-
-    {% if( nombreExpertiseTest > 0 ) %}
-    <tr>
-        <th>Projets test en expertise</th>
-        <td>{{ nombreExpertiseTest }}</td>
-        <td><input type="checkbox" class="cb" id="expertiseTest" checked="checked" /></td>
-     </tr>
-     {% endif %}
-
     {% if( nombreEditionFil > 0 ) %}
     <tr>
         <th>Projets Fil en édition</th>
         <td>{{ nombreEditionFil }}</td>
         <td><input type="checkbox" class="cb" id="editionFil" checked="checked" /></td>
-     </tr>
-     {% endif %}
+    </tr>
+    {% endif %}
 
     {% if( nombreExpertiseFil > 0 ) %}
     <tr>
         <th>Projets Fil en expertise</th>
         <td>{{ nombreExpertiseFil }}</td>
         <td><input type="checkbox" class="cb" id="expertiseFil" checked="checked" /></td>
-     </tr>
-     {% endif %}
+    </tr>
+    {% endif %}
 
-    {% if( nombreEdition > 0 ) %}
+    {% if( nombreEditionSess > 0 ) %}
     <tr>
         <th>Projets en édition</th>
-        <td>{{ nombreEdition }}</td>
-        <td><input type="checkbox" class="cb" id="edition" checked="checked" /></td>
+        <td>{{ nombreEditionSess }}</td>
+        <td><input type="checkbox" class="cb" id="editionSess" checked="checked" /></td>
      </tr>
      {% endif %}
 
-    {% if( nombreExpertise > 0 ) %}
+    {% if( nombreExpertiseSess > 0 ) %}
     <tr>
         <th>Projets en expertise</th>
-        <td>{{ nombreExpertise }}</td>
-        <td><input type="checkbox" class="cb" id="expertise" checked="checked" /></td>
+        <td>{{ nombreExpertiseSess }}</td>
+        <td><input type="checkbox" class="cb" id="expertiseSess" checked="checked" /></td>
      </tr>
      {% endif %}
 
@@ -186,6 +165,13 @@
         <td><input type="checkbox" class="cb" id="annule" checked="checked" /></td>
      </tr>
      {% endif %}
+    {% if(  nombreExperts > 0 ) %}
+    <tr>
+        <th>Projets avec expert affecté</th>
+        <td>{{ nombreExperts }}</td>
+        <td><input type="checkbox" class="cb" id="avec_expert" checked="checked" /></td>
+    </tr>
+    {% endif %}
 
 </table>
 
@@ -262,7 +248,7 @@
     {% for version in versions %}
     {% if( version != null and version.projet != null ) %}
         <tr>
-            {% if( versions_suppl[version.idVersion].isnouvelle ) %}
+            {% if( serviceVersions.isnouvelle(version) ) %}
                 <td class="nouveau"><strong>N</strong></td>
             {% else %}
                 <td class="renouv">&nbsp;</td>
@@ -303,7 +289,7 @@
                    <img class="bouton_poussoir" src="{{ asset('icones/poubelle16.png') }}" alt="Supprimer" /></a>
                 {% endif %}
                 {% if noconso==false %}
-                {% if( not versions_suppl[version.idVersion].isnouvelle ) %}
+                {% if( not serviceVersions.isnouvelle(version) ) %}
                     {% if version.typeSession=='A' %}
                         {% set annee_conso = version.anneeSession - 1 %}
                     {% else %}
@@ -317,7 +303,7 @@
 
 
             </td>
-                <td class="{{ versions_suppl[version.idVersion].metaetat | lower }}">{{ gramcmacros.metagraph(versions_suppl[version.idVersion].metaetat) }}</td>
+                <td class="{{ serviceProjets.metaetat(version.projet) | lower }}">{{ gramcmacros.metagraph(serviceProjets.metaetat(version.projet)) }}</td>
             <td>
                 {% if( version != null) %}
                     {{ gramcmacros.afftitre(version.prjtitre) }}
@@ -378,26 +364,27 @@
             </td>
             <td>{{ version.demHeures }}</td>
             <td>{{ version.attrHeures }}</td>
-            <td>{{ versions_suppl[version.idVersion].consocalcul }}</td>
-                {% if versions_suppl[version.idVersion].issigne %}
+            <td>{{ serviceProjets.getConsoCalculVersion(version) }}</td>
+                {% if serviceVersions.issigne(version) %}
                 <td class="prj_fiche_val">
                     <a href="{{ path('signature',  { 'id': version.idVersion }) }}?">
                     <img src="{{ asset('icones/pdf.png') }}" alt="Fichier pdf" /></a>
-                    <small>({{ versions_suppl[version.idVersion].sizesigne }}K)</small>
+                    <small>({{ serviceVersions.sizesigne(version) }}K)</small>
                 </td>
                 {% else %}
                 <td>-</td>
                 {% endif %}
             {% if( showRapport ==true ) %}
-                {% if( versions_suppl[version.idVersion].isnouvelle ) %}
+                {% set sizerapport = serviceProjets.sizerapport(version.projet,version.anneesession-1) %}
+                {% if( serviceVersions.isnouvelle(version) ) %}
                     <td  class="rapport_activite">N/A
-                {% elseif versions_suppl[version.idVersion].size_rapport == 0 %}
+                {% elseif sizerapport == 0 %}
                     <td>
                 {% else %}
                     <td  class="rapport_activite">
                     <a href="{{ path('rapport',  { 'id': version.idVersion }) }}?">
                     <img src="{{ asset('icones/pdf.png') }}" alt="Fichier pdf" /></a>
-                    <small>({{ versions_suppl[version.idVersion].size_rapport }}K)</small>
+                    <small>({{ sizerapport }}K)</small>
                 {% endif %}
                 </td>
             {% endif %}

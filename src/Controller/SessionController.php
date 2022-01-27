@@ -610,25 +610,11 @@ class SessionController extends AbstractController
         $form    = $data['form']->createView();
 
         $versions = $em->getRepository(Version::class)->findBy(['session' => $session ]);
-
-        // Juin 2021 - Suppression des projets test
-        //$versions = $em->getRepository(Version::class)->findVersionsSessionTypeSess($session);
-        //$versions_suppl = [];
-        //foreach ($versions as $v) {
-        //    $versions_suppl[$v->getIdVersion()]['conso'] = $sp->getConsoCalculVersion($v);
-        //}
-
-        $versions_suppl = [];
-        foreach ($versions as $v) {
-            $versions_suppl[$v->getIdVersion()]['conso'] = $sp->getConsoCalculVersion($v);
-            $f = $sv -> buildFormations($v);
-            $versions_suppl[$v->getIdVersion()]['formation'] = $f;
-        }
         $form_labels = [];
         $form_total = [];
         if (count($versions)>0) {
             $v0 = $versions[0];
-            $formation = $versions_suppl[$v0->getIdVersion()]['formation'];
+            $formation = $sv -> buildFormations($v0);
             foreach ($formation as $f) {
                 // cf. buildFormations ALL_EMPTY
                 if (is_bool($f)) continue;
@@ -641,7 +627,7 @@ class SessionController extends AbstractController
         }
 
         foreach ($versions as $v) {
-            $formation = $versions_suppl[$v->getIdVersion()]['formation'];
+            $formation = $sv -> buildFormations($v);
             foreach ($formation as $f) {
                 if ($f['acro']=='ALL_EMPTY') continue;
                 $form_total[$f['acro']] += intval($f['rep']);
@@ -653,7 +639,6 @@ class SessionController extends AbstractController
             'form'      => $form,
             'idSession' => $session->getIdSession(),
             'versions'  => $versions,
-            'versions_suppl' => $versions_suppl,
             'form_labels' => $form_labels,
             'form_total' => $form_total
         ]
