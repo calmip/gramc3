@@ -87,9 +87,11 @@ use Twig\Environment;
 /**
  * Version controller.
  *
+ * Les méthodes liées aux versions mais SPECIFIQUES à un mésocentre particulier
+ *
  * @Route("version")
  */
-class VersionModifController extends AbstractController
+class VersionSpecController extends AbstractController
 {
     public function __construct(
         private ServiceJournal $sj,

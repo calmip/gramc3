@@ -56,7 +56,6 @@ use App\GramcServices\GramcGraf\Calcul;
 use Psr\Log\LoggerInterface;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -83,6 +82,9 @@ use Twig\Environment;
 
 /**
  * Projet controller.
+ *
+ * Les méthodes liées aux projets mais SPECIFIQUES à un mésocentre particulier
+ *
  *
  * @Route("projet")
  */
