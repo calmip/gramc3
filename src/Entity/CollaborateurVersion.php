@@ -52,21 +52,21 @@ class CollaborateurVersion
      *
      * @ORM\Column(name="deleted", type="boolean", nullable=false)
      */
-    private $deleted;
+    private $deleted = false;
 
     /**
      * @var boolean
      *
      * @ORM\Column(name="login", type="boolean", nullable=false)
      */
-    private $login;
+    private $login = false;
 
     /**
      * @var boolean
      *
      * @ORM\Column(name="clogin", type="boolean", nullable=false)
      */
-    private $clogin;
+    private $clogin = false;
 
     /**
      * @var string
