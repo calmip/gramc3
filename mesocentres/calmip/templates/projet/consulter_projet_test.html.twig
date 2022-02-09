@@ -208,7 +208,7 @@ Le laboratoire associé au projet est le laboratoire du responsable
             {{ version.codeLangage }}
             </td>
         </tr>
-		<tr>
+        <tr>
             <th class="horiz">Binaire GPU</th>
             <td>{{ version.gpu}}</td>
         </tr>
@@ -243,23 +243,21 @@ Le laboratoire associé au projet est le laboratoire du responsable
             <th class="horiz">Nombre d'heures demandées</th>
             <td>{{  version.demHeures }}</td>
         </tr>
-        <tr>
-            <th class="horiz">Nombre d'heures attribuées</th>
-            <td>{{  expertise.nbHeuresAtt }}</td>
-        </tr>
-        {% if not is_granted('ROLE_ADMIN') %}
+        {% if is_granted('ROLE_ADMIN') or version.isExpertDe(app.user) %}
             <tr>
-               <th class="horiz">Commentaire</th>
-               <td>{{ expertise.commentaireExterne | e | nl2br}}</td>
+                <tr>
+                   <th class="horiz">Commentaire pour le responsable</th>
+                   <td>{{ expertise.commentaireExterne | e | nl2br}}</td>
+                </tr>
+                <tr>
+                   <th class="horiz">Commentaire pour le comité</th>
+                   <td>{{ expertise.commentaireInterne | e | nl2br}}</td>
+                </tr>
             </tr>
         {% else %}
             <tr>
-               <th class="horiz">Commentaire pour le responsable</th>
+               <th class="horiz">Commentaire</th>
                <td>{{ expertise.commentaireExterne | e | nl2br}}</td>
-            </tr>
-            <tr>
-               <th class="horiz">Commentaire pour le comité</th>
-               <td>{{ expertise.commentaireInterne | e | nl2br}}</td>
             </tr>
         {% endif %}
 </tbody>
