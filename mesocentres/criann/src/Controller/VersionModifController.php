@@ -91,43 +91,20 @@ use Twig\Environment;
  */
 class VersionModifController extends AbstractController
 {
-    private $sj = null;
-    private $sm = null;
-    private $ss = null;
-    private $sv = null;
-    private $sp = null;
-    private $sf = null;
-    private $pw = null;
-    private $ff = null;
-    private $vl = null;
-    private $tw = null;
-    private $tok = null;
-
     public function __construct(
-        ServiceJournal $sj,
-        ServiceMenus $sm,
-        ServiceSessions $ss,
-        ServiceVersions $sv,
-        ServiceProjets $sp,
-        ServiceForms $sf,
-        ProjetWorkflow $pw,
-        FormFactoryInterface $ff,
-        ValidatorInterface $vl,
-        Environment $tw,
-        TokenStorageInterface $tok
-    ) {
-        $this->sj  = $sj;
-        $this->sm  = $sm;
-        $this->ss  = $ss;
-        $this->sv  = $sv;
-        $this->sp  = $sp;
-        $this->sf  = $sf;
-        $this->pw  = $pw;
-        $this->ff  = $ff;
-        $this->vl  = $vl;
-        $this->tw = $tw;
-        $this->tok= $tok;
-    }
+        private ServiceJournal $sj,
+        private ServiceMenus $sm,
+        private ServiceSessions $ss,
+        private ServiceVersions $sv,
+        private ServiceProjets $sp,
+        private ServiceForms $sf,
+        private ProjetWorkflow $pw,
+        private FormFactoryInterface $ff,
+        private ValidatorInterface $vl,
+        private LoggerInterface $lg,
+        private Environment $tw,
+        private TokenStorageInterface $tok
+    ) {}
 
     /**
      * Montre les projets d'un utilisateur
@@ -139,7 +116,7 @@ class VersionModifController extends AbstractController
      * Method("GET")
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
-    public function accueilAction()
+    public function accueilAction(): Response
     {
         $sm                  = $this->sm;
         $ss                  = $this->ss;
@@ -302,7 +279,7 @@ class VersionModifController extends AbstractController
         //$prefixes = $this->getParameter('prj_prefix');
         //foreach (array_keys($prefixes) as $t)
         //{
-        //	$menu[] = $sm->nouveau_projet($t);
+        //    $menu[] = $sm->nouveau_projet($t);
         //}
         $menu = [];
         $menu[] = $sm -> nouveau_projet(3);
@@ -321,39 +298,6 @@ class VersionModifController extends AbstractController
     }
 
     /**
-     * Appelé par le bouton Envoyer à l'expert: si la demande est incomplète
-     * on envoie un écran pour la compléter. Sinon on passe à envoyer à l'expert
-     *
-     * @Route("/{id}/avant_modifier", name="avant_modifier_version",methods={"GET","POST"})
-     * Method({"GET", "POST"})
-     * @Security("is_granted('ROLE_DEMANDEUR')")
-     */
-    public function avantModifierVersionAction(Request $request, Version $version)
-    {
-        $sm = $this->sm;
-        $sj = $this->sj;
-        $vl = $this->vl;
-        $em = $this->getDoctrine()->getManager();
-
-
-        // ACL
-        if ($sm->modifier_version($version)['ok'] == false) {
-            $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de modifier la version " . $version->getIdVersion().
-                " parce que : " . $sm->modifier_version($version)['raison']);
-        }
-        if ($this->versionValidate($version) != []) {
-            return $this->render(
-                'version/avant_modifier.html.twig',
-                [
-                'version'   => $version
-                ]);
-        }
-        else {
-            return $this->redirectToRoute('avant_envoyer_expert', [ 'id' => $version->getIdVersion() ]);
-        }
-    }
-    
-    /**
      * Modification d'une version existante
      *
      *      1/ D'abord une partie générique (images, collaborateurs)
@@ -363,7 +307,9 @@ class VersionModifController extends AbstractController
      * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
-    public function modifierAction(Request $request, Version $version, $renouvellement = false, LoggerInterface $lg)
+    public function modifierAction(Request $request,
+                                Version $version,
+                                bool $renouvellement): Response
     {
         $sm = $this->sm;
         $sv = $this->sv;
@@ -390,28 +336,28 @@ class VersionModifController extends AbstractController
         // $sj->debugMessage('modifierAction ' .  print_r($_POST, true) );
         $image_forms = [];
 
-        $image_forms['img_expose_1'] =   $this->image_form('img_expose_1', false);
-        $image_forms['img_expose_2'] =   $this->image_form('img_expose_2', false);
-        $image_forms['img_expose_3'] =   $this->image_form('img_expose_3', false);
+        $image_forms['img_expose_1'] =   $sv->imageForm('img_expose_1', false);
+        $image_forms['img_expose_2'] =   $sv->imageForm('img_expose_2', false);
+        $image_forms['img_expose_3'] =   $sv->imageForm('img_expose_3', false);
 
-        $image_forms['img_justif_renou_1'] =   $this->image_form('img_justif_renou_1', false);
-        $image_forms['img_justif_renou_2'] =   $this->image_form('img_justif_renou_2', false);
-        $image_forms['img_justif_renou_3'] =   $this->image_form('img_justif_renou_3', false);
+        $image_forms['img_justif_renou_1'] =   $sv->imageForm('img_justif_renou_1', false);
+        $image_forms['img_justif_renou_2'] =   $sv->imageForm('img_justif_renou_2', false);
+        $image_forms['img_justif_renou_3'] =   $sv->imageForm('img_justif_renou_3', false);
 
 
         //$sj->debugMessage('modifierAction image_handle');
         foreach ($image_forms as $my_form) {
-            $this->image_handle($my_form, $version, $request);
+            $sv->imageHandle($my_form, $version, $request);
         }
         //$sj->debugMessage('modifierAction après image_handle');
 
         //$sj->debugMessage('modifierAction ajax ');
         // upload image ajax
 
-        $image_form = $this->image_form('image_form', false);
+        $image_form = $sv->imageForm('image_form', false);
         //$sj->debugMessage('modifierAction ajax form');
 
-        $ajax = $this->image_handle($image_form, $version, $request);
+        $ajax = $sv->imageHandle($image_form, $version, $request);
         //$sj->debugMessage('modifierAction ajax handled');
         // $sj->debugMessage('modifierAction ajax = ' .  print_r($ajax, true) );
 
@@ -463,34 +409,34 @@ class VersionModifController extends AbstractController
         }
 
         // FORMULAIRE DES COLLABORATEURS
-        $collaborateur_form = $this->getCollaborateurForm($version);
+        $collaborateur_form = $sv->getCollaborateurForm($version);
         $collaborateur_form->handleRequest($request);
         $data   =   $collaborateur_form->getData();
 
         if ($data != null && array_key_exists('individus', $data)) {
             $sj->debugMessage('modifierAction traitement des collaborateurs');
-            $this->handleIndividuForms($data['individus'], $version);
+            $sv->handleIndividuForms($data['individus'], $version);
 
             // ACTUCE : le mail est disabled en HTML et en cas de POST il est annulé
             // nous devons donc refaire le formulaire pour récupérer ces mails
-            $collaborateur_form = $this->getCollaborateurForm($version);
+            $collaborateur_form = $sv->getCollaborateurForm($version);
         }
 
         // DES FORMULAIRES QUI DEPENDENT DU TYPE DE PROJET
         $type = $version->getProjet()->getTypeProjet();
         switch ($type) {
         case Projet::PROJET_SESS:
-        return $this->modifierType1($request, $version, $renouvellement, $image_forms, $collaborateur_form, $lg);
+        return $this->modifierType1($request, $version, $renouvellement, $image_forms, $collaborateur_form);
 
         case Projet::PROJET_TEST:
-        return $this->modifierType2($request, $version, $renouvellement, $image_forms, $collaborateur_form, $lg);
+        return $this->modifierType2($request, $version, $renouvellement, $image_forms, $collaborateur_form);
 
         case Projet::PROJET_FIL:
-        return $this->modifierType3($request, $version, $renouvellement, $image_forms, $collaborateur_form, $lg);
+        return $this->modifierType3($request, $version, $renouvellement, $image_forms, $collaborateur_form);
 
         default:
            $sj->throwException(__METHOD__ . ":" . __LINE__ . " mauvais type de projet " . Functions::show($type));
-    }
+        }
     }
 
     /*
@@ -502,7 +448,12 @@ class VersionModifController extends AbstractController
      *          $collaborateurs_form (formulaire des collaborateurs)
      *
      */
-    private function modifierType1(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form, LoggerInterface $lg)
+    private function modifierType1(Request $request,
+                                   Version $version,
+                                   bool $renouvellement,
+                                   array $image_forms,
+                                   FormInterface $collaborateur_form
+                                   ): Response
     {
         $sj   = $this->sj;
         $ss   = $this->ss;
@@ -540,7 +491,7 @@ class VersionModifController extends AbstractController
             $this->validDemHeures($version);
 
             // on sauvegarde le projet
-            $return = Functions::sauvegarder($version, $em, $lg);
+            $return = Functions::sauvegarder($version, $em);
 
             if ($request->isXmlHttpRequest()) {
                 $sj->debugMessage(__METHOD__ . ' isXmlHttpRequest clicked');
@@ -589,7 +540,7 @@ class VersionModifController extends AbstractController
      * params = $version
      *
      */
-    private function validDemHeures($version)
+    private function validDemHeures($version): void
     {
         $em = $this->getDoctrine()->getManager();
         $ss = $this->ss;
@@ -620,48 +571,48 @@ class VersionModifController extends AbstractController
     }
 
     /* Les champs de la partie I */
-    private function modifierType1PartieI($version, &$form)
+    private function modifierType1PartieI($version, &$form): void
     {
         $em = $this->getDoctrine()->getManager();
         $form
-    ->add('prjTitre', TextType::class, [ 'required'       =>  false ])
-    ->add(
-        'prjThematique',
-        EntityType::class,
-        [
-        'required'    => false,
-        'multiple'    => false,
-        'class'       => 'App:Thematique',
-        'label'       => '',
-        'placeholder' => '-- Indiquez la thématique',
-        ]
-    )
-    ->add('prjSousThematique', TextType::class, [ 'required'       =>  false ]);
-
-        if ($this->getParameter('norattachement')==false) {
-            $form
-        ->add(
-            'prjRattachement',
-            EntityType::class,
-            [
-            'required'    => false,
-            'multiple'    => false,
-            'expanded'    => true,
-            'class'       => 'App:Rattachement',
-            'empty_data'  => null,
-            'label'       => '',
-            'placeholder' => 'AUCUN',
-            ]
-        );
-        };
-        $form
-    ->add('demHeures', IntegerType::class, [ 'required'       => false, 'attr' => ['min' => $this->getParameter('prj_heures_min')] ])
-    ->add('demHeuresGpu', IntegerType::class, [ 'required'       => false ])
-    ->add('prjFinancement', TextType::class, [ 'required'     => false ])
-    ->add('prjGenciCentre', TextType::class, [ 'required' => false ])
-    ->add('prjGenciMachines', TextType::class, [ 'required' => false ])
-    ->add('prjGenciHeures', TextType::class, [ 'required' => false ])
-    ->add('prjGenciDari', TextType::class, [ 'required'   => false ]);
+            ->add('prjTitre', TextType::class, [ 'required'       =>  false ])
+            ->add(
+                'prjThematique',
+                EntityType::class,
+                [
+                'required'    => false,
+                'multiple'    => false,
+                'class'       => 'App:Thematique',
+                'label'       => '',
+                'placeholder' => '-- Indiquez la thématique',
+                ]
+            )
+            ->add('prjSousThematique', TextType::class, [ 'required'       =>  false ]);
+        
+                if ($this->getParameter('norattachement')==false) {
+                    $form
+                ->add(
+                    'prjRattachement',
+                    EntityType::class,
+                    [
+                    'required'    => false,
+                    'multiple'    => false,
+                    'expanded'    => true,
+                    'class'       => 'App:Rattachement',
+                    'empty_data'  => null,
+                    'label'       => '',
+                    'placeholder' => 'AUCUN',
+                    ]
+                );
+                };
+                $form
+            ->add('demHeures', IntegerType::class, [ 'required'       => false, 'attr' => ['min' => $this->getParameter('prj_heures_min')] ])
+            ->add('demHeuresGpu', IntegerType::class, [ 'required'       => false ])
+            ->add('prjFinancement', TextType::class, [ 'required'     => false ])
+            ->add('prjGenciCentre', TextType::class, [ 'required' => false ])
+            ->add('prjGenciMachines', TextType::class, [ 'required' => false ])
+            ->add('prjGenciHeures', TextType::class, [ 'required' => false ])
+            ->add('prjGenciDari', TextType::class, [ 'required'   => false ]);
 
         /* Pour un renouvellement, ajouter la justification du renouvellement */
         if (count($version->getProjet()->getVersion()) > 1) {
@@ -670,265 +621,265 @@ class VersionModifController extends AbstractController
     }
 
     /* Les champs de la partie II */
-    private function modifierType1PartieII($version, &$form)
+    private function modifierType1PartieII($version, &$form) : void
     {
         $form
-    ->add('prjResume', TextAreaType::class, [ 'required'       =>  false ])
-    ->add('prjExpose', TextAreaType::class, [ 'required'       =>  false ])
-    ->add('prjAlgorithme', TextAreaType::class, [ 'required'       =>  false ]);
+            ->add('prjResume', TextAreaType::class, [ 'required'       =>  false ])
+            ->add('prjExpose', TextAreaType::class, [ 'required'       =>  false ])
+            ->add('prjAlgorithme', TextAreaType::class, [ 'required'       =>  false ]);
     }
 
     /* Les champs de la partie III */
-    private function modifierType1PartieIII($version, &$form)
+    private function modifierType1PartieIII($version, &$form) : void
     {
         $form
-    ->add('prjConception', CheckboxType::class, [ 'required'       =>  false ])
-    ->add('prjDeveloppement', CheckboxType::class, [ 'required'       =>  false ])
-    ->add('prjParallelisation', CheckboxType::class, [ 'required'       =>  false ])
-    ->add('prjUtilisation', CheckboxType::class, [ 'required'       =>  false ])
-    ->add('codeNom', TextType::class, [ 'required'       =>  false ])
-    ->add('codeFor', CheckboxType::class, [ 'required'       =>  false ])
-    ->add('codeC', CheckboxType::class, [ 'required'       =>  false ])
-    ->add('codeCpp', CheckboxType::class, [ 'required'       =>  false ])
-    ->add('codeAutre', CheckboxType::class, [ 'required'       =>  false ])
-    ->add('codeLangage', TextType::class, [ 'required'       =>  false ])
-    ->add('codeLicence', TextAreaType::class, [ 'required'       =>  false ])
-    ->add('codeUtilSurMach', TextAreaType::class, [ 'required'       =>  false ])
-    ->add(
-        'codeHeuresPJob',
-        ChoiceType::class,
-        [
-        'required'       =>  false,
-        'placeholder'   =>  "-- Choisissez une option",
-        'choices'  =>   [
-                "< 6000 heures" => "< 6000 heures",
-                "< 18000 heures" => "< 18000 heures",
-                "< 72000 heures" => "< 72000 heures",
-                "> 72000 heures" => "> 72000 heures",
-                "Je ne sais pas" => "je ne sais pas",
-                ],
-        ]
-    )
-    ->add(
-        'gpu',
-        ChoiceType::class,
-        [
-        'required'       =>  false,
-        'placeholder'   =>  "-- Choisissez une option",
-        'choices'  =>   [
-                "Oui" => "Oui",
-                "Non" => "Non",
-                "Je ne sais pas" => "je ne sais pas",
-                ],
-        ]
-    )
-    ->add(
-        'codeRamPCoeur',
-        ChoiceType::class,
-        [
-        'required'       =>  false,
-        'placeholder'   =>  "-- Choisissez une option",
-        'choices'  =>   [
-                "< 5Go" => "< 5Go",
-                "> 5Go" => "> 5Go",
-                "Je ne sais pas" => "je ne sais pas",
-                ],
-        ]
-    )
-    ->add(
-        'codeRamPart',
-        ChoiceType::class,
-        [
-        'required'       =>  false,
-        'placeholder'   =>  "-- Choisissez une option",
-        'choices'  =>   [
-                "< 192Go" => "< 192Go",
-                "> 192Go" => "> 192Go",
-                "< 500Go" => "< 500Go",
-                "< 1To" => "< 1To",
-                "> 2To" => "> 2To",
-                "Je ne sais pas" => "je ne sais pas",
-                ],
-        ]
-    )
-    ->add(
-        'codeEffParal',
-        ChoiceType::class,
-        [
-        'required'       =>  false,
-        'placeholder'   =>  "-- Choisissez une option",
-        'choices'  =>   [
-                "< 36" => "< 36",
-                "36-360" => "36-360",
-                "> 360" => "> 360",
-                "< 1008" => "< 1008",
-                "> 1008" => "> 1008",
-                "Je ne sais pas" => "je ne sais pas",
-                ],
-        ]
-    )
-    ->add(
-        'codeVolDonnTmp',
-        ChoiceType::class,
-        [
-        'required'       =>  false,
-        'placeholder'   =>  "-- Choisissez une option",
-        'choices'  =>   [
-                "< 10Go" => "< 10Go",
-                "< 100Go" => "< 100Go",
-                "< 1To" => "< 1To",
-                "< 10To" => "< 10To",
-                "> 10To" => "> 10To",
-                "Je ne sais pas" => "je ne sais pas",
-                ],
-        ]
-    )
-    ->add(
-        'codeVolDonnUsr',
-        ChoiceType::class,
-        [
-        'required'       =>  false,
-        'placeholder'   =>  "-- Choisissez une option",
-        'choices'  =>   [
-                "< 10Go" => "< 10Go",
-                "< 100Go" => "< 100Go",
-                "< 1To" => "< 1To",
-                "< 10To" => "< 10To",
-                "> 10To" => "> 10To",
-                "Je ne sais pas" => "je ne sais pas",
-                ],
-        ]
-    )
-    ->add(
-        'codeNbFichTmp',
-        ChoiceType::class,
-        [
-        'required'       =>  false,
-        'placeholder'   =>  "-- Choisissez une option",
-        'choices'  =>   [
-                "< 1 000" => "< 1 000",
-                "< 10 000" => "< 10 000",
-                "< 100 000" => "< 100 000",
-                "> 1 000 000" => "> 1 000 000",
-                "Je ne sais pas" => "je ne sais pas",
-                ],
-        ]
-    )
-    ->add(
-        'codeNbFichPerm',
-        ChoiceType::class,
-        [
-        'required'       =>  false,
-        'placeholder'   =>  "-- Choisissez une option",
-        'choices'  =>   [
-                 "< 1 000" => "< 1 000",
-                "< 10 000" => "< 10 000",
-                "< 100 000" => "< 100 000",
-                "> 1 000 000" => "> 1 000 000",
-                "Je ne sais pas" => "je ne sais pas",
-                ],
-        ]
-    )
-    ->add('demLogiciels', TextAreaType::class, [ 'required'       =>  false ])
-    ->add('demBib', TextAreaType::class, [ 'required'       =>  false ])
-    ->add('demAutres', TextAreaType::class, [ 'required'       =>  false ])
-    ->add(
-        'demPostTrait',
-        ChoiceType::class,
-        [
-        'required'       =>  false,
-        'placeholder'   =>  "-- Choisissez une option",
-        'choices'  =>   [
-                "Oui" => "Oui",
-                "Non" => "Non",
-                "Je ne sais pas" => "je ne sais pas",
-                ],
-        ]
-    );
-    }
-
-    /* Les champs de la partie IV */
-    private function modifierType1PartieIV($version, &$form)
-    {
-        $form
-    ->add(
-        'sondVolDonnPerm',
-        ChoiceType::class,
-        [
-        'required'       =>  false,
-        'placeholder'   =>  "-- Choisissez une option",
-        'choices'  =>   [
-                "< 1To" => "< 1To",
-                "1 To" => "1 To",
-                "2 To" => "2 To",
-                "3 To" => "3 To",
-                "4 To" => "4 To",
-                "5 To" => "5 To",
-                "10 To" => "10 To",
-                "25 To" => "25 To",
-                "50 To" => "50 To",
-                "75 To" => "75 To",
-                "100 To" => "100 To",
-                "500 To" => "500 To",
-                "je ne sais pas" => "je ne sais pas",
-                ],
-        ]
-    )
-    ->add('sondJustifDonnPerm', TextAreaType::class, [ 'required'       =>  false ])
-    ->add(
-        'dataMetadataFormat',
-        ChoiceType::class,
-        [
-        'label' => 'Format de métadonnées',
-        'required'       =>  false,
-        'placeholder'   =>  "-- Choisissez une option",
-        'choices'  =>   [
-                "IVOA" => "IVOA",
-                "OGC" => "OGC",
-                "Dublin Core" => "DC",
-                "Autre" => "Autre",
-                "Je ne sais pas" => "je ne sais pas",
-                "je ne suis pas intéressé.e" => "pas intéressé.e",
-                ],
-        ]
-    )
-             ->add(
-                 'dataNombreDatasets',
-                 ChoiceType::class,
-                 [
-        'label' => 'Estimation du nombre de datasets à partager',
-        'required'       =>  false,
-        'placeholder'   =>  "-- Choisissez une option",
-        'choices'  =>   [
-                "< 10 datasets" => "< 10 datasets",
-                "< 100 datasets" => "< 100 datasets",
-                "< 1000 datasets" => "< 1000 datasets",
-                "> 1000 datasets" => "> 1000 datasets",
-                "Je ne sais pas" => "je ne sais pas",
-                "je ne suis pas intéressé.e" => "pas intéressé.e",
-                ],
-        ]
-             )
+            ->add('prjConception', CheckboxType::class, [ 'required'       =>  false ])
+            ->add('prjDeveloppement', CheckboxType::class, [ 'required'       =>  false ])
+            ->add('prjParallelisation', CheckboxType::class, [ 'required'       =>  false ])
+            ->add('prjUtilisation', CheckboxType::class, [ 'required'       =>  false ])
+            ->add('codeNom', TextType::class, [ 'required'       =>  false ])
+            ->add('codeFor', CheckboxType::class, [ 'required'       =>  false ])
+            ->add('codeC', CheckboxType::class, [ 'required'       =>  false ])
+            ->add('codeCpp', CheckboxType::class, [ 'required'       =>  false ])
+            ->add('codeAutre', CheckboxType::class, [ 'required'       =>  false ])
+            ->add('codeLangage', TextType::class, [ 'required'       =>  false ])
+            ->add('codeLicence', TextAreaType::class, [ 'required'       =>  false ])
+            ->add('codeUtilSurMach', TextAreaType::class, [ 'required'       =>  false ])
             ->add(
-                'dataTailleDatasets',
+                'codeHeuresPJob',
                 ChoiceType::class,
                 [
-        'label' => 'Taille moyenne approximative pour un dataset',
-        'required'       =>  false,
-        'placeholder'   =>  "-- Choisissez une option",
-        'choices'  =>   [
-                "< 100 Mo" => "<100 Mo",
-                "< 500 Mo" => "< 500 Mo",
-                "> 1 Go" => ">1 Go",
-                "Je ne sais pas" => "je ne sais pas",
-                                "je ne suis pas intéressé.e" => "pas intéressé.e"
-                ],
-        ]
+                'required'       =>  false,
+                'placeholder'   =>  "-- Choisissez une option",
+                'choices'  =>   [
+                        "< 6000 heures" => "< 6000 heures",
+                        "< 18000 heures" => "< 18000 heures",
+                        "< 72000 heures" => "< 72000 heures",
+                        "> 72000 heures" => "> 72000 heures",
+                        "Je ne sais pas" => "je ne sais pas",
+                        ],
+                ]
+                )
+            ->add(
+                'gpu',
+                ChoiceType::class,
+                [
+                'required'       =>  false,
+                'placeholder'   =>  "-- Choisissez une option",
+                'choices'  =>   [
+                        "Oui" => "Oui",
+                        "Non" => "Non",
+                        "Je ne sais pas" => "je ne sais pas",
+                        ],
+                ]
+            )
+            ->add(
+                'codeRamPCoeur',
+                ChoiceType::class,
+                [
+                'required'       =>  false,
+                'placeholder'   =>  "-- Choisissez une option",
+                'choices'  =>   [
+                        "< 5Go" => "< 5Go",
+                        "> 5Go" => "> 5Go",
+                        "Je ne sais pas" => "je ne sais pas",
+                        ],
+                ]
+            )
+            ->add(
+                'codeRamPart',
+                ChoiceType::class,
+                [
+                'required'       =>  false,
+                'placeholder'   =>  "-- Choisissez une option",
+                'choices'  =>   [
+                        "< 192Go" => "< 192Go",
+                        "> 192Go" => "> 192Go",
+                        "< 500Go" => "< 500Go",
+                        "< 1To" => "< 1To",
+                        "> 2To" => "> 2To",
+                        "Je ne sais pas" => "je ne sais pas",
+                        ],
+                ]
+            )
+            ->add(
+                'codeEffParal',
+                ChoiceType::class,
+                [
+                'required'       =>  false,
+                'placeholder'   =>  "-- Choisissez une option",
+                'choices'  =>   [
+                        "< 36" => "< 36",
+                        "36-360" => "36-360",
+                        "> 360" => "> 360",
+                        "< 1008" => "< 1008",
+                        "> 1008" => "> 1008",
+                        "Je ne sais pas" => "je ne sais pas",
+                        ],
+                ]
+            )
+            ->add(
+                'codeVolDonnTmp',
+                ChoiceType::class,
+                [
+                'required'       =>  false,
+                'placeholder'   =>  "-- Choisissez une option",
+                'choices'  =>   [
+                        "< 10Go" => "< 10Go",
+                        "< 100Go" => "< 100Go",
+                        "< 1To" => "< 1To",
+                        "< 10To" => "< 10To",
+                        "> 10To" => "> 10To",
+                        "Je ne sais pas" => "je ne sais pas",
+                        ],
+                ]
+            )
+            ->add(
+                'codeVolDonnUsr',
+                ChoiceType::class,
+                [
+                'required'       =>  false,
+                'placeholder'   =>  "-- Choisissez une option",
+                'choices'  =>   [
+                        "< 10Go" => "< 10Go",
+                        "< 100Go" => "< 100Go",
+                        "< 1To" => "< 1To",
+                        "< 10To" => "< 10To",
+                        "> 10To" => "> 10To",
+                        "Je ne sais pas" => "je ne sais pas",
+                        ],
+                ]
+            )
+            ->add(
+                'codeNbFichTmp',
+                ChoiceType::class,
+                [
+                'required'       =>  false,
+                'placeholder'   =>  "-- Choisissez une option",
+                'choices'  =>   [
+                        "< 1 000" => "< 1 000",
+                        "< 10 000" => "< 10 000",
+                        "< 100 000" => "< 100 000",
+                        "> 1 000 000" => "> 1 000 000",
+                        "Je ne sais pas" => "je ne sais pas",
+                        ],
+                ]
+            )
+            ->add(
+                'codeNbFichPerm',
+                ChoiceType::class,
+                [
+                'required'       =>  false,
+                'placeholder'   =>  "-- Choisissez une option",
+                'choices'  =>   [
+                         "< 1 000" => "< 1 000",
+                        "< 10 000" => "< 10 000",
+                        "< 100 000" => "< 100 000",
+                        "> 1 000 000" => "> 1 000 000",
+                        "Je ne sais pas" => "je ne sais pas",
+                        ],
+                ]
+            )
+            ->add('demLogiciels', TextAreaType::class, [ 'required'       =>  false ])
+            ->add('demBib', TextAreaType::class, [ 'required'       =>  false ])
+            ->add('demAutres', TextAreaType::class, [ 'required'       =>  false ])
+            ->add(
+                'demPostTrait',
+                ChoiceType::class,
+                [
+                'required'       =>  false,
+                'placeholder'   =>  "-- Choisissez une option",
+                'choices'  =>   [
+                        "Oui" => "Oui",
+                        "Non" => "Non",
+                        "Je ne sais pas" => "je ne sais pas",
+                        ],
+                ]
             );
     }
 
+    /* Les champs de la partie IV */
+    private function modifierType1PartieIV($version, &$form): void
+    {
+        $form
+            ->add(
+                'sondVolDonnPerm',
+                ChoiceType::class,
+                [
+                'required'       =>  false,
+                'placeholder'   =>  "-- Choisissez une option",
+                'choices'  =>   [
+                        "< 1To" => "< 1To",
+                        "1 To" => "1 To",
+                        "2 To" => "2 To",
+                        "3 To" => "3 To",
+                        "4 To" => "4 To",
+                        "5 To" => "5 To",
+                        "10 To" => "10 To",
+                        "25 To" => "25 To",
+                        "50 To" => "50 To",
+                        "75 To" => "75 To",
+                        "100 To" => "100 To",
+                        "500 To" => "500 To",
+                        "je ne sais pas" => "je ne sais pas",
+                        ],
+                ]
+            )
+            ->add('sondJustifDonnPerm', TextAreaType::class, [ 'required'       =>  false ])
+            ->add(
+                'dataMetadataFormat',
+                ChoiceType::class,
+                [
+                'label' => 'Format de métadonnées',
+                'required'       =>  false,
+                'placeholder'   =>  "-- Choisissez une option",
+                'choices'  =>   [
+                        "IVOA" => "IVOA",
+                        "OGC" => "OGC",
+                        "Dublin Core" => "DC",
+                        "Autre" => "Autre",
+                        "Je ne sais pas" => "je ne sais pas",
+                        "je ne suis pas intéressé.e" => "pas intéressé.e",
+                        ],
+                ]
+            )
+            ->add(
+                'dataNombreDatasets',
+                ChoiceType::class,
+                [
+                   'label' => 'Estimation du nombre de datasets à partager',
+                   'required'       =>  false,
+                   'placeholder'   =>  "-- Choisissez une option",
+                   'choices'  =>   [
+                           "< 10 datasets" => "< 10 datasets",
+                           "< 100 datasets" => "< 100 datasets",
+                           "< 1000 datasets" => "< 1000 datasets",
+                           "> 1000 datasets" => "> 1000 datasets",
+                           "Je ne sais pas" => "je ne sais pas",
+                           "je ne suis pas intéressé.e" => "pas intéressé.e",
+                           ],
+               ]
+            )
+             ->add(
+               'dataTailleDatasets',
+               ChoiceType::class,
+               [
+               'label' => 'Taille moyenne approximative pour un dataset',
+               'required'       =>  false,
+               'placeholder'   =>  "-- Choisissez une option",
+               'choices'  =>   [
+                       "< 100 Mo" => "<100 Mo",
+                       "< 500 Mo" => "< 500 Mo",
+                       "> 1 Go" => ">1 Go",
+                       "Je ne sais pas" => "je ne sais pas",
+                                       "je ne suis pas intéressé.e" => "pas intéressé.e"
+                       ],
+               ]
+           );
+    }
+
     /* Les champs de la partie V */
-    private function modifierType1PartieV($version, &$form, &$nb_form)
+    private function modifierType1PartieV($version, &$form, &$nb_form) : void
     {
         $em = $this->getDoctrine()->getManager();
         $formations = $em->getRepository(\App\Entity\Formation::class)->getFormationsPourVersion();
@@ -952,7 +903,7 @@ class VersionModifController extends AbstractController
      *          $collaborateurs_form (formulaire des collaborateurs)
      *
      */
-    private function modifierType2(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form, LoggerInterface $lg)
+    private function modifierType2(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form) : Response
     {
         $sj = $this->sj;
         $sval = $this->vl;
@@ -966,33 +917,35 @@ class VersionModifController extends AbstractController
 
         $version->setDemHeures($heures_projet_test);
         $form_builder = $this->createFormBuilder($version)
-        ->add('prjTitre', TextType::class, [ 'required'       =>  false ])
-        ->add(
-            'prjThematique',
-            EntityType::class,
-            [
-                'required'       =>  false,
-                'multiple' => false,
-                'class' => 'App:Thematique',
-                'label'     => '',
-                'placeholder' => '-- Indiquez la thématique',
-                ]
-        );
+            ->add('prjTitre', TextType::class, [ 'required'       =>  false ])
+            ->add(
+                'prjThematique',
+                EntityType::class,
+                [
+                    'required'       =>  false,
+                    'multiple' => false,
+                    'class' => 'App:Thematique',
+                    'label'     => '',
+                    'placeholder' => '-- Indiquez la thématique',
+                    ]
+            );
+
         if ($this->getParameter('norattachement')==false) {
             $form_builder->add(
                 'prjRattachement',
                 EntityType::class,
                 [
-        'required'    => false,
-        'multiple'    => false,
-        'expanded'    => true,
-        'class'       => 'App:Rattachement',
-        'empty_data'  => null,
-        'label'       => '',
-        'placeholder' => 'AUCUN',
-        ]
+                    'required'    => false,
+                    'multiple'    => false,
+                    'expanded'    => true,
+                    'class'       => 'App:Rattachement',
+                    'empty_data'  => null,
+                    'label'       => '',
+                    'placeholder' => 'AUCUN',
+                    ]
             );
         }
+
         $form_builder->add(
             'demHeures',
             IntegerType::class,
@@ -1000,41 +953,41 @@ class VersionModifController extends AbstractController
             'required'       =>  false,
             'data' => $heures_projet_test,
             'disabled' => 'disabled' ]
-        )
-        ->add('prjResume', TextAreaType::class, [ 'required'       =>  false ])
-        ->add('codeNom', TextType::class, [ 'required'       =>  false ])
-        ->add('codeFor', CheckboxType::class, [ 'required'       =>  false ])
-        ->add('codeC', CheckboxType::class, [ 'required'       =>  false ])
-        ->add('codeCpp', CheckboxType::class, [ 'required'       =>  false ])
-        ->add('codeAutre', CheckboxType::class, [ 'required'       =>  false ])
-        ->add('codeLangage', TextType::class, [ 'required'       =>  false ])
-        ->add('codeLicence', TextAreaType::class, [ 'required'       =>  false ])
-        ->add('codeUtilSurMach', TextAreaType::class, [ 'required'       =>  false ])
-        ->add('demLogiciels', TextAreaType::class, [ 'required'       =>  false ])
-        ->add('demBib', TextAreaType::class, [ 'required'       =>  false ])
-        ->add(
-            'gpu',
-            ChoiceType::class,
-            [
-            'required'       =>  false,
-            'placeholder'   =>  "-- Choisissez une option",
-            'choices'  =>   [
-                            "Oui" => "Oui",
-                            "Non" => "Non",
-                            "Je ne sais pas" => "je ne sais pas",
-                            ],
-            ]
-        )
-        ->add('fermer', SubmitType::class)
-        ->add('annuler', SubmitType::class);
+            )
+            ->add('prjResume', TextAreaType::class, [ 'required'       =>  false ])
+            ->add('codeNom', TextType::class, [ 'required'       =>  false ])
+            ->add('codeFor', CheckboxType::class, [ 'required'       =>  false ])
+            ->add('codeC', CheckboxType::class, [ 'required'       =>  false ])
+            ->add('codeCpp', CheckboxType::class, [ 'required'       =>  false ])
+            ->add('codeAutre', CheckboxType::class, [ 'required'       =>  false ])
+            ->add('codeLangage', TextType::class, [ 'required'       =>  false ])
+            ->add('codeLicence', TextAreaType::class, [ 'required'       =>  false ])
+            ->add('codeUtilSurMach', TextAreaType::class, [ 'required'       =>  false ])
+            ->add('demLogiciels', TextAreaType::class, [ 'required'       =>  false ])
+            ->add('demBib', TextAreaType::class, [ 'required'       =>  false ])
+            ->add(
+                'gpu',
+                ChoiceType::class,
+                [
+                'required'       =>  false,
+                'placeholder'   =>  "-- Choisissez une option",
+                'choices'  =>   [
+                                "Oui" => "Oui",
+                                "Non" => "Non",
+                                "Je ne sais pas" => "je ne sais pas",
+                                ],
+                ]
+            )
+            ->add('fermer', SubmitType::class)
+            ->add('annuler', SubmitType::class);
 
-		$form = $form_builder->getForm();
+        $form = $form_builder->getForm();
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             // on sauvegarde tout de même mais il semble que c'est déjà fait avant
             $version->setDemHeures($heures_projet_test);
-            $return = Functions::sauvegarder($version, $em, $lg);
+            $return = Functions::sauvegarder($version, $em, $this->lg);
             return $this->redirectToRoute('consulter_projet', ['id' => $version->getProjet()->getIdProjet() ]);
         }
 
@@ -1042,11 +995,11 @@ class VersionModifController extends AbstractController
         return $this->render(
             'version/modifier_projet_test.html.twig',
             [
-        'form'      => $form->createView(),
-        'version'   => $version,
-        'collaborateur_form' => $collaborateur_form->createView(),
-        'todo'      => $this->versionValidate($version),
-        ]
+                'form'      => $form->createView(),
+                'version'   => $version,
+                'collaborateur_form' => $collaborateur_form->createView(),
+                'todo'      => $this->versionValidate($version),
+            ]
         );
     }
 
@@ -1060,516 +1013,13 @@ class VersionModifController extends AbstractController
      *          $collaborateurs_form (formulaire des collaborateurs)
      *
      */
-    private function modifierType3(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form, LoggerInterface $lg)
+    private function modifierType3(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form): Response
     {
-		# Même formulaire pour Type3 que pour Type1
-		return $this->modifierType1($request,$version,$renouvellement, $image_forms, $collaborateur_form, $lg);
-	}
-
-    ////////////////////////////////////////////////////////////////////////////////////
-
-    private function image_form($name, $csrf_protection = true)
-    {
-        $format_fichier = $this->imageConstraints();
-        $form           = $this ->ff
-                                ->createNamedBuilder($name, FormType::class, [], ['csrf_protection' => $csrf_protection ])
-                                ->add('filename', HiddenType::class, [ 'data' => $name,])
-                                ->add(
-                                    'image',
-                                    FileType::class,
-                                    ['required' => false,
-                                        'label' => 'Fig',
-                                        'constraints'=>[$format_fichier] ]
-                                )
-                                ->getForm();
-        return $form;
+        # Même formulaire pour Type3 que pour Type1
+        return $this->modifierType1($request,$version,$renouvellement, $image_forms, $collaborateur_form, $this->lg);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////
-
-    private function image_handle($form, Version $version, $request)
-    {
-        $sv = $this->sv;
-        $sf = $this->sf;
-        $sj = $this->sj;
-        $em = $this->getDoctrine()->getManager();
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) { //return ['etat' => 'OKK'];
-            $filename               =    $form->getData()['filename'];
-            $image                  =    $form['image']->getData();
-
-            //$sj->debugMessage(__METHOD__ . ':' . __LINE__ .' form submitted filename = ' . $filename .' , image = ' . $image);
-
-            $dir = $sv->imageDir($version);
-
-            $full_filename          =    $dir .'/' . $filename;
-
-            if (is_file($form->getData()['image'])) {
-                $tempFilename = $form->getData()['image'];
-                $this->redim_figure($tempFilename);
-                //$sj->debugMessage(__METHOD__ . ':' . __LINE__ .' $tempFilename = ' . $form->getData()['image'] );
-                $contents = file_get_contents($tempFilename);
-
-                $file = new File($form->getData()['image']);
-
-
-                if (file_exists($full_filename) && is_file($full_filename)) {
-                    unlink($full_filename);
-                }
-                if (! file_exists($full_filename)) {
-                    $file->move($dir, $filename);
-                } else {
-                    $sj->debugMessage('Version controller image_handle : mauvais fichier pour la version ' . $version->getIdVersion());
-                }
-
-                //$sj->debugMessage('file  ' .$filename . ' : ' .  base64_encode( $contents ) );
-
-                return ['etat' => 'OK', 'contents' => $contents, 'filename' => $filename ];
-            } else {
-                $sj->debugMessage('VersionController:image_handle $tempFilename = (' . $form->getData()['image'] . ") n'existe pas");
-                return ['etat' => 'KO'];
-            }
-        } elseif ($form->isSubmitted() && ! $form->isValid()) {
-            //$sj->debugMessage(__METHOD__ . ':' . __LINE__ .' wrong form submitted filename = ' . $filename .' , image = ' . $image);
-            if (isset($form->getData()['filename'])) {
-                $filename   =  $form->getData()['filename'];
-            } else {
-                $filename   =  'unkonwn';
-            }
-
-            if (isset($form->getData()['image'])) {
-                $image  =    $form->getData()['image'];
-            } else {
-                return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => 'Erreur indeterminée' ];
-            }
-
-            return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => $sf->formError($image, [ $this->imageConstraints() ]) ];
-
-        //$sj->debugMessage('VersionController:image_handle form for ' . $filename . '('. $form->getData()['image'] . ') is not valide, error = ' .
-            //    (string) $form->getErrors(true,false)->current() );
-            //return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => (string) $form->getErrors(true,false)->current() ];
-            //return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => (string) $form->getErrors(true,false)->current() ];
-        } else {
-            //$sj->debugMessage('VersionController:image_handle form not submitted');
-            return ['etat' => null ];
-        }
-    }
-
-    ///////////////////////////////////////////////////////////
-
-    private function image($filename, Version $version)
-    {
-        $sv = $this->sv;
-        $full_filename  = $sv->imagePath($filename, $version);
-
-        if (file_exists($full_filename) && is_file($full_filename)) {
-            //$sj->debugMessage('VersionController image  ' .$filename . ' : ' . base64_encode( file_get_contents( $full_filename ) )  );
-            return base64_encode(file_get_contents($full_filename));
-        } else {
-            return null;
-        }
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////////
-
-    private function imageConstraints()
-    {
-        return new \Symfony\Component\Validator\Constraints\File(
-            [
-                'mimeTypes'=> [ 'image/jpeg', 'image/gif', 'image/png' ],
-                'mimeTypesMessage'=>' Le fichier doit être un fichier jpeg, gif ou png. ',
-                'maxSize' => "2048k",
-                'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
-                'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
-                ]
-        );
-    }
-
-    ///////////////////////////////////////////////////////////
-    private function getCollaborateurForm(Version $version)
-    {
-        $sj = $this->sj;
-        $em = $this->getDoctrine()->getManager();
-        $sval= $this->vl;
-
-        return $this->ff
-                   ->createNamedBuilder('form_projet', FormType::class, [ 'individus' => self::prepareCollaborateurs($version, $sj, $sval) ])
-                   ->add('individus', CollectionType::class, [
-                       'entry_type'     =>  IndividuFormType::class,
-                       'label'          =>  false,
-                       'allow_add'      =>  true,
-                       'allow_delete'   =>  true,
-                       'prototype'      =>  true,
-                       'required'       =>  true,
-                       'by_reference'   =>  false,
-                       'delete_empty'   =>  true,
-                       'attr'         => ['class' => "profil-horiz",],
-                    ])
-                    ->getForm();
-    }
-
-    /**
-    * préparation de la liste des collaborateurs
-    *
-    * params = $version, $sj, $sval
-    *
-    * TODO - Une fonction statique horreur !
-    *
-    * return = Un tableau d'objets de type IndividuForm (cf Util\IndividuForm)
-    *          Le responsable est dans la cellule 0 du tableau
-    *
-    *****************************************************************************/
-    private static function prepareCollaborateurs(Version $version, ServiceJournal $sj, ValidatorInterface $sval)
-    {
-        if ($version == null) {
-            $sj->throwException('VersionController:modifierCollaborateurs : version null');
-        }
-
-        $dataR  =   [];    // Le responsable est seul dans ce tableau
-        $dataNR =   [];    // Les autres collaborateurs
-        foreach ($version->getCollaborateurVersion() as $cv) {
-            $individu = $cv->getCollaborateur();
-            if ($individu == null) {
-                $sj->errorMessage("VersionController:modifierCollaborateurs : collaborateur null pour CollaborateurVersion ".
-                         $cv->getId());
-                continue;
-            } else {
-                $individuForm = new IndividuForm($individu);
-                $individuForm->setLogin($cv->getLogin());
-                $individuForm->setClogin($cv->getClogin());
-                $individuForm->setResponsable($cv->getResponsable());
-                $individuForm->setDelete($cv->getDeleted());
-
-                if ($individuForm->getResponsable() == true) {
-                    $dataR[] = $individuForm;
-                } else {
-                    $dataNR[] = $individuForm;
-                }
-            }
-        }
-
-        // On merge les deux, afin de revoyer un seul tableau, le responsable en premier
-        return array_merge($dataR, $dataNR);
-    }
-
-    /**
-     * Avant de modifier les collaborateurs d'une version.
-     * On demande de quelle version il s'agit !
-     *
-     * @Route("/{id}/avant_collaborateurs", name="avant_modifier_collaborateurs",methods={"GET","POST"})
-     * Method({"GET", "POST"})
-     * @Security("is_granted('ROLE_DEMANDEUR')")
-     */
-    public function avantModifierCollaborateursAction(Version $version, Request $request)
-    {
-        $sm = $this->sm;
-
-        /* Si le bouton modifier est actif, il faut demander de quelle version il s'agit ! */
-        $modifier_version_menu = $sm->modifier_version($version);
-        if ($modifier_version_menu['ok'] == true) {
-            $projet = $version->getProjet();
-            $veract = $projet->getVersionActive();
-
-            // Si pas de version active (nouveau projet) = pas de problème on redirige sur l'édition en cours
-            if ($veract == null) {
-                return $this->redirectToRoute('modifier_version', ['id' => $version, '_fragment' => 'liste_des_collaborateurs']);
-            }
-
-            // Peut arriver pour l'administrateur car pour lui le bouton modifier est toujours acitf
-            elseif ($veract->getId() == $version->getId()) {
-                return $this->redirectToRoute('modifier_version', ['id' => $version, '_fragment' => 'liste_des_collaborateurs']);
-            }
-
-            // Si version active on demande de préciser quelle version !
-            else {
-                return $this->render(
-                    'version/avant_modifier_collaborateurs.html.twig',
-                    [
-                    'veract'  => $veract,
-                    'version' => $version
-                ]
-                );
-            }
-        }
-
-        // bouton modifier_version inactif: on modifie les collabs de la version demandée !
-        else {
-            return $this->redirectToRoute('modifier_collaborateurs', ['id' => $version]);
-        }
-    }
-
-    /**
-     * Modifier les collaborateurs d'une version.
-     *
-     * @Route("/{id}/collaborateurs", name="modifier_collaborateurs",methods={"GET","POST"})
-     * Method({"GET", "POST"})
-     * @Security("is_granted('ROLE_DEMANDEUR')")
-     */
-    public function modifierCollaborateursAction(Version $version, Request $request)
-    {
-        $sm = $this->sm;
-        $sj = $this->sj;
-        $sval= $this->vl;
-        $em = $this->getDoctrine()->getManager();
-
-
-        if ($sm->modifier_collaborateurs($version)['ok'] == false) {
-            $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de modifier la liste des collaborateurs de la version " . $version .
-                " parce que : " . $sm->modifier_collaborateurs($version)['raison']);
-        }
-
-        /* Si le bouton modifier est actif, on doit impérativement passer par le formulaire de la version ! */
-        $modifier_version_menu = $sm->modifier_version($version);
-        if ($modifier_version_menu['ok'] == true) {
-            return $this->redirectToRoute($modifier_version_menu['name'], ['id' => $version, '_fragment' => 'liste_des_collaborateurs']);
-        }
-
-
-        $collaborateur_form = $this->ff
-                                   ->createNamedBuilder('form_projet', FormType::class, [
-                                       'individus' => self::prepareCollaborateurs($version, $sj, $sval)
-                                   ])
-                                   ->add('individus', CollectionType::class, [
-                                       'entry_type'     =>  IndividuFormType::class,
-                                       'label'          =>  false,
-                                       'allow_add'      =>  true,
-                                       'allow_delete'   =>  true,
-                                       'prototype'      =>  true,
-                                       'required'       =>  true,
-                                       'by_reference'   =>  false,
-                                       'delete_empty'   =>  true,
-                                       'attr'         => ['class' => "profil-horiz",],
-                                   ])
-                                   ->add('submit', SubmitType::class, [
-                                        'label' => 'Sauvegarder',
-                                   ])
-                                   ->getForm();
-        $collaborateur_form->handleRequest($request);
-
-        $projet =  $version->getProjet();
-        if ($projet != null) {
-            $idProjet   =   $projet->getIdProjet();
-        } else {
-            $sj->errorMessage(__METHOD__ .':' . __LINE__ . " : projet null pour version " . $version->getIdVersion());
-            $idProjet   =   null;
-        }
-
-        if ($collaborateur_form->isSubmitted() && $collaborateur_form->isValid()) {
-            // Un formulaire par individu
-            $individu_forms =  $collaborateur_form->getData()['individus'];
-            $validated = $this->validateIndividuForms($individu_forms);
-            if (! $validated) {
-                return $this->render(
-                    'version/collaborateurs_invalides.html.twig',
-                    [
-                    'projet' => $idProjet,
-                    'version'   =>  $version,
-                    'session'   =>  $version->getSession(),
-                    ]
-                );
-            }
-            // On traite les formulaires d'individus un par un
-            $this->handleIndividuForms($individu_forms, $version);
-
-
-            // return new Response( Functions::show( $resultat ) );
-            // return new Response( print_r( $mail, true ) );
-            //return new Response( print_r($request->request,true) );
-
-            // SI ON VIRE ça ON N'A PLUS LES MAILS: POURQUOI ???????????????
-            return $this->redirectToRoute(
-                'modifier_collaborateurs',
-                [
-                'id'    => $version->getIdVersion() ,
-            ]
-            );
-        }
-
-        //return new Response( dump( $collaborateur_form->createView() ) );
-        return $this->render(
-            'version/collaborateurs.html.twig',
-            [
-             'projet' => $idProjet,
-             'collaborateur_form'   => $collaborateur_form->createView(),
-             'version'   =>  $version,
-             'session'   =>  $version->getSession(),
-         ]
-        );
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Validation du formulaire des collaborateurs - Retourn true/false
-     ***/
-    private function validateIndividuForms($individu_forms, $definitif = false)
-    {
-        $coll_login = $this->getParameter('coll_login');
-
-        $one_login = false;
-        foreach ($individu_forms as  $individu_form) {
-            if ($individu_form->getLogin()) {
-                $one_login = true;
-            }
-            if ($definitif ==  true  &&
-                (
-                    $individu_form->getPrenom() == null   || $individu_form->getNom() == null
-                || $individu_form->getEtablissement() == null
-                || $individu_form->getLaboratoire() == null || $individu_form->getStatut() == null
-                )
-            ) {
-                return false;
-            }
-        }
-
-        // Personne n'a de login !
-        // Seulement si $coll_login est true
-
-        if ($coll_login) {
-            if ($definitif == true && $one_login == false) {
-                return false;
-            }
-        }
-
-        if ($individu_forms != []) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////
-    /***************************************
-     * Traitement des formulaires des individus individuellement
-     *
-     * $individu_forms = Tableau contenant un formulaire par individu
-     * $version        = La version considérée
-     ****************************************************************/
-    private function handleIndividuForms($individu_forms, Version $version)
-    {
-        $em   = $this->getDoctrine()->getManager();
-        $sv   = $this->sv;
-        $sj   = $this->sj;
-        $sval = $this->vl;
-
-        foreach ($individu_forms as $individu_form) {
-            $id =  $individu_form->getId();
-
-            // Le formulaire correspond à un utilisateur existant
-            if ($id != null) {
-                $individu = $em->getRepository(Individu::class)->find($id);
-            }
-            
-            // On a renseigné le mail de l'utilisateur mais on n'a pas encore l'id: on recherche l'utilisateur !
-            // Si $utilisateur == null, il faudra le créer (voir plus loin)
-            elseif ($individu_form->getMail() != null) {
-                $individu = $em->getRepository(Individu::class)->findOneBy([ 'mail' =>  $individu_form->getMail() ]);
-                if ($individu!=null) {
-                    $sj->debugMessage(__METHOD__ . ':' . __LINE__ . ' mail=' . $individu_form->getMail() . ' => trouvé ' . $individu);
-                } else {
-                    $sj->debugMessage(__METHOD__ . ':' . __LINE__ . ' mail=' . $individu_form->getMail() . ' => Individu à créer !');
-                }
-            }
-
-            // Pas de mail -> pas d'utilisateur !
-            else {
-                $individu = null;
-            }
-
-            // Cas d'erreur qui ne devraient jamais se produire
-            if ($individu == null && $id != null) {
-                $sj->errorMessage(__METHOD__ . ':' . __LINE__ .' idIndividu ' . $id . 'du formulaire ne correspond pas à un utilisateur');
-            }
-
-            elseif (is_array($individu_form)) {
-                // TODO je ne vois pas le rapport
-                $sj->errorMessage(__METHOD__ . ':' . __LINE__ .' individu_form est array ' . Functions::show($individu_form));
-            }
-
-            elseif (is_array($individu)) {
-                // TODO pareil un peu nawak
-                $sj->errorMessage(__METHOD__ . ':' . __LINE__ .' individu est array ' . Functions::show($individu));
-            }
-
-            elseif ($individu != null && $individu_form->getMail() != null && $individu_form->getMail() != $individu->getMail()) {
-                $sj->errorMessage(__METHOD__ . ':' . __LINE__ ." l'adresse mails de l'utilisateur " .
-                    $individu . ' est incorrecte dans le formulaire :' . $individu_form->getMail() . ' != ' . $individu->getMail());
-            }
-
-            // --------------> Maintenant des cas réalistes !
-            // L'individu existe déjà
-            elseif ($individu != null) {
-                // On modifie l'individu
-                $individu = $individu_form->modifyIndividu($individu, $sj);
-                $em->persist($individu);
-
-                // Il devient collaborateur
-                if (! $version->isCollaborateur($individu)) {
-                    $sj->infoMessage(__METHOD__ . ':' . __LINE__ .' individu ' .
-                        $individu . ' ajouté à la version ' .$version);
-                    $collaborateurVersion   =   new CollaborateurVersion($individu);
-                    $collaborateurVersion->setDeleted(false);
-                    $collaborateurVersion->setVersion($version);
-                    if ($this->getParameter('coll_login')) {
-                        $collaborateurVersion->setLogin($individu_form->getLogin());
-                    };
-                    if ($this->getParameter('nodata') == false) {
-                        $collaborateurVersion->setClogin($individu_form->getClogin());
-                    };
-                    $collaborateurVersion->setLogin($individu_form->getLogin());
-                    $collaborateurVersion->setClogin($individu_form->getClogin());
-                    $em->persist($collaborateurVersion);
-                }
-
-                // il était déjà collaborateur
-                else {
-                    $sj->debugMessage(__METHOD__ . ':' . __LINE__ .' individu ' .
-                        $individu . ' confirmé pour la version '.$version);
-
-                    // Modif éventuelle des cases de login
-                    $sv->modifierLogin($version, $individu, $individu_form->getLogin(), $individu_form->getClogin());
-
-                    // modification du labo du projet
-                    if ($version->isResponsable($individu)) {
-                        $sv->setLaboResponsable($version, $individu);
-                    }
-
-                    // modification éventuelle du flag deleted
-                    $sv->syncDeleted($version, $individu, $individu_form->getDelete());
-                }
-                $em -> flush();
-            }
-
-            // Le formulaire correspond à un nouvel utilisateur (adresse mail pas trouvée)
-            elseif ($individu_form->getMail() != null && $individu_form->getDelete() == false) {
-                // Création d'un individu à partir du formulaire
-                // Renvoie null si la validation est négative
-                $individu = $individu_form->nouvelIndividu($sval);
-                if ($individu != null) {
-                    $collaborateurVersion   =   new CollaborateurVersion($individu);
-                    $collaborateurVersion->setLogin($individu_form->getLogin());
-                    $collaborateurVersion->setClogin($individu_form->getClogin());
-                    $collaborateurVersion->setVersion($version);
-
-                    $sj->infoMessage(__METHOD__ . ':' . __LINE__ . ' nouvel utilisateur ' . $individu .
-                        ' créé et ajouté comme collaborateur à la version ' . $version);
-
-                    $em->persist($individu);
-                    $em->persist($collaborateurVersion);
-                    $em->persist($version);
-                    $em->flush();
-                    $sj->warningMessage('Utilisateur ' . $individu . '(' . $individu->getMail() . ') id(' . $individu->getIdIndividu() . ') a été créé');
-                }
-            }
-
-            // Ligne vide
-            elseif ($individu_form->getMail() == null && $id == null) {
-                $sj->debugMessage(__METHOD__ . ':' . __LINE__ . ' nouvel utilisateur vide ignoré');
-            }
-        }
-    }
 
     /**
      * Demande de partage stockage ou partage des données
@@ -1578,7 +1028,7 @@ class VersionModifController extends AbstractController
      * @Security("is_granted('ROLE_DEMANDEUR')")
      * Method({"GET", "POST"})
      */
-    public function donneesAction(Request $request, Version $version)
+    public function donneesAction(Request $request, Version $version): Response
     {
         $sm = $this->sm;
         $sj = $this->sj;
@@ -1639,7 +1089,7 @@ class VersionModifController extends AbstractController
 
     ////////// Recupère et traite le retour du formulaire
     ////////// lié à l'écran données
-    private function handleDonneesForms($form, Version $version)
+    private function handleDonneesForms($form, Version $version): void
     {
         $version->setDataMetaDataFormat($form->get('dataMetadataFormat')->getData());
         $version->setDataNombreDatasets($form->get('dataNombreDatasets')->getData());
@@ -1656,7 +1106,7 @@ class VersionModifController extends AbstractController
      * @Security("is_granted('ROLE_DEMANDEUR')")
      * Method({"GET", "POST"})
      */
-    public function renouvellementAction(Request $request, Version $version, LoggerInterface $lg)
+    public function renouvellementAction(Request $request, Version $version): Response
     {
         $sm = $this->sm;
         $sv = $this->sv;
@@ -1709,7 +1159,7 @@ class VersionModifController extends AbstractController
                 $sv->setLaboResponsable($new_version, $version->getResponsable());
 
                 // nouvelles collaborateurVersions
-                Functions::sauvegarder($new_version, $em, $lg);
+                Functions::sauvegarder($new_version, $em, $this->lg);
 
                 $collaborateurVersions = $version->getCollaborateurVersion();
                 foreach ($collaborateurVersions as $collaborateurVersion) {
@@ -1766,9 +1216,10 @@ class VersionModifController extends AbstractController
      *    return= Un array contenant la "todo liste", ie la liste de choses à faire pour que le formulaire soit validé
      *            Un array vide [] signifie: "Formulaire validé"
      **/
-    private function versionValidate(Version $version)
+    private function versionValidate(Version $version) : array
     {
-        $em   = $this->getDoctrine()->getManager();
+        $sv = $this->sv;
+        $em = $this->getDoctrine()->getManager();
         $nodata = $this->getParameter('nodata');
 
         $todo   =   [];
@@ -1845,7 +1296,7 @@ class VersionModifController extends AbstractController
         };
 
         // Partage de données
-        if ($nodata == false) {		// Stockage de données
+        if ($nodata == false) {        // Stockage de données
             if ($version->getSondVolDonnPerm() == null) {
                 $todo[] = 'sond_vol_donn_perm';
             } elseif ($version->getSondJustifDonnPerm() == null
@@ -1883,52 +1334,10 @@ class VersionModifController extends AbstractController
             }
         }
 
-        if (! $this->validateIndividuForms(self::prepareCollaborateurs($version, $this->sj, $this->vl), true)) {
+        if (! $sv->validateIndividuForms($sv->prepareCollaborateurs($version), true)) {
             $todo[] = 'collabs';
         }
 
         return $todo;
     }
 
-    /***
-     * Redimensionne une figure
-     *
-     *  params $image, le chemin vers un fichier image
-     *
-     */
-    private function redim_figure($image)
-    {
-        $cmd = "identify -format '%w %h' $image";
-        //$sj->debugMessage('redim_figure cmd identify = ' . $cmd);
-        $format = `$cmd`;
-        list($width, $height) = explode(' ', $format);
-        $width = intval($width);
-        $height= intval($height);
-        $rap_w = 0;
-        $rap_h = 0;
-        $rapport = 0;      // Le rapport de redimensionnement
-
-        $max_fig_width = $this->getParameter('max_fig_width');
-        if ($width > $max_fig_width && $max_fig_width > 0) {
-            $rap_w = (1.0 * $width) /  $max_fig_width;
-        }
-
-        $max_fig_height = $this->getParameter('max_fig_height');
-        if ($height > $max_fig_height && $max_fig_height > 0) {
-            $rap_h = (1.0 * $height) / $max_fig_height;
-        }
-
-        // Si l'un des deux rapports est > 0, on prend le plus grand
-        if ($rap_w + $rap_h > 0) {
-            $rapport = ($rap_w > $rap_h) ? 1/$rap_w : 1/$rap_h;
-            $rapport = 100 * $rapport;
-        }
-
-        // Si un rapport a été calculé, on redimensionne
-        if ($rapport > 1) {
-            $cmd = "convert $image -resize $rapport% $image";
-            //$sj->debugMessage('redim_figure cmd convert = ' . $cmd);
-            `$cmd`;
-        }
-    }
-}

@@ -100,7 +100,7 @@ services:
                     "%dfct_directory%"]
 
     App\GramcServices\ServiceVersions:
-        arguments: [ '%attrib_seuil_a%', "%prj_prefix%", "%fig_directory%", "%signature_directory%" ]
+        arguments: [ '%attrib_seuil_a%', "%prj_prefix%", "%fig_directory%", "%signature_directory%", "%coll_login%", "%nodata%", "%max_fig_width%", "%max_fig_height%" ]
         
     App\GramcServices\ServiceMenus:
         arguments: [ "%max_rall%","%nodata%" ]
