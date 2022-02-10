@@ -84,6 +84,8 @@ use Twig\Environment;
 /**
  * Projet controller.
  *
+ * Les méthodes liées aux projets mais SPECIFIQUES à un mésocentre particulier
+ *
  * @Route("projet")
  */
  // Tous ces controleurs sont exécutés au moins par OBS, certains par ADMIN seulement

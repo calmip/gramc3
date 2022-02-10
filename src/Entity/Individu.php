@@ -218,14 +218,6 @@ class Individu implements UserInterface, EquatableInterface, PasswordAuthenticat
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="\App\Entity\CompteActivation", mappedBy="individu")
-     */
-    private $compteActivation;
-
-
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     *
      * @ORM\OneToMany(targetEntity="\App\Entity\Expertise", mappedBy="expert")
      */
     private $expertise;
@@ -343,7 +335,6 @@ class Individu implements UserInterface, EquatableInterface, PasswordAuthenticat
         $this->session = new \Doctrine\Common\Collections\ArrayCollection();
         $this->sso = new \Doctrine\Common\Collections\ArrayCollection();
         $this->collaborateurVersion = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->compteActivation = new \Doctrine\Common\Collections\ArrayCollection();
         $this->expertise = new \Doctrine\Common\Collections\ArrayCollection();
         $this->journal = new \Doctrine\Common\Collections\ArrayCollection();
     }
@@ -843,40 +834,6 @@ class Individu implements UserInterface, EquatableInterface, PasswordAuthenticat
     public function getCollaborateurVersion()
     {
         return $this->collaborateurVersion;
-    }
-
-    /**
-     * Add compteActivation
-     *
-     * @param \App\Entity\CompteActivation $compteActivation
-     *
-     * @return Individu
-     */
-    public function addCompteActivation(\App\Entity\CompteActivation $compteActivation)
-    {
-        $this->compteActivation[] = $compteActivation;
-
-        return $this;
-    }
-
-    /**
-     * Remove compteActivation
-     *
-     * @param \App\Entity\CompteActivation $compteActivation
-     */
-    public function removeCompteActivation(\App\Entity\CompteActivation $compteActivation)
-    {
-        $this->compteActivation->removeElement($compteActivation);
-    }
-
-    /**
-     * Get compteActivation
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getCompteActivation()
-    {
-        return $this->compteActivation;
     }
 
     /**
