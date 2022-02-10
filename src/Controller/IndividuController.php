@@ -86,7 +86,7 @@ class IndividuController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method("GET")
      */
-    public function supprimerUtilisateurAction(Request $request, Individu $individu)
+    public function supprimerUtilisateurAction(Request $request, Individu $individu): Response
     {
         $em = $this->getDoctrine()->getManager();
         $em->remove($individu);
@@ -101,7 +101,7 @@ class IndividuController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method({"GET", "POST"})
      */
-    public function remplacerUtilisateurAction(Request $request, Individu $individu)
+    public function remplacerUtilisateurAction(Request $request, Individu $individu): Response
     {
         $em = $this->getDoctrine()->getManager();
         $sj = $this->sj;
@@ -276,7 +276,7 @@ class IndividuController extends AbstractController
     * @Security("is_granted('ROLE_ADMIN')")
     * Method("DELETE")
     */
-    public function deleteAction(Request $request, Individu $individu)
+    public function deleteAction(Request $request, Individu $individu): Response
     {
         $form = $this->createDeleteForm($individu);
         $form->handleRequest($request);
@@ -298,7 +298,7 @@ class IndividuController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method("GET")
      */
-    public function indexAction()
+    public function indexAction(): Response
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -316,7 +316,7 @@ class IndividuController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method({"GET", "POST"})
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request): Response
     {
         $individu = new Individu();
         $form = $this->createForm('App\Form\IndividuType', $individu);
@@ -343,7 +343,7 @@ class IndividuController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method("GET")
      */
-    public function showAction(Individu $individu)
+    public function showAction(Individu $individu): Response
     {
         $deleteForm = $this->createDeleteForm($individu);
 
@@ -360,7 +360,7 @@ class IndividuController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method({"GET", "POST"})
      */
-    public function editAction(Request $request, Individu $individu)
+    public function editAction(Request $request, Individu $individu): Response
     {
         $deleteForm = $this->createDeleteForm($individu);
         $editForm = $this->createForm('App\Form\IndividuType', $individu);
@@ -423,7 +423,7 @@ class IndividuController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method({"GET", "POST"})
      */
-    public function modifyAction(Request $request, Individu $individu)
+    public function modifyAction(Request $request, Individu $individu): Response
     {
         $em = $this->getDoctrine()->getManager();
         $repos = $em->getRepository(Individu::class);
@@ -520,7 +520,7 @@ class IndividuController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method({"GET", "POST"})
      */
-    public function ajouterAction(Request $request)
+    public function ajouterAction(Request $request): Respone
     {
         $em = $this->getDoctrine()->getManager();
         $individu = new Individu();
@@ -551,7 +551,7 @@ class IndividuController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method("GET")
      */
-    public function devenirAdminAction(Request $request, Individu $individu)
+    public function devenirAdminAction(Request $request, Individu $individu): Response
     {
         $individu->setAdmin(true);
         $individu->setObs(false);    // Pas la peine d'être Observateur si on est admin !
@@ -574,7 +574,7 @@ class IndividuController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method("GET")
      */
-    public function plusAdminAction(Request $request, Individu $individu)
+    public function plusAdminAction(Request $request, Individu $individu): Response
     {
         $individu->setAdmin(false);
         $em = $this->getDoctrine()->getManager();
@@ -595,7 +595,7 @@ class IndividuController extends AbstractController
     * @Security("is_granted('ROLE_ADMIN')")
     * Method("GET")
     */
-    public function devenirObsAction(Request $request, Individu $individu)
+    public function devenirObsAction(Request $request, Individu $individu): Response
     {
         $individu->setObs(true);
         $individu->setAdmin(false); // Si on devient Observateur on n'est plus admin !
@@ -617,7 +617,7 @@ class IndividuController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method("GET")
      */
-    public function plusObsAction(Request $request, Individu $individu)
+    public function plusObsAction(Request $request, Individu $individu): Response
     {
         $individu->setObs(false);
         $em = $this->getDoctrine()->getManager();
@@ -638,7 +638,7 @@ class IndividuController extends AbstractController
     * @Security("is_granted('ROLE_ADMIN')")
     * Method("GET")
     */
-    public function devenirSysadminAction(Request $request, Individu $individu)
+    public function devenirSysadminAction(Request $request, Individu $individu): Response
     {
         $individu->setSysadmin(true);
         $em = $this->getDoctrine()->getManager();
@@ -659,7 +659,7 @@ class IndividuController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method("GET")
      */
-    public function plusSysadminAction(Request $request, Individu $individu)
+    public function plusSysadminAction(Request $request, Individu $individu): Respone
     {
         $individu->setSysadmin(false);
         $em = $this->getDoctrine()->getManager();
@@ -680,7 +680,7 @@ class IndividuController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method("GET")
      */
-    public function devenirPresidentAction(Request $request, Individu $individu)
+    public function devenirPresidentAction(Request $request, Individu $individu): Response
     {
         $individu->setPresident(true);
         $em = $this->getDoctrine()->getManager();
@@ -701,7 +701,7 @@ class IndividuController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method("GET")
      */
-    public function plusPresidentAction(Request $request, Individu $individu)
+    public function plusPresidentAction(Request $request, Individu $individu): Response
     {
         $individu->setPresident(false);
         $em = $this->getDoctrine()->getManager();
@@ -722,7 +722,7 @@ class IndividuController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method("GET")
      */
-    public function devenirExpertAction(Request $request, Individu $individu)
+    public function devenirExpertAction(Request $request, Individu $individu): Response
     {
         $individu->setExpert(true);
         $em = $this->getDoctrine()->getManager();
@@ -743,7 +743,7 @@ class IndividuController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method("GET")
      */
-    public function plusExpertAction(Request $request, Individu $individu)
+    public function plusExpertAction(Request $request, Individu $individu):Response
     {
         $em = $this->getDoctrine()->getManager();
         $se = $this->se;
@@ -787,7 +787,7 @@ class IndividuController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method("GET")
      */
-    public function desactiverAction(Request $request, Individu $individu)
+    public function desactiverAction(Request $request, Individu $individu): Response
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -815,7 +815,7 @@ class IndividuController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method({"GET", "POST"})
      */
-    public function thematiqueAction(Request $request, Individu $individu)
+    public function thematiqueAction(Request $request, Individu $individu): Response
     {
         $em   = $this->getDoctrine()->getManager();
         $form = $this->createFormBuilder($individu)
@@ -886,7 +886,7 @@ class IndividuController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method({"GET", "POST"})
      */
-    public function eppnAction(Request $request, Individu $individu)
+    public function eppnAction(Request $request, Individu $individu): Response
     {
         $em   = $this->getDoctrine()->getManager();
         $ssos = $individu->getSso();
@@ -950,7 +950,7 @@ class IndividuController extends AbstractController
      * @Security("is_granted('ROLE_DEMANDEUR')")
      * Method({"POST","GET"})
      */
-    public function mailAutocompleteAction(Request $request)
+    public function mailAutocompleteAction(Request $request): Response
     {
         $sj = $this->sj;
         $ff = $this->ff;
@@ -1032,7 +1032,7 @@ class IndividuController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method({"GET","POST"})
      */
-    public function gererAction(Request $request)
+    public function gererAction(Request $request): Response
     {
         $ff = $this->ff;
         $em = $this->getDoctrine()->getManager();
@@ -1103,7 +1103,7 @@ class IndividuController extends AbstractController
         );
     }
 
-    private static function sso_to_string($sso, $key)
+    private static function sso_to_string($sso, $key): string
     {
         return $sso->__toString();
     }

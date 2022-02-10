@@ -55,7 +55,7 @@ class GramcDate extends GramcDateTime
     }
 
     // retourne une nouvelle instance
-    public function getNew()
+    public function getNew(): GramcDate
     {
         $date = new GramcDate(
             $this->recup_printemps_d,
@@ -72,7 +72,7 @@ class GramcDate extends GramcDateTime
     // Sommes-nous en periode de récupération des heures de printemps ?
     // param $annee Année considérée - Si non année courante, on renvoie false
     // return true/false
-    public function isRecupPrintemps($annee)
+    public function isRecupPrintemps($annee): bool
     {
         // Pas de paramètres: renvoie false
         if ($this->recup_printemps_d == 0) {
@@ -98,7 +98,7 @@ class GramcDate extends GramcDateTime
     // Sommes-nous en periode de récupération des heures d'automne ?
     // param $annee Année considérée - Si non année courante, on renvoie false
     // return true/false
-    public function isRecupAutomne($annee)
+    public function isRecupAutomne($annee): bool
     {
         // Pas de paramètres: renvoie false
         if ($this->recup_automne_d == 0) {

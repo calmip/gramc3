@@ -122,7 +122,7 @@ class ProjetController extends AbstractController
      * Method("GET")
      * @Security("is_granted('ROLE_OBS')")
      */
-    public function indexAction()
+    public function indexAction(): Response
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -143,7 +143,7 @@ class ProjetController extends AbstractController
      * @Route("/rgpd", name="rgpd", methods={"GET"})
      * 
      */
-    public function rgpdAction(Request $request)
+    public function rgpdAction(Request $request): Response
     {
         return $this->render('projet/rgpd.html.twig');
     }
@@ -155,7 +155,7 @@ class ProjetController extends AbstractController
      * Method({"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
-    public function sessionCSVAction(Session $session)
+    public function sessionCSVAction(Session $session): Response
     {
         $em = $this->getDoctrine()->getManager();
         $sp = $this->sp;
@@ -218,7 +218,7 @@ class ProjetController extends AbstractController
      * Method({"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
-    public function tousCSVAction()
+    public function tousCSVAction(): Response
     {
         $sd = $this->sd;
         $em = $this->getDoctrine()->getManager();
@@ -275,7 +275,7 @@ class ProjetController extends AbstractController
      * @Route("/{id}/fermer", name="fermer_projet", methods={"GET","POST"})
      * Method({"GET","POST"})
      */
-    public function fermerAction(Projet $projet, Request $request)
+    public function fermerAction(Projet $projet, Request $request): Response
     {
         if ($request->isMethod('POST')) {
             $confirmation = $request->request->get('confirmation');
@@ -304,7 +304,7 @@ class ProjetController extends AbstractController
      * @Route("/{id}/nepasterminer", name="nepasterminer_projet", methods={"GET"})
      * Method({"GET"})
      */
-    public function nepasterminerAction(Projet $projet, Request $request)
+    public function nepasterminerAction(Projet $projet, Request $request): Response
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -326,7 +326,7 @@ class ProjetController extends AbstractController
      * @Route("/{id}/onpeutterminer", name="onpeutterminer_projet", methods={"GET","POST"})
      * Method({"GET","POST"})
      */
-    public function onpeutterminerAction(Projet $projet, Request $request)
+    public function onpeutterminerAction(Projet $projet, Request $request): Response
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -348,7 +348,7 @@ class ProjetController extends AbstractController
      * @Route("/{id}/back", name="back_version", methods={"GET","POST"})
      * Method({"GET","POST"})
      */
-    public function backAction(Version $version, Request $request)
+    public function backAction(Version $version, Request $request): Response
     {
         if ($request->isMethod('POST')) {
             $confirmation = $request->request->get('confirmation');
@@ -385,7 +385,7 @@ class ProjetController extends AbstractController
      * @Route("/{id}/fwd", name="fwd_version", methods={"GET","POST"})
      * Method({"GET","POST"})
      */
-    public function fwdAction(Version $version, Request $request, LoggerInterface $lg)
+    public function fwdAction(Version $version, Request $request, LoggerInterface $lg): Response
     {
         $se = $this->se;
         $em = $this->getDoctrine()->getManager();
@@ -419,7 +419,7 @@ class ProjetController extends AbstractController
      * Method({"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
-    public function sessionAction(Request $request)
+    public function sessionAction(Request $request): Response
     {
         $em             = $this->getDoctrine()->getManager();
         $ss             = $this->ss;
@@ -626,7 +626,7 @@ class ProjetController extends AbstractController
      * Method({"GET","POST"})
      *
      */
-    public function resumesAction($annee)
+    public function resumesAction($annee): Response
     {
         $sp    = $this->sp;
         $sj    = $this->sj;
@@ -699,7 +699,7 @@ class ProjetController extends AbstractController
      * @Security("is_granted('ROLE_OBS')")
      */
 
-    public function anneeAction(Request $request)
+    public function anneeAction(Request $request): Response
     {
         $sd = $this->sd;
         $ss = $this->ss;
@@ -754,7 +754,7 @@ class ProjetController extends AbstractController
      * @Security("is_granted('ROLE_OBS')")
      */
 
-    public function donneesAction(Request $request)
+    public function donneesAction(Request $request): Response
     {
         $ss    = $this->ss;
         $sp    = $this->sp;
@@ -780,7 +780,7 @@ class ProjetController extends AbstractController
      * Method({"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
-    public function donneesCSVAction($annee)
+    public function donneesCSVAction($annee): Response
     {
         $sp                  = $this->sp;
         list($projets, $total)= $sp->donneesParProjet($annee);
@@ -858,7 +858,7 @@ class ProjetController extends AbstractController
      * Method({"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
-    public function anneeCSVAction($annee)
+    public function anneeCSVAction($annee): Response
     {
         $sp      = $this->sp;
         $paa     = $sp->projetsParAnnee($annee);
@@ -925,7 +925,7 @@ class ProjetController extends AbstractController
      * @Route("/{id}/rapport/{annee}", defaults={"annee"=0}, name="rapport", methods={"GET"})
      * Method("GET")
      */
-    public function rapportAction(Version $version, Request $request, $annee)
+    public function rapportAction(Version $version, Request $request, $annee): Response
     {
         $sp = $this->sp;
         $sj = $this->sj;
@@ -958,7 +958,7 @@ class ProjetController extends AbstractController
      * @Security("is_granted('ROLE_OBS')")
      * Method("GET")
      */
-    public function signatureAction(Version $version, Request $request)
+    public function signatureAction(Version $version, Request $request): Response
     {
         $sv = $this->sv;
         return Functions::pdf($sv->getSigne($version));
@@ -971,7 +971,7 @@ class ProjetController extends AbstractController
      * @Security("is_granted('ROLE_DEMANDEUR') or is_granted('ROLE_OBS')")
      * Method("GET")
      */
-    public function documentAction(Version $version, Request $request)
+    public function documentAction(Version $version, Request $request): Response
     {
         $sv = $this->sv;
         return Functions::pdf($sv->getDocument($version));
@@ -984,7 +984,7 @@ class ProjetController extends AbstractController
      * Method("GET")
      * @Security("is_granted('ROLE_OBS')")
      */
-    public function tousAction()
+    public function tousAction(): Response
     {
         $em      = $this->getDoctrine()->getManager();
         $projets = $em->getRepository(Projet::class)->findAll();
@@ -1044,7 +1044,7 @@ class ProjetController extends AbstractController
      * @Route("/gerer", name="gerer_projets", methods={"GET"})
      * Method("GET")
      */
-    public function gererAction()
+    public function gererAction(): Response
     {
         $em = $this->getDoctrine()->getManager();
         $projets = $em->getRepository(Projet::class)->findAll();
@@ -1060,7 +1060,7 @@ class ProjetController extends AbstractController
      * @Route("/new", name="projet_new", methods={"GET","POST"})
      * Method({"GET", "POST"})
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request): Response
     {
         $projet = new Projet(Projet::PROJET_SESS);
         $form = $this->createForm('App\Form\ProjetType', $projet);
@@ -1088,7 +1088,7 @@ class ProjetController extends AbstractController
      * @Security("is_granted('ROLE_DEMANDEUR')")
      *
      */
-    public function avantNouveauAction(Request $request, $type)
+    public function avantNouveauAction(Request $request, $type): Response
     {
         $sm = $this->sm;
         $sj = $this->sj;
@@ -1126,7 +1126,7 @@ class ProjetController extends AbstractController
      * @Security("is_granted('ROLE_DEMANDEUR')")
      *
      */
-    public function nouveauAction(Request $request, $type)
+    public function nouveauAction(Request $request, $type): Response
     {
         $sd = $this->sd;
         $sm = $this->sm;
@@ -1210,7 +1210,7 @@ class ProjetController extends AbstractController
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
 
-    public function consoAction(Projet $projet, $loginname="nologin", $annee=null)
+    public function consoAction(Projet $projet, $loginname="nologin", $annee=null): Response
     {
         $sp = $this->sp;
         $sj = $this->sj;
@@ -1252,7 +1252,7 @@ class ProjetController extends AbstractController
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
 
-    public function consoRessourceAction(Projet $projet, $utype, $ress_id, $loginname, $annee)
+    public function consoRessourceAction(Projet $projet, $utype, $ress_id, $loginname, $annee): Response
     {
         $em = $this->getDoctrine()->getManager();
         $sp = $this->sp;
@@ -1333,7 +1333,7 @@ class ProjetController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      */
 
-    public function consoTousAction($ressource, $annee, $mois=false)
+    public function consoTousAction($ressource, $annee, $mois=false): Response
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -1371,7 +1371,7 @@ class ProjetController extends AbstractController
      * Method("GET")
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
-    public function telechargerModeleAction()
+    public function telechargerModeleAction(): Response
     {
         return $this->render('projet/telecharger_modele.html.twig');
     }

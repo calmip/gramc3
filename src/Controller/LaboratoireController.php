@@ -154,40 +154,4 @@ class LaboratoireController extends AbstractController
         return $this->redirectToRoute('gerer_laboratoires');
     }
 
-    /**
-     * Deletes a laboratoire entity.
-     *
-     * @Route("/{id}/delete", name="laboratoire_delete", methods={"DELETE"})
-     * @Security("is_granted('ROLE_ADMIN')")
-     * Method("DELETE")
-     */
-    public function deleteAction_AJETER(Request $request, Laboratoire $laboratoire)
-    {
-        $form = $this->createDeleteForm($laboratoire);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->remove($laboratoire);
-            $em->flush($laboratoire);
-        }
-
-        return $this->redirectToRoute('laboratoire_index');
-    }
-
-    /**
-     * Creates a form to delete a laboratoire entity.
-     *
-     * @param Laboratoire $laboratoire The laboratoire entity
-     *
-     * @return \Symfony\Component\Form\Form The form
-     */
-    private function createDeleteForm_AJETER(Laboratoire $laboratoire)
-    {
-        return $this->createFormBuilder()
-            ->setAction($this->generateUrl('laboratoire_delete', array('id' => $laboratoire->getId())))
-            ->setMethod('DELETE')
-            ->getForm()
-        ;
-    }
 }

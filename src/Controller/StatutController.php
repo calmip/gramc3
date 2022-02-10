@@ -30,6 +30,9 @@ use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Form\FormInterface;
+
 
 /**
  * Statut controller.
@@ -45,7 +48,7 @@ class StatutController extends AbstractController
      * @Route("/", name="statut_index",methods={"GET"})
      * Method("GET")
      */
-    public function indexAction()
+    public function indexAction(): Response
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -62,7 +65,7 @@ class StatutController extends AbstractController
      * @Route("/new", name="statut_new",methods={"GET","POST"})
      * Method({"GET", "POST"})
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request): Response
     {
         $statut = new Statut();
         $form = $this->createForm('App\Form\StatutType', $statut);
@@ -88,7 +91,7 @@ class StatutController extends AbstractController
      * @Route("/{id}", name="statut_show",methods={"GET"})
      * Method("GET")
      */
-    public function showAction(Statut $statut)
+    public function showAction(Statut $statut): Response
     {
         $deleteForm = $this->createDeleteForm($statut);
 
@@ -104,7 +107,7 @@ class StatutController extends AbstractController
      * @Route("/{id}/edit", name="statut_edit",methods={"GET"})
      * Method({"GET", "POST"})
      */
-    public function editAction(Request $request, Statut $statut)
+    public function editAction(Request $request, Statut $statut): Response
     {
         $deleteForm = $this->createDeleteForm($statut);
         $editForm = $this->createForm('App\Form\StatutType', $statut);
@@ -129,7 +132,7 @@ class StatutController extends AbstractController
      * @Route("/{id}", name="statut_delete",methods={"DELETE"})
      * Method("DELETE")
      */
-    public function deleteAction(Request $request, Statut $statut)
+    public function deleteAction(Request $request, Statut $statut): Response
     {
         $form = $this->createDeleteForm($statut);
         $form->handleRequest($request);
@@ -150,7 +153,7 @@ class StatutController extends AbstractController
      *
      * @return \Symfony\Component\Form\Form The form
      */
-    private function createDeleteForm(Statut $statut)
+    private function createDeleteForm(Statut $statut): FormInterface
     {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('statut_delete', array('id' => $statut->getId())))

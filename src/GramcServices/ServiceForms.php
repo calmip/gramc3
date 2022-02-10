@@ -32,6 +32,7 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 use Symfony\Component\HttpFoundation\Request;
@@ -40,21 +41,21 @@ use Symfony\Component\HttpFoundation\File\File;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
-/*
+/*************************************************************
  * Quelques fonctions utiles pour les formulaires
  *
- ******/
+ *************************************************************/
 class ServiceForms
 {
     public function __construct(private $max_size_doc, private ValidatorInterface $vl, private FormFactoryInterface $ff, private EntityManagerInterface $em, private ServiceJournal $sj)
     {}
 
-    /****
+    /******************************************
      * Appelle le service de validation sur les data par rapport à des contraintes
      * retourne une chaine de caractères: soit les erreurs de validation, soit "OK"
      *
      *************************************/
-    public function formError($data, $constraintes)
+    public function formError($data, $constraintes): string
     {
         $violations = $this->vl->validate($data, $constraintes);
 
@@ -69,7 +70,7 @@ class ServiceForms
         }
     }
 
-    /***
+    /**************************************************
      *
      * Crée un formulaire qui permettra de téléverser un fichier pdf
      * Gère le mécanisme de soumission et validation
@@ -85,7 +86,7 @@ class ServiceForms
      *          ou un message d'erreur
      *
      ********************************/
-    public function televerserFichier(Request $request, $dirname, $filename)
+    public function televerserFichier(Request $request, $dirname, $filename): FormInterface|string
     {
         $sj = $this->sj;
         $ff = $this->ff;

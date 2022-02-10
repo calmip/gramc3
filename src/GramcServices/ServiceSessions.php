@@ -62,7 +62,7 @@ class ServiceSessions
     /*******
      * initialise le "cache" des sessions non terminées
      *******/
-    private function initSessionsNonTerm()
+    private function initSessionsNonTerm(): void
     {
         $this->sessions_non_term = $this->em->getRepository(Session::class)->get_sessions_non_terminees();
     }
@@ -81,7 +81,7 @@ class ServiceSessions
     * Initialise le "cache" au besoin
     * TODO - ne marche pas s'il n'y a pas de session non terminée (lors de l'install)
     ************************************************************/
-    public function getSessionCourante()
+    public function getSessionCourante(): ?Session
     {
         if ($this->sessions_non_term==null) {
             $this->initSessionsNonTerm();
@@ -93,15 +93,13 @@ class ServiceSessions
         }
     }
 
-    // form pour choisir une session
-
     /************
     * Formulaire permettant de choisir une session
     *
     * $formb   = Un formBuilder (retour de createView)
     * $request = La requête
     *
-    * Retourne:
+    * Retourne un tableau contenant:
     *     Le formulaire
     *     La session choisie
     *
@@ -109,7 +107,7 @@ class ServiceSessions
     *             $data = $ss->selectSession($this->createFormBuilder(['session' => $une_session"]),$request);
     *
     *******************/
-    public function selectSession(FormBuilder $formb, Request $request)
+    public function selectSession(FormBuilder $formb, Request $request): array
     {
         $form    = $formb
                     ->add(
@@ -137,14 +135,13 @@ class ServiceSessions
         return ['form' => $form, 'session' => $session ];
     }
 
-
     /************
      * Formulaire permettant de choisir une année
      *
      * $request = La requête
      * $annee   = L'année, si null on prend l'année courante
      *
-     * Retourne:
+     * Retourne un tableau contenant:
      *     Le formulaire
      *     L'année choisie
      *
@@ -153,7 +150,7 @@ class ServiceSessions
      *
      *******************/
 
-    public function selectAnnee(Request $request, $annee = null)
+    public function selectAnnee(Request $request, $annee = null): array
     {
         if ($annee == null) {
             $annee=$this->grdt->showYear();
@@ -189,7 +186,7 @@ class ServiceSessions
      * Return: [ $sessionA,$sessionB ] ou [ $sessionA] ou []
      *
      **/
-    public function sessionsParAnnee($annee)
+    public function sessionsParAnnee($annee): array
     {
         $annee -= 2000;
         $sessions = [];
@@ -217,7 +214,7 @@ class ServiceSessions
     *      param $attrib = Attribution
     *      return $recup = Heures pouvant être récupérées
     *********************/
-    public function calc_recup_heures_printemps($conso, $attrib)
+    public function calc_recup_heures_printemps($conso, $attrib): int
     {
         $recup_heures = 0;
         if ($attrib <= 0) {
@@ -249,7 +246,7 @@ class ServiceSessions
     * param $attrib_ete = L'attribution pour l'été
     * return $recup     = Heures pouvant être récupérées
     **********************************/
-    public function calc_recup_heures_automne($conso_ete, $attrib_ete)
+    public function calc_recup_heures_automne($conso_ete, $attrib_ete): int
     {
         $recup_heures = 0;
         if ($attrib_ete <= 0) {
@@ -271,7 +268,7 @@ class ServiceSessions
      *
      * return $session
      **********************************/
-    public function nouvelleSession()
+    public function nouvelleSession(): Session
     {
         $grdt = $this->grdt;
         $em   = $this->em;
@@ -303,7 +300,7 @@ class ServiceSessions
         return $session;
     }
 
-    private function nextSessionInfo()
+    private function nextSessionInfo(): array
     {
         $grdt = $this->grdt;
         $annee = $grdt->format('y');   // 15 pour 2015

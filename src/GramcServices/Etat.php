@@ -70,7 +70,7 @@ class Etat
             self::NON_RENOUVELABLE          =>  'NON_RENOUVELABLE',
         ];
 
-    public static function getLibelle($etat)
+    public static function getLibelle($etat): string
     {
         if ($etat != null && array_key_exists($etat, Etat::LIBELLE_ETAT)) {
             return self::LIBELLE_ETAT[$etat];
@@ -79,7 +79,7 @@ class Etat
         }
     }
 
-    public static function getEtat($libelle)
+    public static function getEtat($libelle): int
     {
         $array_flip = array_flip(self::LIBELLE_ETAT);
 

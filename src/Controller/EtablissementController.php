@@ -28,9 +28,8 @@ use App\Entity\Etablissement;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-
-
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Etablissement controller.
@@ -46,7 +45,7 @@ class EtablissementController extends AbstractController
      * @Route("/", name="etablissement_index", methods={"GET"})
      * Method("GET")
      */
-    public function indexAction()
+    public function indexAction(): Response
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -63,7 +62,7 @@ class EtablissementController extends AbstractController
      * @Route("/new", name="etablissement_new", methods={"GET","POST"})
      * Method({"GET", "POST"})
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request): Response
     {
         $etablissement = new Etablissement();
         $form = $this->createForm('App\Form\EtablissementType', $etablissement);
@@ -89,7 +88,7 @@ class EtablissementController extends AbstractController
      * @Route("/{id}", name="etablissement_show", methods={"GET"})
      * Method("GET")
      */
-    public function showAction(Etablissement $etablissement)
+    public function showAction(Etablissement $etablissement): Response
     {
         $deleteForm = $this->createDeleteForm($etablissement);
 
@@ -105,7 +104,7 @@ class EtablissementController extends AbstractController
      * @Route("/{id}/edit", name="etablissement_edit", methods={"GET","POST"})
      * Method({"GET", "POST"})
      */
-    public function editAction(Request $request, Etablissement $etablissement)
+    public function editAction(Request $request, Etablissement $etablissement): Response
     {
         $deleteForm = $this->createDeleteForm($etablissement);
         $editForm = $this->createForm('App\Form\EtablissementType', $etablissement);
@@ -130,7 +129,7 @@ class EtablissementController extends AbstractController
      * @Route("/{id}", name="etablissement_delete", methods={"DELETE"})
      * Method("DELETE")
      */
-    public function deleteAction(Request $request, Etablissement $etablissement)
+    public function deleteAction(Request $request, Etablissement $etablissement): Response
     {
         $form = $this->createDeleteForm($etablissement);
         $form->handleRequest($request);
@@ -151,7 +150,7 @@ class EtablissementController extends AbstractController
      *
      * @return \Symfony\Component\Form\Form The form
      */
-    private function createDeleteForm(Etablissement $etablissement)
+    private function createDeleteForm(Etablissement $etablissement): Response
     {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('etablissement_delete', array('id' => $etablissement->getId())))

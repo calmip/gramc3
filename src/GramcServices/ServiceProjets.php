@@ -82,7 +82,7 @@ class ServiceProjets
      * Return: Le nouvel id, ou null en cas d'erreur
      *
      ***************/
-    public function NextProjetId($annee, $type)
+    public function NextProjetId($annee, $type): string
     {
         if (intval($annee) >= 2000) {
             $annee = $annee - 2000;
@@ -104,7 +104,7 @@ class ServiceProjets
     * un "état" qui n'est pas utilisé dans les workflows mais qui peut être
     * affiché et qui a du sens pour les utilisateurs
     ************************************************************/
-    public function getMetaEtat(Projet $p)
+    public function getMetaEtat(Projet $p): string
     {
         $etat_projet = $p->getEtatProjet();
 
@@ -177,12 +177,12 @@ class ServiceProjets
       *
       * NOTE - Si un projet a DEUX VERSIONS et change de responsable, donc de laboratoire, au cours de l'année,
       *        on affiche les données de la VERSION A (donc celles du début d'année)
-      * 		  Cela peut conduire à une erreur à la marge dans les statistiques
+      *        Cela peut conduire à une erreur à la marge dans les statistiques
       *
       */
 
     // Ajoute les champs 'c','g','q', 'cp' au tableau $p (pour projetsParAnnee)
-    private function ppa_conso(&$p, &$annee)
+    private function ppa_conso(&$p, &$annee): void
     {
         $conso_cpu = $this->getConsoRessource($p['p'], 'cpu', $annee);
         $conso_gpu = $this->getConsoRessource($p['p'], 'gpu', $annee);
@@ -197,8 +197,13 @@ class ServiceProjets
      * $annee      = Année
      * $isRecup... = Pour gérer les heures de récupération
      *
+     * Return: un tableau de deux tableaux:
+     *         - Le tableau des projets
+     *         - Le tableau des données consolidées
+     *            
+     *
      ********************/
-    public function projetsParAnnee($annee, $isRecupPrintemps=false, $isRecupAutomne=false)
+    public function projetsParAnnee($annee, $isRecupPrintemps=false, $isRecupAutomne=false): array
     {
         $em = $this->em;
         $ss = $this->ss;
@@ -439,7 +444,7 @@ class ServiceProjets
      *
      * Fonction utilisée pour les statistiques et pour le bilan annuel
      */
-    public function projetsParCritere($annee, $critere)
+    public function projetsParCritere($annee, $critere): array
     {
         // pour debug echo '<br><br><br><br><br><br>';
         $projets = $this->projetsParAnnee($annee)[0];
@@ -518,15 +523,15 @@ class ServiceProjets
      *
      */
 
-    private function donneesParProjetFiltre($v, &$p)
+    private function donneesParProjetFiltre($v, &$p): bool
     {
         $keep_it = false;
-        $p               = [];
-        $p['p']          = $v->getProjet();
-        $p['stk']                = false;
-        $p['ptg']				 = false;
-        $p['sondVolDonnPerm']    = $v->getSondVolDonnPerm();
-        $p['sondVolDonnPermTo']  = preg_replace('/^(\d+) .+/', '${1}', $p['sondVolDonnPerm']);
+        $p = [];
+        $p['p'] = $v->getProjet();
+        $p['stk'] = false;
+        $p['ptg'] = false;
+        $p['sondVolDonnPerm'] = $v->getSondVolDonnPerm();
+        $p['sondVolDonnPermTo'] = preg_replace('/^(\d+) .+/', '${1}', $p['sondVolDonnPerm']);
         $p['sondJustifDonnPerm'] = $v->getSondJustifDonnPerm();
         $p['dataMetaDataFormat'] = $v->getDataMetaDataFormat();
         $p['dataNombreDatasets'] = $v->getDataNombreDatasets();
@@ -554,10 +559,10 @@ class ServiceProjets
     *  Ajoute le champ 'c,q,f' au tableau $p:
     *         c => conso
     *         q => quota en octets
-    * 		  q => quota en To (nombre entier)
+    *         q => quota en To (nombre entier)
     *
     */
-    private function addConsoStockage(&$p, $annee, $ress)
+    private function addConsoStockage(&$p, $annee, $ress): void
     {
         if ($ress === "") {
             $p['q']  = 0;
@@ -583,7 +588,7 @@ class ServiceProjets
      * Return: [ $projets, $total ] Un tableau de tableaux pour les projets, et les données consolidées
      *
      */
-    public function donneesParProjet($annee)
+    public function donneesParProjet($annee): array
     {
         $total   = [];
         $projets = [];
@@ -682,10 +687,6 @@ class ServiceProjets
         return [$projets,$total];
     }
 
-
-	// TODO php 8.0 - $projet peut être soit un Projet soit un CollaborateurVersion !
-	//                Il faudra faire une Union cf. https://php.watch/versions/8.0/union-types
-	
     /************************************
     * calcul de la consommation et du quota d'une ressource à une date donnée
     * N'est utilisée que par les méthodes de cette classe
@@ -694,24 +695,24 @@ class ServiceProjets
     * NOTE - Si la table est chargée à 8h00 du matin, toutes les consos de l'année courante seront = 0 avant 8h00
     *
     ************/
-    private function getConsoDate($projet, $ressource, \DateTime $date)
+    private function getConsoDate(Projet|CollaborateurVersion $projet, $ressource, \DateTime $date): array
     {
-		if ($projet instanceof Projet) {
-	        $loginName = strtolower($projet->getIdProjet());
-	        $type = 2;
-		} else {
-			$loginName = strtolower($projet->getLoginname());
-			$type = 1;
-		}
-        $conso     = 0;
-        $quota     = 0;
-        $compta    = $this->em->getRepository(Compta::class)->findOneBy(
+        if ($projet instanceof Projet) {
+            $loginName = strtolower($projet->getIdProjet());
+            $type = 2;
+        } else {
+            $loginName = strtolower($projet->getLoginname());
+            $type = 1;
+        }
+        $conso = 0;
+        $quota = 0;
+        $compta = $this->em->getRepository(Compta::class)->findOneBy(
             [
-                            'date'      => $date,
-                            'ressource' => $ressource,
-                            'loginname' => $loginName,
-                            'type'      => $type
-                        ]
+                'date'      => $date,
+                'ressource' => $ressource,
+                'loginname' => $loginName,
+                'type'      => $type
+            ]
         );
         if ($compta != null) {
             $conso = $compta->getConso();
@@ -721,8 +722,6 @@ class ServiceProjets
         return [$conso, $quota];
     }
 
-	// TODO php 8.0 - $projet peut être soit un Projet soit un CollaborateurVersion !
-	//                Il faudra faire une Union cf. https://php.watch/versions/8.0/union-types
     /***********************
     * calcul de la consommation et du quota d'une ressource (cpu, gpu, work_space, etc.)
     *
@@ -743,7 +742,7 @@ class ServiceProjets
     *        Si on utilise avant 8h00 du matin toutes les consos sont à 0 !
     *
     *******************/
-    public function getConsoRessource($projet, $ressource, $annee_ou_date=null)
+    public function getConsoRessource(Projet|CollaborateurVersion $projet, $ressource, $annee_ou_date=null): array
     {
         //return [0,0];
         $annee_ou_date_courante = $this->grdt->showYear();
@@ -756,9 +755,6 @@ class ServiceProjets
         }
         return $this->getConsoDate($projet, $ressource, $date);
     }
-
-	// TODO php 8.0 - $projet peut être soit un Projet soit un CollaborateurVersion !
-	//                Il faudra faire une Union cf. https://php.watch/versions/8.0/union-types
 
     /*******
     * calcul de la consommation cumulée d'une ou plusieurs ressources dans un intervalle de dates données
@@ -774,7 +770,7 @@ class ServiceProjets
     * TODO - Diminuer le nombre de requêtes SQL avec une seule requête plus complexe
     *
     ***********************/
-    public function getConsoIntervalle($projet, $ressources, $dates)
+    public function getConsoIntervalle(Projet|CollaborateurVersion $projet, $ressources, $dates): int
     {
         if (! is_array($ressources) || ! is_array($dates)) {
             $this->sj->throwException(__METHOD__ . ":" . __LINE__ . " Erreur interne - \$ressources ou \$dates n'est pas un array");
@@ -798,9 +794,6 @@ class ServiceProjets
         return ($conso_fin) ? $conso_fin-$conso_debut : 0;
     }
 
-	// TODO php 8.0 - $projet peut être soit un Projet soit un CollaborateurVersion !
-	//                Il faudra faire une Union cf. https://php.watch/versions/8.0/union-types
-
     /*******************
     * calcul de la consommation "calcul" à une date donnée ou pour une année donnée
     *
@@ -808,7 +801,7 @@ class ServiceProjets
     *           Ne retourne pas le quota
     *
     *************************/
-    public function getConsoCalcul($projet, $annee_ou_date)
+    public function getConsoCalcul(Projet|CollaborateurVersion $projet, $annee_ou_date): int
     {
         $conso_gpu = $this->getConsoRessource($projet, 'gpu', $annee_ou_date);
         $conso_cpu = $this->getConsoRessource($projet, 'cpu', $annee_ou_date);
@@ -818,15 +811,12 @@ class ServiceProjets
     /********
      * La conso d'une version...
      *****/
-    public function getConsoCalculVersion(Version $version)
+    public function getConsoCalculVersion(Version $version): int
     {
         $projet = $version->getProjet();
         $annee  = $version->getAnneeSession();
         return $this->getConsoCalcul($projet, $annee);
     }
-
-	// TODO php 8.0 - $projet peut être soit un Projet soit un CollaborateurVersion !
-	//                Il faudra faire une Union cf. https://php.watch/versions/8.0/union-types
 
     /*******************
     * calcul de la consommation "calcul" à une date donnée ou pour une année donnée, en pourcentage du quota
@@ -835,7 +825,7 @@ class ServiceProjets
     *           en %age du quota cpu
     *
     *************************/
-    public function getConsoCalculP(Projet $projet, $annee_ou_date=null)
+    public function getConsoCalculP(Projet|CollaborateurVersion $projet, $annee_ou_date=null): float
     {
         $conso_gpu = $this->getConsoRessource($projet, 'gpu', $annee_ou_date);
         $conso_cpu = $this->getConsoRessource($projet, 'cpu', $annee_ou_date);
@@ -846,8 +836,6 @@ class ServiceProjets
         }
     }
 
-	// TODO php 8.0 - $projet peut être soit un Projet soit un CollaborateurVersion !
-	//                Il faudra faire une Union cf. https://php.watch/versions/8.0/union-types
     /***************
     * Renvoie la consommation calcul (getConsoCalcul() de l'année et du mois
     *
@@ -858,7 +846,7 @@ class ServiceProjets
     * Retourne: La conso cpu+gpu, ou 0 si le mois se situe dans le futur
     *
     **************************/
-    public function getConsoMois(Projet $projet, $annee, $mois)
+    public function getConsoMois(Projet|CollaborateurVersion $projet, $annee, $mois) : int
     {
         $now = $this->grdt;
         $annee_courante = $now->showYear();
@@ -866,9 +854,12 @@ class ServiceProjets
         $mois += 1;	// 0..11 -> 1..12 !
 
         // 2019 - 2000 !
-        if (($annee==$annee_courante || abs($annee-$annee_courante)==2000) && $mois==$mois_courant) {
+        if (($annee==$annee_courante || abs($annee-$annee_courante)==2000) && $mois==$mois_courant)
+        {
             $conso_fin = $this->getConsoCalcul($projet, $now);
-        } else {
+        }
+        else
+        {
             // Pour décembre on mesure la consomation au 31 car il y a risque de remise à zéro le 1er Janvier
             // Du coup on ignore la consommation du 31 Décembre...
             if ($mois==12) {
@@ -885,14 +876,20 @@ class ServiceProjets
 
         // Pour Janvier on prend zéro, pas la valeur au 1er Janvier
         // La remise à zéro ne se fait jamais le 1er Janvier
-        if ($mois==1) {
+        if ($mois==1)
+        {
             $conso_debut = 0;
-        } else {
+        }
+        else
+        {
             $conso_debut = $this->getConsoCalcul($projet, new \DateTime("$annee-$mois-01"));
         }
-        if ($conso_fin>$conso_debut) {
+        if ($conso_fin>$conso_debut)
+        {
             return $conso_fin-$conso_debut;
-        } else {
+        }
+        else
+        {
             return 0;
         }
     }
@@ -904,7 +901,7 @@ class ServiceProjets
      * return: La consommation "calcul" pour l'année
      *
      */
-    public function getQuota(Projet $projet, $annee=null)
+    public function getQuota(Projet $projet, $annee=null): int
     {
         $conso_cpu = $this->getConsoRessource($projet, 'cpu', $annee);
         return $conso_cpu[1];
@@ -913,7 +910,7 @@ class ServiceProjets
     /********
      * Le quota d'une version...
      *****/
-    public function getQuotaCalculVersion(Version $version)
+    public function getQuotaCalculVersion(Version $version): int
     {
         $projet = $version->getProjet();
         $annee  = $version->getAnneeSession();
@@ -929,7 +926,7 @@ class ServiceProjets
      * return: true/false
      *
      *****/
-    public function projetACL(Projet $projet)
+    public function projetACL(Projet $projet): bool
     {
         if ($this->sac->isGranted('ROLE_OBS') ||  $this->sac->isGranted('ROLE_PRESIDENT')) {
             return true;
@@ -943,7 +940,7 @@ class ServiceProjets
      * Le user connecté a-t-il accès à au moins une version de $projet ?
      *
      *****/
-    private function userProjetACL(Projet $projet)
+    private function userProjetACL(Projet $projet): bool
     {
         $user = $this->token->getUser();
         foreach ($projet->getVersion() as $version) {
@@ -955,7 +952,7 @@ class ServiceProjets
     }
 
     // nous vérifions si un utilisateur a le droit d'accès à une version
-    public static function userVersionACL(Version $version, Individu $user)
+    public static function userVersionACL(Version $version, Individu $user): bool
     {
         // nous vérifions si $user est un collaborateur de cette version
         if ($version->isCollaborateur($user)) {
@@ -988,7 +985,7 @@ class ServiceProjets
      * Création des répertoires de données
      *
      ************************************************************/
-    public function createDirectories($annee = null, $session = null)
+    public function createDirectories($annee = null, $session = null): void
     {
         $rapport_directory = $this->rapport_directory;
         if ($rapport_directory != null) {
@@ -1031,7 +1028,7 @@ class ServiceProjets
         $this->createDirectory($dfct_directory . '/' . $annee);
     }
 
-    private function createDirectory($dir)
+    private function createDirectory($dir): void
     {
         if ($dir != null && ! file_exists($dir)) {
             mkdir($dir);
@@ -1049,7 +1046,7 @@ class ServiceProjets
      * (OK pour sessions de type A !)
      *
      ***********************/
-    public function getRapport(Projet $projet, $annee)
+    public function getRapport(Projet $projet, $annee): ?string
     {
         $rapport_directory = $this->rapport_directory;
         //if ( $annee == null )
@@ -1075,7 +1072,7 @@ class ServiceProjets
      * Return: true/false
      *
      ********************************/
-    public function hasRapport(Projet $projet, $annee)
+    public function hasRapport(Projet $projet, $annee): bool
     {
         $rapportActivite = $this->em->getRepository(RapportActivite::class)->findOneBy(
             [
@@ -1099,7 +1096,7 @@ class ServiceProjets
      * On lit la taille dans la base de données
      *
      *************************************/
-    public function getSizeRapport(Projet $projet, $annee)
+    public function getSizeRapport(Projet $projet, $annee): int
     {
         $rapportActivite = $this->em->getRepository(RapportActivite::class)->findOneBy(
             [
@@ -1118,7 +1115,7 @@ class ServiceProjets
     /*
      * Renvoie un tableau contenant la ou les versions de l'année passée en paramètres
      */
-    public function getVersionsAnnee(Projet $projet, $annee)
+    public function getVersionsAnnee(Projet $projet, $annee): array
     {
         $subAnnee   = substr(strval($annee), -2);
         $repository = $this->em->getRepository(Version::class);
@@ -1140,9 +1137,12 @@ class ServiceProjets
      *         - Pas collaborateurs
      *         - Pas d'expertises
      *         - Pas de privilèges
+     *
+     * Renvoie un tableau contenant les clones des individus effacés
+     * TODO - Un peu zarbi tout de même
      */
 
-    public function effacer_utilisateurs($individus = null)
+    public function effacer_utilisateurs($individus = null): array
     {
         $individus_effaces = [];
         $em = $this->em;
@@ -1183,7 +1183,7 @@ class ServiceProjets
     *
     * @return \App\Entity\Version
     */
-    public function calculVersionDerniere(Projet $projet)
+    public function calculVersionDerniere(Projet $projet): ?Version
     {
         //$this->sj->debugMessage( __FILE__ . ":" . __LINE__ . " coucou1");
         if ($projet->getVersion() == null) {
@@ -1228,7 +1228,7 @@ class ServiceProjets
      *
      * @return \App\Entity\Version
      */
-    public function calculVersionActive(Projet $projet)
+    public function calculVersionActive(Projet $projet): ?Version
     {
         $em            = $this->em;
         $versionActive = $projet->getVersionActive();
@@ -1270,7 +1270,7 @@ class ServiceProjets
         }
         return $result;
     }
-    public function versionActive(Projet $projet)
+    public function versionActive(Projet $projet): ?Version
     {
         return $this->calculVersionActive($projet);
     }
