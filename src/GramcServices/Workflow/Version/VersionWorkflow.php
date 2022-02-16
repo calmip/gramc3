@@ -107,22 +107,6 @@ class VersionWorkflow extends Workflow
                 ]
             )
             ->addState(
-                Etat::EDITION_DEMANDE,
-                [
-                Signal::CLK_VAL_DEM     => new VersionTransition(
-                    Etat::EDITION_EXPERTISE,
-                    Signal::CLK_VAL_DEM,
-                    [ 'R' => 'depot_pour_demandeur',
-                                             'A' => 'depot_pour_experts',
-                                             'ET' => 'depot_pour_experts']
-                ),
-                Signal::CLK_SESS_DEB    => new VersionTransition(Etat::TERMINE, Signal::CLK_SESS_DEB),
-                Signal::CLK_SESS_FIN    => new VersionTransition(Etat::TERMINE, Signal::CLK_SESS_FIN),
-                Signal::CLK_FERM        => new VersionTransition(Etat::TERMINE, Signal::CLK_FERM),
-                Signal::CLK_DEMANDE     => new VersionTransition(Etat::TERMINE, Signal::CLK_DEMANDE),
-                ]
-            )
-            ->addState(
                 Etat::EDITION_EXPERTISE,
                 [
                 Signal::CLK_VAL_EXP_OK  => new VersionTransition(
@@ -195,6 +179,48 @@ class VersionWorkflow extends Workflow
                 Signal::CLK_SESS_DEB    => new VersionTransition(Etat::TERMINE, Signal::CLK_SESS_DEB),
                 Signal::CLK_SESS_FIN    => new VersionTransition(Etat::TERMINE, Signal::CLK_SESS_FIN),
                 Signal::CLK_FERM        => new VersionTransition(Etat::TERMINE, Signal::CLK_FERM),
-                ]);
+		]);
+
+	// Si la session est en édition demande on prévient les experts de la thématique
+	// qu'il y a eu une demande dans cette thématique
+	//
+	$sess_cour = $ss->getSessionCourante();
+	if ($sess_cour->getetatSession() == Etat::EDITION_DEMANDE)
+        {
+            $this			
+               ->addState(Etat::EDITION_DEMANDE,
+                   [
+                    Signal::CLK_VAL_DEM => new VersionTransition(Etat::EDITION_EXPERTISE,Signal::CLK_VAL_DEM,
+                                                                 [ 'R' => 'depot_pour_demandeur',
+                                                                   'A' => 'depot_pour_experts',
+                                                                   'ET' => 'depot_pour_experts']
+                                                                ),
+                    Signal::CLK_SESS_DEB    => new VersionTransition(Etat::TERMINE, Signal::CLK_SESS_DEB),
+                    Signal::CLK_SESS_FIN    => new VersionTransition(Etat::TERMINE, Signal::CLK_SESS_FIN),
+                    Signal::CLK_FERM        => new VersionTransition(Etat::TERMINE, Signal::CLK_FERM),
+                    Signal::CLK_DEMANDE     => new VersionTransition(Etat::TERMINE, Signal::CLK_DEMANDE),
+                ]
+	    );
+	}
+
+	// Sinon (projets fil de l'eau) on ne les prévient pas !
+	else
+	{
+            $this			
+               ->addState(Etat::EDITION_DEMANDE,
+                   [
+                    Signal::CLK_VAL_DEM => new VersionTransition(Etat::EDITION_EXPERTISE,Signal::CLK_VAL_DEM,
+                                                                 [ 'R' => 'depot_pour_demandeur',
+                                                                   'A' => 'depot_pour_experts']
+                                                                ),
+                    Signal::CLK_SESS_DEB    => new VersionTransition(Etat::TERMINE, Signal::CLK_SESS_DEB),
+                    Signal::CLK_SESS_FIN    => new VersionTransition(Etat::TERMINE, Signal::CLK_SESS_FIN),
+                    Signal::CLK_FERM        => new VersionTransition(Etat::TERMINE, Signal::CLK_FERM),
+                    Signal::CLK_DEMANDE     => new VersionTransition(Etat::TERMINE, Signal::CLK_DEMANDE),
+                ]
+	    );
+
+	}
     }
 }
+
