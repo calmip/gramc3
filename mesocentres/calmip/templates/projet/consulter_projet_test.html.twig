@@ -208,7 +208,7 @@ Le laboratoire associé au projet est le laboratoire du responsable
             {{ version.codeLangage }}
             </td>
         </tr>
-		<tr>
+        <tr>
             <th class="horiz">Binaire GPU</th>
             <td>{{ version.gpu}}</td>
         </tr>
@@ -232,7 +232,7 @@ Le laboratoire associé au projet est le laboratoire du responsable
 </table>
 
 
-{% if version.etat in [ 23, 9 ] %}
+{% if version.etat in [ 4, 5, 6, 9 ] %}
 <h3>IV - Commentaire de l'expert</h3>
 
 {% for expertise in version.expertise %}
@@ -247,12 +247,7 @@ Le laboratoire associé au projet est le laboratoire du responsable
             <th class="horiz">Nombre d'heures attribuées</th>
             <td>{{  expertise.nbHeuresAtt }}</td>
         </tr>
-        {% if not is_granted('ROLE_ADMIN') %}
-            <tr>
-               <th class="horiz">Commentaire</th>
-               <td>{{ expertise.commentaireExterne | e | nl2br}}</td>
-            </tr>
-        {% else %}
+        {% if is_granted('ROLE_ADMIN') or version.isExpertDe(app.user) %}
             <tr>
                <th class="horiz">Commentaire pour le responsable</th>
                <td>{{ expertise.commentaireExterne | e | nl2br}}</td>
@@ -261,6 +256,11 @@ Le laboratoire associé au projet est le laboratoire du responsable
                <th class="horiz">Commentaire pour le comité</th>
                <td>{{ expertise.commentaireInterne | e | nl2br}}</td>
             </tr>
+        {% else %}
+            <tr>
+               <th class="horiz">Commentaire</th>
+               <td>{{ expertise.commentaireExterne | e | nl2br}}</td>
+            </tr>
         {% endif %}
 </tbody>
 </table>
@@ -268,6 +268,41 @@ Le laboratoire associé au projet est le laboratoire du responsable
 {% endfor %}
 {% endif %}
 <br>
+
+{% if version.rallonge is not empty %}
+<h4>Rallonges</h4>
+
+<table class="projet">
+<tbody>
+{% for r in version.rallonge %}
+        <tr>
+            <th class="horiz">Nombre d'heures demandées</th>
+            <td>{{  r.demHeures|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
+        </tr>
+        <tr>
+            <th class="horiz">Nombre d'heures attribuées</th>
+            <td>{{  r.nbHeuresAtt|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
+        </tr>
+    {% if is_granted('ROLE_ADMIN') or version.isExpertDe(app.user) %}
+        <tr>
+           <th class="horiz">Commentaire pour le responsable</th>
+           <td>{{ expertise.commentaireExterne | e | nl2br}}</td>
+        </tr>
+        <tr>
+           <th class="horiz">Commentaire pour le comité</th>
+           <td>{{ expertise.commentaireInterne | e | nl2br}}</td>
+        </tr>
+    {% else %}
+        <tr>
+           <th class="horiz">Commentaire</th>
+           <td>{{ expertise.commentaireExterne | e | nl2br}}</td>
+        </tr>
+    {% endif %}
+
+{% endfor %}
+</tbody>
+</table>
+{% endif %}
 
 </section>
 {% endblock %}
