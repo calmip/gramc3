@@ -25,8 +25,10 @@
 namespace App\Controller;
 
 use App\Entity\CommentaireExpert;
+use App\Entity\Expertise;
 use App\Utils\Functions;
 use App\GramcServices\ServiceJournal;
+use App\GramcServices\GramcDate;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -45,6 +47,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 class CommentaireExpertController extends AbstractController
 {
     public function __construct(
+        private GramcDate $grdt,
         private ServiceJournal $sj,
         private TokenStorageInterface $tok
     ) {}
@@ -62,13 +65,39 @@ class CommentaireExpertController extends AbstractController
         $em = $this->getDoctrine()->getManager();
         $sj = $this->sj;
         $token = $this->tok->getToken();
+        $moi = $token->getUser();
 
         // Chaque expert ne peut accéder qu'à son commentaire à lui
-        $moi = $token->getUser();
         if ($moi->getId() != $commentaireExpert->getExpert()->getId()) {
             $sj->throwException(__METHOD__ . ':' . __LINE__ .' problème avec ACL');
         }
 
+        // Retour sur mes expertises pour les trois dernières sessions
+        $expertises = $em->getRepository(Expertise::class)->findExpertisesByExpertForAllSessions($moi);
+
+        // On ne garde que les expertises de cette année, soit pour 2021: 21A, 21B et 22A
+        $expertises_annee = [];
+        $annee = $commentaireExpert->getAnnee() - 2000;
+        $annee_proch = $annee + 1;
+        $sessions = [ $annee.'A', $annee.'B', $annee_proch.'A'];
+        foreach ($expertises as $e)
+        {
+            try
+            {
+                $v = $e->getVersion();
+                if (in_array($v->getSession()->getIdSession(),$sessions))
+                {
+                    $expertises_annee[$v->getProjet()->getIdProjet()] = $e;
+                }
+            }
+            catch ( \Exception $e)
+            {
+                continue;
+            }
+        }
+        
+        
+        // Le formulaire
         $editForm = $this->createForm('App\Form\CommentaireExpertType', $commentaireExpert, ["only_comment" => true]);
         $editForm->handleRequest($request);
 
@@ -83,6 +112,8 @@ class CommentaireExpertController extends AbstractController
             'menu'              => $menu,
             'commentaireExpert' => $commentaireExpert,
             'edit_form'         => $editForm->createView(),
+            'expertises_annee'  => $expertises_annee,
+            'sessions'          => $sessions
         ));
     }
 
@@ -99,6 +130,7 @@ class CommentaireExpertController extends AbstractController
     public function creeOuModifAction(Request $request, $annee): Response
     {
         $token = $this->tok->getToken();
+        $grdt = $this->grdt;
         $em = $this->getDoctrine()->getManager();
 
         $moi = $token->getUser();
@@ -107,7 +139,7 @@ class CommentaireExpertController extends AbstractController
             $commentaireExpert = new Commentaireexpert();
             $commentaireExpert->setAnnee($annee);
             $commentaireExpert->setExpert($moi);
-            $commentaireExpert->setMajStamp(new \DateTime());
+            $commentaireExpert->setMajStamp($grdt);
             $em->persist($commentaireExpert);
             $em->flush();
         }
