@@ -302,6 +302,7 @@ class AdminuxController extends AbstractController
             if ($user==null) {
                 $user = new User();
                 $user->setLoginname($loginname);
+                $user->setExpire(false);
             }
 
             // Le mot de passe est tronqué à 50 caractères, puis crypté
