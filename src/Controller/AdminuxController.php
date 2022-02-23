@@ -1438,19 +1438,29 @@ class AdminuxController extends AbstractController
         foreach ($users as $user)
         {
             $u = [];
-            // On marque le user comme expiré, mais on ne supprime rien
-            if ($user->getPassexpir()<=$sd && $user->getExpire()==false)
+            // Si nécessaire on marque le user comme expiré, mais on ne supprime rien
+            if ($user->getPassexpir() <= $sd && $user->getExpire() == false)
             {
                 $user->setExpire(true);
                 $em->persist($user);
                 $em->flush();
                 
             }
+
+            // On ne devrait jamais rentrer dans le if mais on ajoute de la robustesse
+            if ($user->getPassexpir() > $sd && $user->getExpire() == true)
+            {
+                $user->setExpire(false);
+                $em->persist($user);
+                $em->flush();
+                
+            }
+
             $u["loginname"] = $user->getLoginname();
             $u["cpassword"] = $user->getCpassword();
             $u['expire'] = $user->getExpire();
+            $rusers[] = $u;
         }
-        $rusers[] = $u;
         return new Response(json_encode($rusers));
     }
 }
