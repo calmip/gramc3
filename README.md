@@ -6,20 +6,29 @@
 Installations de paquets
 -----
 
-- fonctionne en php 8.4 MINIMUM, validé avec mariadb 10.3
+- fonctionne en php 8.0 MINIMUM, validé avec mariadb 10.3
 
-- Installer apache/php 8.0 comme expliqué ici: https://sys-admin.fr/installation-php-7-4-sur-debian/
+- Installer apache/php 8.0:
+```
+apt install ca-certificates apt-transport-https lsb-release wget gnupg2
+wget -q https://packages.sury.org/php/apt.gpg -O- | sudo apt-key add -
+echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/php.list
+apt update
+apt install php8.0
+```
+ Voir ici pour les détails: https://sys-admin.fr/installation-php-7-4-sur-debian/
+
 - Modules php:
 ```
-apt install apache2 libapache2-mod-php8.0 php8.0-intl php8.0-cli php8.0-common php8.0-intl php-json php8.0-opcache php8.0-readline php8.0-xml  php8.0-mysql php8.0-gd php8.0-intl
+apt install apache2 libapache2-mod-php8.0 php8.0-intl php8.0-cli php8.0-common php8.0-intl php-json php8.0-opcache php8.0-readline php8.0-xml  php8.0-mysql php8.0-gd php8.0-intl php8.0-curl
 ```
 - Maria-db:
 ```
 apt install mariadb-client mariadb-server
 ```
-- Image magick, polices et autres (pour les graphiques de consommation et la conversion html vers pdf):
+- Image magick, polices et autres (pour les graphiques de consommation, la conversion html vers pdf et la validation des pdf téléversés):
 ```
-apt install imagemagick zip unzip
+apt install imagemagick zip unzip poppler-utils
 apt install xfonts-75dpi xfonts-base xfonts-utils x11-common libfontenc1 xfonts-encodings
 ```
 - Installer `wkhtmltopd` depuis https://wkhtmltopdf.org (disponible en .deb)
@@ -29,8 +38,8 @@ Configuration du mail:
 
 **Le serveur doit être capable d'envoyer des mails:**
 
-  - Par exemple `postfix` fonctionne très bien avec gramc
-  - Ou encore `ssmtp` (les mails sont envoyés, jamais reçus)
+  - Par exemple `Exim4` (le MTA standard sous Debian) fonctionne très bien avec gramc
+  - Ou encore `ssmtp`, ` msmtp` (les mails sont envoyés, jamais reçus), ou postfix
 
 ### Configurer le mail pour une version de développement:
 
@@ -133,6 +142,17 @@ Editer le fichier et inscrivez les paramètres demandés (identifiants de connex
 
 **ATTENTION**: Ce fichier contient des informations sensibles, il doit être protégé:
 
+Les deux premières lignes sont importantes:
+
+APP_ENV=dev   On a la barre symfony en bas de l'écran, très utile pour développer ou déboguer
+APP_DEV=prod  On n'a plus la basse symfony, utile pour la prod
+Il est à noter que certaines configurations sont différentes selon qu'on est en dev ou en prod (cf. config/packages), certains objets n'ont pas le même type, etc:
+il est donc important de tester avec ce paramètre sur prod avant de mettre en production une nouvelle version
+
+APP_DEBUG=1   On peut se connecter en mode debug, c'est-à-dire SANS AUTHENTIFICATION, il faudra donc protéger l'installation par ailleurs (par adresses IP par exemple)
+              Les mails sont envoyés uniquement à l'adresse se trouvant dans la variable MAILER_RECIPIENT, utile pour tester sans importuner les utilisateurs
+APP_DEBUG=0   A UTILISER EN PRODUCTION (sinon n'importe qui peut se connecter !)
+
 ```
 chown www-data .env.local
 chmod 400 .env.local
@@ -151,10 +171,18 @@ sudo -u www-data php composer.phar --no-scripts install
 ./secu-on.bash
 ~~~~
 
+Base de données:
+----
+
+**Création d'une base de données et d'un utilisateur**
+
+Si vous utilisez mariadb, vous pouvez créer l'utilisateur et la base comme indiqué ici: https://www.security-helpzone.com/2016/05/15/developpement-sql-mysql-creer-un-utilisateur-et-lui-attribuer-des-droits/
+
 Configuration du mail:
 ----
 Si vous avez un sendmail qui sait envoyer les mails, la config de .env.local est sans doute OK pour vous
 N'oubliez pas de renseigner MAILER_RECIPIENT pour ne pas envoyer des mails à n'importe qui lors des tests
+**ATTENTION** - Cela ne fonctionne QUE si APP_DEBUG=1 dans .env.local !
 
 Pour tester la configuration:
 
@@ -162,12 +190,8 @@ Pour tester la configuration:
 sudo -u www-data bin/console app:send-a-mail titi@toto.fr
 ~~~~
 
-Base de données:
-----
-
-**Création d'une base de données et d'un utilisateur**
-
-Si vous utilisez mariadb, vous pouvez créer l'utilisateur et la base comme indiqué ici: https://www.security-helpzone.com/2016/05/15/developpement-sql-mysql-creer-un-utilisateur-et-lui-attribuer-des-droits/
+Si APP_DEBUG vaut zéro le mail sera envoyé à titi@toto.fr
+Si APP_DEBUG vaut 1 le mail sera envoyé à MAILER_RECIPIENT
 
 **Installation d'une base de donnees déjà en exploitation sur une instance de développement:**
 
@@ -211,7 +235,7 @@ Il ne doit pas y avoir de warning ou de message d'erreur. S'il y a des messages,
 configuration apache2:
 ----
 
-*Il est important que gramc3 ne ne soit pas à l'URL /, sinon on aura du mal à configurer shibboleth. Le plus "simple" est alors de:*
+*Il est important que gramc3 ne ne soit pas à l'URL /, sinon on aura du mal à configurer shibboleth. Le plus simple est alors de:*
 
 - Activer le module rewrite d'Apache
 
@@ -224,21 +248,15 @@ cd /var/www/html
 ln -s chemin/vers/gramc3/public gramc3
 ~~~~
 
-- Utiliser la commande suivante pour générer un fichier `public/.htaccess`:
+- On peut utiliser la commande suivante pour générer un fichier `public/.htaccess`:
 
   ```
   composer.phar remove symfony/apache-pack
   composer.phar require symfony/apache-pack
   ```
+- la variable d'environnement BASE doit être positionnée à gramc3, ce qui peut se faire grâce à la directiver Apache SetEnvIf 
 
-- Plutôt que d'utiliser le .htaccess, il est recommandé de copier-coller son contenu dans le fichier de configuration du virtualhost apache. Il est important de le mettre dans un <Location /gramc3></Location>:
-
-  ```
-  <Location /gramc3>
-     ...recopie de .htaccess
-  </Location>
-  ```
-- la variable d'environnement BASE doit être positionnée à gramc3, ce qui peut se faire (au niveau global) par la commande: BASE=/gramc3 dans le fichier /etc/apache2/envvars
+- Le fichier doc/apache2-gramc3.conf donne un exemple de fichier de configuration pour Apache
 
 Sécuriser l'installation:
 ----
@@ -269,14 +287,14 @@ Il reste maintenant à:
 - Configurer shibboleth (voir ci-dessous)
 - On peut maintenant supprimer le user admin admin et le laboratoire GRAMC qui ne servent plus à rien
 
-CONFIGURATION DE SHIBBOLETH:
+Configuration de Shibboleth:
 ----
 
 - Installer quelques paquets supplémentaires:
 ~~~~
   apt install libapache2-mod-shib shibboleth-sp-common shibboleth-sp-utils
 ~~~~
-- Configuration apache Ajouter dans la section VirtualHost de gramc3:
+- Configuration apache: Ajouter dans la section VirtualHost de gramc3:
   ~~~~
   # important pour pouvoir utiliser d'autres techniques d'authentification (cf. pour git)
   ShibCompatValidUser On
@@ -296,9 +314,9 @@ CONFIGURATION DE SHIBBOLETH:
 
 
 
-OU EST LE CODE DE GRAMC ?
+Où est le code de gramc ?
 =========================
-gramc3 est une application symfony, il repose donc sur le patron de conception MVC. Les principaux répertoires sont les suivants:
+`gramc3` est une application symfony, il repose sur le patron de conception MVC. Les principaux répertoires sont les suivants:
 
         src                   Le code php de l'application
         src/Controller        Tous les contrôleurs (les points d'entrée de chaque requête)
@@ -308,8 +326,7 @@ gramc3 est une application symfony, il repose donc sur le patron de conception M
         src/GramcServices     L'essentiel du code, implémenté en "services symfony" cf. https://symfony.com/doc/current/service_container.html
         src/GramcServices/Workflow  Les workflows de l'application (changement d'états des objets Projet, Version, Rallonge)
         src/Utils             Des trucs bien utiles
-        src/DataFixtures      Mise à jour de la base de données lors des changements de version
-        src/XXX                         Le code php "extérieur" utilisé par gramc3
+        src/XXX               Le code php "extérieur" utilisé par gramc3
 
 
         templates             Les vues, c'est-à-dire tous les affichages, écrits en html/twig
@@ -324,12 +341,12 @@ gramc3 est une application symfony, il repose donc sur le patron de conception M
         var                   le cache, les sessions php, les fichiers log
                               Il faut **SUPPRIMER** le cache lors des mises à jour, sinon la mise à jour n'est pas correcte !
     
-        vendor                          Le code de symfony
-        bin/console                     L'application ligne de commande de symfony, utile lors des mises à jour ou des rechargements de base de donnée
+        vendor                Le code de symfony
+        bin/console           L'application ligne de commande de symfony, utile lors des mises à jour ou des rechargements de base de donnée
     
-        reprise                         Le code permettant de recharger la base de données, soit pour initialiser gramc, soit pour installer une copie de la production (pour test et debug par exemple)
+        reprise               Le code permettant de recharger la base de données, soit pour initialiser gramc, soit pour installer une copie de la production (pour test et debug par exemple)
 
-COMMENT MODIFIER LE CODE ?
+Comment modifier le code ?
 ----
 Editer dans:
   - `src`
@@ -357,8 +374,9 @@ Editer dans:
   php composer.phar require --working-dir=tools/php-cs-fixer friendsofphp/php-cs-fixer
   tools/php-cs-fixer/vendor/bin/php-cs-fixer fix src
   ~~~~
-COMMENT MODIFIER LE FORMULAIRE PRINCIPAL ?
-----
+
+### Comment modifier le formulaire principal ?
+
 Pour modifier le formulaire principal (par exemple ajouter un champ) il faut intervenir dans les fichiers suivants:
 - `src/Entity/Version.php` (l'entité correspondant à la table de la base de données, la structure est commune à tous les mésocentres).
 - `mesocentres/*/src/Controller/VersionModifController.php` (le formulaire proprement dit, spécifique à chaque mésocentre)
@@ -366,3 +384,7 @@ Pour modifier le formulaire principal (par exemple ajouter un champ) il faut int
 - `mesocentres/*/templates/projet/consulter_projet.html.twig` (l'affichage des données de version)
 
 Après avoir modifié l'entité Version il convient de mettre à jour la base de données par: `bin/console/doctrine:schema:update`
+
+## Pour aller plus loin....
+
+Le fichier `documentation.odt` contient toute la documentation de gramc3, et `documentation-dev.odt` est quant à lui centré sur la structure du code, à des fins de développement
