@@ -1,0 +1,6 @@
+# config/packages/dev/mailer.yaml
+framework:
+    mailer:
+        envelope:
+            recipients: ["%env(MAILER_RECIPIENT)%"]
+
