@@ -60,9 +60,9 @@
  *      bin/console app:brouillage
  *
  * ATTENTION:
- *     Cette commande est DANGEREUSE il est recommandé d'avor une SAUVEGARDE de la BASE DE DONNEES
+ *     Cette commande est DANGEREUSE il est recommandé d'avoir une SAUVEGARDE de la BASE DE DONNEES
  *     et du répertoire de DONNEES
- *     A réserver en développement !!!
+ *     A réserver au développement !!!
  *
  **************************************************/
 
