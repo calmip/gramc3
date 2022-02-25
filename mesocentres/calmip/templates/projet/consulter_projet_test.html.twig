@@ -249,12 +249,14 @@ Le laboratoire associé au projet est le laboratoire du responsable
         </tr>
         {% if is_granted('ROLE_ADMIN') or version.isExpertDe(app.user) %}
             <tr>
-               <th class="horiz">Commentaire pour le responsable</th>
-               <td>{{ expertise.commentaireExterne | e | nl2br}}</td>
-            </tr>
-            <tr>
-               <th class="horiz">Commentaire pour le comité</th>
-               <td>{{ expertise.commentaireInterne | e | nl2br}}</td>
+                <tr>
+                   <th class="horiz">Commentaire pour le responsable</th>
+                   <td>{{ expertise.commentaireExterne | e | nl2br}}</td>
+                </tr>
+                <tr>
+                   <th class="horiz">Commentaire pour le comité</th>
+                   <td>{{ expertise.commentaireInterne | e | nl2br}}</td>
+                </tr>
             </tr>
         {% else %}
             <tr>
