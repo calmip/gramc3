@@ -302,6 +302,7 @@ class AdminuxController extends AbstractController
             if ($user==null) {
                 $user = new User();
                 $user->setLoginname($loginname);
+                $user->setExpire(false);
             }
 
             // Le mot de passe est tronqué à 50 caractères, puis crypté
@@ -850,15 +851,15 @@ class AdminuxController extends AbstractController
     /**
      * Changer le quota de la version active d'un projet
      *
-     * @Route("/version/setquota", name="set_quota", methods={"POST"})
+     * @Route("/projets/setquota", name="set_quota", methods={"POST"})
      * @Security("is_granted('ROLE_ADMIN')")
      * Exemples de données POST (fmt json):
      *
      *             '{ "projet" : "P01234", "session" : "20A", "quota" : "10000"}' -> La version 20AP01234 à condition que ce soit bien la version active !
      *
-     * curl --netrc -H "Content-Type: application/json" -X POST  -d '{ "projet" : "P1234", "session" : "20A", "quota" : "10000" }' https://.../adminux/version/setquota
+     * curl --netrc -H "Content-Type: application/json" -X POST  -d '{ "projet" : "P1234", "session" : "20A", "quota" : "10000" }' https://.../adminux/projets/setquota
      */
-     public function versionsetQuotaAction(Request $request): Response
+     public function projetsSetQuotaAction(Request $request): Response
      {
         $em = $this->getDoctrine()->getManager();
         $sp = $this->sp;
@@ -1077,12 +1078,17 @@ class AdminuxController extends AbstractController
                 }
 
                 // Toutes les versions
-                foreach ($p->getVersion() as $v) {
-                    // ne pas compter deux fois les versions dernière + active
-                    if (in_array($v,$vs)) continue;
-                    $vs[] = $v;
-                    $vs_labels[] = $v->getIdVersion();
-                }
+                // TODO - Viré le 24 Février 2022 - Peut-être qu'on le remettra
+                // à condition d'employer un paramètre particulier à la requête
+                // Par exemple id_session = all déclenche l'envoi de la totalité des versions des projets non terminés
+                // alors que id_session = null déclenche l'envoi des versions DERNIERE et ACTIVE seulement
+                
+                //foreach ($p->getVersion() as $v) {
+                //    // ne pas compter deux fois les versions dernière + active
+                //    if (in_array($v,$vs)) continue;
+                //    $vs[] = $v;
+                //    $vs_labels[] = $v->getIdVersion();
+                //}
             }
 
             // Sinon, on prend la version de cette session... si elle existe
@@ -1437,19 +1443,29 @@ class AdminuxController extends AbstractController
         foreach ($users as $user)
         {
             $u = [];
-            // On marque le user comme expiré, mais on ne supprime rien
-            if ($user->getPassexpir()<=$sd && $user->getExpire()==false)
+            // Si nécessaire on marque le user comme expiré, mais on ne supprime rien
+            if ($user->getPassexpir() <= $sd && $user->getExpire() == false)
             {
                 $user->setExpire(true);
                 $em->persist($user);
                 $em->flush();
                 
             }
+
+            // On ne devrait jamais rentrer dans le if mais on ajoute de la robustesse
+            if ($user->getPassexpir() > $sd && $user->getExpire() == true)
+            {
+                $user->setExpire(false);
+                $em->persist($user);
+                $em->flush();
+                
+            }
+
             $u["loginname"] = $user->getLoginname();
             $u["cpassword"] = $user->getCpassword();
             $u['expire'] = $user->getExpire();
+            $rusers[] = $u;
         }
-        $rusers[] = $u;
         return new Response(json_encode($rusers));
     }
 }
