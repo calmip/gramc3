@@ -485,7 +485,7 @@ class GramcSessionController extends AbstractController
             $session = $request->getSession();
             $session->remove('eppn');
             $session->remove('mail');
-            return $this->redirectToRoute('connexionshiblogin');
+            return $this->redirectToRoute('remlogin');
         }
         return $this->render('default/nouveau_profil.html.twig', array( 'mail' => $request->getSession()->get('mail'), 'form' => $form->createView()));
     }

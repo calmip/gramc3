@@ -30,17 +30,8 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class GramcAuthenticator extends AbstractAuthenticator
 {
-    private $kernel_debug = null;
-    private $em = null;
-    private $sj = null;
-    private $urg = null;
-
-    public function __construct($knl_debug, EntityManagerInterface $em, ServiceJournal $sj, UrlGeneratorInterface $urg)
+    public function __construct(private $knl_debug, private $mode_auth, private EntityManagerInterface $em, private ServiceJournal $sj, private UrlGeneratorInterface $urg)
     {
-        $this->knl_debug = $knl_debug;
-        $this->em = $em;
-        $this->sj = $sj;
-        $this->urg = $urg;
     }
     
     /**
@@ -53,7 +44,7 @@ class GramcAuthenticator extends AbstractAuthenticator
     public function supports(Request $request): ?bool
     {
         $rvl = false;
-        if ($request->attributes->get('_route') === 'connexionshiblogin' && $request->isMethod('GET')) $rvl = true;
+        if ($request->attributes->get('_route') === 'remlogin' && $request->isMethod('GET')) $rvl = true;
         if ($request->attributes->get('_route') === 'connexion_dbg' && $request->isMethod('POST')) $rvl = true;
         return $rvl;
     }
@@ -73,44 +64,10 @@ class GramcAuthenticator extends AbstractAuthenticator
      */
     public function authenticate(Request $request): PassportInterface
     {
-        // vous devez avoir utilisé le paramètre
-        // ShibUseHeaders On
-        // dans la configuration apache
-        //dd($request);
+        $mode_auth = $this->mode_auth;
 
-        $remote_user = $request->headers->get('eppn');
-        $mail = $request->headers->get('mail');
 
-        // Auhentification Shibboleth
-        if ($remote_user != null)
-        {
-            $repository = $this->em->getRepository(Sso::class);
-            $sso = $repository->findOneBy(['eppn' => $remote_user]);
-
-            // Pas de sso --> nouveau compte ou nouvel eppn !
-            if ($sso == null)
-            {
-                // Récupérer les headers dans la session
-                $this->shibbHeadersToSession($request);
-                throw new UsernameNotFoundException();
-            }
-            $individu = $sso->getIndividu();
-            if ($individu instanceof Individu)
-            {
-                return new SelfValidatingPassport(new UserBadge($individu->getIdIndividu()),
-                [
-                    new GramcBadge($this->sj, $individu)
-                ]);
-            }
-            else
-            {
-                // Ecrit le eppn dans le journal et refuse l'authentification
-                $this->sj->warningMessage("Un utilisateur a tenté de se connecter - eppn = $remote_user, mail = $mail");
-                throw new UsernameNotFoundException("votre compte n'est pas encore opérationnel");
-            }
-        }
-
-        // On essaie ensuite le formulaire d'authentification bidon
+        // On essaie le formulaire d'authentification bidon
         // Seulement si on est en debug
         if ($this->knl_debug)
         {
@@ -131,6 +88,59 @@ class GramcAuthenticator extends AbstractAuthenticator
                         ]);
                     }
                 }
+            }
+        }
+
+        // TODO - A améliorer, tout ça n'est pas très clair !
+        // vous devez avoir utilisé le paramètre
+        // ShibUseHeaders On
+        // dans la configuration apache
+        //dd($request);
+
+        if ($mode_auth == 'saml2')
+        {
+            $remote_user = $request->headers->get('eppn');
+            $mail = $request->headers->get('mail');
+        }
+        elseif ($mode_auth == 'openid')
+        {
+            $remote_user = $request->server->get('REDIRECT_REMOTE_USER');
+            $mail = $request->server->get('OIDC_CLAIM_email');
+        }
+        else
+        {
+            $this->sj->errorMessage("ERREUR - mode_auth = $mode_auth - Je ne connais pas ce mode d'authentification - Vérifiez parameters.yml");
+            throw new AuthenticationException("mode_auth = $mode_auth - Je ne connais pas ce mode d'authentification");
+        };
+
+        // Authentification Remote
+        if ($remote_user != null)
+        {
+            $repository = $this->em->getRepository(Sso::class);
+            $sso = $repository->findOneBy(['eppn' => $remote_user]);
+
+            // Pas de sso --> nouveau compte ou nouvel eppn !
+            if ($sso == null)
+            {
+                // Récupérer les headers dans la session
+                //SHIB $this->shibbHeadersToSession($request);
+                $request->getSession()->set('eppn',$remote_user);
+                $request->getSession()->set('mail',$mail);
+                throw new UsernameNotFoundException();
+            }
+            $individu = $sso->getIndividu();
+            if ($individu instanceof Individu)
+            {
+                return new SelfValidatingPassport(new UserBadge($individu->getIdIndividu()),
+                [
+                    new GramcBadge($this->sj, $individu)
+                ]);
+            }
+            else
+            {
+                // Ecrit le eppn dans le journal et refuse l'authentification
+                $this->sj->warningMessage("Un utilisateur a tenté de se connecter - eppn = $remote_user, mail = $mail");
+                throw new UsernameNotFoundException("votre compte n'est pas encore opérationnel");
             }
         }
 
@@ -237,7 +247,7 @@ class GramcAuthenticator extends AbstractAuthenticator
                 
             }
         }
-        
+        dd($headers_values);
         $session = $request->getSession();
         foreach($headers_values as $h => $v) {
             $session->set($h, $v);

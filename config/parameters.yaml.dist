@@ -154,6 +154,21 @@ parameters:
     # Durée de vie du mot de passe temporaire géré par gramc
     pwd_duree: P30D
     
+    # AUTHENTIFICATION
+    #
+    # Actuellement deux authentifications supportées:
+    #
+    #    - SAML2 (Fédération d'identité/Renater)
+    #    - OPENID (Indigo-Iam)
+
+    mode_auth: ''
+    #mode_auth: 'saml2'
+    #mode_auth: 'openid'
+
+    # Utile SEULEMENT si SAML2/Fédération Renater
+    # ===========================================
+    #
+    #        Les IDP les plus importants - Sur la fédération de dev on se limite aux comptes CRU on sait qu'ils fonctionnent
     
     # Les IDP les plus importants - Sur la fédération de dev on se limite aux comptes CRU on sait qu'ils fonctionnent
     IDPprod:

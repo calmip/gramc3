@@ -132,6 +132,7 @@ services:
     App\Security\GramcAuthenticator:
         arguments:
             $knl_debug: '%kernel.debug%'
+            $mode_auth: '%mode_auth%'
     
     # Commandes
     app.gramc.sendamail:

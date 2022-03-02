@@ -35,4 +35,5 @@ twig:
        rapport_dactivite: '%rapport_dactivite%'
        fichier_attache: '%fichier_attache%'
        coll_login: '%coll_login%'
+       mode_auth: '%mode_auth%'
        

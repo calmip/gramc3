@@ -41,14 +41,15 @@ class LoginController extends AbstractController
                                 private TokenStorageInterface $ts)
     {}
 
-    /** 
-     * @Route("/login", name="connexionshiblogin",methods={"GET"})
+    /**
+     * Login "remote" - saml2 (shibboleth) ou openid (iam)
+     * 
+     * @Route("/login", name="remlogin",methods={"GET"})
      * Method({"GET"})
      */
-    public function shibloginAction(Request $request): Response
+    public function remLoginAction(Request $request): Response
     {
-        $this->sj->InfoMessage("shiblogin d'un utilisateur");
-        //dd($request);
+        $this->sj->InfoMessage("remote login d'un utilisateur");
         if( $request->getSession()->has('url') )
             return $this->redirect( $request->getSession()->get('url') );
         else
@@ -128,7 +129,7 @@ class LoginController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $url    =   $request->getSchemeAndHttpHost();
             $url    .= '/Shibboleth.sso/Login?target=';
-            $url    .= $this->generateUrl('connexionshiblogin');
+            $url    .= $this->generateUrl('remlogin');
 
             if ($form->getData()['data'] != 'WAYF') {
                 $url = $url . '&providerId=' . $form->getData()['data'];
