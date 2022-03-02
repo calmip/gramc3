@@ -283,7 +283,6 @@ class ServiceSessions
             $sess_act = $this->getSessionCourante();
             if ($sess_act != null) {
                 $hparannee=$sess_act->getHParAnnee();
-                $president=$sess_act->getPresident();
             };
             $session = new Session();
             $debut = $grdt;

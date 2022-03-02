@@ -149,3 +149,6 @@ services:
 
     App\Command\Brouillage:
         tags: ["console.command"]
+
+    App\Command\KeepOnly:
+        tags: ["console.command"]
