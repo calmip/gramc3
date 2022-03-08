@@ -92,7 +92,7 @@ class StatistiquesController extends AbstractController
     }
 
     /**
-      * @Route("/{annee}", name="statistiques",methods={"GET"})
+      * @Route("/{annee}", name="statistiques",methods={"GET","POST"})
       * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
       */
     public function indexAction(Request $request, $annee=null)
@@ -586,7 +586,7 @@ class StatistiquesController extends AbstractController
     }
 
     /**
-     * @Route("/{annee}/laboratoire", name="statistiques_laboratoire",methods={"GET"})
+     * @Route("/{annee}/laboratoire", name="statistiques_laboratoire",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
     public function laboratoireAction(Request $request, $annee)
@@ -595,7 +595,7 @@ class StatistiquesController extends AbstractController
     }
 
     /**
-     * @Route("/{annee}/etablissement", name="statistiques_etablissement",methods={"GET"})
+     * @Route("/{annee}/etablissement", name="statistiques_etablissement",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
     public function etablissementAction(Request $request, $annee)
@@ -604,7 +604,7 @@ class StatistiquesController extends AbstractController
     }
 
     /**
-     * @Route("/{annee}/thematique", name="statistiques_thematique",methods={"GET"})
+     * @Route("/{annee}/thematique", name="statistiques_thematique",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
     public function thematiqueAction(Request $request, $annee)
@@ -613,7 +613,7 @@ class StatistiquesController extends AbstractController
     }
 
     /**
-     * @Route("/{annee}/metathematique", name="statistiques_metathematique",methods={"GET"})
+     * @Route("/{annee}/metathematique", name="statistiques_metathematique",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
     public function metathematiqueAction(Request $request, $annee)
@@ -642,7 +642,7 @@ class StatistiquesController extends AbstractController
     }
 
     /**
-     * @Route("/{annee}/metathematique_csv", name="statistiques_métathématique_csv",methods={"GET"})
+     * @Route("/{annee}/metathematique_csv", name="statistiques_métathématique_csv",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
     public function metathematiqueCSVAction(Request $request, $annee)
@@ -651,7 +651,7 @@ class StatistiquesController extends AbstractController
     }
 
     /**
-     * @Route("/{annee}/thematique_csv", name="statistiques_thématique_csv",methods={"GET"})
+     * @Route("/{annee}/thematique_csv", name="statistiques_thématique_csv",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
     public function thematiqueCSVAction(Request $request, $annee)
@@ -660,7 +660,7 @@ class StatistiquesController extends AbstractController
     }
 
     /**
-     * @Route("/{annee}/laboratoire_csv", name="statistiques_laboratoire_csv",methods={"GET"})
+     * @Route("/{annee}/laboratoire_csv", name="statistiques_laboratoire_csv",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
     public function laboratoireCSVAction(Request $request, $annee)
@@ -669,7 +669,7 @@ class StatistiquesController extends AbstractController
     }
 
     /**
-     * @Route("/{annee}/etablissement_csv", name="statistiques_établissement_csv",methods={"GET"})
+     * @Route("/{annee}/etablissement_csv", name="statistiques_établissement_csv",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
     public function etablissementCSVAction(Request $request, $annee)
