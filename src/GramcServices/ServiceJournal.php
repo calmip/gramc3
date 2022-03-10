@@ -35,7 +35,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationException;
 
 /********************
- * Ce service est utilisé pour gérer le journal système
+ * Ce service est utilisé pour insérer des messages dans le journal système
  ********************/
 
 class ServiceJournal
@@ -65,7 +65,7 @@ class ServiceJournal
      * return l'objet inséré
      *
      ***/
-    private function journalMessage($message, $niveau)
+    private function journalMessage($message, $niveau): Journal
     {
         $rs    = $this->rs;
         $log   = $this->log;
@@ -115,10 +115,10 @@ class ServiceJournal
         return $journal;
     }
 
-    public function emergencyMessage($message)
+    public function emergencyMessage($message): Journal
     {
         $this->log->emergency($message);
-        $this->journalMessage($message, Journal::EMERGENCY);
+        return $this->journalMessage($message, Journal::EMERGENCY);
     }
 
     public function alertMessage($message)
@@ -127,40 +127,40 @@ class ServiceJournal
         $this->journalMessage($message, Journal::ALERT);
     }
 
-    public function criticalMessage($message)
+    public function criticalMessage($message): Journal
     {
         $this->log->critical($message);
-        $this->journalMessage($message, Journal::CRITICAL);
+        return $this->journalMessage($message, Journal::CRITICAL);
     }
 
-    public function errorMessage($message)
+    public function errorMessage($message): Journal
     {
         $this->log->error($message);
-        $this->journalMessage($message, Journal::ERROR);
+        return $this->journalMessage($message, Journal::ERROR);
     }
 
-    public function warningMessage($message)
+    public function warningMessage($message): Journal
     {
         $this->log->warning($message);
-        $this->journalMessage($message, Journal::WARNING);
+        return $this->journalMessage($message, Journal::WARNING);
     }
 
-    public function noticeMessage($message)
+    public function noticeMessage($message): Journal
     {
         $this->log->notice($message);
-        $this->journalMessage($message, Journal::NOTICE);
+        return $this->journalMessage($message, Journal::NOTICE);
     }
 
-    public function infoMessage($message)
+    public function infoMessage($message): Journal
     {
         $this->log->info($message);
-        $this->journalMessage($message, Journal::INFO);
+        return $this->journalMessage($message, Journal::INFO);
     }
 
-    public function debugMessage($message)
+    public function debugMessage($message): Journal
     {
         $this->log->debug($message);
-        $this->journalMessage($message, Journal::DEBUG);
+        return $this->journalMessage($message, Journal::DEBUG);
     }
 
     /************************
