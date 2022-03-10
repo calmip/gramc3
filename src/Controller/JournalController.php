@@ -25,15 +25,18 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 use App\Utils\Functions;
 use App\Entity\Journal;
 use App\Form\SelectJournalType;
+use Symfony\Component\Form\FormInterface;
+
 
 /**
  * Journal controller.
@@ -51,7 +54,7 @@ class JournalController extends AbstractController
      * @Route("/list", name="journal_list", methods={"GET","POST"})
      * Method({"GET", "POST"})
      */
-    public function listAction(Request $request)
+    public function listAction(Request $request): Response
     {
         $data = $this->index($request);
 
@@ -74,7 +77,7 @@ class JournalController extends AbstractController
      * Method({"GET", "POST"})
      */
 
-    public function indexAction(Request $request)
+    public function indexAction(Request $request): Response
     {
         $data = $this->index($request);
 
@@ -94,7 +97,7 @@ class JournalController extends AbstractController
      * @Route("/new", name="journal_new", methods={"GET","POST"})
      * Method({"GET", "POST"})
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request): Response
     {
         $journal = new Journal();
         $form = $this->createForm('App\Form\JournalType', $journal);
@@ -120,7 +123,7 @@ class JournalController extends AbstractController
      * @Route("/{id}", name="journal_show", methods={"GET"})
      * Method("GET")
      */
-    public function showAction(Journal $journal)
+    public function showAction(Journal $journal): Response
     {
         $deleteForm = $this->createDeleteForm($journal);
 
@@ -136,7 +139,7 @@ class JournalController extends AbstractController
      * @Route("/{id}/edit", name="journal_edit", methods={"GET","POST"})
      * Method({"GET", "POST"})
      */
-    public function editAction(Request $request, Journal $journal)
+    public function editAction(Request $request, Journal $journal): Response
     {
         $deleteForm = $this->createDeleteForm($journal);
         $editForm = $this->createForm('App\Form\JournalType', $journal);
@@ -161,7 +164,7 @@ class JournalController extends AbstractController
      * @Route("/{id}", name="journal_delete", methods={"DELETE"})
      * Method("DELETE")
      */
-    public function deleteAction(Request $request, Journal $journal)
+    public function deleteAction(Request $request, Journal $journal): Response
     {
         $form = $this->createDeleteForm($journal);
         $form->handleRequest($request);
@@ -182,7 +185,7 @@ class JournalController extends AbstractController
      *
      * @return \Symfony\Component\Form\Form The form
      */
-    private function createDeleteForm(Journal $journal)
+    private function createDeleteForm(Journal $journal): FormInterface
     {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('journal_delete', array('id' => $journal->getId())))
@@ -191,7 +194,7 @@ class JournalController extends AbstractController
         ;
     }
 
-    private function index(Request $request)
+    private function index(Request $request): array
     {
         $ff = $this->ff;
         $em = $this->getDoctrine()->getManager();
