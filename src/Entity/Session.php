@@ -33,7 +33,7 @@ use App\Utils\Functions;
 /**
  * Session
  *
- * @ORM\Table(name="session", indexes={@ORM\Index(name="etat_session", columns={"etat_session"}), @ORM\Index(name="id_president", columns={"id_president"})})
+ * @ORM\Table(name="session", indexes={@ORM\Index(name="etat_session", columns={"etat_session"})} )
  * @ORM\Entity(repositoryClass="App\Repository\SessionRepository")
  * @ORM\HasLifecycleCallbacks()
  */
@@ -89,16 +89,6 @@ class Session
      * @ORM\GeneratedValue(strategy="NONE")
      */
     private $idSession;
-
-    /**
-     * @var \App\Entity\Individu
-     *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Individu",cascade={"persist"})
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="id_president", referencedColumnName="id_individu")
-     * })
-     */
-    private $president;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -313,30 +303,6 @@ class Session
     public function getIdSession()
     {
         return $this->idSession;
-    }
-
-    /**
-     * Set president
-     *
-     * @param \App\Entity\Individu $president
-     *
-     * @return Session
-     */
-    public function setPresident(\App\Entity\Individu $president = null)
-    {
-        $this->president = $president;
-
-        return $this;
-    }
-
-    /**
-     * Get president
-     *
-     * @return \App\Entity\Individu
-     */
-    public function getPresident()
-    {
-        return $this->president;
     }
 
     /**
