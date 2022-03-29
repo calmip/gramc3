@@ -91,7 +91,7 @@ class Rgpd extends Command
     }
 
     // effacer toutes les versions d'un projet
-    private function effacerVersions(Projet $projet, OutputInterface $output)
+    protected function effacerVersions(Projet $projet, OutputInterface $output)
     {
         $em = $this->em;
         
@@ -127,7 +127,7 @@ class Rgpd extends Command
     }
 
     // effacer toutes les rallonges d'une version
-    private function effacerRallonges(Version $version, OutputInterface $output)
+    protected function effacerRallonges(Version $version, OutputInterface $output)
     {
         $em = $this->em;
         
@@ -142,7 +142,7 @@ class Rgpd extends Command
 
     // Effacer les documents joints au projet, ainsi que les infos sur le RA
     // Attention on fait ça AVANT de supprimer les versions !
-    private function effacerDocuments(Projet $projet, OutputInterface $output)
+    protected function effacerDocuments(Projet $projet, OutputInterface $output)
     {
         $sv = $this->sv;
         $sp = $this->sp;
@@ -161,6 +161,131 @@ class Rgpd extends Command
         }
     }
 
+    // Effacer les enregistrements de compta correspondant aux logins
+    protected function effacerCompta(OutputInterface $output, array $loginnames) : void
+    {
+        $em = $this->em;
+        $output->writeln("");
+        $output->writeln("======");
+        $output->writeln("COMPTA");
+        $output->writeln("======");
+        foreach (array_keys($loginnames) as $log)
+        {
+            list($l,$d) = explode('-',$log);
+            if ($d == "0") continue;
+            $annee_limite = intval($d) + 1;
+            $date = new \DateTime("$annee_limite-01-01");
+            $del = $em->getRepository(compta::class)->removeLoginname($l,$date);
+            $output->writeln ("   $log -> lignes supprimées = $del");
+        }
+    }
+
+    // Effacer les projets
+    protected function effacerProjets(OutputInterface $output, array $projets_annee) : void
+    {
+        $em = $this->em;
+        $sj = $this->sj;
+        foreach ($projets_annee as $a => $pAnnee)
+        {
+            $output->writeln("    ANNEE $a");
+
+            // effacer les données des versions de projets
+            foreach ($projets_annee[$a] as $projet) {
+
+                $output->writeln("        PROJET $projet");
+
+                // Effacer la version active
+                $projet->setVersionActive(null);
+
+                // effacer les documents joints
+                $output->writeln("                Documents joints");
+                $this->effacerDocuments($projet, $output);
+
+                // effacer les versions du projet
+                $this->effacerVersions($projet, $output);
+                
+                $sj->infoMessage('Le projet ' . $projet . ' a été effacé ');
+
+                $em->remove($projet);
+                $em->flush();
+
+                $output->writeln("                Projet supprimé");
+            }
+        }
+    }
+
+    //
+    // Construit un tableau des projets classés par années: un tableau indexé par l'année,
+    //           l'année étant l'année de fermeture du projet
+    //
+    // params: $limite  = Les projets terminés APRES $limite sont ignorés.
+    //                    Si $limite = 2020, on ignore les projets dont la dernière version date de 2021 ou plus tard
+    //         $projets = Tableau des projets à classer
+    //         $toSkip  = Tableau des ids de projets à ignorer
+    //
+    // Retour: Le tableau des projets par année
+    //
+    protected function buildProjetsByYear(int $limite, array $projets, array $toSkip = []): array
+    {
+        //
+        // $projets_annee[2015] -> un array contenant la liste des projets arrêtés ou en standby depuis 2015
+        //                on le remplit pour les années des projets à supprimer (<= $anneeAncienne)
+
+        $projets_annee = [];
+        foreach ($projets as $projet) {
+            if (in_array($projet->getIdProjet(),$toSkip))
+            {
+                continue;
+            }
+    
+            $derniereVersion    =  $projet->derniereVersion();
+    
+            // Projet merdique - On le met de côté
+            if ($derniereVersion == null) {
+                $mauvais_projets[$projet->getIdProjet()] = $projet;
+                $annee = 0;
+            }
+            else
+            {
+                $annee = $projet->derniereVersion()->getAnneeSession();
+            }
+    
+            if (intval($annee) <= $limite)
+            {
+                $projets_annee[$annee][] = $projet;
+            }
+
+        }
+        return $projets_annee;
+    }
+
+    //
+    // Construit un tableau des loginnames collaborateurs des projets classés par année
+    //
+    // params: $projetsAnnee = Sortie de buildProjetsByYear
+    //
+    // retour: Le tableau est utilisateurs, sous la forme loginname-2015
+    //
+    
+    protected function buildUsersList(array $projets_annee) : array
+    {
+        $loginnames = [];
+        foreach ($projets_annee as $a => $pAnnee) {
+            foreach ($pAnnee as $p) {
+                //$output->writeln("coucou " . $p->getIdProjet());
+                $loginnames[strtolower($p->getIdProjet()).'-'.$a] = 1;
+                foreach ($p->getVersion() as $v) {
+                    foreach ($v->getCollaborateurVersion() as $cv) {
+                        if ($cv->getLoginname() !== null) {
+                            $loginnames[$cv->getLoginname().'-'.$a] = 1;
+                        }
+                    }
+                }
+            }
+        }
+        return $loginnames;
+    }
+    
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         // this method must return an integer number with the "exit status code"
@@ -190,29 +315,9 @@ class Rgpd extends Command
         
         $allProjets = $em->getRepository(Projet::class)->findAll();
         $mauvais_projets = [];
+        $projets_annee = $this->buildProjetsByYear($anneeLimite, $allProjets);
 
-        // $projets_annee[2015] -> un array contenant la liste des projets arrêtés ou en standby depuis 2015
-        //                on le remplit pour les années des projets à supprimer (<= $anneeAncienne)
-        $projets_annee = [];
-        foreach ($allProjets as $projet) {
-            $derniereVersion    =  $projet->derniereVersion();
-
-            // Projet merdique - On le met de côté
-            if ($derniereVersion == null) {
-                $mauvais_projets[$projet->getIdProjet()] = $projet;
-                $annee = 0;
-            }
-            else
-            {
-                $annee = $projet->derniereVersion()->getAnneeSession();
-            }
-
-            if (intval($annee) <= $anneeLimite)
-            {
-                $projets_annee[$annee][] = $projet;
-            }
-        }
-
+        // On affiche le tableau $projets_annee
         foreach ($projets_annee as $a => $pAnnee) {
             $output->writeln("");
             $output->writeln("PROJETS TERMINES EN $a");
@@ -222,21 +327,8 @@ class Rgpd extends Command
             }
         }
 
-        // Rechercher la liste d'utilisateurs correspondant à ces projets
-        $loginnames = [];
-        foreach ($projets_annee as $a => $pAnnee) {
-            foreach ($pAnnee as $p) {
-                //$output->writeln("coucou " . $p->getIdProjet());
-                $loginnames[strtolower($p->getIdProjet()).'-'.$a] = 1;
-                foreach ($p->getVersion() as $v) {
-                    foreach ($v->getCollaborateurVersion() as $cv) {
-                        if ($cv->getLoginname() !== null) {
-                            $loginnames[$cv->getLoginname().'-'.$a] = 1;
-                        }
-                    }
-                }
-            }
-        }
+        // On les affiche
+        $loginnames = $this->buildUsersList($projets_annee);        
 
         $output->writeln("");
         $output->writeln("=============================================================================================================");
@@ -258,56 +350,11 @@ class Rgpd extends Command
         $sj->infoMessage("EXECUTION DE LA COMMANDE: rgpd $years");
 
 
-        // effacer les données de compta
-        $output->writeln("");
-        $output->writeln("======");
-        $output->writeln("COMPTA");
-        $output->writeln("======");
-        foreach (array_keys($loginnames) as $log)
-        {
-            list($l,$d) = explode('-',$log);
-            if ($d == "0") continue;
-            $annee_limite = intval($a) + 1;
-            $date = new \DateTime("$annee_limite-01-01");
-            $del = $em->getRepository(compta::class)->removeLoginname($l,$date);
-            $output->writeln ("   $log -> lignes supprimées = $del");
-        }
-        
-        foreach ($projets_annee as $a => $pAnnee)
-        {
-            $output->writeln("    ANNEE $a");
-
-            // effacer les données des versions de projets
-            foreach ($projets_annee[$a] as $projet) {
-
-                $output->writeln("        PROJET $projet");
-
-                // version active devrait être null car le projet est terminé
-                if ($projet->getVersionActive() != null)
-                {
-                    $output->writeln("        ATTENTION - Le projet $projet a encore une version active ! (".$projet->getVersionActive().")");
-                    $projet->setVersionActive(null);
-                }
-
-                // effacer les documents joints
-                $output->writeln("                Documents joints");
-                $this->effacerDocuments($projet, $output);
-
-                // effacer les versions du projet
-                $this->effacerVersions($projet, $output);
-                
-                $sj->infoMessage('Le projet ' . $projet . ' a été effacé ');
-
-                $em->remove($projet);
-                $em->flush();
-
-                $output->writeln("                Projet supprimé");
-
-            }
-        }
-        
-        // effacer les utilisateurs qui n'ont pas de projet
+        // effacer les données de compta, les projets, les utilisateurs sans projet
+        $this->effacerCompta($output, $loginnames);
+        $this->effacerProjets($output, $projets_annee);
         $individus_effaces = $sp->effacer_utilisateurs();
+
         $output->writeln("");
         $output->writeln("=================");
         $output->writeln("INDIVIDUS EFFACES");

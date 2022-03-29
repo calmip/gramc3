@@ -1,22 +1,58 @@
 {% extends 'default/base.html.twig' %}
 
+
 {% block body %}
 <h2>Commentaires sur l'année écoulée </h2>
     {% import "default/macros.html.twig" as gramcmacros %}
 
-    {{ gramcmacros.info('',"Entrez ici votre commentaire en tant que membre du Comité d'Attributions, à propos de l'année " ~ commentaireExpert.annee ~ ": sujets qui prennent de l'importance, sujets en perte de vitesse, tendances sur les nombres d'heures demandées et attribuées, etc.") }}
+    <div class="message info">
+        <p>Entrez ici votre commentaire en tant que membre du Comité d'Attributions, à propos de l'année {{commentaireExpert.annee}}:</p>
+        <ul>
+            <li>Sujets qui prennent de l'importance</li>
+            <li>Sujets en perte de vitesse</li>
+            <li>Tendances sur les nombres d'heures demandées et attribuées</li>
+            <li><strong>Choix d'un projet "coup de cœur"</strong> (merci d'en choisir un seul et d'argumenter votre choix)</li>
+        </ul>
 
-	{{ form_start(edit_form) }}
-	    <table>
-	        <tr>
-	            <th>{{ form_label(edit_form.commentaire) }}</th>
-	            <td>{{ form_widget(edit_form.commentaire) }}</td>
-	        </tr>
-	        <tr>
-	            <th>&nbsp;</th>
-	            <td>{{ form_widget(edit_form.submit) }}{{ form_widget(edit_form.reset) }}</td>
-	        </tr>
-	    </table>
+        <h2>Les projets que vous avez expertisés en {{commentaireExpert.annee}} <small>(sessions {% for s in sessions %}{{s}} {% endfor %})</small></h2>
+
+        <table id="old_expertises">
+        <thead>
+            <tr>
+                <th>Projet</th>
+                <th>&nbsp;</th>
+                <th>Titre</th>
+                <th>Responsable</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p, expertise in expertises_annee %}
+            <tr>
+                <td>{{ p }}</td>
+                <td>
+                    <a href="{{ path('consulter_version', { 'id' : p, 'version' : expertise.version } ) }}" target="_blank" >
+                        <img src="{{ asset('icones/consulter.png') }}" alt="Expertiser" title="Lire le projet" class="bouton_poussoir">
+                    </a>
+                </td>
+                <td>{{ expertise.version.projet.titre }}</td>
+                <td>{{ expertise.version.responsable }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+    </div>
+
+    {{ form_start(edit_form) }}
+        <table>
+            <tr>
+                <th>Commentaire</th>
+                <td>{{ form_widget(edit_form.commentaire,{ 'attr': { 'rows' : 12, 'cols' : 70 } }) }}</td>
+            </tr>
+            <tr>
+                <th>&nbsp;</th>
+                <td>{{ form_widget(edit_form.submit) }}{{ form_widget(edit_form.reset) }}</td>
+            </tr>
+        </table>
     {{ form_end(edit_form) }}
 
     {{ gramcmacros.menu(menu) }}

@@ -22,11 +22,12 @@
  *            Nicolas Renon - Université Paul Sabatier - CALMIP
  **/
 
-namespace App\Utils;
+namespace App\GramcServices;
 
 class Etat
 {
     // etats
+    public const INVALIDE                  = 0;
     public const CREE_ATTENTE              = 1;
     public const EDITION_DEMANDE           = 2;
     public const EDITION_EXPERTISE         = 3;
@@ -69,7 +70,7 @@ class Etat
             self::NON_RENOUVELABLE          =>  'NON_RENOUVELABLE',
         ];
 
-    public static function getLibelle($etat)
+    public static function getLibelle($etat): string
     {
         if ($etat != null && array_key_exists($etat, Etat::LIBELLE_ETAT)) {
             return self::LIBELLE_ETAT[$etat];
@@ -78,7 +79,7 @@ class Etat
         }
     }
 
-    public static function getEtat($libelle)
+    public static function getEtat($libelle): int
     {
         $array_flip = array_flip(self::LIBELLE_ETAT);
 

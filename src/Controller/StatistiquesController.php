@@ -81,7 +81,7 @@ class StatistiquesController extends AbstractController
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      * Method({"GET","POST"})
      */
-    public function homepageAction(Request $request)
+    public function homepageAction(Request $request): Response
     {
         return $this->render('default/base_test.html.twig');
 
@@ -95,7 +95,7 @@ class StatistiquesController extends AbstractController
       * @Route("/{annee}", name="statistiques",methods={"GET","POST"})
       * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
       */
-    public function indexAction(Request $request, $annee=null)
+    public function indexAction(Request $request, $annee=null): Response
     {
         $sm      = $this->sm;
         $ss      = $this->ss;
@@ -225,7 +225,7 @@ class StatistiquesController extends AbstractController
      * @Route("/{annee}/repartition", name="statistiques_repartition",methods={"GET"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
-    public function repartitionAction(Request $request, $annee)
+    public function repartitionAction(Request $request, $annee): response
     {
         $sm = $this->sm;
         $ss = $this->ss;
@@ -303,7 +303,7 @@ class StatistiquesController extends AbstractController
      * @Route("/{annee}/collaborateur", name="statistiques_collaborateur",methods={"GET"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
-    public function collaborateurAction(Request $request, $annee)
+    public function collaborateurAction(Request $request, $annee): Response
     {
         $sm = $this->sm;
         $ss = $this->ss;
@@ -548,7 +548,7 @@ class StatistiquesController extends AbstractController
     }
 
     /* Cette fonction est appelée par laboratoireAction, etablissementAction etc. */
-    private function parCritere(Request $request, $annee, $critere, $titre)
+    private function parCritere(Request $request, $annee, $critere, $titre): Response
     {
         $sm = $this->sm;
         $ss = $this->ss;
@@ -589,7 +589,7 @@ class StatistiquesController extends AbstractController
      * @Route("/{annee}/laboratoire", name="statistiques_laboratoire",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
-    public function laboratoireAction(Request $request, $annee)
+    public function laboratoireAction(Request $request, $annee): Response
     {
         return $this->parCritere($request, $annee, "getAcroLaboratoire", "laboratoire");
     }
@@ -598,7 +598,7 @@ class StatistiquesController extends AbstractController
      * @Route("/{annee}/etablissement", name="statistiques_etablissement",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
-    public function etablissementAction(Request $request, $annee)
+    public function etablissementAction(Request $request, $annee): Response
     {
         return $this->parCritere($request, $annee, "getAcroEtablissement", "établissement");
     }
@@ -607,7 +607,7 @@ class StatistiquesController extends AbstractController
      * @Route("/{annee}/thematique", name="statistiques_thematique",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
-    public function thematiqueAction(Request $request, $annee)
+    public function thematiqueAction(Request $request, $annee): Response
     {
         return $this->parCritere($request, $annee, "getAcroThematique", "thématique");
     }
@@ -616,13 +616,13 @@ class StatistiquesController extends AbstractController
      * @Route("/{annee}/metathematique", name="statistiques_metathematique",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
-    public function metathematiqueAction(Request $request, $annee)
+    public function metathematiqueAction(Request $request, $annee): Response
     {
         return $this->parCritere($request, $annee, "getAcroMetaThematique", "métathématique");
     }
 
     /* Cette fonction est appelée par laboratoireCSVAction, etablissementCSVAction etc. */
-    private function parCritereCSV(Request $request, $annee, $critere, $titre)
+    private function parCritereCSV(Request $request, $annee, $critere, $titre): Response
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -645,7 +645,7 @@ class StatistiquesController extends AbstractController
      * @Route("/{annee}/metathematique_csv", name="statistiques_métathématique_csv",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
-    public function metathematiqueCSVAction(Request $request, $annee)
+    public function metathematiqueCSVAction(Request $request, $annee): Response
     {
         return $this->parCritereCSV($request, $annee, "getAcroMetaThematique", "métathématique");
     }
@@ -654,7 +654,7 @@ class StatistiquesController extends AbstractController
      * @Route("/{annee}/thematique_csv", name="statistiques_thématique_csv",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
-    public function thematiqueCSVAction(Request $request, $annee)
+    public function thematiqueCSVAction(Request $request, $annee): Response
     {
         return $this->parCritereCSV($request, $annee, "getAcroThematique", "thématique");
     }
@@ -663,7 +663,7 @@ class StatistiquesController extends AbstractController
      * @Route("/{annee}/laboratoire_csv", name="statistiques_laboratoire_csv",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
-    public function laboratoireCSVAction(Request $request, $annee)
+    public function laboratoireCSVAction(Request $request, $annee): Response
     {
         return $this->parCritereCSV($request, $annee, "getAcroLaboratoire", "laboratoire");
     }
@@ -672,7 +672,7 @@ class StatistiquesController extends AbstractController
      * @Route("/{annee}/etablissement_csv", name="statistiques_établissement_csv",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
-    public function etablissementCSVAction(Request $request, $annee)
+    public function etablissementCSVAction(Request $request, $annee): Response
     {
         return $this->parCritereCSV($request, $annee, "getAcroEtablissement", "établissement");
     }
@@ -684,7 +684,7 @@ class StatistiquesController extends AbstractController
      *            (ex = getAcroLaboratoire())
      * $titre   = Titre du camembert
      */
-    private function statistiques($annee, $critere, $titre = "Titre")
+    private function statistiques($annee, $critere, $titre = "Titre"): array
     {
         $sp          = $this->sp;
         $stats       = $sp->projetsParCritere($annee, $critere);
@@ -731,7 +731,7 @@ class StatistiquesController extends AbstractController
 
     ///////////////////////////////////////////
 
-    private function camembert($data, $acros, $titre = "Titre")
+    private function camembert($data, $acros, $titre = "Titre"): string
     {
         $seuil = array_sum($data) * 0.01;
         $autres = 0;
@@ -808,7 +808,7 @@ class StatistiquesController extends AbstractController
     ////////////////////////////////////////////////////////////////////////////////
 
 
-    private function histogram($titre, $donnees, $legende = "abc")
+    private function histogram($titre, $donnees, $legende = "abc"): string
     {
         // Initialisation du graphique
         \JpGraph\JpGraph::load();
@@ -845,7 +845,7 @@ class StatistiquesController extends AbstractController
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    private function line($titre, $donnees)
+    private function line($titre, $donnees): string
     {
         \JpGraph\JpGraph::load();
         \JpGraph\JpGraph::module('line');

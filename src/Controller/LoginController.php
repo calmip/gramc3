@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Utils\IDP;
+//use App\Utils\IDP;
 use App\Utils\Functions;
 use App\Entity\Scalar;
 use App\Entity\Individu;
@@ -45,7 +45,7 @@ class LoginController extends AbstractController
      * @Route("/login", name="connexionshiblogin",methods={"GET"})
      * Method({"GET"})
      */
-    public function shibloginAction(Request $request)
+    public function shibloginAction(Request $request): Response
     {
         $this->sj->InfoMessage("shiblogin d'un utilisateur");
         //dd($request);
@@ -62,7 +62,7 @@ class LoginController extends AbstractController
      * NOTE - NE PAS renseigner logout: dans security.yaml !
      * 
      **/
-    public function deconnexionAction(Request $request)
+    public function deconnexionAction(Request $request): Response
     {
         $sj = $this->sj;
         $ac = $this->ac;
@@ -86,13 +86,18 @@ class LoginController extends AbstractController
             $session->invalidate();
             return $this->render('default/deconnexion.html.twig');
         }
+
+        // On a cliqué sur Déconnecter alors qu'on n'est pas connecté
+        else {
+            return new RedirectResponse($this->generateUrl('accueil'));
+        }
     }
 
     /** 
      * @Route("/erreur_login", name="erreur_login",methods={"GET"})
      * Method({"GET"})
      */
-    public function erreur_loginAction(Request $request)
+    public function erreur_loginAction(Request $request): Response
     {
         return $this->render('login/erreur_login.html.twig');
     }
@@ -102,7 +107,7 @@ class LoginController extends AbstractController
      *
      * Method({"GET", "POST"})
      */
-    public function loginChoiceAction(Request $request)
+    public function loginChoiceAction(Request $request): Response
     {
         $sj = $this->sj;
         $ff = $this->ff;
@@ -143,7 +148,7 @@ class LoginController extends AbstractController
     /**
     * @Route("/connexion_dbg",name="connexion_dbg", methods={"GET","POST"})
     **/
-    public function connexion_dbgAction(Request $request)
+    public function connexion_dbgAction(Request $request): Response
     {
         $em = $this->getDoctrine()->getManager();
         $ff = $this->ff;
@@ -205,7 +210,7 @@ class LoginController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method("GET")
      */
-    public function sudoAction(Request $request, Individu $individu)
+    public function sudoAction(Request $request, Individu $individu): Response
     {
         $sj = $this->sj;
         $ac = $this->ac;

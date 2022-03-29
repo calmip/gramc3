@@ -25,10 +25,9 @@
 namespace App\GramcServices\Workflow\Version;
 
 use App\GramcServices\Workflow\Transition;
-//use App\App;
 use App\Utils\Functions;
-use App\Utils\Etat;
-use App\Utils\Signal;
+use App\GramcServices\Etat;
+use App\GramcServices\Signal;
 use App\Entity\Version;
 use App\GramcServices\Workflow\Rallonge\RallongeWorkflow;
 use App\GramcServices\Workflow\Projet\ProjetWorkflow;
@@ -38,11 +37,9 @@ class VersionTransition extends Transition
     private static $execute_en_cours     = false;
 
     ////////////////////////////////////////////////////
-    public function canExecute($version)
+    public function canExecute(object $version): bool
     {
-        if (!$version instanceof Version) {
-            throw new \InvalidArgumentException();
-        }
+        $version instanceof Version || throw new \InvalidArgumentException();
 
         // Pour éviter une boucle infinie entre projet et version !
         if (self::$execute_en_cours) {
@@ -67,11 +64,10 @@ class VersionTransition extends Transition
     }
 
     ////////////////////////////////////////////////////
-    public function execute($version)
+    public function execute(object $version): bool
     {
-        if (!$version instanceof Version) {
-            throw new \InvalidArgumentException();
-        }
+        $version instanceof Version || throw new \InvalidArgumentException();
+        
         if (Transition::DEBUG) {
             $this->sj->debugMessage(">>> " .  __FILE__ . ":" . __LINE__ . " $this $version");
         }

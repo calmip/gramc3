@@ -32,8 +32,8 @@ use App\Entity\Thematique;
 
 use App\Utils\Functions;
 use App\Utils\Menu;
-use App\Utils\Etat;
-use App\Utils\Signal;
+use App\GramcServices\Etat;
+use App\GramcServices\Signal;
 use App\GramcServices\ServiceJournal;
 use App\GramcServices\Workflow\Projet\ProjetWorkflow;
 use App\GramcServices\Workflow\Version\VersionWorkflow;
@@ -74,7 +74,7 @@ class WorkflowController extends AbstractController
      * @Route("/", name="workflow_index",methods={"GET","POST"})
      * Method({"GET", "POST"})
      */
-    public function indexAction(Request $request, LoggerInterface $lg)
+    public function indexAction(Request $request, LoggerInterface $lg): Response
     {
         $ff = $this->ff;
         $sj = $this->sj;
@@ -183,7 +183,7 @@ class WorkflowController extends AbstractController
     * @Route("/{id}/modify", name="worklow_modifier_session",methods={"GET","POST"})
     * Method({"GET", "POST"})
     */
-    public function modifySessionAction(Request $request, Session $session, LoggerInterface $lg)
+    public function modifySessionAction(Request $request, Session $session, LoggerInterface $lg): Response
     {
         $sj = $this->sj;
         $ff = $this->ff;
@@ -276,7 +276,7 @@ class WorkflowController extends AbstractController
      * @Route("/{id}/signal", name="workflow_signal_projet",methods={"GET","POST"})
      * Method({"GET", "POST"})
      */
-    public function signalProjetAction(Request $request, Projet $projet, LoggerInterface $lg)
+    public function signalProjetAction(Request $request, Projet $projet, LoggerInterface $lg): Response
     {
         $sj = $this->sj;
         $ff = $this->ff;
@@ -392,7 +392,6 @@ class WorkflowController extends AbstractController
                                 'RENOUVELABLE'                  =>   Etat::RENOUVELABLE,
                                 'NON_RENOUVELABLE'              =>   Etat::NON_RENOUVELABLE,
                                 'EDITION_DEMANDE'               =>   Etat::EDITION_DEMANDE,
-                                'EDITION_TEST   '               =>   Etat::EDITION_TEST,
                                 'EDITION_EXPERTISE'             =>   Etat::EDITION_EXPERTISE,
                                 'EN_ATTENTE'                    =>   Etat::EN_ATTENTE,
                                 'ACTIF'                         =>   Etat::ACTIF,
@@ -433,7 +432,6 @@ class WorkflowController extends AbstractController
                     'choices' =>
                                 [
                                 'EDITION_DEMANDE'               =>   Etat::EDITION_DEMANDE,
-                                'EDITION_TEST'                  =>   Etat::EDITION_TEST,
                                 'EDITION_EXPERTISE'             =>   Etat::EDITION_EXPERTISE,
                                 'EN_ATTENTE'                    =>   Etat::EN_ATTENTE,
                                 'ACTIF'                         =>   Etat::ACTIF,
@@ -473,7 +471,7 @@ class WorkflowController extends AbstractController
     * @Route("/{id}/reset", name="workflow_reset_version",methods={"GET","POST"})
     * Method({"GET", "POST"})
     */
-    public function resetVersionAction(Request $request, Version $version, LoggerInterface $lg)
+    public function resetVersionAction(Request $request, Version $version, LoggerInterface $lg): Response
     {
         $em = $this->getdoctrine()->getManager();
 

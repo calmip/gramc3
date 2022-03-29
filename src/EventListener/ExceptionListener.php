@@ -1,10 +1,33 @@
 <?php
 
+/**
+ * This file is part of GRAMC (Computing Ressource Granting Software)
+ * GRAMC stands for : Gestion des Ressources et de leurs Attributions pour Mésocentre de Calcul
+ *
+ * GRAMC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ *  GRAMC is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with GRAMC.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *  authors : Emmanuel Courcelle - C.N.R.S. - UMS 3667 - CALMIP
+ *            Nicolas Renon - Université Paul Sabatier - CALMIP
+ **/
 
-
-/****
- * Ce service traite les exceptionsss
- ************/
+/***
+ * class ExceptionListener = Ce service intercepte les exceptions et les traite de la manière suivante:
+ *                            - En mode DEBUG, affiche l'exception et sort
+ *                            - En mode NON DEBUG, écrit dans le fichier de log ou dans le journal, puis redirige vers la page d'accueil
+ *
+ *
+ **********************/
  
 // src/EventListener/ExceptionListener.php
 namespace App\EventListener;
@@ -13,7 +36,7 @@ use App\Entity\Individu;
 use App\Utils\Functions;
 use App\GramcServices\ServiceJournal;
 
-use App\Exception\UserException;
+//use App\Exception\UserException;
 
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;

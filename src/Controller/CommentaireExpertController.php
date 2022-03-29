@@ -25,84 +25,86 @@
 namespace App\Controller;
 
 use App\Entity\CommentaireExpert;
+use App\Entity\Expertise;
 use App\Utils\Functions;
 use App\GramcServices\ServiceJournal;
+use App\GramcServices\GramcDate;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
-/****
-* Fichier généré automatiquement et modifié par E.Courcelle
-*
-* Les méthodes createDeleteForm, deleteAction, editAction, newAction, showAction ont été générées
-* automatiquement et ne sont pas utilisées (pas de routage)
-*
-*************/
 
 /**
- * Commentaireexpert controller.
+ * Commentaireexpert controller. Les experts peuvent entrer un commentaire
+ * concernant la session d'attribution
  *
  * @Route("commentaireexpert")
  */
 class CommentaireExpertController extends AbstractController
 {
     public function __construct(
+        private GramcDate $grdt,
         private ServiceJournal $sj,
         private TokenStorageInterface $tok
     ) {}
 
-    /**
-     * Displays a form to edit an existing commentaireExpert entity.
-     *
-     */
-    public function editAction(Request $request, CommentaireExpert $commentaireExpert)
-    {
-        $deleteForm = $this->createDeleteForm($commentaireExpert);
-        $editForm = $this->createForm('App\Form\CommentaireExpertType', $commentaireExpert);
-        $editForm->handleRequest($request);
-
-        if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
-
-            return $this->redirectToRoute('commentaireexpert_edit', array('id' => $commentaireExpert->getId()));
-        }
-
-        return $this->render('commentaireexpert/edit.html.twig', array(
-            'commentaireExpert' => $commentaireExpert,
-            'edit_form' => $editForm->createView(),
-            'delete_form' => $deleteForm->createView(),
-        ));
-    }
-
-    /**
+   /**
+    * 
     * Modification d'un commentaire par l'utilisateur connecté
     *
     * @Route("/{id}/modif", name="commentaireexpert_modify", methods={"GET","POST"})
     * @Security("is_granted('ROLE_EXPERT')")
     * Method({"GET", "POST"})
     ************************/
-    public function modifyAction(Request $request, CommentaireExpert $commentaireExpert)
+    public function modifyAction(Request $request, CommentaireExpert $commentaireExpert): Response
     {
+        $em = $this->getDoctrine()->getManager();
         $sj = $this->sj;
-        $token = $this->tok;
+        $token = $this->tok->getToken();
+        $moi = $token->getUser();
 
         // Chaque expert ne peut accéder qu'à son commentaire à lui
-        $moi = $token->getUser();
         if ($moi->getId() != $commentaireExpert->getExpert()->getId()) {
             $sj->throwException(__METHOD__ . ':' . __LINE__ .' problème avec ACL');
         }
 
-        $em = $this->getDoctrine()->getManager();
+        // Retour sur mes expertises pour les trois dernières sessions
+        $expertises = $em->getRepository(Expertise::class)->findExpertisesByExpertForAllSessions($moi);
+
+        // On ne garde que les expertises de cette année, soit pour 2021: 21A, 21B et 22A
+        $expertises_annee = [];
+        $annee = $commentaireExpert->getAnnee() - 2000;
+        $annee_proch = $annee + 1;
+        $sessions = [ $annee.'A', $annee.'B', $annee_proch.'A'];
+        foreach ($expertises as $e)
+        {
+            try
+            {
+                $v = $e->getVersion();
+                if (in_array($v->getSession()->getIdSession(),$sessions))
+                {
+                    $expertises_annee[$v->getProjet()->getIdProjet()] = $e;
+                }
+            }
+            catch ( \Exception $e)
+            {
+                continue;
+            }
+        }
+        
+        
+        // Le formulaire
         $editForm = $this->createForm('App\Form\CommentaireExpertType', $commentaireExpert, ["only_comment" => true]);
         $editForm->handleRequest($request);
 
+        $err = false;
         if ($editForm->isSubmitted() && $editForm->isValid()) {
             $commentaireExpert->setMajStamp(new \DateTime());
             $em->flush();
-            return $this->redirectToRoute('commentaireexpert_modify', array('id' => $commentaireExpert->getId()));
         }
 
         $menu = [];
@@ -110,94 +112,9 @@ class CommentaireExpertController extends AbstractController
             'menu'              => $menu,
             'commentaireExpert' => $commentaireExpert,
             'edit_form'         => $editForm->createView(),
+            'expertises_annee'  => $expertises_annee,
+            'sessions'          => $sessions
         ));
-    }
-
-    /**
-     * Creates a new commentaireExpert entity.
-     *
-     */
-    public function newAction(Request $request)
-    {
-        $commentaireExpert = new Commentaireexpert();
-        $form = $this->createForm('App\Form\CommentaireExpertType', $commentaireExpert);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($commentaireExpert);
-            $em->flush();
-
-            return $this->redirectToRoute('commentaireexpert_show', array('id' => $commentaireExpert->getId()));
-        }
-
-        return $this->render('commentaireexpert/new.html.twig', array(
-            'commentaireExpert' => $commentaireExpert,
-            'form' => $form->createView(),
-        ));
-    }
-
-    /**
-     * Lists all commentaireExpert entities.
-     *
-     */
-    public function indexAction()
-    {
-        $em = $this->getDoctrine()->getManager();
-
-        $commentaireExperts = $em->getRepository('App:CommentaireExpert')->findAll();
-
-        return $this->render('commentaireexpert/index.html.twig', array(
-            'commentaireExperts' => $commentaireExperts,
-        ));
-    }
-
-    /**
-     * Finds and displays a commentaireExpert entity.
-     *
-     */
-    public function showAction(CommentaireExpert $commentaireExpert)
-    {
-        $deleteForm = $this->createDeleteForm($commentaireExpert);
-
-        return $this->render('commentaireexpert/show.html.twig', array(
-            'commentaireExpert' => $commentaireExpert,
-            'delete_form' => $deleteForm->createView(),
-        ));
-    }
-
-    /**
-     * Deletes a commentaireExpert entity.
-     *
-     */
-    public function deleteAction(Request $request, CommentaireExpert $commentaireExpert)
-    {
-        $form = $this->createDeleteForm($commentaireExpert);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->remove($commentaireExpert);
-            $em->flush();
-        }
-
-        return $this->redirectToRoute('commentaireexpert_index');
-    }
-
-    /**
-     * Creates a form to delete a commentaireExpert entity.
-     *
-     * @param CommentaireExpert $commentaireExpert The commentaireExpert entity
-     *
-     * @return \Symfony\Component\Form\Form The form
-     */
-    private function createDeleteForm(CommentaireExpert $commentaireExpert)
-    {
-        return $this->createFormBuilder()
-            ->setAction($this->generateUrl('commentaireexpert_delete', array('id' => $commentaireExpert->getId())))
-            ->setMethod('DELETE')
-            ->getForm()
-        ;
     }
 
     /**
@@ -210,9 +127,10 @@ class CommentaireExpertController extends AbstractController
     * @Security("is_granted('ROLE_EXPERT')")
     * Method({"GET", "POST"})
     **********/
-    public function creeOuModifAction(Request $request, $annee)
+    public function creeOuModifAction(Request $request, $annee): Response
     {
-        $token = $this->tok;
+        $token = $this->tok->getToken();
+        $grdt = $this->grdt;
         $em = $this->getDoctrine()->getManager();
 
         $moi = $token->getUser();
@@ -221,7 +139,7 @@ class CommentaireExpertController extends AbstractController
             $commentaireExpert = new Commentaireexpert();
             $commentaireExpert->setAnnee($annee);
             $commentaireExpert->setExpert($moi);
-            $commentaireExpert->setMajStamp(new \DateTime());
+            $commentaireExpert->setMajStamp($grdt);
             $em->persist($commentaireExpert);
             $em->flush();
         }
@@ -236,7 +154,7 @@ class CommentaireExpertController extends AbstractController
     * @Security("is_granted('ROLE_OBS')")
     * Method({"GET", "POST"})
     **********/
-    public function listeAction(Request $request, $annee)
+    public function listeAction(Request $request, $annee): Response
     {
         $em = $this->getDoctrine()->getManager();
         $commentairesExperts = $em->getRepository('App:CommentaireExpert')->findBy(['annee' => $annee ]);

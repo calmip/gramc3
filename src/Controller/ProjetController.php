@@ -65,8 +65,8 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 
 use Symfony\Component\Config\Definition\Exception\Exception;
 use App\Utils\Functions;
-use App\Utils\Etat;
-use App\Utils\Signal;
+use App\GramcServices\Etat;
+use App\GramcServices\Signal;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -122,7 +122,7 @@ class ProjetController extends AbstractController
      * Method("GET")
      * @Security("is_granted('ROLE_OBS')")
      */
-    public function indexAction()
+    public function indexAction(): Response
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -143,7 +143,7 @@ class ProjetController extends AbstractController
      * @Route("/rgpd", name="rgpd", methods={"GET"})
      * 
      */
-    public function rgpdAction(Request $request)
+    public function rgpdAction(Request $request): Response
     {
         return $this->render('projet/rgpd.html.twig');
     }
@@ -155,7 +155,7 @@ class ProjetController extends AbstractController
      * Method({"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
-    public function sessionCSVAction(Session $session)
+    public function sessionCSVAction(Session $session): Response
     {
         $em = $this->getDoctrine()->getManager();
         $sp = $this->sp;
@@ -218,7 +218,7 @@ class ProjetController extends AbstractController
      * Method({"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
-    public function tousCSVAction()
+    public function tousCSVAction(): Response
     {
         $sd = $this->sd;
         $em = $this->getDoctrine()->getManager();
@@ -275,7 +275,7 @@ class ProjetController extends AbstractController
      * @Route("/{id}/fermer", name="fermer_projet", methods={"GET","POST"})
      * Method({"GET","POST"})
      */
-    public function fermerAction(Projet $projet, Request $request)
+    public function fermerAction(Projet $projet, Request $request): Response
     {
         if ($request->isMethod('POST')) {
             $confirmation = $request->request->get('confirmation');
@@ -304,7 +304,7 @@ class ProjetController extends AbstractController
      * @Route("/{id}/nepasterminer", name="nepasterminer_projet", methods={"GET"})
      * Method({"GET"})
      */
-    public function nepasterminerAction(Projet $projet, Request $request)
+    public function nepasterminerAction(Projet $projet, Request $request): Response
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -326,7 +326,7 @@ class ProjetController extends AbstractController
      * @Route("/{id}/onpeutterminer", name="onpeutterminer_projet", methods={"GET","POST"})
      * Method({"GET","POST"})
      */
-    public function onpeutterminerAction(Projet $projet, Request $request)
+    public function onpeutterminerAction(Projet $projet, Request $request): Response
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -348,7 +348,7 @@ class ProjetController extends AbstractController
      * @Route("/{id}/back", name="back_version", methods={"GET","POST"})
      * Method({"GET","POST"})
      */
-    public function backAction(Version $version, Request $request)
+    public function backAction(Version $version, Request $request): Response
     {
         if ($request->isMethod('POST')) {
             $confirmation = $request->request->get('confirmation');
@@ -385,7 +385,7 @@ class ProjetController extends AbstractController
      * @Route("/{id}/fwd", name="fwd_version", methods={"GET","POST"})
      * Method({"GET","POST"})
      */
-    public function fwdAction(Version $version, Request $request, LoggerInterface $lg)
+    public function fwdAction(Version $version, Request $request, LoggerInterface $lg): Response
     {
         $se = $this->se;
         $em = $this->getDoctrine()->getManager();
@@ -419,7 +419,7 @@ class ProjetController extends AbstractController
      * Method({"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
-    public function sessionAction(Request $request)
+    public function sessionAction(Request $request): Response
     {
         $em             = $this->getDoctrine()->getManager();
         $ss             = $this->ss;
@@ -439,14 +439,13 @@ class ProjetController extends AbstractController
         $nombreSignes   = 0;
         $nombreRapports = 0;
         $nombreExperts  = 0;
-        $nombreAcceptes = 0;
+        $nombreAcceptesSess = 0;
+        $nombreAcceptesFil = 0;
 
-        $nombreEditionTest   = 0;
-        $nombreExpertiseTest = 0;
         $nombreEditionFil    = 0;
         $nombreExpertiseFil  = 0;
-        $nombreEdition       = 0;
-        $nombreExpertise     = 0;
+        $nombreEditionSess   = 0;
+        $nombreExpertiseSess = 0;
         $nombreAttente       = 0;
         $nombreActif         = 0;
         $nombreNouvelleDem   = 0;
@@ -484,20 +483,14 @@ class ProjetController extends AbstractController
         }
 
         //$items  =   [];
-        $versions_suppl = [];
         foreach ($versions as $version) {
-            $id_version                   = $version->getIdVersion();
-            $projet                       = $version->getProjet();
-            $version_suppl                = [];
-            $version_suppl['metaetat']    = $sp->getMetaEtat($projet);
-            $version_suppl['consocalcul'] = $sp->getConsoCalculVersion($version);
-            $version_suppl['isnouvelle']  = $sv->isNouvelle($version);
-            $version_suppl['issigne']     = $sv->isSigne($version);
-            $version_suppl['sizesigne']   = $sv->getSizeSigne($version);
+            $id_version = $version->getIdVersion();
+            $projet = $version->getProjet();
+            $etat = $version->getEtatVersion();
+            $type = $version->getProjet()->getTypeProjet();
+            $metaetat = $sp->getMetaEtat($projet);
 
             $annee_rapport = $version->getAnneeSession()-1;
-            $version_suppl['rapport']     = $sp->getRapport($projet, $annee_rapport);
-            $version_suppl['size_rapport']= $sp->getSizeRapport($projet, $annee_rapport);
 
             //Modif Callisto Septembre 2019
             $typeMetadata = $version -> getDataMetaDataFormat();
@@ -505,79 +498,80 @@ class ProjetController extends AbstractController
             $tailleDatasets = $version -> getDataTailleDatasets();
             $demHeures  +=  $version->getDemHeures();
             $attrHeures +=  $version->getAttrHeures();
+            
             if ($sv->isNouvelle($version) == true) {
                 $nombreNouveaux++;
-            }
+            };
+            
             if ($version->getPrjThematique() != null) {
                 $statsThematique[$version->getPrjThematique()->getLibelleThematique()]++;
-            }
+            };
+            
             if ($version->getPrjRattachement() != null) {
                 $statsRattachement[$version->getPrjRattachement()->getLibelleRattachement()]++;
-            }
+            };
 
             if ($sv->isSigne($version)) {
                 $nombreSignes++;
-            }
+            };
             if ($sp->hasRapport($projet, $annee_rapport)) {
                 $nombreRapports++;
-            }
+            };
             if ($version->hasExpert()) {
                 $nombreExperts++;
-            }
+            };
+            
             //if( $version->getAttrAccept() ) $nombreAcceptes++;
-            if ($version_suppl['metaetat'] == 'ACCEPTE') {
-                $nombreAcceptes++;
-            }
+            if ($metaetat == 'ACCEPTE') {
+                if ($type == Projet::PROJET_FIL) {
+                    $nombreAcceptesFil++;
+                }
+                if ($type == Projet::PROJET_SESS) {
+                    $nombreAcceptesSess++;
+                }
+            };
+        
             if ($version->getProjet() != null && $version->getProjet()->getEtatProjet() == $termine) {
                 $nombreTermines++;
-            }
+            };
 
-            $etat = $version->getEtatVersion();
-            $type = $version->getProjet()->getTypeProjet();
-
-
-            // TODO Que c'est compliqué !
-            //      Plusieurs workflows => pas d'états différents
-            //      Utiliser un tableau
-            if ($type == Projet::PROJET_TEST) {
-                if ($etat == Etat::EDITION_TEST) {
-                    $nombreEditionTest++;
-                } elseif ($etat == Etat::EXPERTISE_TEST) {
-                    $nombreExpertiseTest++;
-                }
-            } elseif ($type == Projet::PROJET_FIL) {
-                if ($etat == Etat::EDITION_TEST) {
+            if ($type == Projet::PROJET_FIL) {
+                if ($etat == Etat::EDITION_DEMANDE) {
                     $nombreEditionFil++;
-                } elseif ($etat == Etat::EXPERTISE_TEST) {
+                };
+                if ($etat == Etat::EDITION_EXPERTISE) {
                     $nombreExpertiseFil++;
                 }
-            } elseif ($type == Projet::PROJET_SESS) {
+            };
+
+            if ($type == Projet::PROJET_SESS) {
                 if ($etat == Etat::EDITION_DEMANDE) {
-                    $nombreEdition++;
+                    $nombreEditionSess++;
                 } elseif ($etat == Etat::EDITION_EXPERTISE) {
-                    $nombreExpertise++;
+                    $nombreExpertiseSess++;
                 }
             };
 
             if ($etat == Etat::ACTIF) {
                 $nombreActif++;
-            } elseif ($etat == Etat::NOUVELLE_VERSION_DEMANDEE) {
-                $nombreNouvelleDem++;
-            } elseif ($etat == Etat::EN_ATTENTE) {
-                $nombreAttente++;
-            } elseif ($etat == Etat::TERMINE) {
-                $nombreTermine++;
-            } elseif ($etat == Etat::ANNULE) {
-                $nombreAnnule++;
+                    
             };
 
-            //$items[]    =
-            //        [
-            //        'version'       =>  $version,
-            //        'sizeSigne'     =>  $version->getSizeSigne(),
-            //        //'sizeRapport'   =>  $version->getSizeRapport(),//
-            //        ];
-            $versions_suppl[$id_version] = $version_suppl;
+            if ($etat == Etat::NOUVELLE_VERSION_DEMANDEE) {
+                $nombreNouvelleDem++;
+            };
+            
+            if ($etat == Etat::EN_ATTENTE) {
+                $nombreAttente++;
+            };
+            
+            if ($etat == Etat::TERMINE) {
+                $nombreTermine++;
+            };
+            
+            if ($etat == Etat::ANNULE) {
+                $nombreAnnule++;
+            };
         }
 
         foreach ($thematiques as $thematique) {
@@ -590,10 +584,8 @@ class ProjetController extends AbstractController
         return $this->render(
             'projet/session.html.twig',
             [
-            'nombreEditionTest'   => $nombreEditionTest,
-            'nombreExpertiseTest' => $nombreExpertiseTest,
-            'nombreEdition'       => $nombreEdition,
-            'nombreExpertise'     => $nombreExpertise,
+            'nombreEditionSess'   => $nombreEditionSess,
+            'nombreExpertiseSess' => $nombreExpertiseSess,
             'nombreAttente'       => $nombreAttente,
             'nombreActif'         => $nombreActif,
             'nombreNouvelleDem'   => $nombreNouvelleDem,
@@ -605,7 +597,6 @@ class ProjetController extends AbstractController
             'idSession'           => $session->getIdSession(), // formulaire
             'session'             => $session,
             'versions'            => $versions,
-            'versions_suppl'      => $versions_suppl,
             'demHeures'           => $demHeures,
             'attrHeures'          => $attrHeures,
             'nombreProjets'       => $nombreProjets,
@@ -617,7 +608,8 @@ class ProjetController extends AbstractController
             'nombreSignes'        => $nombreSignes,
             'nombreRapports'      => $nombreRapports,
             'nombreExperts'       => $nombreExperts,
-            'nombreAcceptes'      => $nombreAcceptes,
+            'nombreAcceptesSess'      => $nombreAcceptesSess,
+            'nombreAcceptesFil'   => $nombreAcceptesFil,
             'nombreTermines'      => $nombreTermines,
             'showRapport'         => (substr($session->getIdSession(), 2, 1) == 'A') ? true : false,
         ]
@@ -634,7 +626,7 @@ class ProjetController extends AbstractController
      * Method({"GET","POST"})
      *
      */
-    public function resumesAction($annee)
+    public function resumesAction($annee): Response
     {
         $sp    = $this->sp;
         $sj    = $this->sj;
@@ -653,7 +645,7 @@ class ProjetController extends AbstractController
             $v = empty($p['vb']) ? $p['va'] : $p['vb'];
 
             // On saute les projets en édition !
-            if ($v->getEtatVersion() == Etat::EDITION_DEMANDE || $v->getEtatVersion() == Etat::EDITION_TEST) {
+            if ($v->getEtatVersion() == Etat::EDITION_DEMANDE) {
                 continue;
             }
             $thematique= $v->getPrjThematique();
@@ -707,7 +699,7 @@ class ProjetController extends AbstractController
      * @Security("is_granted('ROLE_OBS')")
      */
 
-    public function anneeAction(Request $request)
+    public function anneeAction(Request $request): Response
     {
         $sd = $this->sd;
         $ss = $this->ss;
@@ -762,7 +754,7 @@ class ProjetController extends AbstractController
      * @Security("is_granted('ROLE_OBS')")
      */
 
-    public function donneesAction(Request $request)
+    public function donneesAction(Request $request): Response
     {
         $ss    = $this->ss;
         $sp    = $this->sp;
@@ -788,7 +780,7 @@ class ProjetController extends AbstractController
      * Method({"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
-    public function donneesCSVAction($annee)
+    public function donneesCSVAction($annee): Response
     {
         $sp                  = $this->sp;
         list($projets, $total)= $sp->donneesParProjet($annee);
@@ -866,7 +858,7 @@ class ProjetController extends AbstractController
      * Method({"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
-    public function anneeCSVAction($annee)
+    public function anneeCSVAction($annee): Response
     {
         $sp      = $this->sp;
         $paa     = $sp->projetsParAnnee($annee);
@@ -933,7 +925,7 @@ class ProjetController extends AbstractController
      * @Route("/{id}/rapport/{annee}", defaults={"annee"=0}, name="rapport", methods={"GET"})
      * Method("GET")
      */
-    public function rapportAction(Version $version, Request $request, $annee)
+    public function rapportAction(Version $version, Request $request, $annee): Response
     {
         $sp = $this->sp;
         $sj = $this->sj;
@@ -966,7 +958,7 @@ class ProjetController extends AbstractController
      * @Security("is_granted('ROLE_OBS')")
      * Method("GET")
      */
-    public function signatureAction(Version $version, Request $request)
+    public function signatureAction(Version $version, Request $request): Response
     {
         $sv = $this->sv;
         return Functions::pdf($sv->getSigne($version));
@@ -979,7 +971,7 @@ class ProjetController extends AbstractController
      * @Security("is_granted('ROLE_DEMANDEUR') or is_granted('ROLE_OBS')")
      * Method("GET")
      */
-    public function documentAction(Version $version, Request $request)
+    public function documentAction(Version $version, Request $request): Response
     {
         $sv = $this->sv;
         return Functions::pdf($sv->getDocument($version));
@@ -992,7 +984,7 @@ class ProjetController extends AbstractController
      * Method("GET")
      * @Security("is_granted('ROLE_OBS')")
      */
-    public function tousAction()
+    public function tousAction(): Response
     {
         $em      = $this->getDoctrine()->getManager();
         $projets = $em->getRepository(Projet::class)->findAll();
@@ -1052,7 +1044,7 @@ class ProjetController extends AbstractController
      * @Route("/gerer", name="gerer_projets", methods={"GET"})
      * Method("GET")
      */
-    public function gererAction()
+    public function gererAction(): Response
     {
         $em = $this->getDoctrine()->getManager();
         $projets = $em->getRepository(Projet::class)->findAll();
@@ -1068,7 +1060,7 @@ class ProjetController extends AbstractController
      * @Route("/new", name="projet_new", methods={"GET","POST"})
      * Method({"GET", "POST"})
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request): Response
     {
         $projet = new Projet(Projet::PROJET_SESS);
         $form = $this->createForm('App\Form\ProjetType', $projet);
@@ -1096,7 +1088,7 @@ class ProjetController extends AbstractController
      * @Security("is_granted('ROLE_DEMANDEUR')")
      *
      */
-    public function avantNouveauAction(Request $request, $type)
+    public function avantNouveauAction(Request $request, $type): Response
     {
         $sm = $this->sm;
         $sj = $this->sj;
@@ -1134,7 +1126,7 @@ class ProjetController extends AbstractController
      * @Security("is_granted('ROLE_DEMANDEUR')")
      *
      */
-    public function nouveauAction(Request $request, $type)
+    public function nouveauAction(Request $request, $type): Response
     {
         $sd = $this->sd;
         $sm = $this->sm;
@@ -1168,18 +1160,7 @@ class ProjetController extends AbstractController
         $projet   = new Projet($type);
         $projet->setIdProjet($sp->NextProjetId($annee, $type));
         $projet->setNepasterminer(false);
-
-        switch ($type) {
-            case Projet::PROJET_SESS:
-            case Projet::PROJET_FIL:
-                $projet->setEtatProjet(Etat::RENOUVELABLE);
-                break;
-            case Projet::PROJET_TEST:
-                $projet->setEtatProjet(Etat::NON_RENOUVELABLE);
-                break;
-            default:
-               $sj->throwException(__METHOD__ . ":" . __LINE__ . " mauvais type de projet " . Functions::show($type));
-        }
+        $projet->setEtatProjet(Etat::RENOUVELABLE);
 
         // Ecriture du projet dans la BD
         $em->persist($projet);
@@ -1192,11 +1173,7 @@ class ProjetController extends AbstractController
         $version->setSession($session);
         $sv->setLaboResponsable($version, $token->getUser());
 
-        if ($type == Projet::PROJET_TEST) {
-            $version->setEtatVersion(Etat::EDITION_TEST);
-        } else {
-            $version->setEtatVersion(Etat::EDITION_DEMANDE);
-        }
+        $version->setEtatVersion(Etat::EDITION_DEMANDE);
 
         // Ecriture de la version dans la BD
         $em->persist($version);
@@ -1233,7 +1210,7 @@ class ProjetController extends AbstractController
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
 
-    public function consoAction(Projet $projet, $loginname="nologin", $annee=null)
+    public function consoAction(Projet $projet, $loginname="nologin", $annee=null): Response
     {
         $sp = $this->sp;
         $sj = $this->sj;
@@ -1275,7 +1252,7 @@ class ProjetController extends AbstractController
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
 
-    public function consoRessourceAction(Projet $projet, $utype, $ress_id, $loginname, $annee)
+    public function consoRessourceAction(Projet $projet, $utype, $ress_id, $loginname, $annee): Response
     {
         $em = $this->getDoctrine()->getManager();
         $sp = $this->sp;
@@ -1356,7 +1333,7 @@ class ProjetController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      */
 
-    public function consoTousAction($ressource, $annee, $mois=false)
+    public function consoTousAction($ressource, $annee, $mois=false): Response
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -1394,7 +1371,7 @@ class ProjetController extends AbstractController
      * Method("GET")
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
-    public function telechargerModeleAction()
+    public function telechargerModeleAction(): Response
     {
         return $this->render('projet/telecharger_modele.html.twig');
     }

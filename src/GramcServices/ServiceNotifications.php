@@ -60,7 +60,7 @@ class ServiceNotifications
      * param $users                     Liste d'utilisateurs à qui envoyer des emails (cf mailUsers)
      *
      *********/
-    public function sendMessage($twig_sujet, $twig_contenu, $params, $users = null)
+    public function sendMessage($twig_sujet, $twig_contenu, $params, $users = null): void
     {
         $twig    = $this->twig;
         $body    = $twig->render($twig_contenu, $params);
@@ -76,7 +76,7 @@ class ServiceNotifications
      * param $users                     Liste d'utilisateurs à qui envoyer des emails (cf mailUsers)
      *
      *********/
-    public function sendMessageFromString($twig_sujet, $twig_contenu, $params, $users = null)
+    public function sendMessageFromString($twig_sujet, $twig_contenu, $params, $users = null): void
     {
         $twig         = $this->twig;
         $sujet_tmpl   = $twig->createTemplate($twig_sujet);
@@ -89,15 +89,8 @@ class ServiceNotifications
 
 
     // Bas niveau: Envoi du message
-    private function sendRawMessage($subject, $body, $users = null)
+    private function sendRawMessage($subject, $body, $users = null): void
     {
-        // Notifiations désactivées pour l'instant - Swift_Message n'existe plus !
-        //return;
-        //$message = \Swift_Message::newInstance()
-        //            ->setSubject( $subject )
-        //            ->setFrom( $this->mailfrom )
-        //            ->setBody($body ,'text/plain');
-
         $message = new Email();
         $message -> subject($subject);
         $message -> text($body);
@@ -163,7 +156,7 @@ class ServiceNotifications
     // Output: Liste d'individus (pour passer à sendMessage)
     //
 
-    public function mailUsers($mail_roles = [], $objet = null)
+    public function mailUsers($mail_roles = [], $objet = null): array
     {
         $em    = $this->em;
         $users = [];
@@ -273,7 +266,7 @@ class ServiceNotifications
     // obtenir des adresses mail à partir des utilisateurs
     //
 
-    public function usersToMail($users, $warning = false)
+    public function usersToMail($users, $warning = false): array
     {
         $mail   =   [];
 

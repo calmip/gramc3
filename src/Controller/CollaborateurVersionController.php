@@ -28,8 +28,8 @@ use App\Entity\CollaborateurVersion;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Collaborateurversion controller.
@@ -45,7 +45,7 @@ class CollaborateurVersionController extends AbstractController
      * @Route("/", name="collaborateurversion_index", methods={"GET"})
      * Method("GET")
      */
-    public function indexAction()
+    public function indexAction(): Response
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -62,7 +62,7 @@ class CollaborateurVersionController extends AbstractController
      * @Route("/new", name="collaborateurversion_new", methods={"GET", "POST"})
      * Method({"GET", "POST"})
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request): Response
     {
         $collaborateurVersion = new Collaborateurversion();
         $form = $this->createForm('App\Form\CollaborateurVersionType', $collaborateurVersion);
@@ -88,7 +88,7 @@ class CollaborateurVersionController extends AbstractController
      * @Route("/{id}", name="collaborateurversion_show", methods={"GET"})
      * Method("GET")
      */
-    public function showAction(CollaborateurVersion $collaborateurVersion)
+    public function showAction(CollaborateurVersion $collaborateurVersion): Response
     {
         $deleteForm = $this->createDeleteForm($collaborateurVersion);
 
@@ -104,7 +104,7 @@ class CollaborateurVersionController extends AbstractController
      * @Route("/{id}/edit", name="collaborateurversion_edit", methods={"GET","POST"})
      * Method({"GET", "POST"})
      */
-    public function editAction(Request $request, CollaborateurVersion $collaborateurVersion)
+    public function editAction(Request $request, CollaborateurVersion $collaborateurVersion): Response
     {
         $deleteForm = $this->createDeleteForm($collaborateurVersion);
         $editForm = $this->createForm('App\Form\CollaborateurVersionType', $collaborateurVersion);
@@ -129,7 +129,7 @@ class CollaborateurVersionController extends AbstractController
      * @Route("/{id}", name="collaborateurversion_delete", methods={"DELETE"})
      * Method("DELETE")
      */
-    public function deleteAction(Request $request, CollaborateurVersion $collaborateurVersion)
+    public function deleteAction(Request $request, CollaborateurVersion $collaborateurVersion): Response
     {
         $form = $this->createDeleteForm($collaborateurVersion);
         $form->handleRequest($request);
@@ -150,7 +150,7 @@ class CollaborateurVersionController extends AbstractController
      *
      * @return \Symfony\Component\Form\Form The form
      */
-    private function createDeleteForm(CollaborateurVersion $collaborateurVersion)
+    private function createDeleteForm(CollaborateurVersion $collaborateurVersion): Response
     {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('collaborateurversion_delete', array('id' => $collaborateurVersion->getId())))

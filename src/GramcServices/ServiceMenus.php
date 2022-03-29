@@ -44,8 +44,8 @@ use App\Entity\Rallonge;
 use App\Entity\Version;
 use App\Entity\Individu;
 use App\Entity\RapportActivite;
-use App\Utils\Etat;
-use App\Utils\Signal;
+use App\GramcServices\Etat;
+use App\GramcServices\Signal;
 use App\Utils\Functions;
 use App\GramcServices\Workflow\Session\SessionWorkflow;
 
@@ -82,7 +82,7 @@ class ServiceMenus
     /*******************
      * Page d'accueil principale
      ***************************************************/
-    public function demandeur()
+    public function demandeur(): array
     {
         $menu['name']      = 'projet_accueil';
         $menu['lien']      = 'Demandeur';
@@ -97,7 +97,7 @@ class ServiceMenus
         return $menu;
     }
 
-    public function expert()
+    public function expert():array
     {
         $menu['name']      = 'expertise_liste';
         $menu['lien']      = 'Expert';
@@ -112,7 +112,7 @@ class ServiceMenus
         return $menu;
     }
 
-    public function administrateur()
+    public function administrateur():array
     {
         $menu['name']      = 'admin_accueil';
         $menu['lien']      = 'Administrateur';
@@ -127,7 +127,7 @@ class ServiceMenus
         return $menu;
     }
 
-    public function president()
+    public function president():array
     {
         $menu['name']      = 'president_accueil';
         $menu['lien']      = 'Président';
@@ -142,7 +142,7 @@ class ServiceMenus
         return $menu;
     }
 
-    public function aide()
+    public function aide():array
     {
         $menu['name']      = 'aide';
         $menu['lien']      = 'Aide';
@@ -156,7 +156,7 @@ class ServiceMenus
      ***************************************************/
 
     // Nouvelle session
-    public function ajouterSession()
+    public function ajouterSession():array
     {
         $session      = $this->ss->getSessionCourante();
         $etat_session = $session->getEtatSession();
@@ -176,7 +176,7 @@ class ServiceMenus
     }
 
     // Modifier la session
-    public function modifierSession()
+    public function modifierSession():array
     {
         $session        = $this->ss->getSessionCourante();
         $workflow       = $this->sw;
@@ -196,7 +196,7 @@ class ServiceMenus
     }
 
     // Début de la saisie
-    public function demarrerSaisie()
+    public function demarrerSaisie():array
     {
         $session        = $this->ss->getSessionCourante();
         $workflow       = $this->sw;
@@ -217,7 +217,7 @@ class ServiceMenus
     }
 
     // Fin de la saisie
-    public function terminerSaisie()
+    public function terminerSaisie():array
     {
         $session        = $this->ss->getSessionCourante();
         $workflow       = $this->sw;
@@ -238,7 +238,7 @@ class ServiceMenus
     }
 
     // Envoyer les expertises
-    public function envoyerExpertises()
+    public function envoyerExpertises():array
     {
         $session        = $this->ss->getSessionCourante();
         $workflow       = $this->sw;
@@ -265,7 +265,7 @@ class ServiceMenus
     }
 
     // Commentaire de session - accessible à partir de l'écran Président
-    public function commSess()
+    public function commSess():array
     {
         $session      = $this->ss->getSessionCourante();
         $workflow     = $this->sw;
@@ -292,7 +292,7 @@ class ServiceMenus
     }
 
     // Activer la session
-    public function activerSession()
+    public function activerSession():array
     {
         $session        = $this->ss->getSessionCourante();
         $workflow       = $this->sw;
@@ -318,7 +318,7 @@ class ServiceMenus
      * Gestion des projets et des versions
      ***************************************************/
 
-    public function nouveau_projet($type)
+    public function nouveau_projet($type):array
     {
         switch ($type) {
         case Projet::PROJET_FIL:
@@ -340,7 +340,7 @@ class ServiceMenus
      *     - Créé seulement par un permanent, qui devient responsable du projet
      *
      */
-    private function nouveau_projet_sess()
+    private function nouveau_projet_sess():array
     {
         $menu   =   [];
         $menu['commentaire']    =   "Vous ne pouvez pas créer de nouveau projet actuellement";
@@ -377,7 +377,7 @@ class ServiceMenus
      *     - Créé par n'importe qui, qui devient responsable du projet
      *
      */
-    public function nouveau_projet_test()
+    public function nouveau_projet_test():array
     {
         $menu   =   [];
         $menu['commentaire']    =   "Vous ne pouvez pas créer de nouveau projet test actuellement";
@@ -423,7 +423,7 @@ class ServiceMenus
      *     - Créé seulement par un permanent, qui devient responsable du projet
      *
      */
-    private function nouveau_projet_fil()
+    private function nouveau_projet_fil():array
     {
         $menu   =   [];
 
@@ -453,7 +453,7 @@ class ServiceMenus
 
     ////////////////////////////////
 
-    private function peut_creer_projets($user = null)
+    private function peut_creer_projets($user = null): bool
     {
         if ($user == null) {
             $user = $this->token->getUser();
@@ -472,7 +472,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function individu_gerer()
+    public function individu_gerer():array
     {
         $menu['name']   =   'individu_gerer';
         $menu['commentaire']    =   "Gérer les utilisateurs de gramc";
@@ -490,7 +490,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function gerer_sessions()
+    public function gerer_sessions(): array
     {
         $menu['name']   =   'gerer_sessions';
         $menu['commentaire']    =   "Gérer les sessions d'attribution";
@@ -509,7 +509,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function bilan_session()
+    public function bilan_session():array
     {
         $menu['name']   =   'bilan_session';
         $menu['commentaire']    =   "Générer et télécharger le bilan de session";
@@ -528,7 +528,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function bilan_annuel()
+    public function bilan_annuel():array
     {
         $menu['name']   =   'bilan_annuel';
         $menu['commentaire']    =   "Générer et télécharger le bilan annuel";
@@ -547,7 +547,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function projet_session()
+    public function projet_session():array
     {
         $menu['name']   =   'projet_session';
         $menu['commentaire']    =   "Gérer les projets par session";
@@ -565,7 +565,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function projet_annee()
+    public function projet_annee():array
     {
         $menu['name']        =   'projet_annee';
         $menu['commentaire'] =   "Gérer les projets par année";
@@ -583,7 +583,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function projet_donnees()
+    public function projet_donnees():array
     {
         $menu['name']        =   'projet_donnees';
         $menu['commentaire'] =   "Projets ayant des demandes en stockage ou partage de données";
@@ -600,7 +600,7 @@ class ServiceMenus
     }
     //////////////////////////////////////
 
-    public function projet_tous()
+    public function projet_tous():array
     {
         $menu['name']   =   'projet_tous';
         $menu['commentaire']    =   "Liste complète des projets";
@@ -619,7 +619,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function journal()
+    public function journal():array
     {
         $menu['name']   =   'journal_list';
         $menu['commentaire']    =   "Lire le journal des actions";
@@ -637,7 +637,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function info()
+    public function info():array
     {
         $menu['name']        = 'phpinfo';
         $menu['commentaire'] = "Exécuter phpinfo()";
@@ -653,7 +653,7 @@ class ServiceMenus
     }
     //////////////////////////////////////
 
-    public function laboratoires()
+    public function laboratoires():array
     {
         $menu['name']   =   'gerer_laboratoires';
         $menu['commentaire']    =   "Gérer la liste des laboratoires enregistrés";
@@ -669,7 +669,7 @@ class ServiceMenus
         return $menu;
     }
 
-    public function formations()
+    public function formations():array
     {
         $menu['name']       =   'gerer_formations';
         $menu['commentaire']=   "Gérer la liste des formations";
@@ -687,7 +687,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function thematiques()
+    public function thematiques():array
     {
         $menu['name']   =   'gerer_thematiques';
         $menu['commentaire']    =   "Gérer la liste des thématiques";
@@ -705,7 +705,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function rattachements()
+    public function rattachements():array
     {
         $menu['name']   =   'gerer_rattachements';
         $menu['commentaire']    =   "Gérer la liste des rattachements";
@@ -723,7 +723,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function metathematiques()
+    public function metathematiques():array
     {
         $menu['name']   =   'gerer_metaThematiques';
         $menu['commentaire']    =   "Gérer la liste des méta-thématiques";
@@ -744,7 +744,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function changer_responsable(Version $version)
+    public function changer_responsable(Version $version):array
     {
         $menu['name']   =   'changer_responsable';
         $menu['param']  =   $version->getIdVersion();
@@ -785,7 +785,7 @@ class ServiceMenus
 
     ////////////////////////////////////
 
-    public function modifier_version(Version $version)
+    public function modifier_version(Version $version):array
     {
         $menu['name']   = 'modifier_version';
         $menu['param']  = $version->getIdVersion();
@@ -830,7 +830,7 @@ class ServiceMenus
 
     ///////////////////////////////////////////////////////////
 
-    public function modifier_collaborateurs(Version $version)
+    public function modifier_collaborateurs(Version $version):array
     {
         $user = $this->token->getUser();
 
@@ -854,7 +854,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////
 
-    public function televerser_rapport_annee(Version $version)
+    public function televerser_rapport_annee(Version $version):array
     {
         $menu['name']           =   'televerser_rapport_annee';
         $menu['ok']             =   false;
@@ -912,7 +912,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////
 
-    public function telecharger_modele_rapport_dactivite(Version $version)
+    public function telecharger_modele_rapport_dactivite(Version $version):array
     {
         $menu['name']           =   'telecharger_modele';
         $menu['lien']           =   "Télécharger un modèle de rapport d'activité";
@@ -948,7 +948,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////
 
-    public function gerer_publications(Projet $projet)
+    public function gerer_publications(Projet $projet):array
     {
         $menu['name']  = 'gerer_publications';
         $menu['param'] = $projet->getIdProjet();
@@ -982,7 +982,7 @@ class ServiceMenus
 
     /////////////////////////////////////////////////////////////////////
 
-    public function renouveler_version(Version $version)
+    public function renouveler_version(Version $version):array
     {
         $menu['name']           =   'renouveler_version';
         $menu['param']          =   $version->getIdVersion();
@@ -1018,7 +1018,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////
 
-    public function envoyer_expert(Version $version)
+    public function envoyer_expert(Version $version):array
     {
         if ($version == null) {
             return [];
@@ -1063,9 +1063,9 @@ class ServiceMenus
             $this->sj->warningMessage(__METHOD__ . ':' . __LINE__ ." Le responsable " . $this->token->getUser()
                 . " du projet " . $projet . " ne peut pas créer des projets");
         } elseif ($etatVersion ==  Etat::EDITION_EXPERTISE) {
-		$menu['raison'] = "Le projet a déjà été envoyé à l'expert !";
-	} elseif ($isProjetTest == true) {
-		$menu['raison'] = "ATTENTION - PAS DE PROJETS TESTS ACTUELLEMENT - Adressez-vous au support";
+        $menu['raison'] = "Le projet a déjà été envoyé à l'expert !";
+    } elseif ($isProjetTest == true) {
+        $menu['raison'] = "ATTENTION - PAS DE PROJETS TESTS ACTUELLEMENT - Adressez-vous au support";
         } elseif ($isProjetTest == true && $etatVersion ==  Etat::ANNULE) {
             $menu['raison'] = "Le projet test a été annulé !";
         } elseif ($isProjetTest == true && $etatVersion !=  Etat::EDITION_TEST) {
@@ -1086,7 +1086,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function affectation()
+    public function affectation():array
     {
         $session = $this->ss->getSessionCourante();
 
@@ -1107,7 +1107,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function affectation_test()
+    public function affectation_test():array
     {
         //$session = $this->ss->getSessionCourante();
 
@@ -1136,7 +1136,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function avancer()
+    public function avancer():array
     {
         //$session = $this->ss->getSessionCourante();
         $menu['name']           =   'param_avancer';
@@ -1155,7 +1155,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function mailToResponsables()
+    public function mailToResponsables():array
     {
         $session = $this->ss->getSessionCourante();
         if ($session != null) {
@@ -1185,7 +1185,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function mailToResponsablesFiche()
+    public function mailToResponsablesFiche():array
     {
         $session = $this->ss->getSessionCourante();
         if ($session != null) {
@@ -1216,7 +1216,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function nettoyer()
+    public function nettoyer():array
     {
         $menu['name']            = 'rgpd';
         $menu['lien']            = "Nettoyage pour conformité au RGPD";
@@ -1234,7 +1234,7 @@ class ServiceMenus
 
     /////////////////////////////////////////////////////////////////////////////////
 
-    public function connexions()
+    public function connexions():array
     {
         $menu['name']           =   'connexions';
         $menu['lien']           =   "Personnes connectées";
@@ -1252,7 +1252,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function presidents()
+    public function presidents():array
     {
         $menu['name']           =   'individu_president';
         $menu['lien']           =   "Attribuer le rôle de président";
@@ -1270,7 +1270,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function rallonge_creation(Projet $projet)
+    public function rallonge_creation(Projet $projet):array
     {
         $sp = $this->sp;
 
@@ -1306,7 +1306,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function rallonge_modifier(Rallonge $rallonge)
+    public function rallonge_modifier(Rallonge $rallonge):array
     {
         $menu['name']           =   'rallonge_modifier';
         $menu['param']          =   $rallonge->getIdRallonge();
@@ -1356,7 +1356,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function rallonge_envoyer(Rallonge $rallonge)
+    public function rallonge_envoyer(Rallonge $rallonge):array
     {
         $menu['name']        = 'avant_rallonge_envoyer';
         $menu['param']       = $rallonge->getIdRallonge();
@@ -1406,7 +1406,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function affectation_rallonges()
+    public function affectation_rallonges():array
     {
         //$session = $this->ss->getSessionCourante();
         $menu['name']           =   'rallonge_affectation';
@@ -1425,7 +1425,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function televersement_generique()
+    public function televersement_generique():array
     {
         $menu['name']           =   'televersement_generique';
         $menu['lien']           =   "Téléversements génériques";
@@ -1444,7 +1444,7 @@ class ServiceMenus
     //////////////////////////////////////////////////////////////////////////////
 
 
-    public function telechargement_fiche(Version $version)
+    public function telechargement_fiche(Version $version):array
     {
         $menu['name']           =   'version_fiche_pdf';
         $menu['param']          =   $version->getIdVersion();
@@ -1472,7 +1472,7 @@ class ServiceMenus
     //////////////////////////////////////////////////////////////////////////////
 
 
-    public function televersement_fiche(Version $version)
+    public function televersement_fiche(Version $version):array
     {
         $menu['name']           =   'version_televersement_fiche';
         $menu['param']          =   $version->getIdVersion();
@@ -1499,7 +1499,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function rallonge_expertiser(Rallonge $rallonge)
+    public function rallonge_expertiser(Rallonge $rallonge):array
     {
         $menu['name']        =   'rallonge_expertiser';
         $menu['param']       =   $rallonge->getIdRallonge();
@@ -1553,7 +1553,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques_etablissement($annee = null)
+    public function statistiques_etablissement($annee = null):array
     {
         if ($annee == null) {
             $annee=$this->grdt->showYear();
@@ -1577,7 +1577,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques_laboratoire($annee = null)
+    public function statistiques_laboratoire($annee = null):array
     {
         if ($annee == null) {
             $annee=$this->grdt->showYear();
@@ -1601,7 +1601,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques_thematique($annee = null)
+    public function statistiques_thematique($annee = null):array
     {
         if ($annee == null) {
             $annee=$this->grdt->showYear();
@@ -1625,7 +1625,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques_metathematique($annee = null)
+    public function statistiques_metathematique($annee = null):array
     {
         if ($annee == null) {
             $annee=$this->grdt->showYear();
@@ -1649,7 +1649,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques()
+    public function statistiques():array
     {
         $menu['name']           =   'statistiques';
         $menu['lien']           =   "Statistiques";
@@ -1668,7 +1668,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function publications()
+    public function publications():array
     {
         $menu['name']           =   'publication_annee';
         $menu['lien']           =   "Publications";
@@ -1686,7 +1686,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques_collaborateur($annee = null)
+    public function statistiques_collaborateur($annee = null):array
     {
         if ($annee == null) {
             $annee=$this->grdt->showYear();
@@ -1710,7 +1710,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques_repartition($annee = null)
+    public function statistiques_repartition($annee = null):array
     {
         if ($annee == null) {
             $annee=$this->grdt->showYear();
@@ -1735,7 +1735,7 @@ class ServiceMenus
     /*
      * Demandes concernant stockage et partage des données
      */
-    public function donnees(Version $version)
+    public function donnees(Version $version):array
     {
         $menu['name']  = 'donnees';
         $menu['param'] = $version->getIdVersion();

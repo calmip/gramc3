@@ -73,28 +73,23 @@ class GramcDateTime extends \DateTime
     }
 
 
-    public function showDate($format = "d F Y")
+    public function showDate($format = "d F Y"): string
     {
         return $this->format($format);
     }
 
-    public function showDateTime($format = "d F Y H:i:s")
+    public function showDateTime($format = "d F Y H:i:s"): string
     {
         return $this->format($format);
     }
 
-    public function showYear($format = "Y")
+    public function showYear($format = "Y"): string
     {
         return $this->format($format);
     }
 
-    public function showMonth($format = "m")
+    public function showMonth($format = "m"): string
     {
         return $this->format($format);
     }
-
-    //static public function get()
-    //{
-    //    return new GramcDateTime();
-    //}
 }

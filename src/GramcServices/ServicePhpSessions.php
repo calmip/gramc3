@@ -45,7 +45,7 @@ class ServicePhpSessions
      *        pas accès au service ServicePhpSessions.
      *
      *****************************************/
-    static public function clearPhpSessions()
+    static public function clearPhpSessions(): bool
     {
         $dir = session_save_path();
         $scan = scandir($dir);
@@ -70,7 +70,7 @@ class ServicePhpSessions
      *        des moyens plus symfoniques de faire la même chose !
      * 
      **********************************************************/
-    public function getConnexions()
+    public function getConnexions(): array
     {
         $em = $this->em;
         $sj = $this->sj;

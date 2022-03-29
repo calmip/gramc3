@@ -55,9 +55,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\File\File;
 
 use App\Utils\Functions;
-use App\Utils\Etat;
-use App\Utils\Signal;
-use App\Utils\IndividuForm;
+use App\GramcServices\Etat;
+use App\GramcServices\Signal;
+//use App\Utils\IndividuForm;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -74,11 +74,21 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use App\Form\IndividuFormType;
+//use App\Form\IndividuFormType;
 
 use App\Validator\Constraints\PagesNumber;
-
 use Knp\Snappy\Pdf;
+
+/******************************************
+ *
+ * VersionController = Les contrôleurs utilisés avec les versions de projets
+ *                     Partie COMMUNE A TOUS LES MESOCENTRES
+ *
+ * Voir aussi les fichiers mesocentres/xxx/src/Controller/VersionModifController.php
+ * pour des contrôleurs spécifiques à chaque mésocentre
+ * (ce qui concerne la modification des versions)
+ *
+ **********************************************************************/
 
 /**
  * Version controller.
@@ -106,12 +116,12 @@ class VersionController extends AbstractController
 
     /**
      * Lists all version entities.
-     *
+     * TODO - INUTILISé, donc SUPPRIMER
+     * 
      * @Route("/", name="version_index",methods={"GET"})
-     * Method("GET")
      * @Security("is_granted('ROLE_ADMIN')")
      */
-    public function indexAction()
+    public function indexAction(): Response
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -126,10 +136,9 @@ class VersionController extends AbstractController
      * Creates a new version entity.
      *
      * @Route("/new", name="version_new",methods={"GET","POST"})
-     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request): Response
     {
         $version = new Version();
         $form = $this->createForm('App\Form\VersionType', $version);
@@ -150,7 +159,7 @@ class VersionController extends AbstractController
     }
 
     /**
-     * Supprimer version
+     * Affichage d'un écran de confirmation avant la suppression d'une version de projet
      *
      * @Route("/{id}/avant_supprimer/{rtn}",
      *        name="version_avant_supprimer",
@@ -160,7 +169,7 @@ class VersionController extends AbstractController
      * Method("GET")
      *
      */
-    public function avantSupprimerAction(Version $version, $rtn)
+    public function avantSupprimerAction(Version $version, $rtn): Response
     {
         $sm = $this->sm;
         $sj = $this->sj;
@@ -175,8 +184,8 @@ class VersionController extends AbstractController
             'version/avant_supprimer.html.twig',
             [
                 'version' => $version,
-                'rtn'   => $rtn,
-                ]
+                'rtn' => $rtn,
+            ]
         );
     }
 
@@ -185,10 +194,9 @@ class VersionController extends AbstractController
      *
      * @Route("/{id}/supprimer/{rtn}", defaults= {"rtn" = "X" }, name="version_supprimer",methods={"GET"} )
      * @Security("is_granted('ROLE_DEMANDEUR')")
-     * Method("GET")
      *
      */
-    public function supprimerAction(Version $version, $rtn)
+    public function supprimerAction(Version $version, $rtn): Response
     {
         $em = $this->getDoctrine()->getManager();
         $sm = $this->sm;
@@ -265,12 +273,12 @@ class VersionController extends AbstractController
 
     /**
      * Finds and displays a version entity.
+     * TODO - PAS UTILISE - A JETER
      *
      * @Route("/{id}/show", name="version_show",methods={"GET"})
-     * Method("GET")
      * @Security("is_granted('ROLE_ADMIN')")
      */
-    public function showAction(Version $version)
+    public function showAction(Version $version): Response
     {
         $deleteForm = $this->createDeleteForm($version);
 
@@ -281,13 +289,13 @@ class VersionController extends AbstractController
     }
 
     /**
-     * Affiche au format pdf
+     * Convertit et affiche la version au format pdf
      *
      * @Route("/{id}/pdf", name="version_pdf",methods={"GET"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      * Method("GET")
      */
-    public function pdfAction(Version $version, Request $request)
+    public function pdfAction(Version $version, Request $request): Response
     {
         $sv = $this->sv;
         $sp = $this->sp;
@@ -350,13 +358,13 @@ class VersionController extends AbstractController
     }
 
     /**
-     * Finds and displays a version entity.
+     * Téléchargement de la fiche Projet
      *
      * @Route("/{id}/fiche_pdf", name="version_fiche_pdf",methods={"GET"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      * Method("GET")
      */
-    public function fichePdfAction(Version $version, Request $request)
+    public function fichePdfAction(Version $version, Request $request): Response
     {
         $sm   = $this->sm;
         $sj   = $this->sj;
@@ -389,16 +397,13 @@ class VersionController extends AbstractController
         return Functions::pdf($pdf);
     }
 
-    ///////////////////////////////////////////////////////////////
-
     /**
-     * Téléverser le rapport d'activité de l'année précedente
+     * Téléversement de la fiche projet
      *
      * @Route("/{id}/televersement_fiche", name="version_televersement_fiche",methods={"GET","POST"})
-     * Method({"POST","GET"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
-    public function televersementFicheAction(Request $request, Version $version)
+    public function televersementFicheAction(Request $request, Version $version): Response
     {
         $em = $this->getDoctrine()->getManager();
         $sm = $this->sm;
@@ -503,16 +508,14 @@ class VersionController extends AbstractController
         );
     }
 
-
-
     /**
      * Displays a form to edit an existing version entity.
-     *
+     * TODO - PAS UTILISE - A JETER
+
      * @Route("/{id}/edit", name="version_edit",methods={"GET","POST"})
-     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
-    public function editAction(Request $request, Version $version)
+    public function editAction(Request $request, Version $version): Response
     {
         $deleteForm = $this->createDeleteForm($version);
         $editForm = $this->createForm('App\Form\VersionType', $version);
@@ -532,29 +535,9 @@ class VersionController extends AbstractController
     }
 
     /**
-     * Deletes a version entity.
-     *
-     * @Route("/{id}", name="version_delete",methods={"DELETE"})
-     * Method("DELETE")
-     * @Security("is_granted('ROLE_ADMIN')")
-     */
-    /*    public function deleteAction(Request $request, Version $version)
-        {
-            $form = $this->createDeleteForm($version);
-            $form->handleRequest($request);
-
-            if ($form->isSubmitted() && $form->isValid()) {
-                $em = $this->getDoctrine()->getManager();
-                $em->remove($version);
-                $em->flush($version);
-            }
-
-            return $this->redirectToRoute('version_index');
-        }*/
-
-    /**
      * Creates a form to delete a version entity.
-     *
+     * TODO - UTILISE ? Sinon VIRER
+     * 
      * @param Version $version The version entity
      * @Security("is_granted('ROLE_ADMIN')")
      * @return \Symfony\Component\Form\Form The form
@@ -568,15 +551,13 @@ class VersionController extends AbstractController
         ;
     }
 
-
     /**
      * Changer le responsable d'une version.
      *
      * @Route("/{id}/responsable", name="changer_responsable",methods={"GET","POST"})
-     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
-    public function changerResponsableAction(Version $version, Request $request)
+    public function changerResponsableAction(Version $version, Request $request): Response
     {
         $sm = $this->sm;
         $sn = $this->sn;
@@ -687,15 +668,159 @@ class VersionController extends AbstractController
         );
     }
 
+    /**
+     * 
+     * Avant de modifier les collaborateurs d'une version.
+     * On demande de quelle version il s'agit !
+     *
+     * @Route("/{id}/avant_collaborateurs", name="avant_modifier_collaborateurs",methods={"GET","POST"})
+     * Method({"GET", "POST"})
+     * @ Security("is_granted('ROLE_DEMANDEUR')")
+     */
+    public function avantModifierCollaborateursAction(Version $version, Request $request): Response
+    {
+        $sm = $this->sm;
+
+        /* Si le bouton modifier est actif, il faut demander de quelle version il s'agit ! */
+        $modifier_version_menu = $sm->modifier_version($version);
+        if ($modifier_version_menu['ok'] == true) {
+            $projet = $version->getProjet();
+            $veract = $projet->getVersionActive();
+
+            // Si pas de version active (nouveau projet) = pas de problème on redirige sur l'édition en cours
+            if ($veract == null) {
+                return $this->redirectToRoute('modifier_version', ['id' => $version, '_fragment' => 'liste_des_collaborateurs']);
+            }
+
+            // Peut arriver pour l'administrateur car pour lui le bouton modifier est toujours acitf
+            elseif ($veract->getId() == $version->getId()) {
+                return $this->redirectToRoute('modifier_version', ['id' => $version, '_fragment' => 'liste_des_collaborateurs']);
+            }
+
+            // Si version active on demande de préciser quelle version !
+            else {
+                return $this->render(
+                    'version/avant_modifier_collaborateurs.html.twig',
+                    [
+                    'veract'  => $veract,
+                    'version' => $version
+                ]
+                );
+            }
+        }
+
+        // bouton modifier_version inactif: on modifie les collabs de la version demandée !
+        else {
+            return $this->redirectToRoute('modifier_collaborateurs', ['id' => $version]);
+        }
+    }
+
+    /**
+     * Modifier les collaborateurs d'une version.
+     *
+     * @Route("/{id}/collaborateurs", name="modifier_collaborateurs",methods={"GET","POST"})
+     * @Security("is_granted('ROLE_DEMANDEUR')")
+     */
+    public function modifierCollaborateursAction(Version $version, Request $request): Response
+    {
+        $sm = $this->sm;
+        $sj = $this->sj;
+        $sval= $this->vl;
+        $em = $this->getDoctrine()->getManager();
+
+
+        if ($sm->modifier_collaborateurs($version)['ok'] == false) {
+            $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de modifier la liste des collaborateurs de la version " . $version .
+                " parce que : " . $sm->modifier_collaborateurs($version)['raison']);
+        }
+
+        /* Si le bouton modifier est actif, on doit impérativement passer par le formulaire de la version ! */
+        $modifier_version_menu = $sm->modifier_version($version);
+        if ($modifier_version_menu['ok'] == true) {
+            return $this->redirectToRoute($modifier_version_menu['name'], ['id' => $version, '_fragment' => 'liste_des_collaborateurs']);
+        }
+
+
+        $collaborateur_form = $this->ff
+                                   ->createNamedBuilder('form_projet', FormType::class, [
+                                       'individus' => self::prepareCollaborateurs($version, $sj, $sval)
+                                   ])
+                                   ->add('individus', CollectionType::class, [
+                                       'entry_type'     =>  IndividuFormType::class,
+                                       'label'          =>  false,
+                                       'allow_add'      =>  true,
+                                       'allow_delete'   =>  true,
+                                       'prototype'      =>  true,
+                                       'required'       =>  true,
+                                       'by_reference'   =>  false,
+                                       'delete_empty'   =>  true,
+                                       'attr'         => ['class' => "profil-horiz",],
+                                   ])
+                                   ->add('submit', SubmitType::class, [
+                                        'label' => 'Sauvegarder',
+                                   ])
+                                   ->getForm();
+
+        $collaborateur_form->handleRequest($request);
+
+        $projet =  $version->getProjet();
+        if ($projet != null) {
+            $idProjet   =   $projet->getIdProjet();
+        } else {
+            $sj->errorMessage(__METHOD__ .':' . __LINE__ . " : projet null pour version " . $version->getIdVersion());
+            $idProjet   =   null;
+        }
+
+        if ($collaborateur_form->isSubmitted() && $collaborateur_form->isValid()) {
+            // Un formulaire par individu
+            $individu_forms =  $collaborateur_form->getData()['individus'];
+            $validated = $this->validateIndividuForms($individu_forms);
+            if (! $validated) {
+                return $this->render(
+                    'version/collaborateurs_invalides.html.twig',
+                    [
+                    'projet' => $idProjet,
+                    'version'   =>  $version,
+                    'session'   =>  $version->getSession(),
+                    ]
+                );
+            }
+            // On traite les formulaires d'individus un par un
+            $this->handleIndividuForms($individu_forms, $version);
+
+
+            // return new Response( Functions::show( $resultat ) );
+            // return new Response( print_r( $mail, true ) );
+            //return new Response( print_r($request->request,true) );
+
+            // TODO - SI ON VIRE ça ON N'A PLUS LES MAILS: POURQUOI ???????????????
+            return $this->redirectToRoute(
+                'modifier_collaborateurs',
+                [
+                'id'    => $version->getIdVersion() ,
+            ]
+            );
+        }
+
+        //return new Response( dump( $collaborateur_form->createView() ) );
+        return $this->render(
+            'version/collaborateurs.html.twig',
+            [
+             'projet' => $idProjet,
+             'collaborateur_form'   => $collaborateur_form->createView(),
+             'version'   =>  $version,
+             'session'   =>  $version->getSession(),
+         ]
+        );
+    }
 
     /**
      * Mettre une pénalité sur une version (en GET par ajax)
      *
      * @Route("/{id}/version/{penal}/penalite", name="penal_version",methods={"GET"})
-     * Method({"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
-    public function penalAction(Version $idversion, $penal)
+    public function penalAction(Version $idversion, $penal): Response
     {
         $data = [];
         $em = $this->getDoctrine()->getManager();
@@ -720,10 +845,9 @@ class VersionController extends AbstractController
      * envoyer à l'expert
      *
      * @Route("/{id}/avant_envoyer", name="avant_envoyer_expert",methods={"GET","POST"})
-     * Method({"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
-    public function avantEnvoyerAction(Version $version, Request $request, LoggerInterface $lg)
+    public function avantEnvoyerAction(Version $version, Request $request, LoggerInterface $lg): Response
     {
         $sm = $this->sm;
         $sj = $this->sj;
@@ -782,13 +906,45 @@ class VersionController extends AbstractController
     }
 
     /**
+     * Appelé par le bouton Envoyer à l'expert: si la demande est incomplète
+     * on envoie un écran pour la compléter. Sinon on passe à envoyer à l'expert
+     *
+     * @Route("/{id}/avant_modifier", name="avant_modifier_version",methods={"GET","POST"})
+     * Method({"GET", "POST"})
+     * @Security("is_granted('ROLE_DEMANDEUR')")
+     */
+    public function avantModifierVersionAction(Request $request, Version $version): Response
+    {
+        $sm = $this->sm;
+        $sj = $this->sj;
+        $vl = $this->vl;
+        $em = $this->getDoctrine()->getManager();
+
+
+        // ACL
+        if ($sm->modifier_version($version)['ok'] == false) {
+            $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de modifier la version " . $version->getIdVersion().
+                " parce que : " . $sm->modifier_version($version)['raison']);
+        }
+        if ($this->versionValidate($version) != []) {
+            return $this->render(
+                'version/avant_modifier.html.twig',
+                [
+                'version'   => $version
+                ]);
+        }
+        else {
+            return $this->redirectToRoute('avant_envoyer_expert', [ 'id' => $version->getIdVersion() ]);
+        }
+    }
+
+    /**
      * envoyer à l'expert
      *
      * @Route("/{id}/envoyer", name="envoyer_expert",methods={"GET"})
-     * Method("GET")
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
-    public function envoyerAction(Version $version, Request $request, LoggerInterface $lg)
+    public function envoyerAction(Version $version, Request $request, LoggerInterface $lg): Response
     {
         $sm = $this->sm;
         $sj = $this->sj;
@@ -831,7 +987,7 @@ class VersionController extends AbstractController
      * Method({"POST","GET"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
-    public function televersementGeneriqueAction(Request $request)
+    public function televersementGeneriqueAction(Request $request): Response
     {
         $em = $this->getDoctrine()->getManager();
         $sd = $this->sd;
@@ -1057,10 +1213,9 @@ class VersionController extends AbstractController
      * Téléverser le rapport d'actitivé
      *
      * @Route("/{id}/rapport_annee/{annee}", defaults={"annee"=0}, name="televerser_rapport_annee",methods={"GET","POST"})
-     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
-    public function televerserRapportAction(Version $version, Request $request, $annee)
+    public function televerserRapportAction(Version $version, Request $request, $annee): Response
     {
         $em = $this->getDoctrine()->getManager();
         $sm = $this->sm;
@@ -1161,10 +1316,9 @@ class VersionController extends AbstractController
      * Téléverser un fichier attaché à une version
      *
      * @Route("/{id}/fichier", name="televerser_fichier_attache",methods={"GET","POST"})
-     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
-    public function televerserFichierAction(version $version, Request $request)
+    public function televerserFichierAction(version $version, Request $request): Response
     {
         $sv = $this->sv;
         $sm = $this->sm;
@@ -1192,7 +1346,7 @@ class VersionController extends AbstractController
 
     ////////////////////////////////////////////////////////////////////
 
-    private function modifyRapport(Projet $projet, $annee, $filename)
+    private function modifyRapport(Projet $projet, $annee, $filename): void
     {
         $em = $this->getDoctrine()->getManager();
 

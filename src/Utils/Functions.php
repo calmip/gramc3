@@ -47,7 +47,6 @@ use App\GramcServices\ServiceJournal;
 
 use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-//use Symfony\Component\Validator\Validator\TraceableValidator;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 
@@ -67,6 +66,7 @@ use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Persistence\Proxy;
 use Doctrine\Common\Util\Debug;
+use Doctrine\ORM\EntityManagerInterface;
 
 use App\Form\ChoiceList\ExpertChoiceLoader;
 
@@ -105,43 +105,48 @@ class Functions
     }
 
     /*
-     *
      * sauvegarder un objet avec un traitement des exceptions
+     * 
+     *    - Si le flush se passe bien, renvoie true
+     *    - Sinon:
+     *       - écrit des choses dans le Logger (il y a des chances que le journal ne marche pas non plus)
+     *       - Si on est dans une requête ajax: renvoie false, sinon: relance l'exception
      *
      */
-
-    public static function sauvegarder($object, EntityManager $em, Logger $logger=null)
+    public static function sauvegarder(object $object, EntityManager $em, Logger $logger=null): bool
     {
         try {
-            if ($em->isOpen()) {
+            if ($em->isOpen())
+            {
                 $em->persist($object);
                 $em->flush($object);
                 return true;
-            } else {
-                if ($logger != null) {
-                    $logger()->error(__METHOD__ . ":" . __LINE__ . ' Entity manager closed');
-                }
+            }
+            else
+            {
+                if ($logger != null) $logger()->error(__METHOD__ . ":" . __LINE__ . ' Entity manager closed');
                 return static::exception_treatment(new ORMException());
             }
-        } catch (ORMException $e) {
-            if ($logger != null) {
-                $logger()->error(__METHOD__ . ":" . __LINE__ . ' ORMException');
-            }
+        }
+        catch (ORMException $e) {
+            if ($logger != null) $logger()->error(__METHOD__ . ":" . __LINE__ . ' ORMException');
             return static::exception_treatment($e);
-        } catch (\InvalidArgumentException $e) {
-            if ($logger != null) {
-                $logger()->error(__METHOD__ . ":" . __LINE__ . ' InvalidArgumentException');
-            }
+        }
+        catch (\InvalidArgumentException $e) {
+            if ($logger != null) $logger()->error(__METHOD__ . ":" . __LINE__ . ' InvalidArgumentException');
             return static::exception_treatment($e);
-        } catch (DBALException $e) {
-            if ($logger != null) {
-                $logger()->error(__METHOD__ . ":" . __LINE__ . ' DBALException');
-            }
+        }
+        catch (DBALException $e) {
+            if ($logger != null) $logger()->error(__METHOD__ . ":" . __LINE__ . ' DBALException');
             return static::exception_treatment($e);
         }
     }
 
-    private static function exception_treatment($e)
+    /*
+     * Appelé par sauvegarder - retourne false ou propage l'exception suivant la requête
+     *
+     */
+    private static function exception_treatment($e): bool
     {
         if (Request::createFromGlobals()->isXmlHttpRequest()) {
             return false;
@@ -150,6 +155,34 @@ class Functions
         }
     }
 
+    /*
+     * Remplacement de flush(): Appelle flush en traitant l'exception.
+     * Dépose si besoin l'exception dans le flashbag de la session
+     * 
+     * On ne traite que les ORMException - Par exemple violation de contrainte d'intégrité
+     * Si une autre eception est générée (DBALException par exemple) elle sera propagée
+     *
+     * $em = EntityManager, on doit avoir fait l'appel persist avant d'appeler cette fonction
+     * Retourne true si OK, false si une exception a été générée
+     *
+     * TODO - Je n'ai pas réussi à intercepter autre chose que \Exception. du coup je suis sceptique sur
+     *        Function::sauvegarder, pas sûr que ça marche...
+     */
+    public static function flush(EntityManagerInterface $em, Request $request=null): bool
+    {
+        try
+        {
+            $em->flush();
+        }
+        catch ( \Exception $e) {
+            if ($request != null && $request->getSession() != null) {
+                $request->getSession()->getFlashbag()->add("flash erreur",$e->getMessage());
+                return false;
+            }
+        }
+        return true;
+    }
+    
     //////////////////////////////////////////////////
 
     /***************

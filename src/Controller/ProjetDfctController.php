@@ -35,11 +35,12 @@ use App\GramcServices\GramcGraf\Calcul;
 use App\GramcServices\DonneesFacturation;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 
@@ -93,7 +94,7 @@ class ProjetDfctController extends AbstractController
      * Method({"GET","POST"})
      */
 
-    public function dfctlisteAction(Projet $projet, $annee, Request $request)
+    public function dfctlisteAction(Projet $projet, $annee, Request $request): Response
     {
         $dessin_heures = $this -> gcl;
         $sm     = $this->sm;
@@ -184,7 +185,7 @@ class ProjetDfctController extends AbstractController
      * Method({"GET","POST"})
      */
 
-    public function downloaddfctAction(Projet $projet, $annee, $nb, Request $request)
+    public function downloaddfctAction(Projet $projet, $annee, $nb, Request $request): Response
     {
         $dfct= $this->dfct;
         $sj  = $this->sj;
@@ -205,7 +206,7 @@ class ProjetDfctController extends AbstractController
      * @Route("/{id}/dfctgen/{fin_periode}", name="dfct_gen", methods={"GET","POST"})
      * Method({"GET","POST"})
      */
-    public function dfct_genAction(Projet $projet, \DateTime $fin_periode, Request $request)
+    public function dfct_genAction(Projet $projet, \DateTime $fin_periode, Request $request): Response
     {
         $em     = $this->getDoctrine()->getManager();
         $annee  = $fin_periode->format('Y');

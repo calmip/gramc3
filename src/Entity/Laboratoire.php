@@ -25,11 +25,13 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Laboratoire
  *
- * @ORM\Table(name="laboratoire")
+ * @ORM\Table(name="laboratoire",
+ *            uniqueConstraints={@ORM\UniqueConstraint(name="acro", columns={"acro_labo"})})
  * @ORM\Entity(repositoryClass="App\Repository\LaboratoireRepository")
  * 
  */
@@ -39,6 +41,7 @@ class Laboratoire
      * @var integer
      *
      * @ORM\Column(name="numero_labo", type="integer", nullable=false)
+     * @Assert\NotBlank
      */
     private $numeroLabo = '99999';
 
@@ -46,6 +49,7 @@ class Laboratoire
      * @var string
      *
      * @ORM\Column(name="acro_labo", type="string", length=100, nullable=false)
+     * @Assert\NotBlank
      */
     private $acroLabo = '';
 
@@ -53,6 +57,7 @@ class Laboratoire
      * @var string
      *
      * @ORM\Column(name="nom_labo", type="string", length=100, nullable=false)
+     * @Assert\NotBlank
      */
     private $nomLabo = '';
 
@@ -72,7 +77,7 @@ class Laboratoire
      */
     private $individu;
 
-    public function __toString()
+    public function __toString(): string
     {
         if ($this->getAcroLabo() != null && $this->getNomLabo() != null) {
             return $this->getAcroLabo() . ' - ' . $this->getNomLabo();
@@ -85,7 +90,7 @@ class Laboratoire
         }
     }
 
-    public function getId()
+    public function getId():int
     {
         return $this->getIdLabo();
     }
@@ -105,7 +110,7 @@ class Laboratoire
      *
      * @return Laboratoire
      */
-    public function setNumeroLabo($numeroLabo)
+    public function setNumeroLabo($numeroLabo): self
     {
         $this->numeroLabo = $numeroLabo;
 
@@ -117,7 +122,7 @@ class Laboratoire
      *
      * @return integer
      */
-    public function getNumeroLabo()
+    public function getNumeroLabo(): int
     {
         return $this->numeroLabo;
     }
@@ -129,7 +134,7 @@ class Laboratoire
      *
      * @return Laboratoire
      */
-    public function setAcroLabo($acroLabo)
+    public function setAcroLabo($acroLabo): self
     {
         $this->acroLabo = $acroLabo;
 
@@ -141,7 +146,7 @@ class Laboratoire
      *
      * @return string
      */
-    public function getAcroLabo()
+    public function getAcroLabo(): string
     {
         return $this->acroLabo;
     }
@@ -153,7 +158,7 @@ class Laboratoire
      *
      * @return Laboratoire
      */
-    public function setNomLabo($nomLabo)
+    public function setNomLabo($nomLabo): self
     {
         $this->nomLabo = $nomLabo;
 
@@ -165,7 +170,7 @@ class Laboratoire
      *
      * @return string
      */
-    public function getNomLabo()
+    public function getNomLabo(): string
     {
         return $this->nomLabo;
     }
@@ -187,7 +192,7 @@ class Laboratoire
      *
      * @return Laboratoire
      */
-    public function addIndividu(\App\Entity\Individu $individu)
+    public function addIndividu(\App\Entity\Individu $individu): self
     {
         $this->individu[] = $individu;
 
@@ -199,7 +204,7 @@ class Laboratoire
      *
      * @param \App\Entity\Individu $individu
      */
-    public function removeIndividu(\App\Entity\Individu $individu)
+    public function removeIndividu(\App\Entity\Individu $individu): void
     {
         $this->individu->removeElement($individu);
     }
@@ -209,14 +214,14 @@ class Laboratoire
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getIndividu()
+    public function getIndividu(): \Doctrine\Common\Collections\Collection
     {
         return $this->individu;
     }
 
     //////////////////////////////////////////////////////////////////////
 
-    public function isLaboRegional()
+    public function isLaboRegional() : bool
     {
         return $this->idLabo > 1;
     }

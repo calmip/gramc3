@@ -35,9 +35,10 @@ use App\GramcServices\ServiceProjets;
 
 use App\Utils\Functions;
 use App\Utils\Menu;
-use App\Utils\Etat;
+use App\GramcServices\Etat;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -72,7 +73,7 @@ class MailController extends AbstractController
      * Method({"GET", "POST"})
     **/
 
-    public function mailToResponsablesFicheAction(Request $request, Session $session)
+    public function mailToResponsablesFicheAction(Request $request, Session $session): Response
     {
         $em = $this->getDoctrine()->getManager();
         $sn = $this->sn;
@@ -138,7 +139,7 @@ class MailController extends AbstractController
      * téléversé leur fiche projet signée pour la session $session
      *
      ************************************************************/
-    private function getResponsablesFiche(Session $session)
+    private function getResponsablesFiche(Session $session): array
     {
         $sj = $this->sj;
         $em = $this->getDoctrine()->getManager();
@@ -176,7 +177,7 @@ class MailController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_PRESIDENT')")
      * Method({"GET", "POST"})
     **/
-    public function mailToResponsablesAction(Request $request, Session $session)
+    public function mailToResponsablesAction(Request $request, Session $session): Response
     {
         $em = $this->getDoctrine()->getManager();
         $sn = $this->sn;
@@ -249,7 +250,7 @@ class MailController extends AbstractController
      * renouvelé leur projet pour la session $session
      *
      ************************************************************/
-    private function getResponsables(Session $session)
+    private function getResponsables(Session $session): array
     {
         $sp = $this->sp;
         $sj = $this->sj;
@@ -339,7 +340,7 @@ class MailController extends AbstractController
     }
 
     // Pour le tri des responsables en commençant par celui qui a la plus grosse (attribution)
-    private static function compAttr($a, $b)
+    private static function compAttr($a, $b): int
     {
         if ($a['max_attr']==$b['max_attr']) {
             return 0;
@@ -354,7 +355,7 @@ class MailController extends AbstractController
      *   return  une form
      *
      */
-    private function getSelForm(Individu $individu)
+    private function getSelForm(Individu $individu):FormInterface
     {
         $nom = 'selection_'.$individu->getId();
         return $this->get('form.factory')  -> createNamedBuilder($nom, FormType::class, null, ['csrf_protection' => false ])

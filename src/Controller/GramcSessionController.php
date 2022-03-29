@@ -44,7 +44,7 @@ use App\Entity\CompteActivation;
 use App\Entity\Journal;
 
 use App\Utils\Functions;
-use App\Utils\IDP;
+//use App\Utils\IDP;
 
 use App\GramcServices\Workflow\Projet\ProjetWorkflow;
 use App\GramcServices\ServiceMenus;
@@ -108,7 +108,7 @@ class GramcSessionController extends AbstractController
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
     **/
 
-    public function adminAccueilAction()
+    public function adminAccueilAction(): Response
     {
         $sm      = $this->sm;
         $menu1[] = $sm->individu_gerer();
@@ -157,7 +157,7 @@ class GramcSessionController extends AbstractController
     /**
      * @Route("/mentions_legales", name="mentions_legales", methods={"GET"} )
      */
-    public function mentionsAction()
+    public function mentionsAction(): Response
     {
         return $this->render('default/mentions.html.twig');
     }
@@ -165,7 +165,7 @@ class GramcSessionController extends AbstractController
     /**
     * @Route("/aide", name="aide", methods={"GET"} )
     */
-    public function aideAction()
+    public function aideAction(): Response
     {
         return $this->render('default/aide.html.twig');
     }
@@ -174,7 +174,7 @@ class GramcSessionController extends AbstractController
     * @Route("/", name="accueil", methods={"GET"} )
     *
     */
-    public function accueilAction()
+    public function accueilAction(): Response
     {
         $sm     = $this->sm;
         $ss     = $this->ss;
@@ -237,7 +237,7 @@ class GramcSessionController extends AbstractController
      * @Route("/president", name="president_accueil", methods={"GET"} )
      * @Security("is_granted('ROLE_PRESIDENT')")
      */
-    public function presidentAccueilAction()
+    public function presidentAccueilAction(): Response
     {
         $sm     = $this->sm;
         $menu[] = $sm->affectation();
@@ -255,7 +255,7 @@ class GramcSessionController extends AbstractController
     * @Security("is_granted('ROLE_DEMANDEUR')")
 
     **/
-    public function profilAction(Request $request)
+    public function profilAction(Request $request): Response
     {
         $sj = $this->sj;
 
@@ -304,7 +304,7 @@ class GramcSessionController extends AbstractController
     /**
     * @Route("/nouveau_compte", name="nouveau_compte", methods={"GET","POST"})
     */
-    public function nouveau_compteAction(Request $request, LoggerInterface $lg)
+    public function nouveau_compteAction(Request $request, LoggerInterface $lg): Response
     {
         $sj = $this->sj;
         $ff = $this->ff;
@@ -379,7 +379,7 @@ class GramcSessionController extends AbstractController
      * @Route("/nouveau_profil",name="nouveau_profil", methods={"GET","POST"})
      *
      */
-    public function nouveau_profilAction(Request $request, LoggerInterface $lg)
+    public function nouveau_profilAction(Request $request, LoggerInterface $lg): Response
     {
         $sn = $this->sn;
         $sj = $this->sj;
@@ -494,7 +494,7 @@ class GramcSessionController extends AbstractController
      * @Route("/connexions", name="connexions", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
-    public function connexionsAction(Request $request)
+    public function connexionsAction(Request $request): Response
     {
         $em = $this->getDoctrine()->getManager();
         $sps = $this->sps;
@@ -509,7 +509,7 @@ class GramcSessionController extends AbstractController
      * Method({"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
      *********************************************/
-    public function infoAction(Request $request)
+    public function infoAction(Request $request): Response
     {
         ob_start();
         phpinfo();
@@ -526,7 +526,7 @@ class GramcSessionController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      **/
 
-    public function md5Action()
+    public function md5Action(): Response
     {
         $salt = random_int(1, 10000000000) . microtime();
         $key = md5($salt);
@@ -538,7 +538,7 @@ class GramcSessionController extends AbstractController
      * @Security("is_granted('ROLE_DEMANDEUR')")
      **/
 
-    public function uri(Request $request)
+    public function uri(Request $request): Response
     {
         $IDPprod    =   $this->getParameter('IDPprod');
         return new Response(Functions::show($IDPprod));

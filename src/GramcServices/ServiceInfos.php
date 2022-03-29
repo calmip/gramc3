@@ -24,14 +24,15 @@
 namespace App\GramcServices;
 
 use App\GramcServices\GramcDate;
-use App\Utils\Etat;
+use App\GramcServices\Etat;
+use App\Entity\Session;
 
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
-const VERSION = "3.6.6";
+const VERSION = "3.7.0dev";
 
 /*
  * Cette classe garde des informations pouvant être reprises par
@@ -70,33 +71,33 @@ class ServiceInfos
         };
     }
 
-    public function getLibelleEtatSessionCourante()
+    public function getLibelleEtatSessionCourante(): string
     {
         return $this->libelle_etat_session_courante;
     }
 
-    public function getSessionCourante()
+    public function getSessionCourante(): Session
     {
         return $this->session_courante;
     }
 
 
-    public function getEtatSessionCourante()
+    public function getEtatSessionCourante(): int
     {
         return $this->etat_session_courante;
     }
 
-    public function sessions_non_terminees()
+    public function sessions_non_terminees(): array
     {
         return $this->sessions_non_terminees;
     }
 
-    public function mail_replace($mail)
+    public function mail_replace($mail): string
     {
         return str_replace('@', ' at ', $mail);
     }
 
-    public function gramc_date($format)
+    public function gramc_date($format): GramcDate|string
     {
         $d = $this->grdte;
         if ($format == 'raw') {
@@ -106,7 +107,7 @@ class ServiceInfos
         }
     }
 
-    public function prochaine_session_saison()
+    public function prochaine_session_saison(): array
     {
         $annee        = 2000 + intval(substr($this->id_session_courante, 0, 2));
         $type         = substr($this->id_session_courante, 2, 1);
@@ -120,13 +121,14 @@ class ServiceInfos
         return $result;
     } //  function prochaine_session_saison()
 
-    public function strftime_fr($format, $date)
+    // TODO - strftime est obsolète à partir de php 8.1 !
+    public function strftime_fr($format, $date): string
     {
         setlocale(LC_TIME, 'fr_FR.UTF-8');
         return strftime($format, $date->getTimestamp());
     } // function strftime_fr
 
-    public function tronquer_chaine($s, $l)
+    public function tronquer_chaine($s, $l): string
     {
         if (grapheme_strlen($s)>=intval($l)) {
             return grapheme_substr($s, 0, intval($l)).'...';
@@ -136,7 +138,7 @@ class ServiceInfos
     }
 
 
-    public function cette_session()
+    public function cette_session(): array
     {
         $aujourdhui    = $this->gramc_date('raw');
         $fin_sess_date = $this->session_courante->getDateFinSession();
@@ -146,12 +148,12 @@ class ServiceInfos
         return array( 'jours' => $jours, 'fin_sess' => $fin_sess_date->format("d/m/Y") );
     } // function cette_session()
 
-    public function prochaine_session()
+    public function prochaine_session(): string
     {
         return $this->session_courante->getDateDebutSession()->format("d/m/Y");
     } // function prochaine_session
 
-    public function getVersion()
+    public function getVersion(): string
     {
         return VERSION;
     }

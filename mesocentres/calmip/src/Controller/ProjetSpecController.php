@@ -56,7 +56,6 @@ use App\GramcServices\GramcGraf\Calcul;
 use Psr\Log\LoggerInterface;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -66,8 +65,8 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 
 use Symfony\Component\Config\Definition\Exception\Exception;
 use App\Utils\Functions;
-use App\Utils\Etat;
-use App\Utils\Signal;
+use App\GramcServices\Etat;
+use App\GramcServices\Signal;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -83,6 +82,9 @@ use Twig\Environment;
 
 /**
  * Projet controller.
+ *
+ * Les méthodes liées aux projets mais SPECIFIQUES à un mésocentre particulier
+ *
  *
  * @Route("projet")
  */
