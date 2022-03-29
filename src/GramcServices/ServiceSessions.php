@@ -152,11 +152,12 @@ class ServiceSessions
 
     public function selectAnnee(Request $request, $annee = null): array
     {
+        $annee_max = $this->grdt->showYear();
         if ($annee == null) {
-            $annee=$this->grdt->showYear();
+            $annee=$annee_max;
         }
 
-        $choices = array_reverse(Functions::choicesYear(new \DateTime('2000-01-01'), new \DateTime($annee.'-01-01'), 0), true);
+        $choices = array_reverse(Functions::choicesYear(new \DateTime('2000-01-01'), new \DateTime($annee_max.'-01-01'), 0), true);
         $form    = Functions::createFormBuilder($this->ff, ['annee' => $annee ])
                     ->add(
                         'annee',

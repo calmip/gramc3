@@ -38,6 +38,7 @@ config/packages/security.yaml
 altermeso
 config/adresses.txt
 
+.env
 .env.local
 adminer\.php
 
