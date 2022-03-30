@@ -147,8 +147,14 @@ services:
     App\Command\NettCompta:
         tags: ["console.command"]
 
+    App\Command\AddCompta:
+        arguments: ["%kernel.debug%"]
+        tags: ["console.command"]
+
     App\Command\Brouillage:
+        arguments: ["%kernel.debug%"]
         tags: ["console.command"]
 
     App\Command\KeepOnly:
+        arguments: ["%kernel.debug%"]
         tags: ["console.command"]
