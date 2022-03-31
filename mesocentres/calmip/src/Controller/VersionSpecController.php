@@ -105,6 +105,39 @@ class VersionSpecController extends AbstractController
     ) {}
 
     /**
+     * Appelé par le bouton Envoyer à l'expert: si la demande est incomplète
+     * on envoie un écran pour la compléter. Sinon on passe à envoyer à l'expert
+     * TODO - Un héritage ou un interface ici car tous les VersionSpecController ont le même code !
+     *
+     * @Route("/{id}/avant_modifier", name="avant_modifier_version",methods={"GET","POST"})
+     * Method({"GET", "POST"})
+     * @Security("is_granted('ROLE_DEMANDEUR')")
+     */
+    public function avantModifierVersionAction(Request $request, Version $version): Response
+    {
+        $sm = $this->sm;
+        $sj = $this->sj;
+        $vl = $this->vl;
+        $em = $this->getDoctrine()->getManager();
+
+        // ACL
+        if ($sm->modifier_version($version)['ok'] == false) {
+            $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de modifier la version " . $version->getIdVersion().
+                " parce que : " . $sm->modifier_version($version)['raison']);
+        }
+        if ($this->versionValidate($version) != []) {
+            return $this->render(
+                'version/avant_modifier.html.twig',
+                [
+                'version'   => $version
+                ]);
+        }
+        else {
+            return $this->redirectToRoute('avant_envoyer_expert', [ 'id' => $version->getIdVersion() ]);
+        }
+    }
+
+    /**
      * Modification d'une version existante
      *
      *      1/ D'abord une partie générique (images, collaborateurs)

@@ -95,7 +95,7 @@ class Brouillage extends Command
     private $sj = null;
     private $em = null;
 
-    public function __construct(GramcDate $sd, ServiceProjets $sp, ServiceVersions $sv, ServiceJournal $sj, EntityManagerInterface $em)
+    public function __construct(private $debug, GramcDate $sd, ServiceProjets $sp, ServiceVersions $sv, ServiceJournal $sj, EntityManagerInterface $em)
     {
         // best practices recommend to call the parent constructor first and
         // then set your own properties. That wouldn't work in this case
@@ -150,6 +150,17 @@ class Brouillage extends Command
         // of the command.
 
         // return this if there was no problem running the command
+
+        if ($this->debug == false)
+        {
+            $output->writeln("OUPS - VOUS N'ETES PAS EN MODE DEBUG !");
+            return 1;
+        }
+        else
+        {
+            $output->writeln("EXECUTION DE LA COMMANDE: brouillage");
+            $this->sj->infoMessage("EXECUTION DE LA COMMANDE: brouillage");
+        }
 
         $sd = $this->sd;
         $sp = $this->sp;

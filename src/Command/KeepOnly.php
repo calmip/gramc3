@@ -63,7 +63,7 @@ class KeepOnly extends Rgpd
     // the name of the command (the part after "bin/console")
     protected static $defaultName = 'app:keeponly';
 
-    public function __construct(protected GramcDate $sd, protected ServiceProjets $sp, protected ServiceVersions $sv, protected ServiceJournal $sj, protected EntityManagerInterface $em)
+    public function __construct(protected $debug, protected GramcDate $sd, protected ServiceProjets $sp, protected ServiceVersions $sv, protected ServiceJournal $sj, protected EntityManagerInterface $em)
     {
         // best practices recommend to call the parent constructor first and
         // then set your own properties. That wouldn't work in this case
@@ -86,7 +86,17 @@ class KeepOnly extends Rgpd
 
         // return this if there was no problem running the command
 
-        //$sn   = $this->sn;
+        if ($this->debug == false)
+        {
+            $output->writeln("OUPS - VOUS N'ETES PAS EN MODE DEBUG !");
+            return 1;
+        }
+        else
+        {
+            $output->writeln("EXECUTION DE LA COMMANDE: keeponly");
+            $this->sj->infoMessage("EXECUTION DE LA COMMANDE: keeponly");
+        }
+
         $sd = $this->sd;
         $sp = $this->sp;
         $sj = $this->sj;
