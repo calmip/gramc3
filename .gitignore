@@ -6,6 +6,7 @@
 *.bkp
 *.tar
 *.tgz
+*.lock
 var.*
 data/*
 *#
