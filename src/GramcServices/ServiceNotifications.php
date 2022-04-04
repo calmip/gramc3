@@ -44,8 +44,8 @@ class ServiceNotifications
         private \Twig\Environment $twig,
         private TokenStorageInterface $tok,
         private MailerInterface $mailer,
-        private ServiceJournal $sj,
-        private EntityManagerInterface $em
+        protected ServiceJournal $sj,
+        protected EntityManagerInterface $em
     ) {
         $this->token    = $tok->getToken();
     }

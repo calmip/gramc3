@@ -134,7 +134,7 @@ class ExceptionListener
                     'request' => $event->getRequest()
                     ] );
 
-            $this->sj->errorMessage(__METHOD__ . ":" . __LINE__ ." Exception " . get_class($exception) . ' : ' . $exception->getMessage() .
+            $this->sj->warningMessage(__METHOD__ . ":" . __LINE__ ." Exception " . get_class($exception) . ' : ' . $exception->getMessage() .
                                       "  À partir de URL : " .  $event->getRequest()->getPathInfo() );
 
            // uniquement en production nous redirigeons vers la page 'index'
