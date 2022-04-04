@@ -747,6 +747,23 @@ class AdminuxController extends AbstractController
         $sp = $this->sp;
         $sj = $this->sj;
 
+        // todo - Si ce paramètre n'existe pas ça va planter
+        $ressources_conso_group = $this->getParameter('ressources_conso_group');
+
+        // On recherche les ressources marquées "calcul"
+        // On initialise le tableau à 'cpu', ou 'cpu','gpu'
+        $ressources = [];
+        foreach ($ressources_conso_group as $ress)
+        {
+            if (array_key_exists('type', $ress) && $ress['type'] === 'calcul')
+            {
+                if (array_key_exists('ress', $ress))
+                {
+                    $ressources = explode(',',$ress['ress']);
+                }
+            }
+        }
+
         $content  = json_decode($request->getContent(),true);
         if ($content == null)
         {
@@ -802,30 +819,36 @@ class AdminuxController extends AbstractController
         }
 
         // Toutes les vérifications sont terminées, on peut changer le quota
-        // Cela revient à écrire directement dans la table de conso, mais si la conso n'est pas chargée à ce moment
-        // On retourne avec une erreur !
+        // Cela revient à écrire directement dans la table de conso
+        // On écrit le même quota pour toutes les ressources "calcul"
 
         $date = $this->sd;  // aujourd'hui
-        $ressource = "cpu"; // Calcul (cpu ou gpu))
         $loginname = strtolower($idProjet); // Le projet traduit en groupe unix
         $type = 2;                          // Un groupe, pas un utilisateur
-        $compta = $em->getRepository(Compta::class)->findOneBy(
-            [
-                'date'      => $date,
-                'ressource' => $ressource,
-                'loginname' => $loginname,
-                'type'      => $type
-            ]);
+        foreach ($ressources as $ress)
+        {
+            $compta = $em->getRepository(Compta::class)->findOneBy(
+                [
+                    'date'      => $date,
+                    'ressource' => $ress,
+                    'loginname' => $loginname,
+                    'type'      => $type
+                ]);
 
-        if ($compta === null) {
-            $str_date = $date->format("d/m/Y");
-            $sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Pas de données de consommation à la date du $str_date");
-            return new Response(json_encode(['KO' => "Pas de données de consommation à la date du $str_date"]));
+            // Si pas de compta on crée l'objet (nouveau projet pas encore de compta) !
+            if ($compta === null) {
+                $compta = new Compta();
+                $compta ->setDate($date)
+                        ->setRessource($ress)
+                        ->setLoginname($loginname)
+                        ->setType(2)
+                        ->setConso(0);
+            }
+
+            $compta->setQuota($quota);
+            $em->persist($compta);
+            $em->flush();
         }
-
-        $compta->setQuota($quota);
-        $em->persist($compta);
-        $em->flush();
         
         $sj->infoMessage(__METHOD__ . " Le quota de $idVersion est maintenant $quota");
 
