@@ -92,10 +92,10 @@ class StatistiquesController extends AbstractController
     }
 
     /**
-      * @Route("/{annee}", name="statistiques",methods={"GET","POST"})
+      * @Route("/", name="statistiques",methods={"GET","POST"})
       * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
       */
-    public function indexAction(Request $request, $annee=null)
+    public function indexAction(Request $request)
     {
         $sm      = $this->sm;
         $ss      = $this->ss;
@@ -104,16 +104,42 @@ class StatistiquesController extends AbstractController
         $prj_rep = $em->getRepository(Projet::class);
         $ver_rep = $em->getRepository(Version::class);
 
-        $data = $ss->selectAnnee($request, $annee);
+        // Traitement du premier formulaire (annee)
+        // On met le résultat dans la session
+        if ($request->getSession()->has('statistiques_annee'))
+        {
+            $annee = $request->getSession()->get('statistiques_annee');
+        }
+        else
+        {
+            $annee = null;
+        }
+        $data = $ss->selectAnnee($request,$annee);
         $annee= $data['annee'];
+        $request->getSession()->set('statistiques_annee',$annee);
 
-        $menu[] = $sm->statistiques_laboratoire($annee);
+        // traitement du second formulaire (label de session))
+        if ($request->getSession()->has('statistiques_sess_lbl'))
+        {
+            $sess_lbl = $request->getSession()->get('statistiques_sess_lbl');
+        }
+        else
+        {
+            $sess_lbl = '';
+        }
+
+        $datas= $ss->selectSessLbl($request, $sess_lbl);
+        $sess_lbl= $datas['sess_lbl'];
+        $request->getSession()->set('statistiques_sess_lbl',$sess_lbl);
+
+        $menu[] = $sm->statistiques_laboratoire();
         $menu[] = $sm->statistiques_etablissement($annee);
         $menu[] = $sm->statistiques_thematique($annee);
         $menu[] = $sm->statistiques_metathematique($annee);
         $menu[] = $sm->statistiques_collaborateur($annee);
-        $menu[] = $sm->statistiques_repartition($annee);
+        $menu[] = $sm->statistiques_repartition();
 
+        
         $projets_renouvelles = $prj_rep->findProjetsAnnee($annee, Functions::ANCIENS);
         $projets_nouveaux    = $prj_rep->findProjetsAnnee($annee, Functions::NOUVEAUX);
 
@@ -147,6 +173,7 @@ class StatistiquesController extends AbstractController
                              ];
 
         # Remplissage de $individus et $individus_uniques
+        /* Supprimé car redondant avec la page collaborateurs 
        foreach ($versions as $version) {
             $collaborateurs_versions = $version->getCollaborateurVersion();
             foreach ($collaborateurs_versions as $collaborateurVersion) {
@@ -172,9 +199,10 @@ class StatistiquesController extends AbstractController
                     }
                 }
             }
-        }
+        } */
 
         # Calcul de l'histogramme
+        /*
         foreach ($labos as $l=>$v) {
             if ($v > 20) {
                 $lab_hist["> 20"] += 1;
@@ -188,7 +216,7 @@ class StatistiquesController extends AbstractController
                 $lab_hist["== 1"] += 1;
             }
         }
-
+        */
         // debug
         //$db_conso = $em->getRepository(Compta::class)->consoTotale( $annee, 'cpu' );
         //$dessin_heures = $this->get('App\GramcServices\GramcGraf\Calcultous');
@@ -202,7 +230,9 @@ class StatistiquesController extends AbstractController
             'statistiques/index.html.twig',
             [
             'form'                    => $data['form']->createView(),
+            'forms'                   => $datas['form']->createView(),
             'annee'                   => $annee,
+            'sess_lbl'                => $sess_lbl,
             'menu'                    => $menu,
             'num_projets'             => $num_projets,
             'num_projets_renouvelles' => $num_projets_renouvelles,
@@ -222,30 +252,45 @@ class StatistiquesController extends AbstractController
 
 
     /**
-     * @Route("/{annee}/repartition", name="statistiques_repartition",methods={"GET"})
+     * @Route("/repartition", name="statistiques_repartition",methods={"GET"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
-    public function repartitionAction(Request $request, $annee)
+    public function repartitionAction(Request $request): Response
     {
         $sm = $this->sm;
         $ss = $this->ss;
         $sj = $this->sj;
         $em = $this->getDoctrine()->getManager();
 
-        $data = $ss->selectAnnee($request, $annee);
-        $annee= $data['annee'];
-
-        $menu[] = $sm->statistiques_laboratoire($annee);
-        $menu[] = $sm->statistiques_etablissement($annee);
-        $menu[] = $sm->statistiques_thematique($annee);
-        $menu[] = $sm->statistiques_metathematique($annee);
-        $menu[] = $sm->statistiques_collaborateur($annee);
-        $menu[] = $sm->statistiques_repartition($annee);
-
-        $versions = $em->getRepository(Version::class)->findVersionsAnnee($annee);
+        // Si on trouve les données dans la session, OK. Sinon on redirige sur la page de stats générale
+        if ($request->getSession()->has('statistiques_annee'))
+        {
+            $annee = $request->getSession()->get('statistiques_annee');
+        } else
+        {
+            return $this->redirectToRoute('statistiques');
+        }
+        if ($request->getSession()->has('statistiques_sess_lbl'))
+        {
+            $sess_lbl = $request->getSession()->get('statistiques_sess_lbl');
+        } else
+        {
+            return $this->redirectToRoute('statistiques');
+        }
+        
+        if ($sess_lbl == 'AB')
+        {
+            $versions = $em->getRepository(Version::class)->findVersionsAnnee($annee);
+        }
+        else
+        {
+            $id_version = strval(intval($annee)-2000) . $sess_lbl;
+            $versions = $em->getRepository(Version::class)->findSessionVersions($id_version);
+        }
 
         $collaborateurs = [];
         $comptes = [];
+        $comptes[0] = [];
         foreach ($versions as $version) {
             $collaborateurVersions = $version->getCollaborateurVersion();
             $compte = 0;
@@ -280,44 +325,59 @@ class StatistiquesController extends AbstractController
         }
         ksort($count_comptes);
 
-        //return new Response( Functions::show( $collaborateurs ) );
+        try
+        {
+            $histo_comptes = $this->line("Répartition des projets par nombre de projets pour l'année " . $annee, $count_comptes);
+        }
+        catch (\exception $e) { $histo_comptes = '';};
 
+        try
+        {
+            $histo_coll = $this->line("Répartition des projets par nombre de collaborateurs pour l'année " . $annee, $count_collaborateurs);
+        }
+        catch (\exception $e) { $histo_coll = '';};
+        
         return $this->render(
             'statistiques/repartition.html.twig',
             [
-            'menu' => $menu,
-            //'histogram_collaborateurs' => $this->histogram("Collaborateurs par projet pour l'année " + $data['annee'], $collaborateurs),
-            //'histogram_comptes' => $this->histogram("Comptes par projet pour l'année " + $data['annee'], $comptes),
-            'histogram_comptes' => $this->line("Répartition des projets par nombre de projets pour l'année " . $data['annee'], $count_comptes),
-            'histogram_collaborateurs' => $this->line("Répartition des projets par nombre de collaborateurs pour l'année " . $data['annee'], $count_collaborateurs),
+            //'histogram_collaborateurs' => $this->histogram("Collaborateurs par projet pour l'année " + $annee, $collaborateurs),
+            //'histogram_comptes' => $this->histogram("Comptes par projet pour l'année " + $annee, $comptes),
+            'histogram_comptes' => $histo_comptes,
+            'histogram_collaborateurs' => $histo_coll,
             'collaborateurs'    => $count_collaborateurs,
             'comptes'           => $count_comptes,
-            'projets_sans_compte'   => $comptes[ 0 ],
+            'projets_sans_compte'=> $comptes[ 0 ],
             'annee'             => $annee,
-            'form'  =>  $data['form']->createView(),
+            'sess_lbl'          => $sess_lbl
         ]
         );
     }
 
     /**
-     * @Route("/{annee}/collaborateur", name="statistiques_collaborateur",methods={"GET"})
+     * @Route("/collaborateur", name="statistiques_collaborateur",methods={"GET"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
-    public function collaborateurAction(Request $request, $annee)
+    public function collaborateurAction(Request $request)
     {
         $sm = $this->sm;
         $ss = $this->ss;
         $em = $this->getDoctrine()->getManager();
 
-        $data = $ss->selectAnnee($request, $annee);
-        $annee= $data['annee'];
-
-        $menu[] = $sm->statistiques_laboratoire($annee);
-        $menu[] = $sm->statistiques_etablissement($annee);
-        $menu[] = $sm->statistiques_thematique($annee);
-        $menu[] = $sm->statistiques_metathematique($annee);
-        $menu[] = $sm->statistiques_collaborateur($annee);
-        $menu[] = $sm->statistiques_repartition($annee);
+        // Si on trouve les données dans la session, OK. Sinon on redirige sur la page de stats générale
+        if ($request->getSession()->has('statistiques_annee'))
+        {
+            $annee = $request->getSession()->get('statistiques_annee');
+        } else
+        {
+            return $this->redirectToRoute('statistiques');
+        }
+        if ($request->getSession()->has('statistiques_sess_lbl'))
+        {
+            $sess_lbl = $request->getSession()->get('statistiques_sess_lbl');
+        } else
+        {
+            return $this->redirectToRoute('statistiques');
+        }
 
         $versions = $em->getRepository(Version::class)->findVersionsAnnee($annee);
 
@@ -524,9 +584,8 @@ class StatistiquesController extends AbstractController
         return $this->render(
             'statistiques/collaborateur.html.twig',
             [
-            'menu'                         => $menu,
-            'form'                         =>  $data['form']->createView(),
             'annee'                        =>  $annee,
+            'sess_lbl'                     => $sess_lbl,
             'statuts'                      => $statuts,
             'laboratoires'                 => $laboratoires,
             'etablissements'               => $etablissements,
@@ -548,30 +607,35 @@ class StatistiquesController extends AbstractController
     }
 
     /* Cette fonction est appelée par laboratoireAction, etablissementAction etc. */
-    private function parCritere(Request $request, $annee, $critere, $titre)
+    private function parCritere(Request $request, $critere, $titre): Response
     {
         $sm = $this->sm;
         $ss = $this->ss;
 
-        $data = $ss->selectAnnee($request, $annee);
-        $annee= $data['annee'];
+        // Si on trouve les données dans la session, OK. Sinon on redirige sur la page de stats générale
+        if ($request->getSession()->has('statistiques_annee'))
+        {
+            $annee = $request->getSession()->get('statistiques_annee');
+        } else
+        {
+            return $this->redirectToRoute('statistiques');
+        }
+        if ($request->getSession()->has('statistiques_sess_lbl'))
+        {
+            $sess_lbl = $request->getSession()->get('statistiques_sess_lbl');
+        } else
+        {
+            return $this->redirectToRoute('statistiques');
+        }
 
-        $menu[] = $sm->statistiques_laboratoire($annee);
-        $menu[] = $sm->statistiques_etablissement($annee);
-        $menu[] = $sm->statistiques_thematique($annee);
-        $menu[] = $sm->statistiques_metathematique($annee);
-        $menu[] = $sm->statistiques_collaborateur($annee);
-        $menu[] = $sm->statistiques_repartition($annee);
-
-        $stats = $this->statistiques($annee, $critere, $titre);
+        $stats = $this->statistiques($annee, $sess_lbl, $critere, $titre);
 
         return $this->render(
             'statistiques/parcritere.html.twig',
             [
             'titre'         => $titre,
-            'menu'          => $menu,
-            'form'          => $data['form']->createView(),
             'annee'         => $annee,
+            'sess_lbl'      => $sess_lbl,
             'acros'         => $stats['acros'],
             'num_projets'   => $stats['num_projets'],
             'dem_heures'    => $stats['dem_heures'],
@@ -586,39 +650,39 @@ class StatistiquesController extends AbstractController
     }
 
     /**
-     * @Route("/{annee}/laboratoire", name="statistiques_laboratoire",methods={"GET","POST"})
+     * @Route("/laboratoire", name="statistiques_laboratoire",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
-    public function laboratoireAction(Request $request, $annee)
+    public function laboratoireAction(Request $request)
     {
-        return $this->parCritere($request, $annee, "getAcroLaboratoire", "laboratoire");
+        return $this->parCritere($request, "getAcroLaboratoire", "laboratoire");
     }
 
     /**
-     * @Route("/{annee}/etablissement", name="statistiques_etablissement",methods={"GET","POST"})
+     * @Route("/etablissement", name="statistiques_etablissement",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
-    public function etablissementAction(Request $request, $annee)
+    public function etablissementAction(Request $request): response
     {
-        return $this->parCritere($request, $annee, "getAcroEtablissement", "établissement");
+        return $this->parCritere($request, "getAcroEtablissement", "établissement");
     }
 
     /**
-     * @Route("/{annee}/thematique", name="statistiques_thematique",methods={"GET","POST"})
+     * @Route("/thematique", name="statistiques_thematique",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
-    public function thematiqueAction(Request $request, $annee)
+    public function thematiqueAction(Request $request): Response
     {
-        return $this->parCritere($request, $annee, "getAcroThematique", "thématique");
+        return $this->parCritere($request, "getAcroThematique", "thématique");
     }
 
     /**
-     * @Route("/{annee}/metathematique", name="statistiques_metathematique",methods={"GET","POST"})
+     * @Route("/metathematique", name="statistiques_metathematique",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
-    public function metathematiqueAction(Request $request, $annee)
+    public function metathematiqueAction(Request $request): Response
     {
-        return $this->parCritere($request, $annee, "getAcroMetaThematique", "métathématique");
+        return $this->parCritere($request, "getAcroMetaThematique", "métathématique");
     }
 
     /* Cette fonction est appelée par laboratoireCSVAction, etablissementCSVAction etc. */
@@ -679,15 +743,16 @@ class StatistiquesController extends AbstractController
 
     /*
      * $annee   = L'année considérée
+     * $sess_lbl = A, B, AB
      * $critere = Un nom de getter de Version permettant de consolider partiellement les données
      *            Le getter renverra un acronyme (laboratoire, établissement etc)
      *            (ex = getAcroLaboratoire())
      * $titre   = Titre du camembert
      */
-    private function statistiques($annee, $critere, $titre = "Titre")
+    private function statistiques(string $annee, string $sess_lbl, string $critere, string $titre = "Titre"): array
     {
         $sp          = $this->sp;
-        $stats       = $sp->projetsParCritere($annee, $critere);
+        $stats       = $sp->projetsParCritere($annee, $sess_lbl, $critere);
         $acros       = $stats[0];
         $num_projets = $stats[1];
         $dem_heures  = $stats[3];
@@ -845,7 +910,7 @@ class StatistiquesController extends AbstractController
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    private function line($titre, $donnees)
+    private function line(string $titre, array $donnees): ?string
     {
         \JpGraph\JpGraph::load();
         \JpGraph\JpGraph::module('line');

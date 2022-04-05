@@ -30,10 +30,12 @@ use App\GramcServices\GramcDate;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilder;
 use Symfony\Component\Form\FormFactoryInterface;
+
 
 class ServiceSessions
 {
@@ -108,6 +110,7 @@ class ServiceSessions
     * Utilisation depuis un contrôleur:
     *             $data = $ss->selectSession($this->createFormBuilder(['session' => $une_session"]),$request);
     *
+    * todo - Reprendre cette fonction sur le modèle de selectAnnee
     *******************/
     public function selectSession(FormBuilder $formb, Request $request)
     {
@@ -151,6 +154,9 @@ class ServiceSessions
      * Utilisation depuis un contrôleur:
      *             $data = $ss->selectAnnee($request);
      *
+     * TODO = Ne pas utiliser Functions::createFormBuilder
+     *        Donner un nom au formulaire
+     *
      *******************/
 
     public function selectAnnee(Request $request, $annee = null)
@@ -183,6 +189,51 @@ class ServiceSessions
         return ['form'  =>  $form, 'annee'    => $annee ];
     }
 
+    /************
+     * Formulaire permettant de choisir un label de session (A ou B dans l'année choisie par ailleurs)
+     *
+     * $request = La requête
+     * $annee   = $sess_lbl = La valeur initiale
+     *
+     * Retourne:
+     *     Le formulaire
+     *     Le label choisi: 'A', 'B', 'AB' (les deux)
+     *
+     * Utilisation depuis un contrôleur:
+     *              $data = $ss->selectSessLbl($request, $sess_lbl);
+     *              $sess_lbl= $datas['sess_lbl'];
+     * 
+     *******************/
+    public function selectSessLbl(Request $request, string $sess_lbl): array
+    {
+        if ($sess_lbl == '')
+        {
+            $sess_lbl = 'AB';
+        }
+        
+        $choices = [ 'A' => 'A', 'B' => 'B', 'les deux' => 'AB'];
+        $form    = $this->ff->createNamedBuilder('sess_lbl', FormType::class, ['sess_lbl' => $sess_lbl])
+                    ->add(
+                        'sess_lbl',
+                        ChoiceType::class,
+                        [
+                            'multiple' => false,
+                            'required' => true,
+                            'expanded' => true,
+                            'choices'  => $choices,
+                            'label'    => 'Session prise en compte:'
+                        ]
+                    )
+                    ->add('submit', SubmitType::class, ['label' => 'Choisir'])
+                    ->getForm();
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $sess_lbl = $form->getData()['sess_lbl'];
+        }
+
+        return ['form'  =>  $form, 'sess_lbl'    => $sess_lbl ];
+    }
+    
     /**
      * Retourne toutes les sessions d'une année particulière
      *

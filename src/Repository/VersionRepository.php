@@ -73,6 +73,20 @@ class VersionRepository extends \Doctrine\ORM\EntityRepository
         ->getResult();
     }
 
+    public function findVersionsAnnee($annee)
+    {
+        // 2022 -> 22
+        $subAnnee = substr(strval($annee), -2);
+
+        return $this->getEntityManager()
+        ->createQuery('SELECT partial v.{idVersion,etatVersion,prjGenciDari,prjTitre,prjLLabo,demHeures,attrHeures,politique}  FROM App:Version v  WHERE ( v.idVersion LIKE :pattern AND NOT v.etatVersion = :annule)')
+        ->setParameter('annule', Etat::getEtat('ANNULE'))
+        ->setParameter('pattern', $subAnnee . '%')
+        //->setParameter('pattern', $annee . 'T' . $annee)
+        ->getResult();
+    }
+
+
     /*
      *  Renvoie les versions actives de la session, c-à-d qui sont en état: ACTIF, EN_ATTENTE, NOUVELLE_VERSION_DEMANDEE
      *
@@ -167,18 +181,6 @@ class VersionRepository extends \Doctrine\ORM\EntityRepository
          ->createQuery('SELECT COUNT(v) FROM App:Version v  WHERE v.prjThematique; = :thematique')
         ->setParameter('thematique', $thematique)
         ->getSingleResult();
-    }
-
-    public function findVersionsAnnee($annee)
-    {
-        $subAnnee = substr(strval($annee), -2);
-
-        return $this->getEntityManager()
-        ->createQuery('SELECT partial v.{idVersion,etatVersion,prjGenciDari,prjTitre,prjLLabo,demHeures,attrHeures,politique}  FROM App:Version v  WHERE ( v.idVersion LIKE :pattern AND NOT v.etatVersion = :annule)')
-        ->setParameter('annule', Etat::getEtat('ANNULE'))
-        ->setParameter('pattern', $subAnnee . '%')
-        //->setParameter('pattern', $annee . 'T' . $annee)
-        ->getResult();
     }
 
     // Renvoie les projets de type SESS qui appartiennent à la session passée en paramètres
