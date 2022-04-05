@@ -53,7 +53,6 @@
 	                    href="{{ path(item.name) }}"
 	                {% endif %}
 	            >{{ item.lien }}</a>
-	            <div class="infobulleok" data-title="{{ item.commentaire }}" ><img src="{{ asset('icones/q16.png') }}" alt="?" /></div>
 	        </li>
 	        {% else %}
 	        <li><a class="lien_inactif"
@@ -67,7 +66,6 @@
 	                {% endif %}
 	            {% endif %}
 	            title="{{ item.commentaire }} - {{ item.raison }}">{{ item.lien }}</a>
-	            <div class="infobulleko" data-title="{{ item.commentaire }} - {{ item.raison }}" ><img src="{{ asset('icones/q16.png') }}" alt="?" /></div>
 	        </li>
 	        {% endif %}
 	    {% endif %}

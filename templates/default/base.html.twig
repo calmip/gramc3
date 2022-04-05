@@ -1,5 +1,8 @@
 {# app/Resources/views/default/base.html.twig #}
 
+{% import "default/macros.html.twig" as gramcmacros %}
+
+
 <!DOCTYPE html>
 <html lang="fr">
     <head>
@@ -38,17 +41,41 @@
 
     <body>
         {% block header %}
-        <header id="header">
+        <header class="header">
             <img src="{{ asset('icones/banniere.png') }}" alt="logo" />
 
-            <div id="co_deco">
+        <div class="nav">
+            <br>
+            <a class="a_ariane" href="{{ path('accueil') }}">Accueil</a>
+            {% if is_granted('ROLE_DEMANDEUR') %}
+                <a class="a_ariane" href="{{ path('projet_accueil') }}">Demandeur</a> 
+            {% endif %}
+            {% if is_granted('ROLE_EXPERT') %}
+                <a class="a_ariane" href="{{ path('expertise_liste') }}">Expert</a> 
+            {% endif %}
+            {% if is_granted('ROLE_OBS') %}
+                <a class="a_ariane" href="{{ path('admin_accueil') }}">Administrateur</a> 
+            {% endif %}
+            {% if is_granted('ROLE_PRESIDENT') %}
+                <a class="a_ariane" href="{{ path('president_accueil') }}">Président</a> 
+            {% endif %}
+            <a class="a_ariane" href="{{ path('aide') }}">?</a>
+        </div>
+
+        <div>
+        <img src="/gramc3/icones/header.png" alt="élément graphique"/>
             {% if app.debug %}
-                <p class="gauche petit">
+                <p class="etat_session">
                 {% for session in infos.sessions_non_terminees() %}
                     ETAT DE LA SESSION <strong>{{session.IdSession}}</strong>=<strong>{{session.LibelleEtat}}</strong><br />
                 {% endfor %}
                 </p>
             {% endif %}
+        </div>
+
+        </header>
+
+        <div id="co_deco">
 
             {% if is_granted('IS_AUTHENTICATED_FULLY') %}
                 <div>
@@ -78,34 +105,11 @@
             {% endif %}
 
             </div>
-            <br />
-        </header>
         {% endblock header %}
 
     {% include "default/flash.html.twig" %}
     
-    {% block fil_ariane %}
-
-        <div id="fil_ariane">
-        <br>
-        <a class="a_ariane" href="{{ path('accueil') }}">Accueil</a> >
-        {% if is_granted('ROLE_DEMANDEUR') %}
-            <a class="a_ariane" href="{{ path('projet_accueil') }}">Demandeur</a> |
-        {% endif %}
-        {% if is_granted('ROLE_EXPERT') %}
-            <a class="a_ariane" href="{{ path('expertise_liste') }}">Expert</a> |
-        {% endif %}
-        {% if is_granted('ROLE_OBS') %}
-            <a class="a_ariane" href="{{ path('admin_accueil') }}">Administrateur</a> |
-        {% endif %}
-        {% if is_granted('ROLE_PRESIDENT') %}
-            <a class="a_ariane" href="{{ path('president_accueil') }}">Président</a> |
-        {% endif %}
-        <a class="a_ariane" href="{{ path('aide') }}">aide</a>
-
-        </div> <!-- fil_ariane -->
-
-    {% endblock fil_ariane %}
+    
 
 
     {# ###################################################################### #}
