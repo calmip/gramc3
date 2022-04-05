@@ -145,7 +145,7 @@ class ServiceMenus
     public function aide():array
     {
         $menu['name']      = 'aide';
-        $menu['lien']      = 'Aide';
+        $menu['lien']      = '?';
         $menu['ok']          = true;
         $menu['commentaire'] = "Aide et documentation";
         return $menu;
