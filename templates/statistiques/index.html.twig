@@ -27,10 +27,10 @@
 {% if sess_lbl == 'AB' %}
     <p class="centrage"><img id="bconso_allcpu" class="bouton_poussoir conso" src="{{ asset('icones/conso64.png') }}"
         alt="Consommation cpu {{annee}} - Tous les projets" title="Visualiser la consommation cpu {{annee}} - Tous les projets"
-        data-href="{{ absolute_url(path('tous_projets_conso', { 'ressource' : 'cpu', 'annee' : annee, 'mois' : 1 })) }}"/>
+        data-href="{{ absolute_url(path('tous_projets_conso', { 'ressource' : 'cpu', 'annee' : annee})) }}"/>
     <img id="bconso_allgpu" class="bouton_poussoir conso" src="{{ asset('icones/conso64.png') }}"
         alt="Consommation gpu {{annee}} - Tous les projets" title="Visualiser la consommation gpu {{annee}} - Tous les projets"
-        data-href="{{ absolute_url(path('tous_projets_conso', { 'ressource' : 'gpu', 'annee' : annee, 'mois' : 1 })) }}"/></p>
+        data-href="{{ absolute_url(path('tous_projets_conso', { 'ressource' : 'gpu', 'annee' : annee})) }}"/></p>
 {% endif %}
 
 <table id="tab_nb_projets_total_annee">
@@ -106,8 +106,6 @@
 </table>
 
 {{ gramcmacros.menu(menu) }}
-
-
 
 <div id="dialog-compta"></div>
 </div>
