@@ -1553,15 +1553,10 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques_etablissement($annee = null):array
+    public function statistiques_etablissement(): array
     {
-        if ($annee == null) {
-            $annee=$this->grdt->showYear();
-        }
-
         $menu['name']           =   'statistiques_etablissement';
-        $menu['params']          =   ['annee' => $annee];
-        $menu['lien']           =   "Statistiques par établissement";
+        $menu['lien']           =   "Etablissements";
 
         if ($this->ac->isGranted('ROLE_OBS') || $this->ac->isGranted('ROLE_PRESIDENT')) {
             $menu['ok']             =   true;
@@ -1577,15 +1572,10 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques_laboratoire($annee = null):array
+    public function statistiques_laboratoire(): array
     {
-        if ($annee == null) {
-            $annee=$this->grdt->showYear();
-        }
-
         $menu['name']           =   'statistiques_laboratoire';
-        $menu['params']          =   ['annee' => $annee];
-        $menu['lien']           =   "Statistiques par laboratoire";
+        $menu['lien']           =   "Laboratoires";
 
         if ($this->ac->isGranted('ROLE_OBS') || $this->ac->isGranted('ROLE_PRESIDENT')) {
             $menu['ok']             =   true;
@@ -1601,15 +1591,10 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques_thematique($annee = null):array
+    public function statistiques_thematique(): array
     {
-        if ($annee == null) {
-            $annee=$this->grdt->showYear();
-        }
-
         $menu['name']           =   'statistiques_thematique';
-        $menu['params']          =   ['annee' => $annee];
-        $menu['lien']           =   "Statistiques par thématique";
+        $menu['lien']           =   "Thématiques";
 
         if ($this->ac->isGranted('ROLE_OBS') || $this->ac->isGranted('ROLE_PRESIDENT')) {
             $menu['ok']             =   true;
@@ -1625,15 +1610,10 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques_metathematique($annee = null):array
+    public function statistiques_metathematique(): array
     {
-        if ($annee == null) {
-            $annee=$this->grdt->showYear();
-        }
-
         $menu['name']           =   'statistiques_metathematique';
-        $menu['params']          =   ['annee' => $annee];
-        $menu['lien']           =   "Statistiques par metathématique";
+        $menu['lien']           =   "Métathématiques";
 
         if ($this->ac->isGranted('ROLE_OBS') || $this->ac->isGranted('ROLE_PRESIDENT')) {
             $menu['ok']             =   true;
@@ -1686,15 +1666,10 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques_collaborateur($annee = null):array
+    public function statistiques_collaborateur(): array
     {
-        if ($annee == null) {
-            $annee=$this->grdt->showYear();
-        }
-
         $menu['name']           =   'statistiques_collaborateur';
-        $menu['params']          =   ['annee' => $annee];
-        $menu['lien']           =   "Statistiques concernant les collaborateurs";
+        $menu['lien']           =   "Collaborateurs";
 
         if ($this->ac->isGranted('ROLE_OBS') || $this->ac->isGranted('ROLE_PRESIDENT')) {
             $menu['ok']             =   true;
@@ -1710,15 +1685,10 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques_repartition($annee = null):array
+    public function statistiques_repartition(): array
     {
-        if ($annee == null) {
-            $annee=$this->grdt->showYear();
-        }
-
         $menu['name']           =   'statistiques_repartition';
-        $menu['params']          =   ['annee' => $annee];
-        $menu['lien']           =   "Statistiques concernant la répartition des projets";
+        $menu['lien']           =   "Projets";
 
         if ($this->ac->isGranted('ROLE_OBS') || $this->ac->isGranted('ROLE_PRESIDENT')) {
             $menu['ok']             =   true;
