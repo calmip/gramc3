@@ -149,3 +149,8 @@ services:
 
     App\Command\Brouillage:
         tags: ["console.command"]
+
+    App\Command\InitTypeVersion:
+        tags: ["console.command"]
+
+
