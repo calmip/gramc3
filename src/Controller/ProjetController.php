@@ -1351,7 +1351,7 @@ class ProjetController extends AbstractController
     /**
      * Affichage graphique de la consommation de TOUS les projets
      *
-     * @Route("/{ressource/{ressource}/tousconso/{annee}/{mois}", name="tous_projets_conso", methods={"GET"})
+     * @Route("/ressource/{ressource}/tousconso/{annee}/{mois}", name="tous_projets_conso", methods={"GET"})
      * Method("GET")
      * @Security("is_granted('ROLE_ADMIN')")
      */
