@@ -1275,3 +1275,32 @@ p{
 .deconnexion_profil{
     color: var(--second-color);
 }
+
+
+/* ===== FOOTER ===== */
+.footer{
+    background: white;
+    color: black;
+    font-weight: initial;
+    border: none;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    box-shadow: #00000061 0 -4px 4px;
+    padding: 5px 0px;
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+}
+
+.liens_importants_footer{
+    width: 30%;
+    font-size: 0.75rem;
+    display: flex;
+    justify-content: space-around;
+    flex-direction: row-reverse;
+}
+
+.lien_footer{
+    color: var(--first-color);
+}

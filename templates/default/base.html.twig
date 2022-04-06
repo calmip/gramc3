@@ -46,7 +46,7 @@
         
             <div class="nav">
                 {% if is_granted('ROLE_DEMANDEUR') %}
-                    <a class="lien_nav" href="{{ path('projet_accueil') }}">Demandeur</a> 
+                    <a class="lien_nav" href="{{ path('projet_accueil') }}" title="Accéder à l'espace demandeur">Demandeur</a> 
                 {% else %}
                     <p>Veuillez vous <a href="{{ path('connexion_dbg') }}" class="connexion_nav">connecter</a> pour accéder au menu</p>
                 {% endif %}
@@ -134,7 +134,8 @@
 
     {% block footer %}
         {# footer #}
-        <footer>
+        <footer class="footer">
+                <div>
             {{ infos.gramc_date('Y-m-d') }} -
 
             {% block message %}
@@ -169,17 +170,20 @@
                     {% endif %}
                 </strong>
                 {% endif %}
+                </div>
 
             {% endblock message %}
 
             {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-                <span class="petit">gramc {{ infos.VERSION }} <a href="mailto:{{ mailadmin }}">{{ mailadmin }}</a></span>
+            <div class="liens_importants_footer">
+                <span>gramc {{ infos.VERSION }} <a href="mailto:{{ mailadmin }}" class="lien_footer">{{ mailadmin }}</a></span>
             {% else %}
-                <span class="petit">gramc {{ infos.VERSION }} {{ infos.mail_replace(mailadmin) }}</span>
+                <span>gramc {{ infos.VERSION }} {{ infos.mail_replace(mailadmin) }}</span>
             {% endif %}
-            <span class="petit"><a href="{{ path('mentions_legales') }}" title="Lire les mentions légales">Mentions légales</a></span>
+            <a href="{{ path('mentions_legales') }}" class="lien_footer" title="Lire les mentions légales">Mentions légales</a>
             {% if mesoc_cgu != null %}
-            <span class="petit"><a href="{{ mesoc_cgu }}" title="Lire les cgu du calculateur">cgu</a></span>
+            <a href="{{ mesoc_cgu }}" class="lien_footer" title="Lire les cgu du calculateur">cgu</a>
+            </div>
             {% endif %}
 
         </footer>
