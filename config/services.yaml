@@ -152,3 +152,6 @@ services:
 
     App\Command\KeepOnly:
         tags: ["console.command"]
+
+    App\Command\InitTypeVersion:
+        tags: ["console.command"]

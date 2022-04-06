@@ -25,8 +25,8 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-//use App\App;
 use App\GramcServices\Etat;
+use App\Utils\Etat;
 use App\Utils\Functions;
 use App\Interfaces\Demande;
 
@@ -48,6 +48,12 @@ class Version implements Demande
      */
     private $etatVersion = Etat::EDITION_DEMANDE;
 
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="type_version", type="integer", nullable=true)
+     */
+    private $typeVersion;
 
     /**
      * @var string
@@ -825,6 +831,29 @@ class Version implements Demande
         return $this->etatVersion;
     }
 
+    /**
+     * Set typeVersion
+     *
+     * @param integer $typeVersion
+     *
+     * @return Version
+     */
+    public function setTypeVersion($typeVersion)
+    {
+        $this->typeVersion = $typeVersion;
+
+        return $this;
+    }
+
+    /**
+     * Get typeVersion
+     *
+     * @return integer
+     */
+    public function getTypeVersion()
+    {
+        return $this->typeVersion;
+    }
 
     /**
      * Set prjLLabo
@@ -2963,6 +2992,9 @@ class Version implements Demande
     public function setProjet(\App\Entity\Projet $projet = null)
     {
         $this->projet = $projet;
+
+        // On recopie le type de projet
+        $this->setTypeVersion($projet->getTypeProjet());
 
         return $this;
     }
