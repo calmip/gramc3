@@ -11,7 +11,6 @@
 
 <section>
 
-<nav><ul><a class="lien_actif" href="{{ path('statistiques',{'annee': annee}) }}" title="Statistiques">Retour aux statistiques</a></ul></nav>
 
 <h1>Nombre de collaborateurs par projet - année {{ annee }}
 {% if sess_lbl != 'AB' %} - session {{ sess_lbl }} {% endif %}
@@ -87,6 +86,7 @@
 </table>
 <div id="dialog"></div>
 
+<nav><ul><a class="lien_actif" href="{{ path('statistiques',{'annee': annee}) }}" title="Statistiques">Retour aux statistiques</a></ul></nav>
 
 </section>
 

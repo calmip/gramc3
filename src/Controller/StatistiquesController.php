@@ -127,7 +127,6 @@ class StatistiquesController extends AbstractController
         {
             $sess_lbl = '';
         }
-
         $datas= $ss->selectSessLbl($request, $sess_lbl);
         $sess_lbl= $datas['sess_lbl'];
         $request->getSession()->set('statistiques_sess_lbl',$sess_lbl);
@@ -139,114 +138,20 @@ class StatistiquesController extends AbstractController
         $menu[] = $sm->statistiques_collaborateur($annee);
         $menu[] = $sm->statistiques_repartition();
 
-        
-        $projets_renouvelles = $prj_rep->findProjetsAnnee($annee, Functions::ANCIENS);
-        $projets_nouveaux    = $prj_rep->findProjetsAnnee($annee, Functions::NOUVEAUX);
+        [$projets, $total] = $this->sp->projetsParAnnee($annee, false, false, $sess_lbl);
 
-        $conso_nouveaux = 0;
-        foreach ($projets_nouveaux as $projet) {
-            $conso_nouveaux += $sp->getConsoCalcul($projet, $annee);
-        }
-
-        $conso_renouvelles =   0;
-        foreach ($projets_renouvelles as $projet) {
-            $conso_renouvelles += $sp->getConsoCalcul($projet, $annee);
-        }
-
-        $num_projets_renouvelles = count($projets_renouvelles);
-        $num_projets_nouveaux    = count($projets_nouveaux);
-        $num_projets             = $num_projets_renouvelles    +   $num_projets_nouveaux;
-
-        $heures_tous             = $prj_rep->heuresProjetsAnnee($annee, Functions::TOUS);
-        $heures_renouvelles      = $prj_rep->heuresProjetsAnnee($annee, Functions::ANCIENS);
-        $heures_nouveaux         = $prj_rep->heuresProjetsAnnee($annee, Functions::NOUVEAUX);
-
-        $versions          = $ver_rep->findVersionsAnnee($annee);
-        $individus         = [];
-        $individus_uniques = [];
-        $labos             = [];
-        $lab_hist          = ["== 1" => 0,
-                              "<= 5" => 0,
-                              "<=10" => 0,
-                              "<=20" => 0,
-                              "> 20" => 0
-                             ];
-
-        # Remplissage de $individus et $individus_uniques
-        /* Supprimé car redondant avec la page collaborateurs 
-       foreach ($versions as $version) {
-            $collaborateurs_versions = $version->getCollaborateurVersion();
-            foreach ($collaborateurs_versions as $collaborateurVersion) {
-                $individu   = $collaborateurVersion->getCollaborateur();
-                if ($individu == null) {
-                    continue;
-                }
-                $idIndividu = $individu->getIdIndividu();
-
-                if (count($collaborateurs_versions) == 1) {
-                    $individus_uniques[$idIndividu] = $individu;
-                }
-                $individus[$idIndividu] = $individu;
-                if ($collaborateurVersion->getResponsable()) {
-                    # Plutôt que d'utiliser $version->getLabo() qui rejoue la même boucle
-                    $lab = $collaborateurVersion->getLabo();
-                    if ($lab != null) {
-                        $labid = $lab->getId();
-                        if (! isset($labos[$labid])) {
-                            $labos[$labid] = 0;
-                        }
-                        $labos[$labid] += 1;
-                    }
-                }
-            }
-        } */
-
-        # Calcul de l'histogramme
-        /*
-        foreach ($labos as $l=>$v) {
-            if ($v > 20) {
-                $lab_hist["> 20"] += 1;
-            } elseif ($v > 10) {
-                $lab_hist["<=20"] += 1;
-            } elseif ($v > 5) {
-                $lab_hist["<=10"] += 1;
-            } elseif ($v > 1) {
-                $lab_hist["<= 5"] += 1;
-            } else {
-                $lab_hist["== 1"] += 1;
-            }
-        }
-        */
-        // debug
-        //$db_conso = $em->getRepository(Compta::class)->consoTotale( $annee, 'cpu' );
-        //$dessin_heures = $this->get('App\GramcServices\GramcGraf\Calcultous');
-        //$debut = new \DateTime( $annee . '-01-01');
-        //$nannee= $annee + 1;
-        //$fin   = new \DateTime( $nannee . '-01-02');
-        //$struct_data = $dessin_heures->createStructuredData($debut,$fin,$db_conso);
-        //$dessin_heures->derivConso($struct_data);
+        $num_projets = count($projets);
 
         return $this->render(
             'statistiques/index.html.twig',
             [
-            'form'                    => $data['form']->createView(),
-            'forms'                   => $datas['form']->createView(),
-            'annee'                   => $annee,
-            'sess_lbl'                => $sess_lbl,
-            'menu'                    => $menu,
-            'num_projets'             => $num_projets,
-            'num_projets_renouvelles' => $num_projets_renouvelles,
-            'num_projets_nouveaux'    => $num_projets_nouveaux,
-            'heures_tous'             => $heures_tous,
-            'heures_renouvelles'      => $heures_renouvelles,
-            'heures_nouveaux'         => $heures_nouveaux,
-            'num_individus'           => count($individus),
-            'num_individus_uniques'   => count($individus_uniques),
-            'conso_nouveaux'          => $conso_nouveaux,
-            'conso_renouvelles'       => $conso_renouvelles,
-            'lab_hist'                => $lab_hist,
-            //'struct_data' => $struct_data
-        ]
+                'form'        => $data['form']->createView(),
+                'forms'       => $datas['form']->createView(),
+                'annee'       => $annee,
+                'sess_lbl'    => $sess_lbl,
+                'menu'        => $menu,
+                'total'       => $total
+            ]
         );
     }
 
