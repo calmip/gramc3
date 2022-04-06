@@ -194,11 +194,14 @@ class ServiceProjets
 
     /***********
      * Renvoie la liste des projets par année -
-     * $annee      = Année
+     * $annee      = Année (4 charactères - ex. 2022)
      * $isRecup... = Pour gérer les heures de récupération
+     * $sess_lbl   = Défaut [ 'A', 'B' ] On ramène les projets de toute l'année, sessions A et B confondues
+     *               [ 'A' ] Seulement session 'A'
+     *               [ 'B' ] Seulement session 'B'
      *
      ********************/
-    public function projetsParAnnee($annee, $isRecupPrintemps=false, $isRecupAutomne=false)
+    public function projetsParAnnee($annee, $isRecupPrintemps=false, $isRecupAutomne=false, string $sess_lbl = 'AB')
     {
         $em = $this->em;
         $ss = $this->ss;
@@ -244,8 +247,22 @@ class ServiceProjets
         $session_A = $this->em->getRepository(Session::class)->findOneBy(['idSession' => $session_id_A ]);
         $session_B = $this->em->getRepository(Session::class)->findOneBy(['idSession' => $session_id_B ]);
 
-        $versions_A= $this->em->getRepository(Version::class)->findBy(['session' => $session_A ]);
-        $versions_B= $this->em->getRepository(Version::class)->findBy(['session' => $session_B ]);
+        if ( strpos($sess_lbl, 'A') !== false )
+        {
+            $versions_A= $this->em->getRepository(Version::class)->findBy(['session' => $session_A ]);
+        }
+        else
+        {
+            $versions_A = [];
+        }
+        if ( strpos($sess_lbl, 'B') !== false )
+        {
+            $versions_B= $this->em->getRepository(Version::class)->findBy(['session' => $session_B ]);
+        }
+        else
+        {
+            $versions_B = [];
+        }
 
         // $mois est utilisé pour calculer les éventuelles pénalités d'été
         // Si on n'est pas à l'année courante, on le met à 0 donc elles ne seront jamais calculées
@@ -433,16 +450,16 @@ class ServiceProjets
      *    - Liste des projets
      *
      * $annee   = Année
+     * $sess_lbl= 'A', 'B', 'AB'
      * $critere = Un nom de getter de Version permettant de consolider partiellement les données
      *            Le getter renverra un acronyme (laboratoire, établissement etc)
      *            (ex = getAcroLaboratoire())
      *
      * Fonction utilisée pour les statistiques et pour le bilan annuel
      */
-    public function projetsParCritere($annee, $critere)
+    public function projetsParCritere($annee, $sess_lbl, $critere)
     {
-        // pour debug echo '<br><br><br><br><br><br>';
-        $projets = $this->projetsParAnnee($annee)[0];
+        $projets = $this->projetsParAnnee($annee, false, false, $sess_lbl)[0];
 
         // La liste des acronymes
         $acros       = [];
