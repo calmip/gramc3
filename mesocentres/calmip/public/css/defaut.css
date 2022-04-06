@@ -1084,7 +1084,7 @@ div.ui-dialog {
 #expertise label.validation {
     display: block;
     margin: -.2em 5em;
-    width: 30%:
+    width: 30%;
 }
 
 #expertise h3 {
@@ -1177,6 +1177,17 @@ img.dfct {
 
 
 /*    UGO   */
+/* ===== BODY ===== */
+body{
+    margin: 0;
+    padding: 0;
+    background: white;
+}
+
+p{
+    margin: 0;
+}
+
 
 /* ===== HEADER ===== */
 .header{
@@ -1187,12 +1198,80 @@ img.dfct {
     justify-content: space-between;
     flex-direction: row;
     align-items: center;
+    border: none;
+    box-shadow: #00000061 0 4px 4px;
 }
 
-.etat_session{
-
+.lien_accueil{
+    height: 100%;
+    width: 33%;
 }
 
 .nav{
+    width: 50%;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    margin-right: 10%;
+    z-index: 1;
+}
 
+.lien_nav{
+    text-decoration: none;
+    color: var(--first-color);
+    border: var(--first-color) 2px solid;
+    border-radius: 10px;
+    padding: 10px 20px;
+}
+
+.lien_nav:hover{
+    background: var(--first-color);
+    color: white;
+}
+
+.connexion_nav{
+    color: var(--first-color);
+}
+
+.aide_nav{
+    text-decoration: none;
+    color: black;
+    border: black 2px solid;
+    border-radius: 50px;
+    padding: 10px 14px;
+}
+
+.aide_nav:hover{
+    background: black;
+    color: white;
+}
+
+.elm_graphique{
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 10rem;
+    z-index: 0;
+}
+
+.sous_header{
+    display: flex;
+    justify-content: space-between;
+    padding: 1.5rem 0;
+    align-items: flex-start;
+    width: 95%;
+    margin: auto;
+}
+
+.profil{
+    text-align: right;
+}
+
+.nom_profil, .connexion_profil{
+    color: var(--first-color);
+    font-weight: bold;
+}
+
+.deconnexion_profil{
+    color: var(--second-color);
 }

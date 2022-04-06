@@ -42,28 +42,35 @@
     <body>
         {% block header %}
         <header class="header">
-            <img src="{{ asset('icones/banniere.png') }}" alt="logo" />
+            <a class="lien_accueil" href="{{ path('accueil') }}"><img src="{{ asset('icones/banniere.png') }}" alt="logo" /></a>
+        
+            <div class="nav">
+                {% if is_granted('ROLE_DEMANDEUR') %}
+                    <a class="lien_nav" href="{{ path('projet_accueil') }}">Demandeur</a> 
+                {% else %}
+                    <p>Veuillez vous <a href="{{ path('connexion_dbg') }}" class="connexion_nav">connecter</a> pour accéder au menu</p>
+                {% endif %}
 
-        <div class="nav">
-            <br>
-            <a class="a_ariane" href="{{ path('accueil') }}">Accueil</a>
-            {% if is_granted('ROLE_DEMANDEUR') %}
-                <a class="a_ariane" href="{{ path('projet_accueil') }}">Demandeur</a> 
-            {% endif %}
-            {% if is_granted('ROLE_EXPERT') %}
-                <a class="a_ariane" href="{{ path('expertise_liste') }}">Expert</a> 
-            {% endif %}
-            {% if is_granted('ROLE_OBS') %}
-                <a class="a_ariane" href="{{ path('admin_accueil') }}">Administrateur</a> 
-            {% endif %}
-            {% if is_granted('ROLE_PRESIDENT') %}
-                <a class="a_ariane" href="{{ path('president_accueil') }}">Président</a> 
-            {% endif %}
-            <a class="a_ariane" href="{{ path('aide') }}">?</a>
-        </div>
+                {% if is_granted('ROLE_EXPERT') %}
+                    <a class="lien_nav" href="{{ path('expertise_liste') }}">Expert</a> 
+                {% endif %}
 
-        <div>
-        <img src="/gramc3/icones/header.png" alt="élément graphique"/>
+                {% if is_granted('ROLE_OBS') %}
+                    <a class="lien_nav" href="{{ path('admin_accueil') }}">Administrateur</a> 
+                {% endif %}
+
+                {% if is_granted('ROLE_PRESIDENT') %}
+                    <a class="lien_nav" href="{{ path('president_accueil') }}">Président</a> 
+                {% endif %}
+
+                <a class="aide_nav" href="{{ path('aide') }}">?</a>
+            </div>
+            <img src="{{ asset('icones/header.png') }}" alt="élément graphique" class="elm_graphique"/>
+
+
+        </header>
+
+        <div class="sous_header">
             {% if app.debug %}
                 <p class="etat_session">
                 {% for session in infos.sessions_non_terminees() %}
@@ -71,39 +78,32 @@
                 {% endfor %}
                 </p>
             {% endif %}
-        </div>
 
-        </header>
+            <div class="profil">
 
-        <div id="co_deco">
+                {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                    <div>
+                    {% if is_granted('IS_IMPERSONATOR') %}
+                        <p> SUDO par {{ app.token.originalToken.user }}</p>
+                    {% endif %}
+                    {% if app.debug %}
+                        <p>Connecté en tant que : <a href="{{ path('profil') }}" class="nom_profil">{{ app.user.prenom }} {{ app.user.nom }} ({{ app.user.id}})</a></p>
+                    {% else %}
+                        <p>Connecté en tant que : <a href="{{ path('profil') }}" class="nom_profil">{{ app.user.prenom }} {{ app.user.nom }} ({{ app.user.id}})</a></p>
+                    {% endif %}
+                    </div>
 
-            {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-                <div>
-                <p class="droite">
-                {% if is_granted('IS_IMPERSONATOR') %}
-                    SUDO par {{ app.token.originalToken.user }}</p><p class="droite">
-                {% endif %}
-                {% if app.debug %}
-                    {{ app.user.prenom }} {{ app.user.nom }} ({{ app.user.id}})
+                    <a href=" {{ path('deconnexion') }}" class="deconnexion_profil">Déconnexion</a></p>
+
                 {% else %}
-                    {{ app.user.prenom }} {{ app.user.nom }}
+                    <p><a href=" {{ path('connexion') }}" class="connexion_profil">connexion</a></p>
+                    {% if app.debug %}
+
+                        <p><a href=" {{ path('connexion_dbg') }}" class="connexion_profil">connexion (DBG)</a></p>
+                    {% endif %}
                 {% endif %}
-                </p>
-                <p class="droite">{{ app.user.statut }} {{ app.user.etab }}</p>
-                <p class="droite">{{  infos.tronquer_chaine(app.user.labo,15) }}</p>
+
                 </div>
-
-                <p class="droite"><a href=" {{ path('profil') }}">Mettre à jour mon profil</a>
-                <a href=" {{ path('deconnexion') }}">Déconnexion</a></p>
-
-            {% else %}
-                <p class="droite"><a class="droite" href=" {{ path('connexion') }}">connexion</a></p>
-                {% if app.debug %}
-
-                    <p class="droite"><a href=" {{ path('connexion_dbg') }}">connexion (DBG)</a></p>
-                {% endif %}
-            {% endif %}
-
             </div>
         {% endblock header %}
 
