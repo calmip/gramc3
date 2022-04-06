@@ -459,7 +459,6 @@ class ServiceProjets
      */
     public function projetsParCritere($annee, $sess_lbl, $critere)
     {
-        // pour debug echo '<br><br><br><br><br><br>';
         $projets = $this->projetsParAnnee($annee, false, false, $sess_lbl)[0];
 
         // La liste des acronymes

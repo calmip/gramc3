@@ -595,12 +595,29 @@ class StatistiquesController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $sortie =   "Statistiques de l'année ". $annee . " par $titre \n";
-        $ligne  =   [$titre,"nombre de projets","heures demandées","heures attribuées","heure consommées"];
+        // Si on trouve les données dans la session, OK. Sinon on envoie un csv vide
+        if ($request->getSession()->has('statistiques_annee'))
+        {
+            $annee = $request->getSession()->get('statistiques_annee');
+        } else
+        {
+            return Functions::csv([], "erreur.csv");
+        }
+        
+        if ($request->getSession()->has('statistiques_sess_lbl'))
+        {
+            $sess_lbl = $request->getSession()->get('statistiques_sess_lbl');
+        } else
+        {
+            return Functions::csv([], "erreur.csv");
+        }
+
+        $sortie =   "Statistiques de l'année ". $annee;
+        if ($sess_lbl != "AB") $sortie .= " - Session $sess_lbl";
+        $ligne  =   [" par $titre","nombre de projets","heures demandées","heures attribuées","heure consommées"];
         $sortie .= join("\t", $ligne) . "\n";
 
-        //$versions = $em->getRepository(Version::class)->findVersionsAnnee($annee);
-        $stats = $this->statistiques($annee, $critere, $titre);
+        $stats = $this->statistiques($annee, $sess_lbl, $critere, $titre);
 
         foreach ($stats['acros'] as $acro) {
             $ligne = [ '"' . $acro . '"', $stats['num_projets'][$acro], $stats['dem_heures'][$acro], $stats['attr_heures'][$acro], $stats['conso'][$acro] ];
