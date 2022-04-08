@@ -22,6 +22,7 @@
 
 <br />
 
+{% if sess_lbl == 'AB' %}
 <table>
     <thead>
         <tr>
@@ -29,7 +30,7 @@
             <th>Nombre de projets</th>
             <th>Heures demandées</th>
             <th>Heures attribuées</th>
-            {% if sess_lbl == 'AB' %}<th>Consommation</th>{% endif %}
+            <th>Consommation</th>
         </tr>
     </thead>
     <tbody>
@@ -39,12 +40,37 @@
             <td>{{ num_projets[acro] }}</td>
             <td>{{ dem_heures[acro] }}</td>
             <td>{{ attr_heures[acro] }}</td>
-            {% if sess_lbl == 'AB' %}<td>{{ conso[acro] }}</td>{% endif %}
+            <td>{{ conso[acro] }}</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 
+{% else %}
+
+<table>
+    <thead>
+        <tr>
+            <th>{{titre}}</th>
+            <th colspan="3">Renouvellements</th><th colspan="3">Nouveaux projets</th><th colspan="3">Total</th>
+        </tr>
+        <tr>
+            <th>&nbsp;</th>
+            <th>Nombre de projets</th><th>Heures demandées</th><th>Heures attribuées</th>
+            <th>Nombre de projets</th><th>Heures demandées</th><th>Heures attribuées</th>
+            <th>Nombre de projets</th><th>Heures demandées</th><th>Heures attribuées</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for acro in acros %}
+        <tr>
+            <td>{{ acro }}</td>
+            <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>{{ num_projets[acro] }}</td><td>{{ dem_heures[acro] }}</td><td>{{ attr_heures[acro] }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
 
 <table>
     <tbody>
