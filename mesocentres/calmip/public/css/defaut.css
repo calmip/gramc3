@@ -1189,8 +1189,9 @@ p{
     margin: 0;
 }
 
-h2{
+h2, h1{
     color: var(--first-color);
+    margin-bottom: 50px;
 }
 
 
@@ -1376,6 +1377,10 @@ h2{
 
 
 /* ========== Connexion ========== */
+.titre_login{
+    margin: 0 0 120px;
+}
+
 .section_login{
     display: flex;
     flex-direction: column;
