@@ -120,7 +120,7 @@ class LoginController extends AbstractController
                  'choices' => $this->getParameter('IDPprod')
                  ]
                 )
-            ->add('connect', SubmitType::class, ['label' => 'Connexion'])
+            ->add('connect', SubmitType::class, ['label' => 'Connexion *'])
             ->getForm();
 
         $form->handleRequest($request);

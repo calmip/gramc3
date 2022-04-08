@@ -219,6 +219,11 @@ class GramcSessionController extends AbstractController
         $menu[] = $m;
         $menu[] = $sm->aide();
 
+        if (! $this->ac->isGranted('IS_AUTHENTICATED_FULLY')) 
+        {
+            return $this->redirectToRoute('connexion');
+        }
+
         if ($seulement_demandeur) {
             return $this->redirectToRoute('projet_accueil');
         } else {

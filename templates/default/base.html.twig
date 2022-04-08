@@ -44,11 +44,10 @@
         <header class="header">
             <a class="lien_accueil" href="{{ path('accueil') }}"><img src="{{ asset('icones/banniere.png') }}" alt="logo" /></a>
         
-            <div class="nav">
+            <nav class="nav">
+                    <a class="lien_nav" href="{{ path('accueil') }}" title="Accéder à l'accueil">Accueil</a> 
                 {% if is_granted('ROLE_DEMANDEUR') %}
                     <a class="lien_nav" href="{{ path('projet_accueil') }}" title="Accéder à l'espace demandeur">Demandeur</a> 
-                {% else %}
-                    <p>Veuillez vous <a href="{{ path('connexion_dbg') }}" class="connexion_nav">connecter</a> pour accéder au menu</p>
                 {% endif %}
 
                 {% if is_granted('ROLE_EXPERT') %}
@@ -64,7 +63,7 @@
                 {% endif %}
 
                 <a class="aide_nav" href="{{ path('aide') }}">?</a>
-            </div>
+            </nav>
             <img src="{{ asset('icones/header.png') }}" alt="élément graphique" class="elm_graphique"/>
 
 
@@ -135,56 +134,57 @@
     {% block footer %}
         {# footer #}
         <footer class="footer">
-                <div>
-            {{ infos.gramc_date('Y-m-d') }} -
+            <div>
+                {{ infos.gramc_date('Y-m-d') }} -
 
-            {% block message %}
+                {% block message %}
 
-                {% if  infos.getLibelleEtatSessionCourante == 'CREE_ATTENTE' %}
-                    La prochaine session d'attribution sera ouverte le <strong>{{ infos.prochaine_session }}</strong>
+                    {% if  infos.getLibelleEtatSessionCourante == 'CREE_ATTENTE' %}
+                        La prochaine session d'attribution sera ouverte le <strong>{{ infos.prochaine_session }}</strong>
 
-                {% elseif  infos.getLibelleEtatSessionCourante == 'EDITION_DEMANDE'%}
+                    {% elseif  infos.getLibelleEtatSessionCourante == 'EDITION_DEMANDE'%}
 
-                    {% if infos.cette_session()['jours'] == 0 %}
-                    Vous avez encore <strong>JUSQU'A CE SOIR</strong> pour envoyer votre projet pour expertise
+                        {% if infos.cette_session()['jours'] == 0 %}
+                        Vous avez encore <strong>JUSQU'A CE SOIR</strong> pour envoyer votre projet pour expertise
 
-                    {% elseif infos.cette_session()['jours'] > 0 %}
-                        Vous avez jusqu'au <strong>{{ infos.cette_session()['fin_sess'] }}  </strong> pour envoyer votre projet pour expertise
+                        {% elseif infos.cette_session()['jours'] > 0 %}
+                            Vous avez jusqu'au <strong>{{ infos.cette_session()['fin_sess'] }}  </strong> pour envoyer votre projet pour expertise
 
-                    {% else %}
-                    ATTENTION, la date de fin de session est dépassée
-                        {% if infos.cette_session()['jours'] == -1 %}
-                            <strong>d'un jour</strong>
-                       {% else %}
-                            <strong>de {{ - infos.cette_session()['jours'] }} jours</strong>
+                        {% else %}
+                        ATTENTION, la date de fin de session est dépassée
+                            {% if infos.cette_session()['jours'] == -1 %}
+                                <strong>d'un jour</strong>
+                        {% else %}
+                                <strong>de {{ - infos.cette_session()['jours'] }} jours</strong>
+                            {% endif %}
+
                         {% endif %}
 
-                    {% endif %}
-
-                {% else %}
-                Prochaine session d'attribution: <strong>
-                    {%  if infos.prochaine_session_saison.type == 'P' %}
-                    Printemps {{  infos.prochaine_session_saison.annee }}
                     {% else %}
-                    Automne {{  infos.prochaine_session_saison.annee }}
+                    Prochaine session d'attribution: <strong>
+                        {%  if infos.prochaine_session_saison.type == 'P' %}
+                        Printemps {{  infos.prochaine_session_saison.annee }}
+                        {% else %}
+                        Automne {{  infos.prochaine_session_saison.annee }}
+                        {% endif %}
+                    </strong>
                     {% endif %}
-                </strong>
-                {% endif %}
-                </div>
 
-            {% endblock message %}
+                {% endblock message %}
 
-            {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-            <div class="liens_importants_footer">
-                <span>gramc {{ infos.VERSION }} <a href="mailto:{{ mailadmin }}" class="lien_footer">{{ mailadmin }}</a></span>
-            {% else %}
-                <span>gramc {{ infos.VERSION }} {{ infos.mail_replace(mailadmin) }}</span>
-            {% endif %}
-            <a href="{{ path('mentions_legales') }}" class="lien_footer" title="Lire les mentions légales">Mentions légales</a>
-            {% if mesoc_cgu != null %}
-            <a href="{{ mesoc_cgu }}" class="lien_footer" title="Lire les cgu du calculateur">cgu</a>
             </div>
-            {% endif %}
+
+            <div class="liens_importants_footer">
+                {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                    <span>gramc {{ infos.VERSION }} <a href="mailto:{{ mailadmin }}" class="lien_footer">{{ mailadmin }}</a></span>
+                {% else %}
+                    <span>gramc {{ infos.VERSION }} {{ infos.mail_replace(mailadmin) }}</span>
+                {% endif %}
+                <a href="{{ path('mentions_legales') }}" class="lien_footer" title="Lire les mentions légales">Mentions légales</a>
+                {% if mesoc_cgu != null %}
+                <a href="{{ mesoc_cgu }}" class="lien_footer" title="Lire les cgu du calculateur">cgu</a>
+                {% endif %}
+            </div>
 
         </footer>
 

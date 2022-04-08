@@ -6,14 +6,17 @@
 
     {% block body %}
     
-    <div id="section">
-        <h2>Connexion à la plateforme</h2>
-    <div class="message info"><h2>ATTENTION</h2>
-    <strong><em>Authentification uniquement pour debug</em></strong></div>
+    <section class="section_dbg">
+        <h2>Veuillez vous identifier</h2>
+    <div class="information">
+        <h2>ATTENTION</h2>
+        <em>Authentification uniquement pour debug</em>
+    </div>
     
     {{ form_start(form) }}
     
     {{ form_end(form) }}
+    </div>
     
     {% endblock %}
  
