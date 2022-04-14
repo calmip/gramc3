@@ -1,11 +1,3 @@
-/* ========== COLORS ========== */
-:root{
-    --first-color: #1C77E4;
-    --second-color: #D62412;
-    --third-color: #5E5F5F;
-}
-
-
 /* ATTENTION .- DES TRUCS QUI VONT PAS SUITE A LA FUSION REGARDER EN PARTICULIER #legende !!!!! */
 
 h1{
@@ -1177,8 +1169,25 @@ img.dfct {
 
 
 
+
+
 /*    UGO   */
+/* ========== COLORS ========== */
+:root{
+    --first-color: #1C77E4;
+    --second-color: #D62412;
+    --third-color: #5E5F5F;
+    --warning-color: #D96800;
+}
+
+
+
 /* ===== BODY ===== */
+html{
+    height: auto;
+    background: none;
+}
+
 body{
     margin: 0;
     padding: 0;
@@ -1233,6 +1242,11 @@ h2, h1{
 }
 
 .lien_nav:hover{
+    background: var(--first-color);
+    color: white;
+}
+
+.lien_nav.actif{
     background: var(--first-color);
     color: white;
 }
@@ -1349,7 +1363,7 @@ h2, h1{
 
 /* ========== TOUTES LES INFORMATIONS ========== */
 .information{
-    border: 1px solid var(--first-color);
+    border: 1px solid;
     border-radius: 20px;
     width: 45%;
     margin: auto;
@@ -1363,8 +1377,102 @@ h2, h1{
     padding: 0;
     margin: 0;
     text-align: center;
-    color: var(--third-color);
     margin-bottom: 20px;
+}
+
+.information.ok{
+    border-color: var(--first-color);
+}
+
+.information.ok h2{
+    border-color: var(--first-color);
+    color: var(--first-color);
+}
+
+.information.attention{
+    border-color: var(--warning-color);
+}
+
+.information.attention h2{
+    color: var(--warning-color);
+}
+
+
+
+/* ========== TOUS LES MENUS ========== */
+nav{
+    width: 100%;
+}
+
+nav ul{
+    text-align: initial;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: space-evenly;
+}
+
+nav li{
+    padding: 0;
+    margin: 0;
+    margin-right: 25px;
+}
+
+.lien_actif, .lien_inactif{
+    padding: 0;
+    margin: 0;
+    background: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.lien_actif{
+    color: black;
+}
+
+
+
+/* ===== TOUS LES TABLEAUX ===== */
+table{
+    width: 90%;
+    margin: auto;
+    border: initial;
+    border-collapse: collapse;
+}
+
+thead{
+    height: 50px;
+}
+
+thead tr{
+    border-bottom: 1px solid #00000078;
+}
+
+th{
+    background: none;
+    text-align: justify;
+    border: none;
+}
+
+tbody td{
+    border: none;
+    background: none;
+    padding: 0 10px 0 0;
+    text-align: justify;
+}
+
+tbody tr{
+    height: 60px;
+    border-bottom: 1px solid #00000045;
+}
+
+tbody tr:last-of-type{
+    border-bottom: 1px solid #00000078;
+}
+
+tbody tr.rallonge{
+    border-bottom: none;
 }
 
 
@@ -1407,4 +1515,64 @@ h2, h1{
 
 .section_login .contact_login{
     color: var(--first-color);
+}
+
+
+
+/* ========== PROJETS ========== */
+.section_projets h3{
+    margin-left: 10rem;
+    margin-bottom: 3rem;
+}
+
+.section_projets nav{
+    width: fit-content;
+    margin-left: auto;
+}
+
+.section_projets table a{
+    text-decoration: none;
+}
+
+.section_projets table tbody .seuil_0{
+    color: black;
+    stroke: black;
+}
+
+.section_projets table tbody .seuil_1{
+    color: var(--warning-color);
+    stroke: var(--warning-color);
+}
+
+.section_projets table tbody .seuil_2{
+    color: var(--second-color);
+    stroke: var(--second-color);
+    font-weight: bold;
+}
+
+.section_projets table tbody .consommation svg{
+    cursor: pointer;
+}
+
+
+.section_collaborateur, .section_termine{
+    margin-top: 7rem;
+}
+
+#dialog-compta h2{
+    margin: 50px 0 0;
+}
+
+#dialog-compta .conso{
+    stroke: black;
+}
+
+#dialog-compta li{
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+#dialog-compta li svg:hover{
+    cursor: pointer;
 }

@@ -42,24 +42,46 @@
     <body>
         {% block header %}
         <header class="header">
+{#{{app.request.attributes.get('_route')}}#}
             <a class="lien_accueil" href="{{ path('accueil') }}"><img src="{{ asset('icones/banniere.png') }}" alt="logo" /></a>
         
             <nav class="nav">
+                {% if (app.request.attributes.get('_route') == 'accueil') or (app.request.attributes.get('_route') == 'connexion') or (app.request.attributes.get('_route') == 'connexion_dbg') %}
+                    <a class="lien_nav actif" href="{{ path('accueil') }}" title="Accéder à l'accueil">Accueil</a> 
+                {% else %}
                     <a class="lien_nav" href="{{ path('accueil') }}" title="Accéder à l'accueil">Accueil</a> 
+                {% endif %}
+
                 {% if is_granted('ROLE_DEMANDEUR') %}
-                    <a class="lien_nav" href="{{ path('projet_accueil') }}" title="Accéder à l'espace demandeur">Demandeur</a> 
+                    {% if (app.request.attributes.get('_route') == 'projet_accueil') or (app.request.attributes.get('_route') == 'consulter_projet') %}
+                        <a class="lien_nav actif" href="{{ path('projet_accueil') }}" title="Accéder à l'espace demandeur">Demandeur</a> 
+                    {% else %}
+                        <a class="lien_nav" href="{{ path('projet_accueil') }}" title="Accéder à l'espace demandeur">Demandeur</a> 
+                    {% endif %}
                 {% endif %}
 
                 {% if is_granted('ROLE_EXPERT') %}
-                    <a class="lien_nav" href="{{ path('expertise_liste') }}">Expert</a> 
+                    {% if app.request.attributes.get('_route') == 'expertise_liste' %}
+                        <a class="lien_nav actif" href="{{ path('expertise_liste') }}" title="Accéder à l'espace Expert">Expert</a> 
+                    {% else %}
+                        <a class="lien_nav" href="{{ path('expertise_liste') }}" title="Accéder à l'espace Expert">Expert</a> 
+                    {% endif %}
                 {% endif %}
 
                 {% if is_granted('ROLE_OBS') %}
-                    <a class="lien_nav" href="{{ path('admin_accueil') }}">Administrateur</a> 
+                    {% if app.request.attributes.get('_route') == 'admin_accueil' %}
+                        <a class="lien_nav actif" href="{{ path('admin_accueil') }}" title="Accéder à l'espace Administrateur">Administrateur</a> 
+                    {% else %}
+                        <a class="lien_nav" href="{{ path('admin_accueil') }}"  title="Accéder à l'espace Administrateur">Administrateur</a> 
+                    {% endif %}
                 {% endif %}
 
                 {% if is_granted('ROLE_PRESIDENT') %}
-                    <a class="lien_nav" href="{{ path('president_accueil') }}">Président</a> 
+                    {% if app.request.attributes.get('_route') == 'president_accueil' %}
+                        <a class="lien_nav actif" href="{{ path('president_accueil') }}" title="Accéder à l'espace Président">Président</a> 
+                    {% else %}
+                        <a class="lien_nav" href="{{ path('president_accueil') }}" title="Accéder à l'espace Président">Président</a> 
+                    {% endif %}
                 {% endif %}
 
                 <a class="aide_nav" href="{{ path('aide') }}">?</a>
@@ -104,6 +126,7 @@
 
                 </div>
             </div>
+
         {% endblock header %}
 
     {% include "default/flash.html.twig" %}

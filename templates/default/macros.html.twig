@@ -3,11 +3,6 @@
 
 {% import _self as macros %}
 
-{% macro img_consulter() %}{{ asset('icones/consulter.png') }}{% endmacro %}
-{% macro img_supprimer() %}{{ asset('icones/petitdelete.png') }}{% endmacro %}
-{% macro img_modifier() %}{{ asset('icones/modifier.png') }}{% endmacro %}
-
-
 
 {% macro ko(text) %}
     <div class="infobulleko" data-title="{{ text }}" >
@@ -35,10 +30,34 @@
 {% endmacro %}
 
 {# ################################################## #}
+{# Affichage d'une icone à partir d'une valeur #}
+
+{% macro menuIcones(value) %}
+
+    {% import "default/icone.html.twig" as icones %}
+
+    {% if value == "nouveauProjet" %}
+        {{icones.nouveauProjet}}
+    {% elseif value == "details" %}
+        {{icones.details}}
+    {% elseif value == "supprimer" %}
+        {{icones.supprimer}}
+    {% elseif value == "modifier" %}
+        {{icones.modifier}}
+    {% endif %}
+
+{% endmacro %}
+
+
+{# ################################################## #}
 {# Affichage d'un menu à partir d'un array d'array  (cf. lib/navigation.php)
 #}
 
 {% macro menu(menu) %}
+
+{% from _self import menuIcones %}
+
+
 <nav>
     <ul>
         {% for item in menu %}
@@ -52,7 +71,12 @@
 	                {% else %}
 	                    href="{{ path(item.name) }}"
 	                {% endif %}
-	            >{{ item.lien }}</a>
+	            >
+                {% if item.icone is defined %}
+                {{ menuIcones(item.icone) }} {{ item.lien }}</a>
+                {% else %}
+                    {{ item.lien }}</a>
+                {% endif %}
 	        </li>
 	        {% else %}
 	        <li><a class="lien_inactif"
@@ -65,7 +89,13 @@
 	                    href="{{ path(item.name) }}"
 	                {% endif %}
 	            {% endif %}
-	            title="{{ item.commentaire }} - {{ item.raison }}">{{ item.lien }}</a>
+	            title="{{ item.commentaire }} - {{ item.raison }}"
+                >
+                {% if item.icone is defined %}
+                {{ menuIcones(item.icone) }} {{ item.lien }}</a>
+                {% else %}
+                    {{ item.lien }}</a>
+                {% endif %}
 	        </li>
 	        {% endif %}
 	    {% endif %}

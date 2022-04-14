@@ -301,6 +301,7 @@ class ProjetSpecController extends AbstractController
         $menu['commentaire']    =   "Vous ne pouvez pas créer de nouveau projet actuellement";
         $menu['name']   =   'avant_nouveau_projet';
         $menu['params'] =   [ 'type' =>  Projet::PROJET_SESS ];
+        $menu['icone']   =   'nouveauProjet';
         $menu['lien']   =   'Nouveau projet';
         $menu['ok'] = false;
 
@@ -320,6 +321,7 @@ class ProjetSpecController extends AbstractController
             $menu['ok'] = true;
         } else {
             $menu['raison'] = 'Nous ne sommes pas en période de demande, pas possible de créer un nouveau projet';
+            $menu['icone']   =   'nouveauProjet';
         }
 
         return $menu;
@@ -337,7 +339,8 @@ class ProjetSpecController extends AbstractController
         $menu['commentaire']    =   "Vous ne pouvez pas créer de nouveau projet test actuellement";
         $menu['name']   =   'avant_nouveau_projet';
         $menu['params'] =   [ 'type' =>  Projet::PROJET_FIL ];
-        $menu['lien']   =   'Nouveau projet test';
+        $menu['icone']   =   'nouveauProjet';
+        $menu['lien']   =   'Nouveau projet TEST';
         $menu['ok'] = false;
 
         $session =  $this->ss->getSessionCourante();

@@ -5,14 +5,14 @@
 
 {% block body %}
 <section>
-<h1>Bienvenue sur la plateforme d'attribution de ressources de {{mesoc}} </h1>
+<h1>Bonjour {{ app.user.prenom }} {{ app.user.nom }} </h1>
 
 
 {# message #}
 
 {% if is_granted('IS_AUTHENTICATED_FULLY') %}
 
-<div class="message info"><h2>Informations</h2>
+<div class="information ok"><h2>Informations</h2>
 
 {{ block ('message') }}
 <p><strong>Vous pouvez demander un supplément de ressources</strong>

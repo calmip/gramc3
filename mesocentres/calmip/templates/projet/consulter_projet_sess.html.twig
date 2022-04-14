@@ -5,12 +5,19 @@
 <script  type="text/javascript" src="{{ asset('js/projet.js') }}" ></script>
 {% endblock myjavascripts %}
 
+{% block body %}
 
-{% block menu %}
+<h2>
+    Projet : {{ projet }} (session {{ session }})
+    <br>
+    <small><em>{{ version.getMetaEtat }}</em></small>
+</h2>
+
+
+
 {{ gramcmacros.menu(menu) }}
-{% endblock menu %}
 
-{% block before_body %}
+
 <h3>Historique</h3>
 <h4>Autres versions</h4>
 
@@ -103,11 +110,6 @@
 <img src="data:image/png;base64, {{ conso2 }}" />
 #}
 
-<h2>
-    Projet : {{ projet }} (session {{ session }})
-    <br>
-    <small><em>{{ version.getMetaEtat }}</em></small>
-</h2>
 
 <p>
 {% if app.debug %}<strong>DEBUG </strong><em>Type du projet {{projet.id}} = <strong>{{ projet.typeprojet}}</strong> - Etat du projet {{projet.id }}= <strong>{{ projet.getEtatProjet }}</strong> - Etat de la version {{version.idVersion }}= <strong>{{ version.getEtatVersion }}</strong></em>{% endif %}<br />
@@ -116,9 +118,7 @@
 {% endif %}
 </p>
 
-{% endblock before_body %}
 
-{% block body %}
 
 {% if noconso==false %}
 
