@@ -44,7 +44,7 @@
 
         {% if noconso==false %}
         
-            {% if item.conso < conso_seuil_1 %}
+            {% if item.conso < conso_seuil_1 - 20 %}
                 <td rowspan="{{ item.cpt_rall + 1 }}" class="consommation seuil_0">{{ item.conso |number_format(1)}}&nbsp;%</td>
                 
                 <td rowspan="{{ item.cpt_rall + 1 }}" class="consommation seuil_0" title="Evolution de la consommation">
@@ -54,7 +54,7 @@
                     </div>
 
                 </td>
-            {% elseif item.conso < conso_seuil_2 %}
+            {% elseif item.conso < conso_seuil_2 - 20 %}
                 <td rowspan="{{ item.cpt_rall + 1 }}" class="consommation seuil_1">{{ item.conso |number_format(1)}}&nbsp;%</td>
                 
                 <td rowspan="{{ item.cpt_rall + 1 }}" class="consommation seuil_1" title="Evolution de la consommation">
@@ -91,7 +91,7 @@
             <a href="{{ path('rallonge_consulter', { 'id': rallonge.idRallonge })}}"
             {% if rallonge.getMetaEtat() == 'EDITION' %}
                 title="Modifier cette rallonge" >
-                {{ icones.modifier }}
+                {{ icones.modifier_rallonge }}
 
 
             {% else %}

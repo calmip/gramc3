@@ -480,10 +480,10 @@ class ProjetSpecController extends AbstractController
         if ($ac->isGranted('ROLE_ADMIN')) {
             $menu[] = $sm->rallonge_creation($projet);
         }
-        $menu[] = $sm->changer_responsable($version);
         $menu[] = $sm->renouveler_version($version);
         $menu[] = $sm->modifier_version($version);
         $menu[] = $sm->envoyer_expert($version);
+        $menu[] = $sm->changer_responsable($version);
         $menu[] = $sm->modifier_collaborateurs($version);
         if ($this->getParameter('nodata')==false) {
             $menu[] = $sm->donnees($version);

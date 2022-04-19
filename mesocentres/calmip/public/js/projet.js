@@ -109,3 +109,20 @@ $( document ).ready(function() {
 
 });
 
+$( document ).ready(function() {
+
+	//Menu sur la page de consultation d'un projet
+	let menu = $('.consulter_projet nav ul');
+	let li_menu = $('.consulter_projet nav ul li');
+	let more_menu = '<p class="more">En voir plus...</p>';
+
+	console.log(li_menu)
+
+	if(li_menu.length > 3){
+		for(i=3; i < li_menu.length; i++){
+			li_menu[i].style.display = 'none';
+		}
+		menu[0].innerHTML += '<p class="more">En voir plus...</p>'
+	}
+
+})

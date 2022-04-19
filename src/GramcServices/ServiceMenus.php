@@ -790,6 +790,7 @@ class ServiceMenus
         $menu['name']   = 'modifier_version';
         $menu['param']  = $version->getIdVersion();
         $menu['lien']   = "Modifier";
+        $menu['icone']   = "modifier";
         $menu['commentaire']    =   "Vous ne pouvez pas modifier ce projet";
         $menu['ok']          = false;
 
@@ -987,6 +988,7 @@ class ServiceMenus
         $menu['name']           =   'renouveler_version';
         $menu['param']          =   $version->getIdVersion();
         $menu['lien']           =   "Renouvellement";
+        $menu['icone']           =   "renouveler";
         $menu['commentaire']    =   "Vous ne pouvez pas demander de renouvellement";
         $menu['ok']             =   false;
 
@@ -1030,6 +1032,7 @@ class ServiceMenus
         $menu['name']           =   'avant_envoyer_expert';
         $menu['param']          =   $version->getIdVersion();
         $menu['lien']           =   "Envoyer à l'expert";
+        $menu['icone']           =   "envoyer";
         $menu['commentaire']    =   "Vous ne pouvez pas envoyer ce projet à l'expert";
         $menu['ok']             =   false;
         $menu['raison']         =   "";

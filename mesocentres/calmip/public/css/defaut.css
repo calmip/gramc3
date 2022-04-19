@@ -1429,6 +1429,12 @@ nav li{
 
 .lien_actif{
     color: black;
+    stroke: black;
+}
+
+.lien_inactif{
+    stroke: grey;
+    color: grey;
 }
 
 
@@ -1575,4 +1581,38 @@ tbody tr.rallonge{
 
 #dialog-compta li svg:hover{
     cursor: pointer;
+}
+
+
+
+/* ========== CONSULTER PROJETS ========== */
+.consulter_projet nav{
+    width: 85%;
+    margin: auto;
+}
+
+.consulter_projet nav ul{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.consulter_projet nav li{
+    padding: 10px 20px;
+    margin: 0 25px 25px;
+    border: solid 2px var(--first-color);
+    border-radius: 10px;
+}
+
+.consulter_projet li a{
+    flex-direction: row;
+}
+
+.consulter_projet li svg{
+    margin-right: 10px;
+}
+
+.consulter_projet nav ul .more{
+    margin: 0 0 25px;
 }
