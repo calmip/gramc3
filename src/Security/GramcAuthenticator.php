@@ -80,6 +80,7 @@ class GramcAuthenticator extends AbstractAuthenticator
 
         $remote_user = $request->headers->get('eppn');
         $mail = $request->headers->get('mail');
+        // $this->sj->debugMessage(__FILE__ . ":" . __LINE__ . " eppn=$remote_user, mail=$mail ");
 
         // Auhentification Shibboleth
         if ($remote_user != null)
@@ -185,12 +186,34 @@ class GramcAuthenticator extends AbstractAuthenticator
 
         // S'il y a eppn ET mail dans les headers on redirige vers nouveau_compte
         if ($request->getSession()->has('eppn') && $request->getSession()->has('mail'))
+        //if (0)
         {
             return new RedirectResponse($this->urg->generate('nouveau_compte'));
         }
 
         // Sinon nous avons un problème d'authentification
         else {
+            $log_msg = " Erreur d'authentification - ";
+            if ($request->getSession()->has('eppn'))
+            {
+                $eppn = $request->getSession()->get('eppn');
+                $log_msg .= "eppn = $eppn ";
+            }
+            else
+            {
+                $log_msg .= "PAS D'EPPN ";
+            }
+            if ($request->getSession()->has('mail'))
+            {
+                $mail = $request->getSession()->get('mail');
+                $log_msg .= "mail = $mail ";
+            }
+            else
+            {
+                $log_msg .= "PAS DE MAIL ";
+            }
+            $log_msg .= "HTTP_REFERER = " . $request->server->get('HTTP_REFERER');
+            $this->sj->warningMessage(__FILE__ . ":" . __LINE__ . $log_msg);
             $message = "ERREUR d'AUTHENTIFICATION";
             $request->getSession()->getFlashbag()->add("flash erreur",$message . " - Merci de vous rapprocher de CALMIP");
             return new RedirectResponse($this->urg->generate('accueil'));

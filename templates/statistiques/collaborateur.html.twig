@@ -1,11 +1,6 @@
 {% extends 'default/base.html.twig' %}
 {% import "default/macros.html.twig" as gramcmacros %}
 
-{% block menu %}
-{{ gramcmacros.menu(menu) }}
-<nav><ul><a class="lien_actif" href="{{ path('statistiques',{'annee': annee}) }}" title="Statistiques">Retour aux statistiques</a></ul></nav>
-{% endblock menu %}
-
 {% block myjavascripts %}
 <script type="text/javascript" src="{{ asset('js/projet.js') }}" ></script>
 {% endblock myjavascripts %}
@@ -16,13 +11,9 @@
 
 <section>
 
-<h1>Répartition des collaborateurs - année {{ annee }}</h1>
-
-{{ form_start(form) }}
-{{ form_widget(form.annee) }}{{ form_widget(form.submit) }}
-{{ form_end(form) }}
-
-<br />
+<h1>Répartition des collaborateurs - année {{ annee }}
+{% if sess_lbl != 'AB' %} - session {{ sess_lbl }} {% endif %}
+</h1>
 
 <table>
     <thead>
@@ -261,6 +252,8 @@
     </tbody>
 </table>
 <div id="dialog"></div>
+
+<nav><ul><a class="lien_actif" href="{{ path('statistiques') }}" title="Statistiques">Retour aux statistiques</a></ul></nav>
 
 
 </section>

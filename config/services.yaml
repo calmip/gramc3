@@ -158,3 +158,6 @@ services:
     App\Command\KeepOnly:
         arguments: ["%kernel.debug%"]
         tags: ["console.command"]
+
+    App\Command\InitTypeVersion:
+        tags: ["console.command"]

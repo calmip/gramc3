@@ -83,6 +83,8 @@ class AdminuxController extends AbstractController
     public function UpdateComptaBatchAction(Request $request): Response
     {
         $em = $this->getDoctrine()->getManager();
+        $sj = $this->sj;
+        
         if ($this->getParameter('noconso')==true) {
             throw new AccessDeniedException("Forbidden because of parameter noconso");
         }
@@ -106,6 +108,7 @@ class AdminuxController extends AbstractController
             } elseif ($type=="group") {
                 $type_nb = Compta::GROUP;
             } else {
+                $sj -> errorMessage("AdminUxController::UpdateComptaBatchAction - type de ligne bizarre: $type");
                 return new Response('KO');
             }
 
@@ -138,15 +141,17 @@ class AdminuxController extends AbstractController
 
         try {
             $em->flush();
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e)
+        {
+            $sj -> errorMessage("AdminUxController::UpdateComptaBatchAction - Mise à jour de la compta incomplète");
             return new Response('KO');
         }
 
         //return new Response( Functions::show( $conso_repository->findAll() ) );
-
+        $sj -> infoMessage(__METHOD__ . "Compta mise à jour");
         return $this->render('consommation/conso_update_batch.html.twig');
     }
-
 
     ///////////////////////////////////////////////////////////////////////////////
 
@@ -165,6 +170,7 @@ class AdminuxController extends AbstractController
     public function setloginnameAction(Request $request, LoggerInterface $lg): Response
     {
         $em = $this->getdoctrine()->getManager();
+        $sj = $this->sj;
 
         if ($this->getParameter('noconso')==true) {
             throw new AccessDeniedException("Accès interdit (paramètre noconso)");
@@ -172,19 +178,23 @@ class AdminuxController extends AbstractController
 
         $content  = json_decode($request->getContent(), true);
         if ($content == null) {
+            $sj->errorMessage("AdminUxController::setloginnameAction - Pas de données");
             return new Response(json_encode(['KO' => 'Pas de données']));
         }
         if (empty($content['loginname'])) {
+            $sj->errorMessage("AdminUxController::setloginnameAction - Pas de nom de login");
             return new Response(json_encode(['KO' => 'Pas de nom de login']));
         } else {
             $loginname = $content['loginname'];
         }
         if (empty($content['projet'])) {
+            $sj->errorMessage("AdminUxController::setloginnameAction - Pas de projet");
             return new Response(json_encode(['KO' => 'Pas de projet']));
         } else {
             $idProjet = $content['projet'];
         }
         if (empty($content['idIndividu'])) {
+            $sj->errorMessage("AdminUxController::setloginnameAction - Pas de idIndividu");
             return new Response(json_encode(['KO' => 'Pas de idIndividu']));
         } else {
             $idIndividu = $content['idIndividu'];
@@ -202,6 +212,7 @@ class AdminuxController extends AbstractController
         }
 
         if ($error != []) {
+            $sj->errorMessage("AdminUxController::setloginnameAction - " . print_r($error, true));
             return new Response(json_encode(['KO' => $error ]));
         }
 
@@ -223,6 +234,7 @@ class AdminuxController extends AbstractController
                             $old_loginname = $collaborateurVersion->getLoginname();
                             $user = $em->getRepository(User::class)->findBy([ 'loginname' => $old_loginname ]);
                             if ($user != null) {
+                                $sj->errorMessage("AdminUxController::setloginnameAction - Commencez par appeler clearpassword");
                                 return new Response(json_encode(['KO' => 'Commencez par appeler clearpassword']));
                             }
                         }
@@ -236,8 +248,10 @@ class AdminuxController extends AbstractController
             }
         }
         if ($i > 0 ) {
+            $sj -> infoMessage(__METHOD__ . "$i versions modifiées");
             return new Response(json_encode(['OK' => "$i versions modifiees"]));
         } else {
+            $sj->errorMessage("AdminUxController::setloginnameAction - Mauvais projet ou mauvais idIndividu !");
             return new Response(json_encode(['KO' => 'Mauvais projet ou mauvais idIndividu !' ]));
         }
     }
@@ -256,6 +270,7 @@ class AdminuxController extends AbstractController
     public function setpasswordAction(Request $request, LoggerInterface $lg): Response
     {
         $em = $this->getDoctrine()->getManager();
+        $sj = $this->sj;
         //$sp = $this->sp;
         //$rep= $em->getRepository(Projet::class);
 
@@ -265,21 +280,25 @@ class AdminuxController extends AbstractController
 
         $content  = json_decode($request->getContent(), true);
         if ($content == null) {
+            $sj->errorMessage("AdminUxController::setpasswordAction - Pas de données");
             return new Response(json_encode(['KO' => 'Pas de données']));
         }
         if (empty($content['loginname'])) {
+            $sj->errorMessage("AdminUxController::setpasswordAction - Pas de nom de login");
             return new Response(json_encode(['KO' => 'Pas de nom de login']));
         } else {
             $loginname = $content['loginname'];
         }
 
         if (empty($content['password'])) {
+            $sj->errorMessage("AdminUxController::setpasswordAction - Pas de mot de passe");
             return new Response(json_encode(['KO' => 'Pas de mot de passe']));
         } else {
             $password = $content['password'];
         }
 
         if (empty($content['cpassword'])) {
+            $sj->errorMessage("AdminUxController::setpasswordAction - Pas de version cryptée du mot de passe");
             return new Response(json_encode(['KO' => 'Pas de version cryptée du mot de passe']));
         } else {
             $cpassword = $content['cpassword'];
@@ -293,6 +312,7 @@ class AdminuxController extends AbstractController
         # Vérifie que ce loginname est connu
         $cv = $em->getRepository(User::class)->existsLoginname($loginname);
         if ($cv==false) {
+            $sj->errorMessage("AdminUxController::setpasswordAction - No user '$loginname' found in any projet");
             return new Response(json_encode(['KO' => "No user '$loginname' found in any projet" ]));
         }
 
@@ -317,6 +337,8 @@ class AdminuxController extends AbstractController
             $em->persist($user);
             $em->flush($user);
             //Functions::sauvegarder( null, $em, $lg );
+
+            $sj -> infoMessage(__METHOD__ . "Mot de passe de $loginname modifié");
             return new Response(json_encode(['OK' => '']));
         }
     }
@@ -338,6 +360,7 @@ class AdminuxController extends AbstractController
     public function clearpasswordAction(Request $request, LoggerInterface $lg): Response
     {
         $em = $this->getDoctrine()->getManager();
+        $sj = $this->sj;
 
         if ($this->getParameter('noconso')==true) {
             throw new AccessDeniedException("Accès interdit (parametre noconso)");
@@ -345,17 +368,21 @@ class AdminuxController extends AbstractController
 
         $content  = json_decode($request->getContent(), true);
         if ($content == null) {
+            $sj->errorMessage("AdminUxController::clearpasswordAction - Pas de données");
             return new Response(json_encode(['KO' => 'Pas de donnees']));
         }
         if (empty($content['loginname'])) {
+            $sj->errorMessage("AdminUxController::clearpasswordAction - Pas de nom de login");
             return new Response(json_encode(['KO' => 'Pas de nom de login']));
-        } else {
+        } else
+        {
             $loginname = $content['loginname'];
         }
 
         # Vérifie que ce loginname est connu
         $cv = $em->getRepository(User::class)->existsLoginname($loginname);
         if ($cv==false) {
+            $sj->errorMessage("AdminUxController::clearpasswordAction - No user '$loginname' found in any projet");
             return new Response(json_encode(['KO' => "No user '$loginname' found in any projet" ]));
         }
 
@@ -363,12 +390,15 @@ class AdminuxController extends AbstractController
         else {
             $user = $em->getRepository(User::class)->findOneBy(['loginname' => $loginname]);
             if ($user==null) {
+                $sj->errorMessage("AdminUxController::clearpasswordAction - No password stored for '$loginname");
                 return new Response(json_encode(['KO' => "No password stored for '$loginname'" ]));
             }
 
             $em->remove($user);
             $em->flush();
         }
+
+        $sj -> infoMessage(__METHOD__ . "Mot de passe de $loginname effacé");
         return new Response(json_encode(['OK' => '']));
     }
 
@@ -390,6 +420,7 @@ class AdminuxController extends AbstractController
     public function clearloginnameAction(Request $request, LoggerInterface $lg): Response
     {
         $em = $this->getDoctrine()->getManager();
+        $sj = $this->sj;
 
         if ($this->getParameter('noconso')==true) {
             throw new AccessDeniedException("Accès interdit (parametre noconso)");
@@ -397,14 +428,17 @@ class AdminuxController extends AbstractController
 
         $content  = json_decode($request->getContent(), true);
         if ($content == null) {
+            $sj->errorMessage("AdminUxController::clearloginnameAction - Pas de données");
             return new Response(json_encode(['KO' => 'Pas de donnees']));
         }
         if (empty($content['loginname'])) {
+            $sj->errorMessage("AdminUxController::clearloginAction - Pas de nom de login");
             return new Response(json_encode(['KO' => 'Pas de nom de login']));
         } else {
             $loginname = $content['loginname'];
         }
         if (empty($content['projet'])) {
+            $sj->errorMessage("AdminUxController::clearloginAction - Pas de projet");
             return new Response(json_encode(['KO' => 'Pas de projet']));
         } else {
             $idProjet = $content['projet'];
@@ -415,6 +449,7 @@ class AdminuxController extends AbstractController
         $cnt = count($cvs);
         //return new Response(json_encode($cvs));
         if ($cnt==0) {
+            $sj->errorMessage("AdminUxController::clearloginAction - No user '$loginname' found in any active version");
             return new Response(json_encode(['KO' => "No user '$loginname' found in any active version" ]));
         }
         else
@@ -445,9 +480,10 @@ class AdminuxController extends AbstractController
                         
             $em->flush();
         }
+
+        $sj -> infoMessage(__METHOD__ . "Compte $loginname supprimé");
         return new Response(json_encode(['OK' => '']));
     }
-
 
     private function __getVersionInfo($v): array
     {
@@ -525,6 +561,7 @@ class AdminuxController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
         $sp = $this->sp;
+        $sj = $this->sj;
         $rep= $em->getRepository(Projet::class);
 
         $content  = json_decode($request->getContent(), true);
@@ -564,6 +601,7 @@ class AdminuxController extends AbstractController
             $p_tmp[] = $data;
         }
 
+        $sj -> infoMessage(__METHOD__ . " OK");
         return new Response(json_encode($p_tmp));
     }
 
@@ -607,6 +645,8 @@ class AdminuxController extends AbstractController
      {
         $em = $this->getDoctrine()->getManager();
         $sp = $this->sp;
+        $sj = $this->sj;
+        
         $versions = [];
 
         $content  = json_decode($request->getContent(),true);
@@ -726,6 +766,7 @@ class AdminuxController extends AbstractController
 
         // print_r est plus lisible pour le déboguage
         // return new Response(print_r($retour,true));
+        $sj -> infoMessage(__METHOD__ . " OK");
         return new Response(json_encode($retour));
 
      }
@@ -747,9 +788,27 @@ class AdminuxController extends AbstractController
         $sp = $this->sp;
         $sj = $this->sj;
 
+        // todo - Si ce paramètre n'existe pas ça va planter
+        $ressources_conso_group = $this->getParameter('ressources_conso_group');
+
+        // On recherche les ressources marquées "calcul"
+        // On initialise le tableau à 'cpu', ou 'cpu','gpu'
+        $ressources = [];
+        foreach ($ressources_conso_group as $ress)
+        {
+            if (array_key_exists('type', $ress) && $ress['type'] === 'calcul')
+            {
+                if (array_key_exists('ress', $ress))
+                {
+                    $ressources = explode(',',$ress['ress']);
+                }
+            }
+        }
+
         $content  = json_decode($request->getContent(),true);
         if ($content == null)
         {
+            $sj -> errorMessage("AdminUxController::projetsSetQuotaAction - Pas de données");
             return new Response(json_encode(['KO' => 'Pas de données']));
         }
 
@@ -759,14 +818,17 @@ class AdminuxController extends AbstractController
 
         if ($idProjet === null)
         {
+            $sj->errorMessage("AdminUxController::projetsSetQuotaAction - Pas de projet spécifié");
             return new Response(json_encode(['KO' => 'Pas de projet spécifié']));
         }
         if ($idSession === null)
         {
-            return new Response(json_encode(['KO' => 'Pas de session spécifié']));
+            $sj->errorMessage("AdminUxController::projetsSetQuotaAction - Pas de session spécifiée");
+            return new Response(json_encode(['KO' => 'Pas de session spécifiée']));
         }
         if ($quota === null)
         {
+            $sj->errorMessage("AdminUxController::projetsSetQuotaAction - Pas de quota spécifié");
             return new Response(json_encode(['KO' => 'Pas de quota spécifié']));
         }
         else
@@ -774,24 +836,28 @@ class AdminuxController extends AbstractController
             $quota = intval($quota);
             if ($quota < 0)
             {
+                $sj->errorMessage("AdminUxController::projetsSetQuotaAction - quota doit être un entier positif >= 0");
                 return new Response(json_encode(['KO' => 'quota doit être un entier positif >= 0']));
             }
         }
 
         $projet = $em->getRepository(Projet::class)->findOneBy(['idProjet' => $idProjet]);
         if ($projet === null) {
+            $sj->errorMessage("AdminUxController::projetsSetQuotaAction - Pas de projet $idProjet");
             return new Response(json_encode(['KO' => "Pas de projet $idProjet"]));
         }
 
         $session = $em->getRepository(Session::class)->findOneBy(['idSession' => $idSession]);
         if ($session === null) {
+            $sj->errorMessage("AdminUxController::projetsSetQuotaAction - Pas de session $idSession");
             return new Response(json_encode(['KO' => "Pas de session $idSession"]));
         }
 
         $idVersion = $idSession . $idProjet;
         $version = $em->getRepository(Version::class)->findOneBy(['idVersion' => $idVersion]);
         if ($version === null) {
-           return new Response(json_encode(['KO' => "Pas de version $idVersion"]));
+            $sj->errorMessage("AdminUxController::projetsSetQuotaAction - Pas de version $idVersion");
+            return new Response(json_encode(['KO' => "Pas de version $idVersion"]));
  
         }
 
@@ -802,34 +868,39 @@ class AdminuxController extends AbstractController
         }
 
         // Toutes les vérifications sont terminées, on peut changer le quota
-        // Cela revient à écrire directement dans la table de conso, mais si la conso n'est pas chargée à ce moment
-        // On retourne avec une erreur !
+        // Cela revient à écrire directement dans la table de conso
+        // On écrit le même quota pour toutes les ressources "calcul"
 
         $date = $this->sd;  // aujourd'hui
-        $ressource = "cpu"; // Calcul (cpu ou gpu))
         $loginname = strtolower($idProjet); // Le projet traduit en groupe unix
         $type = 2;                          // Un groupe, pas un utilisateur
-        $compta = $em->getRepository(Compta::class)->findOneBy(
-            [
-                'date'      => $date,
-                'ressource' => $ressource,
-                'loginname' => $loginname,
-                'type'      => $type
-            ]);
+        foreach ($ressources as $ress)
+        {
+            $compta = $em->getRepository(Compta::class)->findOneBy(
+                [
+                    'date'      => $date,
+                    'ressource' => $ress,
+                    'loginname' => $loginname,
+                    'type'      => $type
+                ]);
 
-        if ($compta === null) {
-            $str_date = $date->format("d/m/Y");
-            $sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Pas de données de consommation à la date du $str_date");
-            return new Response(json_encode(['KO' => "Pas de données de consommation à la date du $str_date"]));
+            // Si pas de compta on crée l'objet (nouveau projet pas encore de compta) !
+            if ($compta === null) {
+                $compta = new Compta();
+                $compta ->setDate($date)
+                        ->setRessource($ress)
+                        ->setLoginname($loginname)
+                        ->setType(2)
+                        ->setConso(0);
+            }
+
+            $compta->setQuota($quota);
+            $em->persist($compta);
+            $em->flush();
         }
-
-        $compta->setQuota($quota);
-        $em->persist($compta);
-        $em->flush();
         
-        $sj->infoMessage(__METHOD__ . " Le quota de $idVersion est maintenant $quota");
-
         // OK
+        $sj->infoMessage(__METHOD__ . " Le quota de $idVersion est maintenant $quota");
         return new Response(json_encode(['OK' => "Le quota de $idVersion est maintenant $quota"]));
      }
 
@@ -884,6 +955,8 @@ class AdminuxController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
         $raw_content = $request->getContent();
+        $sj = $this->sj;
+        
         if ($raw_content == '' || $raw_content == '{}') {
             $content = null;
         } else {
@@ -1035,9 +1108,9 @@ class AdminuxController extends AbstractController
 
         }
 
-
         // print_r est plus lisible pour le déboguage
         //return new Response(print_r($users,true));
+        $sj -> infoMessage(__METHOD__ . " OK");
         return new Response(json_encode($users));
     }
 
@@ -1051,11 +1124,14 @@ class AdminuxController extends AbstractController
     public function getloginnamesAction($idProjet): Response
     {
         $em = $this->getDoctrine()->getManager();
+        $sj = $this->sj;
+        
         if ($this->getParameter('noconso')==true) {
             throw new AccessDeniedException("Accès interdit (paramètre noconso)");
         }
         $projet      = $em->getRepository(Projet::class)->find($idProjet);
         if ($projet == null) {
+            $sj->infoMessage(__METHOD__ . " No projet $idProjet");
             return new Response(json_encode(['KO' => 'No Projet ' . $idProjet ]));
         }
 
@@ -1093,6 +1169,8 @@ class AdminuxController extends AbstractController
                 }
             }
         }
+
+        $sj -> infoMessage(__METHOD__ . " OK");
         return new Response(json_encode($output));
     }
 
@@ -1107,6 +1185,7 @@ class AdminuxController extends AbstractController
     {
         $sd = $this->sd;
         $sn = $this->sn;
+        $sj = $this->sj;
 
         if ($this->getParameter('noconso')==true) {
             throw new AccessDeniedException("Accès interdit (paramètre noconso)");
@@ -1133,6 +1212,7 @@ class AdminuxController extends AbstractController
             $sn->sendMessage('notification/quota_check-sujet.html.twig', 'notification/quota_check-contenu.html.twig', [ 'MSG' => $msg ], $dest);
         }
 
+        $sj -> infoMessage(__METHOD__ . " OK");
         return $this->render('consommation/conso_update_batch.html.twig');
     }
 
@@ -1190,6 +1270,8 @@ class AdminuxController extends AbstractController
             $u['expire'] = $user->getExpire();
             $rusers[] = $u;
         }
+
+        $sj -> infoMessage(__METHOD__ . " OK");
         return new Response(json_encode($rusers));
     }
 }

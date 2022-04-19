@@ -57,7 +57,7 @@ use Symfony\Component\HttpFoundation\File\File;
 use App\Utils\Functions;
 use App\GramcServices\Etat;
 use App\GramcServices\Signal;
-//use App\Utils\IndividuForm;
+use App\Form\IndividuFormType;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -74,7 +74,6 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-//use App\Form\IndividuFormType;
 
 use App\Validator\Constraints\PagesNumber;
 use Knp\Snappy\Pdf;
@@ -726,6 +725,7 @@ class VersionController extends AbstractController
         $sm = $this->sm;
         $sj = $this->sj;
         $sval= $this->vl;
+        $sv = $this->sv;
         $em = $this->getDoctrine()->getManager();
 
 
@@ -743,7 +743,7 @@ class VersionController extends AbstractController
 
         $collaborateur_form = $this->ff
                                    ->createNamedBuilder('form_projet', FormType::class, [
-                                       'individus' => self::prepareCollaborateurs($version, $sj, $sval)
+                                       'individus' => $sv->prepareCollaborateurs($version, $sj, $sval)
                                    ])
                                    ->add('individus', CollectionType::class, [
                                        'entry_type'     =>  IndividuFormType::class,
@@ -774,7 +774,7 @@ class VersionController extends AbstractController
         if ($collaborateur_form->isSubmitted() && $collaborateur_form->isValid()) {
             // Un formulaire par individu
             $individu_forms =  $collaborateur_form->getData()['individus'];
-            $validated = $this->validateIndividuForms($individu_forms);
+            $validated = $sv->validateIndividuForms($individu_forms);
             if (! $validated) {
                 return $this->render(
                     'version/collaborateurs_invalides.html.twig',
@@ -786,7 +786,7 @@ class VersionController extends AbstractController
                 );
             }
             // On traite les formulaires d'individus un par un
-            $this->handleIndividuForms($individu_forms, $version);
+            $sv->handleIndividuForms($individu_forms, $version);
 
 
             // return new Response( Functions::show( $resultat ) );

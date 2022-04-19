@@ -13,7 +13,7 @@
 {% block stylesheets %}
         <link href="{{ absolute_url(asset('js/jquery-ui/jquery-ui.css')) }}" rel="stylesheet" type="text/css" media="screen" />
         <link href="{{ absolute_url(asset('js/jquery-upload-file-master/css/uploadfile.css') ) }}" rel="stylesheet" type="text/css" media="screen" />
-        <link href="{{ absolute_url(asset('js/DataTables-1.10.11/media/css/jquery.dataTables.min.css') ) }}" rel="stylesheet" type="text/css" media="screen" />
+        <link href="{{ absolute_url(asset('js/DataTables-1.11.5/css/jquery.dataTables.min.css') ) }}" rel="stylesheet" type="text/css" media="screen" />
 
         <link href="{{ absolute_url(asset('css/defaut.css'))  }}" rel="stylesheet" type="text/css" media="screen" />
         <link href="{{ absolute_url(asset('css/gramc2.css') ) }}" rel="stylesheet" type="text/css" media="screen" />
@@ -23,7 +23,7 @@
 {% endblock mystyles %}
 
 {% block javascripts %}
-        <script   src="{{ absolute_url(asset('js/jquery-2.1.4.js') ) }}" ></script>
+        <script   src="{{ absolute_url(asset('js/jquery-3.6.0.min.js') ) }}" ></script>
         <script   src="{{ absolute_url(asset('js/jquery-ui/jquery-ui.js') ) }}" ></script>
         <script   src="{{ absolute_url(asset('js/header_fixe.js') ) }}" ></script>
 {% endblock %}
@@ -32,7 +32,7 @@
 {% endblock myjavascripts %}
 
 {% block datatables %}
-        <script   src="{{ absolute_url(asset('js/DataTables-1.10.11/media/js/jquery.dataTables.min.js') )  }}" ></script>
+        <script   src="{{ absolute_url(asset('js/DataTables-1.11.5/js/jquery.dataTables.min.js') )  }}" ></script>
         <script   src="{{ absolute_url(asset('js/datatable.js') ) }}" ></script>
 {% endblock datatables %}
 

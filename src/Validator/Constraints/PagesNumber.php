@@ -36,4 +36,5 @@ class PagesNumber extends Constraint
 {
     public $message1 = 'Le fichier PDF a {{ pages }} pages. Il ne peut avoir que 1 page.';
     public $message2 = 'Le fichier PDF a {{ pages }} pages. Il ne peut avoir plus de {{ max_pages }} pages.';
+    public $message3 = 'ERREUR INTERNE';
 }
