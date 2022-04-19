@@ -177,11 +177,15 @@ class ServiceProjets
       *
       * NOTE - Si un projet a DEUX VERSIONS et change de responsable, donc de laboratoire, au cours de l'année,
       *        on affiche les données de la VERSION A (donc celles du début d'année)
-      * 		  Cela peut conduire à une erreur à la marge dans les statistiques
+      *        Cela peut conduire à une erreur à la marge dans les statistiques
       *
       */
 
     // Ajoute les champs 'c','g','q', 'cp' au tableau $p (pour projetsParAnnee)
+    // 'c' -> conso TOTALE (cpu + gpu consolidé)
+    // 'g' -> conso GPU consolidée
+    // 'q' -> quota
+    // 'cp' -> Conso totale en %age du quota
     private function ppa_conso(&$p, &$annee)
     {
         $conso_cpu = $this->getConsoRessource($p['p'], 'cpu', $annee);
@@ -196,9 +200,9 @@ class ServiceProjets
      * Renvoie la liste des projets par année -
      * $annee      = Année (4 charactères - ex. 2022)
      * $isRecup... = Pour gérer les heures de récupération
-     * $sess_lbl   = Défaut [ 'A', 'B' ] On ramène les projets de toute l'année, sessions A et B confondues
-     *               [ 'A' ] Seulement session 'A'
-     *               [ 'B' ] Seulement session 'B'
+     * $sess_lbl   = Défaut 'AB' On ramène les projets de toute l'année, sessions A et B confondues
+     *               'A' Seulement session 'A'
+     *               'B' Seulement session 'B'
      *
      ********************/
     public function projetsParAnnee($annee, $isRecupPrintemps=false, $isRecupAutomne=false, string $sess_lbl = 'AB')
@@ -206,30 +210,76 @@ class ServiceProjets
         $em = $this->em;
         $ss = $this->ss;
 
-        // Données consolidées
+        // une version dont l'état se retrouve dans ce tableau ne sera pas comptée dans les données consolidées
+        // (nombre de projets, heures demandées etc)
+        $a_filtrer = [ Etat::CREE_ATTENTE, Etat::EDITION_DEMANDE, Etat::ANNULE ];
+
+        // Données consolidées - Projets de session
         $total = [];
-        $total['prj']         = 0;  // Nombre de projets (A ou B)
-        $total['demHeuresA']  = 0;  // Heures demandées en A
-        $total['attrHeuresA'] = 0;  // Heures attribuées en A
-        $total['demHeuresB']  = 0;  // Heures demandées en B
-        $total['attrHeuresB'] = 0;  // Heures attribuées en B
+        $total['sess'] = [];
+        $total['fil'] = [];
 
-        $total['rall']        = 0;  // Nombre de rallonges
-        $total['demHeuresR']  = 0;  // Heures demandées dans des rallonges
-        $total['attrHeuresR'] = 0;  // Heures attribuées dans des rallonges
+        $total['prj']         = 0;  // Nombre de projets (A ou B) (A JETER)
+        $total['demHeuresA']  = 0;  // Heures demandées en A (A JETER)
+        $total['attrHeuresA'] = 0;  // Heures attribuées en A (A JETER)
+        $total['demHeuresB']  = 0;  // Heures demandées en B (A JETER))
+        $total['sess']['prj'] = 0;  // Nombre de projets (A ou B)
+        $total['attrHeuresB'] = 0;  // Heures attribuées en B (A JETER)
+        $total['penalitesA']  = 0;  // Pénalités de printemps (sous-consommation entre Janvier et Juin) (A JETER)
+        $total['penalitesB']  = 0;  // Pénalités d'Automne (sous-consommation l'été) (A JETER)
+        $total['rall']        = 0;  // Nombre de rallonges (A JETER))
+        $total['demHeuresR']  = 0;  // Heures demandées dans des rallonges (A JETER)
+        $total['attrHeuresR'] = 0;  // Heures attribuées dans des rallonges (A JETER)
+        $total['consoHeuresP']= 0;           // Heures consommées - A JETER ASAP
 
+        $total['sess']['demHeuresA']  = 0;  // Heures demandées en A
+        $total['sess']['attrHeuresA'] = 0;  // Heures attribuées en A
+        $total['sess']['demHeuresB']  = 0;  // Heures demandées en B
+        $total['sess']['attrHeuresB'] = 0;  // Heures attribuées en B
+
+        $total['sess']['penalitesA']  = 0;  // Pénalités de printemps (sous-consommation entre Janvier et Juin)
+        $total['sess']['penalitesB']  = 0;  // Pénalités d'Automne (sous-consommation l'été)
+
+        // Données consolidées - projets tests
+        // Plus utilisées à partir de 2022
         $total['prjTest']     = 0;  // Nombre de projets tests
         $total['demHeuresT']  = 0;  // Heures demandées dans des projets tests
         $total['attrHeuresT'] = 0;  // Heures attribuées dans des projets tests
 
-        $total['demHeuresP']  = 0;  // Nombre d'heures demandées: A+B+Rallonges
-        $total['attrHeuresP'] = 0;  // Heures attribuées aux Projets: A+B+Tests+Rallonges-Pénalité
-        $total['consoHeuresP']= 0;  // Heures consommées
+        // Données consolidées - projets fil de l'eau
+        $total['fil']['prj'] = 0;  // Nombre de projets (A ou B)
+        $total['fil']['demHeuresA']  = 0;  // Heures demandées en A
+        $total['fil']['attrHeuresA'] = 0;  // Heures attribuées en A
+        $total['fil']['demHeuresB']  = 0;  // Heures demandées en B
+        $total['fil']['attrHeuresB'] = 0;  // Heures attribuées en B
+
+        $total['fil']['penalitesA']  = 0;  // Pénalités de printemps (sous-consommation entre Janvier et Juin)
+        $total['fil']['penalitesB']  = 0;  // Pénalités d'Automne (sous-consommation l'été)
+
+        // Rallonges
+
+        $total['sess']['rall']        = 0;  // Nombre de rallonges
+        $total['sess']['demHeuresR']  = 0;  // Heures demandées dans des rallonges
+        $total['sess']['attrHeuresR'] = 0;  // Heures attribuées dans des rallonges
+        
+        // Rallonges - Projets Fil de l'eau
+        $total['fil']['rall']        = 0;  // Nombre de rallonges
+        $total['fil']['demHeuresR']  = 0;  // Heures demandées dans des rallonges
+        $total['fil']['attrHeuresR'] = 0;  // Heures attribuées dans des rallonges
+
+        // Données consolidées - globales
+        $total['demHeuresP']  = 0;  // Nombre d'heures demandées: A+B+Rallonges, sess+fil
+        $total['attrHeuresP'] = 0;  // Heures attribuées aux Projets: A+B+Rallonges-Pénalité, sess+fil
         $total['recupHeuresP']= 0;  // Heures récupérables
 
-        $total['penalitesA']  = 0;  // Pénalités de printemps (sous-consommation entre Janvier et Juin)
-        $total['penalitesB']  = 0;  // Pénalités d'Automne (sous-consommation l'été)
+        // Conso - Projets Fil de l'eau
+        $total['fil']['consoHeuresCPU']= 0;  // Heures consommées - cpu
+        $total['fil']['consoHeuresGPU']= 0;  // Heures consommées - gpu
 
+        // Conso - Projets de session
+        $total['sess']['consoHeuresCPU']= 0;  // Heures consommées - cpu
+        $total['sess']['consoHeuresGPU']= 0;  // Heures consommées - gpu
+        
         // Les rattachements
         $rattachements = $em->getRepository(Rattachement::class)->findAll();
         if ($rattachements == null) {
@@ -276,8 +326,15 @@ class ServiceProjets
         $projets= [];
 
         // Boucle sur les versions de la session A
-
         foreach ($versions_A as $v) {
+            if ($v->getTypeVersion() == 1 || $v->getTypeVersion() == null)
+            {
+                $type = 'sess';
+            }
+            else
+            {
+                $type = 'fil';
+            }
             $p_id = $v->getProjet()->getIdProjet();
             $p = [];
             $p['p']        = $v->getProjet();
@@ -298,28 +355,44 @@ class ServiceProjets
             $p['attrib']     = $v->getAttrHeures();
             $p['attrib']    -= $v->getPenalHeures();
             foreach ($rallonges as $r) {
-                if ($r->getEtatRallonge() != Etat::EDITION_DEMANDE && $r->getEtatRallonge() != Etat::EDITION_EXPERTISE && $r->getEtatRallonge() != Etat::EN_ATTENTE && $r->getEtatRallonge() != Etat::ANNULE) {
+                // filtrage
+                if (! in_array($v->getEtatVersion(), $a_filtrer))
+                {
                     $total['rall']        += 1;
-                    $total['demHeuresR']  += $r->getDemHeures();
+
+                    //if ($type == 'sess')
+                    //{
+                    //    $total['demHeuresR']  += $r->getDemHeures();    // provisoire
+                    //    $total['attrHeuresR'] += $r->getAttrHeures();   // provisoire
+                    //}
+
+                    $total[$type]['rall']        += 1;
+                    $total[$type]['demHeuresR']  += $r->getDemHeures();
+                    $total[$type]['attrHeuresR'] += $r->getAttrHeures();
                     $total['demHeuresP']  += $r->getDemHeures();
-                    $total['attrHeuresR'] += $r->getAttrHeures();
                     $total['attrHeuresP'] += $r->getAttrHeures();
+                    
                     $p['r']               += $r->getAttrHeures();
                     $p['attrib']          += $r->getAttrHeures();
                 }
             }
 
-            if ($v->getEtatVersion() != Etat::EDITION_DEMANDE) {
-                $total['prj'] += 1;
+            // filtrage
+            if (! in_array($v->getEtatVersion(), $a_filtrer))
+            {
+                $total[$type]['prj'] += 1;
                 $total['demHeuresP']  += $v->getDemHeures();
                 $total['attrHeuresP'] += $v->getAttrHeures();
-                $total['demHeuresA']  += $v->getDemHeures();
-                $total['attrHeuresA'] += $v->getAttrHeures();
-                $total['penalitesA']  += $v->getPenalHeures();
+                $total[$type]['demHeuresA']  += $v->getDemHeures();
+                $total[$type]['attrHeuresA'] += $v->getAttrHeures();
+                $total[$type]['penalitesA']  += $v->getPenalHeures();
                 $total['attrHeuresP'] -= $v->getPenalHeures();
+
             }
             if ($v->getProjet()->isProjetTest()) {
-                if ($v->getEtatVersion() != Etat::EDITION_DEMANDE) {
+                // filtrage
+                if (! in_array($v->getEtatVersion(), $a_filtrer))
+                {
                     $total['prjTest']     += 1;
                     $total['demHeuresT']  += $v->getDemHeures();
                     $total['attrHeuresT'] += $v->getAttrHeures();
@@ -328,7 +401,9 @@ class ServiceProjets
 
             // La conso
             $this->ppa_conso($p, $annee);
-            $total['consoHeuresP'] += $p['c'];
+            //$total['consoHeuresP'] += $p['c'];
+            $total[$type]['consoHeuresCPU'] += $p['c'] - $p['g'];
+            $total[$type]['consoHeuresGPU'] += $p['g'];
 
             // Les rattachements
             $ratt = $v->getPrjRattachement();
@@ -349,11 +424,21 @@ class ServiceProjets
 
         // Boucle sur les versions de la session B
         foreach ($versions_B as $v) {
+
+            
+            if ($v->getTypeVersion() == 1 || $v->getTypeVersion() == null)
+            {
+                $type = 'sess';
+            }
+            else
+            {
+                $type = 'fil';
+            }
             $p_id = $v->getProjet()->getIdProjet();
             if (isset($projets[$p_id])) {
                 $p = $projets[$p_id];
             } else {
-                $total['prj']         += 1;
+                $total[$type]['prj'] += 1;
                 $p = [];
                 $p['p']           = $v->getProjet();
                 $p['metaetat']    = $this->getMetaEtat($p['p']);
@@ -368,12 +453,14 @@ class ServiceProjets
             $p['vb']      = $v;
             $rallonges    = $v->getRallonge();
             foreach ($rallonges as $r) {
-                if ($r->getEtatRallonge() != Etat::EDITION_DEMANDE && $r->getEtatRallonge() != Etat::EDITION_EXPERTISE && $r->getEtatRallonge() != Etat::EN_ATTENTE && $r->getEtatRallonge() != Etat::ANNULE) {
-                    $total['rall']        += 1;
-                    $total['demHeuresR']  += $r->getDemHeures();
+                // filtrage
+                if (! in_array($v->getEtatVersion(), $a_filtrer))
+                {
+                    $total[$type]['rall']        += 1;
+                    $total[$type]['demHeuresR']  += $r->getDemHeures();
                     $total['demHeuresP']  += $r->getDemHeures();
                     $total['attrHeuresP'] += $r->getAttrHeures();
-                    $total['attrHeuresR'] += $r->getAttrHeures();
+                    $total[$type]['attrHeuresR'] += $r->getAttrHeures();
                     $p['r']               += $r->getAttrHeures();
                     $p['attrib']          += $r->getAttrHeures();
                 }
@@ -394,9 +481,9 @@ class ServiceProjets
 
             $total['demHeuresP']  += $v->getDemHeures();
             $total['attrHeuresP'] += $v->getAttrHeures();
-            $total['demHeuresB']  += $v->getDemHeures();
-            $total['attrHeuresB'] += $v->getAttrHeures();
-            $total['penalitesB']  += $v->getPenalHeures();
+            $total[$type]['demHeuresB']  += $v->getDemHeures();
+            $total[$type]['attrHeuresB'] += $v->getAttrHeures();
+            $total[$type]['penalitesB']  += $v->getPenalHeures();
             $total['attrHeuresP'] -= $v->getPenalHeures();
 
             // La conso (attention à ne pas compter deux fois la conso pour les projets déjà entamés !)
@@ -408,7 +495,9 @@ class ServiceProjets
             //                         à partir de son état en session A !!!
             //                         Ce cas exceptionnel est ignoré.
             if ($this->sv->isNouvelle($v)) {
-                $total['consoHeuresP'] += $p['c'];
+                //$total['consoHeuresP'] += $p['c'];
+                $total[$type]['consoHeuresCPU'] += $p['c'] - $p['g'];
+                $total[$type]['consoHeuresGPU'] += $p['g'];
 
                 $ratt = $v->getPrjRattachement();
                 if (! empty($ratt)) {
@@ -456,11 +545,21 @@ class ServiceProjets
      *            (ex = getAcroLaboratoire())
      *
      * Fonction utilisée pour les statistiques et pour le bilan annuel
+     *
+     * NOTE - Si $sess_lbl vaut A ou B on ne renvoie PAS les projets fil de l'eau
+     *        Si $sess_lbl vaut AB on renvoie AUSSI les projets fil de l'eau
+     *        On ne tient PAS compte des versions en état EDITION_DEMANDE
+     *
+
      */
     public function projetsParCritere($annee, $sess_lbl, $critere)
     {
         $projets = $this->projetsParAnnee($annee, false, false, $sess_lbl)[0];
 
+        // On filtre complètement les projets qui ont déjà été partiellement filtrés dans projetsParAnnee
+        $a_filtrer = [ Etat::CREE_ATTENTE, Etat::EDITION_DEMANDE, Etat::ANNULE, Etat::TERMINE, Etat::EN_STANDBY];
+
+        
         // La liste des acronymes
         $acros       = [];
 
@@ -475,6 +574,14 @@ class ServiceProjets
         // Remplissage des quatre tableaux précédents
         foreach ($projets as $p) {
             $v    = ($p['vb']==null) ? $p['va'] : $p['vb'];
+
+            // Filtrage !
+            if (in_array($v->getEtatVersion(), $a_filtrer)) continue;
+            if ($sess_lbl != 'AB' && $v->getTypeVersion() != 1)
+            {
+                continue;
+            }
+            
             $acro = $v -> $critere();
             if ($acro == "") {
                 $acro = "Autres";
@@ -512,6 +619,7 @@ class ServiceProjets
             $attr_heures[$acro] += $p['attrib'];
             $conso[$acro]       += $p['c'];
         }
+        //dd($critere, $projets, $acros, $num_projets['IMFT']);
 
         asort($acros);
 

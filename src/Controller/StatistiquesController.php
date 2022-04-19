@@ -39,6 +39,8 @@ use App\GramcServices\ServiceSessions;
 
 // Pour debug
 //use App\Entity\Compta;
+// ATTENTION - La fonction dd(xxx) ne MARCHE PAS à cause de la génération des camemberts !
+//             Pour l'essayer il faudra désactiver la fonction camembert, cf. cette fonction
 
 use App\Utils\Functions;
 
@@ -521,20 +523,22 @@ class StatistiquesController extends AbstractController
         if ($request->getSession()->has('statistiques_annee'))
         {
             $annee = $request->getSession()->get('statistiques_annee');
-        } else
+        }
+        else
         {
             return $this->redirectToRoute('statistiques');
         }
+        
         if ($request->getSession()->has('statistiques_sess_lbl'))
         {
             $sess_lbl = $request->getSession()->get('statistiques_sess_lbl');
-        } else
+        }
+        else
         {
             return $this->redirectToRoute('statistiques');
         }
 
         $stats = $this->statistiques($annee, $sess_lbl, $critere, $titre);
-
         return $this->render(
             'statistiques/parcritere.html.twig',
             [
@@ -670,6 +674,10 @@ class StatistiquesController extends AbstractController
      *            Le getter renverra un acronyme (laboratoire, établissement etc)
      *            (ex = getAcroLaboratoire())
      * $titre   = Titre du camembert
+     *
+     * NOTE - Si $sess_lbl vaut A ou B on ne renvoie PAS les projets fil de l'eau
+     *        Si $sess_lbl vaut AB on renvoie AUSSI les projets fil de l'eau
+     *        On ne tient PAS compte des versions en état EDITION_DEMANDE
      */
     private function statistiques(string $annee, string $sess_lbl, string $critere, string $titre = "Titre"): array
     {
@@ -685,6 +693,7 @@ class StatistiquesController extends AbstractController
         foreach ($acros as $key => $acro) {
             $image_data[$key]   =  $num_projets[$acro];
         }
+
         $image_projets = $this->camembert($image_data, $acros, "Nombre de projets par " . $titre);
 
         $image_data = [];
@@ -697,6 +706,7 @@ class StatistiquesController extends AbstractController
         foreach ($acros as $key => $acro) {
             $image_data[$key]   =  $attr_heures[$acro];
         }
+
         $image_attr = $this->camembert($image_data, $acros, "Nombre d'heures attribuées par " . $titre);
 
         $image_data = [];
@@ -713,13 +723,17 @@ class StatistiquesController extends AbstractController
                 "image_projets" => $image_projets,
                 "image_dem"     => $image_dem,
                 "image_attr"    => $image_attr,
-                "image_conso"   => $image_conso ];
+                "image_conso"   => $image_conso
+                ];
     }
 
     ///////////////////////////////////////////
 
     private function camembert($data, $acros, $titre = "Titre")
     {
+        // Décommenter pour utiliser dd
+        // return null;
+        
         $seuil = array_sum($data) * 0.01;
         $autres = 0;
         foreach ($data as $key => $value) {
@@ -775,7 +789,7 @@ class StatistiquesController extends AbstractController
         $p1->SetCenter($xcenter, $ycenter);
         $graph->Add($p1);
 
-        //~ $color = array();
+        // $color = array();
 
 
         $p1->SetTheme('earth');
