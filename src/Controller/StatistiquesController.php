@@ -555,6 +555,8 @@ class StatistiquesController extends AbstractController
             'image_dem'     => $stats['image_dem'],
             'image_attr'    => $stats['image_attr'],
             'image_conso'   => $stats['image_conso'],
+            'num_projets_n' => $stats['num_projets_n'],
+            'num_projets_r' => $stats['num_projets_r'],
             ]
         );
     }
@@ -707,6 +709,8 @@ class StatistiquesController extends AbstractController
         $dem_heures  = $stats[3];
         $attr_heures = $stats[4];
         $conso       = $stats[5];
+        $num_projets_n = $stats[6];
+        $num_projets_r = $stats[7];
 
         $image_data = [];
         foreach ($acros as $key => $acro) {
@@ -742,7 +746,9 @@ class StatistiquesController extends AbstractController
                 "image_projets" => $image_projets,
                 "image_dem"     => $image_dem,
                 "image_attr"    => $image_attr,
-                "image_conso"   => $image_conso
+                "image_conso"   => $image_conso,
+                "num_projets_n" => $num_projets_n,
+                "num_projets_r" => $num_projets_r
                 ];
     }
 

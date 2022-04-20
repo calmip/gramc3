@@ -554,10 +554,12 @@ class ServiceProjets
      */
     public function projetsParCritere($annee, $sess_lbl, $critere)
     {
+        $sv = $this->sv;
+        
         $projets = $this->projetsParAnnee($annee, false, false, $sess_lbl)[0];
 
         // On filtre complètement les projets qui ont déjà été partiellement filtrés dans projetsParAnnee
-        $a_filtrer = [ Etat::CREE_ATTENTE, Etat::EDITION_DEMANDE, Etat::ANNULE, Etat::TERMINE, Etat::EN_STANDBY];
+        $a_filtrer = [ Etat::CREE_ATTENTE, Etat::EDITION_DEMANDE, Etat::ANNULE];
 
         
         // La liste des acronymes
@@ -565,11 +567,12 @@ class ServiceProjets
 
         // Ces quatre tableaux sont indexés par l'acronyme ($acro)
         $num_projets   = [];
+        $num_projets_n = [];    // nouveaux projets
+        $num_projets_r = [];    // renouvellements
         $liste_projets = [];
         $dem_heures    = [];
         $attr_heures   = [];
         $conso         = [];
-
 
         // Remplissage des quatre tableaux précédents
         foreach ($projets as $p) {
@@ -593,6 +596,12 @@ class ServiceProjets
             if (!array_key_exists($acro, $num_projets)) {
                 $num_projets[$acro]   = 0;
             }
+            if (!array_key_exists($acro, $num_projets_n)) {
+                $num_projets_n[$acro]   = 0;
+            }
+            if (!array_key_exists($acro, $num_projets_r)) {
+                $num_projets_r[$acro]   = 0;
+            }
             if (!array_key_exists($acro, $dem_heures)) {
                 $dem_heures[$acro]    = 0;
             }
@@ -606,7 +615,16 @@ class ServiceProjets
                 $liste_projets[$acro] = [];
             }
 
-            $num_projets[$acro]    += 1;
+            $num_projets[$acro] += 1;
+            if ($sv->isNouvelle($v))
+            {
+                $num_projets_n[$acro] += 1;
+            }
+            else
+            {
+                $num_projets_r[$acro] += 1;
+            }
+            
             $liste_projets[$acro][] = $p['p']->getIdProjet();
 
             if ($p['va'] != null) {
@@ -619,11 +637,9 @@ class ServiceProjets
             $attr_heures[$acro] += $p['attrib'];
             $conso[$acro]       += $p['c'];
         }
-        //dd($critere, $projets, $acros, $num_projets['IMFT']);
-
         asort($acros);
 
-        return [$acros, $num_projets, $liste_projets, $dem_heures, $attr_heures, $conso];
+        return [$acros, $num_projets, $liste_projets, $dem_heures, $attr_heures, $conso, $num_projets_n, $num_projets_r];
     }
 
     /**

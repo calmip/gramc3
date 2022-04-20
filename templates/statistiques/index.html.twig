@@ -22,6 +22,16 @@
 {{ form_widget(forms.sess_lbl) }}{{ form_widget(forms.submit) }}
 {{ form_end(forms) }}
 
+<div class="message info">
+{% if sess_lbl=='AB' %}
+<p>Sont pris en compte tous les projets <strong>de session</strong> ou <strong>fil de l'eau</strong> qui ont démarré ou ont
+été renouvelés en {{ annee }}</p>
+{% else %}
+<p>Les données de consommation ne sont pas spécifiées - Pour les voir regardez les statistiques sur l'année {{ annee }} (deux sessions)</p>
+{% endif %}
+<p>Les versions de projets <strong>en cours d'édition</strong> ne sont pas prises en compte</p>
+</div>
+
 
 <div>
 {% if sess_lbl == 'AB' %}
@@ -43,9 +53,6 @@
         </tr>
     </tbody>
 </table>
-
-dump(total)
-
 
 <table id="tab_heures_calcul_total_annee">
 <tbody>
