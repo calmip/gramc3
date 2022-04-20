@@ -181,19 +181,23 @@ class ServiceProjets
       *
       */
 
-    // Ajoute les champs 'c','g','q', 'cp' au tableau $p (pour projetsParAnnee)
+    // Ajoute les champs 'c','g','q', 'cp', 'stk' au tableau $p (pour projetsParAnnee)
     // 'c' -> conso TOTALE (cpu + gpu consolidé)
     // 'g' -> conso GPU consolidée
     // 'q' -> quota
     // 'cp' -> Conso totale en %age du quota
+    // 'stk'-> Quota de stockage en Ko
     private function ppa_conso(&$p, &$annee)
     {
         $conso_cpu = $this->getConsoRessource($p['p'], 'cpu', $annee);
         $conso_gpu = $this->getConsoRessource($p['p'], 'gpu', $annee);
+        $conso_stk = $this->getConsoRessource($p['p'], 'work_space', $annee);
         $p['c'] = $conso_cpu[0] + $conso_gpu[0];
         $p['q'] = $conso_cpu[1];
         $p['g'] = $conso_gpu[0];
-        $p['cp']= ($p['q']>0) ? (100.0 * $p['c']) / $p['q'] : 0;
+        $p['cp'] = ($p['q']>0) ? (100.0 * $p['c']) / $p['q'] : 0;
+        $p['stk_c'] = $conso_stk[0];
+        $p['stk_q'] = $conso_stk[1];
     }
 
     /***********
@@ -279,6 +283,14 @@ class ServiceProjets
         // Conso - Projets de session
         $total['sess']['consoHeuresCPU']= 0;  // Heures consommées - cpu
         $total['sess']['consoHeuresGPU']= 0;  // Heures consommées - gpu
+
+        // Stockage
+        $total['sess']['sondVolDonnPerm']= 0; // Demandes de stockage
+        $total['sess']['consoVolDonnPerm']= 0; // Demandes de stockage: occupation
+        $total['sess']['quotaVolDonnPerm']= 0; // Quota de stockage
+        $total['fil']['sondVolDonnPerm']= 0; // Demandes de stockage
+        $total['fil']['consoVolDonnPerm']= 0; // Demandes de stockage: occupation
+        $total['fil']['quotaVolDonnPerm']= 0; // Quota de stockage
         
         // Les rattachements
         $rattachements = $em->getRepository(Rattachement::class)->findAll();
@@ -401,10 +413,14 @@ class ServiceProjets
 
             // La conso
             $this->ppa_conso($p, $annee);
+            
             //$total['consoHeuresP'] += $p['c'];
             $total[$type]['consoHeuresCPU'] += $p['c'] - $p['g'];
             $total[$type]['consoHeuresGPU'] += $p['g'];
-
+            $total[$type]['sondVolDonnPerm']+= intval($v->getSondVolDonnPerm());
+            $total[$type]['consoVolDonnPerm']+= $p['stk_c'];
+            $total[$type]['quotaVolDonnPerm']+= $p['stk_q'];
+            
             // Les rattachements
             $ratt = $v->getPrjRattachement();
             if (! empty($ratt)) {
@@ -494,10 +510,18 @@ class ServiceProjets
             //                    NB - Un projet qui change son rattachement entre A et B
             //                         à partir de son état en session A !!!
             //                         Ce cas exceptionnel est ignoré.
-            if ($this->sv->isNouvelle($v)) {
+            
+            // Ici également les quotas de stockage, le stockage à chaque session mais ça ne se cumule pas
+            // TODO - Si un projet demande plus de stockage en B qu'en A cela ne sera pas pris en compte !!!
+            //        Si un projet est renouvelé sa conso sera celle de la session A !
+            if ($this->sv->isNouvelle($v))
+            {
                 //$total['consoHeuresP'] += $p['c'];
                 $total[$type]['consoHeuresCPU'] += $p['c'] - $p['g'];
                 $total[$type]['consoHeuresGPU'] += $p['g'];
+                $total[$type]['sondVolDonnPerm']+= intval($v->getSondVolDonnPerm());
+                $total[$type]['consoVolDonnPerm']+= $p['stk_c'];
+                $total[$type]['quotaVolDonnPerm']+= $p['stk_q'];
 
                 $ratt = $v->getPrjRattachement();
                 if (! empty($ratt)) {

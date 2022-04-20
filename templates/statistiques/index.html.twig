@@ -27,7 +27,7 @@
 <p>Sont pris en compte tous les projets <strong>de session</strong> ou <strong>fil de l'eau</strong> qui ont démarré ou ont
 été renouvelés en {{ annee }}</p>
 {% else %}
-<p>Les données de consommation ne sont pas spécifiées - Pour les voir regardez les statistiques sur l'année {{ annee }} (deux sessions)</p>
+<p>Les données de consommation (heures de calcul ou stockage) ne sont pas affichées - Pour les voir regardez les statistiques sur l'année {{ annee }} (les deux sessions)</p>
 {% endif %}
 <p>Les versions de projets <strong>en cours d'édition</strong> ne sont pas prises en compte</p>
 </div>
@@ -120,14 +120,18 @@
 {% if sess_lbl == 'AB' %}
 <table>
 <tbody>
-    <tr><th colspan="2">Stockage (Go)</th></tr>
+    <tr><th colspan="2">Stockage (To)</th></tr>
     <tr>
         <th class="left">Demandes</th>
-        <td class="right">{{ 0|number_format(0, ',', ' ')}}</td>
+        <td class="right">{{ (total.sess.sondVolDonnPerm + total.fil.sondVolDonnPerm)|number_format(0, ',', ' ')}}</td>
     </tr>
     <tr>
-        <th class="left">Attributions</th>
-        <td class="right">{{ 0|number_format(0, ',', ' ')}}</td>
+        <th class="left">Occupation</th>
+        <td class="right">{{ ((total.sess.consoVolDonnPerm + total.fil.consoVolDonnPerm)/(1024.0 * 1024.0 * 1024.0))|number_format(0, ',', ' ')}}</td>
+    </tr>
+    <tr>
+        <th class="left">Quota</th>
+        <td class="right">{{ ((total.sess.quotaVolDonnPerm + total.fil.quotaVolDonnPerm)/(1024.0 * 1024.0 * 1024.0))|number_format(0, ',', ' ')}}</td>
     </tr>
 </tbody>
 </table>
