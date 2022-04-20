@@ -137,6 +137,7 @@ class StatistiquesController extends AbstractController
         $menu[] = $sm->statistiques_etablissement($annee);
         $menu[] = $sm->statistiques_thematique($annee);
         $menu[] = $sm->statistiques_metathematique($annee);
+        $menu[] = $sm->statistiques_rattachement($annee);
         $menu[] = $sm->statistiques_collaborateur($annee);
         $menu[] = $sm->statistiques_repartition();
 
@@ -592,6 +593,24 @@ class StatistiquesController extends AbstractController
     public function metathematiqueAction(Request $request): Response
     {
         return $this->parCritere($request, "getAcroMetaThematique", "métathématique");
+    }
+
+    /**
+     * @Route("/rattachement", name="statistiques_rattachement",methods={"GET","POST"})
+     * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
+     */
+    public function rattachementAction(Request $request): Response
+    {
+        return $this->parCritere($request, "getAcroRattachement", "rattachement");
+    }
+
+    /**
+     * @Route("/{annee}/rattachement_csv", name="statistiques_rattachement_csv",methods={"GET","POST"})
+     * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
+     */
+    public function rattachementCSVAction(Request $request, $annee)
+    {
+        return $this->parCritereCSV($request, $annee, "getAcroRattachement", "rattachement");
     }
 
     /* Cette fonction est appelée par laboratoireCSVAction, etablissementCSVAction etc. */
