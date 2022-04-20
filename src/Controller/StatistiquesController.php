@@ -637,15 +637,30 @@ class StatistiquesController extends AbstractController
             return Functions::csv([], "erreur.csv");
         }
 
-        $sortie =   "Statistiques de l'année ". $annee;
-        if ($sess_lbl != "AB") $sortie .= " - Session $sess_lbl";
-        $ligne  =   [" par $titre","nombre de projets","heures demandées","heures attribuées","heure consommées"];
+        $sortie =   "Année $annee - ";
+        if ($sess_lbl == "AB")
+        {
+            $ligne = ["par $titre","nombre de projets","heures demandées","heures attribuées","heure consommées"];
+        }
+        else
+        {
+            $sortie .= "Session $sess_lbl - ";
+            $ligne = ["par $titre ","nombre de projets","nouveaux", "renouvellements", "heures demandées","heures attribuées"];
+        }
         $sortie .= join("\t", $ligne) . "\n";
 
         $stats = $this->statistiques($annee, $sess_lbl, $critere, $titre);
 
         foreach ($stats['acros'] as $acro) {
-            $ligne = [ '"' . $acro . '"', $stats['num_projets'][$acro], $stats['dem_heures'][$acro], $stats['attr_heures'][$acro], $stats['conso'][$acro] ];
+            if ($sess_lbl == "AB")
+            {
+                $ligne = [ '"' . $acro . '"', $stats['num_projets'][$acro], $stats['dem_heures'][$acro], $stats['attr_heures'][$acro], $stats['conso'][$acro] ];
+            }
+            else
+            {
+                $ligne = [ '"' . $acro . '"', $stats['num_projets'][$acro], $stats['num_projets_n'][$acro], $stats['num_projets_r'][$acro], $stats['dem_heures'][$acro], $stats['attr_heures'][$acro]];
+
+            }
             $sortie .= join("\t", $ligne) . "\n";
         }
 

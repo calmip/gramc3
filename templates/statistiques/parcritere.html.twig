@@ -27,7 +27,11 @@
 </div>
 {% set route='statistiques_' ~ titre ~ '_csv' %}
 <form action="{{ path(route, { 'annee' : annee }) }}">
-<input type="submit" value="Télécharger en csv les statistiques par {{titre}} - année {{ annee }}">
+    {% if sess_lbl == 'AB' %}
+    <input type="submit" value="csv - statistiques par {{titre}} - année {{ annee }}">
+    {% else %}
+    <input type="submit" value="csv - statistiques par {{titre}} - année {{ annee }} - session {{ sess_lbl }}">
+    {% endif %}
 </form>
 
 <br />
