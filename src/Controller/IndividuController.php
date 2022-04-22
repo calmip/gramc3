@@ -475,31 +475,28 @@ class IndividuController extends AbstractController
         $formEppn->handleRequest($request);
 
         if ($formEppn->isSubmitted() && $formEppn->isValid()) {
-            //dd($individu->getSso());
-            //dd($ssos_old);
-            //dd($formEppn['Sso']->getData());
-            /*
-             * 0 1 2, 0 2 clicked => ne reste que 0 2
-             * */
-
-            // foreach ($formEppn['Sso']->getData() as $s) {
-                 //dd($s);
-                 //$ssos_ttl->removeElement($s);
-            // }
-            // dd($ssos_ttl);
             foreach ($ssos_old as $s) {
                 if ( !$ssos->contains($s)) {
-                    //$individu->removeSso($s);
                     $em->remove($s);
                 }
             }
             $em->flush();
-
-            
-             
         }
 
-        //$session->set('current_mail',$individu->getMail());
+        $formNeppn = $this->createFormBuilder()
+            ->add('Sso1',TextType::class)
+            ->add('submit', SubmitType::class, ['label' => 'nouvel EPPN' ])
+            ->add('reset', ResetType::class, ['label' => 'Annuler' ])
+            ->getForm();
+
+        $sso1 = "";
+        if ($formNeppn->isSubmitted() && $formNeppn->isValid()) {
+            $sso1 = $formNepp->getValue('Sso1');
+            dd($sso1);
+            
+        }
+        
+
 
         return $this->render(
             'individu/modif.html.twig',
@@ -507,6 +504,8 @@ class IndividuController extends AbstractController
             'individu' => $individu,
             'formInd' => $formInd->createView(),
             'formEppn' => $formEppn->createView(),
+            'formNeppn' => $formNeppn->createView(),
+            'sso1' => $sso1
             ]
         );
     }

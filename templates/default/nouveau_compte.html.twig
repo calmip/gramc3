@@ -8,19 +8,30 @@
 
 <h2>Vos accès à la plateforme d'attribution des ressources</h2>
 
-<div class="message warning"> 
-
-    <em>
-    Bonjour. La fédération d'identité-recherche vous a authentifié.
+{% if mail != "" %}
+    <div class="message info"> 
+        <p>Bonjour. La fédération d'identité-recherche vous a authentifié.</p>
+    </div>
+    
     <table>
     <tr><td>Votre courriel:</td><td> {{ mail }}</td></tr>
     <tr><td>Votre eppn:</td><td> {{ eppn }}</td></tr>
     </table>
-</div>
 
 {{ form_start(form) }}
 {{ form_widget(form) }} 
 {{ form_end(form) }}
+
+{% else %}
+    <div class="message erreur">
+        <p>Bonjour. Vous êtes bien authentifié, mais nous n'avons pas votre adresse de courriel. <br />
+        Veuillez s'il vous plaît envoyer un courriel à <strong><code>{{ mailsupport }}</code></strong> contenant:</p>
+           <ul>
+               <li>Votre identifiant ci-contre: <strong>{{eppn}}</strong></li>
+               <li>Votre adresse de courriel, <em>elle doit être la même que celle que votre responsable de projet a déclarée</em></li>
+           </ul>
+    </div>
+{% endif %}
 
 </section>
 

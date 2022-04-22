@@ -8,6 +8,7 @@ twig:
     globals:
        infos: '@App\GramcServices\ServiceInfos'
        mailadmin: '%mailadmin%'
+       mailsupport: '%mailsupport%'
        mesoc: '%mesoc%'
        mesoc_web: '%mesoc_web%'
        mesoc_attrib: '%mesoc_attrib%'
