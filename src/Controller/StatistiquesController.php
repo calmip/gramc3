@@ -39,6 +39,8 @@ use App\GramcServices\ServiceSessions;
 
 // Pour debug
 //use App\Entity\Compta;
+// ATTENTION - La fonction dd(xxx) ne MARCHE PAS à cause de la génération des camemberts !
+//             Pour l'essayer il faudra désactiver la fonction camembert, cf. cette fonction
 
 use App\Utils\Functions;
 
@@ -135,6 +137,7 @@ class StatistiquesController extends AbstractController
         $menu[] = $sm->statistiques_etablissement($annee);
         $menu[] = $sm->statistiques_thematique($annee);
         $menu[] = $sm->statistiques_metathematique($annee);
+        $menu[] = $sm->statistiques_rattachement($annee);
         $menu[] = $sm->statistiques_collaborateur($annee);
         $menu[] = $sm->statistiques_repartition();
 
@@ -521,20 +524,22 @@ class StatistiquesController extends AbstractController
         if ($request->getSession()->has('statistiques_annee'))
         {
             $annee = $request->getSession()->get('statistiques_annee');
-        } else
+        }
+        else
         {
             return $this->redirectToRoute('statistiques');
         }
+        
         if ($request->getSession()->has('statistiques_sess_lbl'))
         {
             $sess_lbl = $request->getSession()->get('statistiques_sess_lbl');
-        } else
+        }
+        else
         {
             return $this->redirectToRoute('statistiques');
         }
 
         $stats = $this->statistiques($annee, $sess_lbl, $critere, $titre);
-
         return $this->render(
             'statistiques/parcritere.html.twig',
             [
@@ -550,6 +555,8 @@ class StatistiquesController extends AbstractController
             'image_dem'     => $stats['image_dem'],
             'image_attr'    => $stats['image_attr'],
             'image_conso'   => $stats['image_conso'],
+            'num_projets_n' => $stats['num_projets_n'],
+            'num_projets_r' => $stats['num_projets_r'],
             ]
         );
     }
@@ -590,6 +597,24 @@ class StatistiquesController extends AbstractController
         return $this->parCritere($request, "getAcroMetaThematique", "métathématique");
     }
 
+    /**
+     * @Route("/rattachement", name="statistiques_rattachement",methods={"GET","POST"})
+     * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
+     */
+    public function rattachementAction(Request $request): Response
+    {
+        return $this->parCritere($request, "getAcroRattachement", "rattachement");
+    }
+
+    /**
+     * @Route("/{annee}/rattachement_csv", name="statistiques_rattachement_csv",methods={"GET","POST"})
+     * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
+     */
+    public function rattachementCSVAction(Request $request, $annee)
+    {
+        return $this->parCritereCSV($request, $annee, "getAcroRattachement", "rattachement");
+    }
+
     /* Cette fonction est appelée par laboratoireCSVAction, etablissementCSVAction etc. */
     private function parCritereCSV(Request $request, $annee, $critere, $titre)
     {
@@ -612,15 +637,30 @@ class StatistiquesController extends AbstractController
             return Functions::csv([], "erreur.csv");
         }
 
-        $sortie =   "Statistiques de l'année ". $annee;
-        if ($sess_lbl != "AB") $sortie .= " - Session $sess_lbl";
-        $ligne  =   [" par $titre","nombre de projets","heures demandées","heures attribuées","heure consommées"];
+        $sortie =   "Année $annee - ";
+        if ($sess_lbl == "AB")
+        {
+            $ligne = ["par $titre","nombre de projets","heures demandées","heures attribuées","heure consommées"];
+        }
+        else
+        {
+            $sortie .= "Session $sess_lbl - ";
+            $ligne = ["par $titre ","nombre de projets","nouveaux", "renouvellements", "heures demandées","heures attribuées"];
+        }
         $sortie .= join("\t", $ligne) . "\n";
 
         $stats = $this->statistiques($annee, $sess_lbl, $critere, $titre);
 
         foreach ($stats['acros'] as $acro) {
-            $ligne = [ '"' . $acro . '"', $stats['num_projets'][$acro], $stats['dem_heures'][$acro], $stats['attr_heures'][$acro], $stats['conso'][$acro] ];
+            if ($sess_lbl == "AB")
+            {
+                $ligne = [ '"' . $acro . '"', $stats['num_projets'][$acro], $stats['dem_heures'][$acro], $stats['attr_heures'][$acro], $stats['conso'][$acro] ];
+            }
+            else
+            {
+                $ligne = [ '"' . $acro . '"', $stats['num_projets'][$acro], $stats['num_projets_n'][$acro], $stats['num_projets_r'][$acro], $stats['dem_heures'][$acro], $stats['attr_heures'][$acro]];
+
+            }
             $sortie .= join("\t", $ligne) . "\n";
         }
 
@@ -670,6 +710,10 @@ class StatistiquesController extends AbstractController
      *            Le getter renverra un acronyme (laboratoire, établissement etc)
      *            (ex = getAcroLaboratoire())
      * $titre   = Titre du camembert
+     *
+     * NOTE - Si $sess_lbl vaut A ou B on ne renvoie PAS les projets fil de l'eau
+     *        Si $sess_lbl vaut AB on renvoie AUSSI les projets fil de l'eau
+     *        On ne tient PAS compte des versions en état EDITION_DEMANDE
      */
     private function statistiques(string $annee, string $sess_lbl, string $critere, string $titre = "Titre"): array
     {
@@ -680,11 +724,14 @@ class StatistiquesController extends AbstractController
         $dem_heures  = $stats[3];
         $attr_heures = $stats[4];
         $conso       = $stats[5];
+        $num_projets_n = $stats[6];
+        $num_projets_r = $stats[7];
 
         $image_data = [];
         foreach ($acros as $key => $acro) {
             $image_data[$key]   =  $num_projets[$acro];
         }
+
         $image_projets = $this->camembert($image_data, $acros, "Nombre de projets par " . $titre);
 
         $image_data = [];
@@ -697,6 +744,7 @@ class StatistiquesController extends AbstractController
         foreach ($acros as $key => $acro) {
             $image_data[$key]   =  $attr_heures[$acro];
         }
+
         $image_attr = $this->camembert($image_data, $acros, "Nombre d'heures attribuées par " . $titre);
 
         $image_data = [];
@@ -713,13 +761,19 @@ class StatistiquesController extends AbstractController
                 "image_projets" => $image_projets,
                 "image_dem"     => $image_dem,
                 "image_attr"    => $image_attr,
-                "image_conso"   => $image_conso ];
+                "image_conso"   => $image_conso,
+                "num_projets_n" => $num_projets_n,
+                "num_projets_r" => $num_projets_r
+                ];
     }
 
     ///////////////////////////////////////////
 
     private function camembert($data, $acros, $titre = "Titre")
     {
+        // Décommenter pour utiliser dd
+        // return null;
+        
         $seuil = array_sum($data) * 0.01;
         $autres = 0;
         foreach ($data as $key => $value) {
@@ -775,7 +829,7 @@ class StatistiquesController extends AbstractController
         $p1->SetCenter($xcenter, $ycenter);
         $graph->Add($p1);
 
-        //~ $color = array();
+        // $color = array();
 
 
         $p1->SetTheme('earth');
