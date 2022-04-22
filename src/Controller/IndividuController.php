@@ -398,24 +398,44 @@ class IndividuController extends AbstractController
     ///////////////////////////////////////////////////////////////////////////////////////
 
     /**
-    * Modifier profil
-    *
-    * Route("/{id}/modifier_profil", name="modifier_profil", methods={"GET"})
-    * Security("is_granted('ROLE_ADMIN')")
-    * Method("GET")
-    */
-    /*public function modifierProfilAction(Request $request, Individu $individu)
+     * Ajouter un utilisateur
+     *
+     * @Route("/ajouter", name="individu_ajouter", methods={"GET","POST"})
+     * @Security("is_granted('ROLE_ADMIN')")
+     * Method({"GET", "POST"})
+     */
+    public function ajouterAction(Request $request)
     {
-        $individu->setAdmin(true);
         $em = $this->getDoctrine()->getManager();
-        $em->persist($individu);
-        $em->flush($individu);
+        $individu = new Individu();
+        $editForm = $this->createForm('App\Form\IndividuType', $individu);
 
-        return $this->render('individu/ligne.html.twig', [ 'individu' => $individu ]);
-    }*/
+        $editForm->handleRequest($request);
+
+        if ($editForm->isSubmitted() /*&& $editForm->isValid()*/) {
+            $individu->setCreationStamp(new \DateTime());
+            $em->persist($individu);
+            $em->flush();
+
+            return $this->redirectToRoute('individu_gerer');
+        }
+
+        // Nouvel EPPN
+        $formSso = $this->ajoutEppn($request, $individu);
+
+        return $this->render(
+            'individu/modif.html.twig',
+            [
+            'individu' => $individu,
+            'formInd' => $editForm->createView(),
+            'formSso' => $formSso->createView(),
+            'formEppn' => null
+            ]
+        );
+    }
 
     /**
-     * Displays a form to edit an existing individu entity.
+     * Displays Modifier une entité individu.
      *
      * @Route("/{id}/modify", name="individu_modify", methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
@@ -452,14 +472,18 @@ class IndividuController extends AbstractController
             }
         }
 
+        // Nouvel EPPN
+        $formSso = $this->ajoutEppn($request, $individu);
+
+        // Supprimer un EPPN
         $ssos = $individu->getSso();
         $ssos_old = clone $ssos;
-        //dd($ssos->toArray());
         $formEppn = $this->createFormBuilder($individu)
             ->add(
                 'Sso',
                 EntityType::class,
                 [
+                'label' => 'Les eppn valides ',
                 'multiple' => true,
                 'expanded' => true,
                 'class' => 'App:Sso',
@@ -474,29 +498,18 @@ class IndividuController extends AbstractController
 
         $formEppn->handleRequest($request);
 
-        if ($formEppn->isSubmitted() && $formEppn->isValid()) {
-            foreach ($ssos_old as $s) {
-                if ( !$ssos->contains($s)) {
+        if ($formEppn->isSubmitted() && $formEppn->isValid())
+        {
+            foreach ($ssos_old as $s)
+            {
+                if ( !$ssos->contains($s))
+                {
                     $em->remove($s);
                 }
             }
             $em->flush();
+            return $this->redirectToRoute('individu_modify', [ 'id' => $individu->getId() ]);
         }
-
-        $formNeppn = $this->createFormBuilder()
-            ->add('Sso1',TextType::class)
-            ->add('submit', SubmitType::class, ['label' => 'nouvel EPPN' ])
-            ->add('reset', ResetType::class, ['label' => 'Annuler' ])
-            ->getForm();
-
-        $sso1 = "";
-        if ($formNeppn->isSubmitted() && $formNeppn->isValid()) {
-            $sso1 = $formNepp->getValue('Sso1');
-            dd($sso1);
-            
-        }
-        
-
 
         return $this->render(
             'individu/modif.html.twig',
@@ -504,43 +517,44 @@ class IndividuController extends AbstractController
             'individu' => $individu,
             'formInd' => $formInd->createView(),
             'formEppn' => $formEppn->createView(),
-            'formNeppn' => $formNeppn->createView(),
-            'sso1' => $sso1
+            'formSso' => $formSso->createView()
             ]
         );
     }
 
-    /**
-     * Ajouter un utilisateur
+    /*********************************
+     * 
+     * Ajout d'un nouvel eppn
      *
-     * @Route("/ajouter", name="individu_ajouter", methods={"GET","POST"})
-     * @Security("is_granted('ROLE_ADMIN')")
-     * Method({"GET", "POST"})
-     */
-    public function ajouterAction(Request $request)
+     *********************************/
+    private function ajoutEppn(Request $request, Individu $individu)
     {
         $em = $this->getDoctrine()->getManager();
-        $individu = new Individu();
-        $editForm = $this->createForm('App\Form\IndividuType', $individu);
+        $sso = new Sso();
+        $sso->setIndividu($individu);
+        $formSso = $this->createForm('App\Form\SsoType', $sso, ['widget_individu' => false]);
+        $formSso
+            ->add('submit', SubmitType::class, ['label' => 'nouvel EPPN' ])
+            ->add('reset', ResetType::class, ['label' => 'Annuler' ]);
 
-        $editForm->handleRequest($request);
+        $formSso->handleRequest($request);
 
-        if ($editForm->isSubmitted() /*&& $editForm->isValid()*/) {
-            $individu->setCreationStamp(new \DateTime());
-            $em->persist($individu);
-            $em->flush();
+        if ($formSso->isSubmitted() && $formSso->isValid()) {
+            $em->persist($sso);
 
-            return $this->redirectToRoute('individu_gerer');
+            try
+            {
+                $em->flush($sso);
+            }
+            catch (UniqueConstraintViolationException $e)
+            {
+                $request->getSession()->getFlashbag()->add("flash erreur","Cet eppn existe déjà !");
+                return $this->redirectToRoute('individu_modify', [ 'id' => $individu->getId() ]);
+            };
         }
-
-        return $this->render(
-            'individu/modif.html.twig',
-            [
-            'individu' => $individu,
-            'form' => $editForm->createView(),
-        ]
-        );
+        return $formSso;        
     }
+
     /**
      * Devenir Admin
      *
