@@ -738,6 +738,7 @@ class ServiceMenus
 
         return $menu;
     }
+
     //////////////////////////////////////
 
     // Menu principal Projet
@@ -1629,7 +1630,26 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques():array
+    public function statistiques_rattachement(): array
+    {
+        $menu['name']           =   'statistiques_rattachement';
+        $menu['lien']           =   "Rattachements";
+
+        if ($this->ac->isGranted('ROLE_OBS') || $this->ac->isGranted('ROLE_PRESIDENT')) {
+            $menu['ok']             =   true;
+            $menu['commentaire']    =   "Vous pouvez accéder aux statistiques par rattachement";
+        } else {
+            $menu['ok']             =   false;
+            $menu['commentaire']    =   "Vous ne pouvez pas accéder aux statistiques par rattachement ";
+            $menu['raison']         =   "Vous devez être président ou administrateur pour y accéder";
+        }
+
+        return $menu;
+    }
+
+    //////////////////////////////////////////////////////////////////////////
+
+    public function statistiques(): array
     {
         $menu['name']           =   'statistiques';
         $menu['lien']           =   "Statistiques";

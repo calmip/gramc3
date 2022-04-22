@@ -3660,6 +3660,18 @@ class Version implements Demande
         }
     }
 
+    ////////////////////////////////////////////
+
+    public function getAcroRattachement()
+    {
+        $rattachement = $this->getPrjRattachement();
+        if ($rattachement == null) {
+            return "aucun";
+        } else {
+            return $rattachement->__toString();
+        }
+    }
+
     /////////////////////////////////////////////////////
     public function getEtat()
     {

@@ -66,6 +66,7 @@ class InitTypeVersion extends Command
     {
         $this->setDescription('Initialiser le type de chaque version à partir du type de son projet');
         $this->setHelp('');
+        $this->addArgument('year', InputArgument::REQUIRED, "On considère les version de cette année");
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -76,24 +77,30 @@ class InitTypeVersion extends Command
         // return this if there was no problem running the command
         $em = $this->em;
         $sj = $this->sj;
+
+        $annee = intval($input->getArgument('year'));
         
         $versions = $em->getRepository(Version::class)->findAll();
 
         $i = 0;
         foreach ($versions as $v)
         {
+            // On ne s'intéresse pas aux années trop anciennes
+            if ($v -> getAnneeSession() != $annee) continue;
             $etat = $v->getEtatVersion();
-            if ($etat != Etat::CREE_ATTENTE && $etat != Etat::EDITION_DEMANDE
-                && $etat != Etat::EDITION_EXPERTISE && $etat != Etat::EN_ATTENTE
-                && $etat != Etat::ACTIF) continue;
+            
             $p = $v -> getProjet();
             $v->SetTypeVersion($p->getTypeProjet());
             $em->persist($v);
-            if ($i % 10 == 0) $em->flush();
+            $em->flush();   // Il faut faire le flush au fur et à mesure sinon ça coince à la fin
+            
+            if ($i % 100 == 0)
+            {
+                $output->writeln("=================================");
+            }
             $output->writeln("Version $v - type " . $v->getTypeVersion());
             $i++;
         }
-        $em->flush();
         $sj->infoMessage("Type de version mis à jour pour $i versions");
         $output->writeln("Type de version mis à jour pour $i versions");
         return 0;

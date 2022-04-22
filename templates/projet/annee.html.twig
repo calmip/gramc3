@@ -13,7 +13,7 @@
 
     <section>
         <h2>Projets de l'année {{ annee }}</h2>
-    
+
         {{ form_start(form) }}
             {{ form_widget(form.annee) }}{{ form_widget(form.submit) }}
         {{ form_end(form) }}
@@ -63,11 +63,11 @@
             </tr>
             <tr>
                 <th>Heures demandées</th>
-            <td>{{ total.demHeuresA|number_format(0, ',', ' ') }}</td>
+            <td>{{ total.sess.demHeuresA|number_format(0, ',', ' ') }}</td>
             </tr>
             <tr>
                 <th>Heures attribuées</th>
-                <td>{{ total.attrHeuresA|number_format(0, ',', ' ') }}</td>
+                <td>{{ total.sess.attrHeuresA|number_format(0, ',', ' ') }}</td>
             </tr>
         </table>
         
@@ -77,11 +77,11 @@
             </tr>
             <tr>
                 <th>Heures demandées</th>
-                <td>{{ total.demHeuresB|number_format(0, ',', ' ') }}</td>
+                <td>{{ total.sess.demHeuresB|number_format(0, ',', ' ') }}</td>
             </tr>
             <tr>
                 <th>Heures attribuées</th>
-                <td>{{ total.attrHeuresB|number_format(0, ',', ' ') }}</td>
+                <td>{{ total.sess.attrHeuresB|number_format(0, ',', ' ') }}</td>
             </tr>
         </table>
         
@@ -91,15 +91,15 @@
             </tr>
             <tr>
                 <th>Nombre de projets test</th>
-                <td>{{ total.prjTest }}</td>
+                <td>{{ total.fil.prj }}</td>
             </tr>
             <tr>
                 <th>Heures demandées</th>
-                <td>{{ total.demHeuresT|number_format(0, ',', ' ') }}</td>
+                <td>{{ (total.fil.demHeuresA+total.fil.demHeuresB)|number_format(0, ',', ' ') }}</td>
             </tr>
             <tr>
                 <th>Heures attribuées</th>
-                <td>{{ total.attrHeuresT|number_format(0, ',', ' ') }}</td>
+                <td>{{ (total.fil.attrHeuresA+total.fil.demHeuresB)|number_format(0, ',', ' ') }}</td>
             </tr>
         </table>
     
@@ -109,15 +109,15 @@
             </tr>
             <tr>
                 <th>Nombre de rallonges</th>
-                <td>{{ total.rall }}</td>
+                <td>{{ total.sess.rall + total.fil.rall }}</td>
             </tr>
             <tr>
                 <th>Heures demandées</th>
-                <td>{{ total.demHeuresR|number_format(0, ',', ' ') }}</td>
+                <td>{{ (total.sess.demHeuresR+total.fil.demHeuresR)|number_format(0, ',', ' ') }}</td>
             </tr>
             <tr>
                 <th>Heures attribuées</th>
-                <td>{{ total.attrHeuresR|number_format(0, ',', ' ') }}</td>
+                <td>{{ (total.sess.attrHeuresR+total.fil.attrHeuresR)|number_format(0, ',', ' ') }}</td>
             </tr>
         </table>
     
@@ -144,7 +144,7 @@
             </tr>
             <tr>
                 <th>Nombre de projets</th>
-                <td>{{ total.prj }}</td>
+                <td>{{ total.sess.prj }} {{total.fil.prj }}</td>
             </tr>
             <tr>
                 <th>Heures demandées</th>
@@ -157,7 +157,7 @@
             {% if noconso==false %}
             <tr>
                 <th>Heures consommées</th>
-                <td>{{ total.consoHeuresP|number_format(0, ',', ' ') }}</td>
+                <td>{{ (total.sess.consoHeuresCPU+total.sess.consoHeuresGPU+total.fil.consoHeuresCPU+total.fil.consoHeuresGPU)|number_format(0, ',', ' ') }}</td>
             </tr>
             {% endif %}
         </table>
@@ -201,7 +201,7 @@
             </tr>
             <tr>
                 <th>Heures consommées</th>
-                <td>{{ total.consoHeuresP|number_format(0, ',', ' ') }}</td>
+                <td>{{ (total.sess.consoHeuresCPU+total.sess.consoHeuresGPU+total.fil.consoHeuresCPU+total.fil.consoHeuresGPU)|number_format(0, ',', ' ') }}</td>
             </tr>
             <tr>
                 <th>Heures attribuables</th>
