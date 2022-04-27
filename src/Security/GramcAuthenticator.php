@@ -78,20 +78,45 @@ class GramcAuthenticator extends AbstractAuthenticator
         // dans la configuration apache
         //dd($request);
 
+        // Récupérer user/mail dans les headers
+        // TODO - Pourquoi on ne peut pas récupérer REMOTE_USER ?
         $remote_user = $request->headers->get('eppn');
         $mail = $request->headers->get('mail');
+
+        // POUR LES TESTS UNIQUEMENT - On simule l'absence de eppn ou de mail
+        // $remote_user = null;
+        // $mail = null;
+        // $mail = null;
+
+        // Pas d'eppn, on essaie persistent-id
+        // TODO - L'authentifiant s'appelle eppn même si le header est persistent-id, ce n'est pas très propre
+        if (empty($remote_user))
+        {
+            $remote_user = $request->headers->get('persistent-id');
+        }
+
+        // POUR LES TESTS UNIQUEMENT - On prend un header stupide
+        //if (empty($remote_user))
+        //{
+        //    $remote_user = $request->headers->get('x-real-ip');
+        //}
+
         // $this->sj->debugMessage(__FILE__ . ":" . __LINE__ . " eppn=$remote_user, mail=$mail ");
 
         // Auhentification Shibboleth
-        if ($remote_user != null)
+        if (! empty($remote_user))
         {
+            // Mettre les authentifiants dans la session
+            $request->getSession()->set('eppn',$remote_user);
+            $request->getSession()->set('mail',$mail);
+
             $repository = $this->em->getRepository(Sso::class);
             $sso = $repository->findOneBy(['eppn' => $remote_user]);
 
             // Pas de sso --> nouveau compte ou nouvel eppn !
             if ($sso == null)
             {
-                // Récupérer les headers dans la session
+                // Récupérer les autres headers utiles dans la session
                 $this->shibbHeadersToSession($request);
                 throw new UsernameNotFoundException();
             }
@@ -106,7 +131,19 @@ class GramcAuthenticator extends AbstractAuthenticator
             else
             {
                 // Ecrit le eppn dans le journal et refuse l'authentification
-                $this->sj->warningMessage("Un utilisateur a tenté de se connecter - eppn = $remote_user, mail = $mail");
+                // On recherche les headers: eppn, subject_id, persistent_id et pairwise_id
+                // TODO - Une fonction privée, pour éviter le copier-coller (cf. ligne 250))
+                $eppn = $request->headers->get('eppn');
+                $persistent_id = $request->headers->get('persistent-id');
+                $targeted_id  = $request->headers->get('targeted-id');
+                $subject_id = $request->headers->get('subject-id');
+                $pairwise_id = $request->headers->get('pairwise-id');
+                $this->sj->warningMessage("Un utilisateur a tenté de se connecter - remote_user = $remote_user, mail = $mail");
+                $this->sj->warningMessage("--> eppn = $eppn");
+                $this->sj->warningMessage("--> persistent-id = $persistent_id");
+                $this->sj->warningMessage("--> targeted-id = $targeted_id");
+                $this->sj->warningMessage("--> subject-id = $subject_id");
+                $this->sj->warningMessage("--> pairwise-id = $pairwise_id");
                 throw new UsernameNotFoundException("votre compte n'est pas encore opérationnel");
             }
         }
@@ -184,7 +221,7 @@ class GramcAuthenticator extends AbstractAuthenticator
         //dd($exception);
         //dd($request);
 
-        // S'il y a eppn ET mail dans les headers on redirige vers nouveau_compte
+        // S'il y a eppn ET mail dans la session on redirige vers nouveau_compte
         if ($request->getSession()->has('eppn') && $request->getSession()->has('mail'))
         //if (0)
         {
@@ -214,6 +251,17 @@ class GramcAuthenticator extends AbstractAuthenticator
             }
             $log_msg .= "HTTP_REFERER = " . $request->server->get('HTTP_REFERER');
             $this->sj->warningMessage(__FILE__ . ":" . __LINE__ . $log_msg);
+            $eppn = $request->headers->get('eppn');
+            $persistent_id = $request->headers->get('persistent-id');
+            $targeted_id  = $request->headers->get('targeted-id');
+            $subject_id = $request->headers->get('subject-id');
+            $pairwise_id = $request->headers->get('pairwise-id');
+            $this->sj->warningMessage("--> eppn = $eppn");
+            $this->sj->warningMessage("--> persistent-id = $persistent_id");
+            $this->sj->warningMessage("--> targeted-id = $targeted_id");
+            $this->sj->warningMessage("--> subject-id = $subject_id");
+            $this->sj->warningMessage("--> pairwise-id = $pairwise_id");
+            
             $message = "ERREUR d'AUTHENTIFICATION";
             $request->getSession()->getFlashbag()->add("flash erreur",$message . " - Merci de vous rapprocher de CALMIP");
             return new RedirectResponse($this->urg->generate('accueil'));
@@ -231,7 +279,7 @@ class GramcAuthenticator extends AbstractAuthenticator
      *
      ***/
     private function shibbHeadersToSession(Request $request) {
-        $headers = ['eppn', 'mail', 'givenName', 'sn', 'displayName', 'cn', 'affiliation', 'primary-affiliation'];
+        $headers = ['givenName', 'sn', 'displayName', 'cn', 'affiliation', 'primary-affiliation'];
         $headers_values = [];
 
         // On recherche dans les headers
