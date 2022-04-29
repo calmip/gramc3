@@ -35,7 +35,8 @@ class SsoType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('eppn')->add('individu')        ;
+        $builder->add('eppn');
+        if ($options['widget_individu']) $builder->add('individu');
     }
 
     /**
@@ -44,7 +45,8 @@ class SsoType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => 'App\Entity\Sso'
+            'data_class' => 'App\Entity\Sso',
+            'widget_individu' => true
         ));
     }
 
