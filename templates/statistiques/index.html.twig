@@ -54,12 +54,13 @@
     </tbody>
 </table>
 
-<table id="tab_heures_calcul_total_annee">
+<h2>
+    {% if sess_lbl == 'AB' %}<th colspan="4">Demandes, attributions, consommation pour {{ annee }}</th>{% else %}
+                             <th colspan="4">Demandes et attributions pour {{ annee }} - session {{ sess_lbl }} </th> {% endif %}
+</h2>
+
+<table>
 <tbody>
-    <tr>
-        {% if sess_lbl == 'AB' %}<th colspan="4">Demandes, attributions, consommation pour {{ annee }}</th>{% else %}
-                                 <th colspan="4">Demandes et attributions pour {{ annee }} - session {{ sess_lbl }} </th> {% endif %}
-    </tr>
     <tr>
         <th>&nbsp;</th><th>Session</th><th>Fil de l'eau</th><th>Total</th>
     </tr>
@@ -81,7 +82,14 @@
         <td class="right">{{(total.fil.attrHeuresA + total.fil.attrHeuresB) | number_format(0, ',', ' ')}}</td>
         <td class="right">{{(total.sess.attrHeuresA + total.sess.attrHeuresB + total.fil.attrHeuresA + total.fil.attrHeuresB ) |number_format(0, ',', ' ')}}</td>
     </tr>
-    
+</tbody>
+</table>
+
+<table>
+<tbody>
+    <tr>
+        <th>&nbsp;</th><th>Session</th><th>Fil de l'eau</th><th>Total</th>
+    </tr>
     <tr>
         <th class="left">Nombre de rallonges</th>
         <td class="right">{{ total.sess.rall }}</td>
@@ -100,7 +108,12 @@
         <td class="right">{{ total.fil.attrHeuresR | number_format(0, ',', ' ') }}</td>
         <td class="right">{{ ( total.sess.attrHeuresR + total.fil.attrHeuresR) | number_format(0, ',', ' ')}}</td>
     </tr>
-    {% if sess_lbl == 'AB' %}
+</tbody>
+</table>
+
+{% if sess_lbl == 'AB' %}
+<table>
+<tbody>
     <tr>
         <th class="left">Consommation CPU</th>
         <td class="right">{{ total.sess.consoHeuresCPU | number_format(0, ',', ' ') }}</td>
@@ -113,11 +126,9 @@
         <td class="right">{{ total.fil.consoHeuresGPU | number_format(0, ',', ' ') }}</td>
         <td class="right">{{ ( total.sess.consoHeuresGPU + total.fil.consoHeuresGPU) | number_format(0, ',', ' ')}}</td>
     </tr>
-    {% endif %}
 </tbody>
 </table>
 
-{% if sess_lbl == 'AB' %}
 <table>
 <tbody>
     <tr><th colspan="2">Stockage (To)</th></tr>

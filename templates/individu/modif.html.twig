@@ -30,7 +30,7 @@
 
 {% block body %}
 
-    <h2>Modification d'un utilisateur</h2>
+    <h2>{% if formEppn==null%}Ajouter {% else %} Modifier {% endif %} un utilisateur</h2>
     <p class="centrage"><em>Veuillez s'il vous plait renseigner tous les champs</em></p>
 
     <div id="profil">
@@ -41,14 +41,28 @@
 
     {% if (individu.eppn | length != 0) %}
 
+        {% if formEppn != null %}
         <h2>Suppression d'un eppn</h2>
-        <p class="centrage"><em>Décocher une ou plusieurs cases pour supprimer les Eppn correspondants.</em></p>
+        <p class="centrage"><em>Décochez les identifiants que vous souhaitez supprimer</em></p>
+        
+        {% form_theme formEppn 'foundation_5_layout.html.twig' %}
         <div id="eppn">
         {{ form_start(formEppn) }}
         <fieldset>{{ form_widget(formEppn) }}</fieldset>
         {{ form_end(formEppn) }}
         </div>
+        {% endif %}
     {% else %}
         <p class="centrage"><em>Cet utilisateur n'a pas d'eppn, il ne peut pas se connecter à gramc</em></p>
-    {% endif %}    
+    {% endif %}
+
+    {% if formSso != null %}
+    <h2>Ajouter un eppn</h2>
+
+    <div id="eppn">
+        {{ form_start(formSso) }}
+        {{ form_widget(formSso)}}
+        {{ form_end(formSso) }}
+    </div>
+    {% endif %}
 {% endblock %}
