@@ -55,15 +55,6 @@
         </div>
     {% endif %}
 
-    {% if not Session == null %}
-        <div class="message info">
-        {% for item in Session %}
-        <p>Président de la session : {{ item }}</p>
-        {% endfor %}
-        </div>
-    {% endif %}
-
-
     {% if not Thematique == null %}
         <div class="message info">
         {% for item in Thematique %}
