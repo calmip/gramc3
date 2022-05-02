@@ -996,14 +996,17 @@ class IndividuController extends AbstractController
         }
 
         // on complète le reste des informations
-
+        // TODO - IndividuForm n'est PAS un objet de type Form !!!! Grrrrr
+        //        $form est un objet de type IndividuFormType, c'est bien un form associé à un object de type IndividuForm
         $collaborateur    = new IndividuForm();
         $form = $this->createForm('App\Form\IndividuFormType', $collaborateur, ['csrf_protection' => false]);
+
         $form->handleRequest($request);
 
+        // On vient de soumettre le formulaire via son adresse mail
         if ($form->isSubmitted()  && $form->isValid()) {
+            // On recherche l'individu ayant le bon mail et on complète l'objet $collaborateur'
             $individu = $em->getRepository(Individu::class)->findOneBy(['mail' => $collaborateur->getMail() ]);
-            //$individu = new Individu();
             if ($individu != null) {
                 if ($individu->getMail() != null) {
                     $collaborateur->setMail($individu->getMail());
@@ -1026,6 +1029,8 @@ class IndividuController extends AbstractController
                 if ($individu->getId()     != null) {
                     $collaborateur->setId($individu->getId());
                 }
+
+                // Maintenant on recrée un $form en utilisant le $collaborateur complété
                 $form = $this->createForm('App\Form\IndividuFormType', $collaborateur, ['csrf_protection' => false]);
 
                 return $this->render('version/collaborateurs_ligne.html.twig', [ 'form' => $form->createView() ]);
