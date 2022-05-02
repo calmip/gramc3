@@ -958,6 +958,7 @@ class ServiceVersions
                        'by_reference'   =>  false,
                        'delete_empty'   =>  true,
                        'attr'         => ['class' => "profil-horiz",],
+                       'entry_options' =>['text_fields' => true]
                     ])
                     ->getForm();
     }

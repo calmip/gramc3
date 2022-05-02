@@ -746,15 +746,16 @@ class VersionController extends AbstractController
                                        'individus' => $sv->prepareCollaborateurs($version, $sj, $sval)
                                    ])
                                    ->add('individus', CollectionType::class, [
-                                       'entry_type'     =>  IndividuFormType::class,
-                                       'label'          =>  false,
-                                       'allow_add'      =>  true,
-                                       'allow_delete'   =>  true,
-                                       'prototype'      =>  true,
-                                       'required'       =>  true,
-                                       'by_reference'   =>  false,
-                                       'delete_empty'   =>  true,
-                                       'attr'         => ['class' => "profil-horiz",],
+                                       'entry_type'   =>  IndividuFormType::class,
+                                       'label'        =>  false,
+                                       'allow_add'    =>  true,
+                                       'allow_delete' =>  true,
+                                       'prototype'    =>  true,
+                                       'required'     =>  true,
+                                       'by_reference' =>  false,
+                                       'delete_empty' =>  true,
+                                       'attr'         => ['class' => "profil-horiz"],
+                                       'entry_options' =>['text_fields' => true]
                                    ])
                                    ->add('submit', SubmitType::class, [
                                         'label' => 'Sauvegarder',

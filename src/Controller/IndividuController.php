@@ -142,27 +142,20 @@ class IndividuController extends AbstractController
         }
 
         $CollaborateurVersion       =   $em->getRepository(CollaborateurVersion::class)->findBy(['collaborateur' => $individu]);
-        $CompteActivation           =   $em->getRepository(CompteActivation ::class)->findBy(['individu' => $individu]);
         $Expertise                  =   $em->getRepository(Expertise ::class)->findBy(['expert' => $individu]);
         $Journal                    =   $em->getRepository(Journal::class)->findBy(['individu' => $individu]);
         $Rallonge                   =   $em->getRepository(Rallonge::class)->findBy(['expert' => $individu]);
-        $Session                    =   $em->getRepository(Session::class)->findBy(['president' => $individu]);
         $Sso                        =   $em->getRepository(Sso::class)->findBy(['individu' => $individu]);
         $Thematique                 =   $individu->getThematique();
 
         $erreurs  =   [];
 
         // utilisateur peu actif peut être effacé même s'il peut se connecter'
-        if ($CollaborateurVersion == null && $Expertise == null
-              && $Rallonge == null && $Session == null) {
+        if ($CollaborateurVersion == null && $Expertise == null && $Rallonge == null) {
 
             foreach ($individu->getThematique() as $item) {
                 $em->persist($item);
                 $item->getExpert()->removeElement($individu);
-            }
-
-            foreach ($CompteActivation  as $item) {
-                $em->remove($item);
             }
 
             foreach ($Sso  as $item) {
@@ -235,11 +228,6 @@ class IndividuController extends AbstractController
                     $item->setPresident($new_individu);
                 }
 
-                // On ne sait jamais
-                foreach ($CompteActivation  as $item) {
-                    $em->remove($item);
-                }
-
                 $sj->infoMessage('Utilisateur ' . $individu . '(' .  $individu->getIdIndividu()
                     . ') remplacé par ' . $new_individu . ' (' .  $new_individu->getIdIndividu() . ')');
 
@@ -258,11 +246,9 @@ class IndividuController extends AbstractController
                 'form' => $form->createView(),
                 'erreurs'                   => $erreurs,
                 'CollaborateurVersion'   =>  $CollaborateurVersion,
-                'CompteActivation'       =>  $CompteActivation,
                 'Expertise'              =>  $Expertise ,
                 'Journal '               =>  $Journal,
                 'Rallonge'               =>  $Rallonge,
-                'Session'                =>  $Session,
                 'Sso'                    =>  $Sso,
                 'individu'               =>  $individu,
                 'Thematique'             =>  $Thematique->toArray(),
@@ -959,6 +945,7 @@ class IndividuController extends AbstractController
 
     /**
      * Autocomplete: en lien avec l'autocomplete de jquery
+     *               Requête appelée lorsqu'on quitte le champ autocomplete "mail" dans le formulaire des collaborateurs
      *
      * @Route("/mail_autocomplete", name="mail_autocomplete", methods={"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
@@ -976,7 +963,7 @@ class IndividuController extends AbstractController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) { // nous ne pouvons pas ajouter $form->isValid() et nous ne savons pas pourquoi
+        if ($form->isSubmitted()) { // TODO - nous ne pouvons pas ajouter $form->isValid() et nous ne savons pas pourquoi
             if (array_key_exists('mail', $form->getData())) {
                 $data   =   $em->getRepository(Individu::class)->liste_mail_like($form->getData()['mail']);
             } else {
@@ -999,7 +986,7 @@ class IndividuController extends AbstractController
         // TODO - IndividuForm n'est PAS un objet de type Form !!!! Grrrrr
         //        $form est un objet de type IndividuFormType, c'est bien un form associé à un object de type IndividuForm
         $collaborateur    = new IndividuForm();
-        $form = $this->createForm('App\Form\IndividuFormType', $collaborateur, ['csrf_protection' => false]);
+        $form = $this->createForm('App\Form\IndividuFormType', $collaborateur, ['csrf_protection' => false, 'text_fields' => true]);
 
         $form->handleRequest($request);
 
@@ -1031,7 +1018,7 @@ class IndividuController extends AbstractController
                 }
 
                 // Maintenant on recrée un $form en utilisant le $collaborateur complété
-                $form = $this->createForm('App\Form\IndividuFormType', $collaborateur, ['csrf_protection' => false]);
+                $form = $this->createForm('App\Form\IndividuFormType', $collaborateur, ['csrf_protection' => false, 'text_fields' => true]);
 
                 return $this->render('version/collaborateurs_ligne.html.twig', [ 'form' => $form->createView() ]);
             } else {
