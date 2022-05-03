@@ -2,6 +2,7 @@
 
 {% import "default/macros.html.twig" as gramcmacros %}
 
+{% import "default/icone.html.twig" as icones %}
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -26,6 +27,7 @@
         <script   src="{{ absolute_url(asset('js/jquery-3.6.0.min.js') ) }}" ></script>
         <script   src="{{ absolute_url(asset('js/jquery-ui/jquery-ui.js') ) }}" ></script>
         <script   src="{{ absolute_url(asset('js/header_fixe.js') ) }}" ></script>
+        <script   src="{{ absolute_url(asset('js/base.js') ) }}" ></script>
 {% endblock %}
 
 {% block myjavascripts %}
@@ -127,7 +129,26 @@
                 </div>
             </div>
 
+
+            {% set scrollTop = "fleche" %}
+
+            <div id="scrollTop">
+                <a class="fleche">
+                    {{ icones.scrollTop }}
+                </a>
+            </div>
+
+        {% if is_granted('ROLE_ADMIN')  %}
+
+            <div class="role_admin" title="Vous êtres administrateur">
+                <span></span>
+                <p>ADMINISTRATEUR</p>
+            </div>
+
+        {% endif %}
+
         {% endblock header %}
+
 
     {% include "default/flash.html.twig" %}
     

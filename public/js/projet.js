@@ -71,11 +71,11 @@ $( document ).ready(function() {
 		var img_alt = $(this).attr('alt');
 		var width   = $(this).data("width");        // pas utilisé
 		var height  = $(this).data("height");       // pas utilisé
-		$('#dialog').html('<img src="'+img_src+'" alt="'+img_alt+'" title="'+img_alt+'" />');
+		$('#dialog').html('<img src="'+img_src+'" alt="'+img_alt+'" title="'+img_alt+'" style="width: 100%;" />');
 		$('#dialog').dialog({autoOpen: false, modal: false });
 		$('#dialog').dialog( "option", "title", img_alt );
 		$('#dialog').dialog( "option", "height", 'auto' );
-		$('#dialog').dialog( "option", "width", 'auto' );
+		$('#dialog').dialog( "option", "width", '100vh' );
 		$('#dialog').dialog('open');
     });
 
@@ -108,21 +108,3 @@ $( document ).ready(function() {
 	});
 
 });
-
-$( document ).ready(function() {
-
-	//Menu sur la page de consultation d'un projet
-	let menu = $('.consulter_projet nav ul');
-	let li_menu = $('.consulter_projet nav ul li');
-	let more_menu = '<p class="more">En voir plus...</p>';
-
-	console.log(li_menu)
-
-	if(li_menu.length > 3){
-		for(i=3; i < li_menu.length; i++){
-			li_menu[i].style.display = 'none';
-		}
-		menu[0].innerHTML += '<p class="more">En voir plus...</p>'
-	}
-
-})

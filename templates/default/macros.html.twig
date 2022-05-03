@@ -50,6 +50,10 @@
         {{icones.modifier}}
     {% elseif value == "envoyer" %}
         {{icones.envoyer}}
+    {% elseif value == "indefinit" %}
+        {{icones.indefinit}}
+    {% elseif value == "croix" %}
+        {{icones.croix}}
     {% endif %}
 
 {% endmacro %}
@@ -63,13 +67,19 @@
 
 {% from _self import menuIcones %}
 
+{# Variable à faire passer dans la macro des icones (celle-ci sert à appeler l'icone indefinit) #}
+{% set indefinit = "indefinit" %}
+
 
 <nav>
     <ul>
         {% for item in menu %}
         {% if not item==null %}
 	        {% if item.ok %}
-	        <li><a class="lien_actif" title="{{ item.commentaire }}"
+	        <li {% if item.priorite is defined %}
+                    class="priorite{{item.priorite}}"
+                {% endif %}
+            ><a class="lien_actif" title="{{ item.commentaire }}"
 	                {% if item.param is defined %}
 	                    href="{{ path(item.name, { 'id' : item.param }) }}"
 	                {% elseif item.params is defined %}
@@ -79,13 +89,16 @@
 	                {% endif %}
 	            >
                 {% if item.icone is defined %}
-                {{ menuIcones(item.icone) }} {{ item.lien }}</a>
+                    {{ menuIcones(item.icone) }} {{ item.lien }}</a>
                 {% else %}
-                    {{ item.lien }}</a>
+                   {{ menuIcones(indefinit) }} {{ item.lien }}</a>
                 {% endif %}
 	        </li>
 	        {% else %}
-	        <li><a class="lien_inactif"
+	        <li {% if item.priorite is defined %}
+                    class="priorite{{item.priorite}}"
+                {% endif %}
+            ><a class="lien_inactif"
 	            {% if  app.debug %}
 	                {% if item.param is defined %}
 	                    href="{{ path(item.name, { 'id' : item.param }) }}"
@@ -98,14 +111,15 @@
 	            title="{{ item.commentaire }} - {{ item.raison }}"
                 >
                 {% if item.icone is defined %}
-                {{ menuIcones(item.icone) }} {{ item.lien }}</a>
+                    {{ menuIcones(item.icone) }} {{ item.lien }}</a>
                 {% else %}
-                    {{ item.lien }}</a>
+                    {{ menuIcones(indefinit) }} {{ item.lien }}</a>
                 {% endif %}
 	        </li>
 	        {% endif %}
 	    {% endif %}
         {% endfor %}
+        <li class="more">En voir plus...</li>
     </ul>
 </nav>
 {% endmacro %}

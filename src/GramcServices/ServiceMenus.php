@@ -82,7 +82,7 @@ class ServiceMenus
     /*******************
      * Page d'accueil principale
      ***************************************************/
-    public function demandeur(): array
+    public function demandeur(int $priorite=1): array
     {
         $menu['name']      = 'projet_accueil';
         $menu['lien']      = 'Demandeur';
@@ -97,7 +97,7 @@ class ServiceMenus
         return $menu;
     }
 
-    public function expert():array
+    public function expert(int $priorite=1):array
     {
         $menu['name']      = 'expertise_liste';
         $menu['lien']      = 'Expert';
@@ -112,7 +112,7 @@ class ServiceMenus
         return $menu;
     }
 
-    public function administrateur():array
+    public function administrateur(int $priorite=1):array
     {
         $menu['name']      = 'admin_accueil';
         $menu['lien']      = 'Administrateur';
@@ -127,7 +127,7 @@ class ServiceMenus
         return $menu;
     }
 
-    public function president():array
+    public function president(int $priorite=1):array
     {
         $menu['name']      = 'president_accueil';
         $menu['lien']      = 'Président';
@@ -142,7 +142,7 @@ class ServiceMenus
         return $menu;
     }
 
-    public function aide():array
+    public function aide(int $priorite=1):array
     {
         $menu['name']      = 'aide';
         $menu['lien']      = '?';
@@ -156,7 +156,7 @@ class ServiceMenus
      ***************************************************/
 
     // Nouvelle session
-    public function ajouterSession():array
+    public function ajouterSession(int $priorite=1):array
     {
         $session      = $this->ss->getSessionCourante();
         $etat_session = $session->getEtatSession();
@@ -176,7 +176,7 @@ class ServiceMenus
     }
 
     // Modifier la session
-    public function modifierSession():array
+    public function modifierSession(int $priorite=1):array
     {
         $session        = $this->ss->getSessionCourante();
         $workflow       = $this->sw;
@@ -196,7 +196,7 @@ class ServiceMenus
     }
 
     // Début de la saisie
-    public function demarrerSaisie():array
+    public function demarrerSaisie(int $priorite=1):array
     {
         $session        = $this->ss->getSessionCourante();
         $workflow       = $this->sw;
@@ -217,7 +217,7 @@ class ServiceMenus
     }
 
     // Fin de la saisie
-    public function terminerSaisie():array
+    public function terminerSaisie(int $priorite=1):array
     {
         $session        = $this->ss->getSessionCourante();
         $workflow       = $this->sw;
@@ -238,7 +238,7 @@ class ServiceMenus
     }
 
     // Envoyer les expertises
-    public function envoyerExpertises():array
+    public function envoyerExpertises(int $priorite=1):array
     {
         $session        = $this->ss->getSessionCourante();
         $workflow       = $this->sw;
@@ -265,7 +265,7 @@ class ServiceMenus
     }
 
     // Commentaire de session - accessible à partir de l'écran Président
-    public function commSess():array
+    public function commSess(int $priorite=1):array
     {
         $session      = $this->ss->getSessionCourante();
         $workflow     = $this->sw;
@@ -292,7 +292,7 @@ class ServiceMenus
     }
 
     // Activer la session
-    public function activerSession():array
+    public function activerSession(int $priorite=1):array
     {
         $session        = $this->ss->getSessionCourante();
         $workflow       = $this->sw;
@@ -318,7 +318,7 @@ class ServiceMenus
      * Gestion des projets et des versions
      ***************************************************/
 
-    public function nouveau_projet($type):array
+    public function nouveau_projet($type, int $priorite=1):array
     {
         switch ($type) {
         case Projet::PROJET_FIL:
@@ -340,7 +340,7 @@ class ServiceMenus
      *     - Créé seulement par un permanent, qui devient responsable du projet
      *
      */
-    private function nouveau_projet_sess():array
+    private function nouveau_projet_sess(int $priorite=1):array
     {
         $menu   =   [];
         $menu['commentaire']    =   "Vous ne pouvez pas créer de nouveau projet actuellement";
@@ -377,7 +377,7 @@ class ServiceMenus
      *     - Créé par n'importe qui, qui devient responsable du projet
      *
      */
-    public function nouveau_projet_test():array
+    public function nouveau_projet_test(int $priorite=1):array
     {
         $menu   =   [];
         $menu['commentaire']    =   "Vous ne pouvez pas créer de nouveau projet test actuellement";
@@ -423,7 +423,7 @@ class ServiceMenus
      *     - Créé seulement par un permanent, qui devient responsable du projet
      *
      */
-    private function nouveau_projet_fil():array
+    private function nouveau_projet_fil(int $priorite=1):array
     {
         $menu   =   [];
 
@@ -472,7 +472,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function individu_gerer():array
+    public function individu_gerer(int $priorite=1):array
     {
         $menu['name']   =   'individu_gerer';
         $menu['commentaire']    =   "Gérer les utilisateurs de gramc";
@@ -490,7 +490,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function gerer_sessions(): array
+    public function gerer_sessions(int $priorite=1): array
     {
         $menu['name']   =   'gerer_sessions';
         $menu['commentaire']    =   "Gérer les sessions d'attribution";
@@ -509,7 +509,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function bilan_session():array
+    public function bilan_session(int $priorite=1):array
     {
         $menu['name']   =   'bilan_session';
         $menu['commentaire']    =   "Générer et télécharger le bilan de session";
@@ -528,7 +528,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function bilan_annuel():array
+    public function bilan_annuel(int $priorite=1):array
     {
         $menu['name']   =   'bilan_annuel';
         $menu['commentaire']    =   "Générer et télécharger le bilan annuel";
@@ -547,7 +547,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function projet_session():array
+    public function projet_session(int $priorite=1):array
     {
         $menu['name']   =   'projet_session';
         $menu['commentaire']    =   "Gérer les projets par session";
@@ -565,7 +565,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function projet_annee():array
+    public function projet_annee(int $priorite=1):array
     {
         $menu['name']        =   'projet_annee';
         $menu['commentaire'] =   "Gérer les projets par année";
@@ -583,7 +583,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function projet_donnees():array
+    public function projet_donnees(int $priorite=1):array
     {
         $menu['name']        =   'projet_donnees';
         $menu['commentaire'] =   "Projets ayant des demandes en stockage ou partage de données";
@@ -600,7 +600,7 @@ class ServiceMenus
     }
     //////////////////////////////////////
 
-    public function projet_tous():array
+    public function projet_tous(int $priorite=1):array
     {
         $menu['name']   =   'projet_tous';
         $menu['commentaire']    =   "Liste complète des projets";
@@ -619,7 +619,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function journal():array
+    public function journal(int $priorite=1):array
     {
         $menu['name']   =   'journal_list';
         $menu['commentaire']    =   "Lire le journal des actions";
@@ -637,7 +637,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function info():array
+    public function info(int $priorite=1):array
     {
         $menu['name']        = 'phpinfo';
         $menu['commentaire'] = "Exécuter phpinfo()";
@@ -653,7 +653,7 @@ class ServiceMenus
     }
     //////////////////////////////////////
 
-    public function laboratoires():array
+    public function laboratoires(int $priorite=1):array
     {
         $menu['name']   =   'gerer_laboratoires';
         $menu['commentaire']    =   "Gérer la liste des laboratoires enregistrés";
@@ -669,7 +669,7 @@ class ServiceMenus
         return $menu;
     }
 
-    public function formations():array
+    public function formations(int $priorite=1):array
     {
         $menu['name']       =   'gerer_formations';
         $menu['commentaire']=   "Gérer la liste des formations";
@@ -687,7 +687,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function thematiques():array
+    public function thematiques(int $priorite=1):array
     {
         $menu['name']   =   'gerer_thematiques';
         $menu['commentaire']    =   "Gérer la liste des thématiques";
@@ -705,7 +705,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function rattachements():array
+    public function rattachements(int $priorite=1):array
     {
         $menu['name']   =   'gerer_rattachements';
         $menu['commentaire']    =   "Gérer la liste des rattachements";
@@ -723,7 +723,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function metathematiques():array
+    public function metathematiques(int $priorite=1):array
     {
         $menu['name']   =   'gerer_metaThematiques';
         $menu['commentaire']    =   "Gérer la liste des méta-thématiques";
@@ -744,11 +744,12 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function changer_responsable(Version $version):array
+    public function changer_responsable(Version $version, int $priorite=2):array
     {
         $menu['name']   =   'changer_responsable';
         $menu['param']  =   $version->getIdVersion();
         $menu['lien']   =   "Nouveau responsable";
+        $menu['priorite']   =   $priorite;
         $user = $this->token->getUser();
 
         if ($this->ac->isGranted('ROLE_ADMIN')) {
@@ -785,14 +786,15 @@ class ServiceMenus
 
     ////////////////////////////////////
 
-    public function modifier_version(Version $version):array
+    public function modifier_version(Version $version, int $priorite=1):array
     {
-        $menu['name']   = 'modifier_version';
-        $menu['param']  = $version->getIdVersion();
-        $menu['lien']   = "Modifier";
-        $menu['icone']   = "modifier";
-        $menu['commentaire']    =   "Vous ne pouvez pas modifier ce projet";
+        $menu['name']        = 'modifier_version';
+        $menu['param']       = $version->getIdVersion();
+        $menu['lien']        = "Modifier";
+        $menu['icone']       = "modifier";
+        $menu['commentaire'] =   "Vous ne pouvez pas modifier ce projet";
         $menu['ok']          = false;
+        $menu['priorite']    =   $priorite;
 
         if ($this->ac->isGranted('ROLE_ADMIN')) {
             $menu['commentaire']    =   "Modifier le projet en tant qu'administrateur";
@@ -831,13 +833,14 @@ class ServiceMenus
 
     ///////////////////////////////////////////////////////////
 
-    public function modifier_collaborateurs(Version $version):array
+    public function modifier_collaborateurs(Version $version, int $priorite=2):array
     {
         $user = $this->token->getUser();
 
         $menu['name']  = 'avant_modifier_collaborateurs';
         $menu['param'] = $version->getIdVersion();
         $menu['lien']  = "Collaborateurs";
+        $menu['priorite'] =   $priorite;
 
         if ($this->ac->isGranted('ROLE_ADMIN')) {
             $menu['commentaire'] = "Modifier les collaborateurs en tant qu'administrateur";
@@ -855,10 +858,11 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////
 
-    public function televerser_rapport_annee(Version $version):array
+    public function televerser_rapport_annee(Version $version, int $priorite=2):array
     {
         $menu['name']           =   'televerser_rapport_annee';
         $menu['ok']             =   false;
+        $menu['priorite']  = $priorite;
 
         if ($version != null) {
             $etat           = $version->getEtatVersion();
@@ -913,12 +917,13 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////
 
-    public function telecharger_modele_rapport_dactivite(Version $version):array
+    public function telecharger_modele_rapport_dactivite(Version $version, int $priorite=2):array
     {
         $menu['name']           =   'telecharger_modele';
         $menu['lien']           =   "Télécharger un modèle de rapport d'activité";
         $menu['ok']             =   false;
         $menu['commentaire'] = "Vous ne pouvez pas télécharger un modèle de rapport d'activité pour ce projet";
+        $menu['priorite']  = $priorite;
 
         if ($version != null) {
             if ($this->ac->isGranted('ROLE_ADMIN')) {
@@ -949,11 +954,12 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////
 
-    public function gerer_publications(Projet $projet):array
+    public function gerer_publications(Projet $projet, int $priorite=2):array
     {
         $menu['name']  = 'gerer_publications';
         $menu['param'] = $projet->getIdProjet();
         $menu['lien']  = "Publications";
+        $menu['priorite']  = $priorite;
 
         if ($this->ac->isGranted('ROLE_ADMIN')) {
             $menu['commentaire'] = "Modifier les publications en tant qu'administrateur";
@@ -983,14 +989,15 @@ class ServiceMenus
 
     /////////////////////////////////////////////////////////////////////
 
-    public function renouveler_version(Version $version):array
+    public function renouveler_version(Version $version, int $priorite=1):array
     {
         $menu['name']           =   'renouveler_version';
         $menu['param']          =   $version->getIdVersion();
         $menu['lien']           =   "Renouvellement";
-        $menu['icone']           =   "renouveler";
+        $menu['icone']          =   "renouveler";
         $menu['commentaire']    =   "Vous ne pouvez pas demander de renouvellement";
         $menu['ok']             =   false;
+        $menu['priorite']       =   $priorite;
 
         $session = $this->em->getRepository(Session::class)->findOneBy([ 'etatSession' => Etat::EDITION_DEMANDE ]);
 
@@ -1020,7 +1027,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////
 
-    public function envoyer_expert(Version $version):array
+    public function envoyer_expert(Version $version, int $priorite=1):array
     {
         if ($version == null) {
             return [];
@@ -1037,6 +1044,7 @@ class ServiceMenus
         $menu['ok']             =   false;
         $menu['raison']         =   "";
         $menu['incomplet']      =   false;
+        $menu['priorite']      =   $priorite;
 
         $etatVersion  = $version->getEtatVersion();
 
@@ -1089,7 +1097,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function affectation():array
+    public function affectation(int $priorite=1):array
     {
         $session = $this->ss->getSessionCourante();
 
@@ -1110,7 +1118,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function affectation_test():array
+    public function affectation_test(int $priorite=1):array
     {
         //$session = $this->ss->getSessionCourante();
 
@@ -1139,7 +1147,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function avancer():array
+    public function avancer(int $priorite=1):array
     {
         //$session = $this->ss->getSessionCourante();
         $menu['name']           =   'param_avancer';
@@ -1158,7 +1166,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function mailToResponsables():array
+    public function mailToResponsables(int $priorite=1):array
     {
         $session = $this->ss->getSessionCourante();
         if ($session != null) {
@@ -1188,7 +1196,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function mailToResponsablesFiche():array
+    public function mailToResponsablesFiche(int $priorite=1):array
     {
         $session = $this->ss->getSessionCourante();
         if ($session != null) {
@@ -1219,7 +1227,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function nettoyer():array
+    public function nettoyer(int $priorite=1):array
     {
         $menu['name']            = 'rgpd';
         $menu['lien']            = "Nettoyage pour conformité au RGPD";
@@ -1237,7 +1245,7 @@ class ServiceMenus
 
     /////////////////////////////////////////////////////////////////////////////////
 
-    public function connexions():array
+    public function connexions(int $priorite=1):array
     {
         $menu['name']           =   'connexions';
         $menu['lien']           =   "Personnes connectées";
@@ -1255,7 +1263,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function presidents():array
+    public function presidents(int $priorite=1):array
     {
         $menu['name']           =   'individu_president';
         $menu['lien']           =   "Attribuer le rôle de président";
@@ -1273,7 +1281,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function rallonge_creation(Projet $projet):array
+    public function rallonge_creation(Projet $projet, int $priorite=1):array
     {
         $sp = $this->sp;
 
@@ -1309,7 +1317,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function rallonge_modifier(Rallonge $rallonge):array
+    public function rallonge_modifier(Rallonge $rallonge, int $priorite=1):array
     {
         $menu['name']           =   'rallonge_modifier';
         $menu['param']          =   $rallonge->getIdRallonge();
@@ -1359,7 +1367,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function rallonge_envoyer(Rallonge $rallonge):array
+    public function rallonge_envoyer(Rallonge $rallonge, int $priorite=1):array
     {
         $menu['name']        = 'avant_rallonge_envoyer';
         $menu['param']       = $rallonge->getIdRallonge();
@@ -1409,7 +1417,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function affectation_rallonges():array
+    public function affectation_rallonges(int $priorite=1):array
     {
         //$session = $this->ss->getSessionCourante();
         $menu['name']           =   'rallonge_affectation';
@@ -1428,7 +1436,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function televersement_generique():array
+    public function televersement_generique(int $priorite=1):array
     {
         $menu['name']           =   'televersement_generique';
         $menu['lien']           =   "Téléversements génériques";
@@ -1447,7 +1455,7 @@ class ServiceMenus
     //////////////////////////////////////////////////////////////////////////////
 
 
-    public function telechargement_fiche(Version $version):array
+    public function telechargement_fiche(Version $version, int $priorite=2):array
     {
         $menu['name']           =   'version_fiche_pdf';
         $menu['param']          =   $version->getIdVersion();
@@ -1455,6 +1463,7 @@ class ServiceMenus
         $menu['commentaire']    =   "Vous ne pouvez pas télécharger la fiche de ce projet";
         $menu['ok']             =   false;
         $menu['raison']         =   "Vous n'êtes pas un collaborateur du projet";
+        $menu['priorite']  = $priorite;
 
         if ($this->ac->isGranted('ROLE_ADMIN')) {
             $menu['ok']             =   true;
@@ -1475,7 +1484,7 @@ class ServiceMenus
     //////////////////////////////////////////////////////////////////////////////
 
 
-    public function televersement_fiche(Version $version):array
+    public function televersement_fiche(Version $version, int $priorite=2):array
     {
         $menu['name']           =   'version_televersement_fiche';
         $menu['param']          =   $version->getIdVersion();
@@ -1483,6 +1492,7 @@ class ServiceMenus
         $menu['commentaire']    =   "Vous ne pouvez pas téléverser la fiche de ce projet";
         $menu['ok']             =   false;
         $menu['raison']         =   "Vous n'êtes pas un collaborateur du projet";
+        $menu['priorite']  = $priorite;
 
         if ($this->ac->isGranted('ROLE_ADMIN')) {
             $menu['ok']             =   true;
@@ -1502,7 +1512,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function rallonge_expertiser(Rallonge $rallonge):array
+    public function rallonge_expertiser(Rallonge $rallonge, int $priorite=1):array
     {
         $menu['name']        =   'rallonge_expertiser';
         $menu['param']       =   $rallonge->getIdRallonge();
@@ -1556,7 +1566,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques_etablissement(): array
+    public function statistiques_etablissement(int $priorite=1): array
     {
         $menu['name']           =   'statistiques_etablissement';
         $menu['lien']           =   "Etablissements";
@@ -1575,7 +1585,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques_laboratoire(): array
+    public function statistiques_laboratoire(int $priorite=1): array
     {
         $menu['name']           =   'statistiques_laboratoire';
         $menu['lien']           =   "Laboratoires";
@@ -1632,7 +1642,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques():array
+    public function statistiques(int $priorite=1):array
     {
         $menu['name']           =   'statistiques';
         $menu['lien']           =   "Statistiques";
@@ -1651,7 +1661,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function publications():array
+    public function publications(int $priorite=1):array
     {
         $menu['name']           =   'publication_annee';
         $menu['lien']           =   "Publications";
@@ -1669,7 +1679,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques_collaborateur(): array
+    public function statistiques_collaborateur(int $priorite=1): array
     {
         $menu['name']           =   'statistiques_collaborateur';
         $menu['lien']           =   "Collaborateurs";
@@ -1688,7 +1698,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques_repartition(): array
+    public function statistiques_repartition(int $priorite=1): array
     {
         $menu['name']           =   'statistiques_repartition';
         $menu['lien']           =   "Projets";
@@ -1708,11 +1718,12 @@ class ServiceMenus
     /*
      * Demandes concernant stockage et partage des données
      */
-    public function donnees(Version $version):array
+    public function donnees(Version $version, int $priorite=2):array
     {
         $menu['name']  = 'donnees';
         $menu['param'] = $version->getIdVersion();
         $menu['lien']  = "Vos données";
+        $menu['priorite']  = $priorite;
         $user          = $this->token->getUser();
 
         if ($this->ac->isGranted('ROLE_ADMIN')) {

@@ -488,6 +488,7 @@ class ProjetSpecController extends AbstractController
         if ($this->getParameter('nodata')==false) {
             $menu[] = $sm->donnees($version);
         }
+        $menu[] = $sm->gerer_publications($projet);
         $menu[] = $sm->telechargement_fiche($version);
         $menu[] = $sm->televersement_fiche($version);
 
@@ -499,7 +500,6 @@ class ProjetSpecController extends AbstractController
             }
         }
 
-        $menu[]       = $sm->gerer_publications($projet);
         $img_expose_1 = $sv->imageProperties('img_expose_1', $version);
         $img_expose_2 = $sv->imageProperties('img_expose_2', $version);
         $img_expose_3 = $sv->imageProperties('img_expose_3', $version);

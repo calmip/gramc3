@@ -1,668 +1,794 @@
 {% extends 'default/base.html.twig' %}
 {% import "default/macros.html.twig" as gramcmacros %}
 
+{% import "default/icone.html.twig" as icones %}
+
 {% block myjavascripts %}
-<script  type="text/javascript" src="{{ asset('js/projet.js') }}" ></script>
+	<script type="text/javascript" src="{{ asset('js/projet.js') }}"></script>
 {% endblock myjavascripts %}
 
 {% block body %}
 
-<section class="consulter_projet">
+	<section class="consulter_projet">
 
-<h2>
-    Projet : {{ projet }} (session {{ session }})
-    <br>
-    <small><em>{{ version.getMetaEtat }}</em></small>
-</h2>
+		<div class="top_body">
+			<div class="retour">
+				<a title="Retour à l'espace demandeur" href="{{ path('projet_accueil') }}"> {{icones.fleche_retour}}
+					Retour
+				</a>
+			</div>
+
+			{% if app.debug %}
+				<div class="info_debug">
+					<strong>DEBUG</strong>
+
+					<p>Type du projet {{projet.id}}
+						=
+						<strong>{{ projet.typeprojet}}</strong>
+					</p>
+
+					<p>Etat du projet {{projet.id }}
+						=
+						<strong>{{ projet.getEtatProjet }}</strong>
+					</p>
+
+					<p>Type de la version {{version.id}}
+						=
+						<strong>{{ version.typeversion}}</strong>
+					</p>
+
+					<p>Etat de la version {{version.idVersion }}
+						=
+						<strong>{{ version.getEtatVersion }}</strong>
+					</p>
+				{% endif %}
+				{% if version.majInd != null %}
+					<em>Dernière modification par {{ version.majInd }}
+						le {{ version.majStamp|date('Y-m-d H:i:s') }}</em>
+				{% endif %}
+			</div>
+		</div>
+
+		<h2>
+			Projet : {{ projet }}
+			(session {{ session }})
+			<br>
+			<small>
+				<em>{{ version.getMetaEtat }}</em>
+			</small>
+		</h2>
+
+		<section class="historique">
+			<h3>Version :
+			</h3> {{ form_start(version_form) }} {{ form_widget(version_form.version) }}{{ form_widget(version_form.submit) }} {{ form_end(version_form) }}
+		</section>
+
+		<div class="menu">
+			{{ gramcmacros.menu(menu) }}
+		</div>
+
+		{% if not is_granted('ROLE_ADMIN')  %}
+			<div class="information ok">
+				<h2>Liste de choses à faire pour la session {{ session }}</h2>
+				<ol>
+					{% for m in menu %}
+						{% if m.todo is defined %}
+							<li>{{ m.todo|raw }}</li>
+						{%endif %}
+					{% endfor %}
+				</ol>
+			</div>
+		{% endif %}
 
 
+		<section class="supplement">
 
-{{ gramcmacros.menu(menu) }} 
+
+		<a title="Version pdf" class="lien_supplementaire" target="_blank" href="{{ path('version_pdf', { 'id' : version.idVersion }) }}"> {{icones.pdf}}
+			<p>Version pdf</p>
+		</a>
+
+		{% if rapport_dactivite %}
+			{% if ( rapport_1 != null   ) %}
+				<a title="Rapport d'activité 2021" class="lien_supplementaire" target="_blank" href="{{ path('rapport', { 'id' : version.idVersion, 'annee' : version.getAnneeSession() - 1 }) }}"> {{icones.pdf}}
+					<p>Rapport d'activité {{ version.getAnneeSession - 1 }}</p>
+				</a>
+			{%  endif %}
+
+			{% if ( rapport != null ) %}
+
+				<a class="lien_supplementaire" target="_blank" href="{{ path('rapport', { 'id' : version.idVersion, 'annee' : version.getAnneeSession() }) }}"> {{icones.pdf}}
+					<p>Rapport d'activité {{ version.getAnneeSession }}</p>
+				</a>
+			{%  endif %}
+		{% endif %}
+
+		{% if fichier_attache %}
+			{% if document != null %}
+				<a class="lien_supplementaire" target="_blank" href="{{ path('document', { 'id' : version.idVersion }) }}"> {{icones.pdf}}
+					<p>Document attaché</p>
+				</a>
+			{% endif %}
+		{% endif %}
+		{% if noconso == 0 %}
+			<a class="lien_supplementaire conso" title="Visualiser la consommation {{version.getAnneeSession}}" data-href="{{ absolute_url(path('projet_conso', { 'id': version.projet.idProjet, 'loginname': loginname, 'annee' : version.getAnneeSession })) }}"/> {{icones.consommation}}
+				<p>Visualiser ma consommation</p>
+			</a>
+			{# Pour les graphiques de conso #}
+			<div id="dialog-compta"></div>
+		{% endif %}
+
+			{# Pour les figures #}
+			<div id="dialog"></div>
+
+			{# Pour deboguer les fonctions de generation de graphes de conso1
+														<img src="data:image/png;base64, {{ conso1 }}" />
+														<img src="data:image/png;base64, {{ conso2 }}" />
+													#}
 
 
-<h3>Historique</h3>
-<h4>Autres versions</h4>
+		{% if noconso==false %}
 
-{{ form_start(version_form) }}
-{{ form_widget(version_form.version) }}{{ form_widget(version_form.submit) }}
-{{ form_end(version_form) }}
+			{% set conso     = conso_cpu[0] + conso_gpu[0] %}
+			{% set quota     = conso_cpu[1]                %}
+			{% if  quota != 0 %}
+				{% set consop=100.0*conso/quota %}
+			{% else           %}
+				{% set consop=0                 %}
+			{% endif %}
 
-<div class="message info">
-    <p>Les heures qui vous seront attribuées dans le cadre de ce projet sont utilisables<br />
-    <strong>jusqu'au 31 Décembre 20{{session.anneesession}}</strong>
-    </p>
+		{% endif %}
+	</section>
+
+		
+
+
+		<details class="I">
+			<summary>{{icones.trait_summary}}I - Présentation générale</summary>
+	
+	
+<div style="max-height: 70vh;overflow-y: scroll;">
+
+
+			{% if conso_gpu[0] > 0 %}
+				<div class="information ok">
+					<p>Les heures gpu sont affichées en heures
+						<strong>normalisées</strong>
+					</p>
+				</div>
+			{% endif %}
+
+			{% if warn_type==1 and session.etatsession != 2 %}
+				<div class="information attention">
+					<strong>ATTENTION</strong>
+					- Vous ne pouvez demander plus de {{prj_seuil_sess}}
+					heures actuellement. 
+																																																							Vous pourrez demander à nouveau des heures (sans limitation) lors de la prochaine session d'attribution.
+				</div>
+			{% endif %}
+
+			<table class="vertical">
+				<tbody>
+					<tr>
+						<th>Titre</th>
+						<td>{{ version.prjTitre }}</td>
+					</tr>
+
+					<tr>
+						<th>Thématique</th>
+						<td>{{ version.prjThematique }}</td>
+					</tr>
+
+					<tr>
+						<th>Sous-thématique</th>
+						<td>{{ version.prjSousThematique }}</td>
+					</tr>
+
+					<tr>
+						{% if norattachement == false %}
+						<th>Rattachement du projet</th>
+						<td>{{ version.prjRattachement }}</td=>
+						{% endif %}
+					</tr>
+
+					{% set versionPrec = version.versionPrecedente1 %}
+					{% if versionPrec != null %}
+						{% if versionPrec.anneeSession == version.anneeSession %}
+							<th>Heures demandées session {{ versionPrec.session }}
+								<span class="petit">Y compris les rallonges</span>
+							</th>
+							<td>{{ (versionPrec.getDemHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
+						{% endif %}
+					{% endif %}
+
+					<tr>
+						<th>Heures demandées session {{ session }}<br>
+							<span class="petit">Y compris les rallonges</span>
+						</th>
+						<td>{{ (version.getDemHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}
+						{% if toomuch %}
+							<img src="{{ absolute_url(asset('icones/attention16.png')) }}" alt="Demande trop forte, cf. règles d'attribution" title="Demande trop forte, cf. règles d'attribution" />
+						{% endif %}
+					</tr>
+
+					{% set versionPrec = version.versionPrecedente1 %}
+					{% if versionPrec != null %}
+						{% if versionPrec.anneeSession == version.anneeSession %}
+						<tr>
+							<th>Heures attribuées session {{ versionPrec.session }}<br>
+								<span class="petit">Y compris les rallonges et les pénalités éventuelles</span>
+							</th>
+							<td>{{ (versionPrec.getAttrHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
+						</tr>
+						{% endif %}
+					{% endif %}
+
+					<tr>
+						<th >Nombre d'heures attribuées session {{ session }}<br>
+						<span class="petit">Y compris les rallonges et les pénalités éventuelles</span>
+						</th>
+						<td>{{ (version.attrHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}
+						{% if version.attrHeuresEte != 0 %} <span class="attention">(dont {{ version.attrHeuresEte |number_format(0, ',', ' ')|replace({' ':'&nbsp;'}) |raw }} heures à utiliser entre le 1er Juillet et le 31 Août)</span> {% endif %}
+						</td>
+					</tr>
+					{% if noconso == 0 %}
+						<tr>
+							<th>Quota machine d'heures allouées pour {{ session.getAnneeSession() + 2000 }}</th>
+							<td>{{quota|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw}}</td>
+						</tr>
+
+						<tr>
+							<th>Nombre d'heures consommées<br>
+								<span class="petit">depuis le début de {{ session.getAnneeSession() + 2000 }}</span>
+							</th>
+							{# TODOPOLITIQUE #}
+							<td>{# {{ version.conso }}
+								{% if(version.getQuota > 0) %}
+									({{ (version.consocalcul * 100 / version.quota) |number_format(1)}} %)
+								{% endif %}
+								<br /> #}
+								{{ conso|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}
+								{% if(quota!=0) %} 
+									({{consop|number_format(1)}} %) 
+								{% endif %}
+								{% if conso_gpu[0] != 0 %}
+									- cpu={{conso_cpu[0]|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw}} gpu={{conso_gpu[0]|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw}} ({{(100*conso_cpu[0]/conso)|number_format(1)}}% {{(100*conso_gpu[0]/conso)|number_format(1)}}%)
+								{% endif %}
+							</td>
+						</tr>
+					{% endif %}
+				</tbody>
+			</table>
+
+
+			<p class="info_supplementaire">Les heures qui vous seront attribuées dans le cadre de ce projet sont utilisables<br/>
+				<strong>jusqu'au 31 Décembre 20{{session.anneesession}}</strong>
+			</p>
+
+			<h4>Laboratoire et responsable du projet :</h4>
+
+			<table>
+				<thead>
+					<tr>
+						<th>Nom</th>
+						<th>Mail</th>
+						<th>Statut</th>
+						<th>Laboratoire *</th>
+					</tr>
+				</thead>
+
+				<tbody>
+					<tr>
+						<td>{{version.getResponsable }}</td>
+
+						<td>{% if ( not version.getResponsable == null ) %} 
+							{{version.getResponsable.Mail }}
+						{% endif %}</td>
+
+						<td>{% if ( not version.getResponsable == null ) %}
+							{{version.getResponsable.Statut }}
+						{% endif %}</td>
+
+						<td>{{version.getPrjLLabo }}</td>
+					</tr>
+				</tbody>
+			</table>
+
+			<p class="info_supplementaire">* Le laboratoire associé au projet est le laboratoire du responsable</p>
+
+			<h4>Personnes participant au projet :</h4>
+			<table>
+				<thead>
+					<tr>
+						{% if coll_login %}
+							<th>Login</th>
+							{% if version.etat==5 or version.etat == 4 %}
+								<th>User</th>
+							{% endif %}
+						{% endif %}
+
+						{% if nodata==false %}
+							<th title="Accès à la plateforme Callisto">Données</th>
+						{% endif %}
+
+						<th>Prénom</th>
+						<th>Nom</th>
+						<th>Mail</th>
+						<th>Statut</th>
+						<th>Laboratoire</th>
+						<th>Établissement</th>
+					</tr>
+				</thead>
+
+				<tbody>
+					{% for user in version.CollaborateurVersion %}
+						{% if not user.deleted %}
+							<tr>
+								{% if coll_login %}
+									<td>
+										{% if( user.login == true) %}Oui{% else %}Non
+										{% endif %}
+									</td>
+
+									{% if version.etat==5 or version.etat == 4 %}
+										<td>
+											{% if (user.login == true) %}
+												{% if user.loginname==null %}
+													<img src="{{ asset('icones/attention16.png') }}" alt="Compte non encore créé" title="compte non encore créé"/>
+												{% else %}
+													<tt>{{ user.loginname }}</tt>
+												{% endif %}
+											{% else %}
+												-
+											{% endif %}
+										</td>
+									{% endif %}
+								{% endif %}
+
+								{% if nodata==false %}
+									<td>
+										{% if( user.clogin == true) %}Oui{% else %}Non
+										{% endif %}
+									</td>
+								{% endif %}
+
+								<td>{{ user.Collaborateur.prenom }}</td>
+
+								<td>{{ user.Collaborateur.nom }}</td>
+
+								<td>{{ user.Collaborateur.mail }}</td>
+
+								<td>
+									{% if( not ( user.Collaborateur.statut == null ) ) %} {{ user.Collaborateur.statut }}
+									{% endif %}
+								</td>
+
+								<td>
+									{% if( not ( user.Collaborateur.labo == null ) ) %} {{ user.Collaborateur.labo.getAcroLabo }}
+									{% endif %}
+								</td>
+								
+								<td>{{ user.Collaborateur.etab }}</td>
+							</tr>
+						{% endif %}
+					{% endfor %}
+				</tbody>
+			</table>
+
+			{% if version.prjFinancement != null %}
+			<h4>Financement :</h4>
+			<p class="financement">{{ version.prjFinancement }}</p>
+			{% endif %}
+
+			<h4>Utilisation des moyens de calcul de GENCI :</h4>
+			<table>
+				<thead>
+					<tr>
+						<th>Centre</th>
+						<th>Machine</th>
+						<th>Heures accordées</th>
+						<th>N° de projet</th>
+					</tr>
+				</thead>
+
+				<tbody>
+					<tr>
+						<td>{{ version.prjGenciCentre }}</td>
+
+						<td>{{ version.prjGenciMachines }}</td>
+
+						<td>{{ version.prjGenciHeures }}</td>
+
+						<td>{{ version.prjGenciDari }}</td>
+					</tr>
+				</tbody>
+			</table>
 </div>
 
-{% if not is_granted('ROLE_ADMIN')  %}
-<div class="message info">
-    <h2>Liste de choses à faire pour la session {{ session }}</h2>
-    <ol>
-        {% for m in menu %}
-            {% if m.todo is defined %}
-                <li>{{ m.todo|raw }}</li>
-            {%endif %}
-        {% endfor %}
-    </ol>
-</div>
-{% endif %}
-
-<hr />
-
-{% if is_granted('ROLE_ADMIN') %}
-<section class="admin">
-{% else %}
-<section>
-{% endif %}
-
-<div class="lien-pdf">
-    <a href="{{ path('version_pdf', { 'id' : version.idVersion }) }}">
-        <img src="{{ asset('icones/pdf32.png') }}" alt="pdf" title="Version pdf">
-        <br>
-        <small>Version pdf</small>
-    </a>
-</div>
-
-{% if rapport_dactivite %}
-    {% if ( rapport_1 != null   ) %}
-    <div class="lien-pdf">
-        <a href="{{ path('rapport', { 'id' : version.idVersion, 'annee' : version.getAnneeSession() - 1 }) }}">
-            <img src="{{ asset('icones/pdf32.png') }}" alt="pdf" title="Rapport d'activité {{ version.getAnneeSession - 1 }}">
-            <br>
-            <small>Rapport d'activité {{ version.getAnneeSession - 1 }}</small>
-        </a>
-    </div>
-    {%  endif %}
-    
-    {% if ( rapport != null ) %}
-    <div class="lien-pdf">
-        <a href="{{ path('rapport', { 'id' : version.idVersion, 'annee' : version.getAnneeSession() }) }}">
-            <img src="{{ asset('icones/pdf32.png') }}" alt="pdf" title="Rapport d'activité {{ version.getAnneeSession  }}">
-            <br>
-            <small>Rapport d'activité {{ version.getAnneeSession }}</small>
-        </a>
-    </div>
-    {%  endif %}
-{% endif %}
-{% if fichier_attache %}
-    {% if document != null %}
-    <div class="lien-pdf">
-        <a href="{{ path('document', { 'id' : version.idVersion }) }}">
-            <img src="{{ asset('icones/pdf32.png') }}" alt="pdf" title="Document attaché">
-            <br>
-            <small>Document attaché</small>
-        </a>
-    </div>
-    {% endif %}
-{% endif %}    
-{% if noconso == 0 %}
-<div class="lien-pdf">
-    <img id="bconso" class="bouton_poussoir conso" src="{{ asset('icones/conso64.png') }}"
-        alt="Consommation {{version.getAnneeSession}}" title="Visualiser la consommation {{version.getAnneeSession}}"
-        data-href="{{ absolute_url(path('projet_conso', { 'id': version.projet.idProjet, 'loginname': loginname, 'annee' : version.getAnneeSession })) }}"/>
-</div>
-{# Pour les graphiques de conso #}
-<div id="dialog-compta"></div>
-{% endif %}
-
-{# Pour les figures #}
-<div id="dialog"></div>
-
-{# Pour deboguer les fonctions de generation de graphes de conso1
-<img src="data:image/png;base64, {{ conso1 }}" />
-<img src="data:image/png;base64, {{ conso2 }}" />
-#}
-
-
-<p>
-{% if app.debug %}
-<strong>DEBUG </strong>
-<em>Type du projet {{projet.id}} = <strong>{{ projet.typeprojet}}</strong> -
-Etat du projet {{projet.id }}= <strong>{{ projet.getEtatProjet }}</strong> -
-Type de la version {{version.id}} = <strong>{{ version.typeversion}}</strong> -
-Etat de la version {{version.idVersion }}= <strong>{{ version.getEtatVersion }}</strong>
-</em>{% endif %}
-<br />
-{% if version.majInd != null %}
-    <em>Dernière modification par {{ version.majInd }} le {{ version.majStamp|date('Y-m-d H:i:s') }}</em>
-{% endif %}
-</p>
+		</details>
 
 
 
-{% if noconso==false %}
+		<details class="II">
+			<summary>{{icones.trait_summary}}II - Description scientifique du projet de recherche</summary>
 
-{% set conso     = conso_cpu[0] + conso_gpu[0] %}
-{% set quota     = conso_cpu[1]                %}
-{% if  quota != 0 %} {% set consop=100.0*conso/quota %}
-{% else           %} {% set consop=0                 %}
-{% endif %}
 
-{% endif %}
+<div style="max-height: 70vh;overflow-y: scroll;">
 
-<h3>I - Présentation générale</h3>
 
-{% if conso_gpu[0] > 0 %}
-<div class="message info">
-    <p>Les heures gpu sont affichées en heures <strong>normalisées</strong></p>
-</div>
-{% endif %}
+			{% if not ( version.prjJustifRenouv == null ) %}
+				<h4>Justification du renouvellement :</h4>
+				<div class="description"><p>{{ version.prjJustifRenouv | e | nl2br }}</p>
 
-{% if warn_type==1 and session.etatsession != 2 %}
-<div class="message warning"> <strong>ATTENTION</strong> - Vous ne pouvez demander plus de {{prj_seuil_sess}} heures actuellement. 
-Vous pourrez demander à nouveau des heures (sans limitation) lors de la prochaine session d'attribution.
-</div>
-{% endif %}
+					<div class="figures">
+						{% if not ( img_justif_renou_1 == null ) %}
+							<div>
+								<img class="figure" src="data:image/png;base64,{{ img_justif_renou_1.contents }}" data-width="{{ img_justif_renou_1.width }}" data-height="{{ img_justif_renou_1.height }}" alt="Figure 1" title="cliquez pour afficher la figure en taille réelle">
+								<p>Figure 1</p>
+							</div>
+						{% endif %}
 
-<table class="projet">
-    <tbody> 
-        <tr><th class="horiz">Titre</th><td>{{ version.prjTitre }}</td></tr>
-        <tr><th class="horiz">Thématique</th><td>{{ version.prjThematique }}</td></tr>
-        <tr><th class="horiz">Sous-thématique</th><td>{{ version.prjSousThematique }}</td></tr>
-    </tbody>
-</table>
+						{% if not( img_justif_renou_2 == null ) %}
+							<div>
+								<img class="figure" src="data:image/png;base64,{{ img_justif_renou_2.contents }}" alt="Figure 2" data-width="{{ img_justif_renou_2.width }}" data-height="{{ img_justif_renou_2.height }}" title="cliquez pour afficher la figure en taille réelle">
+								<p>Figure 2</p>
+							</div>
+						{% endif %}
 
-{% if norattachement == false %}
-<table class="projet">
-    <tbody> 
-        <tr><th class="horiz">Rattachement du projet</th><td>{{ version.prjRattachement }}</td></tr>
-    </tbody>
-</table>
-{% endif %}
+						{% if not ( img_justif_renou_3 == null) %}
+							<div>
+								<img class="figure" src="data:image/png;base64,{{ img_justif_renou_3.contents  }}" alt="Figure 3" data-width="{{ img_justif_renou_3.width }}" data-height="{{ img_justif_renou_3.height }}" title="cliquez pour afficher la figure en taille réelle">
+								<p>Figure 3</p>
+							</div>
+						{% endif %}
+					</div>
+				</div>
+			{% endif %}
 
-<table class="projet">
-    <tbody>
-        {% set versionPrec = version.versionPrecedente1 %}
-        {% if versionPrec != null %}
-        {% if versionPrec.anneeSession == version.anneeSession %}
-        <tr>
-            <th class="horiz">Nombre d'heures demandées session {{ versionPrec.session }}<br>
-            <span class="petit">Y compris les rallonges</span>
-            </th>
-            <td>{{ (versionPrec.getDemHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
-        </tr>
-        {% endif %}
-        {% endif %}
-        <tr>
-            <th class="horiz">Nombre d'heures demandées session {{ session }}<br>
-            <span class="petit">Y compris les rallonges</span>
-            </th>
-            <td>{{ (version.getDemHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}
-            {% if toomuch %} <img src="{{ absolute_url(asset('icones/attention16.png')) }}" alt="Demande trop forte, cf. règles d'attribution" title="Demande trop forte, cf. règles d'attribution" /> {% endif %}
-            </td>
-        </tr>
-    </tbody>
-</table>
+			<h4>Résumé en anglais :</h4>
+			<p class="description">{{ version.prjResume | e | nl2br }}</p>
 
-<table class="projet">
-    <tbody>
-        {% set versionPrec = version.versionPrecedente1 %}
-        {% if versionPrec != null %}
-        {% if versionPrec.anneeSession == version.anneeSession %}
-        <tr>
-            <th class="horiz">Nombre d'heures attribuées session {{ versionPrec.session }}<br>
-            <span class="petit">Y compris les rallonges et les pénalités éventuelles</span>
-            </th>
-            <td>{{ (versionPrec.getAttrHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
-        </tr>
-        {% endif %}
-        {% endif %}
-        <tr>
-            <th class="horiz">Nombre d'heures attribuées session {{ session }}<br>
-            <span class="petit">Y compris les rallonges et les pénalités éventuelles</span>
-            </th>
-            <td>{{ (version.attrHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}
-            {% if version.attrHeuresEte != 0 %} <span class="attention">(dont {{ version.attrHeuresEte |number_format(0, ',', ' ')|replace({' ':'&nbsp;'}) |raw }} heures à utiliser entre le 1er Juillet et le 31 Août)</span> {% endif %}
-            </td>
-        </tr>
-    </tbody>
-</table>
 
-{% if noconso == 0 %}
-<table class="projet">
-<tbody>
-        <tr>
-            <th class="horiz">Quota machine d'heures allouées pour {{ session.getAnneeSession() + 2000 }} <br>
-            </th>
-            <td>{{quota|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw}}</td>
-        </tr>
-        <tr>
-            <th class="horiz">Nombre d'heures consommées<br>
-                <span class="petit">depuis le début de {{ session.getAnneeSession() + 2000 }}</span>
-            </th>
-            {# TODOPOLITIQUE #}
-            <td>{# {{ version.conso }}
-                {% if(version.getQuota > 0) %}
-                    ({{ (version.consocalcul * 100 / version.quota) |number_format(1)}} %)
-                {% endif %}
-                <br /> #}
-                {{ conso|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }} {% if(quota!=0) %} ({{consop|number_format(1)}} %) {% endif %}
-                {% if conso_gpu[0] != 0 %}
-                - cpu={{conso_cpu[0]|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw}} gpu={{conso_gpu[0]|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw}} ({{(100*conso_cpu[0]/conso)|number_format(1)}}% {{(100*conso_gpu[0]/conso)|number_format(1)}}%)
-                {% endif %}
-            </td>
-        </tr>
-    </tbody>
-</table>
-{% endif %}
+			<h4>Exposé Scientifique :</h4>
+			<div class="description"><p>{{ version.prjExpose | e | nl2br}}</p>
 
-<h4>Laboratoire et responsable du projet</h4>
-<div class="message info">
-Le laboratoire associé au projet est le laboratoire du responsable
+				<div class="figures">
+					{% if not ( img_expose_1 == null ) %}
+						<div>
+							<img class="figure" src="data:image/png;base64,{{ img_expose_1.contents }}" data-width="{{ img_expose_1.width }}" data-height="{{ img_expose_1.height }}" alt="Figure 1" title="cliquez pour afficher la figure en taille réelle">
+							<p>Figure 1</p>
+						</div>
+					{% endif %}
+
+					{% if not( img_expose_2 == null ) %}
+						<div>
+							<img class="figure" src="data:image/png;base64,{{ img_expose_2.contents }}" alt="Figure 2" data-width="{{ img_expose_2.width }}" data-height="{{ img_expose_2.height }}" title="cliquez pour afficher la figure en taille réelle">
+							<p>Figure 3</p>
+						</div>
+					{% endif %}
+
+					{% if not ( img_expose_3 == null) %}
+						<div>
+							<img class="figure" src="data:image/png;base64,{{ img_expose_3.contents  }}" alt="Figure 3" data-width="{{ img_expose_3.width }}" data-height="{{ img_expose_3.height }}" title="cliquez pour afficher la figure en taille réelle">
+							<p>Figure 3</p>
+						</div>
+					{% endif %}
+				</div>
+			</div>
+
+			<h4>Algorithmes utilisés :</h4>
+
+			<p class="description">{{ version.prjAlgorithme }}</p>
+			</br>
+
 </div>
 
-<table class="projet">
-<tbody>
-    <tr>
-        <th class="petite_col">Nom</th>
-        <th>Mail</th>
-        <th>Statut</th>
-        <th>Laboratoire</ht>
-    </tr>
-    <tr>
-        <td>{{version.getResponsable }}</td>
-        <td>{% if ( not version.getResponsable == null ) %}{{version.getResponsable.Mail }}{% endif %}</td>
-        <td>{% if ( not version.getResponsable == null ) %}{{version.getResponsable.Statut }}{% endif %}</td>
-        {# <td><strong>{% if ( not version.getResponsable == null ) %}{{version.getResponsable.Labo }}{% endif %}</strong></td> #}
-        <td><strong>{{version.getPrjLLabo }}</strong></td>
-</tbody>
-</table>
-
-<h4>Personnes participant au projet</h4>
-
-<table class="projet">
-<tbody>
-    <tr>
-        {% if coll_login %}
-            <th>Login</th>
-            {% if version.etat==5 or version.etat == 4 %}
-                <th>User</th>
-            {% endif %}
-        {% endif %}
-        {% if nodata==false %}
-            <th title="Accès à la plateforme Callisto">Données</th>
-        {% endif %}
-        <th>Prénom</th>
-        <th>Nom</th>
-        <th>Mail</th>
-        <th>statut</th>
-        <th>laboratoire</th>
-        <th>établissement</th>
-    </tr>
-
-    {% for user in version.CollaborateurVersion %}
-        {% if not user.deleted %}
-        <tr>
-            {% if coll_login %}
-            <td>{% if( user.login == true) %}Oui{% else %}Non{% endif %}</td>
-                {% if version.etat==5 or version.etat == 4 %}
-                    <td>{% if (user.login == true) %}
-                           {% if user.loginname==null %}
-                              <img src="{{ asset('icones/attention16.png') }}" alt="Compte non encore créé" title="compte non encore créé" />
-                           {% else %}
-                              <tt>{{ user.loginname }}</tt>
-                           {% endif %}
-                        {% else %}  - {% endif %}
-                    </td>
-                {% endif %}
-            {% endif %}
-            {% if nodata==false %}
-                <td>{% if( user.clogin == true) %}Oui{% else %}Non{% endif %}</td>
-            {% endif %}
-            <td>{{ user.Collaborateur.prenom }}</td>
-            <td>{{ user.Collaborateur.nom }}</td>
-            <td>{{ user.Collaborateur.mail }}</td>
-            <td>{% if( not ( user.Collaborateur.statut == null ) ) %}{{ user.Collaborateur.statut }}{% endif %}</td>
-            <td>{% if( not ( user.Collaborateur.labo == null ) ) %}{{ user.Collaborateur.labo.getAcroLabo }}{% endif %}</td>
-            <td>{{ user.Collaborateur.etab }}</td>
-        </tr>
-        {% endif %}
-    {% endfor %}
-</tbody>
-</table>
-
-{% if version.prjFinancement != null %}
-<h4>Financement</h4>
-
-<table class="projet">
-<tbody>
-        <tr>
-            <th class="horiz">Financement</th>
-            <td>{{ version.prjFinancement }}</td>
-        </tr>
-</tbody>
-</table>
-{% endif %}
-
-<h4>Utilisation des moyens de calcul de GENCI</h4>
-
-<table class="projet">
-<tbody>
-        <tr>
-            <th class="horiz">Centre</th>
-            <td>{{ version.prjGenciCentre }}</td>
-        </tr>
-        <tr>
-           <th class="horiz">Machine</th>
-            <td>{{ version.prjGenciMachines }}</td>
-        </tr>
-        <tr>
-           <th class="horiz">Heures accordées</th>
-            <td>{{ version.prjGenciHeures }}</td>
-        </tr>
-        <tr>
-           <th class="horiz">n° de projet</th>
-            <td>{{ version.prjGenciDari }}</td>
-        </tr>
-</tbody>
-</table>
-
-<h3>II - Description scientifique du projet de recherche</h3>
-
-{% if not ( version.prjJustifRenouv == null ) %}
-<table class="projet">
-    <tbody>
-        <tr>
-            <th>Justification du renouvellement</th>
-        </tr>
-        <tr>
-            <td>{{ version.prjJustifRenouv | e | nl2br }}</td>
-        </tr>
-    </tbody>
-</table>
-<table class="figures">
-    <tbody>
-        <tr>
-            {% if not ( img_justif_renou_1 == null ) %}
-            <td><img class="figure" src="data:image/png;base64,{{ img_justif_renou_1.contents }}"
-                data-width="{{ img_justif_renou_1.width }}" data-height="{{ img_justif_renou_1.height }}"
-                    alt="Figure 1" title="cliquez pour afficher la figure en taille réelle"></td>
-            {% endif %}
-
-            {% if not( img_justif_renou_2 == null ) %}
-            <td><img class="figure" src="data:image/png;base64,{{ img_justif_renou_2.contents }}" alt="Figure 2"
-                data-width="{{ img_justif_renou_2.width }}" data-height="{{ img_justif_renou_2.height }}"
-                title="cliquez pour afficher la figure en taille réelle"></td>
-            {% endif %}
-
-            {% if not ( img_justif_renou_3 == null) %}
-            <td><img class="figure" src="data:image/png;base64,{{ img_justif_renou_3.contents  }}" alt="Figure 3"
-                data-width="{{ img_justif_renou_3.width }}" data-height="{{ img_justif_renou_3.height }}"
-                title="cliquez pour afficher la figure en taille réelle"></td>
-            {% endif %}
-        </tr>
-        <tr>
-            {% if not ( img_justif_renou_1 == null ) %}<td>Figure 1</td>{% endif %}
-            {% if not ( img_justif_renou_2 == null ) %}<td>Figure 2</td>{% endif %}
-            {% if not ( img_justif_renou_3 == null ) %}<td>Figure 3</td>{% endif %}
-         </tr>
-
-    </tbody>
-</table>
-{% endif %}
-
-<table class="projet">
-<tbody>
-        <tr>
-            <th>Résumé en anglais</th>
-        </tr>
-        <tr>
-            <td>{{ version.prjResume | e | nl2br }}</td>
-        </tr>
-</tbody>
-</table>
-
-<table class="projet">
-<tbody>
-        <tr>
-            <th>Exposé Scientifique</th>
-        </tr>
-        <tr>
-            <td>{{ version.prjExpose | e | nl2br}}</td>
-        </tr>
-</tbody>
-</table>
-
-<table class="figures">
-    <tbody>
-        <tr>
-            {% if not ( img_expose_1 == null ) %}
-            <td><img class="figure" src="data:image/png;base64,{{ img_expose_1.contents }}"
-                data-width="{{ img_expose_1.width }}" data-height="{{ img_expose_1.height }}"
-                alt="Figure 1" title="cliquez pour afficher la figure en taille réelle"></td>
-            {% endif %}
-
-            {% if not( img_expose_2 == null ) %}
-            <td><img class="figure" src="data:image/png;base64,{{ img_expose_2.contents }}" alt="Figure 2"
-                data-width="{{ img_expose_2.width }}" data-height="{{ img_expose_2.height }}"
-                title="cliquez pour afficher la figure en taille réelle"></td>
-            {% endif %}
-
-            {% if not ( img_expose_3 == null) %}
-            <td><img class="figure" src="data:image/png;base64,{{ img_expose_3.contents  }}" alt="Figure 3"
-                data-width="{{ img_expose_3.width }}" data-height="{{ img_expose_3.height }}"
-                title="cliquez pour afficher la figure en taille réelle"></td>
-            {% endif %}
-        </tr>
-        <tr>
-            {% if not ( img_expose_1 == null ) %}<td>Figure 1</td>{% endif %}
-            {% if not ( img_expose_2 == null ) %}<td>Figure 2</td>{% endif %}
-            {% if not ( img_expose_3 == null ) %}<td>Figure 3</td>{% endif %}
-         </tr>
-    </tbody>
-</table>
+		</details>
 
 
-<table class="projet">
-<tbody>
-        <tr>
-            <th>Algorithmes utilisés</th>
-        </tr>
-        <tr>
-            <td>{{ version.prjAlgorithme }}</td>
-        </tr>
-</tbody>
-</table>
+		<details class="III">
+			<summary>{{icones.trait_summary}}III - Description technique du projet</summary>
 
-<h3>III - Description technique du projet</h3>
 
-<h4>Nature du calcul</h4>
+<div style="max-height: 70vh;overflow-y: scroll;">
 
-<table class="projet">
-<tbody>
-        <tr>
-            <th class="horiz">Conception de méthodes de calcul parallèle</th>
-            <td>{% if( version.prjConception == true) %}OUI{% else %}NON{% endif %}</td>
-        </tr>
-        <tr>
-           <th class="horiz">Développement d'un code parallèle</th>
-           <td>{% if( version.prjDeveloppement == true) %}OUI{% else %}NON{% endif %}</td>
-        </tr>
-        <tr>
-           <th class="horiz">Parallélisation d'un code existant</th>
-           <td>{% if( version.prjParallelisation == true) %}OUI{% else %}NON{% endif %}</td>
-        </tr>
-        <tr>
-           <th class="horiz">Utilisation d'un code parallèle</th>
-           <td>{% if( version.prjUtilisation == true) %}OUI{% else %}NON{% endif %}</td>
-        </tr>
-</tbody>
-</table>
 
-<h4>Description du code de calcul</h4>
+			<h4>Nature du calcul :</h4>
+			<table>
+				<thead>
+					<tr>
+						<th>Conception de méthodes de calcul parallèle</th>
+						<th>Développement d'un code parallèle</th>
+						<th>Parallélisation d'un code existant</th>
+						<th>Utilisation d'un code parallèle</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>
+							{% if( version.prjConception == true) %}
+								{{icones.valide}}
+							{% else %}
+								Non
+							{% endif %}
+						</td>
+						<td>
+							{% if( version.prjDeveloppement == true) %}
+								{{icones.valide}}
+							{% else %}
+								Non
+							{% endif %}
+						</td>
+						<td>
+							{% if( version.prjParallelisation == true) %}
+								{{icones.valide}}
+							{% else %}
+								Non
+							{% endif %}
+						</td>
+						<td>
+							{% if( version.prjUtilisation == true) %}
+								{{icones.valide}}
+							{% else %}
+								Non
+							{% endif %}
+						</td>
+					</tr>
+				</tbody>
+			</table>
+					
 
-<table class="projet">
-<tbody>
-        <tr>
-            <th class="horiz">Nom du code</th>
-            <td>{{ version.codeNom }}</td>
-        </tr>
-        <tr>
-            <th class="horiz">Langage utilisé</th>
-            <td>
-            {% if version.codeFor %} Fortran {% endif %}
-            {% if version.codeC %} C {% endif %}
-            {% if version.codeCpp %} C++ {% endif %}
-            {{ version.codeLangage }}
-            </td>
-            </td>
-        </tr>
-        <tr>
-            <th class="horiz">Binaire GPU</th>
-            <td>{{ version.gpu}}</td>
-        </tr>
-        <tr>
-            <th class="horiz">Licence</th>
-            <td>{{ version.codeLicence }}</td>
-        </tr>
-        <tr>
-            <th class="horiz">Utilisation sur d'autres machines</th>
-            <td>{{ version.codeUtilSurMach}}</td>
-        </tr>
-        <tr>
-            <th class="horiz">Estimation du temps CPU max d'un job</th>
-            <td>{{ version.codeHeuresPJob}}</td>
-        </tr>
-        <tr>
-            <th class="horiz">Estimation de la RAM nécessaire par cœur pour un job</th>
-            <td>{{ version.codeRamPCoeur}}</td>
-        </tr>
-        <tr>
-            <th class="horiz">Nombre max de coeurs utilisables efficacement par le code</th>
-            <td>{{ version.codeEffParal}}</td>
-        </tr>
-        <tr>
-            <th class="horiz">Estimation de l'espace-disque temporaire nécessaire</th>
-            <td>{{ version.codeVolDonnTmp}}</td>
-        </tr>
-        <tr>
-            <th class="horiz">Logiciels nécessaires</th>
-            <td>{{ version.demLogiciels}}</td>
-        </tr>
-        <tr>
-            <th class="horiz">Bibliothèques nécessaires</th>
-            <td>{{ version.demBib}}</td>
-        </tr>
-        <tr>
-            <th class="horiz">Visualisation à distance</th>
-            <td>{{ version.demPostTrait}}</td>
-        </tr>
-</tbody>
-</table>
+			<h4>Description du code de calcul :</h4>
+			<div class="tableaux">
+				<table class="vertical">
+					<tbody>
+						<tr>
+							<th>Nom du code</th>
+							<td>{{ version.codeNom }}</td>
+						</tr>
+						<tr>
+							<th>Langage utilisé</th>
+							<td>
+								{% if version.codeFor %}
+									Fortran
+								{% endif %}
+								{% if version.codeC %}
+									C
+								{% endif %}
+								{% if version.codeCpp %}
+									C++
+								{% endif %} {{ version.codeLangage }}
+							</td>
+						</tr>
+						<tr>
+							<th>Binaire GPU</th>
+							<td>{{ version.gpu}}</td>
+						</tr>
+						<tr>
+							<th>Licence</th>
+							<td>{{ version.codeLicence }}</td>
+						</tr>
+						<tr>
+							<th>Utilisation sur d'autres machines</th>
+							<td>{{ version.codeUtilSurMach}}</td>
+						</tr>
+						<tr>
+							<th>Estimation du temps CPU max d'un job</th>
+							<td>{{ version.codeHeuresPJob}}</td>
+						</tr>
+					</tbody>
+				</table>
+				<table class="vertical">
+					<tbody>
+						<tr>
+							<th>Estimation de la RAM nécessaire par cœur pour un job</th>
+							<td>{{ version.codeRamPCoeur}}</td>
+						</tr>
+						<tr>
+							<th>Nombre max de coeurs utilisables efficacement par le code</th>
+							<td>{{ version.codeEffParal}}</td>
+						</tr>
+						<tr>
+							<th>Estimation de l'espace-disque temporaire nécessaire</th>
+							<td>{{ version.codeVolDonnTmp}}</td>
+						</tr>
+						<tr>
+							<th>Logiciels nécessaires</th>
+							<td>{{ version.demLogiciels}}</td>
+						</tr>
+						<tr>
+							<th>Bibliothèques nécessaires</th>
+							<td>{{ version.demBib}}</td>
+						</tr>
+						<tr>
+							<th>Visualisation à distance</th>
+							<td>{{ version.demPostTrait}}</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			</br>
+
+</div>
+
+
+		</details>
+
 
 {% if nodata == false %}
-<h3>IV - Les données</h3>
-<table class="projet">
-    <tbody>
-        <tr>
-            <th class="horiz">Besoin en espace disque permanent (To)</th>
-            <td>{{ version.sondVolDonnPerm}}</td>
-        </tr>
-        <tr>
-            <th class="horiz">Justification de l'usage de ce stockage</th>
-            <td>{{ version.sondJustifDonnPerm | e | nl2br}}</td>
-        </tr>
-        <tr>
-            <th class="horiz">Standard de métadonnées</th>
-            <td>{{ version.dataMetaDataFormat}}</td>
-        </tr>
-        <tr>
-            <th class="horiz">Nombre de datasets (estimation)</th>
-            <td>{{ version.dataNombreDatasets }}</td>
-        </tr>
-        <tr>
-            <th class="horiz">Taille moyenne des datasets (estimation)</th>
-            <td>{{ version.dataTailleDatasets }}</td>
-        </tr>
-    </tbody>
-</table>
-{% endif %}
 
-<h3>V - Formation</h3>
+	<details>
+		<summary>{{icones.trait_summary}}IV - Les données</summary>
 
-<table class="projet">
-<tbody>
-    <th colspan="1">Intitulé</th><th>Nombre de personnes intéressées</th>
-    {% for f in formation %}
-        {% if f.acro != 'ALL_EMPTY' %}
-            <tr><th class="horiz">{{f.nom}}</th><td>{{f.rep}}</td></tr>
-        {% endif %}
-    {% endfor %}
-    <tr><th class="horiz">Autres demandes</th><td>{{version.demformautresautres}}</td>
-</tbody>
-</table>
 
-{% if version.etat in [ 4, 5, 6, 9 ] %}
-<h3>VI- Commentaire de l'expert</h3>
 
-{% for expertise in version.expertise %}
+<div style="max-height: 70vh;overflow-y: scroll;">
 
-<table class="projet">
-<tbody>
 
-    <tr>
-        <th class="horiz">Nombre d'heures demandées</th>
-        <td>{{  version.demHeures|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
-    </tr>
-    <tr>
-        <th class="horiz">Nombre d'heures attribuées</th>
-        <td>{{  expertise.nbHeuresAtt|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
-    </tr>
-    {% if is_granted('ROLE_ADMIN') or version.isExpertDe(app.user) %}
-        <tr>
-           <th class="horiz">Commentaire pour le responsable</th>
-           <td>{{ expertise.commentaireExterne | e | nl2br}}</td>
-        </tr>
-        <tr>
-           <th class="horiz">Commentaire pour le comité</th>
-           <td>{{ expertise.commentaireInterne | e | nl2br}}</td>
-        </tr>
-    {% else %}
-        <tr>
-           <th class="horiz">Commentaire</th>
-           <td>{{ expertise.commentaireExterne | e | nl2br}}</td>
-        </tr>
-    {% endif %}
+		<table>
+			<thead>
+				<tr>
+					<th>Besoin en espace disque permanent (To)</th>
+					<th>Justification de l'usage de ce stockage</th>
+					<th>Standard de métadonnées</th>
+					<th>Nombre de datasets (estimation)</th>
+					<th>Taille moyenne des datasets (estimation)</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+				{% if version.sondVolDonnPerm is null %}
+					<td>-</td>
+				{% else %}
+					<td>{{ version.sondVolDonnPerm}}</td>
+				{% endif %}
 
-</tbody>
-</table>
+				{% if version.sondJustifDonnPerm is null %}
+					<td>-</td>
+				{% else %}
+					<td>{{ version.sondJustifDonnPerm | e | nl2br}}</td>
+				{% endif %}
 
-{% endfor %}
+				{% if version.dataMetaDataFormat is null %}
+					<td>-</td>
+				{% else %}
+					<td>{{ version.dataMetaDataFormat}}</td>
+				{% endif %}
+
+				{% if version.dataNombreDatasets is null %}
+					<td>-</td>
+				{% else %}
+					<td>{{ version.dataNombreDatasets}}</td>
+				{% endif %}
+
+				{% if version.dataTailleDatasets is null %}
+					<td>-</td>
+				{% else %}
+					<td>{{ version.dataTailleDatasets}}</td>
+				{% endif %}
+				</tr>
+			</tbody>
+		</table>
+
+		</br>
+</div>
+
+
+	</details>
 
 {% endif %}
 
-{% if version.rallonge is not empty %}
-<h4>Rallonges</h4>
+		<details>
+		<summary>{{icones.trait_summary}}V - Formation</summary>
 
-<table class="projet">
-<tbody>
-{% for r in version.rallonge %}
-    <tr>
-        <th class="horiz">Nombre d'heures demandées</th>
-        <td>{{  r.demHeures|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
-    </tr>
-    <tr>
-        <th class="horiz">Nombre d'heures attribuées</th>
-        <td>{{  r.nbHeuresAtt|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
-    </tr>
-    {% if is_granted('ROLE_ADMIN') or version.isExpertDe(app.user) %}
-    <tr>
-       <th class="horiz">Commentaire pour le responsable</th>
-       <td>{{ r.commentaireExterne | e | nl2br}}</td>
-    </tr>
-    <tr>
-       <th class="horiz">Commentaire pour le comité</th>
-       <td>{{ r.commentaireInterne | e | nl2br}}</td>
-    </tr>
-    {% else %}
-    <tr>
-       <th class="horiz">Commentaire</th>
-       <td>{{ r.commentaireExterne | e | nl2br}}</td>
-    </tr>
-    {% endif %}
-{% endfor %}
-</tbody>
-</table>
-{% endif %}
 
+<div style="max-height: 70vh;overflow-y: scroll;">
+
+
+			<table>
+				<thead>
+					<tr>
+						<th>Intitulé</th>
+						<th>Nombre de personnes intéressées</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for f in formation %}
+						{% if f.acro != 'ALL_EMPTY' %}
+							<tr>
+								<td>{{f.nom}}</td>
+								{% if f.rep is null %}
+								<td>0</td>
+								{% else %}
+								<td>{{f.rep}}</td>
+								{% endif %}
+							</tr>
+						{% endif %}
+					{% endfor %}
+					<tr>
+						<td>Autres demandes</td>
+						<td>{{version.demformautresautres}}</td>
+					</tr>
+				</tbody>
+			</table>
+
+
+</div>
+
+
+		</details>
+
+	
+	{% if version.etat in [ 4, 5, 6, 9 ] %}
+		<details>
+			<summary>{{icones.trait_summary}}VI - Commentaire de l'expert</summary>
+
+
+<div style="max-height: 70vh;overflow-y: scroll;">
+
+			
+			{% for expertise in version.expertise %}
+				<table class="vertical">
+					<tbody>
+						<tr>
+							<th>Nombre d'heures demandées</th>
+							<td>{{  version.demHeures|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
+						</tr>
+						<tr>
+							<th>Nombre d'heures attribuées</th>
+							<td>{{  expertise.nbHeuresAtt|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
+						</tr>
+						{% if is_granted('ROLE_ADMIN') or version.isExpertDe(app.user) %}
+							<tr>
+								<th>Commentaire pour le responsable</th>
+								<td>{{ expertise.commentaireExterne | e | nl2br}}</td>
+							</tr>
+							<tr>
+								<th>Commentaire pour le comité</th>
+								<td>{{ expertise.commentaireInterne | e | nl2br}}</td>
+							</tr>
+						{% else %}
+							<tr>
+								<th>Commentaire</th>
+								<td>{{ expertise.commentaireExterne | e | nl2br}}</td>
+							</tr>
+						{% endif %}
+					</tbody>
+				</table>
+			{% endfor %}
+	{% endif %}
+
+	{% if version.rallonge is not empty %}
+		<h4>Rallonges :</h4>
+		<table class="vertical">
+			<tbody>
+			{% for r in version.rallonge %}
+				<tr>
+					<th>Nombre d'heures demandées</th>
+					<td>{{  r.demHeures|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td></tr><tr>
+					<th>Nombre d'heures attribuées</th>
+					<td>{{  r.nbHeuresAtt|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
+				</tr>
+				{% if is_granted('ROLE_ADMIN') or version.isExpertDe(app.user) %}
+				<tr>
+					<th>Commentaire pour le responsable</th>
+					<td>{{ r.commentaireExterne | e | nl2br}}</td>
+				</tr>
+				<tr>
+					<th>Commentaire pour le comité</th>
+					<td>{{ r.commentaireInterne | e | nl2br}}</td>
+				</tr>{% else %}
+				<tr>
+					<th>Commentaire</th>
+					<td>{{ r.commentaireExterne | e | nl2br}}</td>
+				</tr>
+				{% endif %}
+			{% endfor %}
+			</tbody>
+		</table>
+	{% endif %}
+	</br>
+</div>
+	</details>
 </section>
 {% endblock %}

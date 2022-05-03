@@ -30,21 +30,30 @@
 
         <td>{{ item.projet.idProjet }}</td>
         
-        {% if noconso==false %}<td rowspan="{{ item.cpt_rall + 1 }}"><tt>{% if item.login == 'nologin' %} / {% else %} {{item.login}} {% endif %}</tt>
+        {% if noconso==false %}
+            <td rowspan="{{ item.cpt_rall + 1 }}">
+                <tt>
+                    {% if item.login == 'nologin' %}
+                        - 
+                    {% else %} 
+                        {{item.login}} 
+                    {% endif %}
+                </tt>
         
-        {% if item.passwd != null %}<img id="bouton_{{item.projet}}" class="bouton_poussoir right cadenas" src="{{ asset('icones/cadenas.png') }}" alt="Donnez-moi mon mot de passe" title="Donnez-moi mon mot de passe" /></a> {% endif %}</td>{% endif %}
+        {% if item.passwd != null %}
+            <img id="bouton_{{item.projet}}" class="bouton_poussoir right cadenas" src="{{ asset('icones/cadenas.png') }}" alt="Donnez-moi mon mot de passe" title="Donnez-moi mon mot de passe" /></a> {% endif %}</td>{% endif %}
         
         <td rowspan="{{ item.cpt_rall + 1 }}">
             {% if item.projet.titre != null %}
                 {{ item.projet.titre }}
             {% else %}
-                /
+                -
             {% endif %}
         </td>
 
         {% if noconso==false %}
         
-            {% if item.conso < conso_seuil_1 - 20 %}
+            {% if item.conso < conso_seuil_1 %}
                 <td rowspan="{{ item.cpt_rall + 1 }}" class="consommation seuil_0">{{ item.conso |number_format(1)}}&nbsp;%</td>
                 
                 <td rowspan="{{ item.cpt_rall + 1 }}" class="consommation seuil_0" title="Evolution de la consommation">
@@ -54,7 +63,7 @@
                     </div>
 
                 </td>
-            {% elseif item.conso < conso_seuil_2 - 20 %}
+            {% elseif item.conso < conso_seuil_2 %}
                 <td rowspan="{{ item.cpt_rall + 1 }}" class="consommation seuil_1">{{ item.conso |number_format(1)}}&nbsp;%</td>
                 
                 <td rowspan="{{ item.cpt_rall + 1 }}" class="consommation seuil_1" title="Evolution de la consommation">
@@ -90,8 +99,8 @@
         <td>
             <a href="{{ path('rallonge_consulter', { 'id': rallonge.idRallonge })}}"
             {% if rallonge.getMetaEtat() == 'EDITION' %}
-                title="Modifier cette rallonge" >
-                {{ icones.modifier_rallonge }}
+                title="Consulter cette rallonge" >
+                {{ icones.details }}
 
 
             {% else %}

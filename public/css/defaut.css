@@ -1182,7 +1182,11 @@ img.dfct {
 
 
 
-/* ===== BODY ===== */
+/* ===== BASE ===== */
+*{
+    scroll-behavior: smooth;
+}
+
 html{
     height: auto;
     background: none;
@@ -1299,6 +1303,61 @@ h2, h1{
 }
 
 
+
+/* ===== BOUTON RETOUR VERS LE HAUT ===== */
+#scrollTop{
+    position: fixed;
+    right: 5rem;
+    bottom: 5rem;
+    z-index: 1;
+    border: var(--first-color) solid 1px;
+    background: #ffffff9c;
+    border-radius: 50px;
+    transition: 0.3s;
+    opacity: 0;
+    cursor: pointer;
+}
+
+#scrollTop:hover{
+    background: var(--first-color);
+}
+
+#scrollTop:hover svg{
+    fill: white;
+}
+
+#scrollTop svg{
+    padding: 0.75rem;
+    fill: var(--first-color);
+}
+
+
+
+/* ===== RÔLE ADMIN ===== */
+.role_admin{
+    position: fixed;
+    left: 3rem;
+    top: 5rem;
+    background: white;
+    display: flex;
+    align-items: center;
+    border: 2px solid var(--warning-color);
+    border-radius: 13px;
+    padding: 1rem;
+    color: var(--warning-color);
+}
+
+.role_admin span{
+    width: 10px;
+    height: 10px;
+    background: var(--warning-color);
+    border-radius: 5px;
+    display: block;
+    margin-right: 1rem;
+}
+
+
+
 /* ===== FOOTER ===== */
 .footer{
     background: white;
@@ -1341,7 +1400,11 @@ h2, h1{
     outline: none;
 }
 
-#form_connect{
+select:hover{
+    cursor: pointer;
+}
+
+#form_connect, #form_submit{
     border-radius: 50px;
     background: white;
     border: 1px solid var(--third-color);
@@ -1349,7 +1412,7 @@ h2, h1{
     cursor: pointer;
 }
 
-#form_connect:hover{
+#form_connect:hover, #form_submit:hover{
     background: var(--third-color);
     border: 1px solid var(--third-color);
     color: white;
@@ -1401,7 +1464,8 @@ h2, h1{
 
 /* ========== TOUS LES MENUS ========== */
 nav{
-    width: 100%;
+    width: 90%;
+    margin: auto;
 }
 
 nav ul{
@@ -1409,13 +1473,27 @@ nav ul{
     padding: 0;
     margin: 0;
     display: flex;
-    justify-content: space-evenly;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
 }
 
 nav li{
-    padding: 0;
-    margin: 0;
-    margin-right: 25px;
+    padding: 10px 20px;
+    margin: 0 25px 25px 0;
+    border: solid 2px var(--first-color);
+    border-radius: 10px;
+    width: 10rem;
+}
+
+nav li:hover{
+    background: #488de2;
+    color: white;
+}
+
+nav li:hover a{
+    color: white;
+    stroke: white;
 }
 
 .lien_actif, .lien_inactif{
@@ -1423,8 +1501,9 @@ nav li{
     margin: 0;
     background: none;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
+    justify-content: space-evenly;
 }
 
 .lien_actif{
@@ -1433,8 +1512,26 @@ nav li{
 }
 
 .lien_inactif{
-    stroke: grey;
-    color: grey;
+    stroke: var(--third-color);
+    color: var(--third-color);
+}
+
+nav li svg{
+    margin-right: 10px;
+}
+
+/* ===== EN VOIR + OU - ===== */
+.more, .less{
+    color: var(--first-color);
+    text-decoration: underline;
+    cursor: pointer;
+    display: none;
+    border: none !important;
+}
+
+.more:hover, .less:hover{
+    background: none;
+    color: var(--first-color);
 }
 
 
@@ -1457,8 +1554,16 @@ thead tr{
 
 th{
     background: none;
-    text-align: justify;
+    text-align: left;
     border: none;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: white;
+}
+
+.vertical th{
+    position: initial;
 }
 
 tbody td{
@@ -1533,7 +1638,25 @@ tbody tr.rallonge{
 
 .section_projets nav{
     width: fit-content;
-    margin-left: auto;
+    margin: 0 0 0 auto;
+}
+
+.section_projets nav li{
+    border: none;
+    margin: 0;
+    width: auto;
+}
+
+.section_projets nav li:hover{
+    background: none;
+}
+
+.section_projets nav li a{
+    flex-direction: column;
+}
+
+.section_projets nav li:hover a{
+    color: initial;
 }
 
 .section_projets table a{
@@ -1560,7 +1683,6 @@ tbody tr.rallonge{
     cursor: pointer;
 }
 
-
 .section_collaborateur, .section_termine{
     margin-top: 7rem;
 }
@@ -1586,33 +1708,211 @@ tbody tr.rallonge{
 
 
 /* ========== CONSULTER PROJETS ========== */
-.consulter_projet nav{
-    width: 85%;
-    margin: auto;
-}
-
-.consulter_projet nav ul{
+.consulter_projet .top_body{
     display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
     align-items: center;
+    width: 90%;
+    margin: auto;
+    justify-content: space-between;
 }
 
-.consulter_projet nav li{
-    padding: 10px 20px;
-    margin: 0 25px 25px;
-    border: solid 2px var(--first-color);
-    border-radius: 10px;
+.consulter_projet .top_body .retour a {
+    color: var(--first-color);
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    text-decoration: underline;
+    cursor: pointer;
 }
 
-.consulter_projet li a{
-    flex-direction: row;
-}
-
-.consulter_projet li svg{
+.consulter_projet .top_body .retour a svg{
+    fill: var(--first-color);
     margin-right: 10px;
 }
 
-.consulter_projet nav ul .more{
-    margin: 0 0 25px;
+.consulter_projet .info_debug{
+    width: fit-content;
+    border: 1px solid var(--first-color);
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.consulter_projet .menu{
+    display: flex;
+    align-items: flex-start;
+    width: 85%;
+    margin: auto;
+    margin-bottom: 2rem;
+}
+
+.consulter_projet .menu nav{
+    width: 100%;
+}
+
+.consulter_projet .supplement{
+    width: 85%;
+    margin: auto;
+    display: flex;
+    padding: 0;
+    }
+
+.consulter_projet .supplement .lien_supplementaire{
+    display: flex;
+    flex-direction: column;
+    margin-right: 1rem;
+    align-items: center;
+    stroke: black;
+    text-decoration: none;
+    color: black;
+    border: 1px solid var(--first-color);
+    padding: 0.5rem;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    height: 60px;
+}
+
+.consulter_projet .supplement .lien_supplementaire:hover{
+    stroke: white;
+    color: white;
+    background: #488de2;
+    cursor: pointer;
+}
+
+.consulter_projet .supplement .lien_supplementaire svg{
+    margin-bottom: 1rem;
+}
+
+.consulter_projet .supplement .conso:hover svg path:first-of-type{
+    stroke: #488de2;
+}
+
+.consulter_projet .supplement .conso svg{
+    width: 23%;
+    height: auto;
+    cursor: pointer;
+}
+
+.consulter_projet .historique{
+    display: flex;
+    align-items: center;
+    width: 85%;
+    margin: auto;
+    padding: 0;
+    margin-bottom: 2rem;
+}
+
+.consulter_projet .historique h3{
+    margin-right: 3rem;
+}
+
+.consulter_projet #form_version{
+    padding: 5px 20px 5px 10px;
+    border-radius: 11px;
+    background: none;
+}
+
+.consulter_projet #form_submit{
+    margin-left: 20px;
+}
+
+.consulter_projet details{
+    width: 90%;
+    margin: auto;
+}
+
+.consulter_projet details[open]{
+    margin-bottom: 5rem;
+}
+
+.consulter_projet .I{
+    margin-top: 3rem;
+}
+
+.consulter_projet details summary{
+    display: flex;
+    align-items: center;
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: var(--first-color);
+    margin-bottom: 3rem;
+    cursor: pointer;
+}
+
+.consulter_projet details summary::marker{
+    content: "";
+}
+
+.consulter_projet details summary svg{
+    margin-right: 1.5rem;
+    stroke: var(--first-color);
+}
+
+.consulter_projet .I .presentation{
+    margin-bottom: 3rem;
+}
+
+.consulter_projet .I .info_supplementaire{
+    width: 90%;
+    margin: 1rem auto;
+    font-style: italic;
+}
+
+.consulter_projet details h4{
+    text-decoration: #5e5f5f69 solid underline;
+    text-underline-position: under;
+    margin-top: 7rem;
+}
+
+.consulter_projet .I .financement{
+    width: 90%;
+    margin: auto;
+}
+
+.consulter_projet .II .description{
+    border: 1px solid var(--first-color);
+    border-radius: 20px;
+    padding: 20px;
+    width: 90%;
+    margin: auto;
+    text-align: justify;
+}
+
+.consulter_projet .II .description .figures{
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    margin-top: 2rem;
+}
+
+.consulter_projet .II .description .figures div{
+    text-align: center;
+}
+
+.consulter_projet .II .description .figure{
+    border: 1px solid var(--first-color);
+    border-radius: 10px;
+}
+
+.consulter_projet .III .tableaux{
+    display: flex;
+    width: 90%;
+    margin: auto;
+}
+
+.consulter_projet .III .tableaux table{
+    width: 45%;
+}
+
+.consulter_projet .III tbody tr:last-of-type {
+    border-bottom: none;
+}
+
+.consulter_projet .III .tableaux table th{
+    width: 50%;
+    padding-right: 2rem;
+    border-right: 1px solid #00000078;
+}
+
+.consulter_projet .III .tableaux table td{
+    padding-left: 2rem;
 }
