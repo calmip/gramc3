@@ -71,7 +71,12 @@ class IndividuType extends AbstractType
                 ->add('prenom', TextType::class, [ 'label' => 'Prénom']);
                 if ($options['mail'] == true) {
                     $builder->add('mail', EmailType::class);
+		}
+                else
+                {
+                   $builder->add('mail', EmailType::class, [ 'disabled' => true]);
                 }
+
         }
 
         if ($options['admin'] == true) {
