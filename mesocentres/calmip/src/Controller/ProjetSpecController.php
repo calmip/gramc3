@@ -209,14 +209,14 @@ class ProjetSpecController extends AbstractController
             }
             $projets_resp[]   =
             [
-        'projet'    => $projet,
-        'conso'     => $sp->getConsoCalculP($projet),
-        'rallonges' => $rallonges,
-        'cpt_rall'  => $cpt_rall,
-        'meta_etat' => $sp->getMetaEtat($projet),
-        'login'     => $login,
-        'passwd'    => $passwd,
-        'pwd_expir' => $pwd_expir
+                'projet'    => $projet,
+                'conso'     => $sp->getConsoCalculP($projet),
+                'rallonges' => $rallonges,
+                'cpt_rall'  => $cpt_rall,
+                'meta_etat' => $sp->getMetaEtat($projet),
+                'login'     => $login,
+                'passwd'    => $passwd,
+                'pwd_expir' => $pwd_expir
             ];
         }
 
@@ -235,6 +235,8 @@ class ProjetSpecController extends AbstractController
 
             $cv    = $cv_repo->findOneBy(['version' => $versionActive, 'collaborateur' => $individu]);
             if ($cv != null) {
+                // TODO - Remonter au niveau du ProjetRepository (fonctions get_projet_etats et getProjetsCollab)
+                if ($cv->getDeleted() == true) continue;
                 $login = $cv->getLoginname()==null ? 'nologin' : $cv->getLoginname();
                 $u     = $user_repo->findOneBy(['loginname' => $login]);
                 if ($u==null) {
