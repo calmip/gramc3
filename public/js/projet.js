@@ -71,11 +71,11 @@ $( document ).ready(function() {
 		var img_alt = $(this).attr('alt');
 		var width   = $(this).data("width");        // pas utilisé
 		var height  = $(this).data("height");       // pas utilisé
-		$('#dialog').html('<img src="'+img_src+'" alt="'+img_alt+'" title="'+img_alt+'" />');
+		$('#dialog').html('<img src="'+img_src+'" alt="'+img_alt+'" title="'+img_alt+'" style="width: 100%;" />');
 		$('#dialog').dialog({autoOpen: false, modal: false });
 		$('#dialog').dialog( "option", "title", img_alt );
 		$('#dialog').dialog( "option", "height", 'auto' );
-		$('#dialog').dialog( "option", "width", 'auto' );
+		$('#dialog').dialog( "option", "width", '100vh' );
 		$('#dialog').dialog('open');
     });
 
@@ -108,4 +108,3 @@ $( document ).ready(function() {
 	});
 
 });
-

@@ -301,6 +301,7 @@ class ProjetSpecController extends AbstractController
         $menu['commentaire']    =   "Vous ne pouvez pas créer de nouveau projet actuellement";
         $menu['name']   =   'avant_nouveau_projet';
         $menu['params'] =   [ 'type' =>  Projet::PROJET_SESS ];
+        $menu['icone']   =   'nouveauProjet';
         $menu['lien']   =   'Nouveau projet';
         $menu['ok'] = false;
 
@@ -320,6 +321,7 @@ class ProjetSpecController extends AbstractController
             $menu['ok'] = true;
         } else {
             $menu['raison'] = 'Nous ne sommes pas en période de demande, pas possible de créer un nouveau projet';
+            $menu['icone']   =   'nouveauProjet';
         }
 
         return $menu;
@@ -337,7 +339,8 @@ class ProjetSpecController extends AbstractController
         $menu['commentaire']    =   "Vous ne pouvez pas créer de nouveau projet test actuellement";
         $menu['name']   =   'avant_nouveau_projet';
         $menu['params'] =   [ 'type' =>  Projet::PROJET_FIL ];
-        $menu['lien']   =   'Nouveau projet test';
+        $menu['icone']   =   'nouveauProjet';
+        $menu['lien']   =   'Nouveau projet TEST';
         $menu['ok'] = false;
 
         $session =  $this->ss->getSessionCourante();
@@ -477,14 +480,15 @@ class ProjetSpecController extends AbstractController
         if ($ac->isGranted('ROLE_ADMIN')) {
             $menu[] = $sm->rallonge_creation($projet);
         }
-        $menu[] = $sm->changer_responsable($version);
         $menu[] = $sm->renouveler_version($version);
         $menu[] = $sm->modifier_version($version);
         $menu[] = $sm->envoyer_expert($version);
+        $menu[] = $sm->changer_responsable($version);
         $menu[] = $sm->modifier_collaborateurs($version);
         if ($this->getParameter('nodata')==false) {
             $menu[] = $sm->donnees($version);
         }
+        $menu[] = $sm->gerer_publications($projet);
         $menu[] = $sm->telechargement_fiche($version);
         $menu[] = $sm->televersement_fiche($version);
 
@@ -496,7 +500,6 @@ class ProjetSpecController extends AbstractController
             }
         }
 
-        $menu[]       = $sm->gerer_publications($projet);
         $img_expose_1 = $sv->imageProperties('img_expose_1', $version);
         $img_expose_2 = $sv->imageProperties('img_expose_2', $version);
         $img_expose_3 = $sv->imageProperties('img_expose_3', $version);

@@ -141,8 +141,11 @@ class ServiceNotifications
             // return [ 'subject'  =>  $message->getSubject(), 'contenu' => $message->getBody(), 'to'  => $to  ]; // debug only
             $this->sj->infoMessage('email "' . $message->getSubject() . '" envoyé à ' . $to);
 
-            // Envoi du message
-            $this->mailer->send($message);
+	    // Envoi du message
+	    try {
+               $this->mailer->send($message);
+	    }
+	    catch ( \Exception $e ) { };
         } else {
             $this->sj->warningMessage(__METHOD__ . ":" . __LINE__ . 'email "' . $message->getSubject() . '" envoyé à une liste vide de destinataires');
         }

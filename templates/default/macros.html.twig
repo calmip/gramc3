@@ -3,11 +3,6 @@
 
 {% import _self as macros %}
 
-{% macro img_consulter() %}{{ asset('icones/consulter.png') }}{% endmacro %}
-{% macro img_supprimer() %}{{ asset('icones/petitdelete.png') }}{% endmacro %}
-{% macro img_modifier() %}{{ asset('icones/modifier.png') }}{% endmacro %}
-
-
 
 {% macro ko(text) %}
     <div class="infobulleko" data-title="{{ text }}" >
@@ -35,16 +30,56 @@
 {% endmacro %}
 
 {# ################################################## #}
+{# Affichage d'une icone à partir d'une valeur #}
+
+{% macro menuIcones(value) %}
+
+    {% import "default/icone.html.twig" as icones %}
+
+    {% if value == "nouveauProjet" %}
+        {{icones.nouveauProjet}}
+    {% elseif value == "details" %}
+        {{icones.details}}
+    {% elseif value == "supprimer" %}
+        {{icones.supprimer}}
+    {% elseif value == "modifier_rallonge" %}
+        {{icones.modifier_rallonge}}
+    {% elseif value == "renouveler" %}
+        {{icones.renouveler}}
+    {% elseif value == "modifier" %}
+        {{icones.modifier}}
+    {% elseif value == "envoyer" %}
+        {{icones.envoyer}}
+    {% elseif value == "indefinit" %}
+        {{icones.indefinit}}
+    {% elseif value == "croix" %}
+        {{icones.croix}}
+    {% endif %}
+
+{% endmacro %}
+
+
+{# ################################################## #}
 {# Affichage d'un menu à partir d'un array d'array  (cf. lib/navigation.php)
 #}
 
 {% macro menu(menu) %}
+
+{% from _self import menuIcones %}
+
+{# Variable à faire passer dans la macro des icones (celle-ci sert à appeler l'icone indefinit) #}
+{% set indefinit = "indefinit" %}
+
+
 <nav>
     <ul>
         {% for item in menu %}
         {% if not item==null %}
 	        {% if item.ok %}
-	        <li><a class="lien_actif" title="{{ item.commentaire }}"
+	        <li {% if item.priorite is defined %}
+                    class="priorite{{item.priorite}}"
+                {% endif %}
+            ><a class="lien_actif" title="{{ item.commentaire }}"
 	                {% if item.param is defined %}
 	                    href="{{ path(item.name, { 'id' : item.param }) }}"
 	                {% elseif item.params is defined %}
@@ -52,11 +87,18 @@
 	                {% else %}
 	                    href="{{ path(item.name) }}"
 	                {% endif %}
-	            >{{ item.lien }}</a>
-	            <div class="infobulleok" data-title="{{ item.commentaire }}" ><img src="{{ asset('icones/q16.png') }}" alt="?" /></div>
+	            >
+                {% if item.icone is defined %}
+                    {{ menuIcones(item.icone) }} {{ item.lien }}</a>
+                {% else %}
+                   {{ menuIcones(indefinit) }} {{ item.lien }}</a>
+                {% endif %}
 	        </li>
 	        {% else %}
-	        <li><a class="lien_inactif"
+	        <li {% if item.priorite is defined %}
+                    class="priorite{{item.priorite}}"
+                {% endif %}
+            ><a class="lien_inactif"
 	            {% if  app.debug %}
 	                {% if item.param is defined %}
 	                    href="{{ path(item.name, { 'id' : item.param }) }}"
@@ -66,12 +108,18 @@
 	                    href="{{ path(item.name) }}"
 	                {% endif %}
 	            {% endif %}
-	            title="{{ item.commentaire }} - {{ item.raison }}">{{ item.lien }}</a>
-	            <div class="infobulleko" data-title="{{ item.commentaire }} - {{ item.raison }}" ><img src="{{ asset('icones/q16.png') }}" alt="?" /></div>
+	            title="{{ item.commentaire }} - {{ item.raison }}"
+                >
+                {% if item.icone is defined %}
+                    {{ menuIcones(item.icone) }} {{ item.lien }}</a>
+                {% else %}
+                    {{ menuIcones(indefinit) }} {{ item.lien }}</a>
+                {% endif %}
 	        </li>
 	        {% endif %}
 	    {% endif %}
         {% endfor %}
+        <li class="more">En voir plus...</li>
     </ul>
 </nav>
 {% endmacro %}

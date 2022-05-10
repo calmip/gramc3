@@ -11,7 +11,14 @@
     <div class="message warning">
 
     <h2>Déconnexion</h2>Veuillez arrêter <strong>complètement</strong> votre navigateur</div>
+
+    <span class="fermer_navigateur">FERMER LE NAVIGATEUR</span>
+
+
+    <script>document.querySelector('.fermer_navigateur').addEventListener('click', ()=>{window.open('', '_self', '');
+       window.close();})</script>
 {% endif %}
+
     
 {% endblock %}
  
