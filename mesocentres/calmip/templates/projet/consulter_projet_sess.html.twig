@@ -80,6 +80,10 @@
 			</div>
 		{% endif %}
 
+			{% if is_granted('ROLE_ADMIN') %}
+				<div class="separateur"></div>
+			{% endif %}
+
 
 		<section class="supplement">
 

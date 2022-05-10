@@ -86,7 +86,11 @@
                     {% endif %}
                 {% endif %}
 
-                <a class="aide_nav" href="{{ path('aide') }}">?</a>
+                {% if app.request.attributes.get('_route') == 'aide' %}
+                    <a class="aide_nav actif" href="{{ path('aide') }}">?</a>
+                {% else %}
+                    <a class="aide_nav" href="{{ path('aide') }}">?</a>
+                {% endif %}
             </nav>
             <img src="{{ asset('icones/header.png') }}" alt="élément graphique" class="elm_graphique"/>
 

@@ -1255,6 +1255,11 @@ h2, h1{
     color: white;
 }
 
+.aide_nav.actif{
+    background: black;
+    color: white;
+}
+
 .connexion_nav{
     color: var(--first-color);
 }
@@ -1309,7 +1314,7 @@ h2, h1{
     position: fixed;
     right: 5rem;
     bottom: 5rem;
-    z-index: 1;
+    z-index: 3;
     border: var(--first-color) solid 1px;
     background: #ffffff9c;
     border-radius: 50px;
@@ -1336,6 +1341,7 @@ h2, h1{
 /* ===== RÔLE ADMIN ===== */
 .role_admin{
     position: fixed;
+    z-index: 5;
     left: 3rem;
     top: 5rem;
     background: white;
@@ -1749,6 +1755,14 @@ tbody tr.rallonge{
     width: 100%;
 }
 
+.consulter_projet .separateur{
+    width: 70%;
+    height: 1px;
+    margin: auto;
+    background: var(--first-color);
+    margin-bottom: 3.5rem;
+}
+
 .consulter_projet .supplement{
     width: 85%;
     margin: auto;
@@ -1915,4 +1929,25 @@ tbody tr.rallonge{
 
 .consulter_projet .III .tableaux table td{
     padding-left: 2rem;
+}
+
+
+
+/* ========== ADMINISTRATEUR ========== */
+.section_administrateur div{
+    display: flex;
+    width: 85%;
+    margin: 0 auto 2rem;
+}
+
+.section_administrateur div h3{
+    width: 20%;
+}
+
+.section_administrateur div nav ul li{
+    width: 12rem;
+}
+
+.section_administrateur div nav ul li a{
+    flex-direction: column;
 }
