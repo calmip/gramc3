@@ -1084,47 +1084,6 @@ div.ui-dialog {
     text-align: center;
 }
 
-/* Tableaux scrollables: Le header et le footer sont fixes, le corps du tableau peut scroller
- * Que du css-hack, horreur !!!! */
-.scrtable {
-    background-color: #D0E3FA;
-    direction: rtl;
-}
-.scrtable thead {
-    display: block;
-    height: 2.8em;
-    overflow-y: scroll;
-}
-
-.scrtable tbody {
-    display: block;
-    overflow-y: scroll;
-    height: 60em;
-}
-.scrtable th, .scrtable td {
-    display: block;
-    float: left;
-    border: 1px solid blue;
-    padding: 10px;
-    margin: 0;
-    border-top: 0;
-    border-left: 0;
-    direction: ltr;
-}
-.scrtable tfoot td{
-    text-align: left;
-    border-top: 1px solid blue;
-/*    height: 2.6em;   */
-}
-
-.scrtable .w15  { width:15px; height: 35px; padding:3px 17px 3px 3px; border-bottom: none }
-.scrtable .w25  { width:25px; height: 35px; padding:3px 10px; border-bottom: none }
-.scrtable .w35  { width:35px; height: 35px; padding:3px 10px; border-bottom: none }
-.scrtable .w45  { width:45px; height: 35px; padding:3px 10px; border-bottom: none }
-.scrtable .w80  { width:80px; height: 35px; padding:3px 10px; border-bottom: none }
-.scrtable .w170 { width:170px; height: 35px; padding:3px 10px; border-bottom: none }
-.scrtable .w180 { width:180px; height: 35px; padding:3px 10px; border-bottom: none }
-
 /* Les onglets du formulaire de projet */
 .ui-widget-content {
     background: inherit;

@@ -237,55 +237,43 @@
     {% endif %}
 </div>
 
-{# largeur = largeur des colonnes + padding + bordure #}
-{% set width=45+4*15+4*170+6*80+ 21*20 + 20 + 20 + 20 %}
-{% if noconso==false %}
-    {% set width = 15 + 6*80 + width %}
-    {% if isRecupPrintemps %}
-        {% set width=80+45 + 2*20 + 35 + width %}
-    {% endif %}
-    {% if isRecupAutomne %}
-        {% set width=80+80+80+45 + 4*20 + 35 + width %}
-    {% endif %}
-{%endif %}
-
 <div id="projets" >
-    <table id="table_projets_annee" class="scrtable dataTable no-footer" role="grid" style="width: {{width}}px" >
+    <table id="table_projets_annee" class="scrtable dataTable no-footer" role="grid" >
         <thead>
             <tr>
-                <th class="w45">N°</th>
-                <th class="w15"></th>
-                <th class="w15" title="Etat">E</th>
-                {% if noconso==false %}<th class="w15" title="Consommation">C</th>
-                <th class="w15" title="Données de facturation">F</th>
+                <th>N°</th>
+                <th></th>
+                <th title="Etat">E</th>
+                {% if noconso==false %}<th title="Consommation">C</th>
+                <th title="Données de facturation">F</th>
                 {% endif %}
-                <th class="w170" title="Etat du projet">Titre</th>
-                <th class="w170">Thématique</th>
-                <th class="w170">Rattachement</th>
-                <th class="w170">Responsable</th>
-                <th class="w80">Laboratoire</th>
-                <th class="w15">R.A.</th>
-                <th class="w80">Demandes A</th>
-                <th class="w80">Attrib A</th>
-                <th class="w80">Demandes B</th>
-                <th class="w80">Attrib B</th>
-                <th class="w80">Rallonges</th>
-                {% if noconso==false %}<th class="w80">Pénalités</th>{% endif %}
-                <th class="w80">Attributions</th>
+                <th title="Etat du projet">Titre</th>
+                <th>Thématique</th>
+                <th>Rattachement</th>
+                <th>Responsable</th>
+                <th>Laboratoire</th>
+                <th>R.A.</th>
+                <th>Demandes A</th>
+                <th>Attrib A</th>
+                <th>Demandes B</th>
+                <th>Attrib B</th>
+                <th>Rallonges</th>
+                {% if noconso==false %}<th>Pénalités</th>{% endif %}
+                <th>Attributions</th>
                 {% if noconso==false %}
-                <th class="w80">Quota</th>
-                <th class="w80">Conso (h)</th>
-                <th class="w80">Conso (%)</th>
-                <th class="w80">Conso gpu</th>
+                <th>Quota</th>
+                <th>Conso (h)</th>
+                <th>Conso (%)</th>
+                <th>Conso gpu</th>
                 {% if isRecupPrintemps %}
-                    <th class="w80">Récupérables (h)</th>
-                    <th class="w45">Récup</th>
+                    <th>Récupérables (h)</th>
+                    <th>Récup</th>
                 {% endif %}
                 {% if isRecupAutomne %}
-                    <th class="w80">Attr Eté</th>
-                    <th class="w80">Conso Eté</th>
-                    <th class="w80">Récupérables (h)</th>
-                    <th class="w45">Récup</th>
+                    <th>Attr Eté</th>
+                    <th>Conso Eté</th>
+                    <th>Récupérables (h)</th>
+                    <th>Récup</th>
                 {% endif %}
                 {% endif %}
             </tr>
@@ -314,8 +302,8 @@
             {% else %}
                 <tr>
             {%endif%}
-            <td class="w45">{{ projet.id }}</td>
-            <td class="w15">
+            <td>{{ projet.id }}</td>
+            <td>
                 {% if vb != null %}
                 {% set version = vb %}
                 {% else %}
@@ -325,17 +313,17 @@
                     <img class="bouton_poussoir" src="{{ asset('icones/consulter.png') }}" alt="Consulter" />
                 </a>
             </td>
-            <td class="w15">
+            <td>
                 {{ gramcmacros.metagraph(prj_array.metaetat) }}
             </td>
 
             {% if noconso==false %}
-            <td class="w15">
+            <td>
                 <img id="bconso_{{ projet.idProjet }}"  class="bouton_poussoir conso" src="{{ asset('icones/courbe.png') }}"
                 title="{{ projet.idProjet }}: Evolution de la consommation pour {{annee}}" alt="{{ projet.idProjet }}: Evolution de la consommation pour {{annee}}"
                 data-href="{{ absolute_url(path('projet_conso', { 'id': projet.idProjet, 'annee' : annee })) }}" />
             </td>
-            <td class="w15">
+            <td>
                  
                 <a href="{{ path('dfct_liste', { 'id':projet.idprojet,'annee': annee }) }}" 
                 title="{{ projet.idProjet }}: Données de facturation pour {{annee}}" alt="{{ projet.idProjet }}: Données de facturation pour {{annee}}"
@@ -345,23 +333,23 @@
             </td>
             {% endif %}
 
-            <td class="w170">
+            <td>
                 {{ gramcmacros.afftitre(projet.titre) }}
             </td>
-            <td class="w170">
+            <td>
                 {{ gramcmacros.tronquer_chaine(projet.thematique,20) }}
             </td>
-             <td class="w170">
+             <td>
                  {% if projet.rattachement == null %} &nbsp; {% else %} {{ gramcmacros.tronquer_chaine(projet.rattachement,20) }} {% endif %}
             </td>
            
-            <td class="w170">
+            <td>
                 <a href="mailto:{{ prj_array.resp.mail }}"><img src="{{ asset('icones/mail_send.png') }}" alt="Envoyer un mail" /></a>{{ prj_array.resp.prenom }} {{ prj_array.resp.nom }}
             </td>
-            <td class="w80">
+            <td>
                 {{ gramcmacros.tronquer_chaine(prj_array.labo,20) }}
             </td>
-            <td class="w15">
+            <td>
                {# {% if not projet.rapportactivite %}
                     <img src="{{ asset('icones/pdf.png') }}" />
                 {% else %}
@@ -369,38 +357,38 @@
                 {% endif %} #}&nbsp;
             </td>
             {% if va is not empty %}
-                <td class="w80">
+                <td>
                     {{ va.demHeures }}
                 </td>
-                <td class="w80">
+                <td>
                     {{ va.attrHeures }}
                 </td>
             {% else %}
-                <td class="w80">
+                <td>
                     &nbsp;
                 </td>
-                <td class="w80" >
+                <td >
                     &nbsp;
 
                 </td>
             {% endif %}
             {% if vb is not empty %}
-                <td class="w80" >
+                <td >
                     {% if prj_array.toomuch %} <img src="{{ asset('icones/attention16.png') }}" alt="Demande trop forte, cf. règles d'attribution" title="Demande trop forte, cf. règles d'attribution" /> {% endif %}
                     {{ vb.demHeures }}
                 </td>
-                <td class="w80" >
+                <td >
                     {{ vb.attrHeures }}
                 </td>
             {% else %}
-                <td class="w80" >
+                <td >
                     &nbsp;
                 </td>
-                <td class="w80" >
+                <td >
                     &nbsp;
                 </td>
             {% endif %}
-            <td class="w80" >
+            <td >
                 {% if prj_array.r > 0 %}
                     {{ prj_array.r }}
                 {% else %}
@@ -408,24 +396,24 @@
                 {% endif %}
             </td>
             {% if noconso==false %}
-            <td class="w80 penalite" >
+            <td class="penalite" >
                 {{ -(prj_array.penal_a + prj_array.penal_b) }}
             </td>
             {% endif %}
-            <td class="w80 attr" >
+            <td class="attr" >
                 {{prj_array.attrib }}
             </td>
             {% if noconso==false %}
-            <td class="w80" >
+            <td >
                 {{prj_array.q }}
             </td>
-            <td class="w80" >
+            <td >
                 {{prj_array.c }}
             </td>
-            <td class="w80" >
+            <td >
                 {{ "%5.1f" | format(prj_array.cp) }}
             </td>
-            <td class="w80" >
+            <td >
                 {{prj_array.g}}
             </td>
 
@@ -436,9 +424,9 @@
            {% if isRecupPrintemps %}
                 {# Pas de pénalités sur les projets tests ! #}
                 {% if projet.id starts with 'P' %}
-                    <td class="w80 recuperable">
+                    <td class="recuperable">
                         {% if prj_array.penal_a==0 %}{{prj_array.recuperable}}{% else %}0{% endif %}</td>
-                    <td class="w45">
+                    <td>
                         {% if prj_array.penal_a==0 %}{% set invisible_recup="" %} {% set invisible_norecup="invisible" %} {% endif %}
                         {% if prj_array.penal_a >0 %}{% set invisible_recup="invisible" %} {% set invisible_norecup="" %} {% endif %}
                         {% if prj_array.penal_a>0 or prj_array.recuperable>0 %}
@@ -449,17 +437,17 @@
                         {% endif %}
                     </td>
                 {% else %}
-                    <td class="w80" >&nbsp;</td><td class="w45" >&nbsp;</td>
+                    <td >&nbsp;</td><td >&nbsp;</td>
                 {% endif %}
             {% endif %}
             {% if isRecupAutomne %}
                 {# Pas de pénalités sur les projets tests ! #}
                 {% if projet.id starts with 'P' %}
-                    <td class="w80"> {{ prj_array.attrete }}</td>
-                    <td class="w80"> {{ prj_array.consoete}} </td>
-                    <td class="w80 recuperable">
+                    <td> {{ prj_array.attrete }}</td>
+                    <td> {{ prj_array.consoete}} </td>
+                    <td class="recuperable">
                         {% if prj_array.penal_b==0 %}{{prj_array.recuperable}}{% else %}0{% endif %}</td>
-                    <td class="w45">
+                    <td>
                         {% if prj_array.penal_b==0 %}{% set invisible_recup="" %} {% set invisible_norecup="invisible" %} {% endif %}
                         {% if prj_array.penal_b >0 %}{% set invisible_recup="invisible" %} {% set invisible_norecup="" %} {% endif %}
                         {% if prj_array.penal_b>0 or prj_array.recuperable>0 %}
@@ -471,7 +459,7 @@
 
                     </td>
                 {% else %}
-                    <td class="w80" >&nbsp;</td><td class="w80" >&nbsp;</td><td class="w80" >&nbsp;</td><td class="w45" >&nbsp;</td>
+                    <td >&nbsp;</td><td >&nbsp;</td><td >&nbsp;</td><td >&nbsp;</td>
                 {% endif %}
             {% endif %}
         {% endif %}
