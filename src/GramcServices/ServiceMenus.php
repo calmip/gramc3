@@ -79,10 +79,32 @@ class ServiceMenus
         $this->token = $this->tok->getToken();
     }
 
+    /*****************************************************
+     * Gestion de la priorité des boutons:
+     *     - Si ok on fixe la priorité suivant le paramètre $priorite
+     *     - Si pas ok ou pas spécifié on la met à BASSE
+     *
+     ******/
+
+    public const BPRIO = 2; // Basse priorité il faudra cliquer sur un voir plus pour afficher
+    public const HPRIO = 1; // Haute priorité on verra toujours le bouton
+    
+    private function __prio(array &$menu, int $priorite): void
+    {
+        if (isset($menu['ok']) && $menu['ok']==true)
+        {
+            $menu['priorite'] = $priorite;
+        }
+        else
+        {
+            $menu['priorite'] = self::BPRIO;
+        }
+    }
+
     /*******************
      * Page d'accueil principale
      ***************************************************/
-    public function demandeur(int $priorite=1): array
+    public function demandeur(int $priorite=self::HPRIO): array
     {
         $menu['name']      = 'projet_accueil';
         $menu['lien']      = 'Demandeur';
@@ -94,10 +116,12 @@ class ServiceMenus
             $menu['commentaire'] = "Vous ne pouvez pas rejoindre l'espace demandeur ";
             $menu['raison']      = "vous n'êtes pas connecté";
         }
+        
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
-    public function expert(int $priorite=1):array
+    public function expert(int $priorite=self::HPRIO):array
     {
         $menu['name']      = 'expertise_liste';
         $menu['lien']      = 'Expert';
@@ -109,10 +133,12 @@ class ServiceMenus
             $menu['commentaire'] = "Vous ne pouvez pas rejoindre l'espace expertise";
             $menu['raison']      = "vous n'êtes pas connecté, ou vous n'avez pas les droits expert";
         }
+
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
-    public function administrateur(int $priorite=1):array
+    public function administrateur(int $priorite=self::HPRIO):array
     {
         $menu['name']      = 'admin_accueil';
         $menu['lien']      = 'Administrateur';
@@ -124,10 +150,12 @@ class ServiceMenus
             $menu['commentaire'] = "Vous ne pouvez pas rejoindre l'espace administrateur";
             $menu['raison']      = "vous n'êtes pas connecté, ou vous n'avez pas les droits administrateur";
         }
+        
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
-    public function president(int $priorite=1):array
+    public function president(int $priorite=self::HPRIO):array
     {
         $menu['name']      = 'president_accueil';
         $menu['lien']      = 'Président';
@@ -139,15 +167,19 @@ class ServiceMenus
             $menu['commentaire'] = "Vous ne pouvez pas rejoindre l'espace président";
             $menu['raison']      = "vous n'êtes pas connecté, ou vous n'avez pas les droits du président";
         }
+
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
-    public function aide(int $priorite=1):array
+    public function aide(int $priorite=self::HPRIO):array
     {
         $menu['name']      = 'aide';
         $menu['lien']      = '?';
         $menu['ok']          = true;
         $menu['commentaire'] = "Aide et documentation";
+
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
@@ -156,7 +188,7 @@ class ServiceMenus
      ***************************************************/
 
     // Nouvelle session
-    public function ajouterSession(int $priorite=1):array
+    public function ajouterSession(int $priorite=self::HPRIO):array
     {
         $session      = $this->ss->getSessionCourante();
         $etat_session = $session->getEtatSession();
@@ -166,17 +198,18 @@ class ServiceMenus
         if ($etat_session === Etat::ACTIF) {
             $menu['ok']          = true;
             $menu['commentaire'] = 'Nouvelle session';
-            return $menu;
         } else {
             $menu['commentaire'] = "Pas possible de créer une nouvelle session";
             $menu['ok']          = false;
             $menu['raison']      = "La session courante n'est pas encore activée";
-            return $menu;
         }
+
+        $this->__prio($menu, $priorite);
+        return $menu;
     }
 
     // Modifier la session
-    public function modifierSession(int $priorite=1):array
+    public function modifierSession(int $priorite=self::HPRIO):array
     {
         $session        = $this->ss->getSessionCourante();
         $workflow       = $this->sw;
@@ -186,17 +219,18 @@ class ServiceMenus
         if ($workflow->canExecute(Signal::DAT_DEB_DEM, $session)) {
             $menu['ok']          = true;
             $menu['commentaire'] = 'Modifier les paramètres de la session';
-            return $menu;
         } else {
             $menu['commentaire'] = 'Pas possible de modifier la session.';
             $menu['ok']          = false;
             $menu['raison']      = 'La session a déjà démarré !';
-            return $menu;
         }
+
+        $this->__prio($menu, $priorite);
+        return $menu;
     }
 
     // Début de la saisie
-    public function demarrerSaisie(int $priorite=1):array
+    public function demarrerSaisie(int $priorite=self::HPRIO):array
     {
         $session        = $this->ss->getSessionCourante();
         $workflow       = $this->sw;
@@ -207,17 +241,18 @@ class ServiceMenus
         if ($workflow->canExecute(Signal::DAT_DEB_DEM, $session)) {
             $menu['ok']          = true;
             $menu['commentaire'] = 'Début de la saisie des demandeurs';
-            return $menu;
         } else {
             $menu['commentaire'] = 'Pas possible de débuter la saisie des projets';
             $menu['ok']          = false;
             $menu['raison']      = 'La période est déjà passée !';
-            return $menu;
         }
+        
+        $this->__prio($menu, $priorite);
+        return $menu;
     }
 
     // Fin de la saisie
-    public function terminerSaisie(int $priorite=1):array
+    public function terminerSaisie(int $priorite=self::HPRIO):array
     {
         $session        = $this->ss->getSessionCourante();
         $workflow       = $this->sw;
@@ -228,17 +263,18 @@ class ServiceMenus
         if ($workflow->canExecute(Signal::DAT_FIN_DEM, $session)) {
             $menu['ok']          = true;
             $menu['commentaire'] = "Début d'expertise des projets";
-            return $menu;
         } else {
             $menu['commentaire'] = 'Pas possible de passer les projets en expertise';
             $menu['ok']          = false;
             $menu['raison']      = 'La session n\'est pas en période de saisie des projets';
-            return $menu;
         }
+
+        $this->__prio($menu, $priorite);
+        return $menu;
     }
 
     // Envoyer les expertises
-    public function envoyerExpertises(int $priorite=1):array
+    public function envoyerExpertises(int $priorite=self::HPRIO):array
     {
         $session        = $this->ss->getSessionCourante();
         $workflow       = $this->sw;
@@ -249,7 +285,6 @@ class ServiceMenus
         if ($workflow->canExecute(Signal::CLK_ATTR_PRS, $session)  &&  $session->getcommGlobal() != null) {
             $menu['ok']          = true;
             $menu['commentaire'] = "Envoyer les expertises";
-            return $menu;
         } else {
             $menu['ok']          = false;
             $menu['commentaire'] = "Impossible d'envoyer les expertises";
@@ -259,13 +294,14 @@ class ServiceMenus
             } else {
                 $menu['raison']  = "La session n'est pas en \"expertise\"";
             }
-            
-            return $menu;
         }
+
+        $this->__prio($menu, $priorite);
+        return $menu;
     }
 
     // Commentaire de session - accessible à partir de l'écran Président
-    public function commSess(int $priorite=1):array
+    public function commSess(int $priorite=self::HPRIO):array
     {
         $session      = $this->ss->getSessionCourante();
         $workflow     = $this->sw;
@@ -277,22 +313,24 @@ class ServiceMenus
             $menu['ok']          = false;
             $menu['commentaire'] = "Vous ne pouvez pas ajouter le commentaire de session";
             $menu['raison']      = "Vous n'êtes pas président";
-            return $menu;
         }
-        if (! $workflow->canExecute(Signal::CLK_ATTR_PRS, $session)) {
-            $menu['ok']          = false;
-            $menu['commentaire'] = "Vous ne pouvez pas ajouter le commentaire de session";
-            $menu['raison']      = "La session n'est pas en phase d'expertise";
-            return $menu;
-        } else {
-            $menu['ok']          = true;
-            $menu['commentaire'] = "Commentaire de session et fin de la phase d'expertise";
-            return $menu;
+        else
+        {
+            if (! $workflow->canExecute(Signal::CLK_ATTR_PRS, $session)) {
+                $menu['ok']          = false;
+                $menu['commentaire'] = "Vous ne pouvez pas ajouter le commentaire de session";
+                $menu['raison']      = "La session n'est pas en phase d'expertise";
+            } else {
+                $menu['ok']          = true;
+                $menu['commentaire'] = "Commentaire de session et fin de la phase d'expertise";
+            }
         }
+        $this->__prio($menu, $priorite);
+        return $menu;
     }
 
     // Activer la session
-    public function activerSession(int $priorite=1):array
+    public function activerSession(int $priorite=self::HPRIO):array
     {
         $session        = $this->ss->getSessionCourante();
         $workflow       = $this->sw;
@@ -306,19 +344,20 @@ class ServiceMenus
             $menu['ok']          = false;
             $menu['commentaire'] = "Vous ne pouvez pas activer la session pour l'instant";
             $menu['raison']      = "La session n'est pas en attente";
-            return $menu;
         } else {
             $menu['ok']          = true;
             $menu['commentaire'] = "Activer la session $session";
-            return $menu;
         }
+
+        $this->__prio($menu, $priorite);
+        return $menu;
     }
 
     /*******************
      * Gestion des projets et des versions
      ***************************************************/
 
-    public function nouveau_projet($type, int $priorite=1):array
+    public function nouveau_projet($type, int $priorite=self::HPRIO):array
     {
         switch ($type) {
         case Projet::PROJET_FIL:
@@ -340,7 +379,7 @@ class ServiceMenus
      *     - Créé seulement par un permanent, qui devient responsable du projet
      *
      */
-    private function nouveau_projet_sess(int $priorite=1):array
+    private function nouveau_projet_sess(int $priorite=self::HPRIO):array
     {
         $menu   =   [];
         $menu['commentaire']    =   "Vous ne pouvez pas créer de nouveau projet actuellement";
@@ -367,6 +406,7 @@ class ServiceMenus
             $menu['raison'] = 'Nous ne sommes pas en période de demande, pas possible de créer un nouveau projet';
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
@@ -377,7 +417,7 @@ class ServiceMenus
      *     - Créé par n'importe qui, qui devient responsable du projet
      *
      */
-    public function nouveau_projet_test(int $priorite=1):array
+    public function nouveau_projet_test(int $priorite=self::HPRIO):array
     {
         $menu   =   [];
         $menu['commentaire']    =   "Vous ne pouvez pas créer de nouveau projet test actuellement";
@@ -413,6 +453,7 @@ class ServiceMenus
             $menu['ok'] = true;
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
@@ -423,7 +464,7 @@ class ServiceMenus
      *     - Créé seulement par un permanent, qui devient responsable du projet
      *
      */
-    private function nouveau_projet_fil(int $priorite=1):array
+    private function nouveau_projet_fil(int $priorite=self::HPRIO):array
     {
         $menu   =   [];
 
@@ -448,6 +489,7 @@ class ServiceMenus
             $menu['ok'] = true;
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
@@ -472,7 +514,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function individu_gerer(int $priorite=1):array
+    public function individu_gerer(int $priorite=self::HPRIO):array
     {
         $menu['name']   =   'individu_gerer';
         $menu['commentaire']    =   "Gérer les utilisateurs de gramc";
@@ -484,13 +526,13 @@ class ServiceMenus
             $menu['ok'] = false;
             $menu['raison'] = "Vous n'êtes pas un administrateur";
         }
-
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     //////////////////////////////////////
 
-    public function gerer_sessions(int $priorite=1): array
+    public function gerer_sessions(int $priorite=self::HPRIO): array
     {
         $menu['name']   =   'gerer_sessions';
         $menu['commentaire']    =   "Gérer les sessions d'attribution";
@@ -504,12 +546,13 @@ class ServiceMenus
             $menu['raison'] = "Vous devez être un administrateur ou président pour accéder à cette page";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     //////////////////////////////////////
 
-    public function bilan_session(int $priorite=1):array
+    public function bilan_session(int $priorite=self::HPRIO):array
     {
         $menu['name']   =   'bilan_session';
         $menu['commentaire']    =   "Générer et télécharger le bilan de session";
@@ -523,12 +566,13 @@ class ServiceMenus
             $menu['raison'] = "Vous devez être un administrateur ou président pour accéder à cette page";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     //////////////////////////////////////
 
-    public function bilan_annuel(int $priorite=1):array
+    public function bilan_annuel(int $priorite=self::HPRIO):array
     {
         $menu['name']   =   'bilan_annuel';
         $menu['commentaire']    =   "Générer et télécharger le bilan annuel";
@@ -542,12 +586,13 @@ class ServiceMenus
             $menu['raison'] = "Vous devez être un administrateur ou président pour accéder à cette page";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     //////////////////////////////////////
 
-    public function projet_session(int $priorite=1):array
+    public function projet_session(int $priorite=self::HPRIO):array
     {
         $menu['name']   =   'projet_session';
         $menu['commentaire']    =   "Gérer les projets par session";
@@ -560,12 +605,13 @@ class ServiceMenus
             $menu['raison'] = "Vous devez être un administrateur ou président pour accéder à cette page";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     //////////////////////////////////////
 
-    public function projet_annee(int $priorite=1):array
+    public function projet_annee(int $priorite=self::HPRIO):array
     {
         $menu['name']        =   'projet_annee';
         $menu['commentaire'] =   "Gérer les projets par année";
@@ -578,12 +624,13 @@ class ServiceMenus
             $menu['raison'] = "Vous devez être un administrateur ou président pour accéder à cette page";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     //////////////////////////////////////
 
-    public function projet_donnees(int $priorite=1):array
+    public function projet_donnees(int $priorite=self::HPRIO):array
     {
         $menu['name']        =   'projet_donnees';
         $menu['commentaire'] =   "Projets ayant des demandes en stockage ou partage de données";
@@ -596,11 +643,12 @@ class ServiceMenus
             $menu['raison'] = "Vous devez être un administrateur ou président pour accéder à cette page";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
     //////////////////////////////////////
 
-    public function projet_tous(int $priorite=1):array
+    public function projet_tous(int $priorite=self::HPRIO):array
     {
         $menu['name']   =   'projet_tous';
         $menu['commentaire']    =   "Liste complète des projets";
@@ -614,12 +662,13 @@ class ServiceMenus
             $menu['raison'] = "Vous devez être un administrateur ou président pour accéder à cette page";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     //////////////////////////////////////
 
-    public function journal(int $priorite=1):array
+    public function journal(int $priorite=self::HPRIO):array
     {
         $menu['name']   =   'journal_list';
         $menu['commentaire']    =   "Lire le journal des actions";
@@ -632,12 +681,13 @@ class ServiceMenus
             $menu['raison'] = "Vous devez être un administrateur pour accéder à cette page";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     //////////////////////////////////////
 
-    public function info(int $priorite=1):array
+    public function info(int $priorite=self::HPRIO):array
     {
         $menu['name']        = 'phpinfo';
         $menu['commentaire'] = "Exécuter phpinfo()";
@@ -649,11 +699,13 @@ class ServiceMenus
             $menu['ok'] = false;
             $menu['raison'] = "Vous devez être un administrateur pour accéder à cette page";
         }
+
+        $this->__prio($menu, $priorite);
         return $menu;
     }
     //////////////////////////////////////
 
-    public function laboratoires(int $priorite=1):array
+    public function laboratoires(int $priorite=self::HPRIO):array
     {
         $menu['name']   =   'gerer_laboratoires';
         $menu['commentaire']    =   "Gérer la liste des laboratoires enregistrés";
@@ -666,10 +718,11 @@ class ServiceMenus
             $menu['raison'] = "Vous devez être au moins un observateur pour accéder à cette page";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
-    public function formations(int $priorite=1):array
+    public function formations(int $priorite=self::HPRIO):array
     {
         $menu['name']       =   'gerer_formations';
         $menu['commentaire']=   "Gérer la liste des formations";
@@ -682,12 +735,13 @@ class ServiceMenus
             $menu['raison'] = "Vous devez être au moins un observateur pour accéder à cette page";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     //////////////////////////////////////
 
-    public function thematiques(int $priorite=1):array
+    public function thematiques(int $priorite=self::HPRIO):array
     {
         $menu['name']   =   'gerer_thematiques';
         $menu['commentaire']    =   "Gérer la liste des thématiques";
@@ -700,12 +754,13 @@ class ServiceMenus
             $menu['raison'] = "Vous devez être au moins un observateur pour accéder à cette page";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     //////////////////////////////////////
 
-    public function rattachements(int $priorite=1):array
+    public function rattachements(int $priorite=self::HPRIO):array
     {
         $menu['name']   =   'gerer_rattachements';
         $menu['commentaire']    =   "Gérer la liste des rattachements";
@@ -718,12 +773,13 @@ class ServiceMenus
             $menu['raison'] = "Vous devez être au moins un observateur pour accéder à cette page";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     //////////////////////////////////////
 
-    public function metathematiques(int $priorite=1):array
+    public function metathematiques(int $priorite=self::HPRIO):array
     {
         $menu['name']   =   'gerer_metaThematiques';
         $menu['commentaire']    =   "Gérer la liste des méta-thématiques";
@@ -736,6 +792,7 @@ class ServiceMenus
             $menu['raison'] = "Vous devez être au moins un observateur pour accéder à cette page";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
     //////////////////////////////////////
@@ -749,44 +806,44 @@ class ServiceMenus
         $menu['name']   =   'changer_responsable';
         $menu['param']  =   $version->getIdVersion();
         $menu['lien']   =   "Nouveau responsable";
-        $menu['priorite']   =   $priorite;
         $user = $this->token->getUser();
 
         if ($this->ac->isGranted('ROLE_ADMIN')) {
             $menu['commentaire'] = "Changer le responsable du projet en tant qu'administrateur";
             $menu['raison']      = "L'admininstrateur peut TOUJOURS modifier le responsable d'une version quelque soit son état !";
             $menu['ok']          = true;
-            return $menu;
+        }
+        else
+        {
+            $menu['ok']          = false;
+            $menu['commentaire'] =   "Vous ne pouvez pas changer le responsable de ce projet";
+    
+            $session        =   $this->ss->getSessionCourante();
+            $etatVersion    =   $version->getEtatVersion();
+    
+            if ($version->getEtatVersion() != Etat::EDITION_DEMANDE) {
+                $menu['raison']         = "Commencez par demander le renouvellement du projet !";
+            } elseif ($session->getEtatSession() != Etat::EDITION_DEMANDE && ! $version->isProjetTest()) {
+                $menu['raison']         = "Nous ne sommes pas en période de demandes de ressources";
+            } elseif ($etatVersion == Etat::EDITION_EXPERTISE || $etatVersion == Etat::EXPERTISE_TEST) {
+                $menu['raison']         = "Le projet a déjà été envoyé à l'expert";
+            } elseif ($etatVersion != Etat::EDITION_DEMANDE && $etatVersion != Etat::EDITION_TEST) {
+                $menu['raison']         = "Cette version de projet n'est pas en mode édition";
+            } elseif (! $version->isResponsable($user)) {
+                $menu['raison']         = "Seul le responsable du projet peut passer la main. S'il n'est pas joignable, merci de nous envoyer un mail";
+            } else {
+                $menu['ok']             = true;
+                $menu['commentaire']    = "Quitter la responsabilité de ce projet";
+            }
         }
 
-        $menu['ok']          = false;
-        $menu['commentaire'] =   "Vous ne pouvez pas changer le responsable de ce projet";
-
-        $session        =   $this->ss->getSessionCourante();
-        $etatVersion    =   $version->getEtatVersion();
-
-        if ($version->getEtatVersion() != Etat::EDITION_DEMANDE) {
-            $menu['raison']         = "Commencez par demander le renouvellement du projet !";
-        } elseif ($session->getEtatSession() != Etat::EDITION_DEMANDE && ! $version->isProjetTest()) {
-            $menu['raison']         = "Nous ne sommes pas en période de demandes de ressources";
-        } elseif ($etatVersion == Etat::EDITION_EXPERTISE || $etatVersion == Etat::EXPERTISE_TEST) {
-            $menu['raison']         = "Le projet a déjà été envoyé à l'expert";
-        } elseif ($etatVersion != Etat::EDITION_DEMANDE && $etatVersion != Etat::EDITION_TEST) {
-            $menu['raison']         = "Cette version de projet n'est pas en mode édition";
-        } elseif (! $version->isResponsable($user)) {
-            $menu['raison']         = "Seul le responsable du projet peut passer la main. S'il n'est pas joignable, merci de nous envoyer un mail";
-        } else {
-            $menu['ok']             = true;
-            $menu['commentaire']    = "Quitter la responsabilité de ce projet";
-        }
-
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
-
     ////////////////////////////////////
 
-    public function modifier_version(Version $version, int $priorite=1):array
+    public function modifier_version(Version $version, int $priorite=self::HPRIO):array
     {
         $menu['name']        = 'modifier_version';
         $menu['param']       = $version->getIdVersion();
@@ -794,46 +851,47 @@ class ServiceMenus
         $menu['icone']       = "modifier";
         $menu['commentaire'] =   "Vous ne pouvez pas modifier ce projet";
         $menu['ok']          = false;
-        $menu['priorite']    =   $priorite;
 
         if ($this->ac->isGranted('ROLE_ADMIN')) {
             $menu['commentaire']    =   "Modifier le projet en tant qu'administrateur";
             $menu['raison']         =   "L'administrateur peut TOUJOURS modifier le projet quelque soit son état !";
             $menu['ok']             = true;
-            return $menu;
+        }
+        else
+        {
+            $etatVersion = $version->getEtatVersion();
+            $isProjetTest = $version->isProjetTest();
+            $isProjetSess = $version->getProjet()->getTypeProjet() === Projet::PROJET_SESS;
+    
+            if ($version->getSession() == null) {
+                $menu['raison'] = "Pas de session attachée à ce projet !";
+                $this->sj->errorMessage(__METHOD__ . ' la version ' . Functions::show($version) . " n'a pas de session attachée !");
+            } elseif ($etatVersion ==  Etat::EDITION_EXPERTISE) {
+                $menu['raison'] = "Le projet a déjà été envoyé à l'expert !";
+            } elseif ($isProjetTest == true && $etatVersion ==  Etat::ANNULE) {
+                $menu['raison'] = "Le projet test a été annulé !";
+            } elseif ($isProjetTest == true && $etatVersion !=  Etat::EDITION_TEST) {
+                $menu['raison'] = "Le projet test a déjà été envoyé à l'expert !";
+            } elseif ($isProjetSess && $version->getSession()->getEtatSession() != Etat::EDITION_DEMANDE) {
+                $menu['raison'] = "Nous ne sommes pas en période de demandes de ressources";
+            } elseif ($version->isCollaborateur($this->token->getUser()) == false) {
+                $menu['raison']         = "Seul un collaborateur du projet peut modifier ou supprimer le projet";
+            } elseif ($etatVersion !=  Etat::EDITION_DEMANDE && $etatVersion !=  Etat::EDITION_TEST) {
+                $menu['raison'] = "Le projet n'est pas en mode d'édition";
+            } else {
+                $menu['ok']          = true;
+                $menu['commentaire'] = "Modifier votre demande de ressources";
+                $menu['todo']        = "<strong>Vérifier</strong> le projet et le <strong>compléter</strong> si nécessaire";
+            }
         }
 
-        $etatVersion = $version->getEtatVersion();
-        $isProjetTest = $version->isProjetTest();
-        $isProjetSess = $version->getProjet()->getTypeProjet() === Projet::PROJET_SESS;
-
-        if ($version->getSession() == null) {
-            $menu['raison'] = "Pas de session attachée à ce projet !";
-            $this->sj->errorMessage(__METHOD__ . ' la version ' . Functions::show($version) . " n'a pas de session attachée !");
-        } elseif ($etatVersion ==  Etat::EDITION_EXPERTISE) {
-            $menu['raison'] = "Le projet a déjà été envoyé à l'expert !";
-        } elseif ($isProjetTest == true && $etatVersion ==  Etat::ANNULE) {
-            $menu['raison'] = "Le projet test a été annulé !";
-        } elseif ($isProjetTest == true && $etatVersion !=  Etat::EDITION_TEST) {
-            $menu['raison'] = "Le projet test a déjà été envoyé à l'expert !";
-        } elseif ($isProjetSess && $version->getSession()->getEtatSession() != Etat::EDITION_DEMANDE) {
-            $menu['raison'] = "Nous ne sommes pas en période de demandes de ressources";
-        } elseif ($version->isCollaborateur($this->token->getUser()) == false) {
-            $menu['raison']         = "Seul un collaborateur du projet peut modifier ou supprimer le projet";
-        } elseif ($etatVersion !=  Etat::EDITION_DEMANDE && $etatVersion !=  Etat::EDITION_TEST) {
-            $menu['raison'] = "Le projet n'est pas en mode d'édition";
-        } else {
-            $menu['ok']          = true;
-            $menu['commentaire'] = "Modifier votre demande de ressources";
-            $menu['todo']        = "<strong>Vérifier</strong> le projet et le <strong>compléter</strong> si nécessaire";
-        }
-
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     ///////////////////////////////////////////////////////////
 
-    public function modifier_collaborateurs(Version $version, int $priorite=2):array
+    public function modifier_collaborateurs(Version $version, int $priorite=self::HPRIO):array
     {
         $user = $this->token->getUser();
 
@@ -853,12 +911,14 @@ class ServiceMenus
             $menu['ok']          = true;
             $menu['commentaire'] = "Modifier la liste des collaborateurs du projet";
         }
+        
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     //////////////////////////////////////////////////////////////////
 
-    public function televerser_rapport_annee(Version $version, int $priorite=2):array
+    public function televerser_rapport_annee(Version $version, int $priorite=self::HPRIO):array
     {
         $menu['name']           =   'televerser_rapport_annee';
         $menu['ok']             =   false;
@@ -873,35 +933,37 @@ class ServiceMenus
                 $menu['commentaire'] = "Téléverser un rapport d'activité pour un projet en tant qu'administrateur";
                 $menu['raison']      = "L'administrateur peut TOUJOURS téléverser un rapport d'activité pour un projet !";
                 $menu['ok']          = true;
-                return $menu;
             }
-
-            $menu['ok']          = false;
-            $menu['commentaire'] = "Vous ne pouvez pas téléverser un rapport d'activité pour ce projet";
-
-            if ($version->getProjet() != null) {
-                $rapportActivite = $this->em->getRepository(RapportActivite::class)->findOneBy(
-                    [
-                    'projet' => $version->getProjet(),
-                    'annee' => $version->getAnneeSession(),
-                    ]
-                );
-            } else {
-                $rapportActivite = null;
-                $this->sj->errorMessage(__METHOD__ . ":" . __LINE__ . " version " . $version . " n'est pas associée à aucun projet !");
-            }
-
-            //if( $etat != Etat::ACTIF && $etat != Etat::TERMINE)
-            //		$menu['raison'] = "Vous devez soumettre le rapport annuel quand vous avez fini vos calculs de l'année en question";
-            if (! $version->isCollaborateur($this->token->getUser())) {
-                $menu['raison'] = "Seul un collaborateur du projet peut téléverser un rapport d'activité pour un projet";
-            }
-            //elseif( $rapportActivite != null)
-            //     $menu['raison'] = "Vous avez déjà téléversé un rapport d'activité pour ce projet pour l'année en question";
-            else {
-                $menu['ok']          = true;
-                $menu['commentaire'] = "Téléverser votre rapport d'activité pour l'année " . $version->getAnneeSession() . "si vous avez déjà terminé vos calculs";
-                $menu['todo']        = "Téléverser votre rapport d'activité pour " . $version->getAnneeSession();
+            else
+            {
+                $menu['ok']          = false;
+                $menu['commentaire'] = "Vous ne pouvez pas téléverser un rapport d'activité pour ce projet";
+    
+                if ($version->getProjet() != null) {
+                    $rapportActivite = $this->em->getRepository(RapportActivite::class)->findOneBy(
+                        [
+                        'projet' => $version->getProjet(),
+                        'annee' => $version->getAnneeSession(),
+                        ]
+                    );
+                } else {
+                    $rapportActivite = null;
+                    $this->sj->errorMessage(__METHOD__ . ":" . __LINE__ . " version " . $version . " n'est pas associée à aucun projet !");
+                }
+    
+                //if( $etat != Etat::ACTIF && $etat != Etat::TERMINE)
+                //		$menu['raison'] = "Vous devez soumettre le rapport annuel quand vous avez fini vos calculs de l'année en question";
+                if (! $version->isCollaborateur($this->token->getUser())) {
+                    $menu['raison'] = "Seul un collaborateur du projet peut téléverser un rapport d'activité pour un projet";
+                }
+                //elseif( $rapportActivite != null)
+                //     $menu['raison'] = "Vous avez déjà téléversé un rapport d'activité pour ce projet pour l'année en question";
+                else
+                {
+                    $menu['ok']          = true;
+                    $menu['commentaire'] = "Téléverser votre rapport d'activité pour l'année " . $version->getAnneeSession() . "si vous avez déjà terminé vos calculs";
+                    $menu['todo']        = "Téléverser votre rapport d'activité pour " . $version->getAnneeSession();
+                }
             }
         } else {
             $menu['param']          =   0;
@@ -911,13 +973,12 @@ class ServiceMenus
             $this->sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Version null !");
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
-
     ////////////////////////////////////////////////////////////
-
-    public function telecharger_modele_rapport_dactivite(Version $version, int $priorite=2):array
+    public function telecharger_modele_rapport_dactivite(Version $version, int $priorite=self::HPRIO):array
     {
         $menu['name']           =   'telecharger_modele';
         $menu['lien']           =   "Télécharger un modèle de rapport d'activité";
@@ -925,36 +986,41 @@ class ServiceMenus
         $menu['commentaire'] = "Vous ne pouvez pas télécharger un modèle de rapport d'activité pour ce projet";
         $menu['priorite']  = $priorite;
 
-        if ($version != null) {
+        if ($version != null)
+        {
             if ($this->ac->isGranted('ROLE_ADMIN')) {
                 $menu['commentaire'] = "Télécharger un modèle de rapport d'activité en tant qu'administrateur";
                 $menu['raison']      = "L'admininstrateur peut TOUJOURS télécharger un modèle de rapport d'activité !";
                 $menu['ok']          = true;
-                return $menu;
             }
-
-            $etat    = $version->getEtatVersion();
-
-            if (! $version->isCollaborateur($this->token->getUser())) {
-                $menu['raison'] = "Seul un collaborateur du projet peut télécharger un modèle de rapport d'activité pour ce projet";
+            else
+            {
+                $etat    = $version->getEtatVersion();
+    
+                if (! $version->isCollaborateur($this->token->getUser())) {
+                    $menu['raison'] = "Seul un collaborateur du projet peut télécharger un modèle de rapport d'activité pour ce projet";
+                }
+                //elseif( $etat != Etat::ACTIF && $etat != Etat::TERMINE)
+                //    $menu['raison'] = "Vous devez soumettre le rapport annuel quand vous avez fini vos calculs de l'année en question";
+                else {
+                    $menu['ok']          = true;
+                    $menu['commentaire'] = "Télécharger un modèle de rapport d'activité";
+                }
             }
-            //elseif( $etat != Etat::ACTIF && $etat != Etat::TERMINE)
-            //    $menu['raison'] = "Vous devez soumettre le rapport annuel quand vous avez fini vos calculs de l'année en question";
-            else {
-                $menu['ok']          = true;
-                $menu['commentaire'] = "Télécharger un modèle de rapport d'activité";
-            }
-        } else {
+        }
+        else
+        {
             $menu['raison']         = "Mauvaise version du projet !";
             $this->sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Version null !");
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     ////////////////////////////////////////////////////////////
 
-    public function gerer_publications(Projet $projet, int $priorite=2):array
+    public function gerer_publications(Projet $projet, int $priorite=self::HPRIO):array
     {
         $menu['name']  = 'gerer_publications';
         $menu['param'] = $projet->getIdProjet();
@@ -965,39 +1031,39 @@ class ServiceMenus
             $menu['commentaire'] = "Modifier les publications en tant qu'administrateur";
             $menu['raison']      = "L'admininstrateur peut TOUJOURS modifier les publications du projet  !";
             $menu['ok']          = true;
-            return $menu;
+        }
+        else
+        {
+            $version = $projet->derniereVersion();
+            $etat    = $version->getEtatVersion();
+    
+            $menu['ok']             = false;
+            $menu['commentaire']    =   "Vous ne pouvez pas modifier les publications";
+    
+            if (! $projet->isCollaborateur($this->token->getUser())) {
+                $menu['raison']     =  "Seul un collaborateur du projet peut gérer les publicatins associées à un projet";
+            } elseif ($this->sv->isNouvelle($version) && ! ($etat == Etat::ACTIF || $etat == Etat::TERMINE)) {
+                $menu['raison']     =  "Vous ne pouvez ajouter que des publications que vous avez publiées grâce au calcul sur notre mésocentre";
+            } else {
+                $menu['ok']             = true;
+                $menu['commentaire']    = "Gérer les publicatins associées au projet " . $projet->getIdProjet();
+                $menu['todo']           = '<strong>Signaler les dernières publications</strong> dans lesquelles le mésocentre a été remercié pour ce projet';
+            }
         }
 
-        $version = $projet->derniereVersion();
-        $etat    = $version->getEtatVersion();
-
-        $menu['ok']             = false;
-        $menu['commentaire']    =   "Vous ne pouvez pas modifier les publications";
-
-        if (! $projet->isCollaborateur($this->token->getUser())) {
-            $menu['raison']     =  "Seul un collaborateur du projet peut gérer les publicatins associées à un projet";
-        } elseif ($this->sv->isNouvelle($version) && ! ($etat == Etat::ACTIF || $etat == Etat::TERMINE)) {
-            $menu['raison']     =  "Vous ne pouvez ajouter que des publications que vous avez publiées grâce au calcul sur notre mésocentre";
-        } else {
-            $menu['ok']             = true;
-            $menu['commentaire']    = "Gérer les publicatins associées au projet " . $projet->getIdProjet();
-            $menu['todo']           = '<strong>Signaler les dernières publications</strong> dans lesquelles le mésocentre a été remercié pour ce projet';
-        }
-
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     /////////////////////////////////////////////////////////////////////
-
-    public function renouveler_version(Version $version, int $priorite=1):array
+    public function renouveler_version(Version $version, int $priorite=self::HPRIO):array
     {
-        $menu['name']           =   'renouveler_version';
-        $menu['param']          =   $version->getIdVersion();
-        $menu['lien']           =   "Renouvellement";
-        $menu['icone']          =   "renouveler";
-        $menu['commentaire']    =   "Vous ne pouvez pas demander de renouvellement";
-        $menu['ok']             =   false;
-        $menu['priorite']       =   $priorite;
+        $menu['name']        = 'renouveler_version';
+        $menu['param']       = $version->getIdVersion();
+        $menu['lien']        = "Renouvellement";
+        $menu['icone']       = "renouveler";
+        $menu['commentaire'] = "Vous ne pouvez pas demander de renouvellement";
+        $menu['ok']          = false;
 
         $session = $this->em->getRepository(Session::class)->findOneBy([ 'etatSession' => Etat::EDITION_DEMANDE ]);
 
@@ -1009,25 +1075,27 @@ class ServiceMenus
         $idVersion = $session->getIdSession() . $version->getProjet()->getIdProjet();
 
         if ($this->em->getRepository(Version::class)->findOneBy([ 'idVersion' =>  $idVersion]) != null) {
-            $menu['raison']     =   "Version initiale ou renouvellement déjà demandé";
+            $menu['raison'] = "Version initiale ou renouvellement déjà demandé";
         } elseif ($version->getProjet()->getEtatProjet() == Etat::TERMINE) {
-            $menu['raison']     =   "Votre projet est ou sera prochainement terminé";
+            $menu['raison'] = "Votre projet est ou sera prochainement terminé";
         } elseif ($version->isCollaborateur($this->token->getUser())) {
-            $menu['commentaire']         =   "Demander de nouvelles ressources sur ce projet pour la session " . $session->getIdSession();
-            $menu['ok']             =   true;
+            $menu['commentaire'] = "Demander de nouvelles ressources sur ce projet pour la session " . $session->getIdSession();
+            $menu['ok'] =   true;
         } elseif ($this->ac->isGranted('ROLE_ADMIN')) {
-            $menu['commentaire']         =   "Demander de nouvelles ressources sur ce projet pour la session "
+            $menu['commentaire'] = "Demander de nouvelles ressources sur ce projet pour la session "
                 .   $session->getIdSession() . " en tant qu'administrateur";
-            $menu['ok']             =   true;
+            $menu['ok'] = true;
         } else {
-            $menu['raison']         = "Vous n'avez pas le droit de renouveler ce projet, vous n'êtes pas un collaborateur";
+            $menu['raison'] = "Vous n'avez pas le droit de renouveler ce projet, vous n'êtes pas un collaborateur";
         }
+        
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     //////////////////////////////////////////////////////////////////
 
-    public function envoyer_expert(Version $version, int $priorite=1):array
+    public function envoyer_expert(Version $version, int $priorite=self::HPRIO):array
     {
         if ($version == null) {
             return [];
@@ -1044,7 +1112,6 @@ class ServiceMenus
         $menu['ok']             =   false;
         $menu['raison']         =   "";
         $menu['incomplet']      =   false;
-        $menu['priorite']      =   $priorite;
 
         $etatVersion  = $version->getEtatVersion();
 
@@ -1067,7 +1134,7 @@ class ServiceMenus
             $menu['raison'] = "Seul le responsable du projet peut envoyer ce projet à l'expert";
         }
 
-        // manu - 11 juin 2019 - Tout le monde peut créer un projet test !
+        // manu - $priorite=self::HPRIO$priorite=self::HPRIO juin 20$priorite=self::HPRIO9 - Tout le monde peut créer un projet test !
         // manu - Je ne comprends pas ce truc !
         elseif ($isProjetTest == false && $version->isResponsable($user) == true &&  ! $this->peut_creer_projets()) {
             $menu['raison'] = "Le responsable du projet n'a pas le droit de créer des projets";
@@ -1092,12 +1159,13 @@ class ServiceMenus
             $menu['name']        = 'avant_modifier_version';
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function affectation(int $priorite=1):array
+    public function affectation(int $priorite=self::HPRIO):array
     {
         $session = $this->ss->getSessionCourante();
 
@@ -1113,12 +1181,13 @@ class ServiceMenus
             $menu['commentaire']    =   "Espace d'affectation des experts";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function affectation_test(int $priorite=1):array
+    public function affectation_test(int $priorite=self::HPRIO):array
     {
         //$session = $this->ss->getSessionCourante();
 
@@ -1142,12 +1211,13 @@ class ServiceMenus
             $menu['commentaire']    =   "Espace d'affectation des experts aux projets test";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function avancer(int $priorite=1):array
+    public function avancer(int $priorite=self::HPRIO):array
     {
         //$session = $this->ss->getSessionCourante();
         $menu['name']           =   'param_avancer';
@@ -1161,12 +1231,13 @@ class ServiceMenus
             $menu['commentaire']    =   "Vous pouvez avancer dans le temps (pour déboguage)";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function mailToResponsables(int $priorite=1):array
+    public function mailToResponsables(int $priorite=self::HPRIO):array
     {
         $session = $this->ss->getSessionCourante();
         if ($session != null) {
@@ -1191,12 +1262,14 @@ class ServiceMenus
             $menu['ok']          = true;
             $menu['commentaire'] = "Envoyer un rappel aux responsables des projets qui n'ont pas renouvelé !";
         }
+
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function mailToResponsablesFiche(int $priorite=1):array
+    public function mailToResponsablesFiche(int $priorite=self::HPRIO):array
     {
         $session = $this->ss->getSessionCourante();
         if ($session != null) {
@@ -1222,12 +1295,13 @@ class ServiceMenus
             $menu['commentaire'] = "Envoyer un rappel aux responsables des projets qui n'ont pas téléversé leur fiche projet !";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function nettoyer(int $priorite=1):array
+    public function nettoyer(int $priorite=self::HPRIO):array
     {
         $menu['name']            = 'rgpd';
         $menu['lien']            = "Nettoyage pour conformité au RGPD";
@@ -1240,12 +1314,13 @@ class ServiceMenus
             $menu['commentaire'] = "Suppresion des anciens projets et des utilisateurs orphelins";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     /////////////////////////////////////////////////////////////////////////////////
 
-    public function connexions(int $priorite=1):array
+    public function connexions(int $priorite=self::HPRIO):array
     {
         $menu['name']           =   'connexions';
         $menu['lien']           =   "Personnes connectées";
@@ -1258,12 +1333,13 @@ class ServiceMenus
             $menu['commentaire']    =   "Vous pouvez pouvez voir les personnes connectées";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function presidents(int $priorite=1):array
+    public function presidents(int $priorite=self::HPRIO):array
     {
         $menu['name']           =   'individu_president';
         $menu['lien']           =   "Attribuer le rôle de président";
@@ -1276,12 +1352,13 @@ class ServiceMenus
             $menu['commentaire']    =   "Vous pouvez attribuer la fonction du président à un utilisateur admin ou expert";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function rallonge_creation(Projet $projet, int $priorite=1):array
+    public function rallonge_creation(Projet $projet, int $priorite=self::HPRIO):array
     {
         $sp = $this->sp;
 
@@ -1312,12 +1389,13 @@ class ServiceMenus
             $menu['commentaire']    =   "Vous pouvez créer une nouvelle rallonge !";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function rallonge_modifier(Rallonge $rallonge, int $priorite=1):array
+    public function rallonge_modifier(Rallonge $rallonge, int $priorite=self::HPRIO):array
     {
         $menu['name']           =   'rallonge_modifier';
         $menu['param']          =   $rallonge->getIdRallonge();
@@ -1361,13 +1439,14 @@ class ServiceMenus
             $menu['raison']         = "Vous n'avez pas le droit de modifier cette demande, vous n'êtes pas un collaborateur";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function rallonge_envoyer(Rallonge $rallonge, int $priorite=1):array
+    public function rallonge_envoyer(Rallonge $rallonge, int $priorite=self::HPRIO):array
     {
         $menu['name']        = 'avant_rallonge_envoyer';
         $menu['param']       = $rallonge->getIdRallonge();
@@ -1412,12 +1491,13 @@ class ServiceMenus
             $menu['raison']         = "Vous n'avez pas le droit d'envoyer cette demande à l'expert, vous n'êtes pas le responsable du projet";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function affectation_rallonges(int $priorite=1):array
+    public function affectation_rallonges(int $priorite=self::HPRIO):array
     {
         //$session = $this->ss->getSessionCourante();
         $menu['name']           =   'rallonge_affectation';
@@ -1431,12 +1511,13 @@ class ServiceMenus
             $menu['commentaire']    =   "Affecter les experts pour les rallonges";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function televersement_generique(int $priorite=1):array
+    public function televersement_generique(int $priorite=self::HPRIO):array
     {
         $menu['name']           =   'televersement_generique';
         $menu['lien']           =   "Téléversements génériques";
@@ -1449,13 +1530,14 @@ class ServiceMenus
             $menu['commentaire']    =   "Téléverser des fiches projet ou des rapports d'activité";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     //////////////////////////////////////////////////////////////////////////////
 
 
-    public function telechargement_fiche(Version $version, int $priorite=2):array
+    public function telechargement_fiche(Version $version, int $priorite=self::HPRIO):array
     {
         $menu['name']           =   'version_fiche_pdf';
         $menu['param']          =   $version->getIdVersion();
@@ -1477,14 +1559,12 @@ class ServiceMenus
             $menu['commentaire']    =   "Télécharger la fiche projet";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
-
     //////////////////////////////////////////////////////////////////////////////
-
-
-    public function televersement_fiche(Version $version, int $priorite=2):array
+    public function televersement_fiche(Version $version, int $priorite=self::HPRIO):array
     {
         $menu['name']           =   'version_televersement_fiche';
         $menu['param']          =   $version->getIdVersion();
@@ -1507,12 +1587,13 @@ class ServiceMenus
             $menu['todo']        = "Télécharger la fiche projet, la faire signer et la téléverser à nouveau";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function rallonge_expertiser(Rallonge $rallonge, int $priorite=1):array
+    public function rallonge_expertiser(Rallonge $rallonge, int $priorite=self::HPRIO):array
     {
         $menu['name']        =   'rallonge_expertiser';
         $menu['param']       =   $rallonge->getIdRallonge();
@@ -1560,13 +1641,14 @@ class ServiceMenus
             $menu['raison']         = "Vous n'avez pas le droit d'expertiser cette demande, vous n'êtes pas l'expert designé";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques_etablissement(int $priorite=1): array
+    public function statistiques_etablissement(int $priorite=self::HPRIO): array
     {
         $menu['name']           =   'statistiques_etablissement';
         $menu['lien']           =   "Etablissements";
@@ -1580,12 +1662,13 @@ class ServiceMenus
             $menu['raison']         =   "Vous devez être président ou administrateur pour y accéder";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques_laboratoire(int $priorite=1): array
+    public function statistiques_laboratoire(int $priorite=self::HPRIO): array
     {
         $menu['name']           =   'statistiques_laboratoire';
         $menu['lien']           =   "Laboratoires";
@@ -1599,6 +1682,7 @@ class ServiceMenus
             $menu['raison']         =   "Vous devez être président ou administrateur pour y accéder";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
@@ -1618,6 +1702,7 @@ class ServiceMenus
             $menu['raison']         =   "Vous devez être président ou administrateur pour y accéder";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
@@ -1637,12 +1722,13 @@ class ServiceMenus
             $menu['raison']         =   "Vous devez être président ou administrateur pour y accéder";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques(int $priorite=1):array
+    public function statistiques(int $priorite=self::HPRIO):array
     {
         $menu['name']           =   'statistiques';
         $menu['lien']           =   "Statistiques";
@@ -1656,12 +1742,13 @@ class ServiceMenus
             $menu['raison']         =   "Vous devez être président ou observateur";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function publications(int $priorite=1):array
+    public function publications(int $priorite=self::HPRIO):array
     {
         $menu['name']           =   'publication_annee';
         $menu['lien']           =   "Publications";
@@ -1674,12 +1761,14 @@ class ServiceMenus
             $menu['commentaire']    =   "Vous ne pouvez pas accéder aux publications  !";
             $menu['raison']         =   "Vous devez être président ou observateur";
         }
+
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques_collaborateur(int $priorite=1): array
+    public function statistiques_collaborateur(int $priorite=self::HPRIO): array
     {
         $menu['name']           =   'statistiques_collaborateur';
         $menu['lien']           =   "Collaborateurs";
@@ -1693,12 +1782,13 @@ class ServiceMenus
             $menu['raison']         =   "Vous devez être président ou administrateur pour y accéder";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques_repartition(int $priorite=1): array
+    public function statistiques_repartition(int $priorite=self::HPRIO): array
     {
         $menu['name']           =   'statistiques_repartition';
         $menu['lien']           =   "Projets";
@@ -1712,13 +1802,14 @@ class ServiceMenus
             $menu['raison']         =   "Vous devez être président ou administrateur pour y accéder";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     /*
      * Demandes concernant stockage et partage des données
      */
-    public function donnees(Version $version, int $priorite=2):array
+    public function donnees(Version $version, int $priorite=self::HPRIO):array
     {
         $menu['name']  = 'donnees';
         $menu['param'] = $version->getIdVersion();
@@ -1738,6 +1829,7 @@ class ServiceMenus
             $menu['commentaire'] = "Gestion et valorisation des données";
         }
 
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 }
