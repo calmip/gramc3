@@ -480,23 +480,25 @@ class ProjetSpecController extends AbstractController
         if ($ac->isGranted('ROLE_ADMIN')) {
             $menu[] = $sm->rallonge_creation($projet);
         }
+
         $menu[] = $sm->renouveler_version($version);
         $menu[] = $sm->modifier_version($version);
         $menu[] = $sm->envoyer_expert($version);
         $menu[] = $sm->changer_responsable($version);
         $menu[] = $sm->modifier_collaborateurs($version);
+
         if ($this->getParameter('nodata')==false) {
             $menu[] = $sm->donnees($version);
         }
         $menu[] = $sm->gerer_publications($projet);
-        $menu[] = $sm->telechargement_fiche($version);
-        $menu[] = $sm->televersement_fiche($version);
+        $menu[] = $sm->telechargement_fiche($version,ServiceMenus::BPRIO);
+        $menu[] = $sm->televersement_fiche($version,ServiceMenus::BPRIO);
 
         $etat_version = $version->getEtatVersion();
         if ($this->getParameter('rapport_dactivite')) {
             if (($etat_version == Etat::ACTIF || $etat_version == Etat::TERMINE) && ! $sp->hasRapport($projet, $version->getAnneeSession())) {
-                $menu[] = $sm->telecharger_modele_rapport_dactivite($version);
-                $menu[] = $sm->televerser_rapport_annee($version);
+                $menu[] = $sm->telecharger_modele_rapport_dactivite($version,ServiceMenus::BPRIO);
+                $menu[] = $sm->televerser_rapport_annee($version,ServiceMenus::BPRIO);
             }
         }
 
