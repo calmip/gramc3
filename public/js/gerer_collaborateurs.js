@@ -16,8 +16,8 @@ $(".collection").each(function()
         $(".collection-contents",this).data("count", $(".collection-tbody",this).find('tr').length);
 
     // ajout d'un paramètre id unique au bouton
-    $(this).append('<button class="add" id="' + $(this).parent().parent().attr('id') +
-                                '_add" type="submit">Ajouter une ligne dans le formulaire</button>');
+    $(this).append('<button class="add" style="" id="' + $(this).parent().parent().attr('id') +
+                                '_add" type="submit"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="9.5"/><path d="M10 16V4M16 10H4" stroke-linecap="round"/></svg>Ajouter une ligne</button>');
 
     $(this).find(".collection-tbody-old").find("input[id$='_mail'][type='text']")
         .attr("class","mail ui-autocomplete-input").prop('disabled', true)

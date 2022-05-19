@@ -406,9 +406,10 @@ class ServiceMenus
         // manu, 11 juin 2019: tout le monde peut créer un projet test. Vraiment ???
         //elseif( ! $this->peut_creer_projets() )
         //    $menu['raison'] = "Vous n'avez pas le droit de créer un projet test, peut-être faut-il mettre à jour votre profil ?";
-        elseif ($etat_session == Etat::EDITION_DEMANDE) {
-            $menu['raison'] = "Il n'est pas possible de créer un projet test en période d'attribution";
-        } else {
+        //elseif ($etat_session == Etat::EDITION_DEMANDE) {
+        //    $menu['raison'] = "Il n'est pas possible de créer un projet test en période d'attribution";
+        //}
+         else {
             $menu['commentaire'] = "Créer un projet test: 5000h max, uniquement pour faire des essais et avoir une idée du nombre d'heures dont vous avez besoin.";
             $menu['ok'] = true;
         }
@@ -867,7 +868,7 @@ class ServiceMenus
         if ($version != null) {
             $etat           = $version->getEtatVersion();
             $menu['param']  = $version->getIdVersion();
-            $menu['lien']   = "Téléverser le rapport d'activité pour l'année " . $version->getAnneeSession();
+            $menu['lien']   = "Rapport d'activité de l'année " . $version->getAnneeSession();
 
             if ($this->ac->isGranted('ROLE_ADMIN') && ($etat == Etat::ACTIF || $etat == Etat::TERMINE)) {
                 $menu['commentaire'] = "Téléverser un rapport d'activité pour un projet en tant qu'administrateur";
@@ -905,7 +906,7 @@ class ServiceMenus
             }
         } else {
             $menu['param']          =   0;
-            $menu['lien']           =   "Téléverser le rapport d'activité";
+            $menu['lien']           =   "Rapport d'activité";
             $menu['commentaire']    =   "Vous ne pouvez pas téléverser un rapport d'activité pour ce projet";
             $menu['raison']         =   "Mauvaise version du projet !";
             $this->sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Version null !");
@@ -920,9 +921,10 @@ class ServiceMenus
     public function telecharger_modele_rapport_dactivite(Version $version, int $priorite=2):array
     {
         $menu['name']           =   'telecharger_modele';
-        $menu['lien']           =   "Télécharger un modèle de rapport d'activité";
+        $menu['lien']           =   "Modèle de rapport d'activité";
         $menu['ok']             =   false;
         $menu['commentaire'] = "Vous ne pouvez pas télécharger un modèle de rapport d'activité pour ce projet";
+        $menu['telecharger']  = "telecharger";
         $menu['priorite']  = $priorite;
 
         if ($version != null) {
@@ -1459,10 +1461,11 @@ class ServiceMenus
     {
         $menu['name']           =   'version_fiche_pdf';
         $menu['param']          =   $version->getIdVersion();
-        $menu['lien']           =   "Téléchargement de la fiche projet";
+        $menu['lien']           =   "Fiche projet";
         $menu['commentaire']    =   "Vous ne pouvez pas télécharger la fiche de ce projet";
         $menu['ok']             =   false;
         $menu['raison']         =   "Vous n'êtes pas un collaborateur du projet";
+        $menu['icone']          =   "telecharger";
         $menu['priorite']  = $priorite;
 
         if ($this->ac->isGranted('ROLE_ADMIN')) {
@@ -1488,11 +1491,12 @@ class ServiceMenus
     {
         $menu['name']           =   'version_televersement_fiche';
         $menu['param']          =   $version->getIdVersion();
-        $menu['lien']           =   "Téléversement de la fiche projet";
+        $menu['lien']           =   "Fiche projet";
         $menu['commentaire']    =   "Vous ne pouvez pas téléverser la fiche de ce projet";
         $menu['ok']             =   false;
         $menu['raison']         =   "Vous n'êtes pas un collaborateur du projet";
         $menu['priorite']  = $priorite;
+        $menu['icone']  = "televerser";
 
         if ($this->ac->isGranted('ROLE_ADMIN')) {
             $menu['ok']             =   true;
