@@ -49,7 +49,7 @@ abstract class BilanSession
     //            $ressources_conso_group Paramètre
     //            $request
     //            $grdt    GramcDate
-    //			  $session
+    //            $session
     //            $ss      ServiceSession
     //            $em
 
@@ -151,8 +151,7 @@ abstract class BilanSession
         $totaux = $this->initTotaux();
 
         // première ligne = les entêtes
-        $sortie = join($this->getEntetes(), "\t") . "\n";
-        ;
+        $sortie = join("\t",$this->getEntetes()) . "\n";
 
         // boucle principale
         foreach ($versions as $version) {

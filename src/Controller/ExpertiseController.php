@@ -40,6 +40,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 use App\Utils\Functions;
 use App\Utils\Menu;
@@ -54,6 +55,7 @@ use App\GramcServices\ServiceNotifications;
 use App\GramcServices\ServiceProjets;
 use App\GramcServices\ServiceSessions;
 use App\GramcServices\ServiceVersions;
+use App\GramcServices\ServiceMenus;
 use App\GramcServices\ServiceExperts\ServiceExperts;
 use App\GramcServices\GramcDate;
 
@@ -88,6 +90,7 @@ class ExpertiseController extends AbstractController
         private ServiceJournal $sj,
         private ServiceProjets $sp,
         private ServiceSessions $ss,
+        private ServiceMenus $sm,
         private GramcDate $sd,
         private ServiceVersions $sv,
         private ServiceExperts $se,
@@ -180,7 +183,7 @@ class ExpertiseController extends AbstractController
 
     /**
      * Affectation des experts
-     *	  Affiche l'écran d'affectation des experts
+     * Affiche l'écran d'affectation des experts
      *
      * @Route("/affectation", name="affectation", methods={"GET","POST"})
      * Method({"GET", "POST"})
@@ -245,6 +248,30 @@ class ExpertiseController extends AbstractController
             'attHeures'     => $attHeures,
             ]
         );
+    }
+    
+    /**
+     * Afficher une expertise
+     *
+     * @Route("/consulter/{id}", name="consulter_expertise", methods={"GET"})
+     * @ Security("is_granted('ROLE_PRESIDENT')")
+     */
+    public function consulterAction(Request $request, Expertise $expertise): Response
+    {
+        $token = $this->token;
+        $sm = $this->sm;
+
+        $menu[] = $sm -> expert();
+        
+        $moi = $token->getUser();
+        $version = $expertise->getVersion();
+        if ($version != null && $version->isExpertDe($moi))
+        {
+            return $this->render('expertise/consulter.html.twig', [ 'expertise' => $expertise, 'menu' => $menu ]);
+        }
+        else{
+            return new RedirectResponse($this->generateUrl('accueil'));
+        }
     }
 
     /**
@@ -414,6 +441,7 @@ class ExpertiseController extends AbstractController
                         'attrHeures' => $version->getAttrHeures(),
                         'responsable' =>  $version->getResponsable(),
                         'versionId'   => $version->getIdVersion(),
+                        'id' => $expertise->getId()
                        ];
             $old_expertises[] = $output;
         };

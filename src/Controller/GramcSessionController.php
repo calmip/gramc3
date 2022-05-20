@@ -315,36 +315,27 @@ class GramcSessionController extends AbstractController
         $ff = $this->ff;
 
         // vérifier si eppn est disponible dans $session
-        if (! $request->getSession()->has('eppn')) { // une tentative de piratage
-            $sj->warningMessage(__FILE__ . ":" . __LINE__ . " No eppn pour le nouveau_compte");
-            $lg->warning("No eppn at nouveau_compte", [ 'request' => $request ]);
-            // return new Response(' no eppn ' );
+        // Sinon, c'est peut-être qu'on est allé à l'URL nouveau_compte sans être authentifié
+        if (! $request->getSession()->has('eppn')) {
+            $sj->warningMessage(__FILE__ . ":" . __LINE__ . " Pas d'eppn dans session");
+            $lg->warning("URL nouveau_compte: Pas d'EPPN", [ 'request' => $request ]);
             return $this->redirectToRoute('accueil');
         }
 
-        $eppn = $request->getSession()->get('eppn');
+        // normalement on a un eppn correct dans la sesison
+        $eppn = "";
+        if ($request->getSession()->has('eppn')) {
+            $eppn = $request->getSession()->get('eppn');
+        }
 
-        // tests !
-        // $eppn = "";
-
-        // vérifier si email est disponible dans $session, sinon on redirige sur accueil avec un message dans le journal
+        // vérifier si email est disponible dans la session
+        $email = "";
         if ($request->getSession()->has('mail')) {
             $email = $request->getSession()->get('mail');
-
-        // vérifier si email est disponible dans les headers
-        } elseif ($request->headers->has('mail')) {
-            $email = $request->headers->get('mail');
-            $request->getSession()->set('mail',$email);
-
-        // Pas d'adresse = Pas d'ouverture de compte
-        } else {
-            $sj->warningMessage(__FILE__ . ":" . __LINE__ . " Pas d'adresse mail pour le nouveau compte (eppn = $eppn");
-            return $this->redirectToRoute('accueil');
         }
 
-        // $eppn = 'toto';
-        // Mauvais eppn - Pas d'ouverture de compte
         // On ne vérifie que la présence de l'eppn, pas sa conformité
+        // Ce qu'on appelle eppn peut être un autre header (persistent-id par exemple)'
         if ($eppn === "") {
             $sj->warningMessage(__FILE__ . ":" . __LINE__ . " eppn défectueux pour le nouveau compte (eppn=$eppn, mail=$email)");
             return $this->redirectToRoute('accueil');
@@ -352,7 +343,8 @@ class GramcSessionController extends AbstractController
 
         // $email = "";
         // Mauvaise adresse - Pas d'ouverture de compte
-        if (!$this->isEmail($email)) {
+        if ($email != "" && !$this->isEmail($email))
+        {
             $sj->warningMessage(__FILE__ . ":" . __LINE__ . " Adresse mail défectueuse pour le nouveau compte (eppn=$eppn, mail=$email)");
             return $this->redirectToRoute('accueil');
         };

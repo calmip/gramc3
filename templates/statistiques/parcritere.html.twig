@@ -15,9 +15,23 @@
 {% if sess_lbl != 'AB' %} - session {{ sess_lbl }} {% endif %}
 </h1>
 
+<div class="message info">
+{% if sess_lbl=='AB' %}
+<p>Sont pris en compte tous les projets <strong>de session</strong> ou <strong>fil de l'eau</strong> qui ont démarré ou ont
+été renouvelés en {{ annee }}</p>
+{% else %}
+<p>Sont pris en compte <strong>seulement les projets de session</strong> qui ont démarré ou ont
+été renouvelés en {{ annee }} lors de la session {{ sess_lbl }}</p>
+{% endif %}
+<p>Ne sont pas pris en compte les versions de projets <strong>en cours d'édition</strong></p>
+</div>
 {% set route='statistiques_' ~ titre ~ '_csv' %}
 <form action="{{ path(route, { 'annee' : annee }) }}">
-<input type="submit" value="Télécharger en csv les statistiques par {{titre}} - année {{ annee }}">
+    {% if sess_lbl == 'AB' %}
+    <input type="submit" value="csv - statistiques par {{titre}} - année {{ annee }}">
+    {% else %}
+    <input type="submit" value="csv - statistiques par {{titre}} - année {{ annee }} - session {{ sess_lbl }}">
+    {% endif %}
 </form>
 
 <br />
@@ -27,6 +41,7 @@
         <tr>
             <th>{{titre}}</th>
             <th>Nombre de projets</th>
+            {% if sess_lbl!='AB' %}<th>Nouveaux projets</th><th>Renouvellements</th>{% endif %}
             <th>Heures demandées</th>
             <th>Heures attribuées</th>
             {% if sess_lbl == 'AB' %}<th>Consommation</th>{% endif %}
@@ -37,6 +52,7 @@
         <tr>
             <td>{{ acro }}</td>
             <td>{{ num_projets[acro] }}</td>
+            {% if sess_lbl!='AB' %}<td>{{ num_projets_n[acro] }}</td><td>{{ num_projets_r[acro] }}</td>{% endif %}
             <td>{{ dem_heures[acro] }}</td>
             <td>{{ attr_heures[acro] }}</td>
             {% if sess_lbl == 'AB' %}<td>{{ conso[acro] }}</td>{% endif %}
@@ -44,7 +60,6 @@
         {% endfor %}
     </tbody>
 </table>
-
 
 <table>
     <tbody>
