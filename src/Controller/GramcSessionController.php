@@ -37,14 +37,17 @@ use Symfony\Component\HttpFoundation\Session\Storage\PhpBridgeSessionStorage;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 use App\Form\IndividuType;
+use App\Entity\Version;
+use App\Entity\Projet;
+use App\Entity\CollaborateurVersion;
 use App\Entity\Individu;
 use App\Entity\Scalar;
 use App\Entity\Sso;
 use App\Entity\CompteActivation;
 use App\Entity\Journal;
+use App\GramcServices\Etat;
 
 use App\Utils\Functions;
-//use App\Utils\IDP;
 
 use App\GramcServices\Workflow\Projet\ProjetWorkflow;
 use App\GramcServices\ServiceMenus;
@@ -258,7 +261,8 @@ class GramcSessionController extends AbstractController
     public function profilAction(Request $request): Response
     {
         $sj = $this->sj;
-
+        $em = $this->getDoctrine()->getManager();
+        
         $individu = $this->ts->getToken()->getUser();
 
         if ($individu == 'anon.' || ! ($individu instanceof Individu)) {
@@ -268,7 +272,8 @@ class GramcSessionController extends AbstractController
         $form = $this->createForm(IndividuType::class, $individu, ['mail' => false ]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid())
+        {
             if ($old_individu->isPermanent() != $individu->isPermanent() && $individu->isPermanent() == false) {
                 $sj->warningMessage(__METHOD__ . ':' . __LINE__ . " " . $individu . " cesse d'être permanent !!");
             }
@@ -291,15 +296,51 @@ class GramcSessionController extends AbstractController
                 . " vers " . $new_laboratoire);
             }
 
-            $em = $this->getDoctrine()->getManager();
             $em->persist($individu);
             $em->flush();
+
+            // On recopie le nouveau profil dans les projets actifs ou en cours d'édition
+            $projetRepository = $em->getRepository(Projet::class);
+            $cvRepository = $em->getRepository(CollaborateurVersion::class);
+            $list_projets = $projetRepository-> getProjetsCollab($individu->getId(), true, true);
+            foreach ($list_projets as $projet)
+            {
+                foreach ($projet->getVersion() as $v)
+                {
+                    if ($v->getEtatVersion() != Etat::TERMINE && $v->getEtatVersion() != Etat::ANNULE)
+                    {
+                        
+                        foreach ($v->getCollaborateurVersion() as $cv)
+                        {
+                            $c = $cv->getCollaborateur();
+                            if ( $c->isEqualTo($individu))
+                            {
+                                $cv->setStatut($individu->getStatut());
+                                $cv->setLabo($individu->getLabo());
+                                $cv->setEtab($individu->getEtab());
+                                $em->persist($cv);
+                                $em->flush();
+
+                                // Si le responsable a changé de labo il faut poitionner le champ de la version
+                                if ($cv->getResponsable())
+                                {
+                                    $v->setPrjLLabo(Functions::string_conversion($c->getLabo()));
+                                    $em->persist($v);
+                                    $em->flush();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             return $this->redirectToRoute('accueil');
-        } else {
+        }
+        else
+        {
             return $this->render('default/profil.html.twig', ['form' => $form->createView() ]);
         }
     }
-
 
     /**
     * @Route("/nouveau_compte", name="nouveau_compte", methods={"GET","POST"})

@@ -309,9 +309,9 @@ Le laboratoire associé au projet est le laboratoire du responsable
             <td>{{ user.Collaborateur.prenom }}</td>
             <td>{{ user.Collaborateur.nom }}</td>
             <td>{{ user.Collaborateur.mail }}</td>
-            <td>{% if( not ( user.Collaborateur.statut == null ) ) %}{{ user.Collaborateur.statut }}{% endif %}</td>
-            <td>{% if( not ( user.Collaborateur.labo == null ) ) %}{{ user.Collaborateur.labo.getAcroLabo }}{% endif %}</td>
-            <td>{{ user.Collaborateur.etab }}</td>
+            <td>{% if( not ( user.statut == null ) ) %}{{ user.statut }}{% endif %}</td>
+            <td>{% if( not ( user.labo == null ) ) %}{{ user.labo.getAcroLabo }}{% endif %}</td>
+            <td>{{ user.etab }}</td>
         </tr>
         {% endif %}
     {% endfor %}
