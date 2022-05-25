@@ -297,7 +297,8 @@ class MailController extends AbstractController
                 }
 
                 # Session de type B = On ne s'intéresse qu'aux projets qui ont une forte consommation
-                else {
+                else
+                {
                     if ($derniereVersion->getSession()->getLibelleTypeSession() == 'B') {
                         continue;
                     }
@@ -309,25 +310,21 @@ class MailController extends AbstractController
                         $rapport = 0;
                     }
 
-                    if ($this->container->hasParameter('conso_seuil_1')) {
-                        if ($rapport > $this->getParameter('conso_seuil_1')) {
-                            $responsable    =  $derniereVersion->getResponsable();
-                            if ($responsable != null) {
-                                $ind = $responsable->getIdIndividu();
-                                $responsables[$ind]['selform']                         = $this->getSelForm($responsable)->createView();
-                                $responsables[$ind]['responsable']                     = $responsable;
-                                $responsables[$ind]['projets'][$projet->getIdProjet()] = $projet;
-                                if (!isset($responsables[$ind]['max_attr'])) {
-                                    $responsables[$ind]['max_attr'] = 0;
-                                }
-                                $attr = $projet->getVersionActive()->getAttrHeures();
-                                if ($attr>$responsables[$ind]['max_attr']) {
-                                    $responsables[$ind]['max_attr'] = $attr;
-                                }
+                    if ($rapport > $this->getParameter('conso_seuil_1')) {
+                        $responsable = $derniereVersion->getResponsable();
+                        if ($responsable != null) {
+                            $ind = $responsable->getIdIndividu();
+                            $responsables[$ind]['selform'] = $this->getSelForm($responsable)->createView();
+                            $responsables[$ind]['responsable'] = $responsable;
+                            $responsables[$ind]['projets'][$projet->getIdProjet()] = $projet;
+                            if (!isset($responsables[$ind]['max_attr'])) {
+                                $responsables[$ind]['max_attr'] = 0;
+                            }
+                            $attr = $projet->getVersionActive()->getAttrHeuresTotal();
+                            if ($attr>$responsables[$ind]['max_attr']) {
+                                $responsables[$ind]['max_attr'] = $attr;
                             }
                         }
-                    } else {
-                        $sj->errorMessage(__METHOD__ . ':'. __LINE__ . " le paramètre conso_seuil_1 manque !");
                     }
                 }
             }
