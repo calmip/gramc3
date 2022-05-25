@@ -16,27 +16,27 @@
 
     <table><tbody>
     {% for responsable in responsables %}
-	<tr>
-		<td>{{ form_widget(responsable.selform ) }}</td>
-	    <td>{{ responsable.responsable.prenom }}</td>
-	    <td>{{ responsable.responsable.nom }}</td>
-	    <td>{{ responsable.responsable.mail }}</td>
-	    <td>
-		{% for projet in responsable.projets %}
-		{# TODO - projet.versionactive NE MARCHE PLUS !!! #}
-		{{ projet }} <small>({{ projet.versionactive.attrHeures|number_format(0, ',', ' ') }}h)</small>
-		{% endfor %}
-	    </td>
-	</tr>
+    <tr>
+        <td>{{ form_widget(responsable.selform ) }}</td>
+        <td>{{ responsable.responsable.prenom }}</td>
+        <td>{{ responsable.responsable.nom }}</td>
+        <td>{{ responsable.responsable.mail }}</td>
+        <td>
+        {% for projet in responsable.projets %}
+        {# TODO - projet.versionactive NE MARCHE PLUS !!! #}
+        {{ projet }} <small>({{ projet.versionactive.attrHeuresTotal|number_format(0, ',', ' ') }}h)</small>
+        {% endfor %}
+        </td>
+    </tr>
     {% endfor %}
     </tbody></table>
 
-	<div class="center">
-	<p>
+    <div class="center">
+    <p>
     {{ form_widget( form)}}
     {{ form_end(form) }}
     </p>
-	</div>
+    </div>
 
 {% else %}
 
