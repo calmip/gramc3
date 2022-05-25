@@ -311,16 +311,16 @@ class MailController extends AbstractController
                     }
 
                     if ($rapport > $this->getParameter('conso_seuil_1')) {
-                        $responsable    =  $derniereVersion->getResponsable();
+                        $responsable = $derniereVersion->getResponsable();
                         if ($responsable != null) {
                             $ind = $responsable->getIdIndividu();
-                            $responsables[$ind]['selform']                         = $this->getSelForm($responsable)->createView();
-                            $responsables[$ind]['responsable']                     = $responsable;
+                            $responsables[$ind]['selform'] = $this->getSelForm($responsable)->createView();
+                            $responsables[$ind]['responsable'] = $responsable;
                             $responsables[$ind]['projets'][$projet->getIdProjet()] = $projet;
                             if (!isset($responsables[$ind]['max_attr'])) {
                                 $responsables[$ind]['max_attr'] = 0;
                             }
-                            $attr = $projet->getVersionActive()->getAttrHeures();
+                            $attr = $projet->getVersionActive()->getAttrHeuresTotal();
                             if ($attr>$responsables[$ind]['max_attr']) {
                                 $responsables[$ind]['max_attr'] = $attr;
                             }
