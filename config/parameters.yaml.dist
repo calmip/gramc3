@@ -73,7 +73,10 @@ parameters:
     
     # Suppression des formulaires concernant les données (stockage et partage)
     nodata: false
-    
+
+    # Si true, le resp de projet peut modifier le profil de ses collaborateurs
+    resp_peut_modif_collabs: true
+
     # Suppression d'une étape dans le workflow des sessions
     # Cette étape est utile si on a un comité d'attribution constitué,
     # car elle vient APRES la réunion: on attend la réunion ET l'entrée du commentaire de session

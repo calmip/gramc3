@@ -61,6 +61,7 @@ class ServiceVersions
                                 private $nodata,
                                 private $max_fig_width,
                                 private $max_fig_height,
+                                private $resp_peut_modif_collabs,
                                 private ServiceJournal $sj,
                                 private ValidatorInterface $vl,
                                 private ServiceForms $sf,
@@ -946,6 +947,11 @@ class ServiceVersions
         $em = $this->em;
         $sval= $this->vl;
 
+        $text_fields = true;
+        if ( $this->resp_peut_modif_collabs)
+        {
+            $text_fields = false;
+        }
         return $this->ff
                    ->createNamedBuilder('form_projet', FormType::class, [ 'individus' => $this->prepareCollaborateurs($version, $sj, $sval) ])
                    ->add('individus', CollectionType::class, [
@@ -958,7 +964,7 @@ class ServiceVersions
                        'by_reference'   =>  false,
                        'delete_empty'   =>  true,
                        'attr'         => ['class' => "profil-horiz",],
-                       'entry_options' =>['text_fields' => true]
+                       'entry_options' =>['text_fields' => $text_fields]
                     ])
                     ->getForm();
     }

@@ -986,12 +986,17 @@ class IndividuController extends AbstractController
         // TODO - IndividuForm n'est PAS un objet de type Form !!!! Grrrrr
         //        $form est un objet de type IndividuFormType, c'est bien un form associé à un object de type IndividuForm
         $collaborateur    = new IndividuForm();
-        $form = $this->createForm('App\Form\IndividuFormType', $collaborateur, ['csrf_protection' => false, 'text_fields' => true]);
+        $text_fields = true;
+        if ($this->getParameter('resp_peut_modif_collabs'))
+        {
+            $text_fields = false;
+        }
+        $form = $this->createForm('App\Form\IndividuFormType', $collaborateur, ['csrf_protection' => false, 'text_fields' => $text_fields]);
 
         $form->handleRequest($request);
 
         // On vient de soumettre le formulaire via son adresse mail
-        if ($form->isSubmitted()  && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             // On recherche l'individu ayant le bon mail et on complète l'objet $collaborateur'
             $individu = $em->getRepository(Individu::class)->findOneBy(['mail' => $collaborateur->getMail() ]);
             if ($individu != null) {
@@ -1018,7 +1023,12 @@ class IndividuController extends AbstractController
                 }
 
                 // Maintenant on recrée un $form en utilisant le $collaborateur complété
-                $form = $this->createForm('App\Form\IndividuFormType', $collaborateur, ['csrf_protection' => false, 'text_fields' => true]);
+                $text_fields = true;
+                if ($this->getParameter('resp_peut_modif_collabs'))
+                {
+                    $text_fields = false;
+                }
+                $form = $this->createForm('App\Form\IndividuFormType', $collaborateur, ['csrf_protection' => false, 'text_fields' => $text_fields]);
 
                 return $this->render('version/collaborateurs_ligne.html.twig', [ 'form' => $form->createView() ]);
             } else {
