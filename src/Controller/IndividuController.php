@@ -42,6 +42,7 @@ use App\Form\IndividuForm\IndividuForm;
 
 use App\GramcServices\ServiceJournal;
 use App\GramcServices\ServiceExperts\ServiceExperts;
+use App\GramcServices\ServiceInvitations;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
@@ -61,6 +62,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
@@ -76,7 +78,9 @@ class IndividuController extends AbstractController
     public function __construct(
         private ServiceExperts $se,
         private ServiceJournal $sj,
+        private ServiceInvitations $si,
         private FormFactoryInterface $ff,
+        private TokenStorageInterface $tok,
         private AuthorizationCheckerInterface $ac
     ) {}
 
@@ -409,22 +413,20 @@ class IndividuController extends AbstractController
             return $this->redirectToRoute('individu_gerer');
         }
 
-        // Nouvel EPPN
-        $formSso = $this->ajoutEppn($request, $individu);
-
+        
         return $this->render(
             'individu/modif.html.twig',
             [
             'individu' => $individu,
             'formInd' => $editForm->createView(),
-            'formSso' => $formSso->createView(),
+            'formSso' => null,
             'formEppn' => null
             ]
         );
     }
 
     /**
-     * Displays Modifier une entité individu.
+     * Modifier une entité individu.
      *
      * @Route("/{id}/modify", name="individu_modify", methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
@@ -511,11 +513,27 @@ class IndividuController extends AbstractController
         );
     }
 
+     /**
+     *
+     * Envoyer une invitation
+     *
+     * @Route("/{id}/invitation", name="invitation", methods={"GET"})
+     * @Security("is_granted('ROLE_ADMIN')")
+     *
+     ***************************************/
+    public function invitationAction(Request $request, Individu $individu): Response
+    {
+        $token = $this->tok->getToken();
+        $user = $token->getUser();
+        $this->si->sendInvitation($user, $individu);
+        return $this->render('individu/invitation.html.twig');
+    }
+
     /*********************************
      * 
      * Ajout d'un nouvel eppn
      *
-     */
+     **************************************/
     private function ajoutEppn(Request $request, Individu $individu) : FormInterface
     {
         $em = $this->getDoctrine()->getManager();

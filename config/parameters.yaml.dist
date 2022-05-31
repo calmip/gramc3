@@ -156,7 +156,9 @@ parameters:
     
     # Durée de vie du mot de passe temporaire géré par gramc
     pwd_duree: P30D
-    
+
+    # La durée de vie d'une invitation
+    invit_duree: P15D
     
     # Les IDP les plus importants - Sur la fédération de dev on se limite aux comptes CRU on sait qu'ils fonctionnent
     IDPprod:

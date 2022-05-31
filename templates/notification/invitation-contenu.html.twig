@@ -1,0 +1,11 @@
+Bonjour {{ invitation.invited.prenom |raw }} {{ invitation.invited.nom |raw }}
+
+Vous avez été invité-e par {{ invitation.inviting.prenom |raw }} {{ invitation.inviting.nom |raw }} sur la plateforme d'attribution de ressources de {{mesoc}}
+
+Afin de finaliser l'ouverture de votre compte sur cette plateforme,
+pouvez-vous s'il vous plaît vous connecter à {{ absolute_url(path('accueil')) |raw }} et renseigner complètement votre profil ?
+
+ATTENTION L'invitation expire le {{ date_limite | date('d-m-Y')}}
+
+Cordialement,
+L'équipe {{mesoc}}

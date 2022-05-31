@@ -122,6 +122,9 @@ services:
     App\GramcServices\ServiceExperts\ServiceExpertsRallonge:
         arguments: [ "%max_expertises_nb%" ]
 
+    App\GramcServices\ServiceInvitations:
+        arguments: [ "%invit_duree%" ]
+
     App\Controller\ExpertiseController:
         arguments: [ '%max_expertises_nb%' ]
 

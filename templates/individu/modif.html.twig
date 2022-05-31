@@ -30,7 +30,13 @@
 
 {% block body %}
 
-    <h2>{% if formEppn==null%}Ajouter {% else %} Modifier {% endif %} un utilisateur</h2>
+    {% if formEppn==null %}
+        {% set ajout=true %}
+    {% else %}
+        {% set ajout=false %}
+    {% endif %}
+    
+    <h2>{% if ajout %}Ajouter {% else %} Modifier {% endif %} un utilisateur</h2>
     <p class="centrage"><em>Veuillez s'il vous plait renseigner tous les champs</em></p>
 
     <div id="profil">
@@ -39,21 +45,27 @@
     {{ form_end(formInd) }}
     </div>
 
-    {% if (individu.eppn | length != 0) %}
-
-        {% if formEppn != null %}
-        <h2>Suppression d'un eppn</h2>
-        <p class="centrage"><em>Décochez les identifiants que vous souhaitez supprimer</em></p>
-        
-        {% form_theme formEppn 'foundation_5_layout.html.twig' %}
-        <div id="eppn">
-        {{ form_start(formEppn) }}
-        <fieldset>{{ form_widget(formEppn) }}</fieldset>
-        {{ form_end(formEppn) }}
-        </div>
+    {% if ajout %}
+    <p class="centrage"><em>Un courriel d'invitation sera envoyé à l'adresse de l'utilisateur que vous venez d'ajouter</em></p>
+    {% endif %}
+    
+    {% if formEppn != null %}
+        {% if (individu.eppn | length != 0) %}
+    
+            {% if formEppn != null %}
+            <h2>Suppression d'un eppn</h2>
+            <p class="centrage"><em>Décochez les identifiants que vous souhaitez supprimer</em></p>
+            
+            {% form_theme formEppn 'foundation_5_layout.html.twig' %}
+            <div id="eppn">
+            {{ form_start(formEppn) }}
+            <fieldset>{{ form_widget(formEppn) }}</fieldset>
+            {{ form_end(formEppn) }}
+            </div>
+            {% endif %}
+        {% else %}
+            <p class="centrage"><em>Cet utilisateur n'a pas d'eppn, il ne peut pas se connecter à gramc</em></p>
         {% endif %}
-    {% else %}
-        <p class="centrage"><em>Cet utilisateur n'a pas d'eppn, il ne peut pas se connecter à gramc</em></p>
     {% endif %}
 
     {% if formSso != null %}
@@ -64,5 +76,10 @@
         {{ form_widget(formSso)}}
         {{ form_end(formSso) }}
     </div>
+
+    <h2>...ou envoyer une invitation</h2>
+
+    <p class="centrage"><a class="lien_actif" href="{{ path('invitation', { 'id': individu.id }) }}" title="Envoyer une invitation à ">Inviter {{individu.prenom}} {{individu.nom}}</a></p>
+    
     {% endif %}
 {% endblock %}
