@@ -44,6 +44,7 @@ use App\Form\IndividuForm\IndividuForm;
 use App\GramcServices\ServiceJournal;
 use App\GramcServices\ServiceExperts\ServiceExperts;
 use App\GramcServices\ServiceInvitations;
+use App\GramcServices\ServiceIndividus;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
@@ -77,6 +78,7 @@ use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 class IndividuController extends AbstractController
 {
     public function __construct(
+        private ServiceIndividus $sid,
         private ServiceExperts $se,
         private ServiceJournal $sj,
         private ServiceInvitations $si,
@@ -110,6 +112,7 @@ class IndividuController extends AbstractController
     public function remplacerUtilisateurAction(Request $request, Individu $individu): Response
     {
         $em = $this->getDoctrine()->getManager();
+        $sid = $this->sid;
         $sj = $this->sj;
         $ff = $this->ff;
 
@@ -177,67 +180,15 @@ class IndividuController extends AbstractController
 
         // utilisateur actif ou qui peut se connecter doit être remplacé
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
             $mail  =   $form->getData()['mail'];
             $new_individu   =   $em->getRepository(Individu::class)->findOneBy(['mail'=>$mail]);
 
             if ($new_individu != null) {
 
-                // Supprimer les thématiques dont je suis expert, il faudra les recréer
-                foreach ($individu->getThematique() as $item) {
-                    $em->persist($item);
-                    $item->getExpert()->removeElement($individu);
-                }
-
-                // Les projets dont je suis collaborateur - Attention aux éventuels doublons
-                foreach ($CollaborateurVersion  as $item) {
-                    if (! $item->getVersion()->isCollaborateur($new_individu)) {
-                        $item->setCollaborateur($new_individu);
-                    } else {
-                        $em->remove($item);
-                    }
-                }
-
-                // On fait reprendre les Sso par le nouvel individu
-                $sso_de_new = $new_individu->getSso();
-                $array_eppn=[];
-                foreach ($new_individu->getSso() as $item) {
-                    $array_eppn[] = $item->getEppn();
-                }
-                foreach ($Sso  as $item) {
-                    if (!in_array($item->getEppn(),$array_eppn)) {
-                        $item->setIndividu($new_individu);
-                        $em->persist($item);
-                    } else {
-                        $em->remove($item);
-                    }
-                }
-
-                // Mes expertises
-                foreach ($Expertise  as $item) {
-                    $item->setExpert($new_individu);
-                }
-
-                // Mes rallonges
-                foreach ($Rallonge  as $item) {
-                    $item->setExpert($new_individu);
-                }
-
-                // Les entrées de journal (sinon on ne pourra pas supprimer l'ancien individu)
-                foreach ($Journal  as $item) {
-                    $item->setIndividu($new_individu);
-                }
-
-                // ...
-                foreach ($Session  as $item) {
-                    $item->setPresident($new_individu);
-                }
-
-                $sj->infoMessage('Utilisateur ' . $individu . '(' .  $individu->getIdIndividu()
-                    . ') remplacé par ' . $new_individu . ' (' .  $new_individu->getIdIndividu() . ')');
-
+                $sid->fusionneIndividus($individu, $new_individu);
                 $em->remove($individu);
-
                 $em->flush();
                 return $this->redirectToRoute('individu_gerer');
             } else {
@@ -249,14 +200,14 @@ class IndividuController extends AbstractController
             'individu/remplacer.html.twig',
             [
                 'form' => $form->createView(),
-                'erreurs'                   => $erreurs,
-                'CollaborateurVersion'   =>  $CollaborateurVersion,
-                'Expertise'              =>  $Expertise ,
-                'Journal '               =>  $Journal,
-                'Rallonge'               =>  $Rallonge,
-                'Sso'                    =>  $Sso,
-                'individu'               =>  $individu,
-                'Thematique'             =>  $Thematique->toArray(),
+                'erreurs' => $erreurs,
+                'CollaborateurVersion' =>  $CollaborateurVersion,
+                'Expertise' => $Expertise ,
+                'Journal ' =>  $Journal,
+                'Rallonge' =>  $Rallonge,
+                'Sso' =>  $Sso,
+                'individu' =>  $individu,
+                'Thematique' =>  $Thematique->toArray(),
             ]
         );
     }
