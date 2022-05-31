@@ -488,6 +488,22 @@ class ServiceMenus
         return $menu;
     }
 
+    public function invitations():array
+    {
+        $menu['name'] = 'invitations';
+        $menu['commentaire'] = "Récapituler les invitations en cours";
+        $menu['lien'] = "Invitations";
+
+        if ($this->ac->isGranted('ROLE_ADMIN')) {
+            $menu['ok'] = true;
+        } else {
+            $menu['ok'] = false;
+            $menu['raison'] = "Vous n'êtes pas un administrateur";
+        }
+
+        return $menu;
+    }
+
     //////////////////////////////////////
 
     public function gerer_sessions(): array

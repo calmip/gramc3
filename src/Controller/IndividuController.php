@@ -25,6 +25,7 @@
 namespace App\Controller;
 
 use App\Entity\Individu;
+use App\Entity\Invitation;
 use App\Entity\Thematique;
 use App\Entity\Rattachement;
 use App\Entity\CollaborateurVersion;
@@ -527,6 +528,42 @@ class IndividuController extends AbstractController
         $user = $token->getUser();
         $this->si->sendInvitation($user, $individu);
         return $this->render('individu/invitation.html.twig');
+    }
+
+     /**
+     *
+     * Afficher toutes les invitations
+     *
+     * @Route("/invitations", name="invitations", methods={"GET"})
+     * @Security("is_granted('ROLE_ADMIN')")
+     *
+     ***************************************/
+    public function invitationsAction(Request $request): Response
+    {
+        $em = $this->getDoctrine()->getManager();
+        
+        $invitations = $em->getRepository(Invitation::class)->findAll();
+        $invit_duree = $this->getParameter('invit_duree');
+        $duree = new \DateInterval($invit_duree);
+        return $this->render('individu/invitations.html.twig', ['invitations' => $invitations, 'duree' => $duree]);
+    }
+
+    /**
+     *
+     * Supprimer une invitation
+     *
+     * @Route("/{id}/supprimer_invitation", name="supprimer_invitation", methods={"GET"})
+     * @Security("is_granted('ROLE_ADMIN')")
+     *
+     ***************************************/
+    public function supprimerInvitationAction(Request $request, Invitation $invitation): Response
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $em->remove($invitation);
+        $em->flush();
+
+        return $this->redirectToRoute('invitations');
     }
 
     /*********************************

@@ -115,6 +115,7 @@ class GramcSessionController extends AbstractController
     {
         $sm      = $this->sm;
         $menu1[] = $sm->individu_gerer();
+        $menu1[] = $sm->invitations();
 
         $menu2[] = $sm->gerer_sessions();
         $menu2[] = $sm->bilan_session();
