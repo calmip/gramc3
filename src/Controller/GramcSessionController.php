@@ -24,6 +24,34 @@
 
 namespace App\Controller;
 
+use App\Form\IndividuType;
+use App\Entity\Version;
+use App\Entity\Projet;
+use App\Entity\CollaborateurVersion;
+use App\Entity\Individu;
+use App\Entity\Invitation;
+use App\Entity\Scalar;
+use App\Entity\Sso;
+use App\Entity\CompteActivation;
+use App\Entity\Journal;
+
+use App\Utils\Functions;
+
+use App\GramcServices\Etat;
+use App\GramcServices\Workflow\Projet\ProjetWorkflow;
+use App\GramcServices\ServiceMenus;
+use App\GramcServices\ServiceIndividus;
+use App\GramcServices\ServicePhpSessions;
+use App\GramcServices\ServiceJournal;
+use App\GramcServices\ServiceNotifications;
+use App\GramcServices\ServiceProjets;
+use App\GramcServices\ServiceSessions;
+use App\GramcServices\ServiceVersions;
+use App\GramcServices\PropositionExperts\PropositionExpertsType1;
+use App\GramcServices\PropositionExperts\PropositionExpertsType2;
+use App\GramcServices\GramcDate;
+use App\Security\User\UserChecker;
+
 use Psr\Log\LoggerInterface;
 
 use Symfony\Component\Routing\Annotation\Route;
@@ -35,32 +63,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\PhpBridgeSessionStorage;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-
-use App\Form\IndividuType;
-use App\Entity\Version;
-use App\Entity\Projet;
-use App\Entity\CollaborateurVersion;
-use App\Entity\Individu;
-use App\Entity\Scalar;
-use App\Entity\Sso;
-use App\Entity\CompteActivation;
-use App\Entity\Journal;
-use App\GramcServices\Etat;
-
-use App\Utils\Functions;
-
-use App\GramcServices\Workflow\Projet\ProjetWorkflow;
-use App\GramcServices\ServiceMenus;
-use App\GramcServices\ServicePhpSessions;
-use App\GramcServices\ServiceJournal;
-use App\GramcServices\ServiceNotifications;
-use App\GramcServices\ServiceProjets;
-use App\GramcServices\ServiceSessions;
-use App\GramcServices\ServiceVersions;
-use App\GramcServices\PropositionExperts\PropositionExpertsType1;
-use App\GramcServices\PropositionExperts\PropositionExpertsType2;
-use App\GramcServices\GramcDate;
-use App\Security\User\UserChecker;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -88,6 +90,8 @@ use Twig\Environment;
 class GramcSessionController extends AbstractController
 {
     public function __construct(
+        private GramcDate $grdt,
+        private ServiceIndividus $sid,
         private ServiceNotifications $sn,
         private ServiceJournal $sj,
         private ServiceMenus $sm,
@@ -553,6 +557,129 @@ class GramcSessionController extends AbstractController
 
     ///////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * @Route("/{clef}/repinvit", name="repinvit", methods={"GET","POST"})
+     * @Security("is_granted('ROLE_DEMANDEUR')")
+     */
+    public function repinvitAction(Request $request, Invitation $invitation=null): Response
+    {
+        $em = $this->getDoctrine()->getManager();
+        $invit_duree = $this->getParameter('invit_duree');
+        
+        $sj = $this->sj;
+
+        // Invitation supprimée !
+        if ( $invitation == null)
+        {
+            $message = "Cette invitation n'existe pas, ou a été supprimée";
+            $request->getSession()->getFlashbag()->add("flash erreur",$message . " - Merci de vous rapprocher de CALMIP");
+            $sj->warningMessage(__METHOD__ . ':' . __LINE__ . $message);       
+            return $this->redirectToRoute('accueil');
+        }
+
+        // Invitation OK - On vérifie la date
+        $now = $this->grdt;
+        $expiration = $invitation->getCreationStamp()->add(new \DateInterval($invit_duree));
+        if ($now > $expiration)
+        {
+            // L'invitation est à usage unique, on la supprime
+            $em->remove($invitation);
+            $em->flush();
+        
+            $message = "Cette invitation a expiré ";
+            $request->getSession()->getFlashbag()->add("flash erreur",$message . " - Merci de vous rapprocher de CALMIP");
+            $sj->warningMessage(__METHOD__ . ':' . __LINE__ . $message . " de " . $invitation->getInviting() . " pour " .$invitation->getInvited());       
+            return $this->redirectToRoute('accueil');
+        }
+
+        // Date OK - On vérifie les users
+        $invited = $invitation->getInvited();
+        $connected = $this->ts->getToken()->getUser();
+        
+        if ($invited->getId() === $connected->getId())
+        {
+            // L'invitation est à usage unique, on la supprime
+            $em->remove($invitation);
+            $em->flush();
+        
+            return $this->redirectToRoute('profil');
+        }
+        else
+        {
+            // On supprimera l'invitation dans choisirMail
+            // TODO - A améliorer il faudrait supprimer à partir d'un seul endroit !
+            return $this->choisirMail($request, $connected, $invitation);
+            //return $this->render('individu/repinvit.html.twig',['invitation' => $invitation, 'connected' => $connected]);
+            //return $this->redirectToRoute('accueil');
+        }        
+    }
+    /*************************
+     * Fonction appelée par repinvitAction lorsque l'adresse de l'invité ne colle pas avec l'adresse du profil
+     **********************************************/
+    private function choisirMail(Request $request, Individu $connected, Invitation $invitation): Response
+    {
+        $em = $this->getDoctrine()->getManager();
+        $ff = $this->ff;
+        $sid = $this->sid;
+        $sj = $this->sj;
+
+        $mail_connected = $connected->getMail();
+        $mail_invited = $invitation->getInvited()->getMail();
+        $form = Functions::createFormBuilder($ff)
+                    ->add('mail',
+                    ChoiceType::class,
+                    [
+                        'required' => false,
+                        'label'    => '',
+                        'expanded' => true,
+                        'multiple' => false,
+                        'choices' => [ $mail_connected => $mail_connected, $mail_invited => $mail_invited ],
+                        'placeholder' => false,
+                        'label' => 'Quel mail souhaitez-vous conserver ? '
+                    ]
+                )
+                ->add('OK', SubmitType::class, ['label' => "OK"])
+                ->getForm();
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            // L'invitation est à usage unique, on la supprime
+            $em->remove($invitation);
+            $em->flush();
+        
+            $mail = $form->getData()['mail'];
+
+            // On garde l'individu $connected, on supprime l'invité
+            if ($mail === $mail_connected)
+            {
+                $sid->fusionnerIndividus($invitation->getInvited(), $connected);
+                return $this->redirectToRoute('profil');
+            }
+
+            // On garde l'invité, on supprime le connected
+            else if ($mail === $mail_invited)
+            {
+                $sid->fusionnerIndividus($connected, $invitation->getInvited());
+                return $this->redirectToRoute('accueil');
+            }
+
+            // oups qu'est-ce que c'est que cette adresse ?
+            else
+            {
+                $message = "mail connected = " . $connected->getMail() . " - mail invited = " . $invitation->getInvited()->getMail() . " - réponse au formulaire = " . $mail;
+                $sj->warningMessage(__METHOD__ . ':' . __LINE__ . $message);
+                $request->getSession()->getFlashbag()->add("flash erreur","Problème de mail, rapprochez-vous de " . $this->getParameter('mesoc'));
+                return $this->redirectToRoute('accueil');
+            }
+        }
+
+        return $this->render('individu/repinvit.html.twig',
+                            ['invitation' => $invitation,
+                             'connected' => $connected,
+                             'form' => $form->createView()
+                            ]);
+    }
 
 
     /**

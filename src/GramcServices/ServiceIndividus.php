@@ -50,7 +50,7 @@ class ServiceIndividus
      * Utilisé lorsqu'on fusionne des comptes: tous les objets liés à $individu
      * sont maintenant attribués à $new_individu
      *************************************************************************/
-    public function fusionneIndividus(Individu $individu, Individu $new_individu): void
+    public function fusionnerIndividus(Individu $individu, Individu $new_individu): void
     {
         $em = $this->em;
         $sj = $this->sj;

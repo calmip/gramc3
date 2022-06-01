@@ -182,12 +182,12 @@ class IndividuController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $mail  =   $form->getData()['mail'];
-            $new_individu   =   $em->getRepository(Individu::class)->findOneBy(['mail'=>$mail]);
+            $mail = $form->getData()['mail'];
+            $new_individu = $em->getRepository(Individu::class)->findOneBy(['mail'=>$mail]);
 
             if ($new_individu != null) {
 
-                $sid->fusionneIndividus($individu, $new_individu);
+                $sid->fusionnerIndividus($individu, $new_individu);
                 $em->remove($individu);
                 $em->flush();
                 return $this->redirectToRoute('individu_gerer');
