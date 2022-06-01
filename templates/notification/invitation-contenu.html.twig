@@ -1,6 +1,6 @@
-Bonjour {{ invitation.invited.prenom |raw }} {{ invitation.invited.nom |raw }}
+Bonjour {{ invitation.invited |raw }}
 
-Vous avez été invité-e par {{ invitation.inviting.prenom |raw }} {{ invitation.inviting.nom |raw }} sur la plateforme d'attribution de ressources de {{mesoc}}
+Vous avez été invité-e par {{ invitation.inviting |raw }} sur la plateforme d'attribution de ressources de {{mesoc}}
 
 Afin de finaliser l'ouverture de votre compte sur cette plateforme,
 pouvez-vous s'il vous plaît vous connecter à {{ absolute_url(path('repinvit', {'clef': invitation.clef})) }} et renseigner complètement votre profil ?

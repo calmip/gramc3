@@ -82,7 +82,7 @@ class ServiceInvitations
     {
         $em = $this->em;
 
-        $key = $this->getToken(5);
+        $key = $this->getToken(50);
         $stamp = new \DateTime();
 
         $invitation = new Invitation;

@@ -89,31 +89,28 @@ class IndividuFormType extends AbstractType
                 'required'  => false,
             ]
         );
-
+        $builder->add(
+            'prenom',
+            TextType::class,
+            [
+                'label'     => 'prénom',
+                'attr'      => [ 'size' => '50' ],
+                'required'  => false,
+            ]
+        )
+        ->add(
+            'nom',
+            TextType::class,
+            [
+                'label'     => 'nom',
+                'attr'      => [ 'size' => '50' ],
+                'required'  => false,
+            ]
+        );
         if ($options['text_fields']==true)
         //if(true)
         {
             $builder->add(
-                'prenom',
-                TextType::class,
-                [
-                    'label'     => 'prénom',
-                    'attr'      => [ 'size' => '50' ],
-                    'required'  => false,
-                    'disabled' => true,
-                ]
-            )
-            ->add(
-                'nom',
-                TextType::class,
-                [
-                    'label'     => 'nom',
-                    'attr'      => [ 'size' => '50' ],
-                    'required'  => false,
-                    'disabled' => true,
-                ]
-            )
-            ->add(
                 'statut',
                 TextType::class,
                 [
@@ -145,24 +142,6 @@ class IndividuFormType extends AbstractType
         else
         {
             $builder->add(
-                'prenom',
-                TextType::class,
-                [
-                    'label'     => 'prénom',
-                    'attr'      => [ 'size' => '50' ],
-                    'required'  => false,
-                ]
-            )
-            ->add(
-                'nom',
-                TextType::class,
-                [
-                    'label'     => 'nom',
-                    'attr'      => [ 'size' => '50' ],
-                    'required'  => false,
-                ]
-            )
-            ->add(
                 'statut',
                 EntityType ::class,
                 [
