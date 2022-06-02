@@ -114,4 +114,22 @@ class ServiceIndividus
         $sj->infoMessage('Utilisateur ' . $individu . '(' .  $individu->getIdIndividu()
             . ') remplacé par ' . $new_individu . ' (' .  $new_individu->getIdIndividu() . ')');
     }
+
+    /*********************************
+     * valide le profil de l'utilisateur passé en paramètre
+     * 
+     * Un profil est valide si tous les champs sont remplis
+     * 
+     **********************************/
+     public function validerProfil(Individu $individu): bool
+     {
+         $ok = true;
+         if ($individu->getPrenom() == null) $ok = false;
+         if ($individu->getNom() == null) $ok = false;
+         if ($individu->getMail() == null) $ok = false;
+         if ($individu->getStatut() == null) $ok = false;
+         if ($individu->getLabo() == null) $ok = false;
+         if ($individu->getEtablissement() == null) $ok = false;
+         return $ok;
+     }
 }

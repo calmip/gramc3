@@ -184,8 +184,9 @@ class GramcSessionController extends AbstractController
     */
     public function accueilAction(): Response
     {
-        $sm     = $this->sm;
-        $ss     = $this->ss;
+        $sm = $this->sm;
+        $ss = $this->ss;
+        $sid = $this->sid;
         $session= $ss->getSessionCourante();
 
         // Lors de l'installation, aucune session n'existe: redirection
@@ -227,6 +228,16 @@ class GramcSessionController extends AbstractController
         $menu[] = $m;
         $menu[] = $sm->aide();
 
+        $token = $this->ts->getToken();
+        if ($token != null)
+        {
+            $individu = $this->ts->getToken()->getUser();
+            if (! $sid->validerProfil($individu))
+            {
+                return $this->redirectToRoute('profil');
+            };
+        }
+        
         if ($seulement_demandeur) {
             return $this->redirectToRoute('projet_accueil');
         } else {
