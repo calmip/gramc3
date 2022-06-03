@@ -610,8 +610,9 @@ class AdminuxController extends AbstractController
      *
      * @Route("/version/get", name="get_version", methods={"POST"})
      * @Security("is_granted('ROLE_ADMIN')")
+     *
      * Exemples de données POST (fmt json):
-     *                ''
+     *             ''
      *             ou
      *             '{ "projet" : null,     "session" : null }' -> Toutes les VERSIONS ACTIVES quelque soit la session
      *
@@ -624,19 +625,31 @@ class AdminuxController extends AbstractController
      *             '{ "projet" : null,     "session" : "20A"}' -> Toutes les versions de la session 20A
      *
      *             '{ "projet" : "P01234", "session" : "20A"}' -> La version 20AP01234
-     *
+     * 
+     * Version "longue" - Le paramètre "long" provoque l'envoi de données supplémentaires concernant la ou les versions:
+     * -----------------------------------------------------------------------------------------------------------------
+     * 
+     *             '{ "projet" : "P01234", "session" : null, "long: true" }' -> LA VERSION ACTIVE du projet P01234
+     * 
      * Donc on renvoie une ou plusieurs versions appartenant à différentes sessions, mais une ou zéro versions par projet
      * Les versions renvoyées peuvent être en état: ACTIF, EN_ATTENTE, NOUVELLE_VERSION_DEMANDEE si "session" vaut null
      * Les versions renvoyées peuvent être dans n'importe quel état (sauf ANNULE) si "session" est spécifiée
      *
      * Données renvoyées (fmt json):
      *                 idProjet    P01234
-     *                 idSession    20A
-     *                 idVersion    20AP01234
+     *                 idSession   20A
+     *                 idVersion   20AP01234
      *                 mail        mail du responsable de la version
-     *                 attrHeures    Heures cpu attribuées
-     *                 quota        Quota sur la machine
+     *                 attrHeures  Heures cpu attribuées
+     *                 quota       Quota sur la machine
      *                 gpfs        sondVolDonnPerm stockage permanent demandé (pas d'attribution pour le stockage)
+     *
+     * Si "long" est spécifié on renvoie aussi:
+     *                 titre       prjTitre
+     *                 resume      prjResume
+     *                 labo        prjLLabo
+     *                 metadonnees dataMetaDataFormat
+     *                 thematique  metathematique (ATTENTION ! PAS la thématique au sens de Calmip, mais la Metathématique)
      *
      * curl --netrc -H "Content-Type: application/json" -X POST  -d '{ "projet" : "P1234", "session" : "20A" }' https://.../adminux/version/get
      *
@@ -654,11 +667,13 @@ class AdminuxController extends AbstractController
         {
             $id_projet = null;
             $id_session= null;
+            $long = false;
         }
         else
         {
             $id_projet  = (isset($content['projet'])) ? $content['projet'] : null;
             $id_session = (isset($content['session']))? $content['session']: null;
+            $long = (isset($content['long']))? $content['long']: false;
         }
 
         $v_tmp = [];
@@ -756,7 +771,16 @@ class AdminuxController extends AbstractController
             $r['mail']            = $v->getResponsable()->getMail();
             $r['attrHeures']      = $attr;
             $r['sondVolDonnPerm'] = $v->getSondVolDonnPerm();
-            $r['quota']              = $sp->getConsoRessource($v->getProjet(),'cpu',$annee)[1];
+            $r['quota']           = $sp->getConsoRessource($v->getProjet(),'cpu',$annee)[1];
+            if ($long)
+            {
+                $r['titre']       = $v->getPrjTitre();
+                $r['resume']      = $v->getPrjResume();
+                $r['labo']        = $v->getPrjLLabo();
+                $r['metadonnees'] = $v->getDataMetaDataFormat();
+                $r['thematique']  = $v->getAcroMetaThematique();
+            }
+            
             // Pour le déboguage
             // if ($r['quota'] != $r['attrHeures']) $r['attention']="INCOHERENCE";
 
