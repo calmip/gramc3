@@ -31,8 +31,8 @@ $(document).ready(function()
 				$('#uploadstatus').html('<p>'+msg+'</p>').addClass("erreur").addClass("message");
 			}
 		},
-		dragDropStr: "<span><b>Faites glisser et déposez le fichier</b></span>",
-		uploadStr:"Téléversez votre fichier"
+		dragDropStr: "</br><span><b>Faites glisser et déposez le fichier</b></span>",
+		uploadStr:"Téléversez votre description scientifique"
 	});
 });
 

@@ -1,5 +1,7 @@
 {% extends 'default/base.html.twig' %}
 
+{% import "default/macros.html.twig" as gramcmacros %}
+
 {% block body %}
 
 {% if session.etat == 2 %}
@@ -9,9 +11,9 @@
 {% set verbe = 'Créer une rallonge pour' %}
 {% endif %}
 
-<section>
-    <div class="message warning">
-        <h2>Création ou renouvellement ?</h2>
+<section class="section_nouveauProjet">
+        <h1>Nouveau projet</h2>
+    <div class="information ok">
         <p>Il apparait que vous collaborez déjà à un ou plusieurs projets {{mesoc}}.<br>
             Vous voudrez <strong>{{verbe}} un projet</strong> si vous souhaitez demander de nouvelles ressources de calcul pour
             <strong>poursuivre le même objectif scientifique</strong>.<br>
@@ -21,26 +23,30 @@
         </p>
         {% if session.etat != 2 %}
             <p>Pour créer une rallonge, contactez {{mailadmin}}</p>
-            <ul>
-                {% for projet in renouvelables %}
-                <li>
-                   <a href="{{ path('consulter_projet', { 'id' : projet.idProjet } ) }}"> {{ projet }}</a>
-                    {% if( not projet.derniereVersion.prjTitre == null ) %}({{ projet.derniereVersion.prjTitre }}){% endif %}
-                </li>
-                {% endfor %}
-                <li><a href="{{ path('nouveau_projet', { 'type' : type } ) }}">Nouveau projet</a></li>
-            </ul>
-        {% else %}
-            <ul>
-                {% for projet in renouvelables %}
-                <li>
-                   <a href="{{ path('consulter_projet', { 'id' : projet.idProjet } ) }}"> {{verbe}} {{ projet }}</a>
-                    {% if( not projet.derniereVersion.prjTitre == null ) %}({{ projet.derniereVersion.prjTitre }}){% endif %}
-                </li>
-                {% endfor %}
-                <li><a href="{{ path('nouveau_projet', { 'type' : type } ) }}">Nouveau projet</a></li>
-            </ul>
         {% endif %}
+    </div>
+
+    <div class="projets">
+        <ul>
+            {% for projet in renouvelables %}
+            <li>
+                <a href="{{ path('consulter_projet', { 'id' : projet.idProjet } ) }}"> {{verbe}} Projet</a>
+                <p title="{{projet.derniereVersion.prjTitre}}">
+                    {{ projet }} {% if( not projet.derniereVersion.prjTitre == null ) %}({{ gramcmacros.tronquer_chaine(projet.derniereVersion.prjTitre, 30) }}){% endif %}
+                </p>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <div class="separation">
+            <span></span>
+            <p>OU</p>
+            <span></span>
+        </div>
+        
+        <div class="nouveau_projet">
+            <a href="{{ path('nouveau_projet', { 'type' : type } ) }}">Nouveau Projet</a>
+        </div>
     </div>
 </section>
 

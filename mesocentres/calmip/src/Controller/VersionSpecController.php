@@ -205,9 +205,16 @@ class VersionSpecController extends AbstractController
             //$sj->debugMessage(__METHOD__ . " koukou $div_sts");
             if ($ajax['etat'] == 'OK') {
                 $html[$ajax['filename']]  = '<img class="dropped" src="data:image/png;base64, ' . base64_encode($ajax['contents']) .'" />';
-                $template                 = $twig->createTemplate('<img class="icone" src=" {{ asset(\'icones/poubelle32.png\') }}" alt="Supprimer cette figure" title="Supprimer cette figure" />');
+                $template                 = $twig->createTemplate('<svg class="icone" alt="Supprimer cette figure" title="Supprimer cette figure" width="19" height="23" viewBox="0 0 19 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2.5 6.5H16.5V20C16.5 21.3807 15.3807 22.5 14 22.5H5C3.61929 22.5 2.5 21.3807 2.5 20V6.5Z" stroke="#D62412"/>
+                <rect x="0.5" y="3.5" width="18" height="3" rx="1.5" stroke="#D62412"/>
+                <path d="M7 0.5H12C12.8284 0.5 13.5 1.17157 13.5 2V3.5H5.5V2C5.5 1.17157 6.17157 0.5 7 0.5Z" stroke="#D62412"/>
+                <line x1="6.5" y1="9.5" x2="6.5" y2="19.5" stroke="#D62412" stroke-linecap="round"/>
+                <line x1="9.5" y1="9.5" x2="9.5" y2="19.5" stroke="#D62412" stroke-linecap="round"/>
+                <line x1="12.5" y1="9.5" x2="12.5" y2="19.5" stroke="#D62412" stroke-linecap="round"/>
+            </svg>');
                 $html[$ajax['filename']] .= $twig->render($template);
-                $html[$div_sts] = '<div class="message info">votre figure a été correctement téléversée</div>';
+                $html[$div_sts] = '<div class="information ok">Votre figure a été correctement téléversée</div>';
             } elseif ($ajax['etat'] == 'KO') {
                 $html[$div_sts] = "Le téléchargement de l'image a échoué";
             } elseif ($ajax['etat'] == 'nonvalide') {
@@ -240,7 +247,7 @@ class VersionSpecController extends AbstractController
             }
             $div_sts  = substr($filename, 0, strlen($filename)-1).'sts'; // img_justif_renou_1 ==>  img_justif_renou_sts
 
-            $html[$div_sts] = '<div class="message info">La figure ' . $rem_nb . ' a été supprimée</div>';
+            $html[$div_sts] = '<div class="information ok">La figure ' . $rem_nb . ' a été supprimée</div>';
             $html[$filename] = 'Figure ' . $rem_nb;
 
             return new Response(json_encode($html));
