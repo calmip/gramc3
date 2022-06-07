@@ -19,8 +19,10 @@
             </div>
             {% endif %}
             <div id="uploadstatus"></div>
-            <div id="fileuploader"><a href="{{ path('televerser_fichier_attache', { 'id' : version.idVersion } ) }}" target="_blank" >
-                <strong>Téléversez le fichier</strong></a>
+            <div id="fileuploader">
+                <a href="{{ path('televerser_fichier_attache', { 'id' : version.idVersion } ) }}" target="_blank" >
+                    <strong>Téléversez le fichier</strong>
+                </a>
             </div>
         </div>
     {% endif %}
@@ -59,7 +61,7 @@
             { 'attr': { 'class': 'compteur', 'rows' : 12, 'cols' : 70 } }) }}
     </div>
 
-    {{ gramcmacros.info_televersement(img_expose_1,img_expose_2,img_expose_3) }}
+    
     <div id="img_expose_sts"></div>
     <div class="wrap-drop-zone">
         <div id="img_expose_1" class="drop-zone" title="Faites glisser une image pour la téléverser">
@@ -112,8 +114,9 @@
         
 
     <div class="textarea">
-        <h4>Algorithmes ou méthodes numériques utilisées :</h4>
-        {{ form_widget(form.prjAlgorithme,
-                    { 'attr': { 'rows' : 8, 'cols' : 70 } }) }}
+        <div>
+            <h4>Algorithmes ou méthodes numériques utilisées :</h4>
+        </div>
+        {{ form_widget(form.prjAlgorithme, { 'attr': { 'rows' : 8, 'cols' : 70 } }) }}
     </div>
 </div>

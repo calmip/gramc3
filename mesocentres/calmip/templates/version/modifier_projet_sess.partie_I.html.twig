@@ -4,15 +4,18 @@
 	<br><br>
 	<h2>Présentation générale</h2>
 
-	<div class="presentation_generale">
+	<div class="inputs">
 		<div class="input">
 			<div>
-				<span>*
-				</span> {{ form_label( form.prjTitre  ,"Titre du projet" ) }}
+				<span>*</span> {{ form_label( form.prjTitre  ,"Titre du projet" ) }}
 			</div> {{ form_widget( form.prjTitre  ,{ 'attr':{'size': '90','style' : ''}})}}
 		</div>
 
-		<div class="input"> {{ form_label( form.prjThematique, "Thématique principale du projet" ) }} {{ form_widget( form.prjThematique ) }}
+		<div class="input"> 
+			<div>
+				<span>*</span> {{ form_label( form.prjThematique, "Thématique principale du projet" ) }} 
+			</div>
+				{{ form_widget( form.prjThematique ) }}
 		</div>
 
 		<div class="input"> {{ form_label( form.prjSousThematique, "Sous-thématique (éventuellement)" ) }} {{ form_widget( form.prjSousThematique ) }}
@@ -50,7 +53,7 @@
 					<strong>et vos besoins en usage des noeuds GPU</strong>.</li>
 			</ul>
 
-			<h4>Quelques exemples:</h4>
+			<h3>Quelques exemples:</h3>
 			<ul>
 				<li>Un calcul utilisant
 					<strong>1 cœur</strong>
@@ -87,7 +90,7 @@
 			</p>
 
 		{% if version.typeSession == 'B'  %}
-				<h3>Session B</h3>
+				<h2 class="sessionB">Session B</h2>
 				<p>Les heures que vous allez demander viennent
 					<strong>en supplément</strong>
 					des heures que vous avez déjà reçues en session A (attribution initiale et rallonges).</p>
@@ -140,10 +143,10 @@
 		<div id="rapport_activite">
 			<h4>Rapport d'activité de l'année précédente :</h4>
 			{% if version.typeSession == 'B'  %}
-				<div class="message info">Vous n'avez pas besoin de téléverser de rapport d'activité lors d'une session B.
+				<div class="information ok">Vous n'avez pas besoin de téléverser de rapport d'activité lors d'une session B.
 					<br/>Nous vous le demanderons à la fin de l'année</div>
 			{% elseif version.anneeRapport == 0 %}
-				<div class="message info">Vous n'avez pas besoin de téléverser de rapport d'activité maintenant. Nous vous le demanderons à la fin de l'année</div>
+				<div class="information ok">Vous n'avez pas besoin de téléverser de rapport d'activité maintenant. Nous vous le demanderons à la fin de l'année</div>
 			{% else %}
 				<div id="uploadstatus"></div>
 				<div id="fileuploader">
@@ -208,21 +211,22 @@
 		</table>
 	{% endif %}
 
-	<h4>Autres informations :</h4>
-	<div class="input">
-		<label>Financement :</label>
-		{{ form_widget(form.prjFinancement ,
-		{ 'attr':
-			{
-			'size': '90',
-			'style' : ''
-				}
-		}) }}
-		<p class="info_supplementaire">Si ce projet bénéficie d'un financement, précisez la source et le montant.</p>
+	<div class="input financement">
+		<h4>Financement :</h4>
+		<div>
+			{{ form_widget(form.prjFinancement ,
+			{ 'attr':
+				{
+				'size': '90',
+				'style' : ''
+					}
+			}) }}
+			<p class="info_supplementaire">Si ce projet bénéficie d'un financement, précisez la source et le montant.</p>
+		</div>
 	</div>
 
 	<h4>Ressources offertes par GENCI ces deux dernières années :</h4>
-	<div class="genci">
+	<div class="inputs">
 		<div class="input">
 			<label>Centre(s)</label>
 			{{ form_widget(form.prjGenciCentre, { 'attr': { 'size': '80' } }) }}

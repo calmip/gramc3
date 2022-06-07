@@ -2039,11 +2039,17 @@ tbody tr.rallonge{
 .section_modifierProjet h4{
     text-decoration: #5e5f5f69 solid underline;
     text-underline-position: under;
-    margin-top: 7rem;
+    margin: 7rem 0 3rem;
 }
 
 .section_modifierProjet #quitter{
     z-index: 5;
+}
+
+.section_modifierProjet #ul_formulaire li{
+    margin-right: -10px;
+    border-radius: 10px 2px 0 0;
+    width: initial;
 }
 
 .section_modifierProjet .presentation_generale,
@@ -2052,20 +2058,41 @@ tbody tr.rallonge{
     flex-wrap: wrap;
     justify-content: space-between;
     width: 80%;
-    height: 15rem;
     margin: auto;
     margin-bottom: 5rem;
-    align-content: space-between;
+}
+
+.section_modifierProjet .inputs{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 80%;
+    margin: auto;
+    margin-bottom: 5rem;
 }
 
 .section_modifierProjet .input{
     display: flex;
     flex-direction: column;
     width: 40%;
+    margin-bottom: 3rem;
+}
+
+.section_modifierProjet .inputs_checkbox{
+    display: flex;
+    justify-content: space-between;
+}
+
+.section_modifierProjet .inputs_checkbox div{
+    max-width: 25%;
 }
 
 .section_modifierProjet .input label{
     font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.section_modifierProjet .input>div{
     margin-bottom: 1rem;
 }
 
@@ -2083,6 +2110,10 @@ tbody tr.rallonge{
     background: none;
 }
 
+.section_modifierProjet .information .sessionB{
+    margin-top: 3rem;
+}
+
 .section_modifierProjet .add{
     margin-top: 1rem;
     stroke: var(--third-color);
@@ -2096,6 +2127,24 @@ tbody tr.rallonge{
 .section_modifierProjet .add svg{
     vertical-align: sub;
     margin-right: 0.5rem;
+}
+
+.section_modifierProjet .financement{
+    width: 100%;
+    margin: auto;
+}
+
+.section_modifierProjet .financement div{
+    width: 80%;
+    margin: auto;
+}
+
+.section_modifierProjet .financement input{
+    width: 40%;
+}
+
+.section_modifierProjet .financement .info_supplementaire{
+    margin: 1rem 0;
 }
 
 .section_modifierProjet .pas_genci{
@@ -2125,9 +2174,8 @@ tbody tr.rallonge{
 
 .section_modifierProjet .textarea{
     display: flex;
-    justify-content: space-between;
-    width: 80%;
-    margin: 7rem auto;
+    justify-content: flex-start;
+    margin: 7rem 0;
 }
 
 .section_modifierProjet .textarea h4{
@@ -2137,6 +2185,14 @@ tbody tr.rallonge{
 .section_modifierProjet .textarea div{
     width: 35%;
     text-align: justify;
+}
+
+.section_modifierProjet .textarea textarea{
+    border: 1px solid var(--first-color);
+    border-radius: 10px;
+    max-width: 60%;
+    margin-left: 3rem;
+    outline: none;
 }
 
 .section_modifierProjet .wrap-drop-zone{
@@ -2163,6 +2219,24 @@ tbody tr.rallonge{
     cursor: pointer;
     width: 30px;
     height: auto;
+}
+
+.section_modifierProjet .quitter{
+    background: none;
+    border: none;
+}
+
+.section_modifierProjet .quitter button{
+    background: none;
+    border: 2px solid var(--first-color);
+    padding: 8px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.section_modifierProjet .quitter button:hover{
+    background: var(--first-color-hover);
+    color: white;
 }
 
 
