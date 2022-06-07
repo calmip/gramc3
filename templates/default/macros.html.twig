@@ -54,6 +54,10 @@
         {{icones.indefinit}}
     {% elseif value == "croix" %}
         {{icones.croix}}
+    {% elseif value == "telecharger" %}
+        {{icones.telecharger}}
+    {% elseif value == "televerser" %}
+        {{icones.televerser}}
     {% endif %}
 
 {% endmacro %}
@@ -207,14 +211,8 @@
 {# ################################################# #}
 
 {% macro info_televersement(img_1,img_2,img_3) %}
-    <div class="message info" style="font-size:.8em"><h2>Téléversement par glisser-déposer</h2>
-        Vous pouvez téléverser des figures pour illustrer vos propos.
-        <ol style="text-align:left" >
-            <li><strong>Merci de redimensionner</strong> au préalable vos images à <strong>800x400 pixels max</strong></li>
-            <li>Vous pouvez glisser-déposer vos fichiers dans l'une des zônes ci-dessus</li>
-        </ol>
-    </div>
-    <div class="message info" style="font-size:.8em"><h2>... ou Téléversement classique</h2>
+    <div>
+        <h4>Téléversement classique :</h4>
         <ul style="text-align: left;">
             <li>
                 <strong>Figure 1 {{ form_errors( img_1.filename ) }}</strong>
@@ -233,6 +231,14 @@
         <div class="quitter" >
             <button type="submit" id="form_fermer" name="form[fermer]" title="Enregistrer et fermer le projet">Fermer</button>
         </div>
+    </div>
+    <div>
+        <h4>Téléversement par glisser-déposer :</h4>
+        Vous pouvez téléverser des figures pour illustrer vos propos.
+        <ol style="text-align:left" >
+            <li><strong>Merci de redimensionner</strong> au préalable vos images à <strong>800x400 pixels max</strong></li>
+            <li>Vous pouvez glisser-déposer vos fichiers dans l'une des zônes ci-dessus</li>
+        </ol>
     </div>
 {% endmacro %}
 

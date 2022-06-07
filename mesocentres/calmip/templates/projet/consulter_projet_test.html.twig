@@ -1,48 +1,68 @@
 {% extends 'default/base.html.twig' %}
 {% import "default/macros.html.twig" as gramcmacros %}
 
+{% import "default/icone.html.twig" as icones %}
+
 {% block myjavascripts %}
 <script  type="text/javascript" src="{{ asset('js/projet.js') }}" ></script>
 {% endblock myjavascripts %}
 
 
-{% block menu %}
-{{ gramcmacros.menu(menu) }}
-{% endblock menu %}
+{% block body %}
 
-{% block before_body %}
 
-{% if is_granted('ROLE_ADMIN') %}
-<section class="admin">
-{% else %}
-<section>
-{% endif %}
+<section class="consulter_projet">
+
+    <div class="top_body">
+        <div class="retour">
+            <a title="Retour à l'espace demandeur" href="{{ path('projet_accueil') }}"> {{icones.fleche_retour}}
+                Retour
+            </a>
+        </div>
+
+        {% if app.debug %}
+            <div class="info_debug">
+                <strong>DEBUG</strong>
+
+                <p>Type du projet {{projet.id}}
+                    =
+                    <strong>{{ projet.typeprojet}}</strong>
+                </p>
+
+                <p>Etat du projet {{projet.id }}
+                    =
+                    <strong>{{ projet.getEtatProjet }}</strong>
+                </p>
+
+                <p>Type de la version {{version.id}}
+                    =
+                    <strong>{{ version.typeversion}}</strong>
+                </p>
+
+                <p>Etat de la version {{version.idVersion }}
+                    =
+                    <strong>{{ version.getEtatVersion }}</strong>
+                </p>
+        {% endif %}
+        {% if version.majInd != null %}
+            <em>Dernière modification par {{ version.majInd }}
+                le {{ version.majStamp|date('Y-m-d H:i:s') }}</em>
+        {% endif %}
+        </div>
+    </div>
+
 
 <div id="dialog"></div>
 
 <h2>
-    Projet test: {{ projet }} (Année {{ version.fullAnnee }})
+    Projet test : {{ projet }} (Année {{ version.fullAnnee }})
     <br>
     <small><em>{{ version.getMetaEtat }}</em></small>
 </h2>
 
-<p>
-{% if app.debug %}
-<strong>DEBUG </strong>
-<em>Type du projet {{projet.id}} = <strong>{{ projet.typeprojet}}</strong> -
-Etat du projet {{projet.id }}= <strong>{{ projet.getEtatProjet }}</strong> -
-Type de la version {{version.id}} = <strong>{{ version.typeversion}}</strong> -
-Etat de la version {{version.idVersion }}= <strong>{{ version.getEtatVersion }}</strong>
-</em>{% endif %}
-<br />
-{% if version.majInd != null %}
-    <em>Dernière modification par {{ version.majInd }} le {{ version.majStamp|date('Y-m-d H:i:s') }}</em>
-{% endif %}
-</p>
+{{ gramcmacros.menu(menu) }}
 
-{% endblock before_body %}
 
-{% block body %}
 
 {% if noconso==false %}
 
@@ -53,194 +73,288 @@ Etat de la version {{version.idVersion }}= <strong>{{ version.getEtatVersion }}<
 {% endif %}
 
 {% endif %}
-<h3>I - Présentation générale</h3>
+<details class="I">
 
-<table class="projet">
-    <tbody>
-        <tr><th class="horiz">Titre</th><td>{{ version.prjTitre }}</td></tr>
-        <tr><th class="horiz">Thématique</th><td>{{ version.prjThematique }}</td></tr>
-    </tbody>
-</table>
+        <summary>{{icones.trait_summary}}I - Présentation générale</summary>
 
-{% if norattachement == 0 %}
-<table class="projet">
-    <tbody>
-        <tr><th class="horiz">Rattachement du projet</th><td>{{ version.prjRattachement }}</td></tr>
-    </tbody>
-</table>
-{% endif %}
+<div style="max-height: 70vh;overflow-y: scroll;">
 
-<table class="projet">
-    <tbody>
-        <tr>
-            <th class="horiz">Nombre d'heures demandées pour cette année ({{ version.fullAnnee }})<br>
-            <span class="petit">Y compris les rallonges</span>
-            </th>
-            <td>{{ version.getDemHeuresRallonge + version.getDemHeures }}</td>
-        </tr>
-    </tbody>
-</table>
+<table class="table_vertical">
+				<tbody>
+					<tr>
+						<th>Titre</th>
+						<td>{{ version.prjTitre }}</td>
+					</tr>
 
-<table class="projet">
-    <tbody>
-        <tr>
-            <th class="horiz">Nombre d'heures attribuées pour cette année ({{ version.fullAnnee }})<br>
-            <span class="petit">Y compris les rallonges et les pénalités éventuelles</span>
-            </th>
-            <td>{{ version.getAttrHeuresRallonge + version.getAttrHeures - version.penalHeures }}</td>
-        </tr>
-    </tbody>
-</table>
+					<tr>
+						<th>Thématique</th>
+						<td>{{ version.prjThematique }}</td>
+					</tr>
 
-{% if noconso == 0 %}
-<table class="projet">
-<tbody>
-        <tr>
-            <th class="horiz">Quota machine d'heures allouées pour {{ session.getAnneeSession() + 2000 }} <br>
-            </th>
-            <td>{{quota|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw}}</td>
-        </tr>
-        <tr>
-            <th class="horiz">Nombre d'heures consommées<br>
-                <span class="petit">depuis le début de {{ session.getAnneeSession() + 2000 }}</span>
-            </th>
-            {# TODOPOLITIQUE #}
-            <td>{# {{ version.conso }}
-                {% if(version.getQuota > 0) %}
-                    ({{ (version.consocalcul * 100 / version.quota) |number_format(1)}} %)
-                {% endif %}
-                <br /> #}
-                {{ conso|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }} {% if(quota!=0) %} ({{consop|number_format(1)}} %) {% endif %}
-                {% if conso_gpu[0] != 0 %}
-                - cpu={{conso_cpu[0]|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw}} gpu={{conso_gpu[0]|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw}} ({{(100*conso_cpu[0]/conso)|number_format(1)}}% {{(100*conso_gpu[0]/conso)|number_format(1)}}%)
-                {% endif %}
-            </td>
-        </tr>
-    </tbody>
-</table>
-{% endif %}
+					<tr>
+						<th>Sous-thématique</th>
+						<td>{{ version.prjSousThematique }}</td>
+					</tr>
 
-<h4>Laboratoire et responsable du projet</h4>
-<div class="message info">
-Le laboratoire associé au projet est le laboratoire du responsable
+					<tr>
+						{% if norattachement == false %}
+						<th>Rattachement du projet</th>
+						<td>{{ version.prjRattachement }}</td=>
+						{% endif %}
+					</tr>
+
+					{% set versionPrec = version.versionPrecedente1 %}
+					{% if versionPrec != null %}
+						{% if versionPrec.anneeSession == version.anneeSession %}
+							<th>Heures demandées session {{ versionPrec.session }}
+								<span class="petit">Y compris les rallonges</span>
+							</th>
+							<td>{{ (versionPrec.getDemHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
+						{% endif %}
+					{% endif %}
+
+					<tr>
+						<th>Heures demandées session {{ session }}<br>
+							<span class="petit">Y compris les rallonges</span>
+						</th>
+						<td>{{ (version.getDemHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}
+					</tr>
+
+					{% set versionPrec = version.versionPrecedente1 %}
+					{% if versionPrec != null %}
+						{% if versionPrec.anneeSession == version.anneeSession %}
+						<tr>
+							<th>Heures attribuées session {{ versionPrec.session }}<br>
+								<span class="petit">Y compris les rallonges et les pénalités éventuelles</span>
+							</th>
+							<td>{{ (versionPrec.getAttrHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
+						</tr>
+						{% endif %}
+					{% endif %}
+
+					<tr>
+						<th >Nombre d'heures attribuées session {{ session }}<br>
+						<span class="petit">Y compris les rallonges et les pénalités éventuelles</span>
+						</th>
+						<td>{{ (version.attrHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}
+						{% if version.attrHeuresEte != 0 %} <span class="attention">(dont {{ version.attrHeuresEte |number_format(0, ',', ' ')|replace({' ':'&nbsp;'}) |raw }} heures à utiliser entre le 1er Juillet et le 31 Août)</span> {% endif %}
+						</td>
+					</tr>
+					{% if noconso == 0 %}
+						<tr>
+							<th>Quota machine d'heures allouées pour {{ session.getAnneeSession() + 2000 }}</th>
+							<td>{{quota|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw}}</td>
+						</tr>
+
+						<tr>
+							<th>Nombre d'heures consommées<br>
+								<span class="petit">depuis le début de {{ session.getAnneeSession() + 2000 }}</span>
+							</th>
+							{# TODOPOLITIQUE #}
+							<td>{# {{ version.conso }}
+								{% if(version.getQuota > 0) %}
+									({{ (version.consocalcul * 100 / version.quota) |number_format(1)}} %)
+								{% endif %}
+								<br /> #}
+								{{ conso|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}
+								{% if(quota!=0) %} 
+									({{consop|number_format(1)}} %) 
+								{% endif %}
+								{% if conso_gpu[0] != 0 %}
+									- cpu={{conso_cpu[0]|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw}} gpu={{conso_gpu[0]|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw}} ({{(100*conso_cpu[0]/conso)|number_format(1)}}% {{(100*conso_gpu[0]/conso)|number_format(1)}}%)
+								{% endif %}
+							</td>
+						</tr>
+					{% endif %}
+				</tbody>
+			</table>
+            <p class="info_supplementaire">Les heures qui vous seront attribuées dans le cadre de ce projet sont utilisables<br/>
+				<strong>jusqu'au 31 Décembre 20{{session.anneesession}}</strong>
+			</p>
+
+            <h4>Laboratoire et responsable du projet :</h4>
+
+			<table>
+				<thead>
+					<tr>
+						<th>Nom</th>
+						<th>Mail</th>
+						<th>Statut</th>
+						<th>Laboratoire *</th>
+					</tr>
+				</thead>
+
+				<tbody>
+					<tr>
+						<td>{{version.getResponsable }}</td>
+
+						<td>{% if ( not version.getResponsable == null ) %} 
+							{{version.getResponsable.Mail }}
+						{% endif %}</td>
+
+						<td>{% if ( not version.getResponsable == null ) %}
+							{{version.getResponsable.Statut }}
+						{% endif %}</td>
+
+						<td>{{version.getPrjLLabo }}</td>
+					</tr>
+				</tbody>
+			</table>
+
+			<p class="info_supplementaire">* Le laboratoire associé au projet est le laboratoire du responsable</p>
+
+			<h4>Personnes participant au projet :</h4>
+			<table>
+				<thead>
+					<tr>
+						{% if coll_login %}
+							<th>Login</th>
+							{% if version.etat==5 or version.etat == 4 %}
+								<th>User</th>
+							{% endif %}
+						{% endif %}
+
+						{% if nodata==false %}
+							<th title="Accès à la plateforme Callisto">Données</th>
+						{% endif %}
+
+						<th>Prénom</th>
+						<th>Nom</th>
+						<th>Mail</th>
+						<th>Statut</th>
+						<th>Laboratoire</th>
+						<th>Établissement</th>
+					</tr>
+				</thead>
+
+				<tbody>
+					{% for user in version.CollaborateurVersion %}
+						{% if not user.deleted %}
+							<tr>
+								{% if coll_login %}
+									<td>
+										{% if( user.login == true) %}Oui{% else %}Non
+										{% endif %}
+									</td>
+
+									{% if version.etat==5 or version.etat == 4 %}
+										<td>
+											{% if (user.login == true) %}
+												{% if user.loginname==null %}
+													<img src="{{ asset('icones/attention16.png') }}" alt="Compte non encore créé" title="compte non encore créé"/>
+												{% else %}
+													<tt>{{ user.loginname }}</tt>
+												{% endif %}
+											{% else %}
+												-
+											{% endif %}
+										</td>
+									{% endif %}
+								{% endif %}
+
+								{% if nodata==false %}
+									<td>
+										{% if( user.clogin == true) %}Oui{% else %}Non
+										{% endif %}
+									</td>
+								{% endif %}
+
+								<td>{{ user.Collaborateur.prenom }}</td>
+
+								<td>{{ user.Collaborateur.nom }}</td>
+
+								<td>{{ user.Collaborateur.mail }}</td>
+
+								<td>
+									{% if( not ( user.Collaborateur.statut == null ) ) %} {{ user.Collaborateur.statut }}
+									{% endif %}
+								</td>
+
+								<td>
+									{% if( not ( user.Collaborateur.labo == null ) ) %} {{ user.Collaborateur.labo.getAcroLabo }}
+									{% endif %}
+								</td>
+								
+								<td>{{ user.Collaborateur.etab }}</td>
+							</tr>
+						{% endif %}
+					{% endfor %}
+				</tbody>
+			</table>
+</details>
+
+
+<details class="II">
+	<summary>{{icones.trait_summary}}II - Description scientifique du projet de recherche</summary>
+
+
+<div style="max-height: 70vh;overflow-y: scroll;">
+
+    <h4>Justificatif de demande de projet test :</h4>
+    <div class="description"><p>{{ version.prjResume | e | nl2br }}</p>
+
 </div>
 
-<table class="projet">
-<tbody>
-    <tr>
-        <th class="petite_col">Nom</th>
-        <th>Mail</th>
-        <th>Statut</th>
-        <th>Laboratoire</ht>
-    </tr>
-    <tr>
-        <td>{{version.getResponsable }}</td>
-        <td>{% if ( not version.getResponsable == null ) %}{{version.getResponsable.Mail }}{% endif %}</td>
-        <td>{% if ( not version.getResponsable == null ) %}{{version.getResponsable.Statut }}{% endif %}</td>
-        <td><strong>{% if ( not version.getResponsable == null ) %}{{version.getResponsable.Labo }}{% endif %}</strong></td>
-</tbody>
-</table>
+</details>
 
-<h4>Personnes participant au projet</h4>
+<details class="III">
+    <summary>{{icones.trait_summary}}III - Description technique du projet</summary>
 
-<table class="projet">
-<tbody>
-    <tr>
-        <th>Login</th>
-        {% if version.etat == 5 %}
-           <th>User</th>
-        {% endif %}
-        <th>Prénom</th>
-        <th>Nom</th>
-        <th>Mail</th>
-        <th>statut</th>
-        <th>laboratoire</th>
-        <th>établissement</th>
-    </tr>
 
-    {% for user in version.CollaborateurVersion %}
-    {% if not user.deleted %}
-    <tr>
-        <td>{% if( user.login == true) %}Oui{% else %}Non{% endif %}</td>
-        {% if version.etat==5 or version.etat == 23 %}
-        <td>{% if (user.login == true) %}
-               {% if user.loginname==null %}
-                  <img src="{{ asset('icones/attention16.png') }}" alt="Compte non encore créé" title="compte non encore créé" />
-               {% else %}
-                  <tt>{{ user.loginname }}</tt>
-               {% endif %}
-            {% else %}  - {% endif %}</td>
-        {% endif %}
-        <td>{{ user.Collaborateur.prenom }}</td>
-        <td>{{ user.Collaborateur.nom }}</td>
-        <td>{{ user.Collaborateur.mail }}</td>
-        <td>{{ user.Collaborateur.statut }}</td>
-        <td>{% if (user.Collaborateur.labo!=null) %}{{ user.Collaborateur.labo.getAcroLabo }}{% endif %}</td>
-        <td>{{ user.Collaborateur.etab }}</td>
-    </tr>
-    {% endif %}
-    {% endfor %}
-</tbody>
-</table>
+<div style="max-height: 70vh;overflow-y: scroll;">
 
-<h3>II - Description scientifique du projet de recherche</h3>
 
-<table class="projet">
-<tbody>
-        <tr>
-            <th>Justificatif de demande de projet test</th>
-        </tr>
-        <tr>
-            <td>{{ version.prjResume | e | nl2br }}</td>
-        </tr>
-</tbody>
-</table>
+    <h4>Description du code de calcul :</h4>
 
-<h3>III - Description technique du projet</h3>
+    <table class="projet">
+    <tbody>
+            <tr>
+                <th>Nom du code</th>
+                <td>{{ version.codeNom }}</td>
+            </tr>
+            <tr>
+                <th>Langage utilisé</th>
+                <td>{% if version.codeFor %} Fortran {% endif %}
+                {% if version.codeC %} C {% endif %}
+                {% if version.codeCpp %} C++ {% endif %}
+                {% if version.codeAutre %} Autre langage {% endif %}
+                {{ version.codeLangage }}
+                </td>
+            </tr>
+            <tr>
+                <th>Binaire GPU</th>
+                <td>{{ version.gpu}}</td>
+            </tr>
+            <tr>
+                <th>Licence</th>
+                <td>{{ version.codeLicence }}</td>
+            </tr>
+            <tr>
+                <th>Utilisation sur d'autres machines</th>
+                <td>{{ version.codeUtilSurMach}}</td>
+            </tr>
+            <tr>
+                <th>Logiciels nécessaires</th>
+                <td>{{ version.demLogiciels}}</td>
+            </tr>
+            <tr>
+                <th>Bibliothèques nécessaires</th>
+                <td>{{ version.demBib}}</td>
+            </tr>
+    </tbody>
+    </table>
 
-<h4>Description du code de calcul</h4>
-
-<table class="projet">
-<tbody>
-        <tr>
-            <th class="horiz">Nom du code</th>
-            <td>{{ version.codeNom }}</td>
-        </tr>
-        <tr>
-            <th class="horiz">Langage utilisé</th>
-            <td>{% if version.codeFor %} Fortran {% endif %}
-            {% if version.codeC %} C {% endif %}
-            {% if version.codeCpp %} C++ {% endif %}
-            {% if version.codeAutre %} Autre langage {% endif %}
-            {{ version.codeLangage }}
-            </td>
-        </tr>
-        <tr>
-            <th class="horiz">Binaire GPU</th>
-            <td>{{ version.gpu}}</td>
-        </tr>
-        <tr>
-            <th class="horiz">Licence</th>
-            <td>{{ version.codeLicence }}</td>
-        </tr>
-        <tr>
-            <th class="horiz">Utilisation sur d'autres machines</th>
-            <td>{{ version.codeUtilSurMach}}</td>
-        </tr>
-        <tr>
-            <th class="horiz">Logiciels nécessaires</th>
-            <td>{{ version.demLogiciels}}</td>
-        </tr>
-        <tr>
-            <th class="horiz">Bibliothèques nécessaires</th>
-            <td>{{ version.demBib}}</td>
-        </tr>
-</tbody>
-</table>
+</details>
 
 
 {% if version.etat in [ 4, 5, 6, 9 ] %}
-<h3>IV - Commentaire de l'expert</h3>
+
+	<details>
+		<summary>{{icones.trait_summary}}IV - Les données</summary>
+
+
+<div style="max-height: 70vh;overflow-y: scroll;">
+
 
 {% for expertise in version.expertise %}
 
@@ -312,6 +426,9 @@ Le laboratoire associé au projet est le laboratoire du responsable
 </tbody>
 </table>
 {% endif %}
+
+</div>
+</details>
 
 </section>
 {% endblock %}

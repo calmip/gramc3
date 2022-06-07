@@ -1,117 +1,122 @@
 {% import "default/macros.html.twig" as gramcmacros %}
 
 <div id="tab2" class="onglet"><br><br>
-    <h3>Description scientifique du projet de recherche</h3>
+    <h2>Description scientifique du projet de recherche</h2>
 
      {% if fichier_attache == true %}
         <div id="fichier_attache">
+
+            <h4>Description détaillée de votre projet :</h4>
         
             {% if version.typeSession == 'B' or version.anneeRapport == 0 %}
-            <div class="message info"><em>Si vous le souhaitez</em>, vous pouvez téléverser une description scientifique détaillée de votre projet.
+            <div class="information ok"><em>Si vous le souhaitez</em>, vous pouvez téléverser une description scientifique détaillée de votre projet.
             Le fichier doit être un pdf de moins de {{ max_page_nb }} pages.
             </div>
             {% else %}
-            <div class="message info">Vous <strong>devez</strong> téléverser un rapport d'activité sur l'année écoulée. Si vous le souhaitez, vous pouvez ajouter
+            <div class="information ok">Vous <strong>devez</strong> téléverser un rapport d'activité sur l'année écoulée. Si vous le souhaitez, vous pouvez ajouter
             un paragraphe sur les perspectives pour l'année prochaine.
             Le fichier est obligatoirement un pdf de moins de {{ max_page_nb }} pages de {{ max_size_doc }} Mo.
             </div>
             {% endif %}
             <div id="uploadstatus"></div>
-            <div id="fileuploader"><a href="{{ path('televerser_fichier_attache', { 'id' : version.idVersion } ) }}" target="_blank" >
-                <strong>Téléversez le fichier</strong></a>
+            <div id="fileuploader">
+                <a href="{{ path('televerser_fichier_attache', { 'id' : version.idVersion } ) }}" target="_blank" >
+                    <strong>Téléversez le fichier</strong>
+                </a>
             </div>
         </div>
     {% endif %}
 
-   <h4>Description détaillée de votre projet</h4>
-   <table class="projet"><tbody>
-        <tr>
-            <th>Références bibliographiques</th>
-        </tr>
-        <tr>
-            <td class="center">Merci de nous signaler les publications pour lesquelles les moyens de calcul de {{mesoc}} ont été utilisés.<br>
-                <strong><a href="{{ path('gerer_publications', { 'id' : version.projet.idProjet }) }}"
-                target="_blank" title="Entrez maintenant les références bibliographiques correspondantes">Cliquez ici</a></strong>
-            </td>
-        </tr>
-    </tbody></table>
 
-    <table class="projet"><tbody>
-        <tr>
-            <th>Résumé du projet en anglais (environ 2000 caractères)<br><span id="form_prjResume_cpt" class="petit"></span></th>
-        </tr>
-        <tr>
-            <td class="center">{{ form_widget(form.prjResume,
-                { 'attr': { 'class': 'compteur', 'rows' : 12, 'cols' : 70 } }) }}
-            </td>
-        </tr>
-    </tbody></table>
+    <h4>Références bibliographiques :</h4>
+    <p>Merci de nous signaler les publications pour lesquelles les moyens de calcul de {{mesoc}} ont été utilisés.<br>
+        <strong><a href="{{ path('gerer_publications', { 'id' : version.projet.idProjet }) }}"
+        target="_blank" title="Entrez maintenant les références bibliographiques correspondantes">Cliquez ici</a></strong>
+    </p>
 
-    <div class="message warning">
+    <div class="textarea">
+    <div>
+        <h4>Résumé du projet en anglais (environ 2000 caractères) :<br><span id="form_prjResume_cpt" class="petit"></span></h4>
+    </div>
+        {{ form_widget(form.prjResume,
+                    { 'attr': { 'class': 'compteur', 'rows' : 12, 'cols' : 70 } }) }}
+    </div>
+
+    <div class="information attention">
         <h2>Confidentialité des données</h2>
         {{mesoc}} se réserve le droit de faire figurer sur son site web le résumé du projet,
         ainsi que le nom du responsable du projet et de son laboratoire.
         Merci de ne pas écrire ici de données confidentielles
     </div>
 
-    <table class="projet"><tbody>
-        <tr>
-            <th>Exposé scientifique (environ 6000 caractères)<br><span id="form_prjExpose_cpt" class="petit"></span>
-                <br><em>Exposer le problème scientifique, la situation de l'équipe par rapport au problème
-                (résultats ou expérience déjà acquise dans le domaine, ou projet nouveau).<br>
-                Mentionner les 3 publications les plus significatives en rapport avec le projet.</em>
-            </th>
-        </tr>
-        <tr>
-            <td class="center">{{ form_widget(form.prjExpose,
-                { 'attr': { 'class': 'compteur', 'rows' : 12, 'cols' : 70 } }) }}
-            </td>
-        </tr>
-        <tr>
-        <td>
-        <div id="img_expose_sts"></div>
-        <div class="wrap-drop-zone">
-            <div id="img_expose_1" class="drop-zone" title="Faites glisser une image pour la téléverser">
-                {% if imageExp1 == null %}
-                Figure 1
-                {% else %}
-                <img class="dropped" src="data:image/png;base64,{{ imageExp1 }}" alt="Figure 1" />
-                <img class="icone" src="{{ asset('icones/poubelle32.png') }}" alt="Supprimer cette figure" title="Supprimer cette figure">
-                {% endif %}
-            </div>
-            <div id="img_expose_2" class="drop-zone" title="Faites glisser une image pour la téléverser">
-                {% if imageExp2 == null %}
-                Figure 2
-                {% else %}
-                <img class="dropped" src="data:image/png;base64,{{ imageExp2 }}" alt="Figure 2" />
-                <img class="icone" src="{{ asset('icones/poubelle32.png') }}" alt="Supprimer cette figure" title="Supprimer cette figure">
-                {% endif %}
-            </div>
-            <div id="img_expose_3" class="drop-zone" title="Faites glisser une image pour la téléverser">
-                {% if imageExp3 == null %}
-                Figure 3
-                {% else %}
-                <img class="dropped" src="data:image/png;base64,{{ imageExp3  }}" alt="Figure 3" />
-                <img class="icone" src="{{ asset('icones/poubelle32.png') }}" alt="Supprimer cette figure" title="Supprimer cette figure">
-                {% endif %}
-            </div>
+    <div class="textarea">
+        <div>
+            <h4>Exposé scientifique (environ 6000 caractères)<br><span id="form_prjExpose_cpt" class="petit"></span></h4>
+            <p><em>Exposer le problème scientifique, la situation de l'équipe par rapport au problème
+            (résultats ou expérience déjà acquise dans le domaine, ou projet nouveau).<br>
+            Mentionner les 3 publications les plus significatives en rapport avec le projet.</em>
+            </p>
         </div>
-        <hr class="retour">
-        {{ gramcmacros.info_televersement(img_expose_1,img_expose_2,img_expose_3) }}
-        </td>
-        </tr>
-    </tbody></table>
+        {{ form_widget(form.prjExpose,
+            { 'attr': { 'class': 'compteur', 'rows' : 12, 'cols' : 70 } }) }}
+    </div>
 
+    
+    <div id="img_expose_sts"></div>
+    <div class="wrap-drop-zone">
+        <div id="img_expose_1" class="drop-zone" title="Faites glisser une image pour la téléverser">
+            {% if imageExp1 == null %}
+            Figure 1
+            {% else %}
+            <img class="dropped" src="data:image/png;base64,{{ imageExp1 }}" alt="Figure 1" />
+            <svg class="icone" alt="Supprimer cette figure" title="Supprimer cette figure" width="19" height="23" viewBox="0 0 19 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2.5 6.5H16.5V20C16.5 21.3807 15.3807 22.5 14 22.5H5C3.61929 22.5 2.5 21.3807 2.5 20V6.5Z" stroke="#D62412"/>
+                <rect x="0.5" y="3.5" width="18" height="3" rx="1.5" stroke="#D62412"/>
+                <path d="M7 0.5H12C12.8284 0.5 13.5 1.17157 13.5 2V3.5H5.5V2C5.5 1.17157 6.17157 0.5 7 0.5Z" stroke="#D62412"/>
+                <line x1="6.5" y1="9.5" x2="6.5" y2="19.5" stroke="#D62412" stroke-linecap="round"/>
+                <line x1="9.5" y1="9.5" x2="9.5" y2="19.5" stroke="#D62412" stroke-linecap="round"/>
+                <line x1="12.5" y1="9.5" x2="12.5" y2="19.5" stroke="#D62412" stroke-linecap="round"/>
+            </svg>
+            {% endif %}
+        </div>
+        <div id="img_expose_2" class="drop-zone" title="Faites glisser une image pour la téléverser">
+            {% if imageExp2 == null %}
+            Figure 2
+            {% else %}
+            <img class="dropped" src="data:image/png;base64,{{ imageExp2 }}" alt="Figure 2" />
+            <svg class="icone" alt="Supprimer cette figure" title="Supprimer cette figure" width="19" height="23" viewBox="0 0 19 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2.5 6.5H16.5V20C16.5 21.3807 15.3807 22.5 14 22.5H5C3.61929 22.5 2.5 21.3807 2.5 20V6.5Z" stroke="#D62412"/>
+                <rect x="0.5" y="3.5" width="18" height="3" rx="1.5" stroke="#D62412"/>
+                <path d="M7 0.5H12C12.8284 0.5 13.5 1.17157 13.5 2V3.5H5.5V2C5.5 1.17157 6.17157 0.5 7 0.5Z" stroke="#D62412"/>
+                <line x1="6.5" y1="9.5" x2="6.5" y2="19.5" stroke="#D62412" stroke-linecap="round"/>
+                <line x1="9.5" y1="9.5" x2="9.5" y2="19.5" stroke="#D62412" stroke-linecap="round"/>
+                <line x1="12.5" y1="9.5" x2="12.5" y2="19.5" stroke="#D62412" stroke-linecap="round"/>
+            </svg>
+            {% endif %}
+        </div>
+        <div id="img_expose_3" class="drop-zone" title="Faites glisser une image pour la téléverser">
+            {% if imageExp3 == null %}
+            Figure 3
+            {% else %}
+            <img class="dropped" src="data:image/png;base64,{{ imageExp3  }}" alt="Figure 3" />
+            <svg class="icone" alt="Supprimer cette figure" title="Supprimer cette figure" width="19" height="23" viewBox="0 0 19 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2.5 6.5H16.5V20C16.5 21.3807 15.3807 22.5 14 22.5H5C3.61929 22.5 2.5 21.3807 2.5 20V6.5Z" stroke="#D62412"/>
+                <rect x="0.5" y="3.5" width="18" height="3" rx="1.5" stroke="#D62412"/>
+                <path d="M7 0.5H12C12.8284 0.5 13.5 1.17157 13.5 2V3.5H5.5V2C5.5 1.17157 6.17157 0.5 7 0.5Z" stroke="#D62412"/>
+                <line x1="6.5" y1="9.5" x2="6.5" y2="19.5" stroke="#D62412" stroke-linecap="round"/>
+                <line x1="9.5" y1="9.5" x2="9.5" y2="19.5" stroke="#D62412" stroke-linecap="round"/>
+                <line x1="12.5" y1="9.5" x2="12.5" y2="19.5" stroke="#D62412" stroke-linecap="round"/>
+            </svg>
+            {% endif %}
+        </div>
+    </div>
+    <hr class="retour">
+        
 
-    <table class="projet"><tbody>
-        <tr>
-            <th>Algorithmes ou méthodes numériques utilisées</th>
-        </tr>
-        <tr>
-            <td class="center projet">{{ form_widget(form.prjAlgorithme,
-                { 'attr': { 'rows' : 8, 'cols' : 70 } }) }}
-            </td>
-        </tr>
-    </tbody></table>
-
+    <div class="textarea">
+        <div>
+            <h4>Algorithmes ou méthodes numériques utilisées :</h4>
+        </div>
+        {{ form_widget(form.prjAlgorithme, { 'attr': { 'rows' : 8, 'cols' : 70 } }) }}
+    </div>
 </div>

@@ -41,11 +41,11 @@
 						=
 						<strong>{{ version.getEtatVersion }}</strong>
 					</p>
-				{% endif %}
-				{% if version.majInd != null %}
-					<em>Dernière modification par {{ version.majInd }}
-						le {{ version.majStamp|date('Y-m-d H:i:s') }}</em>
-				{% endif %}
+			{% endif %}
+			{% if version.majInd != null %}
+				<em>Dernière modification par {{ version.majInd }}
+					le {{ version.majStamp|date('Y-m-d H:i:s') }}</em>
+			{% endif %}
 			</div>
 		</div>
 
@@ -171,7 +171,7 @@
 				</div>
 			{% endif %}
 
-			<table class="vertical">
+			<table class="table_vertical">
 				<tbody>
 					<tr>
 						<th>Titre</th>
@@ -544,7 +544,7 @@
 
 			<h4>Description du code de calcul :</h4>
 			<div class="tableaux">
-				<table class="vertical">
+				<table class="table_vertical">
 					<tbody>
 						<tr>
 							<th>Nom du code</th>
@@ -582,7 +582,7 @@
 						</tr>
 					</tbody>
 				</table>
-				<table class="vertical">
+				<table class="table_vertical">
 					<tbody>
 						<tr>
 							<th>Estimation de la RAM nécessaire par cœur pour un job</th>
@@ -732,7 +732,7 @@
 
 			
 			{% for expertise in version.expertise %}
-				<table class="vertical">
+				<table class="table_vertical">
 					<tbody>
 						<tr>
 							<th>Nombre d'heures demandées</th>
@@ -764,7 +764,7 @@
 
 	{% if version.rallonge is not empty %}
 		<h4>Rallonges :</h4>
-		<table class="vertical">
+		<table class="table_vertical">
 			<tbody>
 			{% for r in version.rallonge %}
 				<tr>
