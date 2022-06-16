@@ -485,7 +485,7 @@ class AdminuxController extends AbstractController
         return new Response(json_encode(['OK' => '']));
     }
 
-    private function __getVersionInfo($v)
+    private function __getVersionInfo($v, bool $long)
     {
         $sp    = $this->sp;
         $em    = $this->getDoctrine()->getManager();
@@ -521,7 +521,15 @@ class AdminuxController extends AbstractController
         $r['sondVolDonnPerm'] = $v->getSondVolDonnPerm();
         // Pour le déboguage
         // if ($r['quota'] != $r['attrHeures']) $r['attention']="INCOHERENCE";
-        $r['quota']              = $sp->getConsoRessource($v->getProjet(), 'cpu', $annee)[1];
+	$r['quota']              = $sp->getConsoRessource($v->getProjet(), 'cpu', $annee)[1];
+        if ($long)
+        {
+            $r['titre']       = $v->getPrjTitre();
+            $r['resume']      = $v->getPrjResume();
+            $r['labo']        = $v->getPrjLLabo();
+            $r['metadonnees'] = $v->getDataMetaDataFormat();
+            $r['thematique']  = $v->getAcroMetaThematique();
+        }
         return $r;
     }
 
@@ -536,6 +544,10 @@ class AdminuxController extends AbstractController
      *             '{ "projet" : null     }' -> Tous les projets non terminés
      *
      *             '{ "projet" : "P01234" }' -> Le projet P01234
+     *             ou
+     *             '{ "projet" : "P01234", "long": "true" }'
+     *
+     * Pour le paramètre "long" voir la doc de versionGet
      *
      * Renvoie les informations utiles sur les projets non terminés, à savoir:
      *     - typeProjet
@@ -568,8 +580,11 @@ class AdminuxController extends AbstractController
         //print_r($content);
         if ($content == null) {
             $id_projet = null;
+            $long = false;
+
         } else {
             $id_projet  = (isset($content['projet'])) ? $content['projet'] : null;
+            $long = (isset($content['long']))? $content['long']: false;
         }
 
         $p_tmp = [];
@@ -594,7 +609,7 @@ class AdminuxController extends AbstractController
             $v_data = [];
             foreach (["active"=>$va,"derniere"=>$vb] as $k=>$v) {
                 if ($v != null) {
-                    $v_data[$k] = $this->__getVersionInfo($v);
+                    $v_data[$k] = $this->__getVersionInfo($v,$long);
                 }
             }
             $data['versions'] = $v_data;
