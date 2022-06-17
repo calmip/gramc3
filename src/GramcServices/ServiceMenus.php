@@ -742,7 +742,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function thematiques(int $priorite=self::HPRIO):array
+    public function thematiques(int $priorite=self::BPRIO):array
     {
         $menu['name']   =   'gerer_thematiques';
         $menu['commentaire']    =   "Gérer la liste des thématiques";
@@ -761,7 +761,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function rattachements(int $priorite=self::HPRIO):array
+    public function rattachements(int $priorite=self::BPRIO):array
     {
         $menu['name']   =   'gerer_rattachements';
         $menu['commentaire']    =   "Gérer la liste des rattachements";
@@ -780,7 +780,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function metathematiques(int $priorite=self::HPRIO):array
+    public function metathematiques(int $priorite=self::BPRIO):array
     {
         $menu['name']   =   'gerer_metaThematiques';
         $menu['commentaire']    =   "Gérer la liste des méta-thématiques";
@@ -1240,7 +1240,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function mailToResponsables(int $priorite=self::HPRIO):array
+    public function mailToResponsables(int $priorite=self::BPRIO):array
     {
         $session = $this->ss->getSessionCourante();
         if ($session != null) {
@@ -1520,7 +1520,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function televersement_generique(int $priorite=self::HPRIO):array
+    public function televersement_generique(int $priorite=self::BPRIO):array
     {
         $menu['name']           =   'televersement_generique';
         $menu['lien']           =   "Téléversements génériques";
