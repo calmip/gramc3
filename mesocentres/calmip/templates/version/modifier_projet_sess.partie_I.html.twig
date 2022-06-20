@@ -11,14 +11,14 @@
 			</div> {{ form_widget( form.prjTitre  ,{ 'attr':{'size': '90','style' : ''}})}}
 		</div>
 
+		<div class="input"> {{ form_label( form.prjSousThematique, "Sous-thématique (éventuellement)" ) }} {{ form_widget( form.prjSousThematique ) }}
+		</div>
+
 		<div class="input"> 
 			<div>
 				<span>*</span> {{ form_label( form.prjThematique, "Thématique principale du projet" ) }} 
 			</div>
 				{{ form_widget( form.prjThematique ) }}
-		</div>
-
-		<div class="input"> {{ form_label( form.prjSousThematique, "Sous-thématique (éventuellement)" ) }} {{ form_widget( form.prjSousThematique ) }}
 		</div>
 
 		{% if norattachement == false %}
