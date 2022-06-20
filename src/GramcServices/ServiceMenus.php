@@ -688,7 +688,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function info(int $priorite=self::HPRIO):array
+    public function info(int $priorite=self::BPRIO):array
     {
         $menu['name']        = 'phpinfo';
         $menu['commentaire'] = "Exécuter phpinfo()";
@@ -1220,7 +1220,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function avancer(int $priorite=self::HPRIO):array
+    public function avancer(int $priorite=self::BPRIO):array
     {
         //$session = $this->ss->getSessionCourante();
         $menu['name']           =   'param_avancer';
@@ -1304,7 +1304,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function nettoyer(int $priorite=self::HPRIO):array
+    public function nettoyer(int $priorite=self::BPRIO):array
     {
         $menu['name']            = 'rgpd';
         $menu['lien']            = "Nettoyage pour conformité au RGPD";

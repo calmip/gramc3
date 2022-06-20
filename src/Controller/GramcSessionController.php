@@ -136,11 +136,9 @@ class GramcSessionController extends AbstractController
         $menu5[] = $sm->statistiques();
         $menu5[] = $sm->publications();
 
-        $menu6[] = $sm->connexions();
         $menu6[] = $sm->journal();
-        if ($this->getParameter('kernel.debug')) {
-            $menu6[] = $sm->avancer();
-        }
+        $menu6[] = $sm->connexions();
+        if ($this->getParameter('kernel.debug')) $menu6[] = $sm->avancer();
         $menu6[] = $sm->info();
         $menu6[] = $sm->nettoyer();
 
