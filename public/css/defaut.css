@@ -1138,6 +1138,7 @@ img.dfct {
     --second-color: #D62412;
     --third-color: #5E5F5F;
     --warning-color: #D96800;
+    --error-color: red;
 }
 
 
@@ -1436,6 +1437,9 @@ select:hover{
     font-style: italic;
 }
 
+.information.error{
+    border-color: var(--error-color);
+}
 
 
 /* ========== TOUS LES MENUS ========== */

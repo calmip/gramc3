@@ -18,8 +18,9 @@
             Le fichier est obligatoirement un pdf de moins de {{ max_page_nb }} pages de {{ max_size_doc }} Mo.
             </div>
             {% endif %}
+
             <div id="uploadstatus"></div>
-            <div id="fileuploader">
+            <div class="fileuploader">
                 <a href="{{ path('televerser_fichier_attache', { 'id' : version.idVersion } ) }}" target="_blank" >
                     <strong>Téléversez le fichier</strong>
                 </a>
