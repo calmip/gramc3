@@ -183,7 +183,7 @@ class ServiceProjets
 
     // Ajoute les champs 'c','g','q', 'cp', 'stk' au tableau $p (pour projetsParAnnee)
     // 'c' -> conso TOTALE (cpu + gpu consolidé)
-    // 'g' -> conso GPU consolidée
+    // 'g' -> conso GPU normalisée
     // 'q' -> quota
     // 'cp' -> Conso totale en %age du quota
     // 'stk'-> Quota de stockage en Ko
@@ -597,6 +597,7 @@ class ServiceProjets
         $dem_heures    = [];
         $attr_heures   = [];
         $conso         = [];
+        $conso_gpu     = [];
 
         // Remplissage des quatre tableaux précédents
         foreach ($projets as $p) {
@@ -635,6 +636,9 @@ class ServiceProjets
             if (!array_key_exists($acro, $conso)) {
                 $conso[$acro]         = 0;
             }
+            if (!array_key_exists($acro, $conso_gpu)) {
+                $conso_gpu[$acro]         = 0;
+            }
             if (!array_key_exists($acro, $liste_projets)) {
                 $liste_projets[$acro] = [];
             }
@@ -660,10 +664,11 @@ class ServiceProjets
             //if ($acro=='LA') echo 'LA '.$p['p']->getIdProjet().' ';
             $attr_heures[$acro] += $p['attrib'];
             $conso[$acro]       += $p['c'];
+            $conso_gpu[$acro]   += $p['g'];
         }
         asort($acros);
 
-        return [$acros, $num_projets, $liste_projets, $dem_heures, $attr_heures, $conso, $num_projets_n, $num_projets_r];
+        return [$acros, $num_projets, $liste_projets, $dem_heures, $attr_heures, $conso, $num_projets_n, $num_projets_r, $conso_gpu];
     }
 
     /**

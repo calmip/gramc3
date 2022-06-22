@@ -551,6 +551,7 @@ class StatistiquesController extends AbstractController
             'dem_heures'    => $stats['dem_heures'],
             'attr_heures'   => $stats['attr_heures'],
             'conso'         => $stats['conso'],
+            'conso_gpu'     => $stats['conso_gpu'],
             'image_projets' => $stats['image_projets'],
             'image_dem'     => $stats['image_dem'],
             'image_attr'    => $stats['image_attr'],
@@ -640,7 +641,7 @@ class StatistiquesController extends AbstractController
         $sortie =   "Année $annee - ";
         if ($sess_lbl == "AB")
         {
-            $ligne = ["par $titre","nombre de projets","heures demandées","heures attribuées","heure consommées"];
+            $ligne = ["par $titre","nombre de projets","heures demandées","heures attribuées","consommation","consommation gpu"];
         }
         else
         {
@@ -654,7 +655,7 @@ class StatistiquesController extends AbstractController
         foreach ($stats['acros'] as $acro) {
             if ($sess_lbl == "AB")
             {
-                $ligne = [ '"' . $acro . '"', $stats['num_projets'][$acro], $stats['dem_heures'][$acro], $stats['attr_heures'][$acro], $stats['conso'][$acro] ];
+                $ligne = [ '"' . $acro . '"', $stats['num_projets'][$acro], $stats['dem_heures'][$acro], $stats['attr_heures'][$acro], $stats['conso'][$acro], $stats['conso_gpu'][$acro] ];
             }
             else
             {
@@ -726,6 +727,7 @@ class StatistiquesController extends AbstractController
         $conso       = $stats[5];
         $num_projets_n = $stats[6];
         $num_projets_r = $stats[7];
+        $conso_gpu     = $stats[8];
 
         $image_data = [];
         foreach ($acros as $key => $acro) {
@@ -758,6 +760,7 @@ class StatistiquesController extends AbstractController
                 "dem_heures"    => $dem_heures,
                 "attr_heures"   => $attr_heures,
                 "conso"         => $conso,
+                "conso_gpu"     => $conso_gpu,
                 "image_projets" => $image_projets,
                 "image_dem"     => $image_dem,
                 "image_attr"    => $image_attr,
