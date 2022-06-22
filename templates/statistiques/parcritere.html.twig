@@ -44,7 +44,10 @@
             {% if sess_lbl!='AB' %}<th>Nouveaux projets</th><th>Renouvellements</th>{% endif %}
             <th>Heures demandées</th>
             <th>Heures attribuées</th>
-            {% if sess_lbl == 'AB' %}<th>Consommation</th>{% endif %}
+            {% if sess_lbl == 'AB' %}
+                <th>Consommation</th>
+                <th>Consommation gpu</th>
+            {% endif %}
         </tr>
     </thead>
     <tbody>
@@ -53,9 +56,12 @@
             <td>{{ acro }}</td>
             <td>{{ num_projets[acro] }}</td>
             {% if sess_lbl!='AB' %}<td>{{ num_projets_n[acro] }}</td><td>{{ num_projets_r[acro] }}</td>{% endif %}
-            <td>{{ dem_heures[acro] }}</td>
-            <td>{{ attr_heures[acro] }}</td>
-            {% if sess_lbl == 'AB' %}<td>{{ conso[acro] }}</td>{% endif %}
+            <td>{{ dem_heures[acro]|number_format(0, ',', ' ') }}</td>
+            <td>{{ attr_heures[acro]|number_format(0, ',', ' ') }}</td>
+            {% if sess_lbl == 'AB' %}
+                <td>{{ conso[acro]|number_format(0, ',', ' ') }}</td>
+                <td>{{conso_gpu[acro]|number_format(0, ',', ' ')}}</td>
+            {% endif %}
         </tr>
         {% endfor %}
     </tbody>
