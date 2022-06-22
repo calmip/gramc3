@@ -2,37 +2,35 @@ $(document).ready(
 
     function()
     {
-    
-        //var ht = "<body><p>Paragraph Here</p></body>";
-        //alert( $('p', '<div>' + ht + '</div>').text() );
-        
-        // collection =
+        // collection = Le div qui entoure tout le tableau des collaborateurs
+        //              En pratique il n'y en a qu'un 
         $(".collection").each(function()
-            {
-            // Les collaborateurs ne sont plus supprimées tout de suite mais plutôt marqués comme deleted
+        {
+            // Les collaborateurs ne sont plus supprimés tout de suite mais plutôt marqués comme deleted
             // Du coup on n'utilise plus cette fonction
             // supprime_aff_collabs();
             // ajout d'un compteur des lignes
             if(  $(".collection-contents",this).data("count") == 0 )
+            {
                 $(".collection-contents",this).data("count", $(".collection-tbody",this).find('tr').length);
+            };
         
             // ajout d'un paramètre id unique au bouton
             $(this).append('<button class="add" id="' + $(this).parent().parent().attr('id') +
-                                        '_add" type="submit">Ajouter une ligne dans le formulaire</button>');
-        
+                            '_add" type="submit">Nouvelle ligne</button>');
             $(this).find(".collection-tbody-old").find("input[id$='_mail'][type='text']")
                 .attr("class","mail ui-autocomplete-input").prop('disabled', true);
         
             // Le controleur envoie automatiquement une nouvelle ligne
             //nouvelle_ligne($(this));
             add_autocomplete( $(this) ); // ajout d'autocomplete sans nouvelle ligne
-            });
+        });
         
         $(".collection .add").click(function(event)
-            {
+        {
             event.preventDefault();
             nouvelle_ligne( $(this) );
-            });
+        });
         
         $(".collection .resp").find("input[id$='_delete'][type='checkbox']").prop('disabled', true); // impossible de supprimer le responsable
         $(".collection .resp").find("input[id$='_delete'][type='checkbox']").css("opacity",'0'); // impossible de supprimer le responsable
@@ -77,8 +75,7 @@ $(document).ready(
     
         $("input[id$='_mail'][type='text']", context.parent()).unbind('blur').on('blur', function()
             { complete_ligne( $(this).val(), $(this) ); })
-    
-    
+        
         // Lorsqu'on décoche une case login, on se choppe un message !
         $("input[id$='_login'][type='checkbox']", context.parent() .parent() ).unbind('change')
         .change(function()
@@ -216,24 +213,35 @@ $(document).ready(
                     let mail = context.val();
                     if (regEmail.test(mail))
                     {
-                        let msg =  "Afin de confirmer cette adresse de courriel, une invitation sera envoyée à votre collaborateur ";
-                        msg += " lorsque vous enregistrerez cette page";
-                        let html = '<p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>';
-                        html += msg;
-                        html += '</p>';
-                        //alert(msg);
-                        $("#dialog-suppression").html(html);
-                        $("#dialog-suppression").dialog({
-                            resizable: false,
-                            height: "auto",
-                            width: 400,
-                            modal: true,
-                            buttons: {
-                                "OK": function() {
-                                    $( this ).dialog( "close" );
+                        if (NOINVITATION != 0)
+                        {
+                            msg = "ERREUR ! Pas possible d'enregistrer ! \n";
+                            msg += "Vous avez peut-être ajouté un collaborateur inconnnu, il faut dans ce cas qu’il se connecte à cette plateforme pour y créer un compte avant de pouvoir être ajouté en tant que collaborateur. \n";
+                            msg += "Attention : les demandes de compte sur le calculateur se font encore au moyen de formulaires séparés (https://www.criann.fr/acces-calcul/)";
+                            alert(msg);
+                            context.val("");
+                        }
+                        else
+                        {
+                            let msg =  "Afin de confirmer cette adresse de courriel, une invitation sera envoyée à votre collaborateur ";
+                            msg += " lorsque vous enregistrerez cette page";
+                            let html = '<p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>';
+                            html += msg;
+                            html += '</p>';
+                            //alert(msg);
+                            $("#dialog-suppression").html(html);
+                            $("#dialog-suppression").dialog({
+                                resizable: false,
+                                height: "auto",
+                                width: 400,
+                                modal: true,
+                                buttons: {
+                                    "OK": function() {
+                                        $( this ).dialog( "close" );
+                                    }
                                 }
-                            }
-                        });
+                            });
+                        }
                     }
                     else if (mail != "")
                     {
