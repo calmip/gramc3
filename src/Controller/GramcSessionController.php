@@ -569,40 +569,33 @@ class GramcSessionController extends AbstractController
     ///////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @Route("/{clef}/repinvit", name="repinvit", methods={"GET","POST"})
-     * @Security("is_granted('ROLE_DEMANDEUR')")
+     * @Route("/{clef}/repinvit", name="repinvit", methods={"GET"})
      */
     public function repinvitAction(Request $request, Invitation $invitation=null): Response
     {
         $em = $this->getDoctrine()->getManager();
-        $invit_duree = $this->getParameter('invit_duree');
-        
         $sj = $this->sj;
+        $ts = $this->ts;
 
-        // Invitation supprimée !
-        if ( $invitation == null)
+        // Invitation non valide = on déconnecte et on redirige vers la page d'accueil
+        if ( ! $this->validInvit($request, $invitation))
         {
-            $message = "Cette invitation n'existe pas, ou a été supprimée";
-            $request->getSession()->getFlashbag()->add("flash erreur",$message . " - Merci de vous rapprocher de CALMIP");
-            $sj->warningMessage(__METHOD__ . ':' . __LINE__ . $message);       
-            return $this->redirectToRoute('deconnexion');
+            $ts->setToken(null);
+            //$request->getSession()->invalidate();
+            return $this->redirectToRoute('accueil');
         }
-
-        // Invitation OK - On vérifie la date
-        $now = $this->grdt;
-        $expiration = $invitation->getCreationStamp()->add(new \DateInterval($invit_duree));
-        if ($now > $expiration)
-        {
-            // L'invitation est à usage unique, on la supprime
-            $em->remove($invitation);
-            $em->flush();
         
-            $message = "Cette invitation a expiré ";
-            $request->getSession()->getFlashbag()->add("flash erreur",$message . " - Merci de vous rapprocher de CALMIP");
-            $sj->warningMessage(__METHOD__ . ':' . __LINE__ . $message . " de " . $invitation->getInviting() . " pour " .$invitation->getInvited());       
-            return $this->redirectToRoute('deconnexion');
-        }
+        // Invitation valide = on redirige vers repinvitok
+        // Cette fois il faudra s'authentifier
+        return $this->redirectToRoute('repinvitok', ['clef' => $invitation->getClef()]);
+    }
 
+    /**
+     * @Route("/{clef}/repinvitok", name="repinvitok", methods={"GET","POST"})
+     * @Security("is_granted('ROLE_DEMANDEUR')")
+     */
+    public function repinvitokAction(Request $request, Invitation $invitation=null): Response
+    {
         // Date OK - On vérifie les users
         $invited = $invitation->getInvited();
         $connected = $this->ts->getToken()->getUser();
@@ -612,17 +605,58 @@ class GramcSessionController extends AbstractController
             // L'invitation est à usage unique, on la supprime
             $em->remove($invitation);
             $em->flush();
-        
+
+            // On oblige l'utilisateur à vérifier son profil
             return $this->redirectToRoute('profil');
         }
         else
         {
-            // On supprimera l'invitation dans choisirMail
-            // TODO - A améliorer il faudrait supprimer à partir d'un seul endroit !
+            // On supprimera l'invitation dans choisirMail seulement lorsque l'utilisateur
+            // aura choisi son mail !
             return $this->choisirMail($request, $connected, $invitation);
-            //return $this->render('individu/repinvit.html.twig',['invitation' => $invitation, 'connected' => $connected]);
-            //return $this->redirectToRoute('accueil');
         }        
+    }
+
+    /*******************************************************************************
+     * Vérifie que l'invitation passée en paramètres est valide
+     * c'est-à-dire qu'elle existe et qu'elle n'a pas expiré
+     *
+     * Si non valide: Met un message d'erreur dans le flasjbag et renvoie false
+     * Si valide: renvoie true (met ne la supprime pas encore)
+     *
+     *****************************************************************************/
+    private function validInvit(Request $request, Invitation $invitation=null) : bool
+    {
+        $sj = $this->sj;
+        // Invitation supprimée !
+        if ( $invitation == null)
+        {
+            $message = "Cette invitation n'existe pas, ou a été supprimée";
+            $request->getSession()->getFlashbag()->add("flash erreur",$message . " - Merci de vous rapprocher de CALMIP");
+            $sj->warningMessage(__METHOD__ . ':' . __LINE__ . $message);
+            return false;
+        }
+
+        // Invitation OK - On vérifie la date
+        $now = $this->grdt;
+        $invit_duree = $this->getParameter('invit_duree');
+        $expiration = $invitation->getCreationStamp()->add(new \DateInterval($invit_duree));
+
+        // On supprime les invitations expirées
+        if ($now > $expiration)
+        {
+            // L'invitation est à usage unique, on la supprime
+            $em->remove($invitation);
+            $em->flush();
+        
+            $message = "Cette invitation a expiré ";
+            $request->getSession()->getFlashbag()->add("flash erreur",$message . " - Merci de vous rapprocher de CALMIP");
+            $sj->warningMessage(__METHOD__ . ':' . __LINE__ . $message . " de " . $invitation->getInviting() . " pour " .$invitation->getInvited());
+            return false;
+        }
+
+        return true;
+
     }
     /*************************
      * Fonction appelée par repinvitAction lorsque l'adresse de l'invité ne colle pas avec l'adresse du profil
@@ -682,7 +716,7 @@ class GramcSessionController extends AbstractController
                 $sj->warningMessage(__METHOD__ . ':' . __LINE__ . $message);
                 $request->getSession()->getFlashbag()->add("flash erreur","Problème de mail, rapprochez-vous de " . $this->getParameter('mesoc'));
             }
-            return $this->redirectToRoute('accueil');
+            return $this->redirectToRoute('profil');
         }
 
         return $this->render('individu/repinvit.html.twig',
