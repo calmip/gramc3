@@ -298,7 +298,7 @@ class ExpertiseController extends AbstractController
     }
 
     // Helper function used by listeAction
-    private static function exptruefirst($a, $b): Response
+    private static function exptruefirst($a, $b): int
     {
         if ($a['expert']==true  && $b['expert']==false) {
             return -1;
