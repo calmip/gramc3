@@ -12,10 +12,12 @@
 
     <p>Or, l'invitation a été envoyée à <strong>{{invitation.invited.mail}}</strong></p>
 
+    <p>Quelle adresse souhaitez-vous conserver ?<br><strong>ATTENTION </strong>Si vous choisissez {{invitation.invited.mail}} vous devrez vous reconnecter !</p>
+
     {{ form_start(form) }}
     {{ form_widget(form) }}
     {{ form_end(form) }}
-     
+
 </section>
 
 {% endblock %}

@@ -33,6 +33,7 @@ use App\Entity\Thematique;
 
 use App\GramcServices\ServiceJournal;
 
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
 /********************
@@ -41,7 +42,7 @@ use Doctrine\ORM\EntityManagerInterface;
  
 class ServiceIndividus
 {
-    public function __construct(private ServiceJournal $sj, private EntityManagerInterface $em){}
+    public function __construct(private ServiceJournal $sj, private TokenStorageInterface $ts, private EntityManagerInterface $em){}
 
 
     /*****************
@@ -54,7 +55,13 @@ class ServiceIndividus
     {
         $em = $this->em;
         $sj = $this->sj;
+        $ts = $this->ts;
 
+        $connected = $ts->getToken()->getUser();
+        if ($individu->getId() === $connected->getId())
+        {
+            $sj->throwException(__METHOD__ . ':' . __LINE__ . " Pas possible de fusionner $individu, car vous êtes cet individu !");
+        }
         $CollaborateurVersion = $em->getRepository(CollaborateurVersion::class)->findBy(['collaborateur' => $individu]);
         $Expertise = $em->getRepository(Expertise ::class)->findBy(['expert' => $individu]);
         $Journal = $em->getRepository(Journal::class)->findBy(['individu' => $individu]);
@@ -110,11 +117,36 @@ class ServiceIndividus
             $item->setIndividu($new_individu);
         }
 
+        // Le profil: si le profil de $new_individu est incomplet, on prend les informations de $individu
+        //            Seulement nom/prénom/statut/laboratoire/établissement
+        $this->copierProfil($individu, $new_individu);
+            
         // Une entrée de journal
         $sj->infoMessage('Utilisateur ' . $individu . '(' .  $individu->getIdIndividu()
-            . ') remplacé par ' . $new_individu . ' (' .  $new_individu->getIdIndividu() . ')');
+            . ') fusionné vers ' . $new_individu . ' (' .  $new_individu->getIdIndividu() . ')');
     }
 
+    /*********************************************************
+     * copie le profil de $individu sur $new_individu
+     * ATTENTION:
+     *     1/ Ne copie que les champs nom/prénom/statut/laboratoire/établissement
+     *     2/ A CONDITION que le champ de $new_individu soit VIDE !
+     **************************************/
+    private function copierProfil(Individu $individu, Individu $new_individu)
+    {
+        $em = $this->em;
+        
+        if ($this->validerProfil($new_individu)) return;
+        if ($new_individu->getPrenom() == null) $new_individu->setPrenom($individu->getPrenom());
+        if ($new_individu->getNom() == null) $new_individu->setNom($individu->getNom());
+        if ($new_individu->getLabo() == null) $new_individu->setLabo($individu->getLabo());
+        if ($new_individu->getEtab() == null) $new_individu->setEtab($individu->getEtab());
+        if ($new_individu->getStatut() == null) $new_individu->setStatut($individu->getStatut());
+
+        $em->persist($new_individu);
+        $em->flush();
+    }
+    
     /*********************************
      * valide le profil de l'utilisateur passé en paramètre
      * 

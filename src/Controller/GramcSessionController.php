@@ -585,7 +585,7 @@ class GramcSessionController extends AbstractController
             $message = "Cette invitation n'existe pas, ou a été supprimée";
             $request->getSession()->getFlashbag()->add("flash erreur",$message . " - Merci de vous rapprocher de CALMIP");
             $sj->warningMessage(__METHOD__ . ':' . __LINE__ . $message);       
-            return $this->redirectToRoute('accueil');
+            return $this->redirectToRoute('deconnexion');
         }
 
         // Invitation OK - On vérifie la date
@@ -600,7 +600,7 @@ class GramcSessionController extends AbstractController
             $message = "Cette invitation a expiré ";
             $request->getSession()->getFlashbag()->add("flash erreur",$message . " - Merci de vous rapprocher de CALMIP");
             $sj->warningMessage(__METHOD__ . ':' . __LINE__ . $message . " de " . $invitation->getInviting() . " pour " .$invitation->getInvited());       
-            return $this->redirectToRoute('accueil');
+            return $this->redirectToRoute('deconnexion');
         }
 
         // Date OK - On vérifie les users
@@ -646,7 +646,7 @@ class GramcSessionController extends AbstractController
                         'multiple' => false,
                         'choices' => [ $mail_connected => $mail_connected, $mail_invited => $mail_invited ],
                         'placeholder' => false,
-                        'label' => 'Quel mail souhaitez-vous conserver ? '
+                        'label' => ' '
                     ]
                 )
                 ->add('OK', SubmitType::class, ['label' => "OK"])
@@ -661,28 +661,28 @@ class GramcSessionController extends AbstractController
         
             $mail = $form->getData()['mail'];
 
-            // On garde l'individu $connected, on supprime l'invité
-            if ($mail === $mail_connected)
-            {
-                $sid->fusionnerIndividus($invitation->getInvited(), $connected);
-                return $this->redirectToRoute('profil');
-            }
+            // On fusionne invité -> connecté puis on supprime le connecté
+            $sid->fusionnerIndividus($invitation->getInvited(), $connected);
+            $em->remove($invitation->getInvited());
+            $em->flush();
 
-            // On garde l'invité, on supprime le connected
-            else if ($mail === $mail_invited)
+            // On veut garder le mail de l'invité, il faut donc changer le mail du connecté
+            if ($mail === $mail_invited)
             {
-                $sid->fusionnerIndividus($connected, $invitation->getInvited());
-                return $this->redirectToRoute('accueil');
+                $connected->setMail($mail_invited);
+                $em->persist($connected);
+                $em->flush();
             }
 
             // oups qu'est-ce que c'est que cette adresse ?
-            else
+            // ne devrait jamais arriver
+            else if ($mail != $mail_connected)
             {
                 $message = "mail connected = " . $connected->getMail() . " - mail invited = " . $invitation->getInvited()->getMail() . " - réponse au formulaire = " . $mail;
                 $sj->warningMessage(__METHOD__ . ':' . __LINE__ . $message);
                 $request->getSession()->getFlashbag()->add("flash erreur","Problème de mail, rapprochez-vous de " . $this->getParameter('mesoc'));
-                return $this->redirectToRoute('accueil');
             }
+            return $this->redirectToRoute('accueil');
         }
 
         return $this->render('individu/repinvit.html.twig',
