@@ -197,6 +197,7 @@ $(document).ready(
             function(data)
             {
                 //alert( data );
+                // Si le mail existe déjà sur gramc
                 if(! regData.test( data ) )
                 {
                     let input = '<div>' + data + '</div>';
@@ -208,12 +209,31 @@ $(document).ready(
                     $("[id$='_id']", context.parent().parent() ).val( $('#Individu_id', input).val());
                     $("[id$='_mail'][type='text']", context.parent().parent() ).prop("disabled",true);
                 }
+
+                // Il faut créer le compte
                 else
                 {
                     let mail = context.val();
                     if (regEmail.test(mail))
                     {
-                        alert("Si vous confirmez cette adresse, un courriel d'invitation sera envoyé à " + mail + " lorsque vous cliquerez sur FERMER ou ENREGISTRER");
+                        let msg =  "Afin de confirmer cette adresse de courriel, une invitation sera envoyée à votre collaborateur ";
+                        msg += " lorsque vous enregistrerez cette page";
+                        let html = '<p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>';
+                        html += msg;
+                        html += '</p>';
+                        //alert(msg);
+                        $("#dialog-suppression").html(html);
+                        $("#dialog-suppression").dialog({
+                            resizable: false,
+                            height: "auto",
+                            width: 400,
+                            modal: true,
+                            buttons: {
+                                "OK": function() {
+                                    $( this ).dialog( "close" );
+                                }
+                            }
+                        });
                     }
                     else if (mail != "")
                     {
