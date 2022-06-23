@@ -82,6 +82,12 @@ use Twig\Environment;
 
 /////////////////////////////////////////////////////
 
+// Pour connexionsAction
+function c_cmp($a, $b): bool
+{
+    return $a["temps"] > $b["temps"];    
+}
+
 class GramcSessionController extends AbstractController
 {
     public function __construct(
@@ -493,7 +499,44 @@ class GramcSessionController extends AbstractController
         $sj = $this->sj;
 
         $connexions = $sps->getConnexions();
-        return $this->render('default/connexions.html.twig', [ 'connexions' => $connexions ]);
+        //dd($connexions);
+        
+        // On garde seulement la connexion la plus récente pour chaque utilisateur
+        $c_uniq = [];
+        foreach ($connexions as $c)
+        {
+            if ($c["user"] == null && $c["rest_user"] == null) continue;
+            if ($c["rest_user"] == null)
+            {
+                $u = $c["user"] . "";
+            }
+            else
+            {
+                $u = $c["rest_user"] . "";
+            }
+            $m = intval($c['minutes']) + 60 * intval($c['heures']);
+            $c["temps"] = $m;
+            
+            if (array_key_exists($u, $c_uniq))
+            {
+                $cu = $c_uniq[$u];
+                if ($cu["temps"] > $c["temps"])
+                {
+                    $c_uniq[$u] = $c;
+                }
+            }
+            else
+            {
+                $c_uniq[$u] = $c;
+            }
+        }
+
+        // On reforme le tableau de connexions, simplifié
+        $connexions_uniq = array_values($c_uniq);
+        //dd($connexions_uniq);
+        usort($connexions_uniq, '\App\Controller\c_cmp');
+        
+        return $this->render('default/connexions.html.twig', [ 'connexions' => $connexions_uniq ]);
     }
 
     /**

@@ -283,7 +283,8 @@ class ServiceSessions
         if ($attrib >= $this->recup_attrib_seuil) {
             $conso_rel = (100.0 * $conso) / $attrib;
             if ($conso_rel < $this->recup_conso_seuil) {
-                $recup_heures = $attrib * $this->recup_attrib_quant / 100;
+                $obj = $attrib * $this->recup_attrib_quant / 100;
+                $recup_heures = $obj - $conso;
             }
         }
         return $recup_heures;

@@ -145,6 +145,7 @@ parameters:
     
     # Différents mails
     mailadmin: admin.calmip@univ-toulouse.fr
+    mailsupport: support.calmip@univ-toulouse.fr
     mailfrom: ne-pas-repondre@calmip.univ-toulouse.fr
     
     # Utilisé pour le nettoyage du journal et aussi des projets (pour le respect du rgpd)
