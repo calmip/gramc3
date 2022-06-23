@@ -740,21 +740,26 @@ class VersionController extends AbstractController
             return $this->redirectToRoute($modifier_version_menu['name'], ['id' => $version, '_fragment' => 'liste_des_collaborateurs']);
         }
 
-
+        $text_fields = true;
+        if ($this->getParameter('resp_peut_modif_collabs'))
+        {
+            $text_fields = false;
+        }
         $collaborateur_form = $this->ff
                                    ->createNamedBuilder('form_projet', FormType::class, [
                                        'individus' => $sv->prepareCollaborateurs($version, $sj, $sval)
                                    ])
                                    ->add('individus', CollectionType::class, [
-                                       'entry_type'     =>  IndividuFormType::class,
-                                       'label'          =>  false,
-                                       'allow_add'      =>  true,
-                                       'allow_delete'   =>  true,
-                                       'prototype'      =>  true,
-                                       'required'       =>  true,
-                                       'by_reference'   =>  false,
-                                       'delete_empty'   =>  true,
-                                       'attr'         => ['class' => "profil-horiz",],
+                                       'entry_type'   =>  IndividuFormType::class,
+                                       'label'        =>  false,
+                                       'allow_add'    =>  true,
+                                       'allow_delete' =>  true,
+                                       'prototype'    =>  true,
+                                       'required'     =>  true,
+                                       'by_reference' =>  false,
+                                       'delete_empty' =>  true,
+                                       'attr'         => ['class' => "profil-horiz"],
+                                       'entry_options' =>['text_fields' => $text_fields]
                                    ])
                                    ->add('submit', SubmitType::class, [
                                         'label' => 'Sauvegarder',

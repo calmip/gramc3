@@ -65,7 +65,8 @@ class IndividuType extends AbstractType
             $builder->add('creationStamp');
         }
 
-        if ($options['user'] == true) {
+        if ($options['user'] == true)
+        {
             $builder
                 ->add('nom', TextType::class, [ 'label' => 'Nom:'])
                 ->add('prenom', TextType::class, [ 'label' => 'Prénom']);
@@ -77,6 +78,14 @@ class IndividuType extends AbstractType
                    $builder->add('mail', EmailType::class, [ 'disabled' => true]);
                 }
 
+            if ($options['mail'] == true)
+            {
+                $builder->add('mail', EmailType::class);
+            }
+            else
+            {
+               $builder->add('mail', EmailType::class, [ 'disabled' => true]); 
+            }
         }
 
         if ($options['admin'] == true) {

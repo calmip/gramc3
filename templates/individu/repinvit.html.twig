@@ -1,0 +1,25 @@
+{% extends 'default/base.html.twig' %}
+{% import "default/macros.html.twig" as gramcmacros %}
+
+{% block body %}
+<section>
+    <h1>Réponse à une invitation</h1>
+
+    <p><strong>{{invitation.invited}}</strong> a été invité sur la plateforme d'attributions de ressources de {{mesoc}} par <strong>{{ invitation.inviting}}</strong></p>
+
+    <p>Vous êtes actuellement connecté en tant que {{connected.prenom}} {{connected.nom}}
+       avec l'adresse de courriel <strong>{{connected.mail }}</strong></p>
+
+    <p>Or, l'invitation a été envoyée à <strong>{{invitation.invited.mail}}</strong></p>
+
+    <p>Quelle adresse souhaitez-vous conserver ?</p>
+    <p><strong>Pour vous aider:</strong> Dans la mesure du possible, choisissez une adresse <strong>institutionnelle</strong>,
+    plutôt qu'une adresse personnelle !</p>
+
+    {{ form_start(form) }}
+    {{ form_widget(form) }}
+    {{ form_end(form) }}
+
+</section>
+
+{% endblock %}
