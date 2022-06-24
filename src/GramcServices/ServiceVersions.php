@@ -776,17 +776,20 @@ class ServiceVersions
      * Validation du formulaire des collaborateurs - Retourne true/false
      *
      * params = Retour de $sv->prepareCollaborateurs
-     *          TODO $definitif = ?
+     *          $definitif = Si false, on fait une validation minimale
      ***********************************************************************/
     public function validateIndividuForms(array $individu_forms, $definitif = false) : bool
     {
         $coll_login = $this->coll_login;
+        $resp_peut_modif_collabs = $this->resp_peut_modif_collabs;
         $one_login = false;
         foreach ($individu_forms as  $individu_form) {
             if ($individu_form->getLogin()) {
                 $one_login = true;
             }
-            if ($definitif ==  true  &&
+            // Si pas définitif, on ne teste pas ça
+            // Si le resp ne peut pas modifier les profils des collabs, on ne teste pas ça
+            if ($definitif == true && $resp_peut_modif_collabs == true &&
                 (
                    $individu_form->getPrenom() == null   || $individu_form->getNom() == null
                 || $individu_form->getEtablissement() == null
