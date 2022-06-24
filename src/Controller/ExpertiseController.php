@@ -737,7 +737,6 @@ class ExpertiseController extends AbstractController
                             [
                                 'multiple' => false,
                                 'choices'   =>  [ 'Accepter' => 1, 'Refuser' => 0,],
-                                'data' => 1
                             ],
                             );
 
@@ -794,6 +793,7 @@ class ExpertiseController extends AbstractController
 
             $em->persist($expertise);
             $em->flush();
+            //dd($expertise);
 
             // Bouton FERMER
             if ($editForm->get('fermer')->isClicked()) {
