@@ -35,6 +35,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Form\FormInterface;
 
+use Doctrine\ORM\EntityManagerInterface;
+
 /**
  * Thematique controller.
  *
@@ -42,7 +44,7 @@ use Symfony\Component\Form\FormInterface;
  */
 class ThematiqueController extends AbstractController
 {
-    public function __construct(private AuthorizationCheckerInterface $ac) {}
+    public function __construct(private AuthorizationCheckerInterface $ac, private EntityManagerInterface $em) {}
 
     /**
      * Lists all thematique entities.
@@ -53,7 +55,7 @@ class ThematiqueController extends AbstractController
      */
     public function indexAction(): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $thematiques = $em->getRepository(Thematique::class)->findAll();
 
@@ -69,7 +71,7 @@ class ThematiqueController extends AbstractController
     public function gererAction(): Response
     {
         $ac = $this->ac;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // Si on n'est pas admin on n'a pas accès au menu
         $menu = $ac->isGranted('ROLE_ADMIN') ? [ ['ok' => true,'name' => 'ajouter_thematique' ,'lien' => 'Ajouter une thématique','commentaire'=> 'Ajouter une thématique'] ] : [];
@@ -93,7 +95,7 @@ class ThematiqueController extends AbstractController
      */
     public function newAction(Request $request): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $thematique = new Thematique();
         $form = $this->createForm(
             'App\Form\ThematiqueType',
@@ -106,7 +108,7 @@ class ThematiqueController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($thematique);
             $em->flush($thematique);
 
@@ -137,7 +139,7 @@ class ThematiqueController extends AbstractController
      */
     public function supprimerAction(Request $request, Thematique $thematique): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->remove($thematique);
         $em->flush($thematique);
         return $this->redirectToRoute('gerer_thematiques');
@@ -152,7 +154,7 @@ class ThematiqueController extends AbstractController
      */
     public function modifyAction(Request $request, Thematique $thematique): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $editForm = $this->createForm(
             'App\Form\ThematiqueType',
             $thematique,
@@ -164,7 +166,7 @@ class ThematiqueController extends AbstractController
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('gerer_thematiques');
         }
@@ -214,7 +216,7 @@ class ThematiqueController extends AbstractController
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('thematique_edit', array('id' => $thematique->getId()));
         }
@@ -239,7 +241,7 @@ class ThematiqueController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->remove($thematique);
             $em->flush($thematique);
         }

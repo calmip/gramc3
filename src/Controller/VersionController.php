@@ -78,6 +78,8 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Validator\Constraints\PagesNumber;
 use Knp\Snappy\Pdf;
 
+use Doctrine\ORM\EntityManagerInterface;
+
 /******************************************
  *
  * VersionController = Les contrôleurs utilisés avec les versions de projets
@@ -110,7 +112,8 @@ class VersionController extends AbstractController
         private FormFactoryInterface $ff,
         private ValidatorInterface $vl,
         private TokenStorageInterface $tok,
-        private Pdf $pdf
+        private Pdf $pdf,
+        private EntityManagerInterface $em
     ) {}
 
     /**
@@ -122,7 +125,7 @@ class VersionController extends AbstractController
      */
     public function indexAction(): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $versions = $em->getRepository(Version::class)->findAll();
 
@@ -144,7 +147,7 @@ class VersionController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($version);
             $em->flush($version);
 
@@ -197,7 +200,7 @@ class VersionController extends AbstractController
      */
     public function supprimerAction(Version $version, $rtn): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sm = $this->sm;
         $sv = $this->sv;
         $sj = $this->sj;
@@ -404,7 +407,7 @@ class VersionController extends AbstractController
      */
     public function televersementFicheAction(Request $request, Version $version): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sm = $this->sm;
         $sj = $this->sj;
 
@@ -521,7 +524,7 @@ class VersionController extends AbstractController
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('version_edit', array('id' => $version->getId()));
         }
@@ -726,7 +729,7 @@ class VersionController extends AbstractController
         $sj = $this->sj;
         $sval= $this->vl;
         $sv = $this->sv;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
 
         if ($sm->modifier_collaborateurs($version)['ok'] == false) {
@@ -828,7 +831,7 @@ class VersionController extends AbstractController
     public function penalAction(Version $idversion, $penal): Response
     {
         $data = [];
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $version = $em->getRepository(Version::class)->findOneBy([ 'idVersion' =>  $idversion]);
         if ($version != null) {
             if ($penal >= 0) {
@@ -857,7 +860,7 @@ class VersionController extends AbstractController
         $sm = $this->sm;
         $sj = $this->sj;
         $ff = $this->ff;
-        $em = $this->getdoctrine()->getManager();
+        $em = $this->em;
 
         if ($sm->envoyer_expert($version)['ok'] == false) {
         $sj->throwException(__METHOD__ . ":" . __LINE__ .
@@ -921,7 +924,7 @@ class VersionController extends AbstractController
         $sm = $this->sm;
         $sj = $this->sj;
         $se = $this->se;
-        $em = $this->getdoctrine()->getManager();
+        $em = $this->em;
 
         ////$this->MenuACL($sm->envoyer_expert($version), " Impossible d'envoyer la version " . $version->getIdVersion() . " à l'expert", __METHOD__, __LINE__);
 
@@ -961,7 +964,7 @@ class VersionController extends AbstractController
      */
     public function televersementGeneriqueAction(Request $request): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sd = $this->sd;
         $ss = $this->ss;
         $sp = $this->sp;
@@ -1159,7 +1162,7 @@ class VersionController extends AbstractController
                 if ($attrHeuresEte>=0) {
                     $version->setAttrHeuresEte($attrHeuresEte);
                 }
-                $em = $this->getDoctrine()->getManager();
+                $em = $this->em;
                 $em->persist($version);
                 $em->flush();
             }
@@ -1189,7 +1192,7 @@ class VersionController extends AbstractController
      */
     public function televerserRapportAction(Version $version, Request $request, $annee): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sm = $this->sm;
         $sf = $this->sf;
         $sj = $this->sj;
@@ -1320,7 +1323,7 @@ class VersionController extends AbstractController
 
     private function modifyRapport(Projet $projet, $annee, $filename): void
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // création de la table RapportActivite
         $rapportActivite = $em->getRepository(RapportActivite::class)->findOneBy(

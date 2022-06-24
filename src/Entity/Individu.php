@@ -256,7 +256,7 @@ class Individu implements UserInterface, EquatableInterface, PasswordAuthenticat
     ////////////////////////////////////////////////////////////////////////////
 
     /* Pour verifier que deux objets sont égaux, utiliser cet interface et pas == ! */
-    public function isEqualTo(UserInterface $user)
+    public function isEqualTo(UserInterface $user) : bool
     {
         if ($user == null || !$user instanceof Individu) {
             return false;
@@ -275,9 +275,9 @@ class Individu implements UserInterface, EquatableInterface, PasswordAuthenticat
     }
 
     // implementation UserInterface
-    public function getUserIdentifier() { return $this->getId();}
-    public function getUsername() { return $this->getMail();}
-    public function getSalt()           { return null;}
+    public function getUserIdentifier(): string { return $this->getId();}
+    public function getUsername(): string { return $this->getMail();}
+    public function getSalt(): ?string { return null;}
     public function getPassword(): ?string { return "";}
     public function eraseCredentials() {}
 
@@ -293,7 +293,7 @@ class Individu implements UserInterface, EquatableInterface, PasswordAuthenticat
      *     - ROLE_SYSADMIN  = Administrateur système, est observateur et reçoit certains mails
      *     - ROLE_ALLOWED_TO_SWITCH = Peut changer d'identité (actuellement kifkif admin)
      */
-    public function getRoles()
+    public function getRoles(): array
     {
         $roles[] = 'ROLE_DEMANDEUR';
 

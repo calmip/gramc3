@@ -31,6 +31,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+use Doctrine\ORM\EntityManagerInterface;
+
 /**
  * Collaborateurversion controller.
  *
@@ -39,6 +41,10 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class CollaborateurVersionController extends AbstractController
 {
+    public function __construct(
+        private EntityManagerInterface $em
+    ) {}
+
     /**
      * Lists all collaborateurVersion entities.
      *
@@ -47,7 +53,7 @@ class CollaborateurVersionController extends AbstractController
      */
     public function indexAction(): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $collaborateurVersions = $em->getRepository(CollaborateurVersion::class)->findAll();
 
@@ -69,7 +75,7 @@ class CollaborateurVersionController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($collaborateurVersion);
             $em->flush($collaborateurVersion);
 
@@ -111,7 +117,7 @@ class CollaborateurVersionController extends AbstractController
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('collaborateurversion_edit', array('id' => $collaborateurVersion->getId()));
         }
@@ -135,7 +141,7 @@ class CollaborateurVersionController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->remove($collaborateurVersion);
             $em->flush($collaborateurVersion);
         }

@@ -45,6 +45,8 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
+use Doctrine\ORM\EntityManagerInterface;
+
 /**
  * Publication controller.
  *
@@ -57,7 +59,8 @@ class PublicationController extends AbstractController
         private ServiceSessions $ss,
         private FormFactoryInterface $ff,
         private TokenStorageInterface $tok,
-        private AuthorizationCheckerInterface $ac
+        private AuthorizationCheckerInterface $ac,
+        private EntityManagerInterface $em
     ) {}
 
     /**
@@ -70,7 +73,7 @@ class PublicationController extends AbstractController
     public function autocompleteAction(Request $request): Response
     {
         $sj = $this->sj;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $sj->debugMessage('autocompleteAction ' .  print_r($_POST, true));
         $form = $this->ff
@@ -134,7 +137,7 @@ class PublicationController extends AbstractController
      */
     public function indexAction(): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $publications = $em->getRepository(Publication::class)->findAll();
 
@@ -150,7 +153,7 @@ class PublicationController extends AbstractController
     public function gererAction(Projet $projet, Request $request, LoggerInterface $lg): Response
     {
         $sj = $this->sj;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $publication    = new Publication();
         $form = $this->createForm('App\Form\PublicationType', $publication);
@@ -227,7 +230,7 @@ class PublicationController extends AbstractController
         $ss    = $this->ss;
         $data  = $ss->selectAnnee($request); // formulaire
         $annee = $data['annee'];
-        $em    = $this->getDoctrine()->getManager();
+        $em    = $this->em;
         $publications = $em->getRepository(Publication::class)->findBy(['annee' => $annee ]);
 
         return $this->render(
@@ -247,7 +250,7 @@ class PublicationController extends AbstractController
      */
     public function AnneeCsvAction($annee): Response
     {
-        $em    = $this->getDoctrine()->getManager();
+        $em    = $this->em;
         $publications = $em->getRepository(Publication::class)->findBy(['annee' => $annee ]);
 
         $header  = [
@@ -286,7 +289,7 @@ class PublicationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($publication);
             $em->flush();
 
@@ -330,7 +333,7 @@ class PublicationController extends AbstractController
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('publication_edit', array('id' => $publication->getId()));
         }
@@ -353,7 +356,7 @@ class PublicationController extends AbstractController
     public function modifyAction(Request $request, Publication $publication, Projet $projet, LoggerInterface $lg): Response
     {
         $sj = $this->sj;
-        $em = $this->getdoctrine()->getManager();
+        $em = $this->em;
 
         $editForm = $this->createForm('App\Form\PublicationType', $publication);
         $editForm->handleRequest($request);
@@ -392,7 +395,7 @@ class PublicationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->remove($publication);
             $em->flush();
         }
@@ -412,7 +415,7 @@ class PublicationController extends AbstractController
         $ac = $this->ac;
         $token = $this->tok->getToken();
         $sj = $this->sj;
-        $em = $this->getdoctrine()->getManager();
+        $em = $this->em;
 
         // ACL
         if (! $projet->isCollaborateur($token->getUser()) && ! $ac->isGranted('ROLE_ADMIN')) {
@@ -425,7 +428,7 @@ class PublicationController extends AbstractController
         Functions::sauvegarder($publication, $em, $lg);
 
         if ($publication->getProjet() == null) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->remove($publication);
             $em->flush();
         }

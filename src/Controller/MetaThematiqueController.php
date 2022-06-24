@@ -33,6 +33,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Doctrine\ORM\EntityManagerInterface;
+
 
 /**
  * Metathematique controller.
@@ -41,7 +43,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class MetaThematiqueController extends AbstractController
 {
-    public function __construct(private AuthorizationCheckerInterface $ac) {}
+    public function __construct(private AuthorizationCheckerInterface $ac, private EntityManagerInterface $em) {}
 
     /**
      * Lists all metaThematique entities.
@@ -52,7 +54,7 @@ class MetaThematiqueController extends AbstractController
      */
     public function indexAction(): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $metaThematiques = $em->getRepository(MetaThematique::class)->findAll();
 
@@ -68,7 +70,7 @@ class MetaThematiqueController extends AbstractController
     public function gererAction(): Response
     {
         $ac = $this->ac;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $menu = $ac->isGranted('ROLE_ADMIN') ? [ ['ok' => true,'name' => 'ajouter_metaThematique' ,'lien' => 'Ajouter une metathématique','commentaire'=> 'Ajouter une metathématique'] ] : [];
         return $this->render(
@@ -95,7 +97,7 @@ class MetaThematiqueController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($metaThematique);
             $em->flush($metaThematique);
 
@@ -126,7 +128,7 @@ class MetaThematiqueController extends AbstractController
      */
     public function supprimerAction(Request $request, MetaThematique $thematique): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->remove($thematique);
         $em->flush($thematique);
         return $this->redirectToRoute('gerer_metaThematiques');
@@ -151,7 +153,7 @@ class MetaThematiqueController extends AbstractController
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
             return $this->redirectToRoute('gerer_metaThematiques');
         }
 
@@ -200,7 +202,7 @@ class MetaThematiqueController extends AbstractController
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('metathematique_edit', array('id' => $metaThematique->getId()));
         }
@@ -225,7 +227,7 @@ class MetaThematiqueController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->remove($metaThematique);
             $em->flush($metaThematique);
         }

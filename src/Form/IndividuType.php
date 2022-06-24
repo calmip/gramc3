@@ -59,7 +59,7 @@ class IndividuType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         if ($options['admin'] == true) {
             $builder->add('creationStamp');
@@ -70,9 +70,10 @@ class IndividuType extends AbstractType
             $builder
                 ->add('nom', TextType::class, [ 'label' => 'Nom:'])
                 ->add('prenom', TextType::class, [ 'label' => 'Prénom']);
-                if ($options['mail'] == true) {
+                if ($options['mail'] == true)
+                {
                     $builder->add('mail', EmailType::class);
-		}
+                }
                 else
                 {
                    $builder->add('mail', EmailType::class, [ 'disabled' => true]);
@@ -189,7 +190,7 @@ class IndividuType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults(
             [
@@ -207,7 +208,7 @@ class IndividuType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function getBlockPrefix()
+    public function getBlockPrefix(): string
     {
         return 'appbundle_individu';
     }

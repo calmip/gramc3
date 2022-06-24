@@ -52,6 +52,8 @@ use Symfony\Component\Form\FormFactoryInterface;
 
 use JpGraph\JpGraph;
 
+use Doctrine\ORM\EntityManagerInterface;
+
 class DefaultController extends AbstractController
 {
     public function __construct(
@@ -60,7 +62,8 @@ class DefaultController extends AbstractController
         private ServiceMenus $sm,
         private ServiceProjets $sp,
         private ServiceSessions $ss,
-        private FormFactoryInterface $ff
+        private FormFactoryInterface $ff,
+        private EntityManagerInterface $em
     ) {}
 
     /**
@@ -69,7 +72,7 @@ class DefaultController extends AbstractController
       */
     public function testAction(Request $request)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $projet = $em->getRepository(Projet::class)->findOneBy(['idProjet' => 'P1440']);
         //return new Response( count( $projet->getVersion() ) );
         //return new Response( gettype($projet->calculDerniereVersion()  ));
@@ -102,7 +105,7 @@ class DefaultController extends AbstractController
     public function twigAction(Request $request)
     {
         $sn = $this->sn;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $users    = [ 'a@x', 'b@x' ];
         $users    = $em->getRepository(Individu::class)->findBy(['president' => true ]);

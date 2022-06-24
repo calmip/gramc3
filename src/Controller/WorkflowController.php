@@ -54,6 +54,8 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 
 use Symfony\Component\Form\FormFactoryInterface;
 
+use Doctrine\ORM\EntityManagerInterface;
+
 /**
  * Workflow controller pour faire des tests.
  * @Security("is_granted('ROLE_ADMIN')")
@@ -65,7 +67,8 @@ class WorkflowController extends AbstractController
         private ServiceJournal $sj,
         private ProjetWorkflow $pw,
         private SessionWorkflow $sw,
-        private FormFactoryInterface $ff
+        private FormFactoryInterface $ff,
+        private EntityManagerInterface $em
     ) { }
 
     /**
@@ -78,7 +81,7 @@ class WorkflowController extends AbstractController
     {
         $ff = $this->ff;
         $sj = $this->sj;
-        $em = $this->getdoctrine()->getManager();
+        $em = $this->em;
         $signal_view_forms = [];
         $etat_view_forms = [];
 
@@ -187,7 +190,7 @@ class WorkflowController extends AbstractController
     {
         $sj = $this->sj;
         $ff = $this->ff;
-        $em = $this->getdoctrine()->getManager();
+        $em = $this->em;
 
         $session_form = Functions::createFormBuilder($ff)
             ->add(
@@ -280,7 +283,7 @@ class WorkflowController extends AbstractController
     {
         $sj = $this->sj;
         $ff = $this->ff;
-        $em = $this->getdoctrine()->getManager();
+        $em = $this->em;
 
 
         $versions = $projet->getVersion();
@@ -473,7 +476,7 @@ class WorkflowController extends AbstractController
     */
     public function resetVersionAction(Request $request, Version $version, LoggerInterface $lg): Response
     {
-        $em = $this->getdoctrine()->getManager();
+        $em = $this->em;
 
         $version->setEtatVersion(Etat::EDITION_DEMANDE);
         Functions::sauvegarder($version, $em, $lg);

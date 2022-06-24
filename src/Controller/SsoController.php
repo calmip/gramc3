@@ -32,6 +32,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * Sso controller.
@@ -41,6 +42,11 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class SsoController extends AbstractController
 {
+
+    public function __construct(
+        private EntityManagerInterface $em
+    ) {}
+
     /**
      * Lists all sso entities.
      *
@@ -49,7 +55,7 @@ class SsoController extends AbstractController
      */
     public function indexAction(): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $ssos = $em->getRepository(Sso::class)->findAll();
 
@@ -71,7 +77,7 @@ class SsoController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($sso);
             $em->flush($sso);
 
@@ -113,7 +119,7 @@ class SsoController extends AbstractController
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('sso_edit', array('id' => $sso->getId()));
         }
@@ -137,7 +143,7 @@ class SsoController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->remove($sso);
             $em->flush($sso);
         }

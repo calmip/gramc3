@@ -68,6 +68,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Doctrine\ORM\EntityManagerInterface;
 
 
 /**
@@ -84,7 +85,8 @@ class IndividuController extends AbstractController
         private ServiceInvitations $si,
         private FormFactoryInterface $ff,
         private TokenStorageInterface $tok,
-        private AuthorizationCheckerInterface $ac
+        private AuthorizationCheckerInterface $ac,
+        private EntityManagerInterface $em
     ) {}
 
     /**
@@ -96,7 +98,7 @@ class IndividuController extends AbstractController
      */
     public function supprimerUtilisateurAction(Request $request, Individu $individu): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->remove($individu);
         $em->flush();
         return $this->redirectToRoute('individu_gerer');
@@ -111,7 +113,7 @@ class IndividuController extends AbstractController
      */
     public function remplacerUtilisateurAction(Request $request, Individu $individu): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sid = $this->sid;
         $sj = $this->sj;
         $ff = $this->ff;
@@ -225,7 +227,7 @@ class IndividuController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->remove($individu);
             $em->flush($individu);
         }
@@ -243,7 +245,7 @@ class IndividuController extends AbstractController
      */
     public function indexAction(): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $individus = $em->getRepository(Individu::class)->findAll();
 
@@ -266,7 +268,7 @@ class IndividuController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($individu);
             $em->flush($individu);
 
@@ -310,7 +312,7 @@ class IndividuController extends AbstractController
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('individu_edit', array('id' => $individu->getId()));
         }
@@ -351,7 +353,7 @@ class IndividuController extends AbstractController
      */
     public function ajouterAction(Request $request)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $individu = new Individu();
         $editForm = $this->createForm('App\Form\IndividuType', $individu);
 
@@ -386,7 +388,7 @@ class IndividuController extends AbstractController
      */
     public function modifyAction(Request $request, Individu $individu): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $repos = $em->getRepository(Individu::class);
         
         $formInd = $this->createForm('App\Form\IndividuType', $individu);
@@ -491,7 +493,7 @@ class IndividuController extends AbstractController
      ***************************************/
     public function invitationsAction(Request $request): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         
         $invitations = $em->getRepository(Invitation::class)->findAll();
         $invit_duree = $this->getParameter('invit_duree');
@@ -509,7 +511,7 @@ class IndividuController extends AbstractController
      ***************************************/
     public function supprimerInvitationAction(Request $request, Invitation $invitation): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $em->remove($invitation);
         $em->flush();
@@ -524,7 +526,7 @@ class IndividuController extends AbstractController
      **************************************/
     private function ajoutEppn(Request $request, Individu $individu) : FormInterface
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sso = new Sso();
         $sso->setIndividu($individu);
         $formSso = $this->createForm('App\Form\SsoType', $sso, ['widget_individu' => false]);
@@ -562,7 +564,7 @@ class IndividuController extends AbstractController
         $individu->setAdmin(true);
         $individu->setObs(false);    // Pas la peine d'être Observateur si on est admin !
 
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->persist($individu);
         $em->flush($individu);
 
@@ -583,7 +585,7 @@ class IndividuController extends AbstractController
     public function plusAdminAction(Request $request, Individu $individu): Response
     {
         $individu->setAdmin(false);
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->persist($individu);
         $em->flush($individu);
 
@@ -605,7 +607,7 @@ class IndividuController extends AbstractController
     {
         $individu->setObs(true);
         $individu->setAdmin(false); // Si on devient Observateur on n'est plus admin !
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->persist($individu);
         $em->flush($individu);
 
@@ -626,7 +628,7 @@ class IndividuController extends AbstractController
     public function plusObsAction(Request $request, Individu $individu): Response
     {
         $individu->setObs(false);
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->persist($individu);
         $em->flush($individu);
 
@@ -647,7 +649,7 @@ class IndividuController extends AbstractController
     public function devenirSysadminAction(Request $request, Individu $individu): Response
     {
         $individu->setSysadmin(true);
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->persist($individu);
         $em->flush($individu);
 
@@ -668,7 +670,7 @@ class IndividuController extends AbstractController
     public function plusSysadminAction(Request $request, Individu $individu): Respone
     {
         $individu->setSysadmin(false);
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->persist($individu);
         $em->flush($individu);
 
@@ -689,7 +691,7 @@ class IndividuController extends AbstractController
     public function devenirPresidentAction(Request $request, Individu $individu): Response
     {
         $individu->setPresident(true);
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->persist($individu);
         $em->flush($individu);
 
@@ -710,7 +712,7 @@ class IndividuController extends AbstractController
     public function plusPresidentAction(Request $request, Individu $individu): Response
     {
         $individu->setPresident(false);
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->persist($individu);
         $em->flush($individu);
 
@@ -731,7 +733,7 @@ class IndividuController extends AbstractController
     public function devenirExpertAction(Request $request, Individu $individu): Response
     {
         $individu->setExpert(true);
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->persist($individu);
         $em->flush($individu);
 
@@ -751,7 +753,7 @@ class IndividuController extends AbstractController
      */
     public function plusExpertAction(Request $request, Individu $individu):Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $se = $this->se;
 
         $individu->setExpert(false);
@@ -775,7 +777,7 @@ class IndividuController extends AbstractController
     public function activerAction(Request $request, Individu $individu)
     {
         $individu->setDesactive(false);
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->persist($individu);
         $em->flush($individu);
 
@@ -795,7 +797,7 @@ class IndividuController extends AbstractController
      */
     public function desactiverAction(Request $request, Individu $individu): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $individu->setDesactive(true);
 
@@ -823,7 +825,7 @@ class IndividuController extends AbstractController
      */
     public function thematiqueAction(Request $request, Individu $individu): Response
     {
-        $em   = $this->getDoctrine()->getManager();
+        $em   = $this->em;
         $form = $this->createFormBuilder($individu)
             ->add(
                 'thematique',
@@ -894,7 +896,7 @@ class IndividuController extends AbstractController
      */
     public function eppnAction(Request $request, Individu $individu): Response
     {
-        $em   = $this->getDoctrine()->getManager();
+        $em   = $this->em;
         $ssos = $individu->getSso();
         $form = $this->createFormBuilder($individu)
             ->add(
@@ -961,7 +963,7 @@ class IndividuController extends AbstractController
     {
         $sj = $this->sj;
         $ff = $this->ff;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $form = $ff
             ->createNamedBuilder('autocomplete_form', FormType::class, [])
             ->add('mail', TextType::class, [ 'required' => true, 'csrf_protection' => false])
@@ -1057,7 +1059,7 @@ class IndividuController extends AbstractController
     public function gererAction(Request $request): Response
     {
         $ff = $this->ff;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $form = Functions::getFormBuilder($ff, 'tri', GererUtilisateurType::class, [])->getForm();
         $form->handleRequest($request);

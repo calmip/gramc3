@@ -31,6 +31,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 use Symfony\Component\HttpFoundation\Request;
 
+use Doctrine\ORM\EntityManagerInterface;
+
 /**
  * Template controller.
  *
@@ -39,6 +41,10 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class TemplatesController extends AbstractController
 {
+    public function __construct(
+        private EntityManagerInterface $em
+    ) {}
+
     /**
      * Lists all template entities.
      *
@@ -47,7 +53,7 @@ class TemplatesController extends AbstractController
      */
     public function indexAction()
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $templates = $em->getRepository(Templates::class)->findAll();
 
@@ -69,7 +75,7 @@ class TemplatesController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($template);
             $em->flush($template);
 
@@ -111,7 +117,7 @@ class TemplatesController extends AbstractController
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('templates_edit', array('id' => $template->getId()));
         }
@@ -135,7 +141,7 @@ class TemplatesController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->remove($template);
             $em->flush($template);
         }

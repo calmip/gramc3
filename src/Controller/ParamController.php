@@ -38,6 +38,8 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\FormFactoryInterface;
+use Doctrine\ORM\EntityManagerInterface;
+
 
 /**
  * Param controller.
@@ -46,7 +48,7 @@ use Symfony\Component\Form\FormFactoryInterface;
  */
 class ParamController extends AbstractController
 {
-    public function __construct(private FormFactoryInterface $ff) {}
+    public function __construct(private FormFactoryInterface $ff, private EntityManagerInterface $em) {}
 
     /**
      * Lists all param entities.
@@ -56,7 +58,7 @@ class ParamController extends AbstractController
      */
     public function indexAction()
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $params = $em->getRepository(Param::class)->findAll();
 
@@ -78,7 +80,7 @@ class ParamController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($param);
             $em->flush($param);
 
@@ -120,7 +122,7 @@ class ParamController extends AbstractController
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('param_edit', array('id' => $param->getId()));
         }
@@ -140,7 +142,7 @@ class ParamController extends AbstractController
      */
     public function avancerAction(Request $request)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $ff = $this->ff;
 
         $now = $em->getRepository(Param::class)->findOneBy(['cle' => 'now']);
@@ -199,7 +201,7 @@ class ParamController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->remove($param);
             $em->flush($param);
         }

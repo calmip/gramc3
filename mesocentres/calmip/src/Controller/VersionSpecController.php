@@ -43,7 +43,6 @@ use App\GramcServices\Workflow\Projet\ProjetWorkflow;
 use App\Utils\Functions;
 use App\GramcServices\Etat;
 use App\GramcServices\Signal;
-//use App\Utils\GramcDate;
 use App\Form\IndividuForm\IndividuForm;
 use App\Form\IndividuFormType;
 use App\Repository\FormationRepository;
@@ -54,7 +53,6 @@ use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 
 use Symfony\Component\HttpFoundation\Request;
@@ -77,7 +75,7 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 use Twig\Environment;
 
@@ -101,7 +99,8 @@ class VersionSpecController extends AbstractController
         private FormFactoryInterface $ff,
         private ValidatorInterface $vl,
         private LoggerInterface $lg,
-        private Environment $tw
+        private Environment $tw,
+        private EntityManagerInterface $em
     ) {}
 
     /**
@@ -118,7 +117,7 @@ class VersionSpecController extends AbstractController
         $sm = $this->sm;
         $sj = $this->sj;
         $vl = $this->vl;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // ACL
         if ($sm->modifier_version($version)['ok'] == false) {
@@ -297,7 +296,7 @@ class VersionSpecController extends AbstractController
         $sv = $this->sv;
         $ss = $this->ss;
         $sval = $this->vl;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // formulaire principal
         $form_builder = $this->createFormBuilder($version);
@@ -381,7 +380,7 @@ class VersionSpecController extends AbstractController
      */
     private function validDemHeures($version): bool
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         //$ss = $this->ss;
         $projet = $version->getProjet();
         $type = $projet->getTypeProjet();
@@ -401,7 +400,7 @@ class VersionSpecController extends AbstractController
     /* Les champs de la partie I */
     private function modifierType1PartieI($version, &$form): void
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $form
         ->add('prjTitre', TextType::class, [ 'required'       =>  false ])
         ->add(
@@ -661,7 +660,7 @@ class VersionSpecController extends AbstractController
     /* Les champs de la partie V */
     private function modifierType1PartieV($version, &$form, &$nb_form)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $formations = $em->getRepository(\App\Entity\Formation::class)->getFormationsPourVersion();
 
         $nb_form = 0;
@@ -692,7 +691,7 @@ class VersionSpecController extends AbstractController
     {
         $sj = $this->sj;
         $sval = $this->vl;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $heures_projet_test = $this->getParameter('heures_projet_test');
         
@@ -834,7 +833,7 @@ class VersionSpecController extends AbstractController
             if ($form->get('valider')->isClicked()) {
                 //$sj->debugMessage("Entree dans le traitement du formulaire données");
                 //$this->handleCallistoForms( $form, $version );
-                $em = $this->getDoctrine()->getManager();
+                $em = $this->em;
                 $em->persist($version);
                 $em->flush();
             }
@@ -865,7 +864,7 @@ class VersionSpecController extends AbstractController
         $version->setDataMetaDataFormat($form->get('dataMetadataFormat')->getData());
         $version->setDataNombreDatasets($form->get('dataNombreDatasets')->getData());
         $version->setDataTailleDatasets($form->get('dataTailleDatasets')->getData());
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->persist($version);
         $em->flush();
     }
@@ -883,7 +882,7 @@ class VersionSpecController extends AbstractController
         $sv = $this->sv;
         $sj = $this->sj;
         $projet_workflow = $this->pw;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // ACL
         //if( $sm->renouveler_version($version)['ok'] == false && (  $this->container->hasParameter('kernel.debug') && $this->getParameter('kernel.debug') == false ) )
@@ -991,7 +990,7 @@ class VersionSpecController extends AbstractController
     private function versionValidate(Version $version): array
     {
         $sv = $this->sv;
-        $em   = $this->getDoctrine()->getManager();
+        $em   = $this->em;
         $nodata = $this->getParameter('nodata');
 
         $todo   =   [];
