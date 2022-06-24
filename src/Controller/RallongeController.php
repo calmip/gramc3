@@ -108,7 +108,7 @@ class RallongeController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $rallonges = $em->getRepository('App:Rallonge')->findAll();
+        $rallonges = $em->getRepository(Rallonge::class)->findAll();
 
         return $this->render('rallonge/index.html.twig', array(
             'rallonges' => $rallonges,

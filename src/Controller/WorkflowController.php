@@ -302,7 +302,7 @@ class WorkflowController extends AbstractController
                 EntityType::class,
                 [
                     'multiple' => false,
-                    'class' => 'App:Session',
+                    'class' => Session::class,
                     'required'  =>  true,
                     'label'     => 'Session',
                     'choices' =>  $sessions,

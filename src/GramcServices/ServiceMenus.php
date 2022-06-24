@@ -394,9 +394,9 @@ class ServiceMenus
 
         $etat_session   =   $session->getEtatSession();
         //$this->sj-> debugMessage(__METHOD__ . ':' . __LINE__ . "countProjetsTestResponsable = " .
-        //     $this->em->getRepository(Projet::class)->countProjetsTestResponsable( App::getUser() ));
+        //     $this->em->getRepository(Projet::class)->countProjetsTestResponsable( getUser() ));
 
-        //if( ! App::getUser() instanceof Individu )
+        //if( ! getUser() instanceof Individu )
         $user = $this->token->getUser();
         if (! $user instanceof Individu) {
             $menu['raison'] = "Vous n'êtes pas connecté";

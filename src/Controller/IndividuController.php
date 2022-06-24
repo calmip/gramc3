@@ -245,7 +245,7 @@ class IndividuController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $individus = $em->getRepository('App:Individu')->findAll();
+        $individus = $em->getRepository(Individu::class)->findAll();
 
         return $this->render('individu/index.html.twig', array(
             'individus' => $individus,
@@ -429,7 +429,7 @@ class IndividuController extends AbstractController
                 'label' => 'Les eppn valides ',
                 'multiple' => true,
                 'expanded' => true,
-                'class' => 'App:Sso',
+                'class' => Sso::class,
                 'choices' => $individu->getSso(),
                 'choice_label' => function ($s) { return $s->getEppn(); },
                 'choice_value' => function ($t) { return $t; },
@@ -831,7 +831,7 @@ class IndividuController extends AbstractController
                 [
                 'multiple' => true,
                 'expanded' => true,
-                'class' => 'App:Thematique',
+                'class' => Thematique::class,
                 ]
             )
             ->add(
@@ -840,7 +840,7 @@ class IndividuController extends AbstractController
                 [
                 'multiple' => true,
                 'expanded' => true,
-                'class' => 'App:Rattachement',
+                'class' => Rattachement::class,
                 ]
             )
             ->add('submit', SubmitType::class, ['label' => 'modifier' ])
@@ -903,7 +903,7 @@ class IndividuController extends AbstractController
                 [
                 'multiple' => true,
                 'expanded' => true,
-                'class' => 'App:Sso',
+                'class' => Sso::class,
                 'choices' => $ssos
                 ]
             )

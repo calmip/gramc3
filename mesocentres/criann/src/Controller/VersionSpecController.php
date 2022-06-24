@@ -616,7 +616,7 @@ class VersionSpecController extends AbstractController
                 [
                 'required'    => false,
                 'multiple'    => false,
-                'class'       => 'App:Thematique',
+                'class'       => Thematique::class,
                 'label'       => '',
                 'placeholder' => '-- Indiquez la thématique',
                 ]
@@ -632,7 +632,7 @@ class VersionSpecController extends AbstractController
                     'required'    => false,
                     'multiple'    => false,
                     'expanded'    => true,
-                    'class'       => 'App:Rattachement',
+                    'class'       => Rattachement::class,
                     'empty_data'  => null,
                     'label'       => '',
                     'placeholder' => 'AUCUN',
@@ -958,7 +958,7 @@ class VersionSpecController extends AbstractController
                 [
                     'required'       =>  false,
                     'multiple' => false,
-                    'class' => 'App:Thematique',
+                    'class' => Thematique::class,
                     'label'     => '',
                     'placeholder' => '-- Indiquez la thématique',
                     ]
@@ -972,7 +972,7 @@ class VersionSpecController extends AbstractController
                     'required'    => false,
                     'multiple'    => false,
                     'expanded'    => true,
-                    'class'       => 'App:Rattachement',
+                    'class'       => Rattachement::class,
                     'empty_data'  => null,
                     'label'       => '',
                     'placeholder' => 'AUCUN',

@@ -124,7 +124,7 @@ class VersionController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $versions = $em->getRepository('App:Version')->findAll();
+        $versions = $em->getRepository(Version::class)->findAll();
 
         return $this->render('version/index.html.twig', array(
             'versions' => $versions,
@@ -590,7 +590,7 @@ class VersionController extends AbstractController
                 EntityType::class,
                 [
                     'multiple' => false,
-                    'class' => 'App:Individu',
+                    'class' => Individu::class,
                     'required'  =>  true,
                     'label'     => '',
                     'choices' =>  $collaborateurs,
@@ -829,7 +829,7 @@ class VersionController extends AbstractController
     {
         $data = [];
         $em = $this->getDoctrine()->getManager();
-        $version = $em->getRepository('App:Version')->findOneBy([ 'idVersion' =>  $idversion]);
+        $version = $em->getRepository(Version::class)->findOneBy([ 'idVersion' =>  $idversion]);
         if ($version != null) {
             if ($penal >= 0) {
                 $data['recuperable'] = 0;

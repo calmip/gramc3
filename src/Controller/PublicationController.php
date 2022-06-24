@@ -136,7 +136,7 @@ class PublicationController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $publications = $em->getRepository('App:Publication')->findAll();
+        $publications = $em->getRepository(Publication::class)->findAll();
 
         return $this->render('publication/index.html.twig', array(
             'publications' => $publications,

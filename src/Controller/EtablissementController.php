@@ -49,7 +49,7 @@ class EtablissementController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $etablissements = $em->getRepository('App:Etablissement')->findAll();
+        $etablissements = $em->getRepository(Etablissement::class)->findAll();
 
         return $this->render('etablissement/index.html.twig', array(
             'etablissements' => $etablissements,

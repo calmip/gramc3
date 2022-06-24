@@ -63,7 +63,7 @@ class MetaThematiqueType extends AbstractType
                 [
                 'multiple' => true,
                 'expanded' => false,
-                'class' => 'App:Thematique',
+                'class' => Thematique::class,
                 'choices' =>  $options['thematiques'],
                 ]
             );

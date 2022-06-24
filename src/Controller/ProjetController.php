@@ -126,7 +126,7 @@ class ProjetController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $projets = $em->getRepository('App:Projet')->findAll();
+        $projets = $em->getRepository(Projet::class)->findAll();
 
         return $this->render('projet/index.html.twig', array(
             'projets' => $projets,

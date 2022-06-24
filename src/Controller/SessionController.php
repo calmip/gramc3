@@ -85,7 +85,7 @@ class SessionController extends AbstractController
     public function indexAction(): Response
     {
         $em = $this->getDoctrine()->getManager();
-        $sessions = $em->getRepository('App:Session')->findAll();
+        $sessions = $em->getRepository(Session::class)->findAll();
 
         return $this->render('session/index.html.twig', array(
             'sessions' => $sessions,

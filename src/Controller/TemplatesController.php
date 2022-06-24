@@ -49,7 +49,7 @@ class TemplatesController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $templates = $em->getRepository('App:Templates')->findAll();
+        $templates = $em->getRepository(Templates::class)->findAll();
 
         return $this->render('templates/index.html.twig', array(
             'templates' => $templates,

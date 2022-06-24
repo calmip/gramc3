@@ -49,7 +49,7 @@ class CollaborateurVersionController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $collaborateurVersions = $em->getRepository('App:CollaborateurVersion')->findAll();
+        $collaborateurVersions = $em->getRepository(CollaborateurVersion::class)->findAll();
 
         return $this->render('collaborateurversion/index.html.twig', array(
             'collaborateurVersions' => $collaborateurVersions,

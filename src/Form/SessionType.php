@@ -100,7 +100,7 @@ class SessionType extends AbstractType
         //->add('president',  EntityType::class,
         //            [
         //        'multiple' => false,
-        //        'class' => 'App:Individu',
+        //        'class' => Individu::class,
         //        'required'  =>  false,
         //        'label'     => 'Président:',
         //        'choices' =>  $this->em->getRepository(Individu::class)->findBy(['expert' => true]),

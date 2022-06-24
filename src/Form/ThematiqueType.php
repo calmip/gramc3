@@ -64,7 +64,7 @@ class ThematiqueType extends AbstractType
                 [
                 'multiple' => true,
                 'expanded' => true,
-                'class' => 'App:Individu',
+                'class' => Individu::class,
                 'choices' =>  $options['experts'],
                 ]
             );

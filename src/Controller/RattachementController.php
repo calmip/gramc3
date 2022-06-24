@@ -58,7 +58,7 @@ class RattachementController extends AbstractController
             'rattachement/liste.html.twig',
             [
             'menu' => $menu,
-            'rattachements' => $em->getRepository('App:Rattachement')->findBy([], ['libelleRattachement' => 'ASC'])
+            'rattachements' => $em->getRepository(Rattachement::class)->findBy([], ['libelleRattachement' => 'ASC'])
             ]
         );
     }

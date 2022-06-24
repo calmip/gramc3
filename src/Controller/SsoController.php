@@ -51,7 +51,7 @@ class SsoController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $ssos = $em->getRepository('App:Sso')->findAll();
+        $ssos = $em->getRepository(Sso::class)->findAll();
 
         return $this->render('sso/index.html.twig', array(
             'ssos' => $ssos,

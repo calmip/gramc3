@@ -61,7 +61,7 @@ class LaboratoireController extends AbstractController
             'laboratoire/liste.html.twig',
             [
             'menu' => $menu,
-            'laboratoires' => $em->getRepository('App:Laboratoire')->findBy([], ['numeroLabo' => 'ASC'])
+            'laboratoires' => $em->getRepository(Laboratoire::class)->findBy([], ['numeroLabo' => 'ASC'])
             ]
         );
     }

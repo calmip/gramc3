@@ -52,7 +52,7 @@ class StatutController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $statuts = $em->getRepository('App:Statut')->findAll();
+        $statuts = $em->getRepository(Statut::class)->findAll();
 
         return $this->render('statut/index.html.twig', array(
             'statuts' => $statuts,

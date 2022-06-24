@@ -58,7 +58,7 @@ class ParamController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $params = $em->getRepository('App:Param')->findAll();
+        $params = $em->getRepository(Param::class)->findAll();
 
         return $this->render('param/index.html.twig', array(
             'params' => $params,

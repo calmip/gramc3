@@ -492,7 +492,7 @@ class ExpertiseController extends AbstractController
         }
         catch (\InvalidArgumentException $e) {};
         
-        $mes_commentaires = $em->getRepository('App:CommentaireExpert')->findBy(['expert' => $moi ]);
+        $mes_commentaires = $em->getRepository(CommentaireExpert::class)->findBy(['expert' => $moi ]);
 
         ///////////////////////
 

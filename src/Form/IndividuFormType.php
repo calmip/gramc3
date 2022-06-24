@@ -149,7 +149,7 @@ class IndividuFormType extends AbstractType
                     'multiple'   => false,
                     'expanded'   => false,
                     'required'   => false,
-                    'class'      => 'App:Statut',
+                    'class'      => Statut::class,
                     'placeholder' => '-- Indiquez le statut',
                 ]
             )
@@ -161,7 +161,7 @@ class IndividuFormType extends AbstractType
                     'multiple'  => false,
                     'expanded'  => false,
                     'required'   => false,
-                    'class'     => 'App:Laboratoire',
+                    'class'     => Laboratoire::class,
                     'placeholder' => '-- Indiquez le laboratoire',
                 ]
             )
@@ -173,7 +173,7 @@ class IndividuFormType extends AbstractType
                     'multiple'  => false,
                     'expanded'  => false,
                     'required'   => false,
-                    'class'     => 'App:Etablissement',
+                    'class'     => Etablissement::class,
                     'placeholder' => "-- Indiquez l'établissement",
                 ]
             );

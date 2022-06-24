@@ -55,7 +55,7 @@ class ThematiqueController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $thematiques = $em->getRepository('App:Thematique')->findAll();
+        $thematiques = $em->getRepository(Thematique::class)->findAll();
 
         return $this->render('thematique/index.html.twig', array(
             'thematiques' => $thematiques,
@@ -78,7 +78,7 @@ class ThematiqueController extends AbstractController
             'thematique/liste.html.twig',
             [
             'menu' => $menu,
-            'thematiques' => $em->getRepository('App:Thematique')->findBy([], ['libelleThematique' => 'ASC'])
+            'thematiques' => $em->getRepository(Thematique::class)->findBy([], ['libelleThematique' => 'ASC'])
             ]
         );
     }

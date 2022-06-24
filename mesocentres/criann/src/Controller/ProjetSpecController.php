@@ -370,7 +370,7 @@ class ProjetSpecController extends AbstractController
             EntityType::class,
             [
             'multiple' => false,
-            'class'    => 'App:Version',
+            'class'    => Version::class,
             'required' =>  true,
             'label'    => '',
             'choices'  =>  $projet->getVersion(),

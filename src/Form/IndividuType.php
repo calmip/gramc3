@@ -105,7 +105,7 @@ class IndividuType extends AbstractType
                     EntityType::class,
                     [
                     'label' => 'Laboratoire:',
-                    'class' => 'App:Laboratoire',
+                    'class' => Laboratoire::class,
                     'multiple' => false,
                     'placeholder'   => '-- Indiquez le laboratoire',
                     'required'  => false,
@@ -124,7 +124,7 @@ class IndividuType extends AbstractType
                     [
                     'placeholder'   => '-- Indiquez votre statut',
                     'label' => 'Statut:',
-                    'class' => 'App:Statut',
+                    'class' => Statut::class,
                     'multiple' => false,
                     'required'  => false,
                     'choices'   => $this->em->getRepository(Statut::class)->findBy(['permanent' => true ]),
@@ -139,7 +139,7 @@ class IndividuType extends AbstractType
                     [
                     'placeholder'   => '-- Indiquez votre statut',
                     'label' => 'Statut:',
-                    'class' => 'App:Statut',
+                    'class' => Statut::class,
                     'multiple' => false,
                     'required'  => false,
                     'attr' => ['style' => 'width:20em'],
@@ -154,7 +154,7 @@ class IndividuType extends AbstractType
                 [
                     'placeholder'   => '-- Indiquez votre établissement',
                     'label' => 'Établissement:',
-                    'class' => 'App:Etablissement',
+                    'class' => Etablissement::class,
                     'multiple' => false,
                     'required'  => false,
                     'attr' => ['style' => 'width:20em'],
@@ -168,7 +168,7 @@ class IndividuType extends AbstractType
                 [
                 'multiple' => true,
                 'expanded' => true,
-                'class' => 'App:Thematique',
+                'class' => Thematique::class,
                 ]
             );
         }

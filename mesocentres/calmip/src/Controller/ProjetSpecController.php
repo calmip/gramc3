@@ -354,7 +354,7 @@ class ProjetSpecController extends AbstractController
 
         $etat_session   =   $session->getEtatSession();
         //$this->sj-> debugMessage(__METHOD__ . ':' . __LINE__ . "countProjetsTestResponsable = " .
-        //     $this->em->getRepository(Projet::class)->countProjetsTestResponsable( App::getUser() ));
+        //     $this->em->getRepository(Projet::class)->countProjetsTestResponsable( getUser() ));
 
         //if ($this->em->getRepository(Projet::class)->countProjetsTestResponsable($user) > 0) {
         //    $menu['raison'] = "Vous êtes déjà responsable d'un projet test";
@@ -450,7 +450,7 @@ class ProjetSpecController extends AbstractController
             EntityType::class,
             [
             'multiple' => false,
-            'class'    => 'App:Version',
+            'class'    => Version::class,
             'required' =>  true,
             'label'    => '',
             'choices'  =>  $projet->getVersion(),

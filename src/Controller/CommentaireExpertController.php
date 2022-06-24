@@ -134,7 +134,7 @@ class CommentaireExpertController extends AbstractController
         $em = $this->getDoctrine()->getManager();
 
         $moi = $token->getUser();
-        $commentaireExpert = $em->getRepository('App:CommentaireExpert')->findOneBy(['expert' => $moi, 'annee' => $annee ]);
+        $commentaireExpert = $em->getRepository(CommentaireExpert::class)->findOneBy(['expert' => $moi, 'annee' => $annee ]);
         if ($commentaireExpert==null) {
             $commentaireExpert = new Commentaireexpert();
             $commentaireExpert->setAnnee($annee);
@@ -157,7 +157,7 @@ class CommentaireExpertController extends AbstractController
     public function listeAction(Request $request, $annee): Response
     {
         $em = $this->getDoctrine()->getManager();
-        $commentairesExperts = $em->getRepository('App:CommentaireExpert')->findBy(['annee' => $annee ]);
+        $commentairesExperts = $em->getRepository(CommentaireExpert::class)->findBy(['annee' => $annee ]);
 
         return $this->render('commentaireexpert/liste_annee.html.twig', ['annee' => $annee, 'commentairesExperts' => $commentairesExperts]);
     }

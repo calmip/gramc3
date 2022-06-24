@@ -54,7 +54,7 @@ class MetaThematiqueController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $metaThematiques = $em->getRepository('App:MetaThematique')->findAll();
+        $metaThematiques = $em->getRepository(MetaThematique::class)->findAll();
 
         return $this->render('metathematique/index.html.twig', array(
             'metaThematiques' => $metaThematiques,
@@ -75,7 +75,7 @@ class MetaThematiqueController extends AbstractController
             'metathematique/liste.html.twig',
             [
             'menu' => $menu,
-            'metathematiques' => $em->getRepository('App:MetaThematique')->findBy([], ['libelle' => 'ASC'])
+            'metathematiques' => $em->getRepository(MetaThematique::class)->findBy([], ['libelle' => 'ASC'])
             ]
         );
     }
