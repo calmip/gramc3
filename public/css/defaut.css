@@ -1338,6 +1338,7 @@ h2, h1{
     align-items: center;
     display: flex;
     justify-content: space-between;
+    z-index: 2;
 }
 
 .liens_importants_footer{
