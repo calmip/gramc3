@@ -4,38 +4,33 @@
 
 $(document).ready(function() 
 {
-	//url=$("#fileuploader").children("a").attr("href");
     $(".fileuploader").each(function(){
+        let fupl = $(this);
         let url = $(this).children("a").attr("href");
         $(this).uploadFile(
         {
             url: url,
             fileName: "fichier[fichier]",
-            //returnType: "json",
-            //dynamicFormData: function() 
-            //{
-            //    var data = { "fichier" : {} };
-            //return data;
-            //},
             onSuccess:function(files,data,xhr,pd) 
             {
-                //msg=JSON.stringify(data);
                 msg = data;
-                //alert(data);
-                //alert ( JSON.stringify(msg) );
+                uls = fupl.siblings(".uploadstatus")[0];
+                acont = fupl.siblings(".ajax-file-upload-container")[0];
                 if (msg == 'OK') 
                 {
-                    $('#uploadstatus').html("<p>Le fichier est correctement enregistré.</p>").addClass("ok").addClass("information");
-                    $(this).remove();
-                    //$('#uploadform').remove();
+                    $(uls).html("<p>Le fichier est correctement enregistré.</p>")
+                          .addClass("ok")
+                          .removeClass('error')
+                          .addClass("information");
                 }
                 else 
                 {
-                    //alert ( JSON.stringify(msg) );
-                    //$(this).html('<p>'+msg+'</p>').addClass("erreur").addClass("message");
-                    $('#uploadstatus').html("<p>" + msg + "</p>").addClass("error").addClass("information");
+                    $(uls).html("<p>" + msg + "</p>")
+                          .addClass("error")
+                          .removeClass("ok")
+                          .addClass("information");
                 }
-                $('#uploadstatus').remove();
+                $(acont).remove();
             },
             dragDropStr: "</br><span><b>glissez - déposez</b></span>",
             uploadStr:"Téléversez"

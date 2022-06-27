@@ -94,12 +94,12 @@ class ServiceForms
         $maxSize = strval(1024 * $max_size_doc) . 'k';
 
         $format_fichier = new \Symfony\Component\Validator\Constraints\File(
-            [
-        'mimeTypes'=> [ 'application/pdf' ],
-        'mimeTypesMessage'=>' Le fichier doit être un fichier pdf. ',
-        'maxSize' => $maxSize,
-        'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
-        'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
+        [
+            'mimeTypes'=> [ 'application/pdf' ],
+            'mimeTypesMessage'=>' Le fichier doit être un fichier pdf. ',
+            'maxSize' => $maxSize,
+            'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
+            'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
         ]
         );
 
@@ -137,17 +137,24 @@ class ServiceForms
 
         // formulaire non valide ou autres cas d'erreur = On retourne un message d'erreur
         elseif ($form->isSubmitted() && ! $form->isValid()) {
-            if (isset($form->getData()['fichier'])) {
+            if (isset($form->getData()['fichier']))
+            {
                 return  $this->formError($form->getData()['fichier'], [$format_fichier , new PagesNumber() ]);
-            } else {
-                return "Le fichier n'a pas été soumis correctement";
             }
-        } elseif ($request->isXMLHttpRequest()) {
+            else
+            {
+                return "<strong>Erreurs :</strong>Fichier trop gros ou autre problème";
+            }
+        }
+        
+        elseif ($request->isXMLHttpRequest())
+        {
             return "Le formulaire n'a pas été soumis";
         }
 
         // formulaire non soumis = On retourne le formulaire
-        else {
+        else
+        {
             return $form;
         }
     }
