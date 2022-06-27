@@ -361,13 +361,13 @@ class ServiceMenus
     {
         switch ($type) {
         case Projet::PROJET_FIL:
-        return $this->nouveau_projet_fil();
+        return $this->nouveau_projet_fil($priorite);
         break;
         case Projet::PROJET_SESS:
-        return $this->nouveau_projet_sess();
+        return $this->nouveau_projet_sess($priorite);
         break;
         case Projet::PROJET_TEST:
-        return $this->nouveau_projet_test();
+        return $this->nouveau_projet_test($priorite);
         break;
     }
     }
@@ -432,24 +432,19 @@ class ServiceMenus
             return $menu;
         }
 
-        $etat_session   =   $session->getEtatSession();
-        //$this->sj-> debugMessage(__METHOD__ . ':' . __LINE__ . "countProjetsTestResponsable = " .
-        //     $this->em->getRepository(Projet::class)->countProjetsTestResponsable( App::getUser() ));
-
-        //if( ! App::getUser() instanceof Individu )
+        //$etat_session   =   $session->getEtatSession();
         $user = $this->token->getUser();
-        if (! $user instanceof Individu) {
+        if (! $user instanceof Individu)
+        {
             $menu['raison'] = "Vous n'êtes pas connecté";
-        } elseif ($this->em->getRepository(Projet::class)->countProjetsTestResponsable($user) > 0) {
+
+        }
+        elseif ($this->em->getRepository(Projet::class)->countProjetsTestResponsable($user) > 0)
+        {
             $menu['raison'] = "Vous êtes déjà responsable d'un projet test";
         }
-        // manu, 11 juin 2019: tout le monde peut créer un projet test. Vraiment ???
-        //elseif( ! $this->peut_creer_projets() )
-        //    $menu['raison'] = "Vous n'avez pas le droit de créer un projet test, peut-être faut-il mettre à jour votre profil ?";
-        //elseif ($etat_session == Etat::EDITION_DEMANDE) {
-        //    $menu['raison'] = "Il n'est pas possible de créer un projet test en période d'attribution";
-        //}
-         else {
+        else
+        {
             $menu['commentaire'] = "Créer un projet test: 5000h max, uniquement pour faire des essais et avoir une idée du nombre d'heures dont vous avez besoin.";
             $menu['ok'] = true;
         }

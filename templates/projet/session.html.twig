@@ -362,8 +362,8 @@
             <td>
             {% endif %}
             </td>
-            <td>{{ version.demHeures }}</td>
-            <td>{{ version.attrHeures }}</td>
+            <td>{{ version.demHeures|number_format(0, ',', '&nbsp;')|raw }}</td>
+            <td>{{ version.attrHeures|number_format(0, ',', '&nbsp;')|raw }}</td>
             <td>{{ serviceProjets.getConsoCalculVersion(version) }}</td>
                 {% if serviceVersions.issigne(version) %}
                 <td class="prj_fiche_val">

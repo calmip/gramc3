@@ -344,11 +344,13 @@ class ProjetSpecController extends AbstractController
         $menu['ok'] = false;
 
         $session =  $this->ss->getSessionCourante();
-        if ($session == null) {
+        if ($session == null)
+        {
             $menu['raison'] = "Il n'y a pas de session courante";
             return $menu;
         }
-        if ($user == null) {
+        if ($user == null)
+        {
             $menu['raison'] = "Connection anonyme ?";
             return $menu;
         }
@@ -364,10 +366,14 @@ class ProjetSpecController extends AbstractController
 
         // manu, 11 juin 2019: tout le monde peut créer un projet test. Vraiment ???
         // manu, Octobre 2021: ben non si on autorise ici ça va coincer plus tard !
-        if( ! $user->peut_creer_projets() ) {
+        if( ! $user->peut_creer_projets() )
+        {
             $menu['raison'] = "Vous n'avez pas le droit de créer un projet test, peut-être faut-il mettre à jour votre profil ?";
             return $menu;
-        } elseif ($etat_session != Etat::ACTIF) {
+        }
+
+        elseif ($etat_session != Etat::ACTIF)
+        {
             $menu['raison'] = "Il n'est pas possible de créer un projet test en période d'attribution";
             return $menu;
         }
