@@ -46,6 +46,7 @@ security:
             pattern:    ^/
             custom_authenticators:
                - App\Security\GramcAuthenticator
+            provider: gramc_provider
 
             context: global_security_context
 

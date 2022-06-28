@@ -12,7 +12,7 @@
 
 {# ################################################################################################# #}
 
-{% if ( is_granted('ROLE_ALLOWED_TO_SWITCH') and  not is_granted('ROLE_PREVIOUS_ADMIN') ) %}
+{% if ( is_granted('ROLE_ALLOWED_TO_SWITCH') and not is_granted('IS_IMPERSONATOR') ) %}
 
 <td>
     <a class="sudo" href="{{ path('sudo',  { 'id': individu.id }) }}?" title="Changer d'identité">

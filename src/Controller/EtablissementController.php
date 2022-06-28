@@ -31,6 +31,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+use Doctrine\ORM\EntityManagerInterface;
+
 /**
  * Etablissement controller.
  *
@@ -39,6 +41,11 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class EtablissementController extends AbstractController
 {
+
+    public function __construct(
+        private EntityManagerInterface $em
+    ) {}
+
     /**
      * Lists all etablissement entities.
      *
@@ -47,9 +54,9 @@ class EtablissementController extends AbstractController
      */
     public function indexAction(): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
-        $etablissements = $em->getRepository('App:Etablissement')->findAll();
+        $etablissements = $em->getRepository(Etablissement::class)->findAll();
 
         return $this->render('etablissement/index.html.twig', array(
             'etablissements' => $etablissements,
@@ -69,7 +76,7 @@ class EtablissementController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($etablissement);
             $em->flush($etablissement);
 
@@ -111,7 +118,7 @@ class EtablissementController extends AbstractController
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('etablissement_edit', array('id' => $etablissement->getId()));
         }
@@ -135,7 +142,7 @@ class EtablissementController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->remove($etablissement);
             $em->flush($etablissement);
         }

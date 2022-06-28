@@ -27,6 +27,7 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * Login controller.
@@ -38,7 +39,8 @@ class LoginController extends AbstractController
     public function __construct(private ServiceJournal $sj,
                                 private FormFactoryInterface $ff,
                                 private AuthorizationCheckerInterface $ac,
-                                private TokenStorageInterface $ts)
+                                private TokenStorageInterface $ts,
+                                private EntityManagerInterface $em)
     {}
 
     /** 
@@ -150,7 +152,7 @@ class LoginController extends AbstractController
     **/
     public function connexion_dbgAction(Request $request): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $ff = $this->ff;
         
         if ($this->getParameter('kernel.debug') === false) {
@@ -159,7 +161,7 @@ class LoginController extends AbstractController
         }
 
         // Etablir la liste des users pouvant se connecter de cette manière
-        $repository = $this->getDoctrine()->getRepository(Individu::class);
+        $repository = $this->em->getRepository(Individu::class);
         $experts    = $repository->findBy(['expert'   => true ]);
         $admins     = $repository->findBy(['admin'    => true ]);
         $obs        = $repository->findby(['obs'      => true ]);

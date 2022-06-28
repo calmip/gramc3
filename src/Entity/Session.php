@@ -119,8 +119,8 @@ class Session
     */
     //public function clearCacheSessionCourante()
     //{
-    //   if (App::getSession()->has('SessionCourante')) {
-    //       App::getSession()->remove('SessionCourante');
+    //   if (getSession()->has('SessionCourante')) {
+    //       getSession()->remove('SessionCourante');
     //   } // clear cache
     //}
     /////////////////////////
@@ -392,7 +392,7 @@ class Session
     }
 
     //public function getSubWorkflow()        { return new \App\Workflow\ProjetWorkflow(); }
-    //public function getSubObjects()         { return App::getRepository(Projet::class)->findNonTermines();  }
+    //public function getSubObjects()         { return getRepository(Projet::class)->findNonTermines();  }
 
 
     ///////////////////////////////////////

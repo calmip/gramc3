@@ -33,7 +33,7 @@ class JournalType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('idIndividu')->add('gramcSessId')->add('type')->add('message')->add('stamp')->add('ip')        ;
     }
@@ -41,7 +41,7 @@ class JournalType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults(array(
             'data_class' => 'App\Entity\Journal'
@@ -51,7 +51,7 @@ class JournalType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function getBlockPrefix()
+    public function getBlockPrefix(): string
     {
         return 'appbundle_journal';
     }

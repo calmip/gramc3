@@ -25,6 +25,7 @@
 namespace App\Controller;
 
 use App\Entity\Individu;
+use App\Entity\Invitation;
 use App\Entity\Thematique;
 use App\Entity\Rattachement;
 use App\Entity\CollaborateurVersion;
@@ -42,6 +43,8 @@ use App\Form\IndividuForm\IndividuForm;
 
 use App\GramcServices\ServiceJournal;
 use App\GramcServices\ServiceExperts\ServiceExperts;
+use App\GramcServices\ServiceInvitations;
+use App\GramcServices\ServiceIndividus;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
@@ -61,9 +64,11 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Doctrine\ORM\EntityManagerInterface;
 
 
 /**
@@ -74,10 +79,14 @@ use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 class IndividuController extends AbstractController
 {
     public function __construct(
+        private ServiceIndividus $sid,
         private ServiceExperts $se,
         private ServiceJournal $sj,
+        private ServiceInvitations $si,
         private FormFactoryInterface $ff,
-        private AuthorizationCheckerInterface $ac
+        private TokenStorageInterface $tok,
+        private AuthorizationCheckerInterface $ac,
+        private EntityManagerInterface $em
     ) {}
 
     /**
@@ -89,7 +98,7 @@ class IndividuController extends AbstractController
      */
     public function supprimerUtilisateurAction(Request $request, Individu $individu): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->remove($individu);
         $em->flush();
         return $this->redirectToRoute('individu_gerer');
@@ -104,7 +113,8 @@ class IndividuController extends AbstractController
      */
     public function remplacerUtilisateurAction(Request $request, Individu $individu): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
+        $sid = $this->sid;
         $sj = $this->sj;
         $ff = $this->ff;
 
@@ -142,27 +152,20 @@ class IndividuController extends AbstractController
         }
 
         $CollaborateurVersion       =   $em->getRepository(CollaborateurVersion::class)->findBy(['collaborateur' => $individu]);
-        $CompteActivation           =   $em->getRepository(CompteActivation ::class)->findBy(['individu' => $individu]);
         $Expertise                  =   $em->getRepository(Expertise ::class)->findBy(['expert' => $individu]);
         $Journal                    =   $em->getRepository(Journal::class)->findBy(['individu' => $individu]);
         $Rallonge                   =   $em->getRepository(Rallonge::class)->findBy(['expert' => $individu]);
-        $Session                    =   $em->getRepository(Session::class)->findBy(['president' => $individu]);
         $Sso                        =   $em->getRepository(Sso::class)->findBy(['individu' => $individu]);
         $Thematique                 =   $individu->getThematique();
 
         $erreurs  =   [];
 
         // utilisateur peu actif peut être effacé même s'il peut se connecter'
-        if ($CollaborateurVersion == null && $Expertise == null
-              && $Rallonge == null && $Session == null) {
+        if ($CollaborateurVersion == null && $Expertise == null && $Rallonge == null) {
 
             foreach ($individu->getThematique() as $item) {
                 $em->persist($item);
                 $item->getExpert()->removeElement($individu);
-            }
-
-            foreach ($CompteActivation  as $item) {
-                $em->remove($item);
             }
 
             foreach ($Sso  as $item) {
@@ -179,72 +182,15 @@ class IndividuController extends AbstractController
 
         // utilisateur actif ou qui peut se connecter doit être remplacé
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
-            $mail  =   $form->getData()['mail'];
-            $new_individu   =   $em->getRepository(Individu::class)->findOneBy(['mail'=>$mail]);
+            $mail = $form->getData()['mail'];
+            $new_individu = $em->getRepository(Individu::class)->findOneBy(['mail'=>$mail]);
 
             if ($new_individu != null) {
 
-                // Supprimer les thématiques dont je suis expert, il faudra les recréer
-                foreach ($individu->getThematique() as $item) {
-                    $em->persist($item);
-                    $item->getExpert()->removeElement($individu);
-                }
-
-                // Les projets dont je suis collaborateur - Attention aux éventuels doublons
-                foreach ($CollaborateurVersion  as $item) {
-                    if (! $item->getVersion()->isCollaborateur($new_individu)) {
-                        $item->setCollaborateur($new_individu);
-                    } else {
-                        $em->remove($item);
-                    }
-                }
-
-                // On fait reprendre les Sso par le nouvel individu
-                $sso_de_new = $new_individu->getSso();
-                $array_eppn=[];
-                foreach ($new_individu->getSso() as $item) {
-                    $array_eppn[] = $item->getEppn();
-                }
-                foreach ($Sso  as $item) {
-                    if (!in_array($item->getEppn(),$array_eppn)) {
-                        $item->setIndividu($new_individu);
-                        $em->persist($item);
-                    } else {
-                        $em->remove($item);
-                    }
-                }
-
-                // Mes expertises
-                foreach ($Expertise  as $item) {
-                    $item->setExpert($new_individu);
-                }
-
-                // Mes rallonges
-                foreach ($Rallonge  as $item) {
-                    $item->setExpert($new_individu);
-                }
-
-                // Les entrées de journal (sinon on ne pourra pas supprimer l'ancien individu)
-                foreach ($Journal  as $item) {
-                    $item->setIndividu($new_individu);
-                }
-
-                // ...
-                foreach ($Session  as $item) {
-                    $item->setPresident($new_individu);
-                }
-
-                // On ne sait jamais
-                foreach ($CompteActivation  as $item) {
-                    $em->remove($item);
-                }
-
-                $sj->infoMessage('Utilisateur ' . $individu . '(' .  $individu->getIdIndividu()
-                    . ') remplacé par ' . $new_individu . ' (' .  $new_individu->getIdIndividu() . ')');
-
+                $sid->fusionnerIndividus($individu, $new_individu);
                 $em->remove($individu);
-
                 $em->flush();
                 return $this->redirectToRoute('individu_gerer');
             } else {
@@ -256,16 +202,14 @@ class IndividuController extends AbstractController
             'individu/remplacer.html.twig',
             [
                 'form' => $form->createView(),
-                'erreurs'                   => $erreurs,
-                'CollaborateurVersion'   =>  $CollaborateurVersion,
-                'CompteActivation'       =>  $CompteActivation,
-                'Expertise'              =>  $Expertise ,
-                'Journal '               =>  $Journal,
-                'Rallonge'               =>  $Rallonge,
-                'Session'                =>  $Session,
-                'Sso'                    =>  $Sso,
-                'individu'               =>  $individu,
-                'Thematique'             =>  $Thematique->toArray(),
+                'erreurs' => $erreurs,
+                'CollaborateurVersion' =>  $CollaborateurVersion,
+                'Expertise' => $Expertise ,
+                'Journal ' =>  $Journal,
+                'Rallonge' =>  $Rallonge,
+                'Sso' =>  $Sso,
+                'individu' =>  $individu,
+                'Thematique' =>  $Thematique->toArray(),
             ]
         );
     }
@@ -283,7 +227,7 @@ class IndividuController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->remove($individu);
             $em->flush($individu);
         }
@@ -301,9 +245,9 @@ class IndividuController extends AbstractController
      */
     public function indexAction(): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
-        $individus = $em->getRepository('App:Individu')->findAll();
+        $individus = $em->getRepository(Individu::class)->findAll();
 
         return $this->render('individu/index.html.twig', array(
             'individus' => $individus,
@@ -324,7 +268,7 @@ class IndividuController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($individu);
             $em->flush($individu);
 
@@ -368,7 +312,7 @@ class IndividuController extends AbstractController
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('individu_edit', array('id' => $individu->getId()));
         }
@@ -409,7 +353,7 @@ class IndividuController extends AbstractController
      */
     public function ajouterAction(Request $request)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $individu = new Individu();
         $editForm = $this->createForm('App\Form\IndividuType', $individu);
 
@@ -423,22 +367,20 @@ class IndividuController extends AbstractController
             return $this->redirectToRoute('individu_gerer');
         }
 
-        // Nouvel EPPN
-        $formSso = $this->ajoutEppn($request, $individu);
-
+        
         return $this->render(
             'individu/modif.html.twig',
             [
             'individu' => $individu,
             'formInd' => $editForm->createView(),
-            'formSso' => $formSso->createView(),
+            'formSso' => null,
             'formEppn' => null
             ]
         );
     }
 
     /**
-     * Displays Modifier une entité individu.
+     * Modifier une entité individu.
      *
      * @Route("/{id}/modify", name="individu_modify", methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
@@ -446,7 +388,7 @@ class IndividuController extends AbstractController
      */
     public function modifyAction(Request $request, Individu $individu): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $repos = $em->getRepository(Individu::class);
         
         $formInd = $this->createForm('App\Form\IndividuType', $individu);
@@ -489,7 +431,7 @@ class IndividuController extends AbstractController
                 'label' => 'Les eppn valides ',
                 'multiple' => true,
                 'expanded' => true,
-                'class' => 'App:Sso',
+                'class' => Sso::class,
                 'choices' => $individu->getSso(),
                 'choice_label' => function ($s) { return $s->getEppn(); },
                 'choice_value' => function ($t) { return $t; },
@@ -525,14 +467,66 @@ class IndividuController extends AbstractController
         );
     }
 
+     /**
+     *
+     * Envoyer une invitation
+     *
+     * @Route("/{id}/invitation", name="invitation", methods={"GET"})
+     * @Security("is_granted('ROLE_ADMIN')")
+     *
+     ***************************************/
+    public function invitationAction(Request $request, Individu $individu): Response
+    {
+        $token = $this->tok->getToken();
+        $user = $token->getUser();
+        $this->si->sendInvitation($user, $individu);
+        return $this->render('individu/invitation.html.twig');
+    }
+
+     /**
+     *
+     * Afficher toutes les invitations
+     *
+     * @Route("/invitations", name="invitations", methods={"GET"})
+     * @Security("is_granted('ROLE_ADMIN')")
+     *
+     ***************************************/
+    public function invitationsAction(Request $request): Response
+    {
+        $em = $this->em;
+        
+        $invitations = $em->getRepository(Invitation::class)->findAll();
+        $invit_duree = $this->getParameter('invit_duree');
+        $duree = new \DateInterval($invit_duree);
+        return $this->render('individu/invitations.html.twig', ['invitations' => $invitations, 'duree' => $duree]);
+    }
+
+    /**
+     *
+     * Supprimer une invitation
+     *
+     * @Route("/{id}/supprimer_invitation", name="supprimer_invitation", methods={"GET"})
+     * @Security("is_granted('ROLE_ADMIN')")
+     *
+     ***************************************/
+    public function supprimerInvitationAction(Request $request, Invitation $invitation): Response
+    {
+        $em = $this->em;
+
+        $em->remove($invitation);
+        $em->flush();
+
+        return $this->redirectToRoute('invitations');
+    }
+
     /*********************************
      * 
      * Ajout d'un nouvel eppn
      *
-     */
+     **************************************/
     private function ajoutEppn(Request $request, Individu $individu) : FormInterface
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sso = new Sso();
         $sso->setIndividu($individu);
         $formSso = $this->createForm('App\Form\SsoType', $sso, ['widget_individu' => false]);
@@ -570,7 +564,7 @@ class IndividuController extends AbstractController
         $individu->setAdmin(true);
         $individu->setObs(false);    // Pas la peine d'être Observateur si on est admin !
 
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->persist($individu);
         $em->flush($individu);
 
@@ -591,7 +585,7 @@ class IndividuController extends AbstractController
     public function plusAdminAction(Request $request, Individu $individu): Response
     {
         $individu->setAdmin(false);
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->persist($individu);
         $em->flush($individu);
 
@@ -613,7 +607,7 @@ class IndividuController extends AbstractController
     {
         $individu->setObs(true);
         $individu->setAdmin(false); // Si on devient Observateur on n'est plus admin !
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->persist($individu);
         $em->flush($individu);
 
@@ -634,7 +628,7 @@ class IndividuController extends AbstractController
     public function plusObsAction(Request $request, Individu $individu): Response
     {
         $individu->setObs(false);
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->persist($individu);
         $em->flush($individu);
 
@@ -655,7 +649,7 @@ class IndividuController extends AbstractController
     public function devenirSysadminAction(Request $request, Individu $individu): Response
     {
         $individu->setSysadmin(true);
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->persist($individu);
         $em->flush($individu);
 
@@ -676,7 +670,7 @@ class IndividuController extends AbstractController
     public function plusSysadminAction(Request $request, Individu $individu): Respone
     {
         $individu->setSysadmin(false);
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->persist($individu);
         $em->flush($individu);
 
@@ -697,7 +691,7 @@ class IndividuController extends AbstractController
     public function devenirPresidentAction(Request $request, Individu $individu): Response
     {
         $individu->setPresident(true);
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->persist($individu);
         $em->flush($individu);
 
@@ -718,7 +712,7 @@ class IndividuController extends AbstractController
     public function plusPresidentAction(Request $request, Individu $individu): Response
     {
         $individu->setPresident(false);
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->persist($individu);
         $em->flush($individu);
 
@@ -739,7 +733,7 @@ class IndividuController extends AbstractController
     public function devenirExpertAction(Request $request, Individu $individu): Response
     {
         $individu->setExpert(true);
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->persist($individu);
         $em->flush($individu);
 
@@ -759,7 +753,7 @@ class IndividuController extends AbstractController
      */
     public function plusExpertAction(Request $request, Individu $individu):Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $se = $this->se;
 
         $individu->setExpert(false);
@@ -783,7 +777,7 @@ class IndividuController extends AbstractController
     public function activerAction(Request $request, Individu $individu)
     {
         $individu->setDesactive(false);
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->persist($individu);
         $em->flush($individu);
 
@@ -803,7 +797,7 @@ class IndividuController extends AbstractController
      */
     public function desactiverAction(Request $request, Individu $individu): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $individu->setDesactive(true);
 
@@ -831,7 +825,7 @@ class IndividuController extends AbstractController
      */
     public function thematiqueAction(Request $request, Individu $individu): Response
     {
-        $em   = $this->getDoctrine()->getManager();
+        $em   = $this->em;
         $form = $this->createFormBuilder($individu)
             ->add(
                 'thematique',
@@ -839,7 +833,7 @@ class IndividuController extends AbstractController
                 [
                 'multiple' => true,
                 'expanded' => true,
-                'class' => 'App:Thematique',
+                'class' => Thematique::class,
                 ]
             )
             ->add(
@@ -848,7 +842,7 @@ class IndividuController extends AbstractController
                 [
                 'multiple' => true,
                 'expanded' => true,
-                'class' => 'App:Rattachement',
+                'class' => Rattachement::class,
                 ]
             )
             ->add('submit', SubmitType::class, ['label' => 'modifier' ])
@@ -902,7 +896,7 @@ class IndividuController extends AbstractController
      */
     public function eppnAction(Request $request, Individu $individu): Response
     {
-        $em   = $this->getDoctrine()->getManager();
+        $em   = $this->em;
         $ssos = $individu->getSso();
         $form = $this->createFormBuilder($individu)
             ->add(
@@ -911,7 +905,7 @@ class IndividuController extends AbstractController
                 [
                 'multiple' => true,
                 'expanded' => true,
-                'class' => 'App:Sso',
+                'class' => Sso::class,
                 'choices' => $ssos
                 ]
             )
@@ -959,6 +953,7 @@ class IndividuController extends AbstractController
 
     /**
      * Autocomplete: en lien avec l'autocomplete de jquery
+     *               Requête appelée lorsqu'on quitte le champ autocomplete "mail" dans le formulaire des collaborateurs
      *
      * @Route("/mail_autocomplete", name="mail_autocomplete", methods={"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
@@ -968,7 +963,7 @@ class IndividuController extends AbstractController
     {
         $sj = $this->sj;
         $ff = $this->ff;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $form = $ff
             ->createNamedBuilder('autocomplete_form', FormType::class, [])
             ->add('mail', TextType::class, [ 'required' => true, 'csrf_protection' => false])
@@ -976,7 +971,7 @@ class IndividuController extends AbstractController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) { // nous ne pouvons pas ajouter $form->isValid() et nous ne savons pas pourquoi
+        if ($form->isSubmitted()) { // TODO - nous ne pouvons pas ajouter $form->isValid() et nous ne savons pas pourquoi
             if (array_key_exists('mail', $form->getData())) {
                 $data   =   $em->getRepository(Individu::class)->liste_mail_like($form->getData()['mail']);
             } else {
@@ -999,12 +994,17 @@ class IndividuController extends AbstractController
         // TODO - IndividuForm n'est PAS un objet de type Form !!!! Grrrrr
         //        $form est un objet de type IndividuFormType, c'est bien un form associé à un object de type IndividuForm
         $collaborateur    = new IndividuForm();
-        $form = $this->createForm('App\Form\IndividuFormType', $collaborateur, ['csrf_protection' => false]);
+        $text_fields = true;
+        if ($this->getParameter('resp_peut_modif_collabs'))
+        {
+            $text_fields = false;
+        }
+        $form = $this->createForm('App\Form\IndividuFormType', $collaborateur, ['csrf_protection' => false, 'text_fields' => $text_fields]);
 
         $form->handleRequest($request);
 
         // On vient de soumettre le formulaire via son adresse mail
-        if ($form->isSubmitted()  && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             // On recherche l'individu ayant le bon mail et on complète l'objet $collaborateur'
             $individu = $em->getRepository(Individu::class)->findOneBy(['mail' => $collaborateur->getMail() ]);
             if ($individu != null) {
@@ -1031,7 +1031,12 @@ class IndividuController extends AbstractController
                 }
 
                 // Maintenant on recrée un $form en utilisant le $collaborateur complété
-                $form = $this->createForm('App\Form\IndividuFormType', $collaborateur, ['csrf_protection' => false]);
+                $text_fields = true;
+                if ($this->getParameter('resp_peut_modif_collabs'))
+                {
+                    $text_fields = false;
+                }
+                $form = $this->createForm('App\Form\IndividuFormType', $collaborateur, ['csrf_protection' => false, 'text_fields' => $text_fields]);
 
                 return $this->render('version/collaborateurs_ligne.html.twig', [ 'form' => $form->createView() ]);
             } else {
@@ -1054,7 +1059,7 @@ class IndividuController extends AbstractController
     public function gererAction(Request $request): Response
     {
         $ff = $this->ff;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $form = Functions::getFormBuilder($ff, 'tri', GererUtilisateurType::class, [])->getForm();
         $form->handleRequest($request);

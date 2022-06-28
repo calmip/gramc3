@@ -100,7 +100,15 @@ services:
                     "%dfct_directory%"]
 
     App\GramcServices\ServiceVersions:
-        arguments: [ '%attrib_seuil_a%', "%prj_prefix%", "%fig_directory%", "%signature_directory%", "%coll_login%", "%nodata%", "%max_fig_width%", "%max_fig_height%" ]
+        arguments: ['%attrib_seuil_a%',
+                    "%prj_prefix%",
+                    "%fig_directory%",
+                    "%signature_directory%",
+                    "%coll_login%",
+                    "%nodata%",
+                    "%max_fig_width%",
+                    "%max_fig_height%",
+                    "%resp_peut_modif_collabs%" ]
         
     App\GramcServices\ServiceMenus:
         arguments: [ "%max_rall%","%nodata%" ]
@@ -113,6 +121,9 @@ services:
 
     App\GramcServices\ServiceExperts\ServiceExpertsRallonge:
         arguments: [ "%max_expertises_nb%" ]
+
+    App\GramcServices\ServiceInvitations:
+        arguments: [ "%invit_duree%" ]
 
     App\Controller\ExpertiseController:
         arguments: [ '%max_expertises_nb%' ]

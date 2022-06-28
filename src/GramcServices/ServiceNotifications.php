@@ -89,7 +89,7 @@ class ServiceNotifications
 
 
     // Bas niveau: Envoi du message
-    private function sendRawMessage($subject, $body, $users = null): void
+    private function sendRawMessage($subject, $body, array $users = null): void
     {
         $message = new Email();
         $message -> subject($subject);
@@ -100,23 +100,35 @@ class ServiceNotifications
             $real_users =   [];
             $mails      =   [];
 
-            foreach ($users as $user) {
-                if ($user instanceof Individu) {
-                    $real_users[]   =   $user;
-                }  // class Individu
-                elseif (is_string($user)) {
-                    $mails[]        =   $user;
-                }  // email string
-                elseif ($users == null) {
+            foreach ($users as $user)
+            {
+
+                // Objet Individu
+                if ($user instanceof Individu)
+                {
+                    $real_users[] = $user;
+                }
+
+                // email string 
+                elseif (is_string($user))
+                {
+                    $mails[] = $user;
+                }
+                elseif ($users == null)
+                {
                     $this->sj->warningMessage(__METHOD__ . ":" . __LINE__ . ' users contient un utilisateur null');
-                } else {
+                }
+                else
+                {
                     $this->sj->errorMessage(__METHOD__ . ":" . __LINE__ . ' users contient un mauvais type de données: ' . Functions::show($user));
                 }
             }
 
-            if ($mails == []) {
+            if ($mails == [])
+            {
                 $warning = true;
-            } else {
+            } else
+            {
                 $warning = false;
             }
 
@@ -283,7 +295,7 @@ class ServiceNotifications
         foreach ($users as $user) {
             if ($user != null && $user instanceof Individu) {
                 $user_mail =  $user->getMail();
-                if ($user_mail  !=  null) {
+                if ($user_mail != null) {
                     $mail[] = $user_mail;
                 } else {
                     $this->sj->warningMessage(__METHOD__ . ":" . __LINE__ . ' Utilisateur '. $user . " n'a pas de mail");

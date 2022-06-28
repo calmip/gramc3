@@ -53,7 +53,7 @@ class MetaThematiqueType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('libelle')
@@ -63,7 +63,7 @@ class MetaThematiqueType extends AbstractType
                 [
                 'multiple' => true,
                 'expanded' => false,
-                'class' => 'App:Thematique',
+                'class' => Thematique::class,
                 'choices' =>  $options['thematiques'],
                 ]
             );
@@ -83,7 +83,7 @@ class MetaThematiqueType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults(
             [
@@ -98,7 +98,7 @@ class MetaThematiqueType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function getBlockPrefix()
+    public function getBlockPrefix(): string
     {
         return 'appbundle_metathematique';
     }

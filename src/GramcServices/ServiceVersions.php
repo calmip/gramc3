@@ -23,7 +23,6 @@
 
 namespace App\GramcServices;
 
-use App\GramcServices\Etat;
 use App\Entity\Projet;
 use App\Entity\Version;
 use App\Entity\Session;
@@ -31,9 +30,11 @@ use App\Entity\Individu;
 use App\Entity\Formation;
 use App\Entity\User;
 use App\Entity\CollaborateurVersion;
+
+use App\GramcServices\Etat;
+use App\GramcServices\ServiceInvitations;
 use App\Form\IndividuFormType;
 
-use App\Utils\GramcDate;
 use App\Utils\Functions;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -49,6 +50,7 @@ use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\FormInterface;
 use App\Form\IndividuForm\IndividuForm;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class ServiceVersions
 {
@@ -61,10 +63,13 @@ class ServiceVersions
                                 private $nodata,
                                 private $max_fig_width,
                                 private $max_fig_height,
+                                private $resp_peut_modif_collabs,
                                 private ServiceJournal $sj,
+                                private ServiceInvitations $sid,
                                 private ValidatorInterface $vl,
                                 private ServiceForms $sf,
                                 private FormFactoryInterface $ff,
+                                private TokenStorageInterface $tok,
                                 private EntityManagerInterface $em
                                 )
     {
@@ -772,17 +777,20 @@ class ServiceVersions
      * Validation du formulaire des collaborateurs - Retourne true/false
      *
      * params = Retour de $sv->prepareCollaborateurs
-     *          TODO $definitif = ?
+     *          $definitif = Si false, on fait une validation minimale
      ***********************************************************************/
     public function validateIndividuForms(array $individu_forms, $definitif = false) : bool
     {
         $coll_login = $this->coll_login;
+        $resp_peut_modif_collabs = $this->resp_peut_modif_collabs;
         $one_login = false;
         foreach ($individu_forms as  $individu_form) {
             if ($individu_form->getLogin()) {
                 $one_login = true;
             }
-            if ($definitif ==  true  &&
+            // Si pas définitif, on ne teste pas ça
+            // Si le resp ne peut pas modifier les profils des collabs, on ne teste pas ça
+            if ($definitif == true && $resp_peut_modif_collabs == true &&
                 (
                    $individu_form->getPrenom() == null   || $individu_form->getNom() == null
                 || $individu_form->getEtablissement() == null
@@ -911,6 +919,7 @@ class ServiceVersions
 
             // Le formulaire correspond à un nouvel utilisateur (adresse mail pas trouvée)
             elseif ($individu_form->getMail() != null && $individu_form->getDelete() == false) {
+                
                 // Création d'un individu à partir du formulaire
                 // Renvoie null si la validation est négative
                 $individu = $individu_form->nouvelIndividu($sval);
@@ -928,6 +937,13 @@ class ServiceVersions
                     $em->persist($version);
                     $em->flush();
                     $sj->warningMessage('Utilisateur ' . $individu . '(' . $individu->getMail() . ') id(' . $individu->getIdIndividu() . ') a été créé');
+
+                    // Envoie une invitation à ce nouvel utilisateur
+                    $connected = $this->tok->getToken()->getUser();
+                    if ($connected != null)
+                    {
+                        $this->sid->sendInvitation($connected, $individu);
+                    }
                 }
             }
 
@@ -947,6 +963,11 @@ class ServiceVersions
         $em = $this->em;
         $sval= $this->vl;
 
+        $text_fields = true;
+        if ( $this->resp_peut_modif_collabs)
+        {
+            $text_fields = false;
+        }
         return $this->ff
                    ->createNamedBuilder('form_projet', FormType::class, [ 'individus' => $this->prepareCollaborateurs($version, $sj, $sval) ])
                    ->add('individus', CollectionType::class, [
@@ -959,6 +980,7 @@ class ServiceVersions
                        'by_reference'   =>  false,
                        'delete_empty'   =>  true,
                        'attr'         => ['class' => "profil-horiz",],
+                       'entry_options' =>['text_fields' => $text_fields]
                     ])
                     ->getForm();
     }

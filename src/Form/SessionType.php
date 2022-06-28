@@ -60,7 +60,7 @@ class SessionType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         if ($options['commentaire']) {
             $builder->add('commGlobal');
@@ -100,7 +100,7 @@ class SessionType extends AbstractType
         //->add('president',  EntityType::class,
         //            [
         //        'multiple' => false,
-        //        'class' => 'App:Individu',
+        //        'class' => Individu::class,
         //        'required'  =>  false,
         //        'label'     => 'Président:',
         //        'choices' =>  $this->em->getRepository(Individu::class)->findBy(['expert' => true]),
@@ -136,7 +136,7 @@ class SessionType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults(
             [
@@ -152,7 +152,7 @@ class SessionType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function getBlockPrefix()
+    public function getBlockPrefix(): string
     {
         return 'appbundle_session';
     }

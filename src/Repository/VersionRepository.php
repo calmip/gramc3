@@ -67,7 +67,7 @@ class VersionRepository extends \Doctrine\ORM\EntityRepository
     public function findSessionVersions($session)
     {
         return $this->getEntityManager()
-        ->createQuery('SELECT partial v.{idVersion,etatVersion,prjGenciDari,prjTitre,prjLLabo,demHeures,attrHeures,penalHeures,politique,sondVolDonnPerm}  FROM App:Version v JOIN v.session s WHERE ( s = :session AND NOT v.etatVersion = :annule)')
+        ->createQuery('SELECT partial v.{idVersion,etatVersion,prjGenciDari,prjTitre,prjLLabo,demHeures,attrHeures,penalHeures,politique,sondVolDonnPerm,prjResume,dataMetaDataFormat}  FROM App:Version v JOIN v.session s WHERE ( s = :session AND NOT v.etatVersion = :annule)')
         ->setParameter('annule', Etat::getEtat('ANNULE'))
         ->setParameter('session', $session)
         ->getResult();

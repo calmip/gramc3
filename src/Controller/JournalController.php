@@ -36,6 +36,7 @@ use App\Utils\Functions;
 use App\Entity\Journal;
 use App\Form\SelectJournalType;
 use Symfony\Component\Form\FormInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 
 /**
@@ -46,7 +47,7 @@ use Symfony\Component\Form\FormInterface;
  */
 class JournalController extends AbstractController
 {
-    public function __construct(private FormFactoryInterface $ff) {}
+    public function __construct(private FormFactoryInterface $ff, private EntityManagerInterface $em) {}
 
     /**
      * Lists all Journal entities.
@@ -104,7 +105,7 @@ class JournalController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($journal);
             $em->flush($journal);
 
@@ -146,7 +147,7 @@ class JournalController extends AbstractController
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('journal_edit', array('id' => $journal->getId()));
         }
@@ -170,7 +171,7 @@ class JournalController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->remove($journal);
             $em->flush($journal);
         }
@@ -197,7 +198,7 @@ class JournalController extends AbstractController
     private function index(Request $request): array
     {
         $ff = $this->ff;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // quand on n'a pas de class on doit définir un nom du formulaire pour HTML
         //$form = Functions::getFormBuilder($ff, 'jnl_requetes', SelectJournalType::class, [] )->getForm();
@@ -217,9 +218,9 @@ class JournalController extends AbstractController
 
         // on regarde si le bouton 'chercher tout' défini dans SelectJournalType a été utilisé
         if ($form->get('all')->isClicked()) {
-            $journals =  $em->getRepository('App:Journal')->findAll();
+            $journals =  $em->getRepository(Journal::class)->findAll();
         } else {
-            $journals =  $em->getRepository('App:Journal')->findData($data['dateDebut'], $data['dateFin'], $data['niveau']);
+            $journals =  $em->getRepository(Journal::class)->findData($data['dateDebut'], $data['dateFin'], $data['niveau']);
         }
         //  findData est défini dans JournalRepository - modèle
 

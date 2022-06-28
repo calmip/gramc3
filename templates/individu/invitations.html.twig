@@ -1,0 +1,42 @@
+{% extends 'default/base.html.twig' %}
+{% import "default/macros.html.twig" as gramcmacros %}
+
+{% block body %}
+<section>
+    <h1>Les invitations en cours</h1>
+
+    {% if invitations %}
+    <table>
+        <thead>
+            <tr>
+                <th>&nbsp;</th>
+                <th>Invité</th>
+                <th>Par</th>
+                <th>Date de création</th>
+                <th>Expiration</th>
+                <th>Clef</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for invit in invitations %}
+            <tr>
+                <td>
+                    <a class="suppression"  href="{{ path('supprimer_invitation',  { 'id': invit.idinvitation }) }}" title="Supprimer">
+                    <img class="bouton_poussoir" src="{{ asset('icones/petitdelete.png') }}" alt="Supprimer" />
+                    </a>
+                </td>
+                <td>{{ invit.invited }}</td>
+                <td>{{ invit.inviting }}</td>
+                <td>{{ invit.creationstamp | date("d-m-Y")  }}</td>
+                <td>{{ invit.creationstamp.add(duree) | date("d-m-Y") }}</td>
+                <td>{{ gramcmacros.afftitre(invit.clef) }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="centrage"><em>Il n'y a pas d'invitations en cours actuellement</em></p>
+    {% endif %}
+</section>
+
+{% endblock %}

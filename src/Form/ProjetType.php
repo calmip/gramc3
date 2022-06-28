@@ -33,7 +33,7 @@ class ProjetType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('etatProjet')->add('idProjet')->add('publi')->add('versionActive')->add('versionDerniere')        ;
     }
@@ -41,7 +41,7 @@ class ProjetType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults(array(
             'data_class' => 'App\Entity\Projet'
@@ -51,7 +51,7 @@ class ProjetType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function getBlockPrefix()
+    public function getBlockPrefix(): string
     {
         return 'appbundle_projet';
     }
