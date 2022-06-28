@@ -100,31 +100,33 @@ class ServiceForms
         switch ($type)
         {
             case "pdf":
-            $format_fichier = new \Symfony\Component\Validator\Constraints\File(
-                [
-                    'mimeTypes'=> [ 'application/pdf' ],
-                    'mimeTypesMessage'=>' Le fichier doit être un fichier pdf. ',
-                    'maxSize' => $maxSize,
-                    'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
-                    'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
-                ]
-            );
-            $constraints = [$format_fichier , new PagesNumber() ];
-            break;
+                $format_fichier = new \Symfony\Component\Validator\Constraints\File(
+                    [
+                        'mimeTypes'=> [ 'application/pdf' ],
+                        'mimeTypesMessage'=>' Le fichier doit être un fichier pdf. ',
+                        'maxSize' => $maxSize,
+                        'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
+                        'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
+                    ]
+                );
+                $constraints = [$format_fichier , new PagesNumber() ];
+                break;
+
             case "jpg":
-            $format_fichier = new \Symfony\Component\Validator\Constraints\File(
-                [
-                    'mimeTypes'=> [ 'image/jpeg' ],
-                    'mimeTypesMessage'=>" L'image doit être au format jpeg.",
-                    'maxSize' => $maxSize,
-                    'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
-                    'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
-                ]
-            );
-            $constraints = [$format_fichier ];
-             
+                $format_fichier = new \Symfony\Component\Validator\Constraints\File(
+                    [
+                        'mimeTypes'=> [ 'image/jpeg' ],
+                        'mimeTypesMessage'=>" L'image doit être au format jpeg.",
+                        'maxSize' => $maxSize,
+                        'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
+                        'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
+                    ]
+                );
+                $constraints = [$format_fichier ];
+                break;
+            
             default:
-                $sj->throwException(__METHOD__ . ":" . __LINE__ . " Erreur interne - type $type pas supporté");
+                $sj->errorMessage(__METHOD__ . ":" . __LINE__ . " Erreur interne - type $type pas supporté");
                 break;
         }
 

@@ -173,34 +173,35 @@ class VersionSpecController extends AbstractController
 
         // TELEVERSEMENT DES IMAGES PAR AJAX
         // $sj->debugMessage('modifierAction ' .  print_r($_POST, true) );
-        $image_forms = [];
+        //$image_forms = [];
 
-        $image_forms['img_expose_1'] = $sv->imageForm('img_expose_1', false);
-        $image_forms['img_expose_2'] = $sv->imageForm('img_expose_2', false);
-        $image_forms['img_expose_3'] = $sv->imageForm('img_expose_3', false);
+        //$image_forms['img_expose_1'] = $sv->imageForm('img_expose_1', false);
+        //$image_forms['img_expose_2'] = $sv->imageForm('img_expose_2', false);
+        //$image_forms['img_expose_3'] = $sv->imageForm('img_expose_3', false);
 
-        $image_forms['img_justif_renou_1'] = $sv->imageForm('img_justif_renou_1', false);
-        $image_forms['img_justif_renou_2'] = $sv->imageForm('img_justif_renou_2', false);
-        $image_forms['img_justif_renou_3'] = $sv->imageForm('img_justif_renou_3', false);
+        //$image_forms['img_justif_renou_1'] = $sv->imageForm('img_justif_renou_1', false);
+        //$image_forms['img_justif_renou_2'] = $sv->imageForm('img_justif_renou_2', false);
+        //$image_forms['img_justif_renou_3'] = $sv->imageForm('img_justif_renou_3', false);
 
 
         //$sj->debugMessage('modifierAction imageHandle');
-        foreach ($image_forms as $my_form) {
-            $sv->imageHandle($my_form, $version, $request);
-        }
+        //foreach ($image_forms as $my_form) {
+        //    $sv->imageHandle($my_form, $version, $request);
+        //}
         //$sj->debugMessage('modifierAction après imageHandle');
 
         //$sj->debugMessage('modifierAction ajax ');
         // upload image ajax
 
-        $image_form = $sv->imageForm('image_form', false);
+        //$image_form = $sv->imageForm('image_form', false);
         //$sj->debugMessage('modifierAction ajax form');
 
-        $ajax = $sv->imageHandle($image_form, $version, $request);
+        //$ajax = $sv->imageHandle($image_form, $version, $request);
         //$sj->debugMessage('modifierAction ajax handled');
         // $sj->debugMessage('modifierAction ajax = ' .  print_r($ajax, true) );
 
         // Téléversement des images
+/*
         if ($ajax['etat'] != null) {
             $div_sts  = substr($ajax['filename'], 0, strlen($ajax['filename'])-1).'sts'; // img_justif_renou_1 ==>  img_justif_renou_sts
             //$sj->debugMessage(__METHOD__ . " koukou $div_sts");
@@ -226,7 +227,7 @@ class VersionSpecController extends AbstractController
                 return new Response(json_encode($html));
             }
         }
-
+*/
         // SUPPRESSION DES IMAGES TELEVERSEES
         $remove_form = $this->ff
                 ->createNamedBuilder('remove_form', FormType::class, [], [ 'csrf_protection' => false ])
@@ -272,13 +273,13 @@ class VersionSpecController extends AbstractController
         $type = $version->getProjet()->getTypeProjet();
         switch ($type) {
             case Projet::PROJET_SESS:
-            return $this->modifierType1($request, $version, $renouvellement, $image_forms, $collaborateur_form);
+            return $this->modifierType1($request, $version, $renouvellement, /*$image_forms,*/ $collaborateur_form);
     
             case Projet::PROJET_TEST:
-            return $this->modifierType3($request, $version, $renouvellement, $image_forms, $collaborateur_form);
+            return $this->modifierType3($request, $version, $renouvellement, /*$image_forms,*/ $collaborateur_form);
     
             case Projet::PROJET_FIL:
-            return $this->modifierType3($request, $version, $renouvellement, $image_forms, $collaborateur_form);
+            return $this->modifierType3($request, $version, $renouvellement, /*$image_forms,*/ $collaborateur_form);
     
             default:
                $sj->throwException(__METHOD__ . ":" . __LINE__ . " mauvais type de projet " . Functions::show($type));
@@ -297,7 +298,7 @@ class VersionSpecController extends AbstractController
     private function modifierType1(Request $request,
                                    Version $version,
                                    bool $renouvellement,
-                                   array $image_forms,
+                                   //array $image_forms,
                                    FormInterface $collaborateur_form
                                    ): Response
     {
@@ -351,25 +352,40 @@ class VersionSpecController extends AbstractController
             return $this->redirectToRoute('consulter_projet', ['id' => $version->getProjet()->getIdProjet() ]);
         }
 
+        $img_expose_1 = $sv->imageProperties('img_expose_1', $version);
+        $img_expose_2 = $sv->imageProperties('img_expose_2', $version);
+        $img_expose_3 = $sv->imageProperties('img_expose_3', $version);
+
+        $img_justif_renou_1 = $sv->imageProperties('img_justif_renou_1', $version);
+        $img_justif_renou_2 = $sv->imageProperties('img_justif_renou_2', $version);
+        $img_justif_renou_3 = $sv->imageProperties('img_justif_renou_3', $version);
+
         $session = $ss -> getSessionCourante();
+
         return $this->render(
             'version/modifier_projet_sess.html.twig',
             [
                 'session' => $session,
                 'form'      => $form->createView(),
                 'version'   => $version,
-                'img_expose_1'   => $image_forms['img_expose_1']->createView(),
-                'img_expose_2'   => $image_forms['img_expose_2']->createView(),
-                'img_expose_3'   => $image_forms['img_expose_3']->createView(),
-                'imageExp1'    => $sv->image2Base64('img_expose_1', $version),
-                'imageExp2'    => $sv->image2Base64('img_expose_2', $version),
-                'imageExp3'    => $sv->image2Base64('img_expose_3', $version),
-                'img_justif_renou_1'    =>  $image_forms['img_justif_renou_1']->createView(),
-                'img_justif_renou_2'    =>  $image_forms['img_justif_renou_2']->createView(),
-                'img_justif_renou_3'    =>  $image_forms['img_justif_renou_3']->createView(),
-                'imageJust1'    =>   $sv->image2Base64('img_justif_renou_1', $version),
-                'imageJust2'    =>   $sv->image2Base64('img_justif_renou_2', $version),
-                'imageJust3'    =>   $sv->image2Base64('img_justif_renou_3', $version),
+                'img_expose_1' => $img_expose_1,
+                'img_expose_2' => $img_expose_2,
+                'img_expose_3' => $img_expose_3,
+                'img_justif_renou_1' => $img_justif_renou_1,
+                'img_justif_renou_2' => $img_justif_renou_2,
+                'img_justif_renou_3' => $img_justif_renou_3,
+               // 'img_expose_1'   => $image_forms['img_expose_1']->createView(),
+               // 'img_expose_2'   => $image_forms['img_expose_2']->createView(),
+               // 'img_expose_3'   => $image_forms['img_expose_3']->createView(),
+               // 'imageExp1'    => $sv->image2Base64('img_expose_1', $version),
+               // 'imageExp2'    => $sv->image2Base64('img_expose_2', $version),
+               // 'imageExp3'    => $sv->image2Base64('img_expose_3', $version),
+               // 'img_justif_renou_1'    =>  $image_forms['img_justif_renou_1']->createView(),
+               // 'img_justif_renou_2'    =>  $image_forms['img_justif_renou_2']->createView(),
+               // 'img_justif_renou_3'    =>  $image_forms['img_justif_renou_3']->createView(),
+               // 'imageJust1'    =>   $sv->image2Base64('img_justif_renou_1', $version),
+               // 'imageJust2'    =>   $sv->image2Base64('img_justif_renou_2', $version),
+               // 'imageJust3'    =>   $sv->image2Base64('img_justif_renou_3', $version),
                 'collaborateur_form' => $collaborateur_form->createView(),
                 'todo'          => static::versionValidate($version, $sj, $em, $sval, $this->getParameter('nodata')),
                 'renouvellement'    => $renouvellement,

@@ -177,39 +177,54 @@
                                          au code le plus utilisé)</em>
                         </p> {{ form_widget(form.prjJustifRenouv,
                 { 'attr': { 'class': 'compteur', 'rows' : 6, 'cols' : 70 } }) }}
-                        <div id="img_justif_renou_sts"></div>
-                        <div class="wrap-drop-zone">
-                            <div id="img_justif_renou_1" class="drop-zone" title="Faites glisser une image pour la téléverser">
-                                {% if  imageJust1 == null %}
-                                    Figure 1
-                                {% else %}
-                                    <img class="dropped" src="data:image/png;base64,{{ imageJust1 }}" alt="Figure 1"/>
-                                    <img class="icone" src="{{ asset('icones/poubelle32.png') }}" alt="Supprimer cette figure" title="Supprimer cette figure">
-                                {% endif %}
-                            </div>
-                            <div id="img_justif_renou_2" class="drop-zone" title="Faites glisser une image pour la téléverser">
-                                {% if  imageJust2 == null %}
-                                    Figure 2
-                                {% else %}
-                                    <img class="dropped" src="data:image/png;base64,{{ imageJust2 }}" alt="Figure 2"/>
-                                    <img class="icone" src="{{ asset('icones/poubelle32.png') }}" alt="Supprimer cette figure" title="Supprimer cette figure">
-                                {% endif %}
-                            </div>
-                            <div id="img_justif_renou_3" class="drop-zone" title="Faites glisser une image pour la téléverser">
-                                {% if  imageJust3 == null %}
-                                    Figure 3
-                                {% else %}
-                                    <img class="dropped" src="data:image/png;base64,{{ imageJust3 }}" alt="Figure 3"/>
-                                    <img class="icone" src="{{ asset('icones/poubelle32.png') }}" alt="Supprimer cette figure" title="Supprimer cette figure">
-                                {% endif %}
-                            </div>
-                        </div>
-                        <hr class="retour"> {{ gramcmacros.info_televersement(img_justif_renou_1,img_justif_renou_2,img_justif_renou_3) }}
-
                     </td>
                 </tr>
             </tbody>
         </table>
+
+            <div class="figures">
+        {% if not ( img_justif_renou_1 == null ) %}
+            <div>
+                <img class="figure" src="data:image/png;base64,{{ img_justif_renou_1.contents }}" data-width="{{ img_justif_renou_1.width }}" data-height="{{ img_justif_renou_1.height }}" alt="Figure 1" title="cliquez pour afficher la figure en taille réelle">
+                <p>Figure 1</p>
+            </div>
+        {% endif %}
+
+        {% if not( img_justif_renou_2 == null ) %}
+            <div>
+                <img class="figure" src="data:image/png;base64,{{ img_justif_renou_2.contents }}" alt="Figure 2" data-width="{{ img_justif_renou_2.width }}" data-height="{{ img_justif_renou_2.height }}" title="cliquez pour afficher la figure en taille réelle">
+                <p>Figure 2</p>
+            </div>
+        {% endif %}
+
+        {% if not ( img_justif_renou_3 == null) %}
+            <div>
+                <img class="figure" src="data:image/png;base64,{{ img_justif_renou_3.contents  }}" alt="Figure 3" data-width="{{ img_justif_renou_3.width }}" data-height="{{ img_justif_renou_3.height }}" title="cliquez pour afficher la figure en taille réelle">
+                <p>Figure 3</p>
+            </div>
+        {% endif %}
+    </div>
+    <div class="uploadstatus"></div>
+    <div class="fileuploader">
+        <a href="{{ path('televerser_fichier_attache', { 'id' : version.idVersion, 'filename' : 'img_justif_renou_1' } ) }}" target="_blank" >
+            <strong>Figure 1</strong>
+        </a>
+    </div>
+
+    <div class="uploadstatus"></div>
+    <div class="fileuploader">
+        <a href="{{ path('televerser_fichier_attache', { 'id' : version.idVersion, 'filename' : 'img_justif_renou_2' } ) }}" target="_blank" >
+            <strong>Figure 2</strong>
+        </a>
+    </div>
+
+    <div class="uploadstatus"></div>
+    <div class="fileuploader">
+        <a href="{{ path('televerser_fichier_attache', { 'id' : version.idVersion, 'filename' : 'img_justif_renou_3' } ) }}" target="_blank" >
+            <strong>Figure 3</strong>
+        </a>
+    </div>
+
     {% endif %}
 
     <div class="input financement">

@@ -489,13 +489,6 @@ class ProjetSpecController extends AbstractController
         $img_expose_3 = $sv->imageProperties('img_expose_3', $version);
         $document     = $sv->getdocument($version);
 
-        /*
-        if( $img_expose_1 == null )
-            $sj->debugMessage(__METHOD__.':'.__LINE__ ." img_expose1 null");
-        else
-            $sj->debugMessage(__METHOD__.':'.__LINE__ . " img_expose1 non null");
-        */
-
         $img_justif_renou_1 = $sv->imageProperties('img_justif_renou_1', $version);
         $img_justif_renou_2 = $sv->imageProperties('img_justif_renou_2', $version);
         $img_justif_renou_3 = $sv->imageProperties('img_justif_renou_3', $version);

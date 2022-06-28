@@ -1308,7 +1308,13 @@ class VersionController extends AbstractController
 
 
         // SEULEMENT CERTAINS NOMS !!!!
-        $valid_filenames = ['document.pdf'];
+        $valid_filenames = ['document.pdf',
+                            'img_expose_1',
+                            'img_expose_2',
+                            'img_expose_3',
+                            'img_justif_renou_1',
+                            'img_justif_renou_2',
+                            'img_justif_renou_3'];
         $filename = $filename;
         if (!in_array($filename, $valid_filenames))
         {
@@ -1323,13 +1329,18 @@ class VersionController extends AbstractController
             case "img_expose_1":
             case "img_expose_2":
             case "img_expose_3":
+            case "img_justif_renou_1":
+            case "img_justif_renou_2":
+            case "img_justif_renou_3":
                 $dir = $sv->imageDir($version);
                 break;
             default:
                 $sj->throwException(__METHOD__ . ":" . __LINE__ . " Erreur interne - calcul de dir pas possible");
+                break;
         }
 
         $type = substr($filename,-3);   // 'pdf' ou ... n'importe quoi !
+        
         if ($type != 'pdf')
         {
             $type = 'jpg';
@@ -1344,7 +1355,7 @@ class VersionController extends AbstractController
             unlink($dir);
             mkdir($dir);
         }
-        $rtn = $sf->televerserFichier($request, $dir, $filename);
+        $rtn = $sf->televerserFichier($request, $dir, $filename, $type);
         return new Response($rtn);
     }
 
