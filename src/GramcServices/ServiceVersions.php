@@ -192,11 +192,12 @@ class ServiceVersions
     public function imageDir(Version $version): string
     {
         $dir = $this->fig_directory;
-        if (! is_dir($dir)) {
-            if (file_exists($dir) && is_file($dir)) {
+        if (! is_dir($dir))
+        {
+            if (file_exists($dir) && is_file($dir))
+            {
                 unlink($dir);
-	    }
-
+            }
             mkdir($dir);
             $this->sj->warningMessage("fig_directory " . $dir . " créé !");
         }
