@@ -76,7 +76,7 @@ class AddCompta extends Command
         $this->setHelp('');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // this method must return an integer number with the "exit status code"
         // of the command.
