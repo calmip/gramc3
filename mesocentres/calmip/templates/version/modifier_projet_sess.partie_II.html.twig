@@ -21,7 +21,7 @@
 
             <div class="uploadstatus"></div>
             <div class="fileuploader">
-                <a href="{{ path('televerser_fichier_attache', { 'id' : version.idVersion } ) }}" target="_blank" >
+                <a href="{{ path('televerser_fichier_attache', { 'id' : version.idVersion, 'filename' : 'document.pdf' } ) }}" target="_blank" >
                     <strong>Téléversez le fichier</strong>
                 </a>
             </div>
@@ -63,15 +63,15 @@
     </div>
     
     <div id="img_expose_sts"></div>
-    <div id="img_expose_1" 
+{#    <div id="img_expose_1" 
         <div class="uploadstatus"></div>
         <div class="fileuploader">
-            <a href="{{ path('televerser_fichier_attache', { 'id' : version.idVersion } ) }}" target="_blank" >
+            <a href="{{ path('televerser_fichier_attache', { 'id' : version.idVersion, 'filename' : 'document.pdf' } ) }}" target="_blank" >
                 <strong>Téléversez le fichier</strong>
             </a>
         </div>
     </div>
-
+#}
     
     {#
     <div class="wrap-drop-zone">

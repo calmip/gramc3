@@ -1288,12 +1288,12 @@ class VersionController extends AbstractController
     }
 
     /**
-     * Téléverser un fichier attaché à une version
+     * Téléverser un fichier lié à une version
      *
-     * @Route("/{id}/fichier", name="televerser_fichier_attache",methods={"GET","POST"})
+     * @Route("/{id}/{filename}/fichier", name="televerser",methods={"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
-    public function televerserFichierAction(version $version, Request $request): Response
+    public function televerserAction(version $version, string $filename, Request $request): Response
     {
         $sv = $this->sv;
         $sm = $this->sm;
@@ -1306,8 +1306,70 @@ class VersionController extends AbstractController
         " parce que : " . $sm->modifier_version($version)['raison']);
         }
 
+
+        // SEULEMENT CERTAINS NOMS !!!!
+        $valid_filenames = ['document.pdf'];
+        $filename = $filename;
+        if (!in_array($filename, $valid_filenames))
+        {
+            $sj->throwException(__METHOD__ . ":" . __LINE__ . " Erreur interne - $filename pas un nom autorisé");
+        }
+
+        // Calcul du répertoire et du type de fichier: dépend du nom de fichier
+        $dir = "";
+        switch ($filename)
+        {
+            case "document.pdf":
+            case "img_expose_1":
+            case "img_expose_2":
+            case "img_expose_3":
+                $dir = $sv->imageDir($version);
+                break;
+            default:
+                $sj->throwException(__METHOD__ . ":" . __LINE__ . " Erreur interne - calcul de dir pas possible");
+        }
+
+        $type = substr($filename,-3);   // 'pdf' ou ... n'importe quoi !
+        if ($type != 'pdf')
+        {
+            $type = 'jpg';
+        }
+
+        if (! file_exists($dir))
+        {
+            mkdir($dir);
+        }
+        elseif (! is_dir($dir))
+        {
+            unlink($dir);
+            mkdir($dir);
+        }
+        $rtn = $sf->televerserFichier($request, $dir, $filename);
+        return new Response($rtn);
+    }
+
+    /**
+     * Téléverser un fichier attaché à une version
+     *
+     * @Route("/{id}/{filename}/fichier", name="televerser_fichier_attache",methods={"GET","POST"})
+     * @Security("is_granted('ROLE_DEMANDEUR')")
+     */
+    public function televerserFichierAction(version $version, string $filename, Request $request): Response
+    {
+        $sv = $this->sv;
+        $sm = $this->sm;
+        $sf = $this->sf;
+        $sj = $this->sj;
+
+        // ACL - Mêmes ACL que modification de version !
+        if ($sm->modifier_version($version)['ok'] == false) {
+            $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de modifier la version " . $version->getIdVersion().
+        " parce que : " . $sm->modifier_version($version)['raison']);
+        }
+
+        // SEULEMENT CERTAINS NOMS !!!!
         $dir      = $sv->imageDir($version);
-        $filename = 'document.pdf';
+        $filename = $filename;
 
         if (! file_exists($dir)) {
             mkdir($dir);

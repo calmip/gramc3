@@ -49,29 +49,25 @@ class ServiceInfos
 
     public function __construct(private GramcDate $grdte, private EntityManagerInterface $em)
     {
-        // un bogue obscur de symfony (lié à la console)
-//        try {
-            $this->sessions_non_terminees =
-                $em->getRepository(Session::class)->get_sessions_non_terminees();
+        $this->sessions_non_terminees =
+            $em->getRepository(Session::class)->get_sessions_non_terminees();
 
-            if (isset($this->sessions_non_terminees[0])) {
-                $this->session_courante = $this->sessions_non_terminees[0];
-            }
+        if (isset($this->sessions_non_terminees[0])) {
+            $this->session_courante = $this->sessions_non_terminees[0];
+        }
 
-            if ($this->session_courante != null) {
-                $this->etat_session_courante  =  $this->session_courante->getEtatSession();
-                if (array_key_exists($this->etat_session_courante, Etat::LIBELLE_ETAT)) {
-                    $this->libelle_etat_session_courante = Etat::LIBELLE_ETAT[$this->etat_session_courante];
-                } else {
-                    $this->libelle_etat_session_courante = "UNKNOWN";
-                }
-                $this->id_session_courante = $this->session_courante->getIdSession();
+        if ($this->session_courante != null) {
+            $this->etat_session_courante  =  $this->session_courante->getEtatSession();
+            if (array_key_exists($this->etat_session_courante, Etat::LIBELLE_ETAT)) {
+                $this->libelle_etat_session_courante = Etat::LIBELLE_ETAT[$this->etat_session_courante];
+            } else {
+                $this->libelle_etat_session_courante = "UNKNOWN";
             }
-//        } catch (\Exception $e) {
-//        };
+            $this->id_session_courante = $this->session_courante->getIdSession();
+        }
     }
 
-    public function getLibelleEtatSessionCourante(): string
+    public function getLibelleEtatSessionCourante(): ?string
     {
         return $this->libelle_etat_session_courante;
     }
@@ -87,7 +83,7 @@ class ServiceInfos
         return $this->etat_session_courante;
     }
 
-    public function sessions_non_terminees(): array
+    public function sessions_non_terminees(): ?array
     {
         return $this->sessions_non_terminees;
     }

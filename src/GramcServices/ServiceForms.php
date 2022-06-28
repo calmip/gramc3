@@ -86,22 +86,47 @@ class ServiceForms
      *          ou un message d'erreur
      *
      ********************************/
-    public function televerserFichier(Request $request, $dirname, $filename): FormInterface|string
+    public function televerserFichier(Request $request, string $dirname, string $filename, string $type): FormInterface|string
     {
         $sj = $this->sj;
         $ff = $this->ff;
         $max_size_doc = intval($this->max_size_doc);
         $maxSize = strval(1024 * $max_size_doc) . 'k';
 
-        $format_fichier = new \Symfony\Component\Validator\Constraints\File(
-        [
-            'mimeTypes'=> [ 'application/pdf' ],
-            'mimeTypesMessage'=>' Le fichier doit être un fichier pdf. ',
-            'maxSize' => $maxSize,
-            'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
-            'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
-        ]
-        );
+        // Les contraintes ne sont pas les mêmes suivant le type de fichier
+        //$type = 'pdf';
+        $format_fichier = '';
+        $constraints = [];
+        switch ($type)
+        {
+            case "pdf":
+            $format_fichier = new \Symfony\Component\Validator\Constraints\File(
+                [
+                    'mimeTypes'=> [ 'application/pdf' ],
+                    'mimeTypesMessage'=>' Le fichier doit être un fichier pdf. ',
+                    'maxSize' => $maxSize,
+                    'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
+                    'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
+                ]
+            );
+            $constraints = [$format_fichier , new PagesNumber() ];
+            break;
+            case "jpg":
+            $format_fichier = new \Symfony\Component\Validator\Constraints\File(
+                [
+                    'mimeTypes'=> [ 'image/jpeg' ],
+                    'mimeTypesMessage'=>" L'image doit être au format jpeg.",
+                    'maxSize' => $maxSize,
+                    'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
+                    'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
+                ]
+            );
+            $constraints = [$format_fichier ];
+             
+            default:
+                $sj->throwException(__METHOD__ . ":" . __LINE__ . " Erreur interne - type $type pas supporté");
+                break;
+        }
 
         $form = $ff
         ->createNamedBuilder('fichier', FormType::class, [], ['csrf_protection' => false ])
@@ -110,8 +135,8 @@ class ServiceForms
             FileType::class,
             [
                 'required'          =>  true,
-                'label'             => "Fichier attaché",
-                'constraints'       => [$format_fichier , new PagesNumber() ]
+                'label'             => "Fichier à téléverser",
+                'constraints'       => $constraints
             ]
         )
         ->getForm();
@@ -119,27 +144,35 @@ class ServiceForms
         $form->handleRequest($request);
 
         // form soumise et valide = On met le fichier à sa place et on retourne OK
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid())
+        {
             $tempFilename = $form->getData()['fichier'];
 
-            if (is_file($tempFilename) && ! is_dir($tempFilename)) {
+            if (is_file($tempFilename) && ! is_dir($tempFilename))
+            {
                 $file = new File($tempFilename);
-            } elseif (is_dir($tempFilename)) {
+            }
+            elseif (is_dir($tempFilename))
+            {
                 return "Erreur interne : Le nom  " . $tempFilename . " correspond à un répertoire" ;
-            } else {
+            }
+            else
+            {
                 return "Erreur interne : Le fichier " . $tempFilename . " n'existe pas" ;
             }
 
             $file->move($dirname, $filename);
-            $sj->debugMessage(__METHOD__ . ':' . __LINE__ . " Fichier attaché -> " . $filename);
+            
+            $sj->debugMessage(__METHOD__ . ':' . __LINE__ . " Fichier -> " . $filename);
             return 'OK';
         }
 
         // formulaire non valide ou autres cas d'erreur = On retourne un message d'erreur
-        elseif ($form->isSubmitted() && ! $form->isValid()) {
+        elseif ($form->isSubmitted() && ! $form->isValid())
+        {
             if (isset($form->getData()['fichier']))
             {
-                return  $this->formError($form->getData()['fichier'], [$format_fichier , new PagesNumber() ]);
+                return  $this->formError($form->getData()['fichier'], $constraints);
             }
             else
             {
