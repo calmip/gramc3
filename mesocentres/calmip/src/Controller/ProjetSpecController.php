@@ -354,16 +354,14 @@ class ProjetSpecController extends AbstractController
      * Affiche un projet avec un menu pour choisir la version
      *
      * @Route("/{id}/consulter", name="consulter_projet",methods={"GET","POST"})
-     * @Route("/{id}/consulter/{warn_type}", name="consulter_projet",methods={"GET","POST"})
      * @Route("/{id}/consulter/{version}", name="consulter_version",methods={"GET","POST"})
      * 
      * Method({"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
 
-     // TODO - On ne peut plus passer une version - Cette variable $warn_type fout la merde il faudra trouver une autre manière de faire
-     //        IDEE = PASSER PAR LA SESSION ?????
-    public function consulterAction(Request $request, Projet $projet, Version $version = null, $warn_type=0)
+     // SUPPRIME ! PASSE PAR LA SESSION ! Route("/{id}/consulter/{warn_type}", name="consulter_projet",methods={"GET","POST"})
+    public function consulterAction(Request $request, Projet $projet, Version $version = null)
     {
         $em = $this->em;
         $sp = $this->sp;
@@ -371,6 +369,10 @@ class ProjetSpecController extends AbstractController
         $coll_vers_repo= $em->getRepository(CollaborateurVersion::class);
         $token = $this->token;
 
+        // On récupère warn_type depuis la session, où il peut avoir été sauvegardé !
+        $warn_type = $request->getSession()->get('warn_type');
+        if (empty($warn_type)) $warn_type = 0;
+        
         // choix de la version
         if ($version == null)
         {

@@ -769,12 +769,16 @@ class VersionSpecController extends AbstractController
         if ($form->isSubmitted() && $form->isValid())
         {
             $version->setDemHeures($heures_projet_test);
- 
+
+            // TODO - Le mécanisme warn_type n'est PLUS UTILISE
             // Changement de type ou plafonnement de la demande en heures !
             $valid = $this->validDemHeures($version);
 
             $return = Functions::sauvegarder($version, $em, $this->lg);
-            return $this->redirectToRoute('consulter_projet', ['id' => $version->getProjet()->getIdProjet(),'warn_type' => $valid ? 0:1 ]);
+
+            // On sauvegarde $warn_type dans la SESSION
+            $request->getSession()->set('warn_type',$valid ? 0:1);
+            return $this->redirectToRoute('consulter_projet', ['id' => $version->getProjet()->getIdProjet()]);
         }
 
         // Les heures de projets tests sont fixes, donc pas dans le formulaire
