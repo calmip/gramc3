@@ -275,6 +275,11 @@ class ProjetSpecController extends AbstractController
      * Method({"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
+
+     // TODO - On ne peut plus passer une version - Cette variable $warn_type fout la merde il faudra trouver une autre manière de faire
+     //        IDEE = PASSER PAR LA SESSION ?????
+
+
     public function consulterAction(Projet $projet, Version $version = null, Request $request, $warn_type=0)
     {
         $em = $this->em;
