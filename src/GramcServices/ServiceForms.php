@@ -25,6 +25,7 @@ namespace App\GramcServices;
 
 use App\GramcServices\GramcDate;
 use App\GramcServices\Etat;
+
 use App\Validator\Constraints\PagesNumber;
 
 use Symfony\Component\Form\Extension\Core\Type\FormType;
@@ -47,7 +48,9 @@ use Doctrine\ORM\EntityManagerInterface;
  *************************************************************/
 class ServiceForms
 {
-    public function __construct(private $max_size_doc, private ValidatorInterface $vl, private FormFactoryInterface $ff, private EntityManagerInterface $em, private ServiceJournal $sj)
+    public function __construct(private ValidatorInterface $vl,
+                                private FormFactoryInterface $ff,
+                                private EntityManagerInterface $em)
     {}
 
     /******************************************
@@ -67,130 +70,6 @@ class ServiceForms
             return $errors;
         } else {
             return "OK";
-        }
-    }
-
-    /**************************************************
-     *
-     * Crée un formulaire qui permettra de téléverser un fichier pdf
-     * Gère le mécanisme de soumission et validation
-     * Fonctionne aussi bien en ajax avec jquery-upload-file-master
-     * que de manière "normale"
-     *
-     * params = request
-     *          dirname : répertoire de destination
-     *          filename: nom définitif du fichier
-     *
-     * return = la form si pas encore soumise
-     *          ou une string: "OK"
-     *          ou un message d'erreur
-     *
-     ********************************/
-    public function televerserFichier(Request $request, string $dirname, string $filename, string $type): FormInterface|string
-    {
-        $sj = $this->sj;
-        $ff = $this->ff;
-        $max_size_doc = intval($this->max_size_doc);
-        $maxSize = strval(1024 * $max_size_doc) . 'k';
-
-        // Les contraintes ne sont pas les mêmes suivant le type de fichier
-        //$type = 'pdf';
-        $format_fichier = '';
-        $constraints = [];
-        switch ($type)
-        {
-            case "pdf":
-                $format_fichier = new \Symfony\Component\Validator\Constraints\File(
-                    [
-                        'mimeTypes'=> [ 'application/pdf' ],
-                        'mimeTypesMessage'=>' Le fichier doit être un fichier pdf. ',
-                        'maxSize' => $maxSize,
-                        'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
-                        'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
-                    ]
-                );
-                $constraints = [$format_fichier , new PagesNumber() ];
-                break;
-
-            case "jpg":
-                $format_fichier = new \Symfony\Component\Validator\Constraints\File(
-                    [
-                        'mimeTypes'=> [ 'image/jpeg' ],
-                        'mimeTypesMessage'=>" L'image doit être au format jpeg.",
-                        'maxSize' => $maxSize,
-                        'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
-                        'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
-                    ]
-                );
-                $constraints = [$format_fichier ];
-                break;
-            
-            default:
-                $sj->errorMessage(__METHOD__ . ":" . __LINE__ . " Erreur interne - type $type pas supporté");
-                break;
-        }
-
-        $form = $ff
-        ->createNamedBuilder('fichier', FormType::class, [], ['csrf_protection' => false ])
-        ->add(
-            'fichier',
-            FileType::class,
-            [
-                'required'          =>  true,
-                'label'             => "Fichier à téléverser",
-                'constraints'       => $constraints
-            ]
-        )
-        ->getForm();
-
-        $form->handleRequest($request);
-
-        // form soumise et valide = On met le fichier à sa place et on retourne OK
-        if ($form->isSubmitted() && $form->isValid())
-        {
-            $tempFilename = $form->getData()['fichier'];
-
-            if (is_file($tempFilename) && ! is_dir($tempFilename))
-            {
-                $file = new File($tempFilename);
-            }
-            elseif (is_dir($tempFilename))
-            {
-                return "Erreur interne : Le nom  " . $tempFilename . " correspond à un répertoire" ;
-            }
-            else
-            {
-                return "Erreur interne : Le fichier " . $tempFilename . " n'existe pas" ;
-            }
-
-            $file->move($dirname, $filename);
-            
-            $sj->debugMessage(__METHOD__ . ':' . __LINE__ . " Fichier -> " . $filename);
-            return 'OK';
-        }
-
-        // formulaire non valide ou autres cas d'erreur = On retourne un message d'erreur
-        elseif ($form->isSubmitted() && ! $form->isValid())
-        {
-            if (isset($form->getData()['fichier']))
-            {
-                return  $this->formError($form->getData()['fichier'], $constraints);
-            }
-            else
-            {
-                return "<strong>Erreurs :</strong>Fichier trop gros ou autre problème";
-            }
-        }
-        
-        elseif ($request->isXMLHttpRequest())
-        {
-            return "Le formulaire n'a pas été soumis";
-        }
-
-        // formulaire non soumis = On retourne le formulaire
-        else
-        {
-            return $form;
         }
     }
 } // class

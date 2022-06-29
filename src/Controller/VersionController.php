@@ -74,6 +74,7 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 use App\Validator\Constraints\PagesNumber;
 use Knp\Snappy\Pdf;
@@ -112,6 +113,7 @@ class VersionController extends AbstractController
         private FormFactoryInterface $ff,
         private ValidatorInterface $vl,
         private TokenStorageInterface $tok,
+        private AuthorizationCheckerInterface $ac,
         private Pdf $pdf,
         private EntityManagerInterface $em
     ) {}
@@ -270,6 +272,48 @@ class VersionController extends AbstractController
             return $this->redirectToRoute($rtn);
         }
     }
+
+    /**
+     * Supprimer Fichier attaché à une version
+     *
+     * @Route("/{id}/{filename}/supprimer_fichier", name="version_supprimer_fichier",methods={"GET"} )
+     * @Security("is_granted('ROLE_DEMANDEUR')")
+     *
+     */
+    public function supprimerFichierAction(Version $version, string $filename): Response
+    {
+        $em = $this->em;
+        $sm = $this->sm;
+        $sv = $this->sv;
+        $sj = $this->sj;
+        $ac = $this->ac;
+
+        // ACL - Les mêmes que pour supprimer version !
+        if ($sm->modifier_version($version)['ok'] == false) {
+            $sj->throwException(__METHOD__ . ':' . __LINE__ . " impossible de supprimer des images de cette version " . $version->getIdVersion().
+                " parce que : " . $sm->modifier_version($version)['raison']);
+        }
+
+        $etat = $version->getEtatVersion();
+        $idProjet = null;
+        $idVersion = null;
+        if ($version->getProjet() == null) {
+            $idProjet = null;
+            $idVersion = $version->getIdVersion();
+        } else {
+            $idProjet   =  $version->getProjet()->getIdProjet();
+        }
+
+        // Seulement en édition demande, ou alors si je suis admin !
+        if ($etat == Etat::EDITION_DEMANDE || $ac->isGranted('ROLE_ADMIN'))
+        {
+            // suppression des fichiers liés à la version
+            $sv->effacerFichier($version, $filename);
+        }
+
+        return new Response(json_encode("OK $filename"));
+    }
+
 
     //////////////////////////////////////////////////////////////////////////
 
@@ -1290,7 +1334,7 @@ class VersionController extends AbstractController
     /**
      * Téléverser un fichier lié à une version
      *
-     * @Route("/{id}/{filename}/fichier", name="televerser",methods={"GET","POST"})
+     * @Route("/{id}/fichier/{filename}", name="televerser",methods={"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function televerserAction(version $version, string $filename, Request $request): Response
@@ -1355,17 +1399,17 @@ class VersionController extends AbstractController
             unlink($dir);
             mkdir($dir);
         }
-        $rtn = $sf->televerserFichier($request, $dir, $filename, $type);
+        $rtn = $sv->televerserFichier($request, $version, $dir, $filename, $type);
         return new Response($rtn);
     }
 
     /**
      * Téléverser un fichier attaché à une version
      *
-     * @Route("/{id}/{filename}/fichier", name="televerser_fichier_attache",methods={"GET","POST"})
+     * @Route("/{id}/fichier/{filename}", name="televerser_fichier_attache",methods={"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
-    public function televerserFichierAction(version $version, string $filename, Request $request): Response
+    public function televerserFichierAction_AJETER(version $version, string $filename, Request $request): Response
     {
         $sv = $this->sv;
         $sm = $this->sm;

@@ -88,9 +88,6 @@ services:
     App\GramcServices\ServiceSessions:
         arguments: ['%recup_attrib_seuil%','%recup_conso_seuil%','%recup_attrib_quant%']
 
-    App\GramcServices\ServiceForms:
-        arguments: ['%max_size_doc%']
- 
     App\GramcServices\ServiceProjets:
         arguments: ["%prj_prefix%",
                     "%ressources_conso_group%",
@@ -108,6 +105,7 @@ services:
                     "%nodata%",
                     "%max_fig_width%",
                     "%max_fig_height%",
+                    "%max_size_doc%",
                     "%resp_peut_modif_collabs%" ]
         
     App\GramcServices\ServiceMenus:

@@ -352,9 +352,9 @@ class VersionSpecController extends AbstractController
             return $this->redirectToRoute('consulter_projet', ['id' => $version->getProjet()->getIdProjet() ]);
         }
 
-        $img_expose_1 = $sv->imageProperties('img_expose_1', $version);
-        $img_expose_2 = $sv->imageProperties('img_expose_2', $version);
-        $img_expose_3 = $sv->imageProperties('img_expose_3', $version);
+        $img_expose = [$sv->imageProperties('img_expose_1', $version),
+                       $sv->imageProperties('img_expose_2', $version),
+                       $sv->imageProperties('img_expose_3', $version)];
 
         $img_justif_renou_1 = $sv->imageProperties('img_justif_renou_1', $version);
         $img_justif_renou_2 = $sv->imageProperties('img_justif_renou_2', $version);
@@ -368,9 +368,10 @@ class VersionSpecController extends AbstractController
                 'session' => $session,
                 'form'      => $form->createView(),
                 'version'   => $version,
-                'img_expose_1' => $img_expose_1,
-                'img_expose_2' => $img_expose_2,
-                'img_expose_3' => $img_expose_3,
+                //'img_expose_1' => $img_expose_1,
+                //'img_expose_2' => $img_expose_2,
+                //'img_expose_3' => $img_expose_3,
+                'img_expose' => $img_expose,
                 'img_justif_renou_1' => $img_justif_renou_1,
                 'img_justif_renou_2' => $img_justif_renou_2,
                 'img_justif_renou_3' => $img_justif_renou_3,

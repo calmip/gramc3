@@ -63,6 +63,7 @@ class ServiceVersions
                                 private $nodata,
                                 private $max_fig_width,
                                 private $max_fig_height,
+                                private $max_size_doc,
                                 private $resp_peut_modif_collabs,
                                 private ServiceJournal $sj,
                                 private ServiceInvitations $sid,
@@ -125,17 +126,21 @@ class ServiceVersions
     public function imageProperties($filename, Version $version): array
     {
         $full_filename = $this->imagePath($filename, $version);
-        if (file_exists($full_filename) && is_file($full_filename)) {
+        if (file_exists($full_filename) && is_file($full_filename))
+        {
             $imageinfo  =   [];
             $my_image_info = getimagesize($full_filename, $imageinfo);
             return [
-        'contents'  =>  base64_encode(file_get_contents($full_filename)),
-        'width'     =>  $my_image_info[0],
-        'height'    =>  $my_image_info[1],
-        'balise'    =>  $my_image_info[2],
-        'mime'      =>  $my_image_info['mime'],
-        ];
-        } else {
+                'contents' => base64_encode(file_get_contents($full_filename)),
+                'width'    => $my_image_info[0],
+                'height'   => $my_image_info[1],
+                'balise'   => $my_image_info[2],
+                'mime'     => $my_image_info['mime'],
+                'name'     => $filename
+            ];
+        }
+        else
+        {
             return [];
         }
     }
@@ -155,6 +160,145 @@ class ServiceVersions
             return $document;
         } else {
             return null;
+        }
+    }
+
+    /**************************************************
+     *
+     * Crée un formulaire qui permettra de téléverser un fichier pdf
+     * Gère le mécanisme de soumission et validation
+     * Fonctionne aussi bien en ajax avec jquery-upload-file-master
+     * que de manière "normale"
+     *
+     * params = request
+     *          dirname : répertoire de destination
+     *          filename: nom définitif du fichier
+     *
+     * return = la form si pas encore soumise
+     *          ou une string: "OK"
+     *          ou un message d'erreur
+     *
+     ********************************/
+    public function televerserFichier(Request $request,
+                                      Version $version,
+                                      string $dirname,
+                                      string $filename,
+                                      string $type): FormInterface|string
+    {
+        $sj = $this->sj;
+        $ff = $this->ff;
+        $max_size_doc = intval($this->max_size_doc);
+        $maxSize = strval(1024 * $max_size_doc) . 'k';
+
+        // Les contraintes ne sont pas les mêmes suivant le type de fichier
+        $format_fichier = '';
+        $constraints = [];
+        switch ($type)
+        {
+            case "pdf":
+                $format_fichier = new \Symfony\Component\Validator\Constraints\File(
+                    [
+                        'mimeTypes'=> [ 'application/pdf' ],
+                        'mimeTypesMessage'=>' Le fichier doit être un fichier pdf. ',
+                        'maxSize' => $maxSize,
+                        'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
+                        'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
+                    ]
+                );
+                $constraints = [$format_fichier , new PagesNumber() ];
+                break;
+
+            case "jpg":
+                $format_fichier = new \Symfony\Component\Validator\Constraints\File(
+                    [
+                        'mimeTypes'=> [ 'image/jpeg' ],
+                        'mimeTypesMessage'=>" L'image doit être au format jpeg.",
+                        'maxSize' => $maxSize,
+                        'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
+                        'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
+                    ]
+                );
+                $constraints = [$format_fichier ];
+                break;
+            
+            default:
+                $sj->errorMessage(__METHOD__ . ":" . __LINE__ . " Erreur interne - type $type pas supporté");
+                break;
+        }
+
+        $form = $ff
+        ->createNamedBuilder('fichier', FormType::class, [], ['csrf_protection' => false ])
+        ->add(
+            'fichier',
+            FileType::class,
+            [
+                'required'          =>  true,
+                'label'             => "Fichier à téléverser",
+                'constraints'       => $constraints
+            ]
+        )
+        ->getForm();
+
+        $form->handleRequest($request);
+
+        // form soumise et valide = On met le fichier à sa place et on retourne OK
+        $rvl = [];
+        $rvl['OK'] = false;
+        if ($form->isSubmitted() && $form->isValid())
+        {
+            $tempFilename = $form->getData()['fichier'];
+
+            if (is_file($tempFilename) && ! is_dir($tempFilename))
+            {
+                $file = new File($tempFilename);
+            }
+            elseif (is_dir($tempFilename))
+            {
+                return "Erreur interne : Le nom  " . $tempFilename . " correspond à un répertoire" ;
+            }
+            else
+            {
+                return "Erreur interne : Le fichier " . $tempFilename . " n'existe pas" ;
+            }
+
+            $file->move($dirname, $filename);
+            
+            $sj->debugMessage(__METHOD__ . ':' . __LINE__ . " Fichier -> " . $filename);
+            $rvl['OK'] = true;
+
+            // Si le type est 'jpg', c'est une image: on la renvoie !
+            if ($type == 'jpg')
+            {
+                $rvl['properties'] = $this->imageProperties($filename, $version);
+            }
+            return json_encode($rvl);
+        }
+
+        // formulaire non valide ou autres cas d'erreur = On retourne un message d'erreur
+        elseif ($form->isSubmitted() && ! $form->isValid())
+        {
+            if (isset($form->getData()['fichier']))
+            {
+                $rvl['message'] = $this->formError($form->getData()['fichier'], $constraints);
+                return json_encode($rvl);
+            }
+            else
+            {
+                $rvl['message'] = "<strong>Erreurs :</strong>Fichier trop gros ou autre problème";
+                return json_encode($rvl);
+            }
+        }
+        
+        elseif ($request->isXMLHttpRequest())
+        {
+            $rvl['message'] = "Le formulaire n'a pas été soumis";
+            return json_encode($rvl);
+        }
+
+        // formulaire non soumis = On retourne le formulaire
+        else
+        {
+            return $form;
         }
     }
 
@@ -515,6 +659,34 @@ class ServiceVersions
         $fiche = $this->getSigne($version);
         if ( $fiche != null) {
             unlink($fiche);
+        }
+    }
+
+    /*************************************************************
+     * Efface un seul fichier liés à une version de projet
+     *
+     *  - Les fichiers img_* et *.pdf du répertoire des figures
+     *  - Le fichier de signatures s'il existe
+     *  - N'EFFACE PAS LE RAPPORT D'ACTIVITE !
+     *    cf. ServiceProjets pour cela
+     *************************************************************/
+    public function effacerFichier(Version $version, string $filename): void
+    {
+        // Les figures et les doc attachés
+        $img_dir = $this->imageDir($version);
+
+        $fichiers = [ 'img_expose_1',
+                      'img_expose_2',
+                      'img_expose_3',
+                      'img_justif_renou_1',
+                      'img_justif_renou_2',
+                      'img_justif_renou_3'
+                    ];
+
+        if (in_array($filename, $fichiers))
+        {
+            $path = $img_dir . '/' . $filename;
+            unlink($path);
         }
     }
 
