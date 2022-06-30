@@ -1128,8 +1128,6 @@ img.dfct {
 
 
 
-
-
 /*    UGO   */
 /* ========== COLORS ========== */
 :root{
@@ -2010,9 +2008,22 @@ tbody tr.rallonge{
 }
 
 .section_modifierProjet #ul_formulaire li{
-    margin-right: -10px;
-    border-radius: 10px 2px 0 0;
-    width: initial;
+ /*   margin-right: -10px; */
+    border-radius: 10px 10px 2px 2px ;
+/*    width: initial;*/
+    width: 10em;
+    margin: 0 .3em;
+    color: white;
+    background-color: #1c77e4;
+    font-weight: bold;
+}
+
+.section_modifierProjet #ul_formulaire li a{
+    color: white;
+}
+
+.section_modifierProjet #ul_formulaire li.ui-tabs-active {
+    background-color: red;
 }
 
 .section_modifierProjet .presentation_generale,
