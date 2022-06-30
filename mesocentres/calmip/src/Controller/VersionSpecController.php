@@ -356,9 +356,9 @@ class VersionSpecController extends AbstractController
                        $sv->imageProperties('img_expose_2', $version),
                        $sv->imageProperties('img_expose_3', $version)];
 
-        $img_justif_renou_1 = $sv->imageProperties('img_justif_renou_1', $version);
-        $img_justif_renou_2 = $sv->imageProperties('img_justif_renou_2', $version);
-        $img_justif_renou_3 = $sv->imageProperties('img_justif_renou_3', $version);
+        $img_justif_renou = [$sv->imageProperties('img_justif_renou_1', $version),
+                             $sv->imageProperties('img_justif_renou_2', $version),
+                             $sv->imageProperties('img_justif_renou_3', $version)];
 
         $session = $ss -> getSessionCourante();
 
@@ -372,9 +372,10 @@ class VersionSpecController extends AbstractController
                 //'img_expose_2' => $img_expose_2,
                 //'img_expose_3' => $img_expose_3,
                 'img_expose' => $img_expose,
-                'img_justif_renou_1' => $img_justif_renou_1,
-                'img_justif_renou_2' => $img_justif_renou_2,
-                'img_justif_renou_3' => $img_justif_renou_3,
+                //'img_justif_renou_1' => $img_justif_renou_1,
+                //'img_justif_renou_2' => $img_justif_renou_2,
+                //'img_justif_renou_3' => $img_justif_renou_3,
+                'img_justif_renou' => $img_justif_renou,
                // 'img_expose_1'   => $image_forms['img_expose_1']->createView(),
                // 'img_expose_2'   => $image_forms['img_expose_2']->createView(),
                // 'img_expose_3'   => $image_forms['img_expose_3']->createView(),

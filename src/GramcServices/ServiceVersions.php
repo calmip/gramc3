@@ -32,10 +32,13 @@ use App\Entity\User;
 use App\Entity\CollaborateurVersion;
 
 use App\GramcServices\Etat;
+use App\GramcServices\ServiceForms;
 use App\GramcServices\ServiceInvitations;
 use App\Form\IndividuFormType;
 
 use App\Utils\Functions;
+
+use App\Validator\Constraints\PagesNumber;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -187,6 +190,7 @@ class ServiceVersions
     {
         $sj = $this->sj;
         $ff = $this->ff;
+        $sf = $this->sf;
         $max_size_doc = intval($this->max_size_doc);
         $maxSize = strval(1024 * $max_size_doc) . 'k';
 
@@ -279,7 +283,7 @@ class ServiceVersions
         {
             if (isset($form->getData()['fichier']))
             {
-                $rvl['message'] = $this->formError($form->getData()['fichier'], $constraints);
+                $rvl['message'] = $sf->formError($form->getData()['fichier'], $constraints);
                 return json_encode($rvl);
             }
             else
