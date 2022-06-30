@@ -310,7 +310,7 @@ class ServiceVersions
      * Calcule le nom de fichier de l'image
      *
      * param = $filename Nom du fichier, sans le répertoire ni l'extension
-     * 		   $version  Version associée
+     *         $version  Version associée
      *
      * return = Le chemin complet (si le fichier existe)
      *          Le chemin avec répertoire mais sans extension sinon
@@ -666,8 +666,14 @@ class ServiceVersions
         }
     }
 
+    /*********************************************
+     *
+     * LES IMAGES
+     * 
+     ********************************************/
+     
     /*************************************************************
-     * Efface un seul fichier liés à une version de projet
+     * Efface un seul fichier lié à une version de projet
      *
      *  - Les fichiers img_* et *.pdf du répertoire des figures
      *  - Le fichier de signatures s'il existe
@@ -694,12 +700,6 @@ class ServiceVersions
         }
     }
 
-    /*********************************************
-     *
-     * LES IMAGES
-     * 
-     ********************************************/
-     
     /*************************************************************
      * Lit un fichier image et renvoie la version base64 pour affichage
      * dans le html
@@ -717,140 +717,6 @@ class ServiceVersions
         else
         {
             return null;
-        }
-    }
-
-    /*************************************************************
-     * Génère et renvoie un form pour téléverser les images
-     *************************************************************/
-    public function imageForm(string $name, bool $csrf_protection = true): FormInterface
-    {
-        $format_fichier = $this->imageConstraints();
-        $form           = $this ->ff
-                                ->createNamedBuilder($name, FormType::class, [], ['csrf_protection' => $csrf_protection ])
-                                ->add('filename', HiddenType::class, [ 'data' => $name,])
-                                ->add(
-                                    'image',
-                                    FileType::class,
-                                    ['required' => false,
-                                        'label' => 'Fig',
-                                        'constraints'=>[$format_fichier] ]
-                                )
-                                ->getForm();
-        return $form;
-    }
-
-    /**************************************************************************
-     * Contraintes de type et de taille sur les images - Utilisé par imageForm
-     **************************************************************************/ 
-    private function imageConstraints() : \Symfony\Component\Validator\Constraints\File
-    {
-        return new \Symfony\Component\Validator\Constraints\File(
-            [
-                'mimeTypes'=> [ 'image/jpeg', 'image/gif', 'image/png' ],
-                'mimeTypesMessage'=>' Le fichier doit être un fichier jpeg, gif ou png. ',
-                'maxSize' => "2048k",
-                'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
-                'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
-                ]
-        );
-    }
-
-    /*************************************************************
-     * Récupère l'image qui vient d'être téléchargée
-     * Fonction appelée par les controleurs
-     *
-     * Renvoie un tableau qui sera transformé en fichier json (ajax)
-     * 
-     * 
-     *************************************************************/
-    public function imageHandle(FormInterface $form, Version $version, Request $request): array
-    {
-        $sf = $this->sf;
-        $sj = $this->sj;
-        $em = $this->em;
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) { //return ['etat' => 'OKK'];
-            $filename = $form->getData()['filename'];
-            $image = $form['image']->getData();
-
-            //$sj->debugMessage(__METHOD__ . ':' . __LINE__ .' form submitted filename = ' . $filename .' , image = ' . $image);
-
-            $dir = $this->imageDir($version);
-            $full_filename = $dir .'/' . $filename;
-
-            if (is_file($form->getData()['image'])) {
-                $tempFilename = $form->getData()['image'];
-                $this->imageRedim($tempFilename);
-
-                //$sj->debugMessage(__METHOD__ . ':' . __LINE__ .' $tempFilename = ' . $form->getData()['image'] );
-                $contents = file_get_contents($tempFilename);
-
-                // On dépose le fichier à sa place définitive en écrasant au besoin le fichier précédent
-                $file = new File($form->getData()['image']);
-                if (file_exists($full_filename) && is_file($full_filename))
-                {
-                    unlink($full_filename);
-                }
-                if (! file_exists($full_filename))
-                {
-                    $file->move($dir, $filename);
-                }
-                else
-                {
-                    $sj->debugMessage('ServiceVersion imageHandle : mauvais fichier pour la version ' . $version->getIdVersion());
-                }
-
-                return ['etat' => 'OK', 'contents' => $contents, 'filename' => $filename ];
-            }
-
-            // On renvoie une erreur
-            else
-            {
-                $sj->errorMessage('ServiceVersion:imageHandle $tempFilename = (' . $form->getData()['image'] . ") n'existe pas");
-                return ['etat' => 'KO'];
-            }
-            
-        }
-
-        // Form submitted mais Validation KO
-        elseif ($form->isSubmitted() && ! $form->isValid())
-        {
-            //$sj->debugMessage(__METHOD__ . ':' . __LINE__ .' wrong form submitted filename = ' . $filename .' , image = ' . $image);
-            if (isset($form->getData()['filename']))
-            {
-                $filename   =  $form->getData()['filename'];
-            }
-            else
-            {
-                $filename   =  'unkonwn';
-            }
-
-            if (isset($form->getData()['image']))
-            {
-                $image  =    $form->getData()['image'];
-            }
-            else
-            {
-                return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => 'Erreur indeterminée' ];
-            }
-
-            return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => $sf->formError($image, [ $this->imageConstraints() ]) ];
-
-        //$sj->debugMessage('VersionController:imageHandle form for ' . $filename . '('. $form->getData()['image'] . ') is not valide, error = ' .
-            //    (string) $form->getErrors(true,false)->current() );
-            //return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => (string) $form->getErrors(true,false)->current() ];
-            //return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => (string) $form->getErrors(true,false)->current() ];
-
-        }
-
-        // Ne devrait arriver...
-        else
-        {
-            //$sj->debugMessage('VersionController:imageHandle form not submitted');
-            return ['etat' => null ];
         }
     }
 
