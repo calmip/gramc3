@@ -355,13 +355,13 @@ class VersionController extends AbstractController
 
         $session = $version->getSession();
 
-        $img_expose_1 = $sv->imageProperties('img_expose_1', $version);
-        $img_expose_2 = $sv->imageProperties('img_expose_2', $version);
-        $img_expose_3 = $sv->imageProperties('img_expose_3', $version);
+        $img_expose_1 = $sv->imageProperties('img_expose_1', 'Figure 1', $version);
+        $img_expose_2 = $sv->imageProperties('img_expose_2', 'Figure 2', $version);
+        $img_expose_3 = $sv->imageProperties('img_expose_3', 'Figure 3', $version);
 
-        $img_justif_renou_1 = $sv->imageProperties('img_justif_renou_1', $version);
-        $img_justif_renou_2 = $sv->imageProperties('img_justif_renou_2', $version);
-        $img_justif_renou_3 = $sv->imageProperties('img_justif_renou_3', $version);
+        $img_justif_renou_1 = $sv->imageProperties('img_justif_renou_1', 'Figure 1', $version);
+        $img_justif_renou_2 = $sv->imageProperties('img_justif_renou_2', 'Figure 2', $version);
+        $img_justif_renou_3 = $sv->imageProperties('img_justif_renou_3', 'Figure 3', $version);
 
         //$toomuch = $sv->is_demande_toomuch($version->getAttrHeures(),$version->getDemHeures());
         $toomuch = false;
@@ -450,6 +450,35 @@ class VersionController extends AbstractController
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function televersementFicheAction(Request $request, Version $version): Response
+    {
+        $em = $this->em;
+        $sm = $this->sm;
+        $sj = $this->sj;
+
+        // ACL
+        if ($sm->televersement_fiche($version)['ok'] == false) {
+            $sj->throwException(__METHOD__ . ':' . __LINE__ . " impossible de téléverser la fiche de la version " . $version .
+                " parce que : " . $sm -> telechargement_fiche($version)['raison']);
+        }
+
+        return $this->render(
+            'version/televersement_fiche.html.twig',
+            [
+            'version'       =>  $version,
+            'form'          =>  $form->createView(),
+            'erreurs'       =>  $erreurs,
+            'resultat'      =>  $resultat,
+            ]
+        );
+    }
+
+    /**
+     * Téléversement de la fiche projet
+     *
+     * Route("/{id}/televersement_fiche", name="version_televersement_fiche",methods={"GET","POST"})
+     * Security("is_granted('ROLE_DEMANDEUR')")
+     */
+    public function televersementFicheAction_AJETER(Request $request, Version $version): Response
     {
         $em = $this->em;
         $sm = $this->sm;
@@ -561,7 +590,7 @@ class VersionController extends AbstractController
      * @Route("/{id}/edit", name="version_edit",methods={"GET","POST"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
-    public function editAction(Request $request, Version $version): Response
+    public function editAction_AJETER(Request $request, Version $version): Response
     {
         $deleteForm = $this->createDeleteForm($version);
         $editForm = $this->createForm('App\Form\VersionType', $version);
@@ -1359,7 +1388,7 @@ class VersionController extends AbstractController
                             'img_justif_renou_1',
                             'img_justif_renou_2',
                             'img_justif_renou_3'];
-        $filename = $filename;
+        //$filename = $filename;
         if (!in_array($filename, $valid_filenames))
         {
             $sj->throwException(__METHOD__ . ":" . __LINE__ . " Erreur interne - $filename pas un nom autorisé");

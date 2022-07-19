@@ -483,16 +483,19 @@ class ProjetSpecController extends AbstractController
                 $menu[] = $sm->televerser_rapport_annee($version,ServiceMenus::BPRIO);
             }
         }
-
-        $img_expose_1 = $sv->imageProperties('img_expose_1', $version);
-        $img_expose_2 = $sv->imageProperties('img_expose_2', $version);
-        $img_expose_3 = $sv->imageProperties('img_expose_3', $version);
+        $img_expose = [
+            $sv->imageProperties('img_expose_1', 'Figure 1', $version),
+            $sv->imageProperties('img_expose_2', 'Figure 2', $version),
+            $sv->imageProperties('img_expose_3', 'Figure 3', $version),
+        ];
         $document     = $sv->getdocument($version);
 
-        $img_justif_renou_1 = $sv->imageProperties('img_justif_renou_1', $version);
-        $img_justif_renou_2 = $sv->imageProperties('img_justif_renou_2', $version);
-        $img_justif_renou_3 = $sv->imageProperties('img_justif_renou_3', $version);
-
+        $img_justif_renou = [
+            $sv->imageProperties('img_justif_renou_1', 'Figure 1', $version),
+            $sv->imageProperties('img_justif_renou_2', 'Figure 2', $version),
+            $sv->imageProperties('img_justif_renou_3', 'Figure 3', $version)
+        ];
+        
         $toomuch = false;
         if ($session->getLibelleTypeSession()=='B' && ! $sv->isNouvelle($version)) {
             $version_prec = $version->versionPrecedente();
@@ -521,12 +524,8 @@ class ProjetSpecController extends AbstractController
                 'version'            => $version,
                 'session'            => $session,
                 'menu'               => $menu,
-                'img_expose_1'       => $img_expose_1,
-                'img_expose_2'       => $img_expose_2,
-                'img_expose_3'       => $img_expose_3,
-                'img_justif_renou_1' => $img_justif_renou_1,
-                'img_justif_renou_2' => $img_justif_renou_2,
-                'img_justif_renou_3' => $img_justif_renou_3,
+                'img_expose'         => $img_expose,
+                'img_justif_renou'   => $img_justif_renou,
                 'conso_cpu'          => $sp->getConsoRessource($projet, 'cpu', $version->getAnneeSession()),
                 'conso_gpu'          => $sp->getConsoRessource($projet, 'gpu', $version->getAnneeSession()),
                 'rapport_1'          => $rapport_1,

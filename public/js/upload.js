@@ -29,11 +29,14 @@ $(document).ready(function()
                     {
                         id_div_img = "#" + json_data['properties']['name'];
                         div_image = $(id_div_img);
+                        remover = div_image.parent();
+                        remover = remover.find("a");
                         if (div_image)
                         {
                             html = '<img class="figure" src="data:image/jpg;base64,' + json_data['properties']['contents'] + '" ';
                             html += ' alt="Figure {{i}}" >';
                             div_image.html(html);
+                            remover.show();
                         }
                     }
                 }
@@ -64,11 +67,14 @@ $(document).ready(function()
             filename = json_data.split(' ')[1];
             id_div_img = "#" + filename;
             div_image = $(id_div_img);
+            remover = div_image.parent();
+            remover = remover.find("a");
             if (div_image)
             {
                 html = '<img class="figure" src="toto.jpg">';
                 div_image.html(html);
             }
+            remover.hide();
          })
          .fail(function(xhr, status, errorThrown) { alert (errorThrown); });
     };

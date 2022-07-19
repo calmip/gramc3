@@ -411,8 +411,6 @@
 
         </details>
 
-
-
         <details class="II">
             <summary>{{icones.trait_summary}}II - Description scientifique du projet de recherche</summary>
 
@@ -421,32 +419,22 @@
 
 
             {% if not ( version.prjJustifRenouv == null ) %}
+
                 <h4>Justification du renouvellement :</h4>
                 <div class="description"><p>{{ version.prjJustifRenouv | e | nl2br }}</p>
 
                     <div class="figures">
-                        {% if not ( img_justif_renou_1 == null ) %}
-                            <div>
-                                <img class="figure" src="data:image/png;base64,{{ img_justif_renou_1.contents }}" data-width="{{ img_justif_renou_1.width }}" data-height="{{ img_justif_renou_1.height }}" alt="Figure 1" title="cliquez pour afficher la figure en taille réelle">
-                                <p>Figure 1</p>
-                            </div>
-                        {% endif %}
-
-                        {% if not( img_justif_renou_2 == null ) %}
-                            <div>
-                                <img class="figure" src="data:image/png;base64,{{ img_justif_renou_2.contents }}" alt="Figure 2" data-width="{{ img_justif_renou_2.width }}" data-height="{{ img_justif_renou_2.height }}" title="cliquez pour afficher la figure en taille réelle">
-                                <p>Figure 2</p>
-                            </div>
-                        {% endif %}
-
-                        {% if not ( img_justif_renou_3 == null) %}
-                            <div>
-                                <img class="figure" src="data:image/png;base64,{{ img_justif_renou_3.contents  }}" alt="Figure 3" data-width="{{ img_justif_renou_3.width }}" data-height="{{ img_justif_renou_3.height }}" title="cliquez pour afficher la figure en taille réelle">
-                                <p>Figure 3</p>
-                            </div>
-                        {% endif %}
+                        {% for img in img_justif_renou %}
+                            {% if img.contents is defined %}
+                                <div>
+                                    <img class="figure" src="data:image/png;base64,{{ img.contents }}" data-width="{{ img.width }}" data-height="{{ img.height }}" alt="{{ img.displayName }}" title="cliquez pour afficher la figure en taille réelle">
+                                    <p>{{ img.displayName }}</p>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
                     </div>
                 </div>
+
             {% endif %}
 
             <h4>Résumé en anglais :</h4>
@@ -457,26 +445,7 @@
             <div class="description"><p>{{ version.prjExpose | e | nl2br}}</p>
 
                 <div class="figures">
-                    {% if not ( img_expose_1 == null ) %}
-                        <div>
-                            <img class="figure" src="data:image/png;base64,{{ img_expose_1.contents }}" data-width="{{ img_expose_1.width }}" data-height="{{ img_expose_1.height }}" alt="Figure 1" title="cliquez pour afficher la figure en taille réelle">
-                            <p>Figure 1</p>
-                        </div>
-                    {% endif %}
-
-                    {% if not( img_expose_2 == null ) %}
-                        <div>
-                            <img class="figure" src="data:image/png;base64,{{ img_expose_2.contents }}" alt="Figure 2" data-width="{{ img_expose_2.width }}" data-height="{{ img_expose_2.height }}" title="cliquez pour afficher la figure en taille réelle">
-                            <p>Figure 2</p>
-                        </div>
-                    {% endif %}
-
-                    {% if not ( img_expose_3 == null) %}
-                        <div>
-                            <img class="figure" src="data:image/png;base64,{{ img_expose_3.contents  }}" alt="Figure 3" data-width="{{ img_expose_3.width }}" data-height="{{ img_expose_3.height }}" title="cliquez pour afficher la figure en taille réelle">
-                            <p>Figure 3</p>
-                        </div>
-                    {% endif %}
+                    FIGURES
                 </div>
             </div>
 

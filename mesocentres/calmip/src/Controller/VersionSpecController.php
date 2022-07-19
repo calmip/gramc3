@@ -268,13 +268,13 @@ class VersionSpecController extends AbstractController
             return $this->redirectToRoute('consulter_projet', ['id' => $version->getProjet()->getIdProjet() ]);
         }
 
-        $img_expose = [$sv->imageProperties('img_expose_1', $version),
-                       $sv->imageProperties('img_expose_2', $version),
-                       $sv->imageProperties('img_expose_3', $version)];
+        $img_expose = [$sv->imageProperties('img_expose_1', 'Figure 1', $version),
+                       $sv->imageProperties('img_expose_2', 'Figure 2', $version),
+                       $sv->imageProperties('img_expose_3', 'Figure 3', $version)];
 
-        $img_justif_renou = [$sv->imageProperties('img_justif_renou_1', $version),
-                             $sv->imageProperties('img_justif_renou_2', $version),
-                             $sv->imageProperties('img_justif_renou_3', $version)];
+        $img_justif_renou = [$sv->imageProperties('img_justif_renou_1', 'Figure 1', $version),
+                             $sv->imageProperties('img_justif_renou_2', 'Figure 2', $version),
+                             $sv->imageProperties('img_justif_renou_3', 'Figure 3', $version)];
 
         $session = $ss -> getSessionCourante();
 

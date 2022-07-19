@@ -393,9 +393,9 @@ class ProjetSpecController extends AbstractController
         }
 
         $menu[]       = $sm->gerer_publications($projet);
-        $img_expose_1 = $sv->imageProperties('img_expose_1', $version);
-        $img_expose_2 = $sv->imageProperties('img_expose_2', $version);
-        $img_expose_3 = $sv->imageProperties('img_expose_3', $version);
+        $img_expose_1 = $sv->imageProperties('img_expose_1', 'Figure 1', $version);
+        $img_expose_2 = $sv->imageProperties('img_expose_2', 'Figure 2', $version);
+        $img_expose_3 = $sv->imageProperties('img_expose_3', 'Figure 3', $version);
         $document     = $sv->getdocument($version);
 
         /*
@@ -405,9 +405,9 @@ class ProjetSpecController extends AbstractController
             $sj->debugMessage(__METHOD__.':'.__LINE__ . " img_expose1 non null");
         */
 
-        $img_justif_renou_1 = $sv->imageProperties('img_justif_renou_1', $version);
-        $img_justif_renou_2 = $sv->imageProperties('img_justif_renou_2', $version);
-        $img_justif_renou_3 = $sv->imageProperties('img_justif_renou_3', $version);
+        $img_justif_renou_1 = $sv->imageProperties('img_justif_renou_1', 'Figure 1', $version);
+        $img_justif_renou_2 = $sv->imageProperties('img_justif_renou_2', 'Figure 2', $version);
+        $img_justif_renou_3 = $sv->imageProperties('img_justif_renou_3', 'Figure 3', $version);
 
         $toomuch = false;
         if ($session->getLibelleTypeSession()=='B' && ! $sv->isNouvelle($version)) {

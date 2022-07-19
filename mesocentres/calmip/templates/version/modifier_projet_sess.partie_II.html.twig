@@ -63,32 +63,9 @@
     </div>
 
     <div class="figures">
-    {% set i = 0 %}
-    {% for img in img_expose %}
-        {% set i = i + 1 %}
-        {% set nom = 'img_expose_' ~ i %}
-        <div>
-            <div id = "{{nom}}">
-                {% if not ( img == null ) %}
-                    <img class="figure" src="data:image/jpg;base64,{{ img.contents }}" data-width="{{ img.width }}" data-height="{{ img.height }}" alt="Figure {{i}}" title="cliquez pour afficher la figure en taille réelle">
-                {% else %}
-                    <img class="figure" src="toto.jpg" >
-                {% endif %}
-            </div>
-            <p>Figure {{i}} <a class="fileremover" href="machin" data-href="{{path('version_supprimer_fichier', { 'id' : version.idVersion, 'filename' : nom }) }}">SUPPR</a></p>
-        </div>
-    {% endfor %}
+    FIGURES
     </div>
-    {% for i in 1..3 %}
-    {% set nom = 'img_expose_' ~ i %}
-    <div class="uploadstatus"></div>
-    <div class="fileuploader">
-        <a href="{{ path('televerser', { 'id' : version.idVersion, 'filename' : nom } ) }}" target="_blank" >
-            <strong>Figure {{1}}</strong>
-        </a>
-    </div>
-    {% endfor %}
-
+    
     <hr class="retour">
         
 

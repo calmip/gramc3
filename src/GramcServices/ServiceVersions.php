@@ -121,30 +121,36 @@ class ServiceVersions
      * informations à propos d'une image liée à une version
      *
      * params: $filename Nom du fichier image
+     *         $displayName Nom pouvant être affiché (ex: figure 1)
      *         $version  Version associée
      *
      * return: Plein d'informations
      *
      ***************************/
-    public function imageProperties($filename, Version $version): array
+    public function imageProperties(string $filename, string $displayName, Version $version): array
     {
         $full_filename = $this->imagePath($filename, $version);
         if (file_exists($full_filename) && is_file($full_filename))
         {
             $imageinfo  =   [];
-            $my_image_info = getimagesize($full_filename, $imageinfo);
+            $imgSize = getimagesize($full_filename, $imageinfo);
+            
             return [
                 'contents' => base64_encode(file_get_contents($full_filename)),
-                'width'    => $my_image_info[0],
-                'height'   => $my_image_info[1],
-                'balise'   => $my_image_info[2],
-                'mime'     => $my_image_info['mime'],
-                'name'     => $filename
+                'width'    => $imgSize[0],
+                'height'   => $imgSize[1],
+                'balise'   => $imgSize[2],
+                'mime'     => $imgSize['mime'],
+                'name'     => $filename,
+                'displayName' => $displayName
             ];
         }
         else
         {
-            return [];
+            return [
+                'name'     => $filename,
+                'displayName' => $displayName
+            ];
         }
     }
 
@@ -273,7 +279,7 @@ class ServiceVersions
             // Si le type est 'jpg', c'est une image: on la renvoie !
             if ($type == 'jpg')
             {
-                $rvl['properties'] = $this->imageProperties($filename, $version);
+                $rvl['properties'] = $this->imageProperties($filename, 'image au format jpeg', $version);
             }
             return json_encode($rvl);
         }
