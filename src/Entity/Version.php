@@ -3519,7 +3519,7 @@ class Version implements Demande
     /*
      * TODO - Serait mieux dans ServiceVersions
      *        Session 22A -> Renvoie la dernière année où il y a eu une version
-     *                       (normalement 2021)
+     *                       (normalement 2021, mais peut-être une année antérieure)
      *
      *
      *************************************/
@@ -3542,7 +3542,6 @@ class Version implements Demande
             return '0';
         }
     }
-
 
     ///////////////////////////////////////////////
 

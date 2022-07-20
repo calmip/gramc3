@@ -60,6 +60,7 @@ class ServiceVersions
     public function __construct(
                                 private $attrib_seuil_a,
                                 private $prj_prefix,
+                                private $rapport_directory,
                                 private $fig_directory,
                                 private $signature_directory,
                                 private $coll_login,
@@ -173,11 +174,12 @@ class ServiceVersions
     }
 
     /**************************************************
-     *
      * Crée un formulaire qui permettra de téléverser un fichier pdf
      * Gère le mécanisme de soumission et validation
      * Fonctionne aussi bien en ajax avec jquery-upload-file-master
      * que de manière "normale"
+     *
+     * Appelé par VersionController::televerserAction
      *
      * params = request
      *          dirname : répertoire de destination
@@ -313,7 +315,7 @@ class ServiceVersions
     }
 
     /*************************
-     * Calcule le nom de fichier de l'image
+     * Calcule le chemin de fichier de l'image
      *
      * param = $filename Nom du fichier, sans le répertoire ni l'extension
      *         $version  Version associée
@@ -323,13 +325,16 @@ class ServiceVersions
      *          TODO - Pas clair du tout !
      *
      ************************************/
-    public function imagePath($filename, Version $version): string
+    public function imagePath(string $filename, Version $version): string
     {
         $full_filename = $this->imageDir($version) .'/'.  $filename;
 
-        if (file_exists($full_filename . ".png") && is_file($full_filename . ".png")) {
+        if (file_exists($full_filename . ".png") && is_file($full_filename . ".png"))
+        {
             $full_filename  =  $full_filename. ".png";
-        } elseif (file_exists($full_filename . ".jpeg") && is_file($full_filename . ".jpeg")) {
+        }
+        elseif (file_exists($full_filename . ".jpeg") && is_file($full_filename . ".jpeg"))
+        {
             $full_filename  =  $full_filename. ".jpeg";
         }
         return $full_filename;
@@ -371,6 +376,31 @@ class ServiceVersions
             }
             mkdir($dir);
         }
+        return $dir;
+    }
+
+     /*******************************
+     * Crée si besoin le répertoire pour les rapports d'activité
+     *
+     * param = $version  La version associée
+     *
+     * return = Le chemin complet vers le répertoire
+     *
+     *******************************************/
+    public function rapportDir(Version $version): string
+    {
+        $annee = $version->anneeRapport();
+        $dir = $this->rapport_directory . '/' . $annee;
+        if (! is_dir($dir))
+        {
+            if (file_exists($dir) && is_file($dir))
+            {
+                unlink($dir);
+            }
+            mkdir($dir);
+            $this->sj->warningMessage("rapport_directory " . $dir . " créé !");
+        }
+        
         return $dir;
     }
 

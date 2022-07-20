@@ -318,23 +318,6 @@ class VersionController extends AbstractController
     //////////////////////////////////////////////////////////////////////////
 
     /**
-     * Finds and displays a version entity.
-     * TODO - PAS UTILISE - A JETER
-     *
-     * @Route("/{id}/show", name="version_show",methods={"GET"})
-     * @Security("is_granted('ROLE_ADMIN')")
-     */
-    public function showAction(Version $version): Response
-    {
-        $deleteForm = $this->createDeleteForm($version);
-
-        return $this->render('version/show.html.twig', array(
-            'version' => $version,
-            'delete_form' => $deleteForm->createView(),
-        ));
-    }
-
-    /**
      * Convertit et affiche la version au format pdf
      *
      * @Route("/{id}/pdf", name="version_pdf",methods={"GET"})
@@ -461,35 +444,6 @@ class VersionController extends AbstractController
                 " parce que : " . $sm -> telechargement_fiche($version)['raison']);
         }
 
-        return $this->render(
-            'version/televersement_fiche.html.twig',
-            [
-            'version'       =>  $version,
-            'form'          =>  $form->createView(),
-            'erreurs'       =>  $erreurs,
-            'resultat'      =>  $resultat,
-            ]
-        );
-    }
-
-    /**
-     * Téléversement de la fiche projet
-     *
-     * Route("/{id}/televersement_fiche", name="version_televersement_fiche",methods={"GET","POST"})
-     * Security("is_granted('ROLE_DEMANDEUR')")
-     */
-    public function televersementFicheAction_AJETER(Request $request, Version $version): Response
-    {
-        $em = $this->em;
-        $sm = $this->sm;
-        $sj = $this->sj;
-
-        // ACL
-        if ($sm->televersement_fiche($version)['ok'] == false) {
-            $sj->throwException(__METHOD__ . ':' . __LINE__ . " impossible de téléverser la fiche de la version " . $version .
-                " parce que : " . $sm -> telechargement_fiche($version)['raison']);
-        }
-
         $format_fichier = new \Symfony\Component\Validator\Constraints\File(
             [
                 'mimeTypes'=> [ 'application/pdf' ],
@@ -581,49 +535,6 @@ class VersionController extends AbstractController
             'resultat'      =>  $resultat,
             ]
         );
-    }
-
-    /**
-     * Displays a form to edit an existing version entity.
-     * TODO - PAS UTILISE - A JETER
-
-     * @Route("/{id}/edit", name="version_edit",methods={"GET","POST"})
-     * @Security("is_granted('ROLE_ADMIN')")
-     */
-    public function editAction_AJETER(Request $request, Version $version): Response
-    {
-        $deleteForm = $this->createDeleteForm($version);
-        $editForm = $this->createForm('App\Form\VersionType', $version);
-        $editForm->handleRequest($request);
-
-        if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->em->flush();
-
-            return $this->redirectToRoute('version_edit', array('id' => $version->getId()));
-        }
-
-        return $this->render('version/edit.html.twig', array(
-            'version' => $version,
-            'edit_form' => $editForm->createView(),
-            'delete_form' => $deleteForm->createView(),
-        ));
-    }
-
-    /**
-     * Creates a form to delete a version entity.
-     * TODO - UTILISE ? Sinon VIRER
-     * 
-     * @param Version $version The version entity
-     * @Security("is_granted('ROLE_ADMIN')")
-     * @return \Symfony\Component\Form\Form The form
-     */
-    private function createDeleteForm(Version $version)
-    {
-        return $this->createFormBuilder()
-            ->setAction($this->generateUrl('version_delete', array('id' => $version->getIdVersion())))
-            ->setMethod('DELETE')
-            ->getForm()
-        ;
     }
 
     /**
@@ -1258,110 +1169,9 @@ class VersionController extends AbstractController
     ///////////////////////////////////////////////////////////////
 
     /**
-     * Téléverser le rapport d'actitivé
-     *
-     * @Route("/{id}/rapport_annee/{annee}", defaults={"annee"=0}, name="televerser_rapport_annee",methods={"GET","POST"})
-     * @Security("is_granted('ROLE_DEMANDEUR')")
-     */
-    public function televerserRapportAction(Version $version, Request $request, $annee): Response
-    {
-        $em = $this->em;
-        $sm = $this->sm;
-        $sf = $this->sf;
-        $sj = $this->sj;
-
-        // ACL
-        if ($sm->televerser_rapport_annee($version)['ok'] == false) {
-            $sj->throwException(__METHOD__ . ":" . __LINE__ .
-            " impossible de téléverser le rapport parce que " . $sm->televerser_rapport_annee($version)['raison']);
-        }
-        //$sj->debugMessage('VersionController:televerserRapportActionAnnee');
-
-        if ($annee == 0) {
-            $annee  =   $version->getAnneeSession();
-        }
-
-        // Calcul du nom de fichier
-        $dir = $this->getParameter('rapport_directory') . '/' . $annee;
-        if (! file_exists($dir)) {
-            mkdir($dir);
-        } elseif (! is_dir($dir)) {
-            unlink($dir);
-            mkdir($dir);
-        }
-        $filename = $annee . $version->getProjet()->getIdProjet() . ".pdf";
-        $path     = $dir . '/' . $filename;
-        
-        $rtn = $sf->televerserFichier($request, $dir, $filename);
-
-        // Fichier téléversé avec succès -> On écrit dans la base de données
-        //                                  On confirme que le rapport est bien là
-        if ($rtn == 'OK') {
-            $rapportActivite = $em->getRepository(RapportActivite::class)->findOneBy(
-                [
-        'projet' => $version->getProjet(),
-        'annee' => $annee,
-        ]
-            );
-            if ($rapportActivite == null) {
-                $rapportActivite    = new RapportActivite($version->getProjet(), $annee);
-            }
-
-            $rapportActivite->setTaille(filesize($path));
-
-            // TODO - ces deux champs ne servent à RIEN Il faut les supprimer
-            $rapportActivite->setNomFichier("");
-            $rapportActivite->setFiledata("");
-
-            $em->persist($rapportActivite);
-            $em->flush();
-
-            if ($request->isXmlHttpRequest()) {
-                return new Response('OK');
-            } else {
-                return $this->render(
-                    'version/confirmation_rapport.html.twig',
-                    [
-            'projet'    =>  $version->getProjet()->getIdProjet(),
-            'version'   =>  $version->getIdVersion(),
-            ]
-                );
-            }
-        }
-
-        // L'objet form est retourné = il faut juste l'afficher
-        elseif (is_object($rtn)) {
-            return $this->render(
-                'version/televerser_rapport.html.twig',
-                [
-        'projet'    =>  $version->getProjet()->getIdProjet(),
-        'version'   =>  $version->getIdVersion(),
-        'annee'     =>  $version->getAnneeSession(),
-        'form'      =>  $rtn->createView(),
-        ]
-            );
-        }
-
-        // Un autre string = Message d'erreur
-        else {
-            if ($request->isXmlHttpRequest()) {
-                return new Response($rtn);
-            } else {
-                return $this->render(
-                    'version/erreur_rapport.html.twig',
-                    [
-            'projet'    =>  $version->getProjet()->getIdProjet(),
-            'version'   =>  $version->getIdVersion(),
-            'annee'     =>  $version->getAnneeSession(),
-            'erreur'    =>  $rtn,
-            ]
-                );
-            }
-        }
-    }
-
-    /**
-     * Téléverser un fichier lié à une version
+     * Téléverser un fichier lié à une version (images, document attaché, rapport d'activité)
+     * TODO - LES FICHES PROJET NE SONT PAS ENCORE CONCERNEES
+     *        CODE UN CHOUYA MERDIQUE - A AMELIORER !!!
      *
      * @Route("/{id}/fichier/{filename}", name="televerser",methods={"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
@@ -1382,6 +1192,7 @@ class VersionController extends AbstractController
 
         // SEULEMENT CERTAINS NOMS !!!!
         $valid_filenames = ['document.pdf',
+                            'rapport.pdf',
                             'img_expose_1',
                             'img_expose_2',
                             'img_expose_3',
@@ -1407,6 +1218,9 @@ class VersionController extends AbstractController
             case "img_justif_renou_3":
                 $dir = $sv->imageDir($version);
                 break;
+            case "rapport.pdf":
+                $dir = $sv->rapportDir($version);
+                break;
             default:
                 $sj->throwException(__METHOD__ . ":" . __LINE__ . " Erreur interne - calcul de dir pas possible");
                 break;
@@ -1428,40 +1242,15 @@ class VersionController extends AbstractController
             unlink($dir);
             mkdir($dir);
         }
+
+        // On CHANGE $filename pour certains téléversements (rapport d'activité, fiche projet)
+        // TODO: Pas bien joli tout ça...
+        if ($filename == 'rapport.pdf')
+        {
+            $d = basename($dir); // /a/b/c/d/2022 -> 2022
+            $filename = $d . $version->getProjet()->getIdProjet() . ".pdf";
+        }
         $rtn = $sv->televerserFichier($request, $version, $dir, $filename, $type);
-        return new Response($rtn);
-    }
-
-    /**
-     * Téléverser un fichier attaché à une version
-     *
-     * @Route("/{id}/fichier/{filename}", name="televerser_fichier_attache",methods={"GET","POST"})
-     * @Security("is_granted('ROLE_DEMANDEUR')")
-     */
-    public function televerserFichierAction_AJETER(version $version, string $filename, Request $request): Response
-    {
-        $sv = $this->sv;
-        $sm = $this->sm;
-        $sf = $this->sf;
-        $sj = $this->sj;
-
-        // ACL - Mêmes ACL que modification de version !
-        if ($sm->modifier_version($version)['ok'] == false) {
-            $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de modifier la version " . $version->getIdVersion().
-        " parce que : " . $sm->modifier_version($version)['raison']);
-        }
-
-        // SEULEMENT CERTAINS NOMS !!!!
-        $dir      = $sv->imageDir($version);
-        $filename = $filename;
-
-        if (! file_exists($dir)) {
-            mkdir($dir);
-        } elseif (! is_dir($dir)) {
-            unlink($dir);
-            mkdir($dir);
-        }
-        $rtn = $sf->televerserFichier($request, $dir, $filename);
         return new Response($rtn);
     }
 

@@ -144,18 +144,17 @@
     {% if rapport_dactivite == true %}
         <div id="rapport_activite">
             <h4>Rapport d'activité de l'année précédente :</h4>
+
             {% if version.typeSession == 'B'  %}
                 <div class="information ok">Vous n'avez pas besoin de téléverser de rapport d'activité lors d'une session B.
                     <br/>Nous vous le demanderons à la fin de l'année</div>
+
             {% elseif version.anneeRapport == 0 %}
                 <div class="information ok">Vous n'avez pas besoin de téléverser de rapport d'activité maintenant. Nous vous le demanderons à la fin de l'année</div>
+
             {% else %}
-                <div id="uploadstatus"></div>
-                <div id="fileuploader">
-                    <a href="{{ path('televerser_rapport_annee', { 'id' : version.idVersion, 'annee': version.anneerapport } ) }}" target="_blank">
-                        <strong>Téléversez le rapport d'activité</strong>
-                    </a>
-                </div>
+                {{ gramcdocmacros.upload_document(version, 'rapport.pdf') }}
+
             {% endif %}
         </div>
     {% endif %}

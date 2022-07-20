@@ -99,6 +99,7 @@ services:
     App\GramcServices\ServiceVersions:
         arguments: ['%attrib_seuil_a%',
                     "%prj_prefix%",
+                    "%rapport_directory%",
                     "%fig_directory%",
                     "%signature_directory%",
                     "%coll_login%",
