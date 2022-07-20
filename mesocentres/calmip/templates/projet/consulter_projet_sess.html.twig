@@ -1,5 +1,7 @@
 {% extends 'default/base.html.twig' %}
 {% import "default/macros.html.twig" as gramcmacros %}
+{% import "default/macros_docattaches.html.twig" as gramcdocmacros %}
+
 
 {% import "default/icone.html.twig" as icones %}
 
@@ -421,18 +423,9 @@
             {% if not ( version.prjJustifRenouv == null ) %}
 
                 <h4>Justification du renouvellement :</h4>
-                <div class="description"><p>{{ version.prjJustifRenouv | e | nl2br }}</p>
-
-                    <div class="figures">
-                        {% for img in img_justif_renou %}
-                            {% if img.contents is defined %}
-                                <div>
-                                    <img class="figure" src="data:image/png;base64,{{ img.contents }}" data-width="{{ img.width }}" data-height="{{ img.height }}" alt="{{ img.displayName }}" title="cliquez pour afficher la figure en taille réelle">
-                                    <p>{{ img.displayName }}</p>
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
+                <div class="description">
+                    <p>{{ version.prjJustifRenouv | e | nl2br }}</p>
+                    {{ gramcdocmacros.display_images(img_justif_renou) }}
                 </div>
 
             {% endif %}
@@ -443,10 +436,7 @@
 
             <h4>Exposé Scientifique :</h4>
             <div class="description"><p>{{ version.prjExpose | e | nl2br}}</p>
-
-                <div class="figures">
-                    FIGURES
-                </div>
+                {{ gramcdocmacros.display_images(img_expose) }}
             </div>
 
             <h4>Algorithmes utilisés :</h4>

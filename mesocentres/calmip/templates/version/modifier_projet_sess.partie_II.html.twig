@@ -1,4 +1,5 @@
 {% import "default/macros.html.twig" as gramcmacros %}
+{% import "default/macros_docattaches.html.twig" as gramcdocmacros %}
 
 <div id="tab2" class="onglet"><br><br>
     <h2>Description scientifique du projet de recherche</h2>
@@ -62,10 +63,8 @@
             { 'attr': { 'class': 'compteur', 'rows' : 12, 'cols' : 70 } }) }}
     </div>
 
-    <div class="figures">
-    FIGURES
-    </div>
-    
+    {{ gramcdocmacros.upload_images(version, img_expose) }}
+
     <hr class="retour">
         
 
