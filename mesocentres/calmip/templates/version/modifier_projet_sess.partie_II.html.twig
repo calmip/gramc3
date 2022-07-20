@@ -20,12 +20,7 @@
             </div>
             {% endif %}
 
-            <div class="uploadstatus"></div>
-            <div class="fileuploader">
-                <a href="{{ path('televerser', { 'id' : version.idVersion, 'filename' : 'document.pdf' } ) }}" target="_blank" >
-                    <strong>Téléversez le fichier</strong>
-                </a>
-            </div>
+            {{ gramcdocmacros.upload_document(version, 'document.pdf') }}
         </div>
     {% endif %}
 

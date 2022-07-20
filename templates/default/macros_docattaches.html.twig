@@ -1,4 +1,4 @@
-{# Téléversement de documents joints à partir d'un tableau de tableaux
+{# Téléversement d'images à partir d'un tableau de tableaux
    cf. VersionSpecController::modifierType1
        modifier_projet_sess.partie_I.html.twig
        ServiceVersions::imageProperties
@@ -31,7 +31,7 @@
 
 {% endmacro %}
 
-{# Affichage de documents joints (images) à partir d'un tableau de tableaux
+{# Affichage d'images à partir d'un tableau de tableaux
    cf. ProjetSpecController::consulterAction
        consulter_projet_sess.html.twig
        ServiceVersions::imageProperties
@@ -47,5 +47,15 @@
                 </div>
             {% endif %}
         {% endfor %}
+    </div>
+{% endmacro %}
+
+{# Téléversement d'un document joint #}
+{% macro upload_document(version, doc) %}
+    <div class="uploadstatus"></div>
+    <div class="fileuploader">
+        <a href="{{ path('televerser', { 'id' : version.idVersion, 'filename' : doc } ) }}" target="_blank" >
+            <strong>Téléversez le fichier</strong>
+        </a>
     </div>
 {% endmacro %}
