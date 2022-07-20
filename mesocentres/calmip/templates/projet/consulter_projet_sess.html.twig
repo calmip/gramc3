@@ -60,10 +60,12 @@
             </small>
         </h2>
 
-        <section class="historique">
-            <h3>Version :
-            </h3> {{ form_start(version_form) }} {{ form_widget(version_form.version) }}{{ form_widget(version_form.submit) }} {{ form_end(version_form) }}
-        </section>
+        {% if version_form is defined %}
+            <section class="historique">
+                <h3>Version :
+                </h3> {{ form_start(version_form) }} {{ form_widget(version_form.version) }}{{ form_widget(version_form.submit) }} {{ form_end(version_form) }}
+            </section>
+        {% endif %}
 
         <div class="menu">
             {{ gramcmacros.menu(menu) }}
@@ -116,21 +118,23 @@
                 </a>
             {% endif %}
         {% endif %}
-        {% if noconso == 0 %}
-            <a class="lien_supplementaire conso" title="Visualiser la consommation {{version.getAnneeSession}}" data-href="{{ absolute_url(path('projet_conso', { 'id': version.projet.idProjet, 'loginname': loginname, 'annee' : version.getAnneeSession })) }}"/> {{icones.consommation}}
-                <p>Visualiser ma consommation</p>
-            </a>
-            {# Pour les graphiques de conso #}
-            <div id="dialog-compta"></div>
-        {% endif %}
+        {% if not pdf is defined %}
+            {% if noconso == false %}
+                <a class="lien_supplementaire conso" title="Visualiser la consommation {{version.getAnneeSession}}" data-href="{{ absolute_url(path('projet_conso', { 'id': version.projet.idProjet, 'loginname': loginname, 'annee' : version.getAnneeSession })) }}"/> {{icones.consommation}}
+                    <p>Visualiser ma consommation</p>
+                </a>
+                {# Pour les graphiques de conso #}
+                <div id="dialog-compta"></div>
+            {% endif %}
 
             {# Pour les figures #}
             <div id="dialog"></div>
-
-            {# Pour deboguer les fonctions de generation de graphes de conso1
-                                                        <img src="data:image/png;base64, {{ conso1 }}" />
-                                                        <img src="data:image/png;base64, {{ conso2 }}" />
-                                                    #}
+        {% endif %}
+        
+        {# Pour deboguer les fonctions de generation de graphes de conso1
+            <img src="data:image/png;base64, {{ conso1 }}" />
+            <img src="data:image/png;base64, {{ conso2 }}" />
+        #}
 
 
         {% if noconso==false %}
@@ -146,446 +150,434 @@
         {% endif %}
     </section>
 
-        
+    <details class="I">
+        <summary>{{icones.trait_summary}}I - Présentation générale</summary>
+
+        <div style="max-height: 70vh;overflow-y: scroll;">
 
 
-        <details class="I">
-            <summary>{{icones.trait_summary}}I - Présentation générale</summary>
-    
-    
-<div style="max-height: 70vh;overflow-y: scroll;">
+        {% if conso_gpu[0] > 0 %}
+            <div class="information ok">
+                <p>Les heures gpu sont affichées en heures
+                    <strong>normalisées</strong>
+                </p>
+            </div>
+        {% endif %}
+
+        {% if warn_type==1 and session.etatsession != 2 %}
+            <div class="information attention">
+                <strong>ATTENTION</strong>
+                - Vous ne pouvez demander plus de {{prj_seuil_sess}}
+                heures actuellement. 
+                                                                                                                                                                                                                        Vous pourrez demander à nouveau des heures (sans limitation) lors de la prochaine session d'attribution.
+            </div>
+        {% endif %}
+
+        <table class="table_vertical">
+            <tbody>
+                <tr>
+                    <th>Titre</th>
+                    <td>{{ version.prjTitre }}</td>
+                </tr>
+
+                <tr>
+                    <th>Thématique</th>
+                    <td>{{ version.prjThematique }}</td>
+                </tr>
+
+                <tr>
+                    <th>Sous-thématique</th>
+                    <td>{{ version.prjSousThematique }}</td>
+                </tr>
+
+                <tr>
+                    {% if norattachement == false %}
+                    <th>Rattachement du projet</th>
+                    <td>{{ version.prjRattachement }}</td=>
+                    {% endif %}
+                </tr>
+
+                {% set versionPrec = version.versionPrecedente1 %}
+                {% if versionPrec != null %}
+                    {% if versionPrec.anneeSession == version.anneeSession %}
+                        <th>Heures demandées session {{ versionPrec.session }}
+                            <span class="petit">Y compris les rallonges</span>
+                        </th>
+                        <td>{{ (versionPrec.getDemHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
+                    {% endif %}
+                {% endif %}
+
+                <tr>
+                    <th>Heures demandées session {{ session }}<br>
+                        <span class="petit">Y compris les rallonges</span>
+                    </th>
+                    <td>{{ (version.getDemHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}
+                    {% if toomuch %}
+                        <img src="{{ absolute_url(asset('icones/attention16.png')) }}" alt="Demande trop forte, cf. règles d'attribution" title="Demande trop forte, cf. règles d'attribution" />
+                    {% endif %}
+                </tr>
+
+                {% set versionPrec = version.versionPrecedente1 %}
+                {% if versionPrec != null %}
+                    {% if versionPrec.anneeSession == version.anneeSession %}
+                    <tr>
+                        <th>Heures attribuées session {{ versionPrec.session }}<br>
+                            <span class="petit">Y compris les rallonges et les pénalités éventuelles</span>
+                        </th>
+                        <td>{{ (versionPrec.getAttrHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
+                    </tr>
+                    {% endif %}
+                {% endif %}
+
+                <tr>
+                    <th >Nombre d'heures attribuées session {{ session }}<br>
+                    <span class="petit">Y compris les rallonges et les pénalités éventuelles</span>
+                    </th>
+                    <td>{{ (version.attrHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}
+                    {% if version.attrHeuresEte != 0 %} <span class="attention">(dont {{ version.attrHeuresEte |number_format(0, ',', ' ')|replace({' ':'&nbsp;'}) |raw }} heures à utiliser entre le 1er Juillet et le 31 Août)</span> {% endif %}
+                    </td>
+                </tr>
+                {% if noconso == 0 %}
+                    <tr>
+                        <th>Quota machine d'heures allouées pour {{ session.getAnneeSession() + 2000 }}</th>
+                        <td>{{quota|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw}}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Nombre d'heures consommées<br>
+                            <span class="petit">depuis le début de {{ session.getAnneeSession() + 2000 }}</span>
+                        </th>
+                        {# TODOPOLITIQUE #}
+                        <td>{# {{ version.conso }}
+                            {% if(version.getQuota > 0) %}
+                                ({{ (version.consocalcul * 100 / version.quota) |number_format(1)}} %)
+                            {% endif %}
+                            <br /> #}
+                            {{ conso|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}
+                            {% if(quota!=0) %} 
+                                ({{consop|number_format(1)}} %) 
+                            {% endif %}
+                            {% if conso_gpu[0] != 0 %}
+                                - cpu={{conso_cpu[0]|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw}} gpu={{conso_gpu[0]|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw}} ({{(100*conso_cpu[0]/conso)|number_format(1)}}% {{(100*conso_gpu[0]/conso)|number_format(1)}}%)
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
 
 
-            {% if conso_gpu[0] > 0 %}
-                <div class="information ok">
-                    <p>Les heures gpu sont affichées en heures
-                        <strong>normalisées</strong>
-                    </p>
-                </div>
-            {% endif %}
+        <p class="info_supplementaire">Les heures qui vous seront attribuées dans le cadre de ce projet sont utilisables<br/>
+            <strong>jusqu'au 31 Décembre 20{{session.anneesession}}</strong>
+        </p>
 
-            {% if warn_type==1 and session.etatsession != 2 %}
-                <div class="information attention">
-                    <strong>ATTENTION</strong>
-                    - Vous ne pouvez demander plus de {{prj_seuil_sess}}
-                    heures actuellement. 
-                                                                                                                                                                                                                            Vous pourrez demander à nouveau des heures (sans limitation) lors de la prochaine session d'attribution.
-                </div>
-            {% endif %}
+        <h4>Laboratoire et responsable du projet :</h4>
 
+        <table>
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Mail</th>
+                    <th>Statut</th>
+                    <th>Laboratoire *</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td>{{version.getResponsable }}</td>
+
+                    <td>{% if ( not version.getResponsable == null ) %} 
+                        {{version.getResponsable.Mail }}
+                    {% endif %}</td>
+
+                    <td>{% if ( not version.getResponsable == null ) %}
+                        {{version.getResponsable.Statut }}
+                    {% endif %}</td>
+
+                    <td>{{version.getPrjLLabo }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p class="info_supplementaire">* Le laboratoire associé au projet est le laboratoire du responsable</p>
+
+        <h4>Personnes participant au projet :</h4>
+        <table>
+            <thead>
+                <tr>
+                    {% if coll_login %}
+                        <th>Login</th>
+                        {% if version.etat==5 or version.etat == 4 %}
+                            <th>User</th>
+                        {% endif %}
+                    {% endif %}
+
+                    {% if nodata==false %}
+                        <th title="Accès à la plateforme Callisto">Données</th>
+                    {% endif %}
+
+                    <th>Prénom</th>
+                    <th>Nom</th>
+                    <th>Mail</th>
+                    <th>Statut</th>
+                    <th>Laboratoire</th>
+                    <th>Établissement</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for user in version.CollaborateurVersion %}
+                    {% if not user.deleted %}
+                        <tr>
+                            {% if coll_login %}
+                                <td>
+                                    {% if( user.login == true) %}Oui{% else %}Non
+                                    {% endif %}
+                                </td>
+
+                                {% if version.etat==5 or version.etat == 4 %}
+                                    <td>
+                                        {% if (user.login == true) %}
+                                            {% if user.loginname==null %}
+                                                <img src="{{ asset('icones/attention16.png') }}" alt="Compte non encore créé" title="compte non encore créé"/>
+                                            {% else %}
+                                                <tt>{{ user.loginname }}</tt>
+                                            {% endif %}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                {% endif %}
+                            {% endif %}
+
+                            {% if nodata==false %}
+                                <td>
+                                    {% if( user.clogin == true) %}Oui{% else %}Non
+                                    {% endif %}
+                                </td>
+                            {% endif %}
+
+                            <td>{{ user.Collaborateur.prenom }}</td>
+
+                            <td>{{ user.Collaborateur.nom }}</td>
+
+                            <td>{{ user.Collaborateur.mail }}</td>
+
+                            <td>
+                                {% if( not ( user.Collaborateur.statut == null ) ) %} {{ user.Collaborateur.statut }}
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if( not ( user.Collaborateur.labo == null ) ) %} {{ user.Collaborateur.labo.getAcroLabo }}
+                                {% endif %}
+                            </td>
+                            
+                            <td>{{ user.Collaborateur.etab }}</td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if version.prjFinancement != null %}
+        <h4>Financement :</h4>
+        <p class="financement">{{ version.prjFinancement }}</p>
+        {% endif %}
+
+        <h4>Utilisation des moyens de calcul de GENCI :</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Centre</th>
+                    <th>Machine</th>
+                    <th>Heures accordées</th>
+                    <th>N° de projet</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td>{{ version.prjGenciCentre }}</td>
+
+                    <td>{{ version.prjGenciMachines }}</td>
+
+                    <td>{{ version.prjGenciHeures }}</td>
+
+                    <td>{{ version.prjGenciDari }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    </details>
+
+    <details class="II">
+    <summary>{{icones.trait_summary}}II - Description scientifique du projet de recherche</summary>
+
+    <div style="max-height: 70vh;overflow-y: scroll;">
+
+        {% if not ( version.prjJustifRenouv == null ) %}
+
+            <h4>Justification du renouvellement :</h4>
+            <div class="description">
+                <p>{{ version.prjJustifRenouv | e | nl2br }}</p>
+                {{ gramcdocmacros.display_images(img_justif_renou) }}
+            </div>
+
+        {% endif %}
+
+        <h4>Résumé en anglais :</h4>
+        <p class="description">{{ version.prjResume | e | nl2br }}</p>
+
+
+        <h4>Exposé Scientifique :</h4>
+        <div class="description"><p>{{ version.prjExpose | e | nl2br}}</p>
+            {{ gramcdocmacros.display_images(img_expose) }}
+        </div>
+
+        <h4>Algorithmes utilisés :</h4>
+
+        <p class="description">{{ version.prjAlgorithme }}</p>
+        </br>
+
+    </div>
+
+    </details>
+
+    <details class="III">
+        <summary>{{icones.trait_summary}}III - Description technique du projet</summary>
+
+
+    <div style="max-height: 70vh;overflow-y: scroll;">
+
+
+        <h4>Nature du calcul :</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Conception de méthodes de calcul parallèle</th>
+                    <th>Développement d'un code parallèle</th>
+                    <th>Parallélisation d'un code existant</th>
+                    <th>Utilisation d'un code parallèle</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        {% if( version.prjConception == true) %}
+                            {{icones.valide}}
+                        {% else %}
+                            Non
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if( version.prjDeveloppement == true) %}
+                            {{icones.valide}}
+                        {% else %}
+                            Non
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if( version.prjParallelisation == true) %}
+                            {{icones.valide}}
+                        {% else %}
+                            Non
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if( version.prjUtilisation == true) %}
+                            {{icones.valide}}
+                        {% else %}
+                            Non
+                        {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+                
+
+        <h4>Description du code de calcul :</h4>
+        <div class="tableaux">
             <table class="table_vertical">
                 <tbody>
                     <tr>
-                        <th>Titre</th>
-                        <td>{{ version.prjTitre }}</td>
+                        <th>Nom du code</th>
+                        <td>{{ version.codeNom }}</td>
                     </tr>
-
                     <tr>
-                        <th>Thématique</th>
-                        <td>{{ version.prjThematique }}</td>
-                    </tr>
-
-                    <tr>
-                        <th>Sous-thématique</th>
-                        <td>{{ version.prjSousThematique }}</td>
-                    </tr>
-
-                    <tr>
-                        {% if norattachement == false %}
-                        <th>Rattachement du projet</th>
-                        <td>{{ version.prjRattachement }}</td=>
-                        {% endif %}
-                    </tr>
-
-                    {% set versionPrec = version.versionPrecedente1 %}
-                    {% if versionPrec != null %}
-                        {% if versionPrec.anneeSession == version.anneeSession %}
-                            <th>Heures demandées session {{ versionPrec.session }}
-                                <span class="petit">Y compris les rallonges</span>
-                            </th>
-                            <td>{{ (versionPrec.getDemHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
-                        {% endif %}
-                    {% endif %}
-
-                    <tr>
-                        <th>Heures demandées session {{ session }}<br>
-                            <span class="petit">Y compris les rallonges</span>
-                        </th>
-                        <td>{{ (version.getDemHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}
-                        {% if toomuch %}
-                            <img src="{{ absolute_url(asset('icones/attention16.png')) }}" alt="Demande trop forte, cf. règles d'attribution" title="Demande trop forte, cf. règles d'attribution" />
-                        {% endif %}
-                    </tr>
-
-                    {% set versionPrec = version.versionPrecedente1 %}
-                    {% if versionPrec != null %}
-                        {% if versionPrec.anneeSession == version.anneeSession %}
-                        <tr>
-                            <th>Heures attribuées session {{ versionPrec.session }}<br>
-                                <span class="petit">Y compris les rallonges et les pénalités éventuelles</span>
-                            </th>
-                            <td>{{ (versionPrec.getAttrHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
-                        </tr>
-                        {% endif %}
-                    {% endif %}
-
-                    <tr>
-                        <th >Nombre d'heures attribuées session {{ session }}<br>
-                        <span class="petit">Y compris les rallonges et les pénalités éventuelles</span>
-                        </th>
-                        <td>{{ (version.attrHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}
-                        {% if version.attrHeuresEte != 0 %} <span class="attention">(dont {{ version.attrHeuresEte |number_format(0, ',', ' ')|replace({' ':'&nbsp;'}) |raw }} heures à utiliser entre le 1er Juillet et le 31 Août)</span> {% endif %}
+                        <th>Langage utilisé</th>
+                        <td>
+                            {% if version.codeFor %}
+                                Fortran
+                            {% endif %}
+                            {% if version.codeC %}
+                                C
+                            {% endif %}
+                            {% if version.codeCpp %}
+                                C++
+                            {% endif %} {{ version.codeLangage }}
                         </td>
                     </tr>
-                    {% if noconso == 0 %}
-                        <tr>
-                            <th>Quota machine d'heures allouées pour {{ session.getAnneeSession() + 2000 }}</th>
-                            <td>{{quota|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw}}</td>
-                        </tr>
-
-                        <tr>
-                            <th>Nombre d'heures consommées<br>
-                                <span class="petit">depuis le début de {{ session.getAnneeSession() + 2000 }}</span>
-                            </th>
-                            {# TODOPOLITIQUE #}
-                            <td>{# {{ version.conso }}
-                                {% if(version.getQuota > 0) %}
-                                    ({{ (version.consocalcul * 100 / version.quota) |number_format(1)}} %)
-                                {% endif %}
-                                <br /> #}
-                                {{ conso|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}
-                                {% if(quota!=0) %} 
-                                    ({{consop|number_format(1)}} %) 
-                                {% endif %}
-                                {% if conso_gpu[0] != 0 %}
-                                    - cpu={{conso_cpu[0]|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw}} gpu={{conso_gpu[0]|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw}} ({{(100*conso_cpu[0]/conso)|number_format(1)}}% {{(100*conso_gpu[0]/conso)|number_format(1)}}%)
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endif %}
+                    <tr>
+                        <th>Binaire GPU</th>
+                        <td>{{ version.gpu}}</td>
+                    </tr>
+                    <tr>
+                        <th>Licence</th>
+                        <td>{{ version.codeLicence }}</td>
+                    </tr>
+                    <tr>
+                        <th>Utilisation sur d'autres machines</th>
+                        <td>{{ version.codeUtilSurMach}}</td>
+                    </tr>
+                    <tr>
+                        <th>Estimation du temps CPU max d'un job</th>
+                        <td>{{ version.codeHeuresPJob}}</td>
+                    </tr>
                 </tbody>
             </table>
-
-
-            <p class="info_supplementaire">Les heures qui vous seront attribuées dans le cadre de ce projet sont utilisables<br/>
-                <strong>jusqu'au 31 Décembre 20{{session.anneesession}}</strong>
-            </p>
-
-            <h4>Laboratoire et responsable du projet :</h4>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nom</th>
-                        <th>Mail</th>
-                        <th>Statut</th>
-                        <th>Laboratoire *</th>
-                    </tr>
-                </thead>
-
+            <table class="table_vertical">
                 <tbody>
                     <tr>
-                        <td>{{version.getResponsable }}</td>
-
-                        <td>{% if ( not version.getResponsable == null ) %} 
-                            {{version.getResponsable.Mail }}
-                        {% endif %}</td>
-
-                        <td>{% if ( not version.getResponsable == null ) %}
-                            {{version.getResponsable.Statut }}
-                        {% endif %}</td>
-
-                        <td>{{version.getPrjLLabo }}</td>
+                        <th>Estimation de la RAM nécessaire par cœur pour un job</th>
+                        <td>{{ version.codeRamPCoeur}}</td>
+                    </tr>
+                    <tr>
+                        <th>Nombre max de coeurs utilisables efficacement par le code</th>
+                        <td>{{ version.codeEffParal}}</td>
+                    </tr>
+                    <tr>
+                        <th>Estimation de l'espace-disque temporaire nécessaire</th>
+                        <td>{{ version.codeVolDonnTmp}}</td>
+                    </tr>
+                    <tr>
+                        <th>Logiciels nécessaires</th>
+                        <td>{{ version.demLogiciels}}</td>
+                    </tr>
+                    <tr>
+                        <th>Bibliothèques nécessaires</th>
+                        <td>{{ version.demBib}}</td>
+                    </tr>
+                    <tr>
+                        <th>Visualisation à distance</th>
+                        <td>{{ version.demPostTrait}}</td>
                     </tr>
                 </tbody>
             </table>
+        </div>
+        </br>
 
-            <p class="info_supplementaire">* Le laboratoire associé au projet est le laboratoire du responsable</p>
-
-            <h4>Personnes participant au projet :</h4>
-            <table>
-                <thead>
-                    <tr>
-                        {% if coll_login %}
-                            <th>Login</th>
-                            {% if version.etat==5 or version.etat == 4 %}
-                                <th>User</th>
-                            {% endif %}
-                        {% endif %}
-
-                        {% if nodata==false %}
-                            <th title="Accès à la plateforme Callisto">Données</th>
-                        {% endif %}
-
-                        <th>Prénom</th>
-                        <th>Nom</th>
-                        <th>Mail</th>
-                        <th>Statut</th>
-                        <th>Laboratoire</th>
-                        <th>Établissement</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% for user in version.CollaborateurVersion %}
-                        {% if not user.deleted %}
-                            <tr>
-                                {% if coll_login %}
-                                    <td>
-                                        {% if( user.login == true) %}Oui{% else %}Non
-                                        {% endif %}
-                                    </td>
-
-                                    {% if version.etat==5 or version.etat == 4 %}
-                                        <td>
-                                            {% if (user.login == true) %}
-                                                {% if user.loginname==null %}
-                                                    <img src="{{ asset('icones/attention16.png') }}" alt="Compte non encore créé" title="compte non encore créé"/>
-                                                {% else %}
-                                                    <tt>{{ user.loginname }}</tt>
-                                                {% endif %}
-                                            {% else %}
-                                                -
-                                            {% endif %}
-                                        </td>
-                                    {% endif %}
-                                {% endif %}
-
-                                {% if nodata==false %}
-                                    <td>
-                                        {% if( user.clogin == true) %}Oui{% else %}Non
-                                        {% endif %}
-                                    </td>
-                                {% endif %}
-
-                                <td>{{ user.Collaborateur.prenom }}</td>
-
-                                <td>{{ user.Collaborateur.nom }}</td>
-
-                                <td>{{ user.Collaborateur.mail }}</td>
-
-                                <td>
-                                    {% if( not ( user.Collaborateur.statut == null ) ) %} {{ user.Collaborateur.statut }}
-                                    {% endif %}
-                                </td>
-
-                                <td>
-                                    {% if( not ( user.Collaborateur.labo == null ) ) %} {{ user.Collaborateur.labo.getAcroLabo }}
-                                    {% endif %}
-                                </td>
-                                
-                                <td>{{ user.Collaborateur.etab }}</td>
-                            </tr>
-                        {% endif %}
-                    {% endfor %}
-                </tbody>
-            </table>
-
-            {% if version.prjFinancement != null %}
-            <h4>Financement :</h4>
-            <p class="financement">{{ version.prjFinancement }}</p>
-            {% endif %}
-
-            <h4>Utilisation des moyens de calcul de GENCI :</h4>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Centre</th>
-                        <th>Machine</th>
-                        <th>Heures accordées</th>
-                        <th>N° de projet</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    <tr>
-                        <td>{{ version.prjGenciCentre }}</td>
-
-                        <td>{{ version.prjGenciMachines }}</td>
-
-                        <td>{{ version.prjGenciHeures }}</td>
-
-                        <td>{{ version.prjGenciDari }}</td>
-                    </tr>
-                </tbody>
-            </table>
-</div>
-
-        </details>
-
-        <details class="II">
-            <summary>{{icones.trait_summary}}II - Description scientifique du projet de recherche</summary>
-
-
-<div style="max-height: 70vh;overflow-y: scroll;">
-
-
-            {% if not ( version.prjJustifRenouv == null ) %}
-
-                <h4>Justification du renouvellement :</h4>
-                <div class="description">
-                    <p>{{ version.prjJustifRenouv | e | nl2br }}</p>
-                    {{ gramcdocmacros.display_images(img_justif_renou) }}
-                </div>
-
-            {% endif %}
-
-            <h4>Résumé en anglais :</h4>
-            <p class="description">{{ version.prjResume | e | nl2br }}</p>
-
-
-            <h4>Exposé Scientifique :</h4>
-            <div class="description"><p>{{ version.prjExpose | e | nl2br}}</p>
-                {{ gramcdocmacros.display_images(img_expose) }}
-            </div>
-
-            <h4>Algorithmes utilisés :</h4>
-
-            <p class="description">{{ version.prjAlgorithme }}</p>
-            </br>
-
-</div>
-
-        </details>
-
-        <details class="III">
-            <summary>{{icones.trait_summary}}III - Description technique du projet</summary>
-
-
-<div style="max-height: 70vh;overflow-y: scroll;">
-
-
-            <h4>Nature du calcul :</h4>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Conception de méthodes de calcul parallèle</th>
-                        <th>Développement d'un code parallèle</th>
-                        <th>Parallélisation d'un code existant</th>
-                        <th>Utilisation d'un code parallèle</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>
-                            {% if( version.prjConception == true) %}
-                                {{icones.valide}}
-                            {% else %}
-                                Non
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if( version.prjDeveloppement == true) %}
-                                {{icones.valide}}
-                            {% else %}
-                                Non
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if( version.prjParallelisation == true) %}
-                                {{icones.valide}}
-                            {% else %}
-                                Non
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if( version.prjUtilisation == true) %}
-                                {{icones.valide}}
-                            {% else %}
-                                Non
-                            {% endif %}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-                    
-
-            <h4>Description du code de calcul :</h4>
-            <div class="tableaux">
-                <table class="table_vertical">
-                    <tbody>
-                        <tr>
-                            <th>Nom du code</th>
-                            <td>{{ version.codeNom }}</td>
-                        </tr>
-                        <tr>
-                            <th>Langage utilisé</th>
-                            <td>
-                                {% if version.codeFor %}
-                                    Fortran
-                                {% endif %}
-                                {% if version.codeC %}
-                                    C
-                                {% endif %}
-                                {% if version.codeCpp %}
-                                    C++
-                                {% endif %} {{ version.codeLangage }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Binaire GPU</th>
-                            <td>{{ version.gpu}}</td>
-                        </tr>
-                        <tr>
-                            <th>Licence</th>
-                            <td>{{ version.codeLicence }}</td>
-                        </tr>
-                        <tr>
-                            <th>Utilisation sur d'autres machines</th>
-                            <td>{{ version.codeUtilSurMach}}</td>
-                        </tr>
-                        <tr>
-                            <th>Estimation du temps CPU max d'un job</th>
-                            <td>{{ version.codeHeuresPJob}}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <table class="table_vertical">
-                    <tbody>
-                        <tr>
-                            <th>Estimation de la RAM nécessaire par cœur pour un job</th>
-                            <td>{{ version.codeRamPCoeur}}</td>
-                        </tr>
-                        <tr>
-                            <th>Nombre max de coeurs utilisables efficacement par le code</th>
-                            <td>{{ version.codeEffParal}}</td>
-                        </tr>
-                        <tr>
-                            <th>Estimation de l'espace-disque temporaire nécessaire</th>
-                            <td>{{ version.codeVolDonnTmp}}</td>
-                        </tr>
-                        <tr>
-                            <th>Logiciels nécessaires</th>
-                            <td>{{ version.demLogiciels}}</td>
-                        </tr>
-                        <tr>
-                            <th>Bibliothèques nécessaires</th>
-                            <td>{{ version.demBib}}</td>
-                        </tr>
-                        <tr>
-                            <th>Visualisation à distance</th>
-                            <td>{{ version.demPostTrait}}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            </br>
-
-</div>
-
-
-        </details>
+    </div>
+    </details>
 
 
 {% if nodata == false %}
 
     <details>
         <summary>{{icones.trait_summary}}IV - Les données</summary>
-
-
-
-<div style="max-height: 70vh;overflow-y: scroll;">
-
+        <div style="max-height: 70vh;overflow-y: scroll;">
 
         <table>
             <thead>
@@ -631,126 +623,121 @@
                 </tr>
             </tbody>
         </table>
-
         </br>
-</div>
-
+    </div>
 
     </details>
 
 {% endif %}
 
-        <details>
-        <summary>{{icones.trait_summary}}V - Formation</summary>
+    <details>
+    <summary>{{icones.trait_summary}}V - Formation</summary>
+
+    <div style="max-height: 70vh;overflow-y: scroll;">
 
 
-<div style="max-height: 70vh;overflow-y: scroll;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Intitulé</th>
+                    <th>Nombre de personnes intéressées</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for f in formation %}
+                    {% if f.acro != 'ALL_EMPTY' %}
+                        <tr>
+                            <td>{{f.nom}}</td>
+                            {% if f.rep is null %}
+                            <td>0</td>
+                            {% else %}
+                            <td>{{f.rep}}</td>
+                            {% endif %}
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+                <tr>
+                    <td>Autres demandes</td>
+                    <td>{{version.demformautresautres}}</td>
+                </tr>
+            </tbody>
+        </table>
 
+    </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Intitulé</th>
-                        <th>Nombre de personnes intéressées</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for f in formation %}
-                        {% if f.acro != 'ALL_EMPTY' %}
-                            <tr>
-                                <td>{{f.nom}}</td>
-                                {% if f.rep is null %}
-                                <td>0</td>
-                                {% else %}
-                                <td>{{f.rep}}</td>
-                                {% endif %}
-                            </tr>
-                        {% endif %}
-                    {% endfor %}
-                    <tr>
-                        <td>Autres demandes</td>
-                        <td>{{version.demformautresautres}}</td>
-                    </tr>
-                </tbody>
-            </table>
-
-
-</div>
-
-
-        </details>
+    </details>
 
     
     {% if version.etat in [ 4, 5, 6, 9 ] %}
-        <details>
-            <summary>{{icones.trait_summary}}VI - Commentaire de l'expert</summary>
+    <details>
+    <summary>{{icones.trait_summary}}VI - Commentaire de l'expert</summary>
 
+    <div style="max-height: 70vh;overflow-y: scroll;">
 
-<div style="max-height: 70vh;overflow-y: scroll;">
+        {% for expertise in version.expertise %}
+        <table class="table_vertical">
+            <tbody>
+                <tr>
+                    <th>Nombre d'heures demandées</th>
+                    <td>{{  version.demHeures|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
+                </tr>
+                <tr>
+                    <th>Nombre d'heures attribuées</th>
+                    <td>{{  expertise.nbHeuresAtt|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
+                </tr>
+                {% if is_granted('ROLE_ADMIN') or version.isExpertDe(app.user) %}
+                    <tr>
+                        <th>Commentaire pour le responsable</th>
+                        <td>{{ expertise.commentaireExterne | e | nl2br}}</td>
+                    </tr>
+                    <tr>
+                        <th>Commentaire pour le comité</th>
+                        <td>{{ expertise.commentaireInterne | e | nl2br}}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <th>Commentaire</th>
+                        <td>{{ expertise.commentaireExterne | e | nl2br}}</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+        {% endfor %}
 
-            
-            {% for expertise in version.expertise %}
-                <table class="table_vertical">
-                    <tbody>
-                        <tr>
-                            <th>Nombre d'heures demandées</th>
-                            <td>{{  version.demHeures|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
-                        </tr>
-                        <tr>
-                            <th>Nombre d'heures attribuées</th>
-                            <td>{{  expertise.nbHeuresAtt|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
-                        </tr>
-                        {% if is_granted('ROLE_ADMIN') or version.isExpertDe(app.user) %}
-                            <tr>
-                                <th>Commentaire pour le responsable</th>
-                                <td>{{ expertise.commentaireExterne | e | nl2br}}</td>
-                            </tr>
-                            <tr>
-                                <th>Commentaire pour le comité</th>
-                                <td>{{ expertise.commentaireInterne | e | nl2br}}</td>
-                            </tr>
-                        {% else %}
-                            <tr>
-                                <th>Commentaire</th>
-                                <td>{{ expertise.commentaireExterne | e | nl2br}}</td>
-                            </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
-            {% endfor %}
     {% endif %}
 
     {% if version.rallonge is not empty %}
-        <h4>Rallonges :</h4>
-        <table class="table_vertical">
-            <tbody>
-            {% for r in version.rallonge %}
-                <tr>
-                    <th>Nombre d'heures demandées</th>
-                    <td>{{  r.demHeures|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td></tr><tr>
-                    <th>Nombre d'heures attribuées</th>
-                    <td>{{  r.nbHeuresAtt|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
-                </tr>
-                {% if is_granted('ROLE_ADMIN') or version.isExpertDe(app.user) %}
-                <tr>
-                    <th>Commentaire pour le responsable</th>
-                    <td>{{ r.commentaireExterne | e | nl2br}}</td>
-                </tr>
-                <tr>
-                    <th>Commentaire pour le comité</th>
-                    <td>{{ r.commentaireInterne | e | nl2br}}</td>
-                </tr>{% else %}
-                <tr>
-                    <th>Commentaire</th>
-                    <td>{{ r.commentaireExterne | e | nl2br}}</td>
-                </tr>
-                {% endif %}
-            {% endfor %}
-            </tbody>
-        </table>
+    <h4>Rallonges :</h4>
+    <table class="table_vertical">
+        <tbody>
+        {% for r in version.rallonge %}
+            <tr>
+                <th>Nombre d'heures demandées</th>
+                <td>{{  r.demHeures|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td></tr><tr>
+                <th>Nombre d'heures attribuées</th>
+                <td>{{  r.nbHeuresAtt|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
+            </tr>
+            {% if is_granted('ROLE_ADMIN') or version.isExpertDe(app.user) %}
+            <tr>
+                <th>Commentaire pour le responsable</th>
+                <td>{{ r.commentaireExterne | e | nl2br}}</td>
+            </tr>
+            <tr>
+                <th>Commentaire pour le comité</th>
+                <td>{{ r.commentaireInterne | e | nl2br}}</td>
+            </tr>{% else %}
+            <tr>
+                <th>Commentaire</th>
+                <td>{{ r.commentaireExterne | e | nl2br}}</td>
+            </tr>
+            {% endif %}
+        {% endfor %}
+        </tbody>
+    </table>
     {% endif %}
     </br>
-</div>
+    </div>
+
     </details>
 </section>
 {% endblock %}

@@ -355,14 +355,18 @@ class VersionController extends AbstractController
 
         $session = $version->getSession();
 
-        $img_expose_1 = $sv->imageProperties('img_expose_1', 'Figure 1', $version);
-        $img_expose_2 = $sv->imageProperties('img_expose_2', 'Figure 2', $version);
-        $img_expose_3 = $sv->imageProperties('img_expose_3', 'Figure 3', $version);
+        $img_expose = [
+            $sv->imageProperties('img_expose_1', 'Figure 1', $version),
+            $sv->imageProperties('img_expose_2', 'Figure 2', $version),
+            $sv->imageProperties('img_expose_3', 'Figure 3', $version),
+        ];
 
-        $img_justif_renou_1 = $sv->imageProperties('img_justif_renou_1', 'Figure 1', $version);
-        $img_justif_renou_2 = $sv->imageProperties('img_justif_renou_2', 'Figure 2', $version);
-        $img_justif_renou_3 = $sv->imageProperties('img_justif_renou_3', 'Figure 3', $version);
-
+        $img_justif_renou = [
+            $sv->imageProperties('img_justif_renou_1', 'Figure 1', $version),
+            $sv->imageProperties('img_justif_renou_2', 'Figure 2', $version),
+            $sv->imageProperties('img_justif_renou_3', 'Figure 3', $version),
+        ];
+        
         //$toomuch = $sv->is_demande_toomuch($version->getAttrHeures(),$version->getDemHeures());
         $toomuch = false;
         if ($session->getLibelleTypeSession()=='B' && ! $sv->isNouvelle($version)) {
@@ -380,22 +384,18 @@ class VersionController extends AbstractController
             'warn_type'          => false,
             'formation'          => $formation,
             'projet'             => $projet,
-            'version_form'       => null,
+            'pdf'                => true,
             'version'            => $version,
             'session'            => $session,
             'menu'               => null,
-            'img_expose_1'       => $img_expose_1,
-            'img_expose_2'       => $img_expose_2,
-            'img_expose_3'       => $img_expose_3,
-            'img_justif_renou_1' => $img_justif_renou_1,
-            'img_justif_renou_2' => $img_justif_renou_2,
-            'img_justif_renou_3' => $img_justif_renou_3,
+            'img_expose'         => $img_expose,
+            'img_justif_renou'   => $img_justif_renou,
             'conso_cpu'          => $sp->getConsoRessource($projet, 'cpu', $version->getAnneeSession()),
             'conso_gpu'          => $sp->getConsoRessource($projet, 'gpu', $version->getAnneeSession()),
             'rapport_1'          => null,
             'rapport'            => null,
             'toomuch'            => $toomuch
-        ]
+            ]
         );
 
         $pdf = $spdf->setOption('enable-local-file-access', true);
