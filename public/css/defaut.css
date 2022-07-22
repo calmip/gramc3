@@ -1311,15 +1311,34 @@ h2, h1{
     padding: 1rem;
     color: var(--warning-color);
     transform: rotate(-90deg) translate(0, -150%);
+    cursor: pointer;
+    transition: 0.3s;
 }
 
-.role_admin span{
+.role_admin_reduit{
+    position: fixed;
+    z-index: 5;
+    background: white;
+    border: 2px solid var(--warning-color);
+    border-radius: 13px;
+    padding: 1rem 0rem 1rem 1rem;
+    cursor: pointer;
+    top: 2rem;
+    transition: 0.3s;
+}
+
+.role_admin span,
+.role_admin_reduit span{
     width: 10px;
     height: 10px;
     background: var(--warning-color);
     border-radius: 5px;
     display: block;
     margin-right: 1rem;
+}
+
+.role_admin_reduit p{
+    display: none;
 }
 
 
@@ -1440,6 +1459,10 @@ select:hover{
 
 .information.error{
     border-color: var(--error-color);
+}
+
+.information.error p{
+    color: var(--error-color);
 }
 
 
@@ -1569,6 +1592,127 @@ tbody tr.rallonge{
 
 
 
+/* ========== TOUS LES TOP_BODY ==========  */
+.top_body{
+    display: flex;
+    align-items: center;
+    width: 90%;
+    margin: auto;
+    justify-content: space-between;
+}
+
+.top_body .retour a {
+    color: var(--first-color);
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.top_body .retour a svg{
+    fill: var(--first-color);
+    margin-right: 10px;
+}
+
+
+
+/* ========== TOUS LES PANNEAUX ENREGISTRER / ANNULER / FERMER ==========  */
+#panneau_enregistrer{
+    background: white;
+    position: fixed;
+    top: 100px;
+    right: 0;
+    padding: 3px;
+    width: 200px;
+    border-radius: 10px;
+    border: var(--warning-color) 2px solid;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+}
+
+#panneau_enregistrer h2{
+    margin-bottom: 0;
+}
+
+#panneau_enregistrer .panneau{
+    width: 87%;
+}
+
+#panneau_enregistrer .boutons{
+    display: flex;
+    flex-direction: column;
+    width: 95%;
+    margin: auto;
+}
+
+#panneau_enregistrer .boutons button,
+#panneau_enregistrer .boutons input{
+    margin: 0.5rem 0;
+    border: var(--first-color) 1px solid;
+    background: none;
+    border-radius: 10px;
+    padding: 5px 0;
+    cursor: pointer;
+}
+
+#panneau_enregistrer .boutons button:hover,
+#panneau_enregistrer .boutons input:hover{
+    background: var(--first-color-hover);
+    color: white;
+}
+
+#panneau_enregistrer .menu,
+#panneau_enregistrer.panneau_ferme .menu_ferme{
+    display: flex;
+    flex-direction: column;
+    width: fit-content;
+    height: 25px;
+    cursor: pointer;
+}
+
+#panneau_enregistrer .menu span,
+#panneau_enregistrer.panneau_ferme .menu_ferme span{
+    width: 25px;
+    height: 3px;
+    background-color: var(--warning-color);
+    margin-top: 0.25rem;
+    transition: 0.5s;
+}
+
+#panneau_enregistrer .menu span:nth-of-type(1){
+    transform: rotate(45deg) translate(5px, 5px);
+}
+
+#panneau_enregistrer .menu span:nth-of-type(2){
+    display: none;
+}
+
+#panneau_enregistrer .menu span:nth-of-type(3){
+    transform: rotate(-45deg);
+}
+
+/* QUAND LE PANNEAU ENREGISTRER EST FERMÉ */
+#panneau_enregistrer.panneau_ferme{
+    width: fit-content;
+}
+
+#panneau_enregistrer.panneau_ferme .panneau{
+    display: none;
+}
+
+#panneau_enregistrer.panneau_ferme .menu_ferme{
+    padding: 0 0 0.25rem;
+    height: fit-content;
+}
+
+#panneau_enregistrer.panneau_ferme .menu_ferme span{
+    margin-top: 0.25rem;
+}
+
+
+
 /* ========== Connexion DBG ========== */
 .section_dbg form{
     text-align: center;
@@ -1663,6 +1807,7 @@ tbody tr.rallonge{
 
 .section_projets table a{
     text-decoration: none;
+    stroke: black;
 }
 
 .section_projets table tbody .seuil_0{
@@ -1710,28 +1855,6 @@ tbody tr.rallonge{
 
 
 /* ========== CONSULTER PROJETS ========== */
-.consulter_projet .top_body{
-    display: flex;
-    align-items: center;
-    width: 90%;
-    margin: auto;
-    justify-content: space-between;
-}
-
-.consulter_projet .top_body .retour a {
-    color: var(--first-color);
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    text-decoration: underline;
-    cursor: pointer;
-}
-
-.consulter_projet .top_body .retour a svg{
-    fill: var(--first-color);
-    margin-right: 10px;
-}
-
 .consulter_projet .info_debug{
     width: fit-content;
     border: 1px solid var(--first-color);
@@ -2222,4 +2345,496 @@ tbody tr.rallonge{
 
 .section_administrateur div nav ul li a{
     flex-direction: column;
+}
+
+
+
+/* ========== ADMINISTRATEUR PROJETS SESSION ==========  */
+.section_projet_session .formulaire{
+    display: flex;
+    align-items: center;
+}
+
+.section_projet_session #form_session{
+    padding: 5px 20px 5px 10px;
+    border-radius: 11px;
+    background: none;
+    margin: 0 20px;
+}
+
+.section_projet_session .telecharger_csv{
+    background: none;
+    border: 1px solid var(--first-color);
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    margin: 0 20px;
+}
+
+.section_projet_session .telecharger_csv:hover{
+    background: var(--first-color-hover);
+    color: white;
+}
+
+.section_projet_session .separateur{
+    margin-bottom: 0;
+}
+
+.section_projet_session .tableaux{
+    display: flex;
+    height: 85vh;
+}
+
+.section_projet_session .tableaux #bilan_legende{
+    margin: 0 1em;
+    width: 25%;
+    position: initial;
+    overflow-y: scroll;
+}
+
+.section_projet_session .tableaux #bilan_legende #bilan table{
+    margin: 1.5rem 0;
+}
+
+.section_projet_session .tableaux #bilan_legende  #bilan tr:first-of-type{
+    font-size: 1rem;
+}
+
+.section_projet_session .tableaux #bilan_legende  #bilan tr{
+    height: 20px;
+}
+
+.section_projet_session .tableaux #projets{
+    font-size: 0.7em;
+    min-width: 75%;
+    margin: 0;
+    overflow: scroll;
+    border-left: 1px solid grey;
+    border-bottom: 1px solid grey;
+}
+
+.section_projet_session .tableaux #projets #table_projets_session{
+    border-collapse: collapse;
+}
+
+
+
+/* ========== EXPERTS ==========  */
+#section_expert .commentaires{
+    display: flex;
+    flex-direction: column;
+}
+
+#section_expert .commentaires .commentaire_annee{
+    display: flex;
+    align-items: center;
+    margin: 0 0 1.5rem 3rem;
+}
+
+#section_expert .commentaires .commentaire_annee a{
+    text-decoration: none;
+    color: initial;
+    border: 1px solid var(--first-color);
+    padding: 10px;
+    border-radius: 10px;
+}
+
+#section_expert .commentaires .commentaire_annee a:hover{
+    background: var(--first-color-hover);
+    color: white;
+}
+
+#section_expert .commentaires .commentaire_annee p{
+    margin-left: 1rem;
+}
+
+#section_expert .commentaires .commentaire_tous{
+    margin: 0 0 0 3rem;
+}
+
+#section_expert .commentaires .commentaire_tous .commentaire{
+    border: 1px solid var(--first-color);
+    padding: 10px 20px;
+    border-radius: 10px;
+    width: 90%;
+}
+
+#section_expert .liste_projets table a svg{
+    stroke: black;
+    width: 20px;
+}
+
+#section_expert .anciennes_expertises svg{
+    stroke: black;
+}
+
+
+
+/* ========== EXPERTISER UN PROJET ==========  */
+#expertise #panneau_enregistrer{
+    flex-direction: row;
+}
+
+#expertise #panneau_enregistrer .fleches{
+    display: flex;
+    justify-content: space-around;
+}
+
+#expertise #panneau_enregistrer .fleche{
+    stroke: var(--first-color);
+    stroke-width: 2px;
+    text-decoration: none;
+}
+
+#expertise #panneau_enregistrer .fleche:hover svg{
+    fill: var(--first-color-hover);
+}
+
+#expertise #panneau_enregistrer .disabled{
+    stroke: none;
+}
+
+#expertise #panneau_enregistrer .fleche.disabled svg{
+    fill: none;
+}
+
+#expertise #panneau_enregistrer .envoyer{
+    margin-top: 2rem;
+}
+
+#expertise .top{
+    text-align: center;
+    margin: 3rem 0;
+}
+
+#expertise .top h2{
+    margin-bottom: 0;
+    padding: 0;
+}
+
+#expertise .top p{
+    font-style: italic;
+}
+
+#expertise .top span{
+    font-weight: bold;
+}
+
+#expertise .top .titre{
+    margin-top: 3.5rem;
+}
+
+#expertise .top .titre h3{
+    margin-bottom: 0;
+    color: var(--first-color);
+}
+
+#expertise .top .titre p{
+    font-style: italic;
+}
+
+#expertise h3{
+    margin-top: 2rem;
+    color: var(--first-color);
+}
+
+#expertise h4{
+    margin: 0 0 0 2rem;
+    text-decoration: #5e5f5f69 solid underline;
+    text-underline-position: under;
+}
+
+#expertise #menu_expertiser{
+    display: flex;
+    justify-content: center;
+}
+
+#expertise #menu_expertiser a{
+    text-decoration: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 1rem;
+    border: 2px solid var(--first-color);
+    padding: 10px 20px;
+    border-radius: 10px;
+    color: black;
+}
+
+#expertise #menu_expertiser a:hover{
+    color: white;
+    background: var(--first-color-hover);
+}
+
+#expertise #menu_expertiser a:hover svg{
+    stroke: white;
+}
+
+#expertise #menu_expertiser a svg{
+    width: 40px;
+    height: 40px;
+    stroke: black;
+    margin-bottom: 1rem;
+}
+
+#expertise a.conso:hover svg path:first-of-type{
+    stroke: var(--first-color-hover);
+}
+
+#expertise .textarea{
+    display: flex;
+    justify-content: flex-start;
+    margin: 7rem auto;
+    width: 90%;
+}
+
+#expertise .textarea div{
+    width: 30%;
+}
+
+#expertise .textarea h4{
+    margin: 0;
+}
+
+#expertise .textarea textarea{
+    border: 1px solid var(--first-color);
+    border-radius: 10px;
+    outline: none;
+    margin-left: 2rem;
+}
+
+#expertise .proposition{
+    margin: auto 0 auto 2rem;
+}
+
+#expertise .commentaire_externe{
+    margin-bottom: 0;
+}
+
+#expertise .validation select{
+    border-top: none;
+    border-right: none;
+    border-left: none;
+    border-bottom: 1px solid var(--first-color);
+    outline: none;
+    background: none;
+    font-size: initial;
+    margin-left: 10rem;
+}
+
+#expertise .input{
+    display: flex;
+    width: 90%;
+    margin: 7rem auto;
+}
+
+#expertise .input div{
+    width: 30%;
+}
+
+#expertise .input h4{
+    margin: 0;
+}
+
+#expertise .input input{
+    border-top: none;
+    border-right: none;
+    border-left: none;
+    border-bottom: 1px solid var(--first-color);
+    margin-left: 2rem;
+    outline: none;
+    background: none;
+    justify-content: flex-start;
+    font-size: initial;
+    height: fit-content;
+}
+
+
+
+/* ========== VALIDATION EXPERTISE ==========  */
+#section_validation_expertise .recapitulatif {
+    width: 80%;
+    margin: auto;
+}
+
+#section_validation_expertise .recapitulatif h4{
+    margin-top: 0;
+    text-decoration: #9c9c9c69 solid underline;
+    text-underline-position: under;
+    color: var(--first-color);
+}
+
+#section_validation_expertise .recapitulatif .premiere_partie{
+    display: flex;
+    justify-content: space-between;
+    width: 80%;
+    margin: auto;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+}
+
+#section_validation_expertise .recapitulatif .premiere_partie div{
+    display: flex;
+}
+
+#section_validation_expertise .recapitulatif .premiere_partie div p{
+    margin-left: 2rem;
+}
+
+#section_validation_expertise .recapitulatif .deuxieme_partie{
+    display: flex;
+    justify-content: space-between;
+    width: 80%;
+    margin: auto;
+    flex-wrap: wrap;
+}
+
+#section_validation_expertise .recapitulatif .deuxieme_partie .commentaire{
+    width: 45%;
+}
+
+#section_validation_expertise .recapitulatif .deuxieme_partie .commentaire p{
+    border: solid 1px var(--first-color);
+    padding: 10px 20px;
+    border-radius: 10px;
+}
+
+#section_validation_expertise .notifications{
+    margin-top: 5rem;
+
+}
+
+#section_validation_expertise #form{
+    display: flex;
+    width: fit-content;
+    margin: 2rem auto 0;
+
+}
+
+#section_validation_expertise #form button{
+    background: none;
+    border: 2px solid var(--first-color);
+    padding: 8px;
+    border-radius: 10px;
+    cursor: pointer;
+    margin: 0 1rem;
+}
+
+#section_validation_expertise #form button:hover{
+    background: var(--first-color-hover);
+    color: white;
+}
+
+
+
+/* ========== COMMENTAIRE DE L'ANNÉE ==========  */
+#section_commentaire_annee h2{
+    margin: 50px 0;
+}
+
+#section_commentaire_annee #old_expertises{
+    stroke: black;
+    width: 90%;
+    border: 1px solid grey;
+    border-collapse: collapse;
+}
+
+#section_commentaire_annee .textarea{
+    display: flex;
+    justify-content: flex-start;
+    margin: 7rem auto;
+    width: 90%;
+}
+
+#section_commentaire_annee .textarea .label h4{
+    margin-top: 0;
+    text-decoration: #5e5f5f69 solid underline;
+    text-underline-position: under;
+}
+
+#section_commentaire_annee .textarea .label{
+    width: 35%;
+    text-align: justify;
+}
+
+#section_commentaire_annee .textarea textarea{
+    border: 1px solid var(--first-color);
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    outline: none;
+}
+
+#section_commentaire_annee .textarea .text_form {
+    margin-left: 2rem;
+}
+
+#section_commentaire_annee .textarea .fin_form {
+    width: 50%;
+    margin: auto;
+    display: flex;
+    justify-content: space-around;
+}
+
+#section_commentaire_annee .textarea .fin_form button{
+    border: 1px solid var(--first-color);
+    background: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: initial;
+    cursor: pointer;
+}
+
+#section_commentaire_annee .textarea .fin_form button:hover{
+    background: var(--first-color-hover);
+    color: white;
+}
+
+
+
+/* ========== CONSULTER ANCIENNE EXPERTISE ==========  */
+#section_anciennes_expertises{
+    width: 90%;
+    margin: auto;
+}
+
+#section_anciennes_expertises div{
+    margin-bottom: 3rem;
+}
+
+#section_anciennes_expertises h4{
+    margin-top: 0;
+    text-decoration: #9c9c9c69 solid underline;
+    text-underline-position: under;
+    color: var(--first-color);
+}
+
+#section_anciennes_expertises .commentaire p{
+    border: solid 1px var(--first-color);
+    padding: 10px 20px;
+    border-radius: 10px;
+}
+
+#section_anciennes_expertises .heures{
+    display: flex;
+}
+
+#section_anciennes_expertises .heures p{
+    margin-left: 2rem;
+}
+
+#section_anciennes_expertises .consulter{
+    border: 1px solid var(--first-color);
+    border-radius: 10px;
+    padding: 10px 20px;
+    display: flex;
+    width: fit-content;
+    text-decoration: none;
+    color: black;
+    margin: auto;
+}
+
+#section_anciennes_expertises .consulter:hover{
+    background: var(--first-color-hover);
+    color: white;
 }

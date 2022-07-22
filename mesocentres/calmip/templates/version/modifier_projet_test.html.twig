@@ -213,13 +213,12 @@
 </tr></tbody></table>
 
 
-<div id="quitter">
-
-
-<input class="invisible_if_no_js"  type="submit" name="ENREGISTRER" id="Enregistrer" value="Enregistrer" title="Enregistrer le projet sans le fermer" />
-{{ form_widget( form.annuler, { 'attr': { 'title' : 'Abandonner les modifications' } }) }}
-{{ form_widget( form.fermer, { 'attr': { 'title' : 'Enregistrer et fermer le projet'  } }) }}
-
+<div id="panneau_enregistrer">
+    <div class="boutons">
+        <input class="invisible_if_no_js"  type="submit" name="ENREGISTRER" id="Enregistrer" value="Enregistrer" title="Enregistrer le projet sans le fermer" />
+        {{ form_widget( form.annuler, { 'attr': { 'title' : 'Abandonner les modifications' } }) }}
+        {{ form_widget( form.fermer, { 'attr': { 'title' : 'Enregistrer et fermer le projet'  } }) }}
+    </div>
 
 </div>
 

@@ -220,11 +220,11 @@ $( document ).ready(function() {
 		// Suivant la valeur du compteur, cache ou affiche le cadre des boutons
 		if (cpt_sel==0)
 		{
-			$("#bouton_affecter").hide();
+			$("#panneau_enregistrer").hide();
 		}
 		else
 		{
-			$("#bouton_affecter").show();
+			$("#panneau_enregistrer").show();
 		}
 	}
 
@@ -316,6 +316,6 @@ $( document ).ready(function() {
 	});
 	if (cpt_sel==0)
 	{
-		$("#bouton_affecter").hide();
+		$("#panneau_enregistrer").hide();
 	}
 });
