@@ -480,7 +480,7 @@ class ProjetSpecController extends AbstractController
         if ($this->getParameter('rapport_dactivite')) {
             if (($etat_version == Etat::ACTIF || $etat_version == Etat::TERMINE) && ! $sp->hasRapport($projet, $version->getAnneeSession())) {
                 $menu[] = $sm->telecharger_modele_rapport_dactivite($version,ServiceMenus::BPRIO);
-                $menu[] = $sm->televerser_rapport_annee($version,ServiceMenus::BPRIO);
+//                $menu[] = $sm->televerser_rapport_annee($version,ServiceMenus::BPRIO);
             }
         }
         $img_expose = [
