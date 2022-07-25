@@ -21,6 +21,7 @@ $(document).ready(function() { // table projets par session
         "bPaginate": false,
         "bFilter":     false,
         "info":         false,
+        "columnDefs":[{ type: "num-fmt", targets: [13,14] }],
         "aoColumnDefs": [{bSortable: false,aTargets: [ 1,4,6 ]}]
     });
 });

@@ -126,7 +126,7 @@ class CommentaireExpert
      *
      * @return string
      */
-    public function getCommentaire(): string
+    public function getCommentaire(): ?string
     {
         return $this->commentaire;
     }

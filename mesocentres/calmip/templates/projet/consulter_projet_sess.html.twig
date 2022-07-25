@@ -85,7 +85,7 @@
 			{% endif %}
 
 
-		<section class="supplement">
+		<div class="supplement">
 
 
 		<a title="Version pdf" class="lien_supplementaire" target="_blank" href="{{ path('version_pdf', { 'id' : version.idVersion }) }}"> {{icones.pdf}}
@@ -115,7 +115,7 @@
 			{% endif %}
 		{% endif %}
 		{% if noconso == 0 %}
-			<a class="lien_supplementaire conso" title="Visualiser la consommation {{version.getAnneeSession}}" data-href="{{ absolute_url(path('projet_conso', { 'id': version.projet.idProjet, 'loginname': loginname, 'annee' : version.getAnneeSession })) }}"/> {{icones.consommation}}
+			<a class="lien_supplementaire conso" title="Visualiser la consommation {{version.getAnneeSession}}" data-href="{{ absolute_url(path('projet_conso', { 'id': version.projet.idProjet, 'loginname': loginname, 'annee' : version.getAnneeSession })) }}"> {{icones.consommation}}
 				<p>Visualiser ma consommation</p>
 			</a>
 			{# Pour les graphiques de conso #}
@@ -142,7 +142,7 @@
 			{% endif %}
 
 		{% endif %}
-	</section>
+	</div>
 
 		
 
@@ -191,7 +191,7 @@
 					<tr>
 						{% if norattachement == false %}
 						<th>Rattachement du projet</th>
-						<td>{{ version.prjRattachement }}</td=>
+						<td>{{ version.prjRattachement }}</td>
 						{% endif %}
 					</tr>
 
@@ -206,7 +206,8 @@
 					{% endif %}
 
 					<tr>
-						<th>Heures demandées session {{ session }}<br>
+						<th>
+							<p>Heures demandées session {{ session }}</p>
 							<span class="petit">Y compris les rallonges</span>
 						</th>
 						<td>{{ (version.getDemHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}
@@ -219,7 +220,8 @@
 					{% if versionPrec != null %}
 						{% if versionPrec.anneeSession == version.anneeSession %}
 						<tr>
-							<th>Heures attribuées session {{ versionPrec.session }}<br>
+							<th>
+								<p>Heures attribuées session {{ versionPrec.session }}</p>
 								<span class="petit">Y compris les rallonges et les pénalités éventuelles</span>
 							</th>
 							<td>{{ (versionPrec.getAttrHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
@@ -228,8 +230,9 @@
 					{% endif %}
 
 					<tr>
-						<th >Nombre d'heures attribuées session {{ session }}<br>
-						<span class="petit">Y compris les rallonges et les pénalités éventuelles</span>
+						<th>
+							<p>Nombre d'heures attribuées session {{ session }}</p>
+							<span class="petit">Y compris les rallonges et les pénalités éventuelles</span>
 						</th>
 						<td>{{ (version.attrHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}
 						{% if version.attrHeuresEte != 0 %} <span class="attention">(dont {{ version.attrHeuresEte |number_format(0, ',', ' ')|replace({' ':'&nbsp;'}) |raw }} heures à utiliser entre le 1er Juillet et le 31 Août)</span> {% endif %}
@@ -242,7 +245,8 @@
 						</tr>
 
 						<tr>
-							<th>Nombre d'heures consommées<br>
+							<th>
+								<p>Nombre d'heures consommées</p>
 								<span class="petit">depuis le début de {{ session.getAnneeSession() + 2000 }}</span>
 							</th>
 							{# TODOPOLITIQUE #}
@@ -340,7 +344,7 @@
 												{% if user.loginname==null %}
 													<img src="{{ asset('icones/attention16.png') }}" alt="Compte non encore créé" title="compte non encore créé"/>
 												{% else %}
-													<tt>{{ user.loginname }}</tt>
+													{{ user.loginname }}
 												{% endif %}
 											{% else %}
 												-
@@ -483,7 +487,7 @@
 			<h4>Algorithmes utilisés :</h4>
 
 			<p class="description">{{ version.prjAlgorithme }}</p>
-			</br>
+			<br>
 
 </div>
 
@@ -611,7 +615,7 @@
 					</tbody>
 				</table>
 			</div>
-			</br>
+			<br>
 
 </div>
 
@@ -674,7 +678,7 @@
 			</tbody>
 		</table>
 
-		</br>
+		<br>
 </div>
 
 
@@ -791,7 +795,7 @@
 			</tbody>
 		</table>
 	{% endif %}
-	</br>
+	<br>
 </div>
 	</details>
 </section>
