@@ -31,7 +31,7 @@
     {%- else -%}
         {% set form_method = "POST" %}
     {%- endif -%}
-    <form name="{{ name }}" method="{{ form_method|lower }}"{% if action != '' %} action="{{ action }}"{% endif %}{% for attrname, attrvalue in attr %} {{ attrname }}="{{ attrvalue }}"{% endfor %}enctype="multipart/form-data">
+    <form name="{{ name }}" method="{{ form_method|lower }}"{% if action != '' %} action="{{ action }}"{% endif %}{% for attrname, attrvalue in attr %} {{ attrname }}="{{ attrvalue }}"{% endfor %} enctype="multipart/form-data">
     {%- if form_method != method -%}
         <input type="hidden" name="_method" value="{{ method }}" />
     {%- endif -%}
@@ -124,14 +124,16 @@
 
 </div>
 
-<div id="quitter">
-    {% if renouvellement %}
-        <input class="invisible_if_no_js" name="RENOUVELER" id="Renouveler" value="Renouvellement" title="Renouveler le projet" type="submit"><br />
-    {% else %}
-        <input class="invisible_if_no_js"  type="submit" name="ENREGISTRER" id="Enregistrer" value="Enregistrer" title="Enregistrer le projet sans le fermer" />
+<div id="panneau_enregistrer">
+    <div class="boutons">
+        {% if renouvellement %}
+            <input class="invisible_if_no_js" name="RENOUVELER" id="Renouveler" value="Renouvellement" title="Renouveler le projet" type="submit"><br />
+        {% else %}
+            <input class="invisible_if_no_js"  type="submit" name="ENREGISTRER" id="Enregistrer" value="Enregistrer" title="Enregistrer le projet sans le fermer" />
         {{ form_widget( form.annuler, { 'attr': { 'title' : 'Abandonner les modifications' } }) }}
         {{ form_widget( form.fermer, { 'attr': { 'title' : 'Enregistrer et fermer le projet'  } }) }}
-    {% endif %}
+        {% endif %}
+    </div>
 </div>
 
 {{ form_end(form) }}

@@ -120,13 +120,13 @@
                     {% endif %}
                     </div>
 
-                    <a href=" {{ path('deconnexion') }}" class="deconnexion_profil">Déconnexion</a></p>
+                    <a href=" {{ path('deconnexion') }}" class="deconnexion_profil">Déconnexion</a>
 
                 {% else %}
-                    <p><a href=" {{ path('connexion') }}" class="connexion_profil">connexion</a></p>
+                    <p><a href=" {{ path('connexion') }}" class="connexion_profil">connexion</a>
                     {% if app.debug %}
 
-                        <p><a href=" {{ path('connexion_dbg') }}" class="connexion_profil">connexion (DBG)</a></p>
+                        <p><a href=" {{ path('connexion_dbg') }}" class="connexion_profil">connexion (DBG)</a>
                     {% endif %}
                 {% endif %}
 

@@ -32,16 +32,16 @@
         
         {% if noconso==false %}
             <td rowspan="{{ item.cpt_rall + 1 }}">
-                <tt>
-                    {% if item.login == 'nologin' %}
-                        - 
-                    {% else %} 
-                        {{item.login}} 
-                    {% endif %}
-                </tt>
+                {% if item.login == 'nologin' %}
+                    - 
+                {% else %} 
+                    {{item.login}} 
+                {% endif %}
         
-        {% if item.passwd != null %}
-            <img id="bouton_{{item.projet}}" class="bouton_poussoir right cadenas" src="{{ asset('icones/cadenas.png') }}" alt="Donnez-moi mon mot de passe" title="Donnez-moi mon mot de passe" /></a> {% endif %}</td>{% endif %}
+                {% if item.passwd != null %}
+                    <img id="bouton_{{item.projet}}" class="bouton_poussoir right cadenas" src="{{ asset('icones/cadenas.png') }}" alt="Donnez-moi mon mot de passe" title="Donnez-moi mon mot de passe" /></a> {% endif %}
+                {% endif %}
+            </td>
         
         <td rowspan="{{ item.cpt_rall + 1 }}">
             {% if item.projet.titre != null %}
@@ -170,8 +170,6 @@ passwd
 
 {{ gramcmacros.menu(menu) }}
 
-</div>
-
 
 {# ######################################################################### #}
 
@@ -297,7 +295,7 @@ Si vous souhaiter demander des ressources, vous devez créer un nouveau projet
 
 
 {% if projets_resp == null and projets_collab == null and projets_term == null %}
-<div class="message info">
+<div class="information ok">
 Les utilisateurs qui ont le droit suffisant pour demander eux-mêmes des ressources sur {{mesoc}}
 peuvent cliquer sur le lien 'Nouveau projet' pour faire une demande d'attributions de ressources.
 <br>

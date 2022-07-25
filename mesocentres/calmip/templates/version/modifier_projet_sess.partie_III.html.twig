@@ -28,7 +28,7 @@
 		</div>
 
 		<div class="input">
-			<label>{{ form_label(form.codeNom, "Le nom du principal logiciel que vous allez utiliser :")}}</label>
+			{{ form_label(form.codeNom, "Le nom du principal logiciel que vous allez utiliser :")}}
 			{{ form_widget(form.codeNom) }}
 		</div>
 
@@ -59,7 +59,7 @@
 		</div>
 
 		<div class="input">
-			<label>{{ form_label(form.gpu, "Existe-t-il un binaire GPU pour votre application ?" ) }}</label>
+			{{ form_label(form.gpu, "Existe-t-il un binaire GPU pour votre application ?" ) }}
 			{{ form_widget(form.gpu) }}
 		</div>
 
@@ -85,23 +85,23 @@
 
 	<div class="inputs">
 		<div class="input">{# #}
-			<label>{{ form_label(form.codeHeuresPJob, "Estimation du temps CPU max d'un job (heures monoprocesseur)" ) }}</label>
+			{{ form_label(form.codeHeuresPJob, "Estimation du temps CPU max d'un job (heures monoprocesseur)" ) }}
 			{{ form_widget(form.codeHeuresPJob) }}
 		</div>
 		<div class="input">{# #}
-			<label>{{ form_label(form.codeRamPCoeur, "Estimation de la RAM nécessaire par coeur pour un job" ) }}</label>
+			{{ form_label(form.codeRamPCoeur, "Estimation de la RAM nécessaire par coeur pour un job" ) }}
 			{{ form_widget(form.codeRamPCoeur) }}
 		</div>
 		<div class="input">{# #}
-			<label>{{ form_label(form.codeRamPart, "Estimation de la RAM nécessaire en mémoire partagée" ) }}</label>
+			{{ form_label(form.codeRamPart, "Estimation de la RAM nécessaire en mémoire partagée" ) }}
 			{{ form_widget(form.codeRamPart) }}
 		</div>
 		<div class="input">{# #}
-			<label>{{ form_label(form.codeEffParal, "Nombre maximal de coeurs utilisables efficacement par le code" ) }}</label>
+			{{ form_label(form.codeEffParal, "Nombre maximal de coeurs utilisables efficacement par le code" ) }}
 			{{ form_widget(form.codeEffParal) }}
 		</div>
 		<div class="input">
-			<label>{{ form_label(form.codeVolDonnTmp, "Estimation de l'espace-disque temporaire nécessaire par job" ) }}</label>
+			{{ form_label(form.codeVolDonnTmp, "Estimation de l'espace-disque temporaire nécessaire par job" ) }}
 			{{ form_widget(form.codeVolDonnTmp) }}
 		</div>
 	</div>
