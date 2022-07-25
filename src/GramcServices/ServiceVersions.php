@@ -748,11 +748,14 @@ class ServiceVersions
         $dataNR =   [];    // Les autres collaborateurs
         foreach ($version->getCollaborateurVersion() as $cv) {
             $individu = $cv->getCollaborateur();
-            if ($individu == null) {
+            if ($individu == null)
+            {
                 $sj->errorMessage("ServiceVersion:modifierCollaborateurs : collaborateur null pour CollaborateurVersion ".
                          $cv->getId());
                 continue;
-            } else {
+            }
+            else
+            {
                 $individuForm = new IndividuForm($individu);
                 $individuForm->setLogin($cv->getLogin());
                 $individuForm->setClogin($cv->getClogin());
@@ -791,9 +794,11 @@ class ServiceVersions
             // Si le resp ne peut pas modifier les profils des collabs, on ne teste pas ça
             if ($definitif == true && $resp_peut_modif_collabs == true &&
                 (
-                   $individu_form->getPrenom() == null   || $individu_form->getNom() == null
-                || $individu_form->getEtablissement() == null
-                || $individu_form->getLaboratoire() == null || $individu_form->getStatut() == null
+                   $individu_form->getPrenom() == null
+                   || $individu_form->getNom() == null
+                   || $individu_form->getEtablissement() == null
+                   || $individu_form->getLaboratoire() == null
+                   || $individu_form->getStatut() == null
                 )
             )
             {
