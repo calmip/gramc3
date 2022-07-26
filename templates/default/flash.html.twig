@@ -1,4 +1,4 @@
-{# commenté car l'utilisateur lit "Bonjour [son nom]" et sait qu'elle est authentifiée
+{# commenté car l'utilisateur lit "Bonjour [son nom]" et sait qu'elle est authentifiée #}
 {% for type, messages in app.flashes %}
     {% for message in messages %}
         <div class="{{ type }}" role="alert" >
@@ -6,4 +6,4 @@
         </div>
     {% endfor %}
 {% endfor %}
-#}
+

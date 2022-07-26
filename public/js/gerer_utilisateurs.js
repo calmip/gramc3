@@ -151,7 +151,7 @@ $( document ).ready(function() {
     };
 
     // Connecter aux fonctions click lors de l'initialisation
-    //////////////$( "a.modification" ).click(click_modification);
+    $( "a.modification" ).click(click_modification);
     // Pas d'ajax pour la suppression, car en cas d'erreur (si la personne a des projets)
     // la redirection ne se fait pas
     // Il faudra arranger ça, mais pour l'instant on vire l'ajax

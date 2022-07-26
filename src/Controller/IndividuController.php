@@ -1061,7 +1061,8 @@ class IndividuController extends AbstractController
         $ff = $this->ff;
         $em = $this->em;
 
-        $form = Functions::getFormBuilder($ff, 'tri', GererUtilisateurType::class, [])->getForm();
+        $form = $ff->createNamedBuilder('tri', GererUtilisateurType::class, [], []) -> getform();
+        //$form = Functions::getFormBuilder($ff, 'tri', GererUtilisateurType::class, [])->getForm();
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

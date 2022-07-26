@@ -1367,7 +1367,7 @@ svg .fill{
 }
 
 .liens_importants_footer{
-    width: 30%;
+    /*width: 30%;*/
     font-size: 0.75rem;
     display: flex;
     justify-content: space-around;
@@ -1396,7 +1396,7 @@ select:hover{
     cursor: pointer;
 }
 
-#form_connect, #form_submit{
+#form_connect, #form_submit, #tri_filtrer {
     border-radius: 50px;
     background: white;
     border: 1px solid var(--third-color);
@@ -1896,9 +1896,9 @@ tbody tr.rallonge{
     margin: auto;
     display: flex;
     padding: 0;
-    }
+}
 
-.consulter_projet .supplement .lien_supplementaire{
+.consulter_projet .supplement .lien_supplementaire {
     display: flex;
     flex-direction: column;
     margin-right: 1rem;
@@ -1913,14 +1913,14 @@ tbody tr.rallonge{
     height: 60px;
 }
 
-.consulter_projet .supplement .lien_supplementaire:hover{
+.consulter_projet .supplement .lien_supplementaire:hover {
     stroke: white;
     color: white;
     background: var(--first-color-hover);
     cursor: pointer;
 }
 
-.consulter_projet .supplement .lien_supplementaire svg{
+.consulter_projet .supplement .lien_supplementaire svg {
     margin-bottom: 1rem;
 }
 
@@ -2385,7 +2385,14 @@ tbody tr.rallonge{
     flex-direction: column;
 }
 
-
+/* ========== ADMINISTRATEUR LISTE D'UTILISATEURS ==========  */
+/* TODO - MUTUALISER */
+.section_projet_session #tri_filtre {
+    padding: 5px 20px 5px 10px;
+    border-radius: 11px;
+    background: none;
+    margin: 0 20px;
+}
 
 /* ========== ADMINISTRATEUR PROJETS SESSION ==========  */
 .section_projet_session .formulaire{
@@ -2393,7 +2400,7 @@ tbody tr.rallonge{
     align-items: center;
 }
 
-.section_projet_session #form_session{
+.section_projet_session #form_session,.section_projet_session #form_annee {
     padding: 5px 20px 5px 10px;
     border-radius: 11px;
     background: none;
@@ -2456,7 +2463,52 @@ tbody tr.rallonge{
     border-collapse: collapse;
 }
 
+/* ========== ADMINISTRATEUR PROJETS PAR ANNEE ==========  */
+/* === Emmanuel ==== */
+/* === TODO = Factoriser avec Consulter Projet === */
 
+#bilan_legende .supplement{
+    width: 85%;
+    margin: auto;
+    display: flex;
+    padding: 0;
+}
+
+#bilan_legende .supplement .lien_supplementaire {
+    display: flex;
+    flex-direction: column;
+    margin-right: 1rem;
+    align-items: center;
+    stroke: black;
+    text-decoration: none;
+    color: black;
+    border: 1px solid var(--first-color);
+    padding: 0.5rem;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    height: 60px;
+}
+
+#bilan_legende .supplement .lien_supplementaire:hover {
+    stroke: white;
+    color: white;
+    background: var(--first-color-hover);
+    cursor: pointer;
+}
+
+#bilan_legende .supplement .lien_supplementaire svg {
+    margin-bottom: 1rem;
+}
+
+#bilan_legende .supplement .conso:hover svg path:first-of-type{
+    stroke: var(--first-color-hover);
+}
+
+#bilan_legende .supplement .conso svg{
+    /* width: 23%; */
+    height: auto;
+    cursor: pointer;
+}
 
 /* ========== EXPERTS ==========  */
 #section_expert .commentaires{
