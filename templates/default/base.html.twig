@@ -224,11 +224,11 @@
 
             <div class="liens_importants_footer">
                 {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-                    <span>gramc {{ infos.VERSION }} <a href="mailto:{{ mailadmin }}" class="lien_footer">{{ mailadmin }}</a></span>
+                    <span>gramc {{ infos.VERSION }} - design <a href="https://fr.linkedin.com/in/ugo-mariotto-952aa21b8" target='_blank'>Ugo Mariotto</a> - <a href="mailto:{{ mailadmin }}" class="lien_footer">{{ mailadmin }}</a></span>
                 {% else %}
-                    <span>gramc {{ infos.VERSION }} {{ infos.mail_replace(mailadmin) }}</span>
+                    <span>gramc {{ infos.VERSION }} - design <a href="https://fr.linkedin.com/in/ugo-mariotto-952aa21b8" target='_blank'>Ugo Mariotto</a> - {{ infos.mail_replace(mailadmin) }}</span>
                 {% endif %}
-                <a href="{{ path('mentions_legales') }}" class="lien_footer" title="Lire les mentions légales">Mentions légales</a>
+                &nbsp;-&nbsp;<a href="{{ path('mentions_legales') }}" class="lien_footer" title="Lire les mentions légales">Mentions légales</a>&nbsp;-&nbsp;
                 {% if mesoc_cgu != null %}
                 <a href="{{ mesoc_cgu }}" class="lien_footer" title="Lire les cgu du calculateur">cgu</a>
                 {% endif %}
