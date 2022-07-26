@@ -4,30 +4,38 @@
        ServiceVersions::imageProperties
 #}
 
+
 {% macro upload_images(version, images) %}
-    {% for img in images %}
+
+{% import "default/icone.html.twig" as icones %}
+
     <div class="figures">
-        <div>
-            <div id = "{{img.name}}">
-                {% if img.contents is defined  %}
-                    <img class="figure" src="data:image/jpg;base64,{{ img.contents }}" data-width="{{ img.width }}" data-height="{{ img.height }}" alt="{{img.displayName}}" title="cliquez pour afficher la figure en taille réelle">
-                {% else %}
-                    <img class="figure" src="toto.jpg" >
-                {% endif %}
-            </div>
-            <p>{{img.displayName}} <a class="fileremover"  {% if img.contents is defined %}style="display:inline"{% else %}style="display:none"{% endif %} href="#" data-href="{{path('version_supprimer_fichier', { 'id' : version.idVersion, 'filename' : img.name }) }}">SUPPR</a></p>
+        {% for img in images %}
+        <div class="figure">
+                <div id = "{{img.name}}">
+                    {% if img.contents is defined  %}
+                        <img class="figure_image" src="data:image/jpg;base64,{{ img.contents }}" data-width="{{ img.width }}" data-height="{{ img.height }}" alt="{{img.displayName}}" title="cliquez pour afficher la figure en taille réelle">
+                    {% else %}
+                        <img class="figure_image" src="toto.jpg" >
+                    {% endif %}
+                </div>
+                <p>{{img.displayName}} <a class="fileremover"  {% if img.contents is defined %}style="display:inline"{% else %}style="display:none"{% endif %} href="#" data-href="{{path('version_supprimer_fichier', { 'id' : version.idVersion, 'filename' : img.name }) }}">{{icones.supprimer}}</a></p>
         </div>
+        {% endfor %}
     </div>
-    {% endfor %}
-    
-    {% for img in images %}
-    <div class="uploadstatus"></div>
-    <div class="fileuploader">
-        <a href="{{ path('televerser', { 'id' : version.idVersion, 'filename' : img.name } ) }}" target="_blank" >
-            <strong>{{img.displayName}}</strong>
-        </a>
+
+    <div class="uploaders">
+        {% for img in images %}
+        <div>
+            <div class="fileuploader">
+                <a href="{{ path('televerser', { 'id' : version.idVersion, 'filename' : img.name } ) }}" target="_blank" >
+                    <strong>{{img.displayName}}</strong>
+                </a>
+            </div>
+            <div class="uploadstatus"></div>
+        </div>
+        {% endfor %}
     </div>
-    {% endfor %}
 
 {% endmacro %}
 
@@ -42,7 +50,7 @@
         {% for img in images %}
             {% if img.contents is defined %}
                 <div>
-                    <img class="figure" src="data:image/png;base64,{{ img.contents }}" data-width="{{ img.width }}" data-height="{{ img.height }}" alt="{{ img.displayName }}" title="cliquez pour afficher la figure en taille réelle">
+                    <img class="figure_image" src="data:image/png;base64,{{ img.contents }}" data-width="{{ img.width }}" data-height="{{ img.height }}" alt="{{ img.displayName }}" title="cliquez pour afficher la _image en taille réelle">
                     <p>{{ img.displayName }}</p>
                 </div>
             {% endif %}

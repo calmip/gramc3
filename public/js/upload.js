@@ -33,7 +33,7 @@ $(document).ready(function()
                         remover = remover.find("a");
                         if (div_image)
                         {
-                            html = '<img class="figure" src="data:image/jpg;base64,' + json_data['properties']['contents'] + '" ';
+                            html = '<img class="figure_image" src="data:image/jpg;base64,' + json_data['properties']['contents'] + '" ';
                             html += ' alt="Figure {{i}}" >';
                             div_image.html(html);
                             remover.show();
@@ -71,7 +71,7 @@ $(document).ready(function()
             remover = remover.find("a");
             if (div_image)
             {
-                html = '<img class="figure" src="toto.jpg">';
+                html = '<img class="figure_image" src="toto.jpg">';
                 div_image.html(html);
             }
             remover.hide();

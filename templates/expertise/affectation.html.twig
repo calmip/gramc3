@@ -156,17 +156,25 @@
         </table>
         {% if forms['BOUTONS'] is defined %}
         <div id="panneau_enregistrer" > {# ANCIENNEMENT "BOUTON_AFFECTER" #}
-            <h2>Pour la sélection</h2>
-            <div class="boutons">
-                {#{{ form_start( forms['BOUTONS'] ) }}#}
-                {{ form_widget( forms['BOUTONS'].sub1 ) }}
-                {{ form_widget( forms['BOUTONS'].sub2 ) }}
-                {% if max_expertises_nb > 1 %}
-                    {{ form_widget( forms['BOUTONS'].sub3 ) }}
-                    {{ form_widget( forms['BOUTONS'].sub4 ) }}
-                {% endif %}
+            <div class="panneau">
+                <h2>Pour la sélection</h2>
+                <div class="boutons">
+                    {#{{ form_start( forms['BOUTONS'] ) }}#}
+                    {{ form_widget( forms['BOUTONS'].sub1 ) }}
+                    {{ form_widget( forms['BOUTONS'].sub2 ) }}
+                    {% if max_expertises_nb > 1 %}
+                        {{ form_widget( forms['BOUTONS'].sub3 ) }}
+                        {{ form_widget( forms['BOUTONS'].sub4 ) }}
+                    {% endif %}
+                </div>
+                {#{{ form_end( forms['BOUTONS'] ) }}#}
             </div>
-            {#{{ form_end( forms['BOUTONS'] ) }}#}
+
+            <div class="menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
         </div>
         {% endif %}
     </div>

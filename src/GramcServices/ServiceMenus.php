@@ -515,6 +515,7 @@ class ServiceMenus
         $menu['name']   =   'individu_gerer';
         $menu['commentaire']    =   "Gérer les utilisateurs de gramc";
         $menu['lien']           =   "Utilisateurs";
+        $menu['icone']          =   "liste_utilisateur";
 
         if ($this->ac->isGranted('ROLE_ADMIN')) {
             $menu['ok'] = true;
@@ -549,6 +550,7 @@ class ServiceMenus
         $menu['name']   =   'gerer_sessions';
         $menu['commentaire']    =   "Gérer les sessions d'attribution";
         $menu['lien']           =   "Sessions";
+        $menu['icone']          =   "sessions";
 
 
         if ($this->ac->isGranted('ROLE_ADMIN')) {
@@ -569,6 +571,7 @@ class ServiceMenus
         $menu['name']   =   'bilan_session';
         $menu['commentaire']    =   "Générer et télécharger le bilan de session";
         $menu['lien']           =   "Bilan de session";
+        $menu['icone']           =   "bilan";
 
 
         if ($this->ac->isGranted('ROLE_OBS') || $this->ac->isGranted('ROLE_PRESIDENT')) {
@@ -609,6 +612,7 @@ class ServiceMenus
         $menu['name']   =   'projet_session';
         $menu['commentaire']    =   "Gérer les projets par session";
         $menu['lien']           =   "Projets ( par session )";
+        $menu['icone']           =   "projet_session";
 
         if ($this->ac->isGranted('ROLE_OBS') || $this->ac->isGranted('ROLE_PRESIDENT')) {
             $menu['ok'] = true;
@@ -628,6 +632,7 @@ class ServiceMenus
         $menu['name']        =   'projet_annee';
         $menu['commentaire'] =   "Gérer les projets par année";
         $menu['lien']        =   "Projets ( par année )";
+        $menu['icone']       =   "projet_annee";
 
         if ($this->ac->isGranted('ROLE_OBS') || $this->ac->isGranted('ROLE_PRESIDENT')) {
             $menu['ok'] = true;
@@ -647,6 +652,7 @@ class ServiceMenus
         $menu['name']        =   'projet_donnees';
         $menu['commentaire'] =   "Projets ayant des demandes en stockage ou partage de données";
         $menu['lien']        =   "Gestion et valo des données";
+        $menu['icone']        =   "donnees";
 
         if ($this->ac->isGranted('ROLE_OBS') || $this->ac->isGranted('ROLE_PRESIDENT')) {
             $menu['ok'] = true;
@@ -665,6 +671,7 @@ class ServiceMenus
         $menu['name']   =   'projet_tous';
         $menu['commentaire']    =   "Liste complète des projets";
         $menu['lien']           =   "Tous les projets";
+        $menu['icone']          =   "tous";
 
 
         if ($this->ac->isGranted('ROLE_OBS') || $this->ac->isGranted('ROLE_PRESIDENT')) {
@@ -1538,6 +1545,7 @@ class ServiceMenus
         $menu['commentaire']    =   "Téléverser des fiches projet ou des rapports d'activité";
         $menu['ok']             =   false;
         $menu['raison']         =   "Vous n'êtes pas un administrateur";
+        $menu['icone']         =   "televersement_generique";
 
         if ($this->ac->isGranted('ROLE_ADMIN')) {
             $menu['ok']             =   true;

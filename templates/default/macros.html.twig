@@ -36,28 +36,58 @@
 
     {% import "default/icone.html.twig" as icones %}
 
-    {% if value == "nouveauProjet" %}
+    {% if value == "indefinit" %}
+        {{icones.indefinit}}
+    {% elseif value == "scrollTop" %}
+        {{icones.scrollTop}}
+    {% elseif value == "nouveauProjet" %}
         {{icones.nouveauProjet}}
     {% elseif value == "details" %}
         {{icones.details}}
     {% elseif value == "supprimer" %}
         {{icones.supprimer}}
-    {% elseif value == "modifier_rallonge" %}
-        {{icones.modifier_rallonge}}
+    {% elseif value == "consommation" %}
+        {{icones.consommation}}
+    {% elseif value == "croix" %}
+        {{icones.croix}}
+    {% elseif value == "valide" %}
+        {{icones.valide}}
     {% elseif value == "renouveler" %}
         {{icones.renouveler}}
     {% elseif value == "modifier" %}
         {{icones.modifier}}
     {% elseif value == "envoyer" %}
         {{icones.envoyer}}
-    {% elseif value == "indefinit" %}
-        {{icones.indefinit}}
-    {% elseif value == "croix" %}
-        {{icones.croix}}
     {% elseif value == "telecharger" %}
         {{icones.telecharger}}
     {% elseif value == "televerser" %}
         {{icones.televerser}}
+    {% elseif value == "pdf" %}
+        {{icones.pdf}}
+    {% elseif value == "fleche_retour" %}
+        {{icones.fleche_retour}}
+    {% elseif value == "trait_summary" %}
+        {{icones.trait_summary}}
+    {% elseif value == "fleche_gauche" %}
+        {{icones.fleche_gauche}}
+    {% elseif value == "fleche_droite" %}
+        {{icones.fleche_droite}}
+    {% elseif value == "liste_utilisateur" %}
+        {{icones.liste_utilisateur}}
+    {% elseif value == "projet_session" %}
+        {{icones.projet_session}}
+    {% elseif value == "projet_annee" %}
+        {{icones.projet_annee}}
+    {% elseif value == "tous" %}
+        {{icones.tous}}
+    {% elseif value == "donnees" %}
+        {{icones.donnees}}
+    {% elseif value == "televersement_generique" %}
+        {{icones.televersement_generique}}
+    {% elseif value == "sessions" %}
+        {{icones.sessions}}
+    {% elseif value == "bilan" %}
+        {{icones.bilan}}
     {% endif %}
 
 {% endmacro %}
