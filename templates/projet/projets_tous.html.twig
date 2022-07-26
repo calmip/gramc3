@@ -8,13 +8,17 @@
 
 {% block body %}
 
-<section>
-    <h1>Projets enregistrés (toutes années)</h1>
+<section class="section_projet_session">
 
-    <form action="{{ path('projet_tous_csv') }}">
-        <input type="submit" value="Télécharger en csv" />
-    </form></p>
+    <h2>Projets enregistrés (toutes années)</h2>
 
+    <div class="formulaire">
+        <form action="{{ path('projet_tous_csv') }}">
+            <input class="telecharger_csv" type="submit" value="Télécharger en csv" />
+        </form>
+    </div>
+
+    <div class="tableaux">
     <div id="bilan_legende"><div id="bilan">
         <table>
             <tbody>
@@ -106,7 +110,7 @@
                     {% else %}
                         <td class="{{ item.metaetat|lower }}">
                     {% endif %}
-					{{ gramcmacros.metagraph(item.metaetat) }}
+                    {{ gramcmacros.metagraph(item.metaetat) }}
                         </td>
 
                     <td>
@@ -143,6 +147,7 @@
         </table>
         </div></div>
 
+ </div>
  <div id="formulaire_confirmation"></div>
  </section>
 {% endblock %}
