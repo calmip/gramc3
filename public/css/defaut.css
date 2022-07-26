@@ -1388,7 +1388,8 @@ select:hover{
     cursor: pointer;
 }
 
-#form_connect, #form_submit, #tri_filtrer {
+/* TODO - Un peu le bordel ! */
+#form_connect, #form_submit, #tri_filtrer, .form_submit {
     border-radius: 50px;
     background: white;
     border: 1px solid var(--third-color);
