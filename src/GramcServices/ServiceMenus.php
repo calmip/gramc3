@@ -702,8 +702,8 @@ class ServiceMenus
     public function info(int $priorite=self::BPRIO):array
     {
         $menu['name']        = 'phpinfo';
-        $menu['commentaire'] = "Exécuter phpinfo()";
-        $menu['lien']        = "phpinfo";
+        $menu['commentaire'] = "Infos sur php et sur aussi sur gramc";
+        $menu['lien']        = "infos techniques";
 
         if ($this->ac->isGranted('ROLE_ADMIN')) {
             $menu['ok'] = true;

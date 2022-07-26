@@ -1,1 +1,20 @@
+{% import "default/macros.html.twig" as gramcmacros %} 
+{% import "default/icone.html.twig" as icones %}
+
 {{ info|raw }}
+
+<hr />
+    <h2 style="text-align: center">Icones utilisables dans gramc3</h2>
+
+    {% set liste_icones= [ 'nouveauProjet',
+                           'details',
+                           'supprimer'] %}
+    <div class="center">
+    <table style="stroke: black">
+        {% for i in liste_icones %}
+        <tr><td class="e">{{i}}</td><td class="v">{{ gramcmacros.menuIcones(i) }}</td></tr>
+        {% endfor %}
+    </table>
+    </div>
+
+    <br><br><br>

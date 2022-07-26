@@ -58,6 +58,8 @@
         {{icones.telecharger}}
     {% elseif value == "televerser" %}
         {{icones.televerser}}
+    {% elseif value == "consommation" %}
+        {{icones.consommation}}
     {% endif %}
 
 {% endmacro %}
@@ -93,7 +95,7 @@
 	                {% endif %}
 	            >
                 {% if item.icone is defined %}
-                    {{ menuIcones(item.icone) }} {{ item.lien }}</a>
+                   {{ menuIcones(item.icone) }} {{ item.lien }}</a>
                 {% else %}
                    {{ menuIcones(indefinit) }} {{ item.lien }}</a>
                 {% endif %}
