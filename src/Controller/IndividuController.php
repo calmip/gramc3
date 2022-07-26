@@ -419,6 +419,10 @@ class IndividuController extends AbstractController
 
         // Nouvel EPPN
         $formSso = $this->ajoutEppn($request, $individu);
+        if ($formSso == null)
+        {
+            return $this->redirectToRoute('individu_modify', [ 'id' => $individu->getId() ]);
+        }
 
         // Supprimer un EPPN
         $ssos = $individu->getSso();
@@ -428,7 +432,7 @@ class IndividuController extends AbstractController
                 'Sso',
                 EntityType::class,
                 [
-                'label' => 'Les eppn valides ',
+                'label' => 'Les eppn de cet individu: ',
                 'multiple' => true,
                 'expanded' => true,
                 'class' => Sso::class,
@@ -438,7 +442,7 @@ class IndividuController extends AbstractController
                 ]
             )
             ->add('submit', SubmitType::class, ['label' => 'modifier' ])
-            ->add('reset', ResetType::class, ['label' => 'reset' ])
+            ->add('reset', ResetType::class, ['label' => 'Annuler' ])
             ->getForm();
 
         $formEppn->handleRequest($request);
@@ -480,7 +484,8 @@ class IndividuController extends AbstractController
         $token = $this->tok->getToken();
         $user = $token->getUser();
         $this->si->sendInvitation($user, $individu);
-        return $this->render('individu/invitation.html.twig');
+        $request->getSession()->getFlashbag()->add("flash info","Invitation envoyée à $individu");
+        return $this->redirectToRoute('individu_gerer');
     }
 
      /**
@@ -524,7 +529,7 @@ class IndividuController extends AbstractController
      * Ajout d'un nouvel eppn
      *
      **************************************/
-    private function ajoutEppn(Request $request, Individu $individu) : FormInterface
+    private function ajoutEppn(Request $request, Individu $individu) : ?FormInterface
     {
         $em = $this->em;
         $sso = new Sso();
@@ -546,7 +551,7 @@ class IndividuController extends AbstractController
             catch (UniqueConstraintViolationException $e)
             {
                 $request->getSession()->getFlashbag()->add("flash erreur","Cet eppn existe déjà !");
-                return $this->redirectToRoute('individu_modify', [ 'id' => $individu->getId() ]);
+                return null;
             };
         }
         return $formSso;        
