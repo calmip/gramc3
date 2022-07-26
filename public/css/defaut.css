@@ -1388,7 +1388,7 @@ select:hover{
     cursor: pointer;
 }
 
-#form_connect, #form_submit{
+#form_connect, #form_submit, #tri_filtrer {
     border-radius: 50px;
     background: white;
     border: 1px solid var(--third-color);
@@ -2358,7 +2358,14 @@ tbody tr.rallonge{
     flex-direction: column;
 }
 
-
+/* ========== ADMINISTRATEUR LISTE D'UTILISATEURS ==========  */
+/* TODO - MUTUALISER */
+.section_projet_session #tri_filtre {
+    padding: 5px 20px 5px 10px;
+    border-radius: 11px;
+    background: none;
+    margin: 0 20px;
+}
 
 /* ========== ADMINISTRATEUR PROJETS SESSION ==========  */
 .section_projet_session .formulaire{

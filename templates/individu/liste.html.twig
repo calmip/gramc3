@@ -1,4 +1,5 @@
 {% extends 'default/base.html.twig' %}
+{% import "default/icone.html.twig" as icones %}
 
 {% block myjavascripts %}
 <script  type="text/javascript" src="{{ asset('js/gerer_utilisateurs.js') }}"></script>
@@ -7,35 +8,38 @@
 
 {% block body %}
 
-<section>
+<section class="section_projet_session">
+
 
     {# ################################################################################## #}
 
     <h1>Utilisateurs de gramc</h1>
 
-    <div class="message warning">
+    <div class="information attention">
         <h2>AVERTISSEMENT</h2>
         Si la case <strong>Filtrer sur tous les utilisateurs</strong>
         est décochée, seuls les utilisateurs qui peuvent se connecter, qui sont admins ou experts, seront considérés.
         <br />
-        <strong>On peut restreindre l'affichage</strong> en entrant un filtre sur les adresses mail
+        <strong>On peut restreindre l'affichage</strong> en entrant un filtre sur les adresses mail/nom/prénom
     </div>
 
-    {{ form_start(form) }}
-    {{ form_row(form.all) }}
-    <div>{{ form_row(form.filtre) }}{{ form_row(form.filtrer) }}</div>
-
     <nav><ul><li>
-        <a id="ajout" class="lien_actif" href="{{ path('individu_ajouter') }}?" title="Créer un utilisateur">Nouvel utilisateur</a>
-        <div class="infobulleok" data-title="Créer un utilisateur">
-            <img src="{{ asset('icones/q16.png') }}" alt="?" />
-        </div>
+        <a id="ajout" class="lien_actif" href="{{ path('individu_ajouter') }}?" title="Créer un utilisateur">{{ icones.nouveauProjet}}Nouvel utilisateur</a>
     </li></ul></nav>
 
-
-
-    {# ################################################################################## #}
-
+    <div class="formulaire">
+    {# VIEUX
+    {{ form_start(form) }}
+    {{ form_row(form.all) }}
+    {{ form_row(form.filtre) }}{{ form_row(form.filtrer) }}
+    {{ form_end(form) }}
+    #}
+    {{ form_start(form) }}
+    {{ form_widget(form.filtre) }}{{ form_widget(form.filtrer)}} {{form_widget(form.all)}} sur tous les utilisateurs
+    {{ form_end(form) }}
+    </div>
+    <hr>
+    <div class="tableaux">
     <div id="bilan_legende"><div id="bilan">
 
     <table>
@@ -69,7 +73,8 @@
 
    {# ################################################################################## #}
 
-    <div id="projets"><table id="utilisateurs">
+    <div id="projets">
+        <table id="utilisateurs">
         <thead>
             <tr>
                 <th>&nbsp;</th>
@@ -97,12 +102,13 @@
             {% endfor %}
         </tbody>
 
-    </table></div>
+        </table>
+    </div>
 
     {# ################################################################################## #}
 
-     {{ form_end(form)  }}
 
+    </div>
     <div id="formulaire_profil"></div>
     <div id="formulaire_thematiques"></div>
 

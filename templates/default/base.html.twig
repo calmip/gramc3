@@ -42,6 +42,7 @@
 
 
     <body>
+        {% if not app.request.xmlhttprequest %}
         {% block header %}
         <header class="header">
 {#{{app.request.attributes.get('_route')}}#}
@@ -153,12 +154,9 @@
 
         {% endblock header %}
 
-
     {% include "default/flash.html.twig" %}
+    {% endif %} {# si ajax on saute tout ça}
     
-    
-
-
     {# ###################################################################### #}
 
     {% block menu %}
