@@ -160,27 +160,20 @@
     {% endif %}
 
     {% if version.versionPrecedente != null  %}
-        <h4 id="prj_justif_renou">Justification du renouvellement :</h4>
-        <table class="projet">
-            <tbody>
-                <tr>
-                    <th>Justification de votre demande de renouvellement (environ 2000 caractères)<br>
-                        <span id="form_prjJustifRenouv_cpt" class="petit"></span>
-                    </th>
-                </tr>
-                <tr>
-                    <td class="center">
-                        <p>
-                            <em>Justifiez votre demande de ressources par rapport à l'évolution de votre projet: Si la demande est importante (> 1Mh),
-                                         vous pouvez présenter un plan de calcul détaillé.<br/>
-                                Citez les codes utilisés (et n'oubliez pas, le cas échéant, de mettre à jour le champ de formulaire consacré
-                                         au code le plus utilisé)</em>
-                        </p> {{ form_widget(form.prjJustifRenouv,
-                { 'attr': { 'class': 'compteur', 'rows' : 6, 'cols' : 70 } }) }}
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+    <div class="textarea renouvellement">
+        <div>
+            <h4 id="prj_justif_renou">Justification du renouvellement : <br>
+                <span id="form_prjJustifRenouv_cpt" class="petit"></span>
+            </h4>
+            <em>Justifiez votre demande de ressources par rapport à l'évolution de votre projet: Si la demande est importante (> 1Mh),
+                vous pouvez présenter un plan de calcul détaillé.<br/>
+                Citez les codes utilisés (et n'oubliez pas, le cas échéant, de mettre à jour le champ de formulaire consacré
+                au code le plus utilisé)
+            </em>
+        </div>
+            {{ form_widget(form.prjJustifRenouv,
+            { 'attr': { 'class': 'compteur', 'rows' : 6, 'cols' : 70 } }) }}
+    </div>
 
         {{ gramcdocmacros.upload_images(version, img_justif_renou) }}
     

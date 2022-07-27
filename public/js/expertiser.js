@@ -16,21 +16,3 @@ $(document).ready(function(e) {
 		$('#nb_heures_att').prop('disabled',false);
 	});
 });
-
-
-// Réduire et développer le menu pour sauvegarder l'expertise d'un projet
-$(document).ready(function() {
-
-    $('#panneau_enregistrer .menu').on('click', function(){
-        if(this.className == 'menu'){
-            this.className = 'menu_ferme'
-            this.parentNode.className = 'panneau_ferme'
-			console.log(this.parentNode)
-        }
-        else{
-            this.className = 'menu'
-			this.parentNode.className = ''
-        }
-		console.log(this.parentNode)
-    })
-})

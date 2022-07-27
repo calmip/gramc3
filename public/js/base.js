@@ -86,9 +86,27 @@ $(document).ready(function() {
     })
 })
 
-
+/*
 function retourArriere(){
     this.on('click', function(){
         //history.back()
         console.log('eee')
 })}
+*/
+
+// Réduire et développer le menu pour enregistrer / annuler / fermer
+$(document).ready(function() {
+
+    $('#panneau_enregistrer .menu').on('click', function(){
+        if(this.className == 'menu'){
+            this.className = 'menu_ferme'
+            this.parentNode.className = 'panneau_ferme'
+            console.log(this.parentNode)
+        }
+        else{
+            this.className = 'menu'
+            this.parentNode.className = ''
+        }
+        console.log(this.parentNode)
+    })
+})

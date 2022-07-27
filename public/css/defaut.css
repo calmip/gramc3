@@ -925,7 +925,7 @@ text-align: center;
 }
 
 /* Affichage du projet: le tableau de figures */
-.figure {
+.figure_image {
     max-width: 200px;
     cursor: pointer;
 }
@@ -1352,6 +1352,14 @@ h2, h1{
 
 
 
+/* ===== TOUTES LES ICONES QUI ONT BESOIN DE FILL ===== */
+svg .fill{
+    fill: black;
+    stroke: none;
+}
+
+
+
 /* ===== FOOTER ===== */
 .footer{
     background: white;
@@ -1510,6 +1518,10 @@ nav li:hover a{
     stroke: white;
 }
 
+nav li:hover a .fill{
+    fill: white;
+}
+
 .lien_actif, .lien_inactif{
     padding: 0;
     margin: 0;
@@ -1639,7 +1651,6 @@ tbody tr.rallonge{
     border: var(--warning-color) 2px solid;
     z-index: 5;
     display: flex;
-    flex-direction: column;
 }
 
 #panneau_enregistrer h2{
@@ -2159,7 +2170,8 @@ tbody tr.rallonge{
 }
 
 .section_modifierProjet #ul_formulaire li.ui-tabs-active {
-    background-color: red;
+    background-color: var(--warning-color);
+    border: none;
 }
 
 .section_modifierProjet .presentation_generale,
@@ -2303,32 +2315,47 @@ tbody tr.rallonge{
     max-width: 60%;
     margin-left: 3rem;
     outline: none;
+    padding: 10px;
 }
 
-.section_modifierProjet .wrap-drop-zone{
+.section_modifierProjet .figures{
     display: flex;
+    justify-content: space-evenly;
+    margin-bottom: 2rem;
+    align-items: flex-end;
 }
 
-.section_modifierProjet .drop-zone{
-    border: 2px dashed var(--first-color);
-    overflow: initial;
-    background: none;
-    float: none;
+.section_modifierProjet .figure{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 200px;
+    border: 2px solid var(--first-color);
+    padding: 10px;
+    border-radius: 15px;
 }
 
-.section_modifierProjet .drop-zone:hover{
-    background: #e9e9e9;
+.section_modifierProjet .figure .fileremover svg{
+    vertical-align: text-bottom;
 }
 
-.section_modifierProjet .drop-zone svg{
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    background: white;
-    padding: 0.35rem;
-    cursor: pointer;
-    width: 30px;
-    height: auto;
+.section_modifierProjet .uploaders{
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.section_modifierProjet .uploaders .fileuploader .ajax-upload-dragdrop{
+    width: 230px !important;
+    text-align: center;
+}
+
+.section_modifierProjet .uploaders .fileuploader .ajax-upload-dragdrop .ajax-file-upload{
+    background: var(--first-color);
+}
+
+.section_modifierProjet .uploaders .uploadstatus{
+    width: 200px;
+    margin: 1rem auto 0;
 }
 
 .section_modifierProjet .quitter{
@@ -2407,7 +2434,7 @@ tbody tr.rallonge{
 }
 
 .section_projet_session .separateur{
-    margin-bottom: 0;
+    margin: 2rem 10px 0 0;
 }
 
 .section_projet_session .tableaux{
@@ -2437,10 +2464,11 @@ tbody tr.rallonge{
 .section_projet_session .tableaux #projets{
     font-size: 0.7em;
     min-width: 75%;
-    margin: 0;
+    margin: 0 10px 0 0;
     overflow: scroll;
     border-left: 1px solid grey;
     border-bottom: 1px solid grey;
+    margin-right: 10px;
 }
 
 .section_projet_session .tableaux #projets #table_projets_session{
@@ -2546,10 +2574,6 @@ tbody tr.rallonge{
 
 
 /* ========== EXPERTISER UN PROJET ==========  */
-#expertise #panneau_enregistrer{
-    flex-direction: row;
-}
-
 #expertise #panneau_enregistrer .fleches{
     display: flex;
     justify-content: space-around;
