@@ -50,7 +50,7 @@
 				{{ form_label(form.codeFor, "Fortran")}}
 				</div>
 
-				<div>
+				<div class="autre">
 				{{ form_widget(form.codeAutre) }} 
 				{{ form_label(form.codeAutre, "Autre")}}
 				{{ form_widget(form.codeLangage) }} 
@@ -106,20 +106,23 @@
 		</div>
 	</div>
 
-	        <tr>
-	            <td class="droite">{{ form_label(form.demLogiciels, "Autres logiciels nécessaires au projet" ) }}<br></td>
-	            <td class="gauche">{{ form_widget(form.demLogiciels, { 'attr': { 'rows' : 5, 'cols' : 50 } }) }}<br><br></td>
-	        </tr>
-	       <tr>
-	            <td class="droite">{{ form_label(form.demBib, "Bibliothèques nécessaires" ) }}<br></td>
-	            <td class="gauche">{{ form_widget(form.demBib, { 'attr': { 'rows' : 5, 'cols' : 50 } }) }}<br><br></td>
-	        </tr>
+	<div class="textarea">
+		<div>
+			<h4>{{ form_label(form.demLogiciels, "Autres logiciels nécessaires au projet :" ) }}</h4>
+			</div>
+		{{ form_widget(form.demLogiciels, { 'attr': { 'rows' : 5, 'cols' : 50 } }) }}
+	</div>
+		   
+	<div class="textarea">
+		<div>
+			<h4>{{ form_label(form.demBib, "Bibliothèques nécessaires :" ) }}</h4>
+		</div>
+		{{ form_widget(form.demBib, { 'attr': { 'rows' : 5, 'cols' : 50 } }) }}
+	</div>
 
-	        <tr>
-	            <td class="droite">Pensez-vous utiliser la <a href="{{ mesoc_visu }}" target="_blank">visualisation à distance</a> ?</td>
-	            <td class="gauche">{{ form_widget(form.demPostTrait) }}<br><br></td>
-	        </tr></tbody></table>
-	    </td>
-	</tr></tbody></table>
+	<div class="input">
+		<label>Pensez-vous utiliser la <a href="{{ mesoc_visu }}" target="_blank">visualisation à distance</a> ?</label>
+		{{ form_widget(form.demPostTrait) }}
+	</div>
 
 </div>

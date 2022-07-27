@@ -98,6 +98,7 @@
 
         </header>
 
+
         <div class="sous_header">
             {% if app.debug %}
                 <p class="etat_session">
@@ -106,6 +107,8 @@
                 {% endfor %}
                 </p>
             {% endif %}
+
+            {% include "default/flash.html.twig" %}
 
             <div class="profil">
 
@@ -154,7 +157,6 @@
 
         {% endblock header %}
 
-    {% include "default/flash.html.twig" %}
     {% endif %} {# si ajax on saute tout ça}
     
     {# ###################################################################### #}

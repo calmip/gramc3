@@ -1268,6 +1268,30 @@ h2, h1{
 
 
 
+/* ===== FLASH ===== */
+div.flash.info{
+    border: 2px solid #64c145;
+    color: #64c145;
+    width: 40%;
+    margin: auto;
+    float: unset;
+    border-radius: 15px;
+    box-shadow: 0px 5px 4px 0px;
+    background-color: white;
+}
+div.flash.erreur{
+    border: 2px solid var(--second-color);
+    color: var(--second-color);
+    width: 40%;
+    margin: auto;
+    float: unset;
+    border-radius: 15px;
+    box-shadow: 0px 5px 4px 0px;
+    background-color: white;
+}
+
+
+
 /* ===== BOUTON RETOUR VERS LE HAUT ===== */
 #scrollTop{
     position: fixed;
@@ -2197,6 +2221,16 @@ tbody tr.rallonge{
     max-width: 25%;
 }
 
+.section_modifierProjet .inputs_checkbox .autre{
+    display: flex;
+    align-items: flex-start;
+    max-width: 40%;
+}
+
+.section_modifierProjet .inputs_checkbox .autre input[type="text"]{
+    width: 100%;
+}
+
 .section_modifierProjet .input label{
     font-weight: bold;
     margin-bottom: 1rem;
@@ -2337,13 +2371,18 @@ tbody tr.rallonge{
     text-align: center;
 }
 
-.section_modifierProjet .uploaders .fileuploader .ajax-upload-dragdrop .ajax-file-upload{
+.section_modifierProjet .uploaders .fileuploader .ajax-upload-dragdrop .ajax-file-upload,
+.section_modifierProjet #tab2 .fileuploader .ajax-upload-dragdrop .ajax-file-upload{
     background: var(--first-color);
 }
 
 .section_modifierProjet .uploaders .uploadstatus{
     width: 200px;
     margin: 1rem auto 0;
+}
+
+.section_modifierProjet #tab2 .fileuploader .ajax-upload-dragdrop{
+    text-align: center;
 }
 
 .section_modifierProjet .quitter{
@@ -2362,6 +2401,10 @@ tbody tr.rallonge{
 .section_modifierProjet .quitter button:hover{
     background: var(--first-color-hover);
     color: white;
+}
+
+.section_modifierProjet #tab5{
+    text-align: initial;
 }
 
 
@@ -2385,6 +2428,10 @@ tbody tr.rallonge{
     flex-direction: column;
 }
 
+.section_administrateur div nav ul li a svg{
+    margin: 0;
+}
+
 /* ========== ADMINISTRATEUR LISTE D'UTILISATEURS ==========  */
 /* TODO - MUTUALISER */
 .section_projet_session #tri_filtre {
@@ -2393,6 +2440,8 @@ tbody tr.rallonge{
     background: none;
     margin: 0 20px;
 }
+
+
 
 /* ========== ADMINISTRATEUR PROJETS SESSION ==========  */
 .section_projet_session .formulaire{
@@ -2509,6 +2558,8 @@ tbody tr.rallonge{
     height: auto;
     cursor: pointer;
 }
+
+
 
 /* ========== EXPERTS ==========  */
 #section_expert .commentaires{
