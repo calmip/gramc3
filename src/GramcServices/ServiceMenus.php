@@ -1418,12 +1418,13 @@ class ServiceMenus
 
     public function rallonge_modifier(Rallonge $rallonge, int $priorite=self::HPRIO):array
     {
-        $menu['name']           =   'rallonge_modifier';
-        $menu['param']          =   $rallonge->getIdRallonge();
-        $menu['lien']           =   "Modifier la demande";
-        $menu['commentaire']    =   "Vous ne pouvez pas modifier la demande";
-        $menu['ok']             =   false;
-        $menu['raison']         =   "raison inconnue";
+        $menu['name']           = 'rallonge_modifier';
+        $menu['param']          = $rallonge->getIdRallonge();
+        $menu['lien']           = "Modifier";
+        $menu['icone']          = "modifier";
+        $menu['commentaire']    = "Vous ne pouvez pas modifier la demande";
+        $menu['ok']             = false;
+        $menu['raison']         = "raison inconnue";
 
 
         $version = $rallonge->getVersion();
@@ -1471,7 +1472,8 @@ class ServiceMenus
     {
         $menu['name']        = 'avant_rallonge_envoyer';
         $menu['param']       = $rallonge->getIdRallonge();
-        $menu['lien']        = "Envoyer la demande à l'expert";
+        $menu['icone']       = 'envoyer';
+        $menu['lien']        = "Envoyer en expertise";
         $menu['commentaire'] = "Vous ne pouvez pas envoyer cette demande à l'expert";
         $menu['ok']          = false;
         $menu['raison']      = "raison inconnue";

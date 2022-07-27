@@ -1408,12 +1408,16 @@ select:hover{
 }
 
 /* TODO - Un peu le bordel ! */
-#form_connect, #form_submit, #tri_filtrer, .form_submit, #form_reset, #sso_reset, #sso_submit {
+#form_connect, #form_submit, #tri_filtrer, .form_submit, #form_reset, #sso_reset, #sso_submit, .rallonge_fermer button {
     border-radius: 50px;
     background: white;
     border: 1px solid var(--third-color);
     padding: 5px 20px;
     cursor: pointer;
+}
+
+.rallonge_fermer button {
+    width: 10em;
 }
 
 #form_connect:hover, #form_submit:hover{

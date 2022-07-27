@@ -182,17 +182,13 @@ class RallongeController extends AbstractController
         $rtn      = $workflow->execute(Signal::CLK_DEMANDE, $rallonge);
         if ($rtn == false) {
             $sj->errorMessage(__METHOD__ . ":" . __LINE__ . " Impossible d'envoyer le signal CLK_DEMANDE à la rallonge " . $rallonge);
+            $request->getSession()->getFlashbag()->add("flash erreur","Rallonge créée, mais responsable probablement pas notifié - Veuillez vérifier");
         }
 
         Functions::sauvegarder($rallonge, $em, $lg);
 
-        return $this->render(
-            'rallonge/creation.html.twig',
-            [
-                'projet'   => $projet,
-                'rallonge' => $rallonge,
-                ]
-        );
+        $request->getSession()->getFlashbag()->add("flash info","Rallonge créée, responsable notifié");
+        return $this->redirectToRoute('consulter_version', ['id' => $projet->getIdProjet(), 'version' => $version->getId()]);
     }
 
     /**
@@ -307,20 +303,10 @@ class RallongeController extends AbstractController
         if ($editForm->isSubmitted()) {
             $erreurs = Functions::dataError($sval, $rallonge);
             $em->flush();
+            $request->getSession()->getFlashbag()->add("flash info","Rallonge enregistrée");
 
             if ($editForm->get('fermer')->isClicked()) {
-                $menu[]   = $sm->rallonge_modifier($rallonge);
-                $menu[]   = $sm->rallonge_envoyer($rallonge);
-                return $this->render(
-                    'rallonge/fermer.html.twig',
-                    [
-                    'rallonge'  => $rallonge,
-                    'projet'    => $projet,
-                    'session'   => $session,
-                    'erreurs'   => $erreurs,
-                    'menu'      => $menu,
-                 ]
-                );
+                return $this->redirectToRoute('rallonge_consulter', [ 'id' => $rallonge->getIdRallonge() ]);
             }
         }
         return $this->render(
