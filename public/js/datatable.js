@@ -63,14 +63,14 @@ $(document).ready(function() { // table anciennes expertises
     });
 });
 
-$(document).ready(function() { // table d'affectation des experts
+/*$(document).ready(function() { // table d'affectation des experts
     $('#affecte_experts').DataTable( {
         "bPaginate": false,
         "bFilter":     false,
         "info":         false,
         "aoColumnDefs": [{bSortable: false,aTargets: [4]}]
     });
-});
+});*/
 
 $(document).ready(function() { // table statistiques laboratoires
     $('#tab_statistiques_labo').DataTable( {

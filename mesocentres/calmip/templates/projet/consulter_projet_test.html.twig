@@ -409,16 +409,16 @@
     {% if is_granted('ROLE_ADMIN') or version.isExpertDe(app.user) %}
         <tr>
            <th class="horiz">Commentaire pour le responsable</th>
-           <td>{{ expertise.commentaireExterne | e | nl2br}}</td>
+           <td>{{ r.commentaireExterne | e | nl2br}}</td>
         </tr>
         <tr>
            <th class="horiz">Commentaire pour le comité</th>
-           <td>{{ expertise.commentaireInterne | e | nl2br}}</td>
+           <td>{{ r.commentaireInterne | e | nl2br}}</td>
         </tr>
     {% else %}
         <tr>
            <th class="horiz">Commentaire</th>
-           <td>{{ expertise.commentaireExterne | e | nl2br}}</td>
+           <td>{{ r.commentaireExterne | e | nl2br}}</td>
         </tr>
     {% endif %}
 

@@ -7,7 +7,7 @@
 <section id="section_expert">
 
 {% if rallonges | length > 0 %}
-    <section class="rallonge">
+    <section class="rallonge" style="stroke:black" >
     <h2>Demandes de rallonges (session en cours)</h2>
     <table id="RALLONGE" class="projet">
         <thead>
@@ -22,35 +22,35 @@
             </tr>
         </thead>
         <tbody>
-    {% for rallonge in rallonges %}
-            <tr class="gras">
-                <td>{{ rallonge.projet }}</td>
-                <td>
-                    <a href="{{ path('consulter_projet', { 'id' : rallonge.projet.idProjet } ) }}">
-                        <img src="{{ asset('icones/consulter.png') }}" alt="Projet" title="Lire le projet" class="bouton_poussoir">
-                    </a>
-                </td>
-                <td>{{ rallonge.version.prjTitre }}</td>
-                <td>{{ rallonge.version.demHeures }}</td>
-                <td>{{ rallonge.version.attrHeures }}</td>
-                <td>{{ rallonge.consocalcul }}</td>
-                <td>{{ rallonge.version.responsable }}</td>
-            </tr>
-            {% for item in rallonge.rallonges %}
-            <tr>
-                <td>{{ item.idRallonge }}</td>
-                <td><a href="{{ path('rallonge_expertiser', { 'id' : item.idRallonge } ) }}" title="Expertiser la demande">
-                    <img src="{{ asset('icones/modifier.png') }}" alt="Projet"  class="bouton_poussoir">
-                    </a>
-                </td>
-                <td>&nbsp;</td>
-                <td>{{ item.demHeures }}</td>
-                <td>{{ item.attrHeures }}</td>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-            </tr>
-            {% endfor %}
-    {% endfor %}
+        {% for rallonge in rallonges %}
+        <tr class="gras">
+            <td>{{ rallonge.projet }}</td>
+            <td>
+                <a href="{{ path('consulter_projet', { 'id' : rallonge.projet.idProjet } ) }}">
+                    {{ icones.details}}
+                </a>
+            </td>
+            <td rowspan="{{ rallonge.rallonges|length + 1 }}">{{ rallonge.version.prjTitre }}</td>
+            <td>{{ rallonge.version.demHeures }}</td>
+            <td>{{ rallonge.version.attrHeures }}</td>
+            <td rowspan>{{ rallonge.consocalcul }}</td>
+            <td rowspan="{{ rallonge.rallonges|length + 1 }}">{{ rallonge.version.responsable }}</td>
+        </tr>
+        {% for item in rallonge.rallonges %}
+        <tr>
+            <td>{{ item.idRallonge }}</td>
+            <td><a href="{{ path('rallonge_expertiser', { 'id' : item.idRallonge } ) }}" title="Expertiser la demande">
+                {{icones.modifier}}
+                </a>
+            </td>
+            <td>&nbsp;</td>
+            <td>{{ item.demHeures }}</td>
+            <td>{{ item.attrHeures }}</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+        </tr>
+        {% endfor %}
+        {% endfor %}
         </tbody>
     </table>
     </section>

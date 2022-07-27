@@ -100,11 +100,11 @@
             <a href="{{ path('rallonge_consulter', { 'id': rallonge.idRallonge })}}"
             {% if rallonge.getMetaEtat() == 'EDITION' %}
                 title="Consulter cette rallonge" >
-                {{ icones.details }}
+                {{ icones.modifier }}
 
 
             {% else %}
-                title="Consulter cette rallonge" ><img class="bouton_poussoir" src="{{ asset('icones/consulter.png') }}" alt="Consulter" />
+                title="Consulter cette rallonge" >{{icones.details}}
             {% endif %}
             </a>
         </td>
