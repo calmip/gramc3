@@ -133,7 +133,7 @@ class Rallonge implements Demande
      * @var string
      *
      * @ORM\Column(name="commentaire_externe", type="text", length=65535, nullable=true)
-     * @Assert\NotBlank(message="Vous n'avez pas rempli le commentaire interne", groups={"president"})
+     * @Assert\NotBlank(message="Vous n'avez pas rempli le commentaire pour le responsable", groups={"president"})
      */
     private $commentaireExterne;
 

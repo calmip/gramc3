@@ -144,7 +144,7 @@
                     <td>{{ rallonge.idRallonge }}</td>
                     <td>
                         {% if( rallonge.finalisable == true ) %}
-                            <a href="{{ path('avant_rallonge_finaliser', { 'id' : rallonge.idRallonge } ) }}" title="finaliser la réponse">
+                            <a href="{{ path('rallonge_finaliser', { 'id' : rallonge.idRallonge } ) }}" title="finaliser la réponse">
                             <img class="bouton_poussoir" src="{{ asset('icones/modifier.png') }}">
                             </a>
                         {% else %}

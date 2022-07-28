@@ -1,76 +1,167 @@
 {% extends 'default/base.html.twig' %}
 
+{% block myjavascripts %}
+
+{{ parent() }}
+
+<script type="text/javascript" src="{{asset('js/projet.js')}}" ></script>
+<script   src="{{ asset('js/compteur_caracteres.js') }}" ></script>
+<script type="text/javascript" src="{{asset('js/expertiser.js')}}" ></script>
+
+{% endblock myjavascripts %}
+
+{%- block choice_widget_expanded -%}
+    {%- for child in form %}
+        {{- form_widget(child) -}}
+        {{- form_label(child, null, {translation_domain: choice_translation_domain}) -}}
+    {% endfor -%}
+{%- endblock choice_widget_expanded -%}
+
+{% form_theme edit_form _self %}
+{% import "default/icone.html.twig" as icones %}
+
+{# ######################################################################### #}
+
 {% block body %}
 
-{% if not erreurs == null %}
-    <section>
-        <div class="message erreur">
+<section id="expertise">
+    {% if noconso==false %}
+        <div id="dialog-compta"></div>
+    {% endif %}
 
-            <h2>Envoi de la demande pas possible actuellement</h2>
-            La demande de rallonge pour le projet {{ projet }} (session {{ session }}) ne <strong>peut pas</strong> être finalisée en l'état.<br>
-            Merci de la compléter
-            {% for erreur in erreurs %}
-            <p>ERREUR: {{ erreur }}</p>
-            {% endfor %}
-        </div>
-        <a class="lien_actif" href="{{ path( 'avant_rallonge_finaliser', { 'id': rallonge.idRallonge } )}}" title="Retourner à la rallonge">Retourner</a>   
-    </section>
-    {% else %}
+    <div id="dialog-compta"></div>
 
-    <section>
-        <h2>Projet {{ projet }}, session {{   session }}: Confirmation d'envoi de l'expertise de demande de rallonge n° {{ rallonge }}</h2>
-
-        <div class="message info">Merci de vérifier votre expertise avant envoi définitif.<br>
-        cette expertise est définitive, une <strong>notification sera envoyée au responsable du projet</strong>
-        </div>
-        
-        <table class="projet">
-            <tbody>
-                <tr>
-                    <th>Validation</th>
-                    <td>
-                        {% if( rallonge.validation == true ) %}
-                            <strong>ACCEPTE</strong>
-                        {% elseif( rallonge.validation == false ) %}
-                            <strong>REFUSE</strong>
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <th>Heures attribuées</th>
-                    <td>{{ rallonge.nbHeuresAtt }}</td>
-                </tr>
-                <tr>
-                    <th>Commentaire interne</th>
-                    <td>{{ rallonge.commentaireInterne }}</td>
-                </tr>
-                <tr>
-                    <th>Commentaire envoyé au responsable</th>
-                    <td>{{ rallonge.commentaireExterne }}</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <div class="message warning">
-            <strong>Confirmez-vous cette expertise ? </strong><br>
-            
-            <nav>
-                <ul>
-                    <li>
-                        <a class="lien_actif" href="{{ path( 'avant_rallonge_finaliser', { 'id': rallonge.idRallonge } ) }}" title="Annuler et retourner à votre expertise">ANNULER</a>
-                    </li>
-                    <li>
-                        <a class="lien_actif" href="{{ path( 'rallonge_finaliser', { 'id': rallonge.idRallonge } ) }}" title="Finaliser cette demande">FINALISER</a>
-                    </li>
-                </ul>
-            </nav>
-            
-        </div>
-
-    </section>
-
+    <div class="top">
+        <h2>Finalisation de la réponse à la demande de rallonge {{ rallonge }}</h2>
+        <p>Projet {{rallonge.version.projet}} de <span>{{ rallonge.version.responsable }} - {{rallonge.version.acroLaboratoire }}</span></p>
     
-{% endif %}
+        <div class="titre">
+            <h3>{{ rallonge.version.prjTitre }}</h3>
+            <p>(<strong>{{ rallonge.version.demHeuresTotal - rallonge.demHeures}}</strong> heures demandées,
+            <strong>{{ rallonge.version.attrHeuresTotal }}</strong> attribuées,
+            <strong>{{ rallonge.demHeures}}</strong> demandées dans cette rallonge).
+            
+            </p>
+        </div>
+    </div>
+
+    <div class="information">
+        <h2>ATTENTION</h2>
+            <p>En tant que président du comité d'attributions, vous devez <strong>finaliser </strong> la réponse à cette demande de rallonges<br>
+            Vous pouvez:<ul>
+                <li>Compléter le commentaire pour le comité</li>
+                <li>Modifier le nombre d'heures attribuées</li>
+                <li>Ajouter un commentaire qui sera envoyé au responsable du projet.</li>
+                </ul>
+            Lorsque vous cliquerez sur <strong>ENVOYER</strong>, le responsable du projet sera automatiquement notifié de votre décision.</p>
+    </div>
+
+    <div id="menu_expertiser" class="center">
+        <a href="{{ path('rallonge_consulter', { 'id' : rallonge.idRallonge } ) }}" title="Consulter la demande" target="_blank">
+            {{icones.details}}
+            <p>Rallonge</p>
+        </a>
+        <a href="{{ path('consulter_projet', { 'id' : rallonge.version.projet.idProjet } ) }}" title="Consulter le projet" target="_blank">
+            {{icones.details}}
+            <p>Projet</p>
+        </a>
+        {% if noconso==false %}
+            <a class="conso" title="Consommation {{anneePrec}}" data-href="{{ absolute_url(path('projet_conso', { 'id': rallonge.version.projet.idProjet, 'annee' : anneePrec })) }}">
+                {{icones.consommation}}
+                <p>Conso {{anneePrec}}</p>
+            <a class="conso" title="Consommation {{anneeCour}}" data-href="{{ absolute_url(path('projet_conso', { 'id': rallonge.version.projet.idProjet, 'annee' : anneeCour })) }}">
+                {{icones.consommation}}
+                <p>Conso {{anneeCour}}</p>
+            </a>
+        {% endif %}
+        
+    </div>
+
+    {% if not erreurs == null %}
+        <div class="information attention">
+        {% for erreur in erreurs %}
+        <p>ERREUR: {{ erreur }}</p>
+        {% endfor %}
+        </div>
+    {% endif %}
+
+    {{ form_start(edit_form) }}
+
+    <h3>La réponse finale </h3>
+
+        <div class="input">
+            <div>
+                <h4>Validation :</h4>
+                <small>Vous ne pouvez pas modifier la décision de l'expert-e</small>
+            </div>
+            <div class="validation">
+                {{ form_widget(edit_form.validation)  }}
+            </div>
+        </div>
+        <div class="textarea">
+            <div>
+                <h4>Commentaire pour le comité :</h4>
+                <small>Ce commentaire restera au sein du comité d'attribution.
+                Il a été initié par l'expert qui a examiné la demande</small>
+            </div>
+            {{ form_widget(edit_form.commentaireInterne,{ 'attr': { 'class': 'compteur', 'rows' : 10, 'cols' : 100 } }) }}
+        </div>
+        <div class="textarea commentaire_externe">
+            <div>
+                <h4>Commentaire :</h4>
+                <small>Ce commentaire sera envoyé au responsable du projet</small></th>
+            </div>
+            {{ form_widget(edit_form.commentaireExterne,{ 'attr': { 'class': 'compteur', 'rows' : 10, 'cols' : 100 } }) }}
+        </div>
+
+        <div class="input">
+            <div>
+                <h4>Nombre d'heures attribuées :</h4>
+                <small>Le nombre d'heures a été suggéré par l'expert-e, mais vous pouvez le modifier.</small>
+            </div>
+            {{ form_widget(edit_form.nbHeuresAtt) }}
+        </div>
+
+    </div>
+
+    <div id="panneau_enregistrer">
+        <div class="panneau">
+            <div class="boutons">
+                {{ form_widget(edit_form.enregistrer, {'attr': {'title' : 'Enregistrer l\'expertise et continuer'}}) }}
+                {{ form_widget( edit_form.annuler,{ 'attr': { 'title' : 'Abandonner les modifications' } }) }}
+                {{ form_widget( edit_form.fermer, { 'attr': { 'title' : 'Enregistrer et fermer l\'expertise' } }) }}
+            </div>
+            
+{#          <div class="fleches">
+                {% if prev!=null %}
+                    <a href="{{ path('expertise_modifier', { 'id' : prev.id } ) }}" class="fleche" title="Expertise précédente" alt="Expertise précédente">{{icones.fleche_gauche}}</a>
+                {% else %}
+                    <a class="fleche disabled" title="Pas d'expertise précédente" alt="Pas d'expertise précédente">{{icones.fleche_gauche}}</a>
+                {% endif %}
+                {% if next!=null %}
+                    <a href="{{ path('expertise_modifier', { 'id' : next.id } ) }}"class="fleche" title="Expertise suivante" alt="Expertise suivante">{{icones.fleche_droite}}</a>
+                {% else %}
+                    <a class="fleche disabled" title="Pas d'expertise suivante" alt="Pas d'expertise suivante">{{icones.fleche_droite}}</a>
+                {% endif %}
+            </div>
+#}
+            {% set peut_envoyer = 1 %}
+            {% if peut_envoyer %}
+                <div class="boutons envoyer">
+                    {{ form_widget(edit_form.envoyer) }}
+                </div>
+            {% endif %}
+    
+        </div>    
+        <div class="menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+
+</section>
+
 
 
 
