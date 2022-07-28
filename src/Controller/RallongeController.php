@@ -469,7 +469,6 @@ class RallongeController extends AbstractController
         }
 
         if ($editForm->isSubmitted()) {
-            $rallonge->setValidation($validation); // validation disabled
             $erreurs = Functions::dataError($sval, $rallonge, ['president']);
 
 

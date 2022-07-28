@@ -519,6 +519,24 @@ class Rallonge implements Demande
         return $this->expert;
     }
 
+    /**
+     * @ORM\PrePersist()
+     */
+    // cf. https://stackoverflow.com/questions/39272733/boolean-values-and-choice-symfony-type
+    public function prePersist()
+    {
+        $this->validation = (bool) $this->validation; //Force using boolean value of $this->active
+    }
+
+    /**
+     * @ORM\PreUpdate()
+     */
+    public function preUpdate()
+    {
+        $this->validation = (bool) $this->validation;
+    }    
+
+
     /***************************************************
      * Fonctions utiles pour la class Workflow
      * Autre nom pour getEtatRallonge/setEtatRallonge !
