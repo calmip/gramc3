@@ -1327,6 +1327,9 @@ div.flash.erreur{
 
 #scrollTop svg{
     padding: 0.75rem;
+}
+
+#scrollTop svg .fill{
     fill: var(--first-color);
 }
 
@@ -1848,6 +1851,7 @@ tbody tr.rallonge{
 
 .section_projets nav li:hover a{
     color: initial;
+    stroke: var(--third-color);
 }
 
 .section_projets table a{
