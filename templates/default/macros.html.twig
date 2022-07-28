@@ -115,49 +115,49 @@
     <ul>
         {% for item in menu %}
         {% if not item==null %}
-	        {% if item.ok %}
-	        <li {% if item.priorite is defined %}
+            {% if item.ok %}
+            <li {% if item.priorite is defined %}
                     class="priorite{{item.priorite}}"
                 {% endif %}
             ><a class="lien_actif" title="{{ item.commentaire }}"
-	                {% if item.param is defined %}
-	                    href="{{ path(item.name, { 'id' : item.param }) }}"
-	                {% elseif item.params is defined %}
-	                    href="{{ path(item.name, item.params) }}"
-	                {% else %}
-	                    href="{{ path(item.name) }}"
-	                {% endif %}
-	            >
+                    {% if item.param is defined %}
+                        href="{{ path(item.name, { 'id' : item.param }) }}"
+                    {% elseif item.params is defined %}
+                        href="{{ path(item.name, item.params) }}"
+                    {% else %}
+                        href="{{ path(item.name) }}"
+                    {% endif %}
+                >
                 {% if item.icone is defined %}
                    {{ menuIcones(item.icone) }} {{ item.lien }}</a>
                 {% else %}
                    {{ menuIcones(indefinit) }} {{ item.lien }}</a>
                 {% endif %}
-	        </li>
-	        {% else %}
-	        <li {% if item.priorite is defined %}
+            </li>
+            {% else %}
+            <li {% if item.priorite is defined %}
                     class="priorite{{item.priorite}}"
                 {% endif %}
             ><a class="lien_inactif"
-	            {% if  app.debug %}
-	                {% if item.param is defined %}
-	                    href="{{ path(item.name, { 'id' : item.param }) }}"
-	                {% elseif item.params is defined %}
-	                    href="{{ path(item.name, item.params) }}"
-	                {% else %}
-	                    href="{{ path(item.name) }}"
-	                {% endif %}
-	            {% endif %}
-	            title="{{ item.commentaire }} - {{ item.raison }}"
+                {% if  app.debug %}
+                    {% if item.param is defined %}
+                        href="{{ path(item.name, { 'id' : item.param }) }}"
+                    {% elseif item.params is defined %}
+                        href="{{ path(item.name, item.params) }}"
+                    {% else %}
+                        href="{{ path(item.name) }}"
+                    {% endif %}
+                {% endif %}
+                title="{{ item.commentaire }} - {{ item.raison }}"
                 >
                 {% if item.icone is defined %}
                     {{ menuIcones(item.icone) }} {{ item.lien }}</a>
                 {% else %}
                     {{ menuIcones(indefinit) }} {{ item.lien }}</a>
                 {% endif %}
-	        </li>
-	        {% endif %}
-	    {% endif %}
+            </li>
+            {% endif %}
+        {% endif %}
         {% endfor %}
         <li class="more">En voir plus...</li>
     </ul>

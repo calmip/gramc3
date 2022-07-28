@@ -170,11 +170,22 @@ table#profil td select,table#profil td input {
 }
 
 /* Le formulaire eppn associé */
-div#eppn {
+#eppn {
     margin: 0 auto;
-    width: 30%;
+    width: 60%;
 }
-
+#eppn .checkbox {
+    margin-left:2em;
+}
+#eppn .row {
+    margin-bottom: 2ex;
+}
+#eppn label {
+    font-weight: bold;
+}
+#eppn #sso_submit, #eppn #sso_reset,#eppn #form_submit, #eppn #form_reset {
+    margin: 1ex 0;
+}
 /* Le formulaire de profil horizontal */
 table#profil_horiz {
     font-size: .8em;
@@ -1420,7 +1431,8 @@ select:hover{
     cursor: pointer;
 }
 
-#form_connect, #form_submit, #tri_filtrer {
+/* TODO - Un peu le bordel ! */
+#form_connect, #form_submit, #tri_filtrer, .form_submit, #form_reset, #sso_reset, #sso_submit {
     border-radius: 50px;
     background: white;
     border: 1px solid var(--third-color);

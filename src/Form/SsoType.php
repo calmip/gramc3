@@ -55,6 +55,6 @@ class SsoType extends AbstractType
      */
     public function getBlockPrefix(): string
     {
-        return 'appbundle_sso';
+        return 'sso';
     }
 }

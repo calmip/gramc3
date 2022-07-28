@@ -94,12 +94,12 @@ $(document).ready(function() {
         if(this.className == 'menu'){
             this.className = 'menu_ferme'
             this.parentNode.className = 'panneau_ferme'
-			console.log(this.parentNode)
+            console.log(this.parentNode)
         }
         else{
             this.className = 'menu'
-			this.parentNode.className = ''
+            this.parentNode.className = ''
         }
-		console.log(this.parentNode)
+        console.log(this.parentNode)
     })
 })

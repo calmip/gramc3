@@ -86,7 +86,6 @@ class MailController extends AbstractController
         $nb_msg = 0;
         $sujet   = \file_get_contents(__DIR__."/../../templates/notification/mail_to_responsables_fiche-sujet.html.twig");
         $body    = \file_get_contents(__DIR__."/../../templates/notification/mail_to_responsables_fiche-contenu.html.twig");
-        $sent    =   false;
         $responsables   =   $this->getResponsablesFiche($session);
 
         $form   =  Functions::createFormBuilder($ff)
@@ -100,15 +99,14 @@ class MailController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $sent   = true;
             $body   = $form->getData()['texte'];
 
             foreach ($responsables as $item) {
                 $individus[ $item['responsable']->getIdIndividu() ] = $item['responsable'];
                 $selform = $this->getSelForm($item['responsable']);
                 $selform->handleRequest($request);
-                if ($selform->getData()['sel']==false) {
-                    //$sj->debugMessage( __METHOD__ . $version->getIdVersion().' selection NON');
+                //dd($selform->getData());
+                if (empty($selform->getData()['sel'])) {
                     continue;
                 }
                 $sn->sendMessageFromString(
@@ -121,12 +119,19 @@ class MailController extends AbstractController
                 // DEBUG = Envoi d'un seul message
                  // break;
             }
+            if ($nb_msg)
+            {
+                $request->getSession()->getFlashbag()->add("flash info","$nb_msg message envoyé(s)");
+            }
+            else
+            {
+                $request->getSession()->getFlashbag()->add("flash erreur","Pas de message à envoyer");
+            }
         }
 
         return $this->render(
             'mail/mail_to_responsables_fiche.html.twig',
             [
-            'sent'         => $sent,
             'nb_msg'       => $nb_msg,
             'responsables' => $responsables,
             'session'      => $session,
@@ -207,7 +212,6 @@ class MailController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $sent   = true;
             $body   = $form->getData()['texte'];
 
             foreach ($responsables as $item) {
@@ -231,12 +235,19 @@ class MailController extends AbstractController
                 // DEBUG = Envoi d'un seul message
                  // break;
             }
+            if ($nb_msg)
+            {
+                $request->getSession()->getFlashbag()->add("flash info","$nb_msg envoyés");
+            }
+            else
+            {
+                $request->getSession()->getFlashbag()->add("flash erreur","Pas de message à envoyer");
+            }
         }
 
         return $this->render(
             'mail/mail_to_responsables.html.twig',
             [
-                'sent'          => $sent,
                 'nb_msg'        => $nb_msg,
                 'responsables'  => $responsables,
                 'nb_projets'    => $nb_projets,

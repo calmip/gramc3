@@ -52,7 +52,7 @@
         {% if (individu.eppn | length != 0) %}
     
             {% if formEppn != null %}
-            <h2>Suppression d'un eppn</h2>
+            <h2>Supprimer un eppn</h2>
             <p class="centrage"><em>Décochez les identifiants que vous souhaitez supprimer</em></p>
             
             {% form_theme formEppn 'foundation_5_layout.html.twig' %}
@@ -71,6 +71,7 @@
     <h2>Ajouter un eppn</h2>
 
     <div id="eppn">
+        {% form_theme formEppn 'foundation_5_layout.html.twig' %}
         {{ form_start(formSso) }}
         {{ form_widget(formSso)}}
         {{ form_end(formSso) }}
