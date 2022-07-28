@@ -86,13 +86,6 @@ $(document).ready(function() {
     })
 })
 
-/*
-function retourArriere(){
-    this.on('click', function(){
-        //history.back()
-        console.log('eee')
-})}
-*/
 
 // Réduire et développer le menu pour enregistrer / annuler / fermer
 $(document).ready(function() {

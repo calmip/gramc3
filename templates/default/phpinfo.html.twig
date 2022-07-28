@@ -36,6 +36,11 @@
                            ] %}
     <div class="center">
     <table style="stroke: black">
+    <style>
+    .fill{
+        fill: black;
+    }
+    </style>
         {% for i in liste_icones %}
         <tr><td class="e">{{i}}</td><td class="v">{{ gramcmacros.menuIcones(i) }}</td></tr>
         {% endfor %}

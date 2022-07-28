@@ -729,6 +729,7 @@ class ServiceMenus
         $menu['name']   =   'gerer_laboratoires';
         $menu['commentaire']    =   "Gérer la liste des laboratoires enregistrés";
         $menu['lien']           =   "Laboratoires";
+        $menu['icone']          =   "laboratoire";
 
         if ($this->ac->isGranted('ROLE_OBS')) {
             $menu['ok'] = true;
@@ -746,6 +747,7 @@ class ServiceMenus
         $menu['name']       =   'gerer_formations';
         $menu['commentaire']=   "Gérer la liste des formations";
         $menu['lien']       =   "Formations";
+        $menu['icone']      =   "formations";
 
         if ($this->ac->isGranted('ROLE_OBS')) {
             $menu['ok'] = true;
@@ -1276,6 +1278,7 @@ class ServiceMenus
         $menu['commentaire'] = "Vous ne pouvez pas envoyer un mail aux responsables des projets qui ne l'ont pas renouvelé";
         $menu['ok']          = false;
         $menu['raison']      = "Vous n'êtes pas un administrateur ou président";
+        $menu['icone']      = "mail";
 
         if ($etatSession    != Etat::EDITION_DEMANDE) {
             $menu['raison']  = "La session n'est pas en mode d'édition";
