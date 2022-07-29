@@ -848,7 +848,7 @@ class ServiceMenus
             } elseif ($session->getEtatSession() != Etat::EDITION_DEMANDE && ! $version->isProjetTest()) {
                 $menu['raison']         = "Nous ne sommes pas en période de demandes de ressources";
             } elseif ($etatVersion == Etat::EDITION_EXPERTISE || $etatVersion == Etat::EXPERTISE_TEST) {
-                $menu['raison']         = "Le projet a déjà été envoyé à l'expert";
+                $menu['raison']         = "Le projet a déjà été envoyé en expertise";
             } elseif ($etatVersion != Etat::EDITION_DEMANDE && $etatVersion != Etat::EDITION_TEST) {
                 $menu['raison']         = "Cette version de projet n'est pas en mode édition";
             } elseif (! $version->isResponsable($user)) {
@@ -889,11 +889,11 @@ class ServiceMenus
                 $menu['raison'] = "Pas de session attachée à ce projet !";
                 $this->sj->errorMessage(__METHOD__ . ' la version ' . Functions::show($version) . " n'a pas de session attachée !");
             } elseif ($etatVersion ==  Etat::EDITION_EXPERTISE) {
-                $menu['raison'] = "Le projet a déjà été envoyé à l'expert !";
+                $menu['raison'] = "Le projet a déjà été envoyé en expertise !";
             } elseif ($isProjetTest == true && $etatVersion ==  Etat::ANNULE) {
                 $menu['raison'] = "Le projet test a été annulé !";
             } elseif ($isProjetTest == true && $etatVersion !=  Etat::EDITION_TEST) {
-                $menu['raison'] = "Le projet test a déjà été envoyé à l'expert !";
+                $menu['raison'] = "Le projet test a déjà été envoyé en expertise !";
             } elseif ($isProjetSess && $version->getSession()->getEtatSession() != Etat::EDITION_DEMANDE) {
                 $menu['raison'] = "Nous ne sommes pas en période de demandes de ressources";
             } elseif ($version->isCollaborateur($this->token->getUser()) == false) {
@@ -1129,9 +1129,9 @@ class ServiceMenus
 
         $menu['name']           =   'avant_envoyer_expert';
         $menu['param']          =   $version->getIdVersion();
-        $menu['lien']           =   "Envoyer à l'expert";
+        $menu['lien']           =   "Envoyer en expertise";
         $menu['icone']           =   "envoyer";
-        $menu['commentaire']    =   "Vous ne pouvez pas envoyer ce projet à l'expert";
+        $menu['commentaire']    =   "Vous ne pouvez pas envoyer ce projet en expertise";
         $menu['ok']             =   false;
         $menu['raison']         =   "";
         $menu['incomplet']      =   false;
@@ -1154,7 +1154,7 @@ class ServiceMenus
             $menu['raison'] = "Pas de session attachée à ce projet !";
             $this->sj->errorMessage(__METHOD__ . ' la version ' . Functions::show($version) . " n'a pas de session attachée !");
         } elseif ($version->isResponsable($user) == false) {
-            $menu['raison'] = "Seul le responsable du projet peut envoyer ce projet à l'expert";
+            $menu['raison'] = "Seul le responsable du projet peut envoyer ce projet en expertise";
         }
 
         // manu - $priorite=self::HPRIO$priorite=self::HPRIO juin 20$priorite=self::HPRIO9 - Tout le monde peut créer un projet test !
@@ -1164,13 +1164,13 @@ class ServiceMenus
             $this->sj->warningMessage(__METHOD__ . ':' . __LINE__ ." Le responsable " . $this->token->getUser()
                 . " du projet " . $projet . " ne peut pas créer des projets");
         } elseif ($etatVersion ==  Etat::EDITION_EXPERTISE) {
-        $menu['raison'] = "Le projet a déjà été envoyé à l'expert !";
+        $menu['raison'] = "Le projet a déjà été envoyé en expertise !";
     } elseif ($isProjetTest == true) {
         $menu['raison'] = "ATTENTION - PAS DE PROJETS TESTS ACTUELLEMENT - Adressez-vous au support";
         } elseif ($isProjetTest == true && $etatVersion ==  Etat::ANNULE) {
             $menu['raison'] = "Le projet test a été annulé !";
         } elseif ($isProjetTest == true && $etatVersion !=  Etat::EDITION_TEST) {
-            $menu['raison'] = "Le projet test a déjà été envoyé à l'expert !";
+            $menu['raison'] = "Le projet test a déjà été envoyé en expertise !";
         } elseif ($etatVersion !=  Etat::EDITION_DEMANDE && $etatVersion !=  Etat::EDITION_TEST) {
             $menu['raison'] = "Le responsable du projet n'a pas demandé de renouvellement";
         } elseif ($isProjetSess && $etatSession != Etat::EDITION_DEMANDE) {
@@ -1453,7 +1453,7 @@ class ServiceMenus
         } elseif ($rallonge->getEtatRallonge() == Etat::ANNULE) {
             $menu['raison']     =   "Cette rallonge a été annulée";
         } elseif ($rallonge->getEtatRallonge() != Etat::EDITION_DEMANDE) {
-            $menu['raison']     =   "Cette rallonge a déjà été envoyée à l'expert";
+            $menu['raison']     =   "Cette rallonge a déjà été envoyée en expertise";
         } elseif ($this->ac->isGranted('ROLE_ADMIN')) {
             $menu['ok']             =   true;
             $menu['commentaire']    =   "Vous pouvez modifier la demande en tant qu'administrateur !";
@@ -1477,7 +1477,7 @@ class ServiceMenus
         $menu['param']       = $rallonge->getIdRallonge();
         $menu['icone']       = 'envoyer';
         $menu['lien']        = "Envoyer en expertise";
-        $menu['commentaire'] = "Vous ne pouvez pas envoyer cette demande à l'expert";
+        $menu['commentaire'] = "Vous ne pouvez pas envoyer cette demande en expertise";
         $menu['ok']          = false;
         $menu['raison']      = "raison inconnue";
         $user                = $this->token->getUser();
@@ -1506,15 +1506,15 @@ class ServiceMenus
         } elseif ($rallonge->getEtatRallonge() == Etat::ANNULE) {
             $menu['raison']     =   "Cette rallonge a été annulée";
         } elseif ($rallonge->getEtatRallonge() != Etat::EDITION_DEMANDE) {
-            $menu['raison']     =   "Cette rallonge a déjà été envoyée à l'expert";
+            $menu['raison']     =   "Cette rallonge a déjà été envoyée en expertise";
         } elseif ($this->ac->isGranted('ROLE_ADMIN')) {
             $menu['ok']             =   true;
-            $menu['commentaire']    =   "Vous pouvez envoyer cette demande à l'expert en tant qu'administrateur !";
+            $menu['commentaire']    =   "Vous pouvez envoyer cette demande en expertise en tant qu'administrateur !";
         } elseif ($version->isResponsable($user)) {
-            $menu['commentaire']         =   "Vous pouvez envoyer votre demande à l'expert" ;
+            $menu['commentaire']         =   "Vous pouvez envoyer votre demande en expertise" ;
             $menu['ok']             =   true;
         } else {
-            $menu['raison']         = "Vous n'avez pas le droit d'envoyer cette demande à l'expert, vous n'êtes pas le responsable du projet";
+            $menu['raison']         = "Vous n'avez pas le droit d'envoyer cette demande en expertise, vous n'êtes pas le responsable du projet";
         }
 
         $this->__prio($menu, $priorite);
@@ -1655,7 +1655,7 @@ class ServiceMenus
         } elseif ($version->getEtatVersion() == Etat::TERMINE) {
             $menu['raison']     =   "Votre projet de cette session est déjà terminé";
         } elseif ($etatRallonge == Etat::EDITION_DEMANDE) {
-            $menu['raison']     =   "Cette demande n'a pas encore été envoyée à l'expert";
+            $menu['raison']     =   "Cette demande n'a pas encore été envoyée en expertise";
         } elseif ($etatRallonge== Etat::ANNULE) {
             $menu['raison']     =   "Cette demande a été annulée";
         } elseif ($etatRallonge != Etat::EDITION_EXPERTISE) {

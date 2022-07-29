@@ -610,7 +610,7 @@ class VersionSpecController extends AbstractController
     private function modifierType3( Request $request,
                                     Version $version,
                                     bool $renouvellement,
-                                    array $image_forms,
+                                    // array $image_forms,
                                     FormInterface $collaborateur_form
                                     ): Response
     {

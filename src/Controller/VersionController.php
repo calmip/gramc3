@@ -844,13 +844,15 @@ class VersionController extends AbstractController
         $sm = $this->sm;
         $sj = $this->sj;
         $ff = $this->ff;
+        $se = $this->se;
+        $projetWorkflow = $this->pw;
+
         $em = $this->em;
 
         if ($sm->envoyer_expert($version)['ok'] == false) {
         $sj->throwException(__METHOD__ . ":" . __LINE__ .
             " impossible d'envoyer en expertise parce que " . $sm->envoyer_expert($version)['raison']);
         }
-        //$this->MenuACL($sm->envoyer_expert($version), "Impossible d'envoyer la version " . $version->getIdVersion() . " à l'expert", __METHOD__, __LINE__);
 
         $projet  = $version->getProjet();
         $session = $version->getSession();
@@ -871,72 +873,51 @@ class VersionController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $CGU = $form->getData()['CGU'];
-            if ($form->get('annuler')->isClicked()) {
+            if ($form->get('annuler')->isClicked())
+            {
                 return $this->redirectToRoute('consulter_projet', [ 'id' => $projet->getIdProjet() ]);
             }
 
-            if ($CGU == false && $form->get('envoyer')->isClicked()) {
-                //$sj->errorMessage(__METHOD__  .":". __LINE__ . " CGU pas acceptées ");
-                //return $this->redirectToRoute('consulter_projet',[ 'id' => $projet->getIdProjet() ] );
-                return $this->render(
-                    'version/avant_envoyer_expert.html.twig',
-                    [ 'projet' => $projet, 'form' => $form->createView(), 'session' => $session, 'cgu' => 'KO' ]
-                );
-            } elseif ($CGU == true && $form->get('envoyer')->isClicked()) {
+            if ($CGU == false && $form->get('envoyer')->isClicked())
+            {
+                $request->getSession()->getFlashbag()->add("flash erreur","Vous ne pouvez pas envoyer votre projet en expertise si vous n'acceptez pas les CGU");
+            }
+            elseif ($CGU == true && $form->get('envoyer')->isClicked())
+            {
                 $version->setCGU(true);
                 Functions::sauvegarder($version, $em, $lg);
-                return $this->redirectToRoute('envoyer_expert', [ 'id' => $version->getIdVersion() ]);
-            } else {
+
+                // Crée une nouvelle expertise avec proposition d'experts
+                $se->newExpertiseIfPossible($version);
+
+                // Avance du workflow
+                $rtn = $projetWorkflow->execute(Signal::CLK_VAL_DEM, $projet);
+
+                if ($rtn == true)
+                {
+                    $request->getSession()->getFlashbag()->add("flash info","Votre projet a été envoyé en expertise. Vous allez recevoir un courriel de confirmation.");
+                }
+                else
+                {
+                    $sj->errorMessage(__METHOD__ .  ":" . __LINE__ . " Le projet " . $projet->getIdProjet() . " n'a pas pu etre envoyé à l'expert correctement.");
+                    $request->getSession()->getFlashbag()->add("flash info","Votre projet n'a pas pu être envoyé en expertise. Merci de vous rapprocher du support");
+                }
+                return $this->redirectToRoute('projet_accueil');
+            }
+            else
+            {
+                $request->getSession()->getFlashbag()->add("flash info","Votre projet n'a pas pu être envoyé en expertise. Merci de vous rapprocher du support");
                 $sj->throwException(__METHOD__ .":". __LINE__ ." Problème avec le formulaire d'envoi à l'expert du projet " . $version->getIdVersion());
             }
         }
 
         return $this->render(
             'version/avant_envoyer_expert.html.twig',
-            [ 'projet' => $projet, 'form' => $form->createView(), 'session' => $session, 'cgu' => 'OK' ]
+            [ 'projet' => $projet,
+              'form' => $form->createView(),
+              'session' => $session
+            ]
         );
-    }
-
-    /**
-     * envoyer à l'expert
-     *
-     * @Route("/{id}/envoyer", name="envoyer_expert",methods={"GET"})
-     * @Security("is_granted('ROLE_DEMANDEUR')")
-     */
-    public function envoyerAction(Version $version, Request $request, LoggerInterface $lg): Response
-    {
-        $sm = $this->sm;
-        $sj = $this->sj;
-        $se = $this->se;
-        $em = $this->em;
-
-        ////$this->MenuACL($sm->envoyer_expert($version), " Impossible d'envoyer la version " . $version->getIdVersion() . " à l'expert", __METHOD__, __LINE__);
-
-        $projet = $version -> getProjet();
-
-        if ($sm->envoyer_expert($version)['incomplet'] == true) {
-            $sj->throwException(__METHOD__ .":". __LINE__ ." Version " . $version->getIdVersion() . " incomplet envoyé à l'expert !");
-        }
-
-        if ($version->getCGU() == false) {
-            $sj->throwException(__METHOD__ .":". __LINE__ ." Pas d'acceptation des CGU " . $projet->getIdProjet());
-        }
-
-        // Crée une nouvelle expertise avec proposition d'experts
-        $se->newExpertiseIfPossible($version);
-
-        $projetWorkflow = $this->pw;
-        $rtn = $projetWorkflow->execute(Signal::CLK_VAL_DEM, $projet);
-
-        //$sj->debugMessage(__METHOD__ .  ":" . __LINE__ . " Le projet " . $projet . " est dans l'état " . Etat::getLibelle( $projet->getObjectState() )
-        //    . "(" . $projet->getObjectState() . ")" );
-
-        if ($rtn == true) {
-            return $this->render('version/envoyer_expert.html.twig', [ 'projet' => $projet, 'session' => $version->getSession() ]);
-        } else {
-            $sj->errorMessage(__METHOD__ .  ":" . __LINE__ . " Le projet " . $projet->getIdProjet() . " n'a pas pu etre envoyé à l'expert correctement");
-            return new Response("Le projet " . $projet->getIdProjet() . " n'a pas pu etre envoyé à l'expert correctement");
-        }
     }
 
     /**
