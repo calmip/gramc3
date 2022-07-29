@@ -1127,7 +1127,7 @@ class ServiceMenus
         $projet = $version -> getProjet();
         $user   = $this->token->getUser();
 
-        $menu['name']           =   'avant_envoyer_expert';
+        $menu['name']           =   'envoyer_expert';
         $menu['param']          =   $version->getIdVersion();
         $menu['lien']           =   "Envoyer en expertise";
         $menu['icone']           =   "envoyer";

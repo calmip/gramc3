@@ -836,10 +836,10 @@ class VersionController extends AbstractController
     /**
      * envoyer à l'expert
      *
-     * @Route("/{id}/avant_envoyer", name="avant_envoyer_expert",methods={"GET","POST"})
+     * @Route("/{id}/envoyer", name="envoyer_expert",methods={"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
-    public function avantEnvoyerAction(Version $version, Request $request, LoggerInterface $lg): Response
+    public function envoyerAction(Version $version, Request $request, LoggerInterface $lg): Response
     {
         $sm = $this->sm;
         $sj = $this->sj;
@@ -875,6 +875,7 @@ class VersionController extends AbstractController
             $CGU = $form->getData()['CGU'];
             if ($form->get('annuler')->isClicked())
             {
+                $request->getSession()->getFlashbag()->add("flash erreur","Votre projet n'a toujours pas été envoyé en expertise");
                 return $this->redirectToRoute('consulter_projet', [ 'id' => $projet->getIdProjet() ]);
             }
 
@@ -900,19 +901,19 @@ class VersionController extends AbstractController
                 else
                 {
                     $sj->errorMessage(__METHOD__ .  ":" . __LINE__ . " Le projet " . $projet->getIdProjet() . " n'a pas pu etre envoyé à l'expert correctement.");
-                    $request->getSession()->getFlashbag()->add("flash info","Votre projet n'a pas pu être envoyé en expertise. Merci de vous rapprocher du support");
+                    $request->getSession()->getFlashbag()->add("flash erreur","Votre projet n'a pas pu être envoyé en expertise. Merci de vous rapprocher du support");
                 }
                 return $this->redirectToRoute('projet_accueil');
             }
             else
             {
-                $request->getSession()->getFlashbag()->add("flash info","Votre projet n'a pas pu être envoyé en expertise. Merci de vous rapprocher du support");
+                $request->getSession()->getFlashbag()->add("flash erreur","Votre projet n'a pas pu être envoyé en expertise. Merci de vous rapprocher du support");
                 $sj->throwException(__METHOD__ .":". __LINE__ ." Problème avec le formulaire d'envoi à l'expert du projet " . $version->getIdVersion());
             }
         }
 
         return $this->render(
-            'version/avant_envoyer_expert.html.twig',
+            'version/envoyer_expert.html.twig',
             [ 'projet' => $projet,
               'form' => $form->createView(),
               'session' => $session

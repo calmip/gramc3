@@ -134,7 +134,7 @@ class VersionSpecController extends AbstractController
                 ]);
         }
         else {
-            return $this->redirectToRoute('avant_envoyer_expert', [ 'id' => $version->getIdVersion() ]);
+            return $this->redirectToRoute('envoyer_expert', [ 'id' => $version->getIdVersion() ]);
         }
     }
 
