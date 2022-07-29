@@ -532,6 +532,7 @@ class ServiceMenus
         $menu['name'] = 'invitations';
         $menu['commentaire'] = "Récapituler les invitations en cours";
         $menu['lien'] = "Invitations";
+        $menu['icone'] = "mail";
 
         if ($this->ac->isGranted('ROLE_ADMIN')) {
             $menu['ok'] = true;
@@ -592,6 +593,7 @@ class ServiceMenus
         $menu['name']   =   'bilan_annuel';
         $menu['commentaire']    =   "Générer et télécharger le bilan annuel";
         $menu['lien']           =   "Bilan annuel";
+        $menu['icone']           =   "annee";
 
 
         if ($this->ac->isGranted('ROLE_OBS') || $this->ac->isGranted('ROLE_PRESIDENT')) {
@@ -632,7 +634,7 @@ class ServiceMenus
         $menu['name']        =   'projet_annee';
         $menu['commentaire'] =   "Gérer les projets par année";
         $menu['lien']        =   "Projets ( par année )";
-        $menu['icone']       =   "projet_annee";
+        $menu['icone']       =   "annee";
 
         if ($this->ac->isGranted('ROLE_OBS') || $this->ac->isGranted('ROLE_PRESIDENT')) {
             $menu['ok'] = true;
@@ -692,6 +694,7 @@ class ServiceMenus
         $menu['name']   =   'journal_list';
         $menu['commentaire']    =   "Lire le journal des actions";
         $menu['lien']           =   "Lire le journal";
+        $menu['icone']          =   "lire_journal";
 
         if ($this->ac->isGranted('ROLE_ADMIN')) {
             $menu['ok'] = true;
@@ -711,6 +714,7 @@ class ServiceMenus
         $menu['name']        = 'phpinfo';
         $menu['commentaire'] = "Infos sur php et sur aussi sur gramc";
         $menu['lien']        = "infos techniques";
+        $menu['icone']       = "technique";
 
         if ($this->ac->isGranted('ROLE_ADMIN')) {
             $menu['ok'] = true;
@@ -747,7 +751,7 @@ class ServiceMenus
         $menu['name']       =   'gerer_formations';
         $menu['commentaire']=   "Gérer la liste des formations";
         $menu['lien']       =   "Formations";
-        $menu['icone']      =   "formations";
+        $menu['icone']      =   "formation";
 
         if ($this->ac->isGranted('ROLE_OBS')) {
             $menu['ok'] = true;
@@ -767,6 +771,7 @@ class ServiceMenus
         $menu['name']   =   'gerer_thematiques';
         $menu['commentaire']    =   "Gérer la liste des thématiques";
         $menu['lien']           =   "Thématiques";
+        $menu['icone']          =   "thematique";
 
         if ($this->ac->isGranted('ROLE_OBS')) {
             $menu['ok'] = true;
@@ -786,6 +791,7 @@ class ServiceMenus
         $menu['name']   =   'gerer_rattachements';
         $menu['commentaire']    =   "Gérer la liste des rattachements";
         $menu['lien']           =   "Rattachements";
+        $menu['icone']          =   "rattachement";
 
         if ($this->ac->isGranted('ROLE_OBS')) {
             $menu['ok'] = true;
@@ -805,6 +811,7 @@ class ServiceMenus
         $menu['name']   =   'gerer_metaThematiques';
         $menu['commentaire']    =   "Gérer la liste des méta-thématiques";
         $menu['lien']           =   "Méta-Thématiques";
+        $menu['icone']           =   "thematique";
 
         if ($this->ac->isGranted('ROLE_OBS')) {
             $menu['ok'] = true;
@@ -1248,6 +1255,7 @@ class ServiceMenus
         $menu['commentaire']    =   "Vous ne pouvez pas avancer dans le temps";
         $menu['ok']             =   false;
         $menu['raison']         =   "Vous n'êtes pas un administrateur";
+        $menu['icone']         =   "avancer_temps";
 
         if ($this->ac->isGranted('ROLE_ADMIN')) {
             $menu['ok']             =   true;
@@ -1311,6 +1319,7 @@ class ServiceMenus
         $menu['commentaire'] = "Vous ne pouvez pas envoyer un mail aux responsables des projets qui n'ont pas téléversé leur fiche projet";
         $menu['ok']          = false;
         $menu['raison']      = "Vous n'êtes pas un administrateur ou président";
+        $menu['icone']      = "mail";
 
         if ($etatSession    !=  Etat::ACTIF && $etatSession    !=  Etat::EN_ATTENTE) {
             $menu['raison']         =   "La session n'est pas en mode actif ou en attente";
@@ -1332,6 +1341,7 @@ class ServiceMenus
         $menu['commentaire']     = "Vous ne pouvez pas supprimer les projets ou les utilisateurs anciens";
         $menu['ok']              = false;
         $menu['raison']          = "Vous n'êtes pas un administrateur";
+        $menu['icone']          = "nettoyage";
 
         if ($this->ac->isGranted('ROLE_ADMIN')) {
             $menu['ok']          = true;
@@ -1351,6 +1361,7 @@ class ServiceMenus
         $menu['commentaire']    =   "Vous ne pouvez pas voir les personnes connectées";
         $menu['ok']             =   false;
         $menu['raison']         =   "Vous n'êtes pas un administrateur";
+        $menu['icone']          =   "personnes_connectees";
 
         if ($this->ac->isGranted('ROLE_ADMIN')) {
             $menu['ok']             =   true;
@@ -1780,6 +1791,7 @@ class ServiceMenus
     {
         $menu['name']           =   'statistiques';
         $menu['lien']           =   "Statistiques";
+        $menu['icone']          =   "statistiques";
 
         if ($this->ac->isGranted('ROLE_OBS') || $this->ac->isGranted('ROLE_PRESIDENT')) {
             $menu['ok']             =   true;
@@ -1800,6 +1812,7 @@ class ServiceMenus
     {
         $menu['name']           =   'publication_annee';
         $menu['lien']           =   "Publications";
+        $menu['icone']          =   "publications";
 
         if ($this->ac->isGranted('ROLE_OBS') || $this->ac->isGranted('ROLE_PRESIDENT')) {
             $menu['ok']             =   true;
