@@ -294,6 +294,7 @@ class RallongeController extends AbstractController
             ->add('prjJustifRallonge', TextAreaType::class, [ 'required'       =>  false ])
             ->add('enregistrer', SubmitType::class, ['label' => 'Enregistrer' ])
             ->add('fermer', SubmitType::class, ['label' => 'Fermer' ])
+            ->add('annuler', SubmitType::class, ['label' => 'Annuler' ])
             ->getForm();
 
         [ $version, $projet, $session ] = $this->getVerProjSess($rallonge);
@@ -301,6 +302,11 @@ class RallongeController extends AbstractController
         $erreurs = [];
         $editForm->handleRequest($request);
         if ($editForm->isSubmitted()) {
+            
+            if ($editForm->get('annuler')->isClicked()) {
+                return $this->redirectToRoute('rallonge_consulter', [ 'id' => $rallonge->getIdRallonge() ]);
+            }
+            
             $erreurs = Functions::dataError($sval, $rallonge);
             $em->flush();
             $request->getSession()->getFlashbag()->add("flash info","Rallonge enregistrée");
