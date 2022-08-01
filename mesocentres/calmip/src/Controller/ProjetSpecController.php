@@ -473,8 +473,8 @@ class ProjetSpecController extends AbstractController
             $menu[] = $sm->donnees($version);
         }
         $menu[] = $sm->gerer_publications($projet);
-        $menu[] = $sm->telechargement_fiche($version,ServiceMenus::BPRIO);
-        $menu[] = $sm->televersement_fiche($version,ServiceMenus::BPRIO);
+        $menu[] = $sm->telechargement_fiche($version);
+        $menu[] = $sm->televerser_fiche($version);
 
         $etat_version = $version->getEtatVersion();
         if ($this->getParameter('rapport_dactivite')) {

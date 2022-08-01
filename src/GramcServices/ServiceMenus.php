@@ -1603,10 +1603,12 @@ class ServiceMenus
     }
 
     //////////////////////////////////////////////////////////////////////////////
-    public function televersement_fiche(Version $version, int $priorite=self::HPRIO):array
+    public function televerser_fiche(Version $version, int $priorite=self::HPRIO):array
     {
-        $menu['name']           =   'version_televersement_fiche';
-        $menu['param']          =   $version->getIdVersion();
+        $menu['name']           =   'version_televerser_fiche';
+        //$menu['name']           =   'televerser';
+        //$menu['param']          =   $version->getIdVersion();
+        $menu['params'] = [ 'id' => $version->getIdVersion(), 'filename' => 'fiche.pdf' ];
         $menu['lien']           =   "Fiche projet";
         $menu['commentaire']    =   "Vous ne pouvez pas téléverser la fiche de ce projet";
         $menu['ok']             =   false;

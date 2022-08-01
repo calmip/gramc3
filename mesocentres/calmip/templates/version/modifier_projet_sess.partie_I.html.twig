@@ -153,7 +153,9 @@
                 <div class="information ok">Vous n'avez pas besoin de téléverser de rapport d'activité maintenant. Nous vous le demanderons à la fin de l'année</div>
 
             {% else %}
+            <div id="fichier_attache">
                 {{ gramcdocmacros.upload_document(version, 'rapport.pdf') }}
+            </div>
 
             {% endif %}
         </div>
@@ -205,7 +207,7 @@
             {{ form_widget(form.prjGenciMachines, { 'attr': { 'size': '80' } }) }}
         </div>
 
-        <div class="input">
+        <div id="form_genci" class="input">
             <label for="prj_genci_heures">Heures accordées</label>
             {{ form_widget(form.prjGenciHeures) }}
         </div>

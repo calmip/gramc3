@@ -58,7 +58,7 @@ class RapportActivite
     /**
      * @var string
      *
-     * @ORM\Column(name="filedata", type="blob", length=65535, nullable=false)
+     * @ORM\Column(name="filedata", type="blob", length=65535, nullable=true)
      */
     private $filedata;
 

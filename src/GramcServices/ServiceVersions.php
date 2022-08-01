@@ -41,6 +41,7 @@ use App\Utils\Functions;
 use App\Validator\Constraints\PagesNumber;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -176,6 +177,8 @@ class ServiceVersions
     /**************************************************
      * Crée un formulaire qui permettra de téléverser un fichier pdf
      * Gère le mécanisme de soumission et validation
+     * Renvoie un json: soit OK soit les erreurs.
+     * 
      * Fonctionne aussi bien en ajax avec jquery-upload-file-master
      * que de manière "normale"
      *
@@ -194,7 +197,7 @@ class ServiceVersions
                                       Version $version,
                                       string $dirname,
                                       string $filename,
-                                      string $type): FormInterface|string
+                                      string $type): Form|string
     {
         $sj = $this->sj;
         $ff = $this->ff;
@@ -314,6 +317,11 @@ class ServiceVersions
         }
     }
 
+    /*************************************************************
+     *
+     * IMAGES ET DOC ATTACHE
+     *
+     *************************************************************/
     /*************************
      * Calcule le chemin de fichier de l'image
      *
@@ -379,7 +387,103 @@ class ServiceVersions
         return $dir;
     }
 
+    /***********************************************************************
+     *
+     * SIGNATURES
+     *
+     *************************************************************/
+
+    /***************************************************
+     * Renvoie true si le fichier pdf de signature est présent
+     *********************************************************/
+    public function isSigne(Version $version) : bool
+    {
+        $file = $this->getSignePath($version);
+        if (file_exists($file) && ! is_dir($file))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /*****************
+     * Retourne le chemin vers le fichier de signature correspondant à cette version
+     *          null si pas de fichier de signature
+     ****************/
+    public function getSigne(Version $version): ?string
+    {
+        if ( $this->isSigne($version) )
+        {
+            return $this->getSignePath($version);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    /*****************************
+     * Retourne la taille du fichier de signature arrondi au Ko inférieur
+     *****************************/
+    public function getSizeSigne(Version $version): int
+    {
+        $signe = $this->getSigne($version);
+        if ($signe == null)
+        {
+            return 0;
+        }
+        else
+        {
+            return intdiv(filesize($signe), 1024);
+        }
+    }
+
+    /*************************
+     * Calcule le chemin de fichier de la fiche signée
+     *
+     * param = $version  Version
+     *
+     * return = Le chemin complet (que le fichier existe ou non)
+     *
+     ************************************/
+     public function getSignePath(Version $version): string
+     {
+         return $this->getSigneDir($version) . '/' . $version . '.pdf';
+     }
+
      /*******************************
+     * Crée si besoin le répertoire pour les fiches signées
+     *
+     * param = $version  La version associée
+     *
+     * return = Le chemin complet vers le répertoire
+     *
+     *******************************************/
+    public function getSigneDir(Version $version): string
+    {
+        $dir = $this->signature_directory . '/' . $version->getSession();
+        if (! is_dir($dir))
+        {
+            if (file_exists($dir) && is_file($dir))
+            {
+                unlink($dir);
+            }
+            mkdir($dir);
+            $this->sj->warningMessage("Répertoire pour les fiches signées " . $dir . " créé !");
+        }
+        return $dir;
+    }
+
+    /***********************************************************************
+     *
+     * RAPPORTS D'ACTIVITE
+     *
+     *************************************************************/
+
+    /*******************************
      * Crée si besoin le répertoire pour les rapports d'activité
      *
      * param = $version  La version associée
@@ -403,6 +507,21 @@ class ServiceVersions
         
         return $dir;
     }
+    public function rapportDir1(Projet $projet, string $annee): string
+    {
+        $dir = $this->rapport_directory . '/' . $annee;
+        if (! is_dir($dir))
+        {
+            if (file_exists($dir) && is_file($dir))
+            {
+                unlink($dir);
+            }
+            mkdir($dir);
+            $this->sj->warningMessage("rapport_directory " . $dir . " créé !");
+        }        
+        return $dir;
+    }
+
 
     /**************************************
      * Changer le responsable d'une version
@@ -555,63 +674,6 @@ class ServiceVersions
             } else {
                 return true; // Non il n'y en a pas donc on est bien sur une nouvelle version
             }
-        }
-    }
-
-    /***********************************************************************
-     *
-     * SIGNATURES
-     *
-     *************************************************************/
-
-    /***************************************************
-     * Renvoie true si le fichier pdf de signature est présent
-     *********************************************************/
-    public function isSigne(Version $version) : bool
-    {
-        $dir = $this->signature_directory;
-        if ($dir == null) {
-            $this->sj->errorMessage("ServiceVersions:isSigne parameter signature_directory absent !");
-            return false;
-        }
-        $file   =  $dir . '/' . $version->getSession()->getIdSession() . '/' . $version->getIdVersion() . '.pdf';
-        if (file_exists($file) && ! is_dir($file)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /*****************
-     * Retourne le chemin vers le fichier de signature correspondant à cette version
-     *          null si pas de fichier de signature
-     ****************/
-    public function getSigne(Version $version): ?string
-    {
-        $dir = $this->signature_directory;
-        if ($dir == null) {
-            //$sj->errorMessage("Version:isSigne parameter signature_directory absent !" );
-            return null;
-        }
-
-        $file   =  $dir . '/' . $version->getSession()->getIdSession() . '/' . $version->getIdVersion() . '.pdf';
-        if (file_exists($file) && ! is_dir($file)) {
-            return $file;
-        } else {
-            return null;
-        }
-    }
-
-    /*****************************
-     * Retourne la taille du fichier de signature
-     *****************************/
-    public function getSizeSigne(Version $version): int
-    {
-        $signe    =   $this->getSigne($version);
-        if ($signe == null) {
-            return 0;
-        } else {
-            return intdiv(filesize($signe), 1024);
         }
     }
 

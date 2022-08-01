@@ -1435,7 +1435,8 @@ select:hover{
 }
 
 /* TODO - Un peu le bordel ! */
-#form_connect, #form_submit, #tri_filtrer, .form_submit, #form_reset, #sso_reset, #sso_submit, .rallonge_fermer button {
+#form_connect, #form_submit, #tri_filtrer, .form_submit, #form_reset, #sso_reset, #sso_submit, .rallonge_fermer button, .televerser input
+ {
     border-radius: 50px;
     background: white;
     border: 1px solid var(--third-color);
@@ -2404,7 +2405,7 @@ tbody tr.rallonge{
 }
 
 .section_modifierProjet .uploaders .fileuploader .ajax-upload-dragdrop .ajax-file-upload,
-.section_modifierProjet #tab2 .fileuploader .ajax-upload-dragdrop .ajax-file-upload{
+.section_modifierProjet .fileuploader .ajax-upload-dragdrop .ajax-file-upload{
     background: var(--first-color);
 }
 

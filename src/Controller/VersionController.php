@@ -60,6 +60,7 @@ use App\GramcServices\Signal;
 use App\Form\IndividuFormType;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Form\form;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -429,112 +430,63 @@ class VersionController extends AbstractController
     /**
      * Téléversement de la fiche projet
      *
-     * @Route("/{id}/televersement_fiche", name="version_televersement_fiche",methods={"GET","POST"})
+     * @Route("/{id}/televerser_fiche", name="version_televerser_fiche",methods={"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
-    public function televersementFicheAction(Request $request, Version $version): Response
+    public function televerserFicheAction(Request $request, Version $version): Response
     {
         $em = $this->em;
         $sm = $this->sm;
         $sj = $this->sj;
 
         // ACL
-        if ($sm->televersement_fiche($version)['ok'] == false) {
+        if ($sm->televerser_fiche($version)['ok'] == false) {
             $sj->throwException(__METHOD__ . ':' . __LINE__ . " impossible de téléverser la fiche de la version " . $version .
                 " parce que : " . $sm -> telechargement_fiche($version)['raison']);
         }
 
-        $format_fichier = new \Symfony\Component\Validator\Constraints\File(
-            [
-                'mimeTypes'=> [ 'application/pdf' ],
-                'mimeTypesMessage'=>' Le fichier doit être un fichier pdf. ',
-                'maxSize' => "2024k",
-                'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
-                'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
-            ]
-        );
+        $rtn = $this->televerser($request, $version, "fiche.pdf");
 
-        $form = $this->ff
-                    ->createNamedBuilder('upload', FormType::class, [], ['csrf_protection' => false ])
-                    ->add(
-                        'file',
-                        FileType::class,
-                        [
-                        'required'          =>  true,
-                        'label'             => "",
-                        'constraints'       => [$format_fichier , new PagesNumber() ]
-                        ]
-                    )
-                   ->getForm();
-
-        $erreurs  = [];
-        $resultat = [];
-        $file = null;
-
-        $form->handleRequest($request);
-        if ($form->isSubmitted()) {
-            $data = $form->getData();
-
-            if (isset($data['file']) && $data['file'] != null) {
-                $tempFilename = $data['file'];
-                if (! empty($tempFilename) && $tempFilename != "") {
-                    $validator  = $this->vl;
-                    $violations = $validator->validate($tempFilename, [ $format_fichier, new PagesNumber() ]);
-                    foreach ($violations as $violation) {
-                        $erreurs[]  =   $violation->getMessage();
-                    }
-                }
-            } else {
-                $tempFilename = null;
-            }
-
-
-            if (is_file($tempFilename) && ! is_dir($tempFilename)) {
-                $file = new File($tempFilename);
-            } elseif (is_dir($tempFilename)) {
-                $sj->errorMessage(__METHOD__ .":" . __LINE__ . " Le nom  " . $tempFilename . " correspond à un répertoire");
-                $erreurs[]  =  " Le nom  " . $tempFilename . " correspond à un répertoire";
-            } else {
-                $sj->errorMessage(__METHOD__ .":" . __LINE__ . " Le fichier " . $tempFilename . " n'existe pas");
-                $erreurs[]  =  " Le fichier " . $tempFilename . " n'existe pas";
-            }
-
-            if ($form->isValid() && $erreurs == []) {
-                $session = $version->getSession();
-                $projet = $version->getProjet();
-                if ($projet != null && $session != null) {
-                    $filename = $this->getParameter('signature_directory') .'/'.$session->getIdSession() .
-                                    "/" . $session->getIdSession() . $projet->getIdProjet() . ".pdf";
-                    $file->move(
-                        $this->getParameter('signature_directory') .'/'.$session->getIdSession(),
-                        $session->getIdSession() . $projet->getIdProjet() . ".pdf"
-                    );
-
-                    // on marque le téléversement de la fiche projet
-                    $version->setPrjFicheVal(true);
-                    $em->flush();
-                    $resultat[] =   " La fiche du projet " . $projet . " pour la session " . $session . " a été téléversée ";
-                } else {
-                    $resultat[] =   " La fiche du projet n'a pas été téléversée";
-                    if ($projet == null) {
-                        $sj->errorMessage(__METHOD__ . ':'. __LINE__ . " version " . $version . " n'a pas de projet");
-                    }
-                    if ($session == null) {
-                        $sj->errorMessage(__METHOD__ . ':' . __LINE__ . " version " . $version . " n'a pas de session");
-                    }
-                }
-            }
+        // Si on récupère un formulaire on l'affiche
+        if (is_a($rtn, 'Symfony\Component\Form\Form'))
+        {
+            return $this->render(
+                'version/televerser_fiche.html.twig',
+                [
+                    'version' => $version,
+                    'form' => $rtn->createView(),
+                    'resultat' => null
+                ]);
         }
 
-        return $this->render(
-            'version/televersement_fiche.html.twig',
-            [
-            'version'       =>  $version,
-            'form'          =>  $form->createView(),
-            'erreurs'       =>  $erreurs,
-            'resultat'      =>  $resultat,
-            ]
-        );
+        // Sinon c'est une chaine de caractères en json.
+        else
+        {
+            $resultat = json_decode($rtn, true);
+
+            if ($resultat['OK'])
+            {
+                $this->modifyFiche($version);
+                $request->getSession()->getFlashbag()->add("flash info","La fiche projet a été correctement téléversée");
+                return $this->redirectToRoute('consulter_projet', ['id' => $version->getProjet()->getIdProjet() ]);
+            }
+            else
+            {
+                $request->getSession()->getFlashbag()->add("flash erreur",strip_tags($resultat['message']));
+                return $this->redirectToRoute('version_televerser_fiche', ['id' => $version->getIdVersion() ]);
+            }
+            return new Response ($rtn);
+        }
+    }
+
+    private function modifyFiche(Version $version) : void
+    {
+        $em = $this->em;
+        
+        // on marque le téléversement de la fiche projet
+        $version->setPrjFicheVal(true);
+        $em->persist($version);
+        $em->flush();
     }
 
     /**
@@ -1152,17 +1104,16 @@ class VersionController extends AbstractController
 
     /**
      * Téléverser un fichier lié à une version (images, document attaché, rapport d'activité)
-     * TODO - LES FICHES PROJET NE SONT PAS ENCORE CONCERNEES
-     *        CODE UN CHOUYA MERDIQUE - A AMELIORER !!!
+     *
+     * DOIT ETRE APPELE EN AJAX, Sinon ça NE VA PAS MARCHER !
+     *      Renvoie normalement une réponse en json
      *
      * @Route("/{id}/fichier/{filename}", name="televerser",methods={"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
-    public function televerserAction(version $version, string $filename, Request $request): Response
+    public function televerserAction(Request $request, version $version, string $filename): Response
     {
-        $sv = $this->sv;
         $sm = $this->sm;
-        $sf = $this->sf;
         $sj = $this->sj;
 
         // ACL - Mêmes ACL que modification de version !
@@ -1171,17 +1122,37 @@ class VersionController extends AbstractController
         " parce que : " . $sm->modifier_version($version)['raison']);
         }
 
+        $rtn = $this->televerser($request, $version, $filename);
+        if (is_a($rtn, 'Symfony\Component\Form\Form'))
+        {
+            $sj->throwException(__METHOD__ . ":" . __LINE__ . " Erreur interne - televerser a renvoyé un Form");
+        }
+        else
+        {
+            return new Response($rtn);
+        }
+    }
 
+    /**********************************************************************
+     * Fonction unique pour faire le téléversement, que ce soit en ajax ou pas
+     *
+     ****************************************************/
+    private function televerser(Request $request, version $version, string $filename): Form|string
+    {
+        $sv = $this->sv;
+        $sf = $this->sf;
+        
         // SEULEMENT CERTAINS NOMS !!!!
         $valid_filenames = ['document.pdf',
                             'rapport.pdf',
+                            'fiche.pdf',
                             'img_expose_1',
                             'img_expose_2',
                             'img_expose_3',
                             'img_justif_renou_1',
                             'img_justif_renou_2',
                             'img_justif_renou_3'];
-        //$filename = $filename;
+
         if (!in_array($filename, $valid_filenames))
         {
             $sj->throwException(__METHOD__ . ":" . __LINE__ . " Erreur interne - $filename pas un nom autorisé");
@@ -1203,44 +1174,63 @@ class VersionController extends AbstractController
             case "rapport.pdf":
                 $dir = $sv->rapportDir($version);
                 break;
+            case "fiche.pdf":
+                $dir = $sv->getSigneDir($version);
+                break;
             default:
-                $sj->throwException(__METHOD__ . ":" . __LINE__ . " Erreur interne - calcul de dir pas possible");
+                $sj->throwException(__METHOD__ . ":" . __LINE__ . " Erreur interne - $filename - calcul de dir pas possible");
                 break;
         }
 
         $type = substr($filename,-3);   // 'pdf' ou ... n'importe quoi !
-        
+
+        // Seulement deux types supportés = pdf ou jpg
         if ($type != 'pdf')
         {
             $type = 'jpg';
         }
 
-        if (! file_exists($dir))
-        {
-            mkdir($dir);
-        }
-        elseif (! is_dir($dir))
-        {
-            unlink($dir);
-            mkdir($dir);
-        }
-
-        // On CHANGE $filename pour certains téléversements (rapport d'activité, fiche projet)
+        // Traitement différentié pour un rapport:
+        // 1/ On CHANGE $filename
+        // 2/ On appelle modifyRapport afin d'écrire un truc dans la base de données
+        //    On doit le faire ici car on est en ajax et on appelle la fonction "générique" téléverser...
+        //
         // TODO: Pas bien joli tout ça...
-        if ($filename == 'rapport.pdf')
+        if ($filename === 'rapport.pdf')
         {
             $d = basename($dir); // /a/b/c/d/2022 -> 2022
             $filename = $d . $version->getProjet()->getIdProjet() . ".pdf";
+            $rtn = $sv->televerserFichier($request, $version, $dir, $filename, $type);
+            $resultat = json_decode($rtn, true);
+            if ($resultat['OK'])
+            {
+                $this->modifyRapport($version->getProjet(), $version->anneeRapport(), $filename);
+            }
         }
-        $rtn = $sv->televerserFichier($request, $version, $dir, $filename, $type);
-        return new Response($rtn);
+
+        // Traitement différentié pour une fiche:
+        // 1/ On CHANGE $filename
+        // 2/ La fonction modifyFiche sera appelée par le controleur televerserFicheAction
+        //
+        // TODO: Pas bien joli tout ça...
+        elseif ($filename === 'fiche.pdf')
+        {
+            $filename = $sv ->getSignePath($version);
+            $rtn = $sv->televerserFichier($request, $version, $dir, $filename, $type);
+        }
+        else
+        {
+            $rtn = $sv->televerserFichier($request, $version, $dir, $filename, $type);
+        }
+        return $rtn;
     }
 
     ////////////////////////////////////////////////////////////////////
 
-    private function modifyRapport(Projet $projet, $annee, $filename): void
+    private function modifyRapport(Projet $projet, string $annee, string $filename): void
     {
         $em = $this->em;
+        $sv = $this->sv;
 
         // création de la table RapportActivite
         $rapportActivite = $em->getRepository(RapportActivite::class)->findOneBy(
@@ -1253,12 +1243,10 @@ class VersionController extends AbstractController
             $rapportActivite = new RapportActivite($projet, $annee);
         }
 
-
-        $rapportActivite->setTaille(filesize($filename));
-        $rapportActivite->setNomFichier($filename);
-        $rapportActivite->setFiledata("");
-
+        $size = filesize($sv->rapportDir1($projet, $annee) . '/' .$filename );
+        $rapportActivite->setTaille($size);
         $em->persist($rapportActivite);
         $em->flush();
     }
+
 }
