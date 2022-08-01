@@ -35,7 +35,7 @@ $(document).ready(function() {
     });
 
     // Lorsqu'on clique sur le bouton Enregistrer, on déclenche une requête ajax
-    $('#Enregistrer').on('click', function(e) {
+    $('#form_enregistrer').on('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
 

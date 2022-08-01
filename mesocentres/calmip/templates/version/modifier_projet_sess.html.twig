@@ -40,6 +40,8 @@
 
 {# ####################################################################################################### #}
 
+{% import "default/macros_panneau_enregistrer.html.twig" as panneau_enregistrer %}
+
 
 {% block body %}
 
@@ -124,27 +126,12 @@
 
 </div>
 
-<div id="panneau_enregistrer">
-    <div class="panneau">
-        <div class="boutons">
-            {% if renouvellement %}
-                <input class="invisible_if_no_js" name="RENOUVELER" id="Renouveler" value="Renouvellement" title="Renouveler le projet" type="submit"><br />
-            {% else %}
-                <input class="invisible_if_no_js"  type="submit" name="ENREGISTRER" id="Enregistrer" value="Enregistrer" title="Enregistrer le projet sans le fermer" />
-            {{ form_widget( form.annuler, { 'attr': { 'title' : 'Abandonner les modifications' } }) }}
-            {{ form_widget( form.fermer, { 'attr': { 'title' : 'Enregistrer et fermer le projet'  } }) }}
-            {% endif %}
-        </div>
-    </div>
 
-    <div class="menu">
-        <span></span>
-        <span></span>
-        <span></span>
-    </div>
-</div>
+{# Les boutons pour enregistrer / fermer #}
+{{ panneau_enregistrer.panneau_enregistrer(form,false) }}
 
 {{ form_end(form) }}
+
 
 <div id="enregistrer_message" ></div>
 

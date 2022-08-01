@@ -148,7 +148,7 @@ class VersionSpecController extends AbstractController
      * @Security("is_granted('ROLE_DEMANDEUR')")
      * 
      */
-    public function modifierAction(Request $request, Version $version, $renouvellement = false): Response
+    public function modifierAction(Request $request, Version $version): Response
     {
         $sm = $this->sm;
         $sv = $this->sv;
@@ -189,13 +189,13 @@ class VersionSpecController extends AbstractController
         $type = $version->getProjet()->getTypeProjet();
         switch ($type) {
             case Projet::PROJET_SESS:
-            return $this->modifierType1($request, $version, $renouvellement, /*$image_forms,*/ $collaborateur_form);
+            return $this->modifierType1($request, $version, $collaborateur_form);
     
             case Projet::PROJET_TEST:
-            return $this->modifierType3($request, $version, $renouvellement, /*$image_forms,*/ $collaborateur_form);
+            return $this->modifierType3($request, $version, $collaborateur_form);
     
             case Projet::PROJET_FIL:
-            return $this->modifierType3($request, $version, $renouvellement, /*$image_forms,*/ $collaborateur_form);
+            return $this->modifierType3($request, $version, $collaborateur_form);
     
             default:
                $sj->throwException(__METHOD__ . ":" . __LINE__ . " mauvais type de projet " . Functions::show($type));
@@ -206,15 +206,12 @@ class VersionSpecController extends AbstractController
      * Appelée par modifierAction pour les projets de type 1 (PROJET_SESS)
      *
      * params = $request, $version
-     *          $renouvellement (toujours true/false)
      *          $image_forms (formulaire de téléversement d'images)
      *          $collaborateurs_form (formulaire des collaborateurs)
      *
      */
     private function modifierType1(Request $request,
                                    Version $version,
-                                   bool $renouvellement,
-                                   //array $image_forms,
                                    FormInterface $collaborateur_form
                                    ): Response
     {
@@ -237,7 +234,7 @@ class VersionSpecController extends AbstractController
 
         $form_builder
             ->add('fermer', SubmitType::class)
-                //->add( 'enregistrer',   SubmitType::Class )
+            ->add( 'enregistrer',   SubmitType::Class )
             ->add('annuler', SubmitType::class);
 
         $form = $form_builder->getForm();
@@ -288,7 +285,6 @@ class VersionSpecController extends AbstractController
                 'img_justif_renou' => $img_justif_renou,
                 'collaborateur_form' => $collaborateur_form->createView(),
                 'todo'          => static::versionValidate($version, $sj, $em, $sval, $this->getParameter('nodata')),
-                'renouvellement'    => $renouvellement,
                 'nb_form'       => $nb_form
             ]
         );
@@ -602,15 +598,12 @@ class VersionSpecController extends AbstractController
      * Appelée par modifierAction pour les projets de type 3 (PROJET_FIL => PROJET_TEST)
      *
      * params = $request, $version
-     *          $renouvellement (toujours false)
      *          $image_forms (formulaire de téléversement d'images)
      *          $collaborateurs_form (formulaire des collaborateurs)
      *
      */
     private function modifierType3( Request $request,
                                     Version $version,
-                                    bool $renouvellement,
-                                    // array $image_forms,
                                     FormInterface $collaborateur_form
                                     ): Response
     {
@@ -684,7 +677,8 @@ class VersionSpecController extends AbstractController
             ]
         )
         ->add('fermer', SubmitType::class)
-        ->add('annuler', SubmitType::class);
+        ->add('annuler', SubmitType::class)
+        ->add('enregistrer', SubmitType::class);
 
         $form = $form_builder->getForm();
         $form->handleRequest($request);
