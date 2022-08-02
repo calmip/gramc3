@@ -1,4 +1,4 @@
-{# TODO - houlala et les deux autrers types de projet alors ??? #}
+{# TODO - houlala et les deux autres types de projet alors ??? #}
 {% extends 'projet/consulter_projet_sess.html.twig' %}
 
 
@@ -8,18 +8,23 @@
 {% block fil_ariane %}
 {% endblock fil_ariane %}
 
+{% block stylesheets %}
+    <link href="{{ absolute_url(asset('css/defaut.css'))  }}" rel="stylesheet" type="text/css" media="screen" />
+    <link href="{{ absolute_url(asset('css/pdf.css'))  }}" rel="stylesheet" type="text/css" media="screen" />
+{% endblock stylesheets %}
+
+{% block javascripts %}
+{% endblock %}
+
+{% block myjavascripts %}
+{% endblock %}
+
+{% block datatables %}
+{% endblock %}
+
 {% block menu %}
-<img src="{{  absolute_url(asset('icones/banniere.png') ) }}" alt="logo" />
+<img id="banniere" src="{{  absolute_url(asset('icones/banniere.png') ) }}" alt="logo" />
 {% endblock menu %}
-
-{% block before_body %}
-<h2>
-    Projet : {{ projet }} (session {{ session }})
-    <br>
-    <small><em>{{ version.getMetaEtat }}</em></small>
-</h2>
-
-{% endblock before_body %}
 
 {% block footer %}
 {% endblock footer %}

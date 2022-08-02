@@ -382,6 +382,9 @@ class VersionController extends AbstractController
             ]
         );
 
+        // NOTE - Pour déboguer la version pdf, décommentez 
+        //return $html4pdf;
+        
         $pdf = $spdf->setOption('enable-local-file-access', true);
         $pdf = $spdf->getOutputFromHtml($html4pdf->getContent());
         return Functions::pdf($pdf);

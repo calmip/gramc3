@@ -1648,7 +1648,7 @@ tbody tr.rallonge{
 
 /* ========== TOUS LES TOP_BODY ==========  */
 .top_body{
-    display: flex;
+    /*display: flex;*/
     align-items: center;
     width: 90%;
     margin: auto;
@@ -1914,6 +1914,7 @@ tbody tr.rallonge{
     border: 1px solid var(--first-color);
     padding: 20px;
     border-radius: 10px;
+    margin: 1em 0;
 }
 
 .consulter_projet .menu{
@@ -2044,6 +2045,11 @@ tbody tr.rallonge{
 .consulter_projet details summary svg{
     margin-right: 1.5rem;
     stroke: var(--first-color);
+}
+
+.consulter_projet details .chapitre {
+    max-height: 70vh;
+    overflow-y: scroll;
 }
 
 .consulter_projet .I .presentation{
