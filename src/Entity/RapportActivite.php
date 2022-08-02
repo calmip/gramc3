@@ -56,13 +56,6 @@ class RapportActivite
     private $taille;
 
     /**
-     * @var string
-     *
-     * @ORM\Column(name="filedata", type="blob", length=65535, nullable=true)
-     */
-    private $filedata;
-
-    /**
      * @var integer
      *
      * @ORM\Column(name="id", type="integer")
@@ -159,32 +152,6 @@ class RapportActivite
     public function getTaille()
     {
         return $this->taille;
-    }
-
-
-
-    /**
-     * Set filedata
-     *
-     * @param string $filedata
-     *
-     * @return RapportActivite
-     */
-    public function setFiledata($filedata)
-    {
-        $this->filedata = $filedata;
-
-        return $this;
-    }
-
-    /**
-     * Get filedata
-     *
-     * @return string
-     */
-    public function getFiledata()
-    {
-        return $this->filedata;
     }
 
     /**
