@@ -1,6 +1,7 @@
 {% extends 'default/base.html.twig' %}
 {% import "default/macros.html.twig" as gramcmacros %}
 {% import "projet/terminer.html.twig" as terminermacros %}
+{% import "default/icone.html.twig" as icones %}
 
 {% block myjavascripts %}
 <script  type="text/javascript" src="{{ asset('js/projets_experts.js') }}" ></script>
@@ -8,7 +9,7 @@
 
 {% block body %}
 
-<section class="section_projet_session">
+<section class="section_projet_session"  style="stroke:black">
 
     <h2>Projets enregistrés (toutes années)</h2>
 
@@ -87,21 +88,21 @@
                 <tr role="row" class="odd">
 
                     <td class="sorting_1">
-					{% if item.renouvelable %}
-	                    {% if (item.metaetat == 'standby' or item.metaetat == 'agarder') %}
-							{% if item.projet.nepasterminer==false %}
-								{{ terminermacros.onpeutterminer(item.projet) }}
-							{% else %}
-								{{ terminermacros.nepasterminer(item.projet) }}
-		                    {% endif %}
-	                    {% endif %}
-	                 {% endif %}
+                    {% if item.renouvelable %}
+                        {% if (item.metaetat == 'standby' or item.metaetat == 'agarder') %}
+                            {% if item.projet.nepasterminer==false %}
+                                {{ terminermacros.onpeutterminer(item.projet) }}
+                            {% else %}
+                                {{ terminermacros.nepasterminer(item.projet) }}
+                            {% endif %}
+                        {% endif %}
+                     {% endif %}
 
                     </td>
                     <td>{{ item.projet.idProjet }}</td>
                     <td>
                         <a href="{{ path('consulter_projet', { 'id': item.projet.idProjet }) }}" title="Consulter le projet">
-                            <img src="{{ asset('icones/consulter.png') }}" alt="Consulter" />
+                            {{icones.details}}
                         </a>
                     </td>
 
@@ -126,10 +127,12 @@
                         {% if( item.responsable != null) %}
                         {% if is_granted('ROLE_ADMIN') %}
                         <a class="sudo" href="{{ path('sudo',  { 'id': item.responsable.id }) }}?" title="Changer d'identité">
-                            <img class="bouton_poussoir" src="{{ asset('icones/sudo.png') }}" alt="Changer d'identité" /></a>
+                            {{icones.sudo(20,20)}}
+                        </a>
                         {% endif %}
                         <a href="mailto:{{ item.responsable.mail }}" title="Envoyer un courriel au responsable à l'adresse {{ item.responsable.mail }}">
-                            <img src="{{ asset('icones/mail_send.png') }}" alt="Envoyer un mail" /></a>
+                            {{icones.mail_send}}
+                        </a>
                         {{ item.responsable.prenom }} {{ item.responsable.nom }}
                         {% endif %}
                     </td>

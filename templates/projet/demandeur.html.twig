@@ -2,22 +2,19 @@
 
 
 {% import "default/macros.html.twig" as gramcmacros %}
-{% import "projet/macros_graphiques.html.twig" as macros_graphiques %}
 {% import _self as thismacro %}
-
 {% import "default/icone.html.twig" as icones %}
 
 {# ################################################# #}
 
 
 {% macro ligne_projet(item) %}
-{% import "projet/macros_graphiques.html.twig" as macros_graphiques %}
 {% if item.cpt_rall + 1 > 1 %}
     <tr class="rallonge">
     {% else %}
     <tr>
     {% endif %}
-        <td>{{ macros_graphiques.meta_etat_graphique(item.meta_etat) }}</td>
+        <td><span title="{{item.meta_etat}}" style="height:16">{{ gramcmacros.metagraph(item.meta_etat) }}</span> </td>
         
         <td><a href="{{ path('consulter_projet', { 'id': item.projet.idProjet })}}" title="Ouvrir le projet {{ item.projet.idProjet }}">
             {{ icones.details }}
@@ -95,7 +92,7 @@
     {% set num_rallonge = 1 %}
     {% for rallonge in item.rallonges %}
     <tr>
-        <td>{{ macros_graphiques.meta_etat_graphique(rallonge.getMetaEtat() ) }}</td>
+        <td>{{ gramcmacros.metagraph(rallonge.getMetaEtat()) }}</td>
         <td>
             <a href="{{ path('rallonge_consulter', { 'id': rallonge.idRallonge })}}"
             {% if rallonge.getMetaEtat() == 'EDITION' %}
@@ -242,7 +239,7 @@ passwd
 {%  endif %}
 
 {% if projets_term != null %}
-<section class="section_termine">
+<section class="section_termine" style="stroke:black;">
 
 <h3>Projets anciens ou terminés:</h3>
 
@@ -272,7 +269,7 @@ Si vous souhaiter demander des ressources, vous devez créer un nouveau projet
     <tbody>
     {% for item in  projets_term %}
         <tr>
-            <td>{{ macros_graphiques.meta_etat_graphique('TERMINE') }}</td>
+            <td>{{ gramcmacros.metagraph('termine') }}</td>
             <td>
                 <a href="{{ path('consulter_projet', { 'id': item.idProjet })}}" title="Ouvrir le projet {{ item.idProjet }}">
                     {{ icones.details }}

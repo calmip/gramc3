@@ -1,5 +1,6 @@
 {% extends 'default/base.html.twig' %}
 {% import "default/macros.html.twig" as gramcmacros %}
+{% import "default/icone.html.twig" as icones %}
 
 {% block myjavascripts %}
 <script  type="text/javascript" src="{{ asset('js/projets_experts.js') }}" ></script>
@@ -8,7 +9,7 @@
 
 {% block body %}
 <div id="dialog-compta"></div>
-<section class="section_projet_session">
+<section class="section_projet_session" style="stroke:black">
     <h2>Projets de la session {{ session }}</h2>
 
     <div class="formulaire">
@@ -262,23 +263,23 @@
                     <td>
                             {% if( version.projet.libelleEtat == 'STANDBY' ) %}
                             <a class="fermeture" href="{{ path('fermer_projet', { 'id': version.projet.idProjet }) }}" title="Fermer le projet">
-                                <img src="{{ asset('icones/process-stop.png') }}" alt="Fermer" />
+                                {{icones.process_stop}}
                             </a>
                             {% elseif( version.libelleEtat == 'EDITION_EXPERTISE') %}
                             <a class="arriere" href="{{ path('back_version', { 'id': version.idVersion }) }}" title="Revenir en édition">
-                                <img src="{{ asset('icones/back.png') }}" alt="En arrière" />
+                                {{ icones.back(25, 25) }}
                             </a>
                             {% elseif( version.libelleEtat == 'EXPERTISE_TEST' ) %}
                             <a class="arriere" href="{{ path('back_version', { 'id': version.idVersion }) }}" title="Revenir en édition">
-                                <img src="{{ asset('icones/back.png') }}" alt="En arrière" />
+                                {{ icones.back(25, 25) }}
                             </a>
                             {% elseif( version.libelleEtat == 'EDITION_DEMANDE') %}
                             <a href="{{ path('fwd_version', { 'id': version.idVersion }) }}" title="Envoyer pour expertise">
-                                <img src="{{ asset('icones/forward.png') }}" alt="En avant" />
+                                {{ icones.forward(25,25) }}
                             </a>
                             {% elseif( version.libelleEtat == 'EDITION_TEST') %}
                             <a href="{{ path('fwd_version', { 'id': version.idVersion }) }}" title="Envoyer pour expertise">
-                                <img src="{{ asset('icones/forward.png') }}" alt="En avant" />
+                                {{ icones.forward(25,25) }}
                             </a>
                             {% else %}
                             &nbsp;
@@ -288,11 +289,13 @@
                         <td><strong>{{ version.projet.libelletype }}</strong></td>
                         <td>
                             <a href="{{ path('consulter_version', { 'id': version.projet.idProjet, 'version': version.idVersion }) }}" title="Consulter le projet">
-                            <img src="{{ asset('icones/consulter.png') }}" alt="Consulter" /></a>
+                            {{icones.details}}
+                            </a>
                             {% if( version.projet.derniereVersion != null and version.projet.derniereVersion.isEdited ) %}
                             <a href="{{ path('version_avant_supprimer',
                             { 'id': version.projet.derniereVersion.idVersion, 'rtn' : 'projet_session' })}}" title="Supprimer le projet {{ version.projet.idProjet }}">
-                            <img class="bouton_poussoir" src="{{ asset('icones/poubelle16.png') }}" alt="Supprimer" /></a>
+                            {{icones.supprimer}}
+                            </a>
                             {% endif %}
                             {% if noconso==false %}
                             {% if( not serviceVersions.isnouvelle(version) ) %}
@@ -301,9 +304,11 @@
                                 {% else %}
                                     {% set annee_conso = version.anneeSession %}
                                 {% endif %}
-                                <img id="bconso_{{ version.projet.idProjet }}"  class="bouton_poussoir conso" src="{{ asset('icones/courbe.png') }}"
-                                title="{{ version.projet.idProjet }}: Evolution de la consommation pour {{annee_conso}}" alt="{{ version.projet.idProjet }}: Evolution de la consommation pour {{annee_conso}}"
-                                    data-href="{{ absolute_url(path('projet_conso', { 'id': version.projet.idProjet, 'annee' : annee_conso })) }}" />
+                                <a id="bconso_{{ version.projet.idProjet }}"  class="conso" 
+                                title="{{ version.projet.idProjet }}: Evolution de la consommation pour {{annee_conso}}" 
+                                    data-href="{{ absolute_url(path('projet_conso', { 'id': version.projet.idProjet, 'annee' : annee_conso })) }}">
+                                    {{icones.consommation(25,30)}}
+                                </a>
                             {% endif %}
                             {% endif %}
 
@@ -335,13 +340,15 @@
                             {% if( version.responsable != null ) %}
                             {% if ( is_granted('ROLE_ADMIN') ) %}
                             <a class="sudo" href="{{ path('sudo',  { 'id': version.responsable.id }) }}?" title="Changer d'identité">
-                                        <img class="bouton_poussoir" src="{{ asset('icones/sudo.png') }}" alt="Changer d'identité" /></a>
+                                {{icones.sudo(20,20)}}
+                            </a>
                             {% endif %}
                             <a href="mailto:{{ version.responsable.mail }}" title="Envoyer un courriel au responsable à l'adresse {{ version.responsable.mail }}">
-                                        <img src="{{ asset('icones/mail_send.png') }}" alt="Envoyer un mail" /></a>
+                                {{icones.mail_send}}
+                            </a>
                             {{ version.responsable.prenom }} {{ version.responsable.nom }}
                                 {% if(  version.responsable.peut_creer_projets == false ) %}
-                                <img class="bouton_poussoir" src="{{ asset('icones/attention.png') }}" title="Le responsable non éligible" />
+                                <span title="Responsable non éligible">{{icones.attention(20,20)}}</span>
                                 {% endif %}
                             {% endif %}
                         </td>
@@ -357,10 +364,12 @@
                             {% if exp != null %}
                                 {% if ( is_granted('ROLE_ADMIN')) %}
                                 <a class="sudo" href="{{ path('sudo',  { 'id': exp.id }) }}?" title="Changer d'identité">
-                                            <img class="bouton_poussoir" src="{{ asset('icones/sudo.png') }}" alt="Changer d'identité" /></a>
+                                    {{icones.sudo(20,20)}}
+                                </a>
                                 {% endif %}
                                 <a href="mailto:{{ exp.mail }}" title="Envoyer un courriel à l'expert à l'adresse {{ exp.mail }}">
-                                            <img src="{{ asset('icones/mail_send.png') }}" alt="Envoyer un mail" /></a>
+                                    {{icones.mail_send}}
+                                </a>
                                 {{ exp.prenom }} {{ exp.nom }}<br />
                             {% endif %}
                             {% endfor %}
@@ -374,7 +383,8 @@
                             {% if serviceVersions.issigne(version) %}
                             <td class="prj_fiche_val">
                                 <a href="{{ path('signature',  { 'id': version.idVersion }) }}?">
-                                <img src="{{ asset('icones/pdf.png') }}" alt="Fichier pdf" /></a>
+                                    {{icones.pdf(25,25)}}
+                                </a><br>
                                 <small>({{ serviceVersions.sizesigne(version) }}K)</small>
                             </td>
                             {% else %}
@@ -389,7 +399,8 @@
                             {% else %}
                                 <td  class="rapport_activite">
                                 <a href="{{ path('rapport',  { 'id': version.idVersion }) }}?">
-                                <img src="{{ asset('icones/pdf.png') }}" alt="Fichier pdf" /></a>
+                                    {{icones.pdf(25,25)}}
+                                </a><br>
                                 <small>({{ sizerapport }}K)</small>
                             {% endif %}
                             </td>

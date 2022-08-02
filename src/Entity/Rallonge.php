@@ -608,6 +608,8 @@ class Rallonge implements Demande
             return  'EXPERTISE';
         } elseif ($etat    ==  Etat::EN_ATTENTE) {
             return  'ATTENTE';
+        } elseif ($etat == Etat::ANNULE ) {
+            return 'TERMINE';
         } elseif ($this->getAttrAccept() == true) {
             return  'ACCEPTE';
         } elseif ($this->getAttrAccept() == false) {

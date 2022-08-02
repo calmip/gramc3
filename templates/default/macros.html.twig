@@ -48,12 +48,16 @@
         {{icones.supprimer}}
     {% elseif value == "consommation" %}
         {{icones.consommation}}
-    {% elseif value == "croix" %}
-        {{icones.croix}}
+    {% elseif value == "termine" %}
+        {{icones.termine}}
     {% elseif value == "valide" %}
         {{icones.valide}}
+    {% elseif value == "accepte" %}
+        {{icones.accepte}}
     {% elseif value == "renouveler" %}
         {{icones.renouveler}}
+    {% elseif value == "edition" %}
+        {{icones.edition}}
     {% elseif value == "modifier" %}
         {{icones.modifier}}
     {% elseif value == "envoyer" %}
@@ -68,6 +72,8 @@
         {{icones.fleche_retour}}
     {% elseif value == "trait_summary" %}
         {{icones.trait_summary}}
+    {% elseif value == "plus_summary" %}
+        {{icones.plus_summary}}
     {% elseif value == "fleche_gauche" %}
         {{icones.fleche_gauche}}
     {% elseif value == "fleche_droite" %}
@@ -130,16 +136,16 @@
         {{icones.agarder}}
     {% elseif value == "expertise" %}
         {{icones.expertise}}
-    {% elseif value == "nonrenouvelle" %}
-        {{icones.nonrenouvelle}}
+    {% elseif value == "nonrenouvele" %}
+        {{icones.nonrenouvele}}
     {% elseif value == "back" %}
         {{icones.back}}
     {% elseif value == "forward" %}
         {{icones.forward}}
     {% elseif value == "bientotactif" %}
         {{icones.bientotactif}}
-    {% elseif value == "inactif" %}
-        {{icones.inactif}}
+    {% elseif value == "refuse" %}
+        {{icones.refuse}}
     {% elseif value == "forbidden" %}
         {{icones.forbidden}}
     {% elseif value == "expert" %}
@@ -289,12 +295,12 @@
 
 {# #################################################### #}
 {# Affichage des méta etats par une icône               #}
-{# --> cf. aussi le fichier macros_graphiques.html.twig #}
 {# #################################################### #}
 
 {% macro metagraph(etat) %}
-{% set src=asset('icones/%ETAT%')|replace({'%ETAT%' : etat|lower}) %}
-<span class="invisible">{{etat}}</span><img src="{{src}}.png" alt="{{etat}}" title="{{etat}}" />
+{% from _self import menuIcones %}
+{% set svg=etat|lower %}
+<span class="invisible">{{etat}}</span><span title="{{etat}}">{{ menuIcones(svg)}}</span>
 {% endmacro %}
 
 {# ################################################# #}

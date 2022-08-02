@@ -12,7 +12,7 @@
 
 <div id="dialog-compta"></div>
 
-    <section class="section_projet_session">
+    <section class="section_projet_session" style="stroke:black">
         <h2>Projets de l'année {{ annee }}</h2>
 
         <div class="formulaire">
@@ -314,25 +314,25 @@
                     {% set version = va %}
                     {% endif %}
                     <a href="{{ path('consulter_version', { 'id':projet.idprojet,'version': version }) }}" title="Consulter le projet">
-                        <img class="bouton_poussoir" src="{{ asset('icones/consulter.png') }}" alt="Consulter" />
+                        {{icones.details}}
                     </a>
                 </td>
                 <td>
-                    {{ gramcmacros.metagraph(prj_array.metaetat) }}
+                    {#{{prj_array.metaetat}}#}<span title="{{prj_array.metaetat}}" style="height:16">{{ gramcmacros.metagraph(prj_array.metaetat) }}</span>
                 </td>
     
                 {% if noconso==false %}
                 <td>
-                    <img id="bconso_{{ projet.idProjet }}"  class="bouton_poussoir conso" src="{{ asset('icones/courbe.png') }}"
-                    title="{{ projet.idProjet }}: Evolution de la consommation pour {{annee}}" alt="{{ projet.idProjet }}: Evolution de la consommation pour {{annee}}"
-                    data-href="{{ absolute_url(path('projet_conso', { 'id': projet.idProjet, 'annee' : annee })) }}" />
+                    <a id="bconso_{{ projet.idProjet }}"  class="conso" title="{{ projet.idProjet }}: Evolution de la consommation pour {{annee}}" alt="{{ projet.idProjet }}: Evolution de la consommation pour {{annee}}"
+                    data-href="{{ absolute_url(path('projet_conso', { 'id': projet.idProjet, 'annee' : annee })) }}" >{{icones.consommation}}
+                    
                 </td>
                 <td>
                      
                     <a href="{{ path('dfct_liste', { 'id':projet.idprojet,'annee': annee }) }}" 
                     title="{{ projet.idProjet }}: Données de facturation pour {{annee}}" alt="{{ projet.idProjet }}: Données de facturation pour {{annee}}"
                     target = "_blank">
-                        <img class="bouton_poussoir" src="{{ asset('icones/euro16.png') }}" alt="Consulter" />
+                        {{icones.euro}}
                     </a>
                 </td>
                 {% endif %}
@@ -348,7 +348,7 @@
                 </td>
                
                 <td>
-                    <a href="mailto:{{ prj_array.resp.mail }}"><img src="{{ asset('icones/mail_send.png') }}" alt="Envoyer un mail" /></a>{{ prj_array.resp.prenom }} {{ prj_array.resp.nom }}
+                    <a href="mailto:{{ prj_array.resp.mail }}">{{icones.mail_send}}</a> {{ prj_array.resp.prenom }} {{ prj_array.resp.nom }}
                 </td>
                 <td>
                     {{ gramcmacros.tronquer_chaine(prj_array.labo,20) }}
