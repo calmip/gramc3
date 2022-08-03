@@ -337,11 +337,7 @@ class ServiceVersions
     {
         $full_filename = $this->imageDir($version) .'/'.  $filename;
 
-        if (file_exists($full_filename . ".png") && is_file($full_filename . ".png"))
-        {
-            $full_filename  =  $full_filename. ".png";
-        }
-        elseif (file_exists($full_filename . ".jpeg") && is_file($full_filename . ".jpeg"))
+        if (file_exists($full_filename . ".jpeg") && is_file($full_filename . ".jpeg"))
         {
             $full_filename  =  $full_filename. ".jpeg";
         }

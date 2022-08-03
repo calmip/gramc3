@@ -1,5 +1,6 @@
 {% extends 'default/base.html.twig' %}
 {% import "default/macros.html.twig" as gramcmacros %}
+{% import "default/icone.html.twig" as icones %}
 
 {% block myjavascripts %}
 <script  type="text/javascript" src="{{ asset('js/projets_experts.js') }}" ></script>
@@ -11,7 +12,7 @@
 
 <div id="dialog-compta"></div>
 
-<section class="section_projet_session">
+<section class="section_projet_session" style="stroke:black">
     <h2>Gestion et valorisation des données ({{annee}})</h2>
 
     <div class = "formulaire">
@@ -119,15 +120,16 @@
                         <td>
                             {% set version=annee|slice(2,2) ~ 'A' ~ projet %}
                             <a href="{{ path('consulter_version', { 'id':projet.idprojet,'version': version }) }}" title="Consulter le projet">
-                                <img class="bouton_poussoir" src="{{ asset('icones/consulter.png') }}" alt="Consulter" />
+                                {{ icones.details}}
                             </a>
                         </td>
     
                         {% if noconso==false %}
                         <td class="w15">
-                            <img id="bconso_{{ projet.idProjet }}"  class="bouton_poussoir conso" src="{{ asset('icones/courbe.png') }}"
-                            title="{{ projet.idProjet }}: Evolution de la consommation pour {{annee}}" alt="{{ projet.idProjet }}: Evolution de la consommation pour {{annee}}"
-                            data-href="{{ absolute_url(path('projet_conso', { 'id': projet.idProjet, 'annee' : annee })) }}" />
+                            <a id="bconso_{{ projet.idProjet }}" title="{{ projet.idProjet }}: Evolution de la consommation pour {{annee}}"
+                            data-href="{{ absolute_url(path('projet_conso', { 'id': projet.idProjet, 'annee' : annee })) }}">
+                                {{icones.consommation(25,25)}}
+                            </a>
                         </td>
                         {% endif %}
     
@@ -138,7 +140,10 @@
                             {{ gramcmacros.tronquer_chaine(projet.thematique,20) }}
                         </td>
                         <td>
-                            <a href="mailto:{{ projet.responsable.mail }}"><img src="{{ asset('icones/mail_send.png') }}" alt="Envoyer un mail" /></a>{{ projet.responsable.prenom }} {{ projet.responsable.nom }}
+                            <a href="mailto:{{ projet.responsable.mail }}">
+                                <span title="Envoyer un mail" >{{icones.mail_send}}</span>
+                            </a>
+                            {{ projet.responsable.prenom }} {{ projet.responsable.nom }}
                         </td>
                         <td>
                             {{ gramcmacros.tronquer_chaine(projet.laboratoire,20) }}
@@ -150,9 +155,13 @@
                         <td>
                             {{prj_array.qt}}
                             {% if '<' in prj_array.sondVolDonnPermTo or 'sais pas' in prj_array.sondVolDonnPermTo %}
-                                {% if (prj_array.qt != 1) %}<img src="{{ asset('icones/attention16.png') }}" alt="Pas de demande le quota devrait avoir la valeur par défaut" title="Pas de demande le quota devrait avoir la valeur par défaut" /> {% endif %}
+                                {% if (prj_array.qt != 1) %}
+                                    <span title="Pas de demande le quota devrait avoir la valeur par défaut">{{icones.attention(25,25)}}</span>
+                                {% endif %}
                             {% else %}
-                                 {% if (prj_array.qt != prj_array.sondVolDonnPermTo) %}<img src="{{ asset('icones/attention16.png') }}" alt="Quota différent de la demande" title="Quota différent de la demande" />{% endif %}
+                                 {% if (prj_array.qt != prj_array.sondVolDonnPermTo) %}
+                                    <span title="Quota différent de la demande">{{icones.attention(25,25)}}</span>
+                                 {% endif %}
                             {% endif %}
                         </td>
                         <td>

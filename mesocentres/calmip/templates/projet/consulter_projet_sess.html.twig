@@ -9,7 +9,7 @@
 
 {% block body %}
 
-    <section class="consulter_projet">
+    <section class="consulter_projet" style="stroke:black">
 
         <div class="top_body">
             {% if app.debug %}
@@ -124,8 +124,8 @@
             {% endif %}
 
         {% endif %}
-    </section>
-    
+        </section>
+
 {% if pdf is defined %}
     <div class="I details">
         <h3>I - Présentation générale</h3>
@@ -192,7 +192,7 @@
                     </th>
                     <td>{{ (version.getDemHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}
                     {% if toomuch %}
-                        <img src="{{ absolute_url(asset('icones/attention16.png')) }}" alt="Demande trop forte, cf. règles d'attribution" title="Demande trop forte, cf. règles d'attribution" />
+                        <span title="Demande trop forte, cf. règles d'attribution">{{ icones.attention}}</span>
                     {% endif %}
                 </tr>
 
@@ -280,7 +280,6 @@
         </table>
 
         <p class="info_supplementaire">* Le laboratoire associé au projet est le laboratoire du responsable</p>
-
         <h4>Personnes participant au projet :</h4>
         <table>
             <thead>
@@ -316,10 +315,10 @@
                                 </td>
 
                                 {% if version.etat==5 or version.etat == 4 %}
-                                    <td>
+                                    <td style="stroke:black;">
                                         {% if (user.login == true) %}
                                             {% if user.loginname==null %}
-                                                <img src="{{ asset('icones/attention16.png') }}" alt="Compte non encore créé" title="compte non encore créé"/>
+                                               {{icones.attention(25,25)}}
                                             {% else %}
                                                 <tt>{{ user.loginname }}</tt>
                                             {% endif %}

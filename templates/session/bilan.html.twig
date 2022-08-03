@@ -1,5 +1,7 @@
 {% extends 'default/base.html.twig' %}
 {% import "default/macros.html.twig" as gramcmacros %}
+{% import "default/icone.html.twig" as icones %}
+
 
 {% block body %}
 <section>
@@ -20,7 +22,7 @@
 </section>
 <hr />
 
-<section>
+<section style="stroke:black">
 
     <h2>Réponses au questionnaire (session {{ idSession }})</h2>
 
@@ -69,7 +71,8 @@
             <td>
                 {% if version.projet != null and  version.projet.idProjet != null %}
                 <a href="{{ path('consulter_projet', { 'id': version.projet.idProjet }) }}" title="Consulter le projet">
-                <img src="{{ asset('icones/consulter.png') }}" alt="consulter" /></a>
+                    {{icones.details}}
+                </a>
                 {% endif %}
             </td>
             <td>{{ version.demHeurestotal }}</td>
@@ -124,7 +127,8 @@
                         <td>
                         {% if version.projet != null and  version.projet.idProjet != null %}
                             <a href="{{ path('consulter_projet', { 'id': version.projet.idProjet }) }}" title="Consulter le projet">
-                            <img src="{{ asset('icones/consulter.png') }}" alt="consulter" /></a>
+                                {{icones.details}}
+                            </a>
                         {% endif %}
                         </td>
                         {% for label in form_labels %}

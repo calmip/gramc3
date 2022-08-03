@@ -8,7 +8,7 @@
 
 {% block body %}
 
-<section style="stroke:black">
+<section class="section_projet_session" style="stroke:black">
 
 <h1>{{ titre }}</h1>
 {% if forms|length > 0 %}
@@ -24,12 +24,10 @@
     <hr />
 {% endif %}
 
-{% include('expertise/affectation_bilans.html.twig') %}
+<form name="affecter_les_experts" method="post">
+<div class="tableaux">
+    {% include('expertise/affectation_bilans.html.twig') %}
 
-
-{# #################################################################### #}
-
-    <form name="affecter_les_experts" method="post">
     <div id="projets">
         <table id="affecte_experts">
         <thead>

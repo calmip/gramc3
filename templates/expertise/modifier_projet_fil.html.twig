@@ -20,7 +20,7 @@
 
         <div class="titre">
             <h3>{{ version.prjTitre }}</h3>
-            <p>({{ version.demHeures }} heures demandées)</p> {% if toomuch %} <img src="{{ asset('icones/attention16.png') }}" alt="Demande trop forte, cf. règles d'attribution" title="Demande trop forte, cf. règles d'attribution" /> {% endif %}
+            <p>({{ version.demHeures }} heures demandées)</p> {% if toomuch %}<span title="Demande trop forte, cf. règles d'attribution"> {{ icones.attention }}</span>{% endif %}
         </div>
     </div>
 

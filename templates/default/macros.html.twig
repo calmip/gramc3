@@ -3,33 +3,6 @@
 
 {% import _self as macros %}
 
-
-{% macro ko(text) %}
-    <div class="infobulleko" data-title="{{ text }}" >
-    <img src="{{ asset('icones/q16.png') }}" alt="?" />
-    </div>
-{% endmacro %}
-
-{# ################################################## #}
-
-{% macro inactif(link,title,message) %}
-    {% import _self as macros %}
-    <a  class="lien_inactif"
-     {% if(  app.debug ) %} href="{{ path( link ) }}" {% endif %}
-    title="{{ title }}">{{ title }}</a>
-{{ macros.ko(message) }}
-{% endmacro %}
-
-{# ################################################## #}
-
-{% macro actif(link,title,message) %}
-    <a  class="lien_actif" href="{{ path( link ) }}" title="{{ title }}">{{ title }}</a>
-    <div class="infobulleok" data-title="{{ message|default('Vous pouvez y accéder') }}" >
-        <img src="{{ asset('icones/q16.png') }}" alt="?" />
-    </div>
-{% endmacro %}
-
-{# ################################################## #}
 {# Affichage d'une icone à partir d'une valeur #}
 
 {% macro menuIcones(value) %}
@@ -160,8 +133,8 @@
         {{icones.sysadmin}}
     {% elseif value == "attention" %}
         {{icones.attention}}
-    {% elseif value == "invsel" %}
-        {{icones.invsel}}
+    {% elseif value == "norecup" %}
+        {{icones.norecup}}
     {% elseif value == "recup" %}
         {{icones.recup}}
     {% endif %}
@@ -294,7 +267,7 @@
 {% endmacro %}
 
 {# #################################################### #}
-{# Affichage des méta etats par une icône               #}
+{# Affichage des méta etats par une icône svg           #}
 {# #################################################### #}
 
 {% macro metagraph(etat) %}

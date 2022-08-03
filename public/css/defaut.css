@@ -2016,11 +2016,11 @@ tbody tr.rallonge{
     display: none;
 }
 
-.consulter_projet details[open] svg:nth-of-type(1){
+.consulter_projet details[open] summary svg:nth-of-type(1){
     display: none;
 }
 
-.consulter_projet details[open] svg:nth-of-type(2){
+.consulter_projet details[open] summary svg:nth-of-type(2){
     display: initial;
 }
 

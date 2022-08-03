@@ -107,7 +107,7 @@
 {# ################################################################### #}
 
 {% if( not ( expertises_hors_thematique == null ) ) %}
-<section>
+<section style="stroke:black">
     <h2>Autres thématiques</h2>
     <table id="HORS_THEM" class="projet">
     <thead>
@@ -131,10 +131,12 @@
                         <td>
                             {% if( expertise.expert == true) %}
                                 <a href="{{ path('expertise_modifier', { 'id' : expertise.expertise.id } ) }}">
-                                <img src="{{ asset('icones/modifier.png') }}" alt="Expertiser" title="Expertiser le projet" class="bouton_poussoir"></a>
+                                    {{ icones.modifier }}
+                                </a>
                             {% else %}
                                 <a href="{{ path('consulter_projet', { 'id' : expertise.projetId } ) }}">
-                                <img src="{{ asset('icones/consulter.png') }}" alt="Expertiser" title="Lire le projet" class="bouton_poussoir"></a>
+                                    {{ icones.details }}
+                                </a>
                             {% endif %}
                         </td>
                         <td>{{ expertise.thematique }}</td>
