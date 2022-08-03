@@ -1,11 +1,12 @@
 {% extends 'default/base.html.twig' %}
 {% import "default/macros.html.twig" as gramcmacros %}
+{% import "default/icone.html.twig" as icones %}
 
 {% block body %}
-<section>
+<section style="stroke:black">
     <h1>Formations enregistrées dans gramc</h1>
 
-    <div class="message info">
+    <div class="information">
         <h2>Gérer les formations proposées</h2>
         <ul>
             <li>Vous êtes limité à <strong>10 formations</strong></li>
@@ -19,20 +20,22 @@
     <table id="formations" >
     <thead>
         <tr>
-			{% if is_granted('ROLE_ADMIN') %}<th colspan="2">&nbsp;</th>{% endif %}<th>Numéro d'ordre</th><th>Acronyme</th><th>Libellé</th>
+            {% if is_granted('ROLE_ADMIN') %}<th colspan="2">&nbsp;</th>{% endif %}<th>Numéro d'ordre</th><th>Acronyme</th><th>Libellé</th>
         </tr>
     </thead>
     <tbody>
     {% for form in formations %}
         <tr>
-			{% if is_granted('ROLE_ADMIN') %}
+            {% if is_granted('ROLE_ADMIN') %}
             <td>
                 <a class="suppression" href="{{ path('supprimer_formation',{'id' : form.id }) }}" title="Supprimer">
-                <img class="bouton_poussoir" src="{{ gramcmacros.img_supprimer() }}" alt="Supprimer" /></a>
+                {{ icones.supprimer }}
+                </a>
             </td>
             <td>
                 <a class="modification" href="{{ path('modifier_formation',{'id' : form.id }) }}" title="Modifier le libellé">
-                <img class="bouton_poussoir" src="{{ gramcmacros.img_modifier() }}" alt="Modifier" /></a>
+                {{ icones.modifier }}
+                </a>
             </td>
             {% endif %}
             <td>{% if form.numeroform<10 %}{{ form.numeroform }}{% else %} <em>aucun</em> (n°{{form.numeroform}}){% endif %}</td>

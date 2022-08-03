@@ -21,58 +21,52 @@
         </div>
     {% endif %}
 
-    <div class="message warning">
-    <h2>Attention</h2>
-    <p>L'utilisateur <strong>{{ individu }}</strong> est présent dans certaines structures de données, avant de le supprimer nous devons
-    transférer ces données à un autre utilisateur</p>
+    <div class="information attention">
+        <h2>Attention</h2>
+        <p>L'utilisateur <strong>{{ individu }}</strong> est présent dans certaines structures de données, avant de le supprimer nous devons
+        transférer ces données à un autre utilisateur</p>
     </div>
 
+    <div class="information">
     {% if not CollaborateurVersion == null %}
-        <div class="message info"><h3>Collaborateur dans des projets</h3>
+        <h3>Collaborateur dans des projets</h3>
         <p>
         {% for item in CollaborateurVersion %}
         {{ item.version }}
         {% endfor %}
         </p>
-        </div>
     {% endif %}
 
     {% if not Expertise == null %}
-        <div class="message info"><h3>Expert de certaines versions de projets</h3>
+        <h3>Expert pour certaines versions de projets</h3>
         <p>
         {% for item in Expertise %}
         {{ item.version }}
         {% endfor %}
         </p>
-        </div>
     {% endif %}
 
     {% if not Rallonge == null %}
-        <div class="message info">
         {% for item in Rallonge %}
         <p>Expert de l'expertise de la rallonge : {{ item }}</p>
         {% endfor %}
-        </div>
     {% endif %}
 
     {% if not Thematique == null %}
-        <div class="message info">
         {% for item in Thematique %}
         <p>Expert de la thématique : {{ item }}</p>
         {% endfor %}
-        </div>
     {% endif %}
 
     {% if Sso | length > 0 %}
-        <div class="message info">
         <h3>Informations de connexion (eppn)</h3>
         <p>
         {% for item in Sso%}
         {{item.eppn }}
         {% endfor %}
         </p>
-        </div>
     {% endif %}
+    </div>
     
     <div class="center" >
     {{ form_start(form) }}
