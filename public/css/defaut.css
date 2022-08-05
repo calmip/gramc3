@@ -1578,9 +1578,10 @@ tbody tr.rallonge{
 
 .section_projet_session .tableaux #bilan_legende  #bilan tr{
     height: 20px;
+    font-size: .7em;
 }
 
-.section_projet_session .tableaux #projets{
+.section_projet_session .tableaux #projets {
     font-size: 0.7em;
     min-width: 75%;
     margin: 0 10px 0 0;
