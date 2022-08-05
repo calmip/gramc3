@@ -531,6 +531,7 @@ class ServiceExperts
     {
         return ($a["expert"]->getNom()<=$b["expert"]->getNom()) ? -1 : 1;
     }
+
     private static function cmpExpertises($a, $b)
     {
         return $a->getId() > $b ->getId();

@@ -849,12 +849,13 @@ class RallongeController extends AbstractController
 
         // On trie les projets en fonction de l'état de la dernière rallonge
         usort($projets, "self::cmpProjetsByRallonges");
+        //dd($projets);
 
 
         $forms = $affectationExperts->getExpertsForms();
         $stats = $affectationExperts->getStats();
         $titre = "Affectation des experts aux rallonges de l'année 20$annee";
-
+        
         return $this->render(
             'rallonge/affectation.html.twig',
             [
@@ -867,26 +868,10 @@ class RallongeController extends AbstractController
         );
     }
 
-    // Cette fonction est utilisée par affectationAction,
-    // elle permet d'écrire les rallonges de manière ordonnée
-    // On trie en ordre inverse de l'état...
-    // SAUF QUE les projets avec rallonge active viennent en DERNIER
-    // En tout premier les projets avec rallonge en EDITION_EXPERTISE
-    // Puis les projets avec rallonge en ATTENTE
-    // Puis les projets qui ont une rallonge en état "non actif"
-    // Puis les autres
-    //
-    private static function cmpProjetsByRallonges(array $a, array $b): int
+   private static function cmpProjetsByRallonges(array $a, array $b): int
     {
-        if ($a['rstate'] == $b['rstate']) {
-            return 0;
-        }
-        if ($a['rstate'] == Etat::ACTIF) return 1;
-        if ($b['rstate'] == Etat::ACTIF) return -1;
-        return ($a['rstate'] < $b['rstate']) ? 1 : -1;
+        return (Etat::cmpEtatExpertise($a['rstate'],$b['rstate']));
     }
-
-
 
     /**
      * Deletes a rallonge entity.

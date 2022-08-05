@@ -205,9 +205,9 @@ class ExpertiseController extends AbstractController
         $session      = $session_data['session']!=null ? $session_data['session'] : $session;
         $session_form = $session_data['form'];
         $versions     = $em->getRepository(Version::class)->findSessionVersions($session);
+        usort($versions, "self::cmpVersionsByEtat");
         $etatSession  = $session->getEtatSession();
 
-        //$affectationExperts = new AffectationExperts($request, $versions, $this->get('form.factory'), $this->getDoctrine());
         $affectationExperts->setDemandes($versions);
 
         //
@@ -237,6 +237,8 @@ class ExpertiseController extends AbstractController
 
         $sessionForm      = $session_data['form']->createView();
         $titre            = "Affectation des experts aux projets de la session " . $session;
+
+        
         return $this->render(
             'expertise/affectation.html.twig',
             [
@@ -251,6 +253,11 @@ class ExpertiseController extends AbstractController
             'attHeures'     => $attHeures,
             ]
         );
+    }
+
+    private static function cmpVersionsByEtat(Version $a, Version $b): int
+    {
+        return (Etat::cmpEtatExpertise($a->getEtatVersion(),$b->getEtatVersion()));
     }
     
     /**
