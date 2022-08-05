@@ -24,6 +24,13 @@
 
 namespace App\Form;
 
+use App\Entity\Statut;
+use App\Entity\Laboratoire;
+use App\Entity\Etablissement;
+
+use App\Form\IndividuForm\IndividuForm;
+
+
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -33,9 +40,6 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-
-//use App\Utils\IndividuForm;
-use App\Form\IndividuForm\IndividuForm;
 
 class IndividuFormType extends AbstractType
 {

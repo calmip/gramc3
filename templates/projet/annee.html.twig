@@ -325,10 +325,9 @@
             <td>
                 <a id="bconso_{{ projet.idProjet }}"  class="conso" title="{{ projet.idProjet }}: Evolution de la consommation pour {{annee}}" alt="{{ projet.idProjet }}: Evolution de la consommation pour {{annee}}"
                 data-href="{{ absolute_url(path('projet_conso', { 'id': projet.idProjet, 'annee' : annee })) }}" >{{icones.consommation}}
-                
+                </a>
             </td>
             <td>
-                 
                 <a href="{{ path('dfct_liste', { 'id':projet.idprojet,'annee': annee }) }}" 
                 title="{{ projet.idProjet }}: Données de facturation pour {{annee}}" alt="{{ projet.idProjet }}: Données de facturation pour {{annee}}"
                 target = "_blank">

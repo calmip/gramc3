@@ -34,9 +34,8 @@
                 {% else %} 
                     {{item.login}} 
                 {% endif %}
-        
                 {% if item.passwd != null %}
-                    <img id="bouton_{{item.projet}}" class="bouton_poussoir right cadenas" src="{{ asset('icones/cadenas.png') }}" alt="Donnez-moi mon mot de passe" title="Donnez-moi mon mot de passe" /></a> {% endif %}
+                    &nbsp;&nbsp;<img id="bouton_{{item.projet}}" class="bouton_poussoir cadenas" src="{{ asset('icones/cadenas.png') }}" alt="Donnez-moi mon mot de passe" title="Donnez-moi mon mot de passe" /></a> {% endif %}
                 {% endif %}
             </td>
         
@@ -181,9 +180,9 @@ passwd
             <th>État</th>
             <th>Accès</th>
             <th>Numéro</th>
-            {% if noconso==false %}<th>Identifiants</th>{% endif %}
+            {% if noconso==false %}<th>Identifiant</th>{% endif %}
             <th>Titre</th>
-            {% if noconso==false %}<th colspan="2">Consommations</th>{% endif %}
+            {% if noconso==false %}<th colspan="2">Consommation</th>{% endif %}
         </tr>
     </thead>
 
@@ -218,9 +217,9 @@ passwd
             <th>État</th>
             <th>Accès</th>
             <th>Numéro</th>
-            {% if noconso==false %}<th>Identifiants</th>{% endif %}
+            {% if noconso==false %}<th>Identifiant</th>{% endif %}
             <th>Titre</th>
-            {% if noconso==false %}<th colspan="2">Consommations</th>{% endif %}
+            {% if noconso==false %}<th colspan="2">Consommation</th>{% endif %}
         </tr>
     </thead>
 

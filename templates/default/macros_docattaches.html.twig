@@ -50,7 +50,7 @@
         {% for img in images %}
             {% if img.contents is defined %}
                 <div>
-                    <img class="figure_image" src="data:image/png;base64,{{ img.contents }}" data-width="{{ img.width }}" data-height="{{ img.height }}" alt="{{ img.displayName }}" title="cliquez pour afficher la _image en taille réelle">
+                    <img class="figure" src="data:image/png;base64,{{ img.contents }}" data-width="{{ img.width }}" data-height="{{ img.height }}" alt="{{ img.displayName }}" title="cliquez pour afficher la _image en taille réelle">
                     <p>{{ img.displayName }}</p>
                 </div>
             {% endif %}

@@ -220,7 +220,7 @@ class ProjetSpecController extends AbstractController
                     $pwd_expir = null;
                 } else {
                     $passwd = $u->getPassword();
-                    $passwd    = Functions::simpleDecrypt($passwd);
+                    $passwd = Functions::simpleDecrypt($passwd);
                     $pwd_expir = $u->getPassexpir();
                 }
             } else {
