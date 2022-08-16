@@ -23,37 +23,57 @@
 
 namespace App\GramcServices;
 
-use App\Utils\Etat;
 use App\Entity\Projet;
 use App\Entity\Version;
 use App\Entity\Session;
 use App\Entity\Individu;
 use App\Entity\Formation;
 use App\Entity\User;
+use App\Entity\CollaborateurVersion;
 
-use App\Utils\GramcDate;
+use App\GramcServices\Etat;
+use App\GramcServices\ServiceInvitations;
+use App\Form\IndividuFormType;
+
 use App\Utils\Functions;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\File\File;
+
+use Symfony\Component\Form\Extension\Core\Type\FormType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\FormInterface;
+use App\Form\IndividuForm\IndividuForm;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class ServiceVersions
 {
-    private $attrib_seuil_a;
-    private $prj_prefix;
-    private $fig_directory;
-    private $signature_directory;
-    private $sj;
-    private $em;
-
-    public function __construct($attrib_seuil_a, $prj_prefix, $fig_directory, $signature_directory, ServiceJournal $sj, EntityManagerInterface $em)
+    public function __construct(
+                                private $attrib_seuil_a,
+                                private $prj_prefix,
+                                private $fig_directory,
+                                private $signature_directory,
+                                private $coll_login,
+                                private $nodata,
+                                private $max_fig_width,
+                                private $max_fig_height,
+                                private $resp_peut_modif_collabs,
+                                private ServiceJournal $sj,
+                                private ServiceInvitations $sid,
+                                private ValidatorInterface $vl,
+                                private ServiceForms $sf,
+                                private FormFactoryInterface $ff,
+                                private TokenStorageInterface $tok,
+                                private EntityManagerInterface $em
+                                )
     {
-        $this->attrib_seuil_a      = intval($attrib_seuil_a);
-        $this->prj_prefix          = $prj_prefix;
-        $this->fig_directory       = $fig_directory;
-        $this->signature_directory = $signature_directory;
-
-        $this->sj = $sj;
-        $this->em = $em;
+        $this->attrib_seuil_a = intval($this->attrib_seuil_a);
     }
 
     /*********
@@ -64,7 +84,7 @@ class ServiceVersions
      * return true/false
      *
      **************************/
-    public function is_demande_toomuch($attr_heures_a, $dem_heures_b)
+    public function is_demande_toomuch($attr_heures_a, $dem_heures_b): bool
     {
         // Si demande en A = 0, no pb (il s'agit d'un nouveau projet apparu en B)
         if ($attr_heures_a==0) {
@@ -102,7 +122,7 @@ class ServiceVersions
      * return: Plein d'informations
      *
      ***************************/
-    public function imageProperties($filename, Version $version)
+    public function imageProperties($filename, Version $version): array
     {
         $full_filename = $this->imagePath($filename, $version);
         if (file_exists($full_filename) && is_file($full_filename)) {
@@ -128,7 +148,7 @@ class ServiceVersions
      * return: chemin vers fichier ou null
      *
      ***************************/
-    public function getDocument(Version $version)
+    public function getDocument(Version $version): ?string
     {
         $document = $this->imageDir($version).'/document.pdf';
         if (file_exists($document) && is_file($document)) {
@@ -149,7 +169,7 @@ class ServiceVersions
      *          TODO - Pas clair du tout !
      *
      ************************************/
-    public function imagePath($filename, Version $version)
+    public function imagePath($filename, Version $version): string
     {
         $full_filename = $this->imageDir($version) .'/'.  $filename;
 
@@ -169,7 +189,7 @@ class ServiceVersions
      * return = Le chemin complet vers le répertoire
      *
      *******************************************/
-    public function imageDir(Version $version)
+    public function imageDir(Version $version): string
     {
         $dir = $this->fig_directory;
         if (! is_dir($dir)) {
@@ -201,7 +221,7 @@ class ServiceVersions
     /**************************************
      * Changer le responsable d'une version
      **********************************************/
-    public function changerResponsable(Version $version, Individu $new)
+    public function changerResponsable(Version $version, Individu $new): void
     {
         foreach ($version->getCollaborateurVersion() as $item) {
             $collaborateur = $item->getCollaborateur();
@@ -235,7 +255,7 @@ class ServiceVersions
      * Renvoie soit null, soit le $cv correspondant à $individu
      * 
      **********************************************************/
-    private function TrouverCollaborateur(Version $version, Individu $individu)
+    private function TrouverCollaborateur(Version $version, Individu $individu): ?CollaborateurVersion
     {
         $filteredCollection = $version
                                 ->getCollaborateurVersion()
@@ -257,7 +277,7 @@ class ServiceVersions
     /********************************************
      * Supprimer un collaborateur d'une version
      **********************************************************/
-    public function supprimerCollaborateur(Version $version, Individu $individu)
+    public function supprimerCollaborateur(Version $version, Individu $individu): void
     {
         $em = $this->em;
         $sj = $this->sj;
@@ -271,7 +291,7 @@ class ServiceVersions
     /*********************************************************
      * Synchroniser le flag Deleted d'un collaborateurVersion
      **********************************************************/
-    public function syncDeleted( Version $version, Individu $individu, bool $delete)
+    public function syncDeleted( Version $version, Individu $individu, bool $delete): void
     {
         $em = $this->em;
         $sj = $this->sj;
@@ -285,10 +305,10 @@ class ServiceVersions
         }
     }
 
-    // modifier login d'un collaborateur d'une version
+    // modifier le login d'un collaborateur d'une version
     // Si le login passe à false, suppression du Loginname,
     // et suppression de la ligne correspondante si elle existe (mot de passe) dans la table user
-    public function modifierLogin(Version $version, Individu $individu, $login=false, $clogin=false)
+    public function modifierLogin(Version $version, Individu $individu, $login=false, $clogin=false): void
     {
         $em = $this->em;
         $sj = $this->sj;
@@ -323,7 +343,7 @@ class ServiceVersions
     *      - session B -> En plus on vérifie qu'il n'y a pas eu une version en session A
     *
     *****/
-    public function isNouvelle(Version $version)
+    public function isNouvelle(Version $version): bool
     {
         // Un projet test ne peut être renouvelé donc il est obligatoirement nouveau !
         if ($version->isProjetTest()) {
@@ -352,7 +372,16 @@ class ServiceVersions
         }
     }
 
-    public function isSigne(Version $version)
+    /***********************************************************************
+     *
+     * SIGNATURES
+     *
+     *************************************************************/
+
+    /***************************************************
+     * Renvoie true si le fichier pdf de signature est présent
+     *********************************************************/
+    public function isSigne(Version $version) : bool
     {
         $dir = $this->signature_directory;
         if ($dir == null) {
@@ -371,7 +400,7 @@ class ServiceVersions
      * Retourne le chemin vers le fichier de signature correspondant à cette version
      *          null si pas de fichier de signature
      ****************/
-    public function getSigne(Version $version)
+    public function getSigne(Version $version): ?string
     {
         $dir = $this->signature_directory;
         if ($dir == null) {
@@ -390,7 +419,7 @@ class ServiceVersions
     /*****************************
      * Retourne la taille du fichier de signature
      *****************************/
-    public function getSizeSigne(Version $version)
+    public function getSizeSigne(Version $version): int
     {
         $signe    =   $this->getSigne($version);
         if ($signe == null) {
@@ -401,7 +430,7 @@ class ServiceVersions
     }
 
     ////////////////////////////////////////////////////
-    public function setLaboResponsable(Version $version, Individu $individu)
+    public function setLaboResponsable(Version $version, Individu $individu): void
     {
         if ($individu == null) {
             return;
@@ -417,7 +446,7 @@ class ServiceVersions
 
     // A partir des champs demFormN et de la table Formation, construit et retourne un tableau des formations
     // demandées, sous une forme plus simple à manipuler
-    public function buildFormations(Version $version)
+    public function buildFormations(Version $version) : array
     {
         $em = $this->em;
 
@@ -473,7 +502,7 @@ class ServiceVersions
      *  - N'EFFACE PAS LE RAPPORT D'ACTIVITE !
      *    cf. ServiceProjets pour cela
      *************************************************************/
-    public function effacerDonnees(Version $version)
+    public function effacerDonnees(Version $version): void
     {
         // Les figures et les doc attachés
         $img_dir = $this->imageDir($version);
@@ -485,5 +514,478 @@ class ServiceVersions
         if ( $fiche != null) {
             unlink($fiche);
         }
+    }
+
+    /*********************************************
+     *
+     * LES IMAGES
+     * 
+     ********************************************/
+     
+    /*************************************************************
+     * Lit un fichier image et renvoie la version base64 pour affichage
+     * dans le html
+     *************************************************************/
+    public function image2Base64(string $filename, Version $version) : ?string
+    {
+        $full_filename  = $this->imagePath($filename, $version);
+
+        if (file_exists($full_filename) && is_file($full_filename))
+        {
+            //dd($full_filename);
+            //$sj->debugMessage('ServiceVersion image  ' .$filename . ' : ' . base64_encode( file_get_contents( $full_filename ) )  );
+            return base64_encode(file_get_contents($full_filename));
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    /*************************************************************
+     * Génère et renvoie un form pour téléverser les images
+     *************************************************************/
+    public function imageForm(string $name, bool $csrf_protection = true): FormInterface
+    {
+        $format_fichier = $this->imageConstraints();
+        $form           = $this ->ff
+                                ->createNamedBuilder($name, FormType::class, [], ['csrf_protection' => $csrf_protection ])
+                                ->add('filename', HiddenType::class, [ 'data' => $name,])
+                                ->add(
+                                    'image',
+                                    FileType::class,
+                                    ['required' => false,
+                                        'label' => 'Fig',
+                                        'constraints'=>[$format_fichier] ]
+                                )
+                                ->getForm();
+        return $form;
+    }
+
+    /**************************************************************************
+     * Contraintes de type et de taille sur les images - Utilisé par imageForm
+     **************************************************************************/ 
+    private function imageConstraints() : \Symfony\Component\Validator\Constraints\File
+    {
+        return new \Symfony\Component\Validator\Constraints\File(
+            [
+                'mimeTypes'=> [ 'image/jpeg', 'image/gif', 'image/png' ],
+                'mimeTypesMessage'=>' Le fichier doit être un fichier jpeg, gif ou png. ',
+                'maxSize' => "2048k",
+                'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
+                'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
+                ]
+        );
+    }
+
+    /*************************************************************
+     * Récupère l'image qui vient d'être téléchargée
+     * Fonction appelée par les controleurs
+     *
+     * Renvoie un tableau qui sera transformé en fichier json (ajax)
+     * 
+     * 
+     *************************************************************/
+    public function imageHandle(FormInterface $form, Version $version, Request $request): array
+    {
+        $sf = $this->sf;
+        $sj = $this->sj;
+        $em = $this->em;
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) { //return ['etat' => 'OKK'];
+            $filename = $form->getData()['filename'];
+            $image = $form['image']->getData();
+
+            //$sj->debugMessage(__METHOD__ . ':' . __LINE__ .' form submitted filename = ' . $filename .' , image = ' . $image);
+
+            $dir = $this->imageDir($version);
+            $full_filename = $dir .'/' . $filename;
+
+            if (is_file($form->getData()['image'])) {
+                $tempFilename = $form->getData()['image'];
+                $this->imageRedim($tempFilename);
+
+                //$sj->debugMessage(__METHOD__ . ':' . __LINE__ .' $tempFilename = ' . $form->getData()['image'] );
+                $contents = file_get_contents($tempFilename);
+
+                // On dépose le fichier à sa place définitive en écrasant au besoin le fichier précédent
+                $file = new File($form->getData()['image']);
+                if (file_exists($full_filename) && is_file($full_filename))
+                {
+                    unlink($full_filename);
+                }
+                if (! file_exists($full_filename))
+                {
+                    $file->move($dir, $filename);
+                }
+                else
+                {
+                    $sj->debugMessage('ServiceVersion imageHandle : mauvais fichier pour la version ' . $version->getIdVersion());
+                }
+
+                return ['etat' => 'OK', 'contents' => $contents, 'filename' => $filename ];
+            }
+
+            // On renvoie une erreur
+            else
+            {
+                $sj->errorMessage('ServiceVersion:imageHandle $tempFilename = (' . $form->getData()['image'] . ") n'existe pas");
+                return ['etat' => 'KO'];
+            }
+            
+        }
+
+        // Form submitted mais Validation KO
+        elseif ($form->isSubmitted() && ! $form->isValid())
+        {
+            //$sj->debugMessage(__METHOD__ . ':' . __LINE__ .' wrong form submitted filename = ' . $filename .' , image = ' . $image);
+            if (isset($form->getData()['filename']))
+            {
+                $filename   =  $form->getData()['filename'];
+            }
+            else
+            {
+                $filename   =  'unkonwn';
+            }
+
+            if (isset($form->getData()['image']))
+            {
+                $image  =    $form->getData()['image'];
+            }
+            else
+            {
+                return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => 'Erreur indeterminée' ];
+            }
+
+            return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => $sf->formError($image, [ $this->imageConstraints() ]) ];
+
+        //$sj->debugMessage('VersionController:imageHandle form for ' . $filename . '('. $form->getData()['image'] . ') is not valide, error = ' .
+            //    (string) $form->getErrors(true,false)->current() );
+            //return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => (string) $form->getErrors(true,false)->current() ];
+            //return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => (string) $form->getErrors(true,false)->current() ];
+
+        }
+
+        // Ne devrait arriver...
+        else
+        {
+            //$sj->debugMessage('VersionController:imageHandle form not submitted');
+            return ['etat' => null ];
+        }
+    }
+
+    /***
+     * Redimensionne une image aux valeurs fixées dans le fichier de paramètres
+     *
+     * Utilise convert (d'imagemagick)
+     *
+     *  params $image, le chemin vers un fichier image
+     *
+     */
+    private function imageRedim(string $image): void
+    {
+
+        $cmd = "identify -format '%w %h' $image";
+        //$sj->debugMessage('imageRedim cmd identify = ' . $cmd);
+        $format = `$cmd`;
+        list($width, $height) = explode(' ', $format);
+        $width = intval($width);
+        $height= intval($height);
+        $rap_w = 0;
+        $rap_h = 0;
+        $rapport = 0;      // Le rapport de redimensionnement
+
+        $max_fig_width = $this->max_fig_width;
+        if ($width > $max_fig_width && $max_fig_width > 0) {
+            $rap_w = (1.0 * $width) /  $max_fig_width;
+        }
+
+        $max_fig_height = $this->max_fig_height;
+        if ($height > $max_fig_height && $max_fig_height > 0) {
+            $rap_h = (1.0 * $height) / $max_fig_height;
+        }
+
+        // Si l'un des deux rapports est > 0, on prend le plus grand
+        if ($rap_w + $rap_h > 0) {
+            $rapport = ($rap_w > $rap_h) ? 1/$rap_w : 1/$rap_h;
+            $rapport = 100 * $rapport;
+        }
+
+        // Si un rapport a été calculé, on redimensionne
+        if ($rapport > 1) {
+            $cmd = "convert $image -resize $rapport% $image";
+            //$sj->debugMessage('imageRedim cmd convert = ' . $cmd);
+            `$cmd`;
+        }
+    }
+
+    /*********************************************
+     *
+     * LES COLLABORATEURS
+     * 
+     ********************************************/
+
+    /**************************
+     * préparation de la liste des collaborateurs
+     *
+     * params = $version
+     *
+     * return = Un tableau d'objets de type IndividuForm (cf Util\IndividuForm)
+     *          Le responsable est dans la cellule 0 du tableau
+     *
+     *****************************************************************************/
+    public function prepareCollaborateurs(Version $version) : array
+    {
+        $sj = $this->sj;
+        
+        if ($version == null) {
+            $sj->throwException('ServiceVersion:modifierCollaborateurs : version null');
+        }
+
+        $dataR  =   [];    // Le responsable est seul dans ce tableau
+        $dataNR =   [];    // Les autres collaborateurs
+        foreach ($version->getCollaborateurVersion() as $cv) {
+            $individu = $cv->getCollaborateur();
+            if ($individu == null)
+            {
+                $sj->errorMessage("ServiceVersion:modifierCollaborateurs : collaborateur null pour CollaborateurVersion ".
+                         $cv->getId());
+                continue;
+            }
+            else
+            {
+                $individuForm = new IndividuForm($individu);
+                $individuForm->setLogin($cv->getLogin());
+                $individuForm->setClogin($cv->getClogin());
+                $individuForm->setResponsable($cv->getResponsable());
+                $individuForm->setDelete($cv->getDeleted());
+
+                if ($individuForm->getResponsable() == true) {
+                    $dataR[] = $individuForm;
+                } else {
+                    $dataNR[] = $individuForm;
+                }
+            }
+        }
+
+        // On merge les deux, afin de revoyer un seul tableau, le responsable en premier
+        return array_merge($dataR, $dataNR);
+    }
+
+    /*********************************
+     * 
+     * Validation du formulaire des collaborateurs - Retourne true/false
+     *
+     * params = Retour de $sv->prepareCollaborateurs
+     *          $definitif = Si false, on fait une validation minimale
+     ***********************************************************************/
+    public function validateIndividuForms(array $individu_forms, $definitif = false) : bool
+    {
+        $coll_login = $this->coll_login;
+        $resp_peut_modif_collabs = $this->resp_peut_modif_collabs;
+        $one_login = false;
+        foreach ($individu_forms as  $individu_form) {
+            if ($individu_form->getLogin()) {
+                $one_login = true;
+            }
+            // Si pas définitif, on ne teste pas ça
+            // Si le resp ne peut pas modifier les profils des collabs, on ne teste pas ça
+            if ($definitif == true && $resp_peut_modif_collabs == true &&
+                (
+                   $individu_form->getPrenom() == null
+                   || $individu_form->getNom() == null
+                   || $individu_form->getEtablissement() == null
+                   || $individu_form->getLaboratoire() == null
+                   || $individu_form->getStatut() == null
+                )
+            )
+            {
+                return false;
+            }
+        }
+
+        // Personne n'a de login !
+        // Seulement si $coll_login est true
+        if ($coll_login) {
+            if ($definitif == true && $one_login == false) {
+                return false;
+            }
+        }
+
+        if ($individu_forms != []) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /***************************************
+     * Traitement des formulaires des individus individuellement
+     *
+     * $individu_forms = Tableau contenant un formulaire par individu
+     * $version        = La version considérée
+     ****************************************************************/
+    public function handleIndividuForms($individu_forms, Version $version): void
+    {
+        $em   = $this->em;
+        $sj   = $this->sj;
+        $sval = $this->vl;
+
+        foreach ($individu_forms as $individu_form) {
+            $id =  $individu_form->getId();
+
+            // Le formulaire correspond à un utilisateur existant
+            if ($id != null) {
+                $individu = $em->getRepository(Individu::class)->find($id);
+            }
+            
+            // On a renseigné le mail de l'utilisateur mais on n'a pas encore l'id: on recherche l'utilisateur !
+            // Si $utilisateur == null, il faudra le créer (voir plus loin)
+            elseif ($individu_form->getMail() != null) {
+                $individu = $em->getRepository(Individu::class)->findOneBy([ 'mail' =>  $individu_form->getMail() ]);
+                if ($individu!=null) {
+                    $sj->debugMessage(__METHOD__ . ':' . __LINE__ . ' mail=' . $individu_form->getMail() . ' => trouvé ' . $individu);
+                } else {
+                    $sj->debugMessage(__METHOD__ . ':' . __LINE__ . ' mail=' . $individu_form->getMail() . ' => Individu à créer !');
+                }
+            }
+
+            // Pas de mail -> pas d'utilisateur !
+            else {
+                $individu = null;
+            }
+
+            // Cas d'erreur qui ne devraient jamais se produire
+            if ($individu == null && $id != null) {
+                $sj->errorMessage(__METHOD__ . ':' . __LINE__ .' idIndividu ' . $id . 'du formulaire ne correspond pas à un utilisateur');
+            }
+
+            elseif (is_array($individu_form)) {
+                // TODO je ne vois pas le rapport
+                $sj->errorMessage(__METHOD__ . ':' . __LINE__ .' individu_form est array ' . Functions::show($individu_form));
+            }
+
+            elseif (is_array($individu)) {
+                // TODO pareil un peu nawak
+                $sj->errorMessage(__METHOD__ . ':' . __LINE__ .' individu est array ' . Functions::show($individu));
+            }
+
+            elseif ($individu != null && $individu_form->getMail() != null && $individu_form->getMail() != $individu->getMail()) {
+                $sj->errorMessage(__METHOD__ . ':' . __LINE__ ." l'adresse mails de l'utilisateur " .
+                    $individu . ' est incorrecte dans le formulaire :' . $individu_form->getMail() . ' != ' . $individu->getMail());
+            }
+
+            // --------------> Maintenant des cas réalistes !
+            // L'individu existe déjà
+            elseif ($individu != null) {
+                // On modifie l'individu
+                $individu = $individu_form->modifyIndividu($individu, $sj);
+                $em->persist($individu);
+
+                // Il devient collaborateur
+                if (! $version->isCollaborateur($individu)) {
+                    $sj->infoMessage(__METHOD__ . ':' . __LINE__ .' individu ' .
+                        $individu . ' ajouté à la version ' .$version);
+                    $collaborateurVersion   =   new CollaborateurVersion($individu);
+                    $collaborateurVersion->setDeleted(false);
+                    $collaborateurVersion->setVersion($version);
+                    if ($this->coll_login) {
+                        $collaborateurVersion->setLogin($individu_form->getLogin());
+                    };
+                    if ($this->nodata == false) {
+                        $collaborateurVersion->setClogin($individu_form->getClogin());
+                    };
+                    $collaborateurVersion->setLogin($individu_form->getLogin());
+                    $collaborateurVersion->setClogin($individu_form->getClogin());
+                    $em->persist($collaborateurVersion);
+                }
+
+                // il était déjà collaborateur
+                else {
+                    $sj->debugMessage(__METHOD__ . ':' . __LINE__ .' individu ' .
+                        $individu . ' confirmé pour la version '.$version);
+
+                    // Modif éventuelle des cases de login
+                    $this->modifierLogin($version, $individu, $individu_form->getLogin(), $individu_form->getClogin());
+
+                    // modification du labo du projet
+                    if ($version->isResponsable($individu)) {
+                        $this->setLaboResponsable($version, $individu);
+                    }
+
+                    // modification éventuelle du flag deleted
+                    $this->syncDeleted($version, $individu, $individu_form->getDelete());
+                }
+                $em -> flush();
+            }
+
+            // Le formulaire correspond à un nouvel utilisateur (adresse mail pas trouvée)
+            elseif ($individu_form->getMail() != null && $individu_form->getDelete() == false) {
+                
+                // Création d'un individu à partir du formulaire
+                // Renvoie null si la validation est négative
+                $individu = $individu_form->nouvelIndividu($sval);
+                if ($individu != null) {
+                    $collaborateurVersion   =   new CollaborateurVersion($individu);
+                    $collaborateurVersion->setLogin($individu_form->getLogin());
+                    $collaborateurVersion->setClogin($individu_form->getClogin());
+                    $collaborateurVersion->setVersion($version);
+
+                    $sj->infoMessage(__METHOD__ . ':' . __LINE__ . ' nouvel utilisateur ' . $individu .
+                        ' créé et ajouté comme collaborateur à la version ' . $version);
+
+                    $em->persist($individu);
+                    $em->persist($collaborateurVersion);
+                    $em->persist($version);
+                    $em->flush();
+                    $sj->warningMessage('Utilisateur ' . $individu . '(' . $individu->getMail() . ') id(' . $individu->getIdIndividu() . ') a été créé');
+
+                    // Envoie une invitation à ce nouvel utilisateur
+                    $connected = $this->tok->getToken()->getUser();
+                    if ($connected != null)
+                    {
+                        $this->sid->sendInvitation($connected, $individu);
+                    }
+                }
+            }
+
+            // Ligne vide
+            elseif ($individu_form->getMail() == null && $id == null) {
+                $sj->debugMessage(__METHOD__ . ':' . __LINE__ . ' nouvel utilisateur vide ignoré');
+            }
+        }
+    }
+
+    /*************************************************************
+     * Génère et renvoie un form pour modifier un collaborateur
+     *************************************************************/
+    public function getCollaborateurForm(Version $version): FormInterface
+    {
+        $sj = $this->sj;
+        $em = $this->em;
+        $sval= $this->vl;
+
+        $text_fields = true;
+        if ( $this->resp_peut_modif_collabs)
+        {
+            $text_fields = false;
+        }
+        return $this->ff
+                   ->createNamedBuilder('form_projet', FormType::class, [ 'individus' => $this->prepareCollaborateurs($version, $sj, $sval) ])
+                   ->add('individus', CollectionType::class, [
+                       'entry_type'     =>  IndividuFormType::class,
+                       'label'          =>  false,
+                       'allow_add'      =>  true,
+                       'allow_delete'   =>  true,
+                       'prototype'      =>  true,
+                       'required'       =>  true,
+                       'by_reference'   =>  false,
+                       'delete_empty'   =>  true,
+                       'attr'         => ['class' => "profil-horiz",],
+                       'entry_options' =>['text_fields' => $text_fields]
+                    ])
+                    ->getForm();
     }
 }

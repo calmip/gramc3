@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Utils\IDP;
+//use App\Utils\IDP;
 use App\Utils\Functions;
 use App\Entity\Scalar;
 use App\Entity\Individu;
@@ -27,6 +27,7 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * Login controller.
@@ -38,14 +39,15 @@ class LoginController extends AbstractController
     public function __construct(private ServiceJournal $sj,
                                 private FormFactoryInterface $ff,
                                 private AuthorizationCheckerInterface $ac,
-                                private TokenStorageInterface $ts)
+                                private TokenStorageInterface $ts,
+                                private EntityManagerInterface $em)
     {}
 
     /** 
      * @Route("/login", name="connexionshiblogin",methods={"GET"})
      * Method({"GET"})
      */
-    public function shibloginAction(Request $request)
+    public function shibloginAction(Request $request): Response
     {
         $this->sj->InfoMessage("shiblogin d'un utilisateur");
         //dd($request);
@@ -62,7 +64,7 @@ class LoginController extends AbstractController
      * NOTE - NE PAS renseigner logout: dans security.yaml !
      * 
      **/
-    public function deconnexionAction(Request $request)
+    public function deconnexionAction(Request $request): Response
     {
         $sj = $this->sj;
         $ac = $this->ac;
@@ -86,13 +88,18 @@ class LoginController extends AbstractController
             $session->invalidate();
             return $this->render('default/deconnexion.html.twig');
         }
+
+        // On a cliqué sur Déconnecter alors qu'on n'est pas connecté
+        else {
+            return new RedirectResponse($this->generateUrl('accueil'));
+        }
     }
 
     /** 
      * @Route("/erreur_login", name="erreur_login",methods={"GET"})
      * Method({"GET"})
      */
-    public function erreur_loginAction(Request $request)
+    public function erreur_loginAction(Request $request): Response
     {
         return $this->render('login/erreur_login.html.twig');
     }
@@ -102,7 +109,7 @@ class LoginController extends AbstractController
      *
      * Method({"GET", "POST"})
      */
-    public function loginChoiceAction(Request $request)
+    public function loginChoiceAction(Request $request): Response
     {
         $sj = $this->sj;
         $ff = $this->ff;
@@ -143,9 +150,9 @@ class LoginController extends AbstractController
     /**
     * @Route("/connexion_dbg",name="connexion_dbg", methods={"GET","POST"})
     **/
-    public function connexion_dbgAction(Request $request)
+    public function connexion_dbgAction(Request $request): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $ff = $this->ff;
         
         if ($this->getParameter('kernel.debug') === false) {
@@ -154,7 +161,7 @@ class LoginController extends AbstractController
         }
 
         // Etablir la liste des users pouvant se connecter de cette manière
-        $repository = $this->getDoctrine()->getRepository(Individu::class);
+        $repository = $this->em->getRepository(Individu::class);
         $experts    = $repository->findBy(['expert'   => true ]);
         $admins     = $repository->findBy(['admin'    => true ]);
         $obs        = $repository->findby(['obs'      => true ]);
@@ -205,7 +212,7 @@ class LoginController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method("GET")
      */
-    public function sudoAction(Request $request, Individu $individu)
+    public function sudoAction(Request $request, Individu $individu): Response
     {
         $sj = $this->sj;
         $ac = $this->ac;

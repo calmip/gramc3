@@ -218,14 +218,6 @@ class Individu implements UserInterface, EquatableInterface, PasswordAuthenticat
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="\App\Entity\CompteActivation", mappedBy="individu")
-     */
-    private $compteActivation;
-
-
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     *
      * @ORM\OneToMany(targetEntity="\App\Entity\Expertise", mappedBy="expert")
      */
     private $expertise;
@@ -264,7 +256,7 @@ class Individu implements UserInterface, EquatableInterface, PasswordAuthenticat
     ////////////////////////////////////////////////////////////////////////////
 
     /* Pour verifier que deux objets sont égaux, utiliser cet interface et pas == ! */
-    public function isEqualTo(UserInterface $user)
+    public function isEqualTo(UserInterface $user) : bool
     {
         if ($user == null || !$user instanceof Individu) {
             return false;
@@ -283,9 +275,9 @@ class Individu implements UserInterface, EquatableInterface, PasswordAuthenticat
     }
 
     // implementation UserInterface
-    public function getUserIdentifier() { return $this->getId();}
-    public function getUsername() { return $this->getMail();}
-    public function getSalt()           { return null;}
+    public function getUserIdentifier(): string { return $this->getId();}
+    public function getUsername(): string { return $this->getMail();}
+    public function getSalt(): ?string { return null;}
     public function getPassword(): ?string { return "";}
     public function eraseCredentials() {}
 
@@ -301,7 +293,7 @@ class Individu implements UserInterface, EquatableInterface, PasswordAuthenticat
      *     - ROLE_SYSADMIN  = Administrateur système, est observateur et reçoit certains mails
      *     - ROLE_ALLOWED_TO_SWITCH = Peut changer d'identité (actuellement kifkif admin)
      */
-    public function getRoles()
+    public function getRoles(): array
     {
         $roles[] = 'ROLE_DEMANDEUR';
 
@@ -343,7 +335,6 @@ class Individu implements UserInterface, EquatableInterface, PasswordAuthenticat
         $this->session = new \Doctrine\Common\Collections\ArrayCollection();
         $this->sso = new \Doctrine\Common\Collections\ArrayCollection();
         $this->collaborateurVersion = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->compteActivation = new \Doctrine\Common\Collections\ArrayCollection();
         $this->expertise = new \Doctrine\Common\Collections\ArrayCollection();
         $this->journal = new \Doctrine\Common\Collections\ArrayCollection();
     }
@@ -843,40 +834,6 @@ class Individu implements UserInterface, EquatableInterface, PasswordAuthenticat
     public function getCollaborateurVersion()
     {
         return $this->collaborateurVersion;
-    }
-
-    /**
-     * Add compteActivation
-     *
-     * @param \App\Entity\CompteActivation $compteActivation
-     *
-     * @return Individu
-     */
-    public function addCompteActivation(\App\Entity\CompteActivation $compteActivation)
-    {
-        $this->compteActivation[] = $compteActivation;
-
-        return $this;
-    }
-
-    /**
-     * Remove compteActivation
-     *
-     * @param \App\Entity\CompteActivation $compteActivation
-     */
-    public function removeCompteActivation(\App\Entity\CompteActivation $compteActivation)
-    {
-        $this->compteActivation->removeElement($compteActivation);
-    }
-
-    /**
-     * Get compteActivation
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getCompteActivation()
-    {
-        return $this->compteActivation;
     }
 
     /**

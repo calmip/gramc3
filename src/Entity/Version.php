@@ -25,7 +25,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use App\Utils\Etat;
+use App\GramcServices\Etat;
 use App\Utils\Functions;
 use App\Interfaces\Demande;
 

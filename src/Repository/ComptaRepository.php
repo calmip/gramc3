@@ -24,10 +24,11 @@ class ComptaRepository extends \Doctrine\ORM\EntityRepository
      * $type=1 permet de s'intéresser aux données de type 1 (user)
      * Dans ce cas $loginname est le nom de login
      *
-     * On ne s'intéresse qu'aux ressources de type calcul, c-à-d cpu, gpu
+     * Par défaut, on ne s'intéresse qu'aux ressources de type calcul, c-à-d cpu, gpu
+     * On peut passer d'autres ressources dans le tableau $ressources
      *
      */
-    public function conso($loginname, $annee, $type=2)
+    public function conso(string $loginname, int $annee, int $type=2, array $ressources=['cpu','gpu']): ?array
     {
         $debut = new \DateTime($annee . '-01-01');
         $fin   = new \DateTime($annee . '-12-31');
@@ -36,15 +37,22 @@ class ComptaRepository extends \Doctrine\ORM\EntityRepository
             throw new \Exception("ERREUR - Fonction conso: type vaut $type, devrait être 1 ou 2");
         }
 
+        // todo = Utiliser le mécanisme de requête préparée pour les ressources !
+        $tmp = [];
+        foreach ($ressources as $b)
+        {
+            $tmp[] = "c.ressource = '$b'";
+        }
+        $ressources_str = join(' OR ',$tmp);
         $db_data = $this->getEntityManager()->createQuery(
-            'SELECT c
+            "SELECT c
             FROM App:Compta c
             WHERE c.loginname = :loginname
-            AND (c.ressource = \'cpu\' OR c.ressource=\'gpu\')
+            AND ($ressources_str) 
             AND c.type = :type
             AND c.date >= :debut
             AND c.date <= :fin
-            ORDER BY c.date ASC'
+            ORDER BY c.date ASC"
         )
         ->setParameter('loginname', strtolower($loginname))
         ->setParameter('debut', $debut)
@@ -88,7 +96,7 @@ class ComptaRepository extends \Doctrine\ORM\EntityRepository
      * Les données de type 1 (user) sont ignorées
      * Renvoie un int
      */
-    public function consoDateInt(Projet $projet, \DateTime $date)
+    public function consoDateInt(Projet $projet, \DateTime $date): int
     {
         $conso_cpu = $this->consoResPrjDate($projet, ['ress' => 'cpu'], $date);
         ////echo('<pre>'.$projet."###".$date->format('Y-m-d').'</pre>');
@@ -124,9 +132,9 @@ class ComptaRepository extends \Doctrine\ORM\EntityRepository
              FROM App:Compta c
              WHERE c.type = 2
              AND c.date >= :debut
-	         AND c.date <= :fin
-	         AND c.ressource = :ressource
-	         AND ( c.loginname LIKE \'p%\' OR c.loginname LIKE \'t%\' )
+             AND c.date <= :fin
+             AND c.ressource = :ressource
+             AND ( c.loginname LIKE \'p%\' OR c.loginname LIKE \'t%\' )
              GROUP BY c.date'
         )
         ->setParameter('debut', $debut)
@@ -243,8 +251,9 @@ class ComptaRepository extends \Doctrine\ORM\EntityRepository
         return $db_data;
     }
 
-    /* Renvoie la conso cpu (!) d'un projet à une date donnée, éventuellement renvoie null
-     * Peut être utile dans des fixtures de temps en temps
+    /*
+     *  Renvoie la conso d'un projet (toutes ressources confondues) à une date donnée, éventuellement renvoie null
+     * 
      */
     public function consoDateProjet(Projet $projet, \DateTime $date)
     {
@@ -284,7 +293,7 @@ class ComptaRepository extends \Doctrine\ORM\EntityRepository
     }
 
     /***********
-     * Supprime les TOUS les enregistrements compta de à une certaine date
+     * Supprime les TOUS les enregistrements compta à une certaine date
      *
      *********************************/
     public function removeDate(\Datetime $date)

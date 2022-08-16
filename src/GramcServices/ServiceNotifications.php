@@ -60,7 +60,7 @@ class ServiceNotifications
      * param $users                     Liste d'utilisateurs à qui envoyer des emails (cf mailUsers)
      *
      *********/
-    public function sendMessage($twig_sujet, $twig_contenu, $params, $users = null)
+    public function sendMessage($twig_sujet, $twig_contenu, $params, $users = null): void
     {
         $twig    = $this->twig;
         $body    = $twig->render($twig_contenu, $params);
@@ -76,7 +76,7 @@ class ServiceNotifications
      * param $users                     Liste d'utilisateurs à qui envoyer des emails (cf mailUsers)
      *
      *********/
-    public function sendMessageFromString($twig_sujet, $twig_contenu, $params, $users = null)
+    public function sendMessageFromString($twig_sujet, $twig_contenu, $params, $users = null): void
     {
         $twig         = $this->twig;
         $sujet_tmpl   = $twig->createTemplate($twig_sujet);
@@ -89,15 +89,8 @@ class ServiceNotifications
 
 
     // Bas niveau: Envoi du message
-    private function sendRawMessage($subject, $body, $users = null)
+    private function sendRawMessage($subject, $body, array $users = null): void
     {
-        // Notifiations désactivées pour l'instant - Swift_Message n'existe plus !
-        //return;
-        //$message = \Swift_Message::newInstance()
-        //            ->setSubject( $subject )
-        //            ->setFrom( $this->mailfrom )
-        //            ->setBody($body ,'text/plain');
-
         $message = new Email();
         $message -> subject($subject);
         $message -> text($body);
@@ -107,23 +100,35 @@ class ServiceNotifications
             $real_users =   [];
             $mails      =   [];
 
-            foreach ($users as $user) {
-                if ($user instanceof Individu) {
-                    $real_users[]   =   $user;
-                }  // class Individu
-                elseif (is_string($user)) {
-                    $mails[]        =   $user;
-                }  // email string
-                elseif ($users == null) {
+            foreach ($users as $user)
+            {
+
+                // Objet Individu
+                if ($user instanceof Individu)
+                {
+                    $real_users[] = $user;
+                }
+
+                // email string 
+                elseif (is_string($user))
+                {
+                    $mails[] = $user;
+                }
+                elseif ($users == null)
+                {
                     $this->sj->warningMessage(__METHOD__ . ":" . __LINE__ . ' users contient un utilisateur null');
-                } else {
+                }
+                else
+                {
                     $this->sj->errorMessage(__METHOD__ . ":" . __LINE__ . ' users contient un mauvais type de données: ' . Functions::show($user));
                 }
             }
 
-            if ($mails == []) {
+            if ($mails == [])
+            {
                 $warning = true;
-            } else {
+            } else
+            {
                 $warning = false;
             }
 
@@ -163,7 +168,7 @@ class ServiceNotifications
     // Output: Liste d'individus (pour passer à sendMessage)
     //
 
-    public function mailUsers($mail_roles = [], $objet = null)
+    public function mailUsers($mail_roles = [], $objet = null): array
     {
         $em    = $this->em;
         $users = [];
@@ -273,7 +278,7 @@ class ServiceNotifications
     // obtenir des adresses mail à partir des utilisateurs
     //
 
-    public function usersToMail($users, $warning = false)
+    public function usersToMail($users, $warning = false): array
     {
         $mail   =   [];
 
@@ -287,7 +292,7 @@ class ServiceNotifications
         foreach ($users as $user) {
             if ($user != null && $user instanceof Individu) {
                 $user_mail =  $user->getMail();
-                if ($user_mail  !=  null) {
+                if ($user_mail != null) {
                     $mail[] = $user_mail;
                 } else {
                     $this->sj->warningMessage(__METHOD__ . ":" . __LINE__ . ' Utilisateur '. $user . " n'a pas de mail");

@@ -38,11 +38,11 @@ class LaboratoireType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('numeroLabo', IntegerType::class, ['required' => false, 'label' => "Numéro d'ordre:" ])
-            ->add('acroLabo', TextType::class, ['required' => false, 'label' => 'Acronyme:' ])
+            ->add('numeroLabo', IntegerType::class, ['required' => true, 'label' => "Numéro d'ordre:" ])
+            ->add('acroLabo', TextType::class, ['required' => true, 'label' => 'Acronyme:' ])
             ->add('nomLabo', TextType::class, ['required' => true, 'label' => 'Nom *:' ]);
 
         if ($options['modifier'] == false &&  $options['ajouter'] == false) {
@@ -64,7 +64,7 @@ class LaboratoireType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults(
             [
@@ -78,8 +78,8 @@ class LaboratoireType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function getBlockPrefix()
+    public function getBlockPrefix(): string
     {
-        return 'appbundle_laboratoire';
+        return 'laboratoire';
     }
 }

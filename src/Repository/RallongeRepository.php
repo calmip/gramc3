@@ -24,7 +24,7 @@
 
 namespace App\Repository;
 
-use App\Utils\Etat;
+use App\GramcServices\Etat;
 use App\Utils\Functions;
 //use App\App;
 

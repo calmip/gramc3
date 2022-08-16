@@ -35,16 +35,19 @@ use App\GramcServices\GramcGraf\Calcul;
 use App\GramcServices\DonneesFacturation;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
 
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
+
+use Doctrine\ORM\EntityManagerInterface;
+
 
 use Knp\Snappy\Pdf;
 
@@ -59,31 +62,16 @@ use Knp\Snappy\Pdf;
 
 class ProjetDfctController extends AbstractController
 {
-    private $sj;
-    private $sm;
-    private $gcl;
-    private $sd;
-    private $sv;
-    private $dfct;
-    private $pdf;
-
     public function __construct(
-        ServiceJournal $sj,
-        ServiceMenus $sm,
-        Calcul $gcl,
-        GramcDate $sd,
-        ServiceVersions $sv,
-        DonneesFacturation $dfct,
-        Pdf $pdf
-    ) {
-        $this->sj = $sj;
-        $this->sm = $sm;
-        $this->gcl= $gcl;
-        $this->sd = $sd;
-        $this->sv = $sv;
-        $this->dfct= $dfct;
-        $this->pdf = $pdf;
-    }
+        private ServiceJournal $sj,
+        private ServiceMenus $sm,
+        private Calcul $gcl,
+        private GramcDate $sd,
+        private ServiceVersions $sv,
+        private DonneesFacturation $dfct,
+        private Pdf $pdf,
+        private EntityManagerInterface $em
+    ) {}
 
     /**
      * Appelé quand on clique sur le bouton € dans la page projets par année
@@ -93,12 +81,12 @@ class ProjetDfctController extends AbstractController
      * Method({"GET","POST"})
      */
 
-    public function dfctlisteAction(Projet $projet, $annee, Request $request)
+    public function dfctlisteAction(Projet $projet, $annee, Request $request): Response
     {
         $dessin_heures = $this -> gcl;
         $sm     = $this->sm;
         $sd     = $this->sd;
-        $em     = $this->getDoctrine()->getManager();
+        $em     = $this->em;
         $dfct   = $this->dfct;
         $emises = $dfct->getNbEmises($projet, $annee);
         $version= $dfct->getVersion($projet, $annee);
@@ -184,7 +172,7 @@ class ProjetDfctController extends AbstractController
      * Method({"GET","POST"})
      */
 
-    public function downloaddfctAction(Projet $projet, $annee, $nb, Request $request)
+    public function downloaddfctAction(Projet $projet, $annee, $nb, Request $request): Response
     {
         $dfct= $this->dfct;
         $sj  = $this->sj;
@@ -205,9 +193,9 @@ class ProjetDfctController extends AbstractController
      * @Route("/{id}/dfctgen/{fin_periode}", name="dfct_gen", methods={"GET","POST"})
      * Method({"GET","POST"})
      */
-    public function dfct_genAction(Projet $projet, \DateTime $fin_periode, Request $request)
+    public function dfct_genAction(Projet $projet, \DateTime $fin_periode, Request $request): Response
     {
-        $em     = $this->getDoctrine()->getManager();
+        $em     = $this->em;
         $annee  = $fin_periode->format('Y');
         $dfct   = $this->dfct;
         $emises = $dfct->getNbEmises($projet, $annee);

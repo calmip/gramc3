@@ -36,7 +36,7 @@ class ServiceParam
     public function __construct(private EntityManagerInterface $em) {}
 
     /* Renvoie la valeur du paramètre s'il existe, null sinon */
-    public function getParameter($parameter)
+    public function getParameter($parameter): ?string
     {
         $param = $this->em->getRepository(Param::class)->findOneBy([ 'cle' => $parameter ]);
         if ($param == null) {
@@ -47,7 +47,7 @@ class ServiceParam
     }
 
     /* renvoie true/false suivant que le paramètre existe ou pas */
-    public function hasParameter($parameter)
+    public function hasParameter($parameter): bool
     {
         $param = $this->getParameter($parameter);
         if ($param==null) {

@@ -40,11 +40,12 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 use App\Utils\Functions;
 use App\Utils\Menu;
-use App\Utils\Etat;
-use App\Utils\Signal;
+use App\GramcServices\Etat;
+use App\GramcServices\Signal;
 use App\AffectationExperts\AffectationExperts;
 
 use App\GramcServices\Workflow\Projet\ProjetWorkflow;
@@ -54,6 +55,7 @@ use App\GramcServices\ServiceNotifications;
 use App\GramcServices\ServiceProjets;
 use App\GramcServices\ServiceSessions;
 use App\GramcServices\ServiceVersions;
+use App\GramcServices\ServiceMenus;
 use App\GramcServices\ServiceExperts\ServiceExperts;
 use App\GramcServices\GramcDate;
 
@@ -73,6 +75,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 use App\Form\ChoiceList\ExpertChoiceLoader;
 
+use Doctrine\ORM\EntityManagerInterface;
+
 /**
  * Expertise controller.
  *
@@ -88,6 +92,7 @@ class ExpertiseController extends AbstractController
         private ServiceJournal $sj,
         private ServiceProjets $sp,
         private ServiceSessions $ss,
+        private ServiceMenus $sm,
         private GramcDate $sd,
         private ServiceVersions $sv,
         private ServiceExperts $se,
@@ -95,7 +100,8 @@ class ExpertiseController extends AbstractController
         private FormFactoryInterface $ff,
         private ValidatorInterface $vl,
         private TokenStorageInterface $tok,
-        private AuthorizationCheckerInterface $ac
+        private AuthorizationCheckerInterface $ac,
+        private EntityManagerInterface $em
     ) {
         $this->token = $tok->getToken();
     }
@@ -107,12 +113,12 @@ class ExpertiseController extends AbstractController
      * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_PRESIDENT')")
      */
-    public function affectationTestAction(Request $request)
+    public function affectationTestAction_SUPPR(Request $request)
     {
         $ss = $this->ss;
         $sp = $this->sp;
         $se = $this->se;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $session  = $ss->getSessionCourante();
         $annee    = $session->getAnneeSession();
@@ -180,18 +186,18 @@ class ExpertiseController extends AbstractController
 
     /**
      * Affectation des experts
-     *	  Affiche l'écran d'affectation des experts
+     * Affiche l'écran d'affectation des experts
      *
      * @Route("/affectation", name="affectation", methods={"GET","POST"})
      * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_PRESIDENT')")
      */
-    public function affectationAction(Request $request)
+    public function affectationAction(Request $request): Response
     {
         $ss = $this->ss;
         $sp = $this->sp;
         $sv = $this->sv;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $affectationExperts = $this->se;
 
         $session      = $ss->getSessionCourante();
@@ -229,18 +235,6 @@ class ExpertiseController extends AbstractController
         $stats         = $affectationExperts->getStats();
         $attHeures     = $affectationExperts->getAttHeures($versions);
 
-        $versions_suppl   = [];
-        foreach ($versions as $version) {
-            $id_version                  = $version->getIdVersion();
-            $projet                      = $version->getProjet();
-            $version_suppl               = [];
-            $version_suppl['metaetat']   = $sp->getMetaEtat($projet);
-            $version_suppl['consocalcul']= $sp->getConsoCalculVersion($version);
-            $version_suppl['isnouvelle'] = $sv->isNouvelle($version);
-
-            $versions_suppl[$id_version] = $version_suppl;
-        }
-
         $sessionForm      = $session_data['form']->createView();
         $titre            = "Affectation des experts aux projets de la session " . $session;
         return $this->render(
@@ -248,7 +242,6 @@ class ExpertiseController extends AbstractController
             [
             'titre'         => $titre,
             'versions'      => $versions,
-            'versions_suppl'=> $versions_suppl,
             'forms'         => $forms,
             'sessionForm'   => $sessionForm,
             'thematiques'   => $thematiques,
@@ -259,6 +252,30 @@ class ExpertiseController extends AbstractController
             ]
         );
     }
+    
+    /**
+     * Afficher une expertise
+     *
+     * @Route("/consulter/{id}", name="consulter_expertise", methods={"GET"})
+     * @ Security("is_granted('ROLE_PRESIDENT')")
+     */
+    public function consulterAction(Request $request, Expertise $expertise): Response
+    {
+        $token = $this->token;
+        $sm = $this->sm;
+
+        $menu[] = $sm -> expert();
+        
+        $moi = $token->getUser();
+        $version = $expertise->getVersion();
+        if ($version != null && $version->isExpertDe($moi))
+        {
+            return $this->render('expertise/consulter.html.twig', [ 'expertise' => $expertise, 'menu' => $menu ]);
+        }
+        else{
+            return new RedirectResponse($this->generateUrl('accueil'));
+        }
+    }
 
     /**
      * Lists all expertise entities.
@@ -267,9 +284,9 @@ class ExpertiseController extends AbstractController
      * Method("GET")
      * @Security("is_granted('ROLE_PRESIDENT')")
      */
-    public function indexAction()
+    public function indexAction(): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $expertises = $em->getRepository(Expertise::class)->findAll();
         $projets =  $em->getRepository(Projet::class)->findAll();
@@ -284,7 +301,7 @@ class ExpertiseController extends AbstractController
     }
 
     // Helper function used by listeAction
-    private static function exptruefirst($a, $b)
+    private static function exptruefirst($a, $b): int
     {
         if ($a['expert']==true  && $b['expert']==false) {
             return -1;
@@ -303,14 +320,14 @@ class ExpertiseController extends AbstractController
      * Method("GET")
      * @Security("is_granted('ROLE_EXPERT')")
      */
-    public function listeAction()
+    public function listeAction(): Response
     {
         $sd  = $this->sd;
         $ss  = $this->ss;
         $sp  = $this->sp;
         $sj  = $this->sj;
         $token = $this->token;
-        $em  = $this->getDoctrine()->getManager();
+        $em  = $this->em;
 
         $moi = $token->getUser();
         if (is_string($moi)) {
@@ -427,6 +444,7 @@ class ExpertiseController extends AbstractController
                         'attrHeures' => $version->getAttrHeures(),
                         'responsable' =>  $version->getResponsable(),
                         'versionId'   => $version->getIdVersion(),
+                        'id' => $expertise->getId()
                        ];
             $old_expertises[] = $output;
         };
@@ -455,18 +473,29 @@ class ExpertiseController extends AbstractController
         // Commentaires
         // On propose aux experts du comité d'attribution (c-a-d ceux qui ont une thématique) d'entrer un commentaire sur l'année écoulée
         $mes_commentaires_flag = false;
-        $mes_commentaires_maj        = null;
-        if ($this->has('commentaires_experts_d') && count($mes_thematiques)>0) {
-            $mes_commentaires_flag = true;
+        $mes_commentaires_maj = null;
+        
+        try
+        {
             $mois = $sd->format('m');
             $annee= $sd->format('Y');
-            if ($mois>=$this->getParameter('commentaires_experts_d')) {
+
+            // si on est après mars 2022, on ouvre le commentaires pour 2022
+            if ($mois >= $this->getParameter('commentaires_experts_d'))
+            {
                 $mes_commentaires_maj = $annee;
-            } elseif ($mois<$this->getParameter('commentaires_experts_f')) {
+            }
+
+            // si on est avant mai 2022, on ouvre le commentaire pour 2021
+            elseif ($mois < $this->getParameter('commentaires_experts_f'))
+            {
                 $mes_commentaires_maj = $annee - 1;
             }
+            $mes_commentaires_flag = true;
         }
-        $mes_commentaires = $em->getRepository('App:CommentaireExpert')->findBy(['expert' => $moi ]);
+        catch (\InvalidArgumentException $e) {};
+        
+        $mes_commentaires = $em->getRepository(CommentaireExpert::class)->findBy(['expert' => $moi ]);
 
         ///////////////////////
 
@@ -492,14 +521,14 @@ class ExpertiseController extends AbstractController
      * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_PRESIDENT')")
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request): Response
     {
         $expertise = new Expertise();
         $form = $this->createForm('App\Form\ExpertiseType', $expertise);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($expertise);
             $em->flush($expertise);
 
@@ -519,7 +548,7 @@ class ExpertiseController extends AbstractController
      * Method("GET")
      * @Security("is_granted('ROLE_PRESIDENT')")
      */
-    public function showAction(Expertise $expertise)
+    public function showAction(Expertise $expertise): Response
     {
         $deleteForm = $this->createDeleteForm($expertise);
 
@@ -536,14 +565,14 @@ class ExpertiseController extends AbstractController
      * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_PRESIDENT')")
      */
-    public function editAction(Request $request, Expertise $expertise)
+    public function editAction(Request $request, Expertise $expertise): Response
     {
         $deleteForm = $this->createDeleteForm($expertise);
         $editForm = $this->createForm('App\Form\ExpertiseType', $expertise);
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('expertise_edit', array('id' => $expertise->getId()));
         }
@@ -557,7 +586,7 @@ class ExpertiseController extends AbstractController
 
 
     // Helper function used by modifierAction
-    private static function expprjfirst($a, $b)
+    private static function expprjfirst($a, $b): int
     {
         if ($a->getVersion()->getProjet()->getId() < $b->getVersion()->getId()) {
             return -1;
@@ -577,7 +606,7 @@ class ExpertiseController extends AbstractController
      * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_EXPERT')")
      */
-    public function modifierAction(Request $request, Expertise $expertise)
+    public function modifierAction(Request $request, Expertise $expertise): Response
     {
         $max_expertises_nb = $this->max_expertises_nb;
         $ss = $this->ss;
@@ -587,7 +616,7 @@ class ExpertiseController extends AbstractController
         $ac = $this->ac;
         $sval = $this->vl;
         $token = $this->token;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // ACL
         $moi = $token->getUser();
@@ -711,7 +740,6 @@ class ExpertiseController extends AbstractController
                             [
                                 'multiple' => false,
                                 'choices'   =>  [ 'Accepter' => 1, 'Refuser' => 0,],
-                                'data' => 1
                             ],
                             );
 
@@ -768,6 +796,7 @@ class ExpertiseController extends AbstractController
 
             $em->persist($expertise);
             $em->flush();
+            //dd($expertise);
 
             // Bouton FERMER
             if ($editForm->get('fermer')->isClicked()) {
@@ -864,13 +893,13 @@ class ExpertiseController extends AbstractController
      * Method({"GET","POST"})
      * @Security("is_granted('ROLE_EXPERT')")
      */
-    public function validationAction(Request $request, Expertise $expertise)
+    public function validationAction(Request $request, Expertise $expertise): Response
     {
         $max_expertises_nb = $this->max_expertises_nb;
         $sn = $this->sn;
         $sj = $this->sj;
         $ac = $this->ac;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $token = $this->token;
 
         // ACL
@@ -984,13 +1013,13 @@ class ExpertiseController extends AbstractController
      * Method("DELETE")
      * @Security("is_granted('ROLE_PRESIDENT')")
      */
-    public function deleteAction(Request $request, Expertise $expertise)
+    public function deleteAction(Request $request, Expertise $expertise): Response
     {
         $form = $this->createDeleteForm($expertise);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->remove($expertise);
             $em->flush($expertise);
         }
@@ -1005,7 +1034,7 @@ class ExpertiseController extends AbstractController
      *
      * @return \Symfony\Component\Form\Form The form
      */
-    private function createDeleteForm(Expertise $expertise)
+    private function createDeleteForm(Expertise $expertise): Response
     {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('expertise_delete', array('id' => $expertise->getId())))

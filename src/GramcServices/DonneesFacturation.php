@@ -24,6 +24,7 @@
 namespace App\GramcServices;
 
 use App\Entity\Projet;
+use App\Entity\Version;
 use App\Entity\Compta;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -44,7 +45,7 @@ class DonneesFacturation
     /*
      * Construit le nom de répertoire à partir du projet, et de l'année
      */
-    private function getDirName(Projet $projet, $annee)
+    private function getDirName(Projet $projet, $annee): string
     {
         return $this->dfct_directory . '/' . $annee . '/' . $projet;
     }
@@ -52,7 +53,7 @@ class DonneesFacturation
     /*
      * Renvoie un tableau trié de chemins correspondant aux pdf de facturation
      */
-    private function getPathes(Projet $projet, $annee)
+    private function getPathes(Projet $projet, $annee): array
     {
         $dfct_dir   = $this->getDirName($projet, $annee);
         $dfct_files = [];
@@ -78,12 +79,12 @@ class DonneesFacturation
      * Renvoie un array de numéros qui permettra de reconstruire la liste des données de facturation
      */
 
-    public function getNbEmises(Projet $projet, $annee)
+    public function getNbEmises(Projet $projet, $annee): array
     {
         $dfct_files = $this->getPathes($projet, $annee);
         $numeros    = [];
         foreach ($dfct_files as $f) {
-            $numeros[] = substr($f, 4, 1);	// dfct1.pdb -> "1"
+            $numeros[] = substr($f, 4, 1); // dfct1.pdb -> "1"
         }
         return $numeros;
     }
@@ -93,7 +94,7 @@ class DonneesFacturation
      * 	-> si $new = false renvoie '' si le fichier n'existe pas
      *  -> si $new = true  renvoie '' si le fichier existe déjà !
      */
-    public function getPath(Projet $projet, $annee, $nb, $new=false)
+    public function getPath(Projet $projet, $annee, $nb, $new=false): string
     {
         $f = $this->getDirName($projet, $annee) . '/dfct'.$nb.'.pdb';
         if (is_file($f)) {
@@ -116,7 +117,7 @@ class DonneesFacturation
      * Renvoie la consomation du projet entre deux dates
      * Renvoie -1 s'il y a une incohérence de dates
      */
-    public function getConsoPeriode(Projet $projet, \Datetime $debut_periode, \DateTime $fin_periode)
+    public function getConsoPeriode(Projet $projet, \Datetime $debut_periode, \DateTime $fin_periode): int
     {
         // conso en début de période, ie date de début à 0h00
         // Avant le 20 Janvier on considère que la conso vaut 0
@@ -152,7 +153,7 @@ class DonneesFacturation
     /*
      * Sauvegarde le pdf dans un fichier au bon endroit avec le bon nom
      */
-    public function savePdf(Projet $projet, $annee, $pdf)
+    public function savePdf(Projet $projet, $annee, $pdf): void
     {
         $dir = $this->getDirName($projet, $annee);
         if (! file_exists($dir)) {
@@ -179,7 +180,7 @@ class DonneesFacturation
     /*
      * Renvoie la version qui sera utilisée pour stocker les données de consommation
      */
-    public function getVersion(Projet $projet, $annee)
+    public function getVersion(Projet $projet, $annee): Version
     {
         //
         // s'il y a une version A on utilise le champ fctstamp de version A

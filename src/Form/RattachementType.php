@@ -54,7 +54,7 @@ class RattachementType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('libelleRattachement')
@@ -64,7 +64,7 @@ class RattachementType extends AbstractType
                 [
                 'multiple' => true,
                 //'expanded' => true,
-                'class' => 'App:Individu',
+                'class' => Individu::class,
                 'choices' =>  $options['experts'],
                 ]
             );
@@ -83,7 +83,7 @@ class RattachementType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults(
             [
@@ -98,7 +98,7 @@ class RattachementType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function getBlockPrefix()
+    public function getBlockPrefix(): string
     {
         return 'appbundle_rattachement';
     }

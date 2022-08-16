@@ -7,6 +7,8 @@ twig:
     exception_controller: null
     globals:
        infos: '@App\GramcServices\ServiceInfos'
+       serviceVersions: '@App\GramcServices\ServiceVersions'
+       serviceProjets: '@App\GramcServices\ServiceProjets'
        mailadmin: '%mailadmin%'
        mailsupport: '%mailsupport%'
        mesoc: '%mesoc%'
@@ -34,4 +36,5 @@ twig:
        rapport_dactivite: '%rapport_dactivite%'
        fichier_attache: '%fichier_attache%'
        coll_login: '%coll_login%'
+       noinvitation: '%noinvitation%'
        

@@ -35,9 +35,10 @@ use App\GramcServices\ServiceProjets;
 
 use App\Utils\Functions;
 use App\Utils\Menu;
-use App\Utils\Etat;
+use App\GramcServices\Etat;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -48,6 +49,8 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\ResetType;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Form\FormFactoryInterface;
+use Doctrine\ORM\EntityManagerInterface;
+
 
 /////////////////////////////////////////////////////
 
@@ -63,7 +66,8 @@ class MailController extends AbstractController
         private ServiceNotifications $sn,
         private ServiceJournal $sj,
         private ServiceProjets $sp,
-        private FormFactoryInterface $ff
+        private FormFactoryInterface $ff,
+        private EntityManagerInterface $em
     ) {}
 
     /**
@@ -72,9 +76,9 @@ class MailController extends AbstractController
      * Method({"GET", "POST"})
     **/
 
-    public function mailToResponsablesFicheAction(Request $request, Session $session)
+    public function mailToResponsablesFicheAction(Request $request, Session $session): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sn = $this->sn;
         $sj = $this->sj;
         $ff = $this->ff;
@@ -138,10 +142,10 @@ class MailController extends AbstractController
      * téléversé leur fiche projet signée pour la session $session
      *
      ************************************************************/
-    private function getResponsablesFiche(Session $session)
+    private function getResponsablesFiche(Session $session): array
     {
         $sj = $this->sj;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $responsables = [];
 
         $all_versions = $em->getRepository(Version::class)->findBy(['session' => $session, 'prjFicheVal' => false]);
@@ -176,9 +180,9 @@ class MailController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_PRESIDENT')")
      * Method({"GET", "POST"})
     **/
-    public function mailToResponsablesAction(Request $request, Session $session)
+    public function mailToResponsablesAction(Request $request, Session $session): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sn = $this->sn;
         $sj = $this->sj;
         $ff = $this->ff;
@@ -249,11 +253,11 @@ class MailController extends AbstractController
      * renouvelé leur projet pour la session $session
      *
      ************************************************************/
-    private function getResponsables(Session $session)
+    private function getResponsables(Session $session): array
     {
         $sp = $this->sp;
         $sj = $this->sj;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $type_session = $session->getLibelleTypeSession();
         if ($type_session =='B') {
@@ -336,7 +340,7 @@ class MailController extends AbstractController
     }
 
     // Pour le tri des responsables en commençant par celui qui a la plus grosse (attribution)
-    private static function compAttr($a, $b)
+    private static function compAttr($a, $b): int
     {
         if ($a['max_attr']==$b['max_attr']) {
             return 0;
@@ -351,7 +355,7 @@ class MailController extends AbstractController
      *   return  une form
      *
      */
-    private function getSelForm(Individu $individu)
+    private function getSelForm(Individu $individu):FormInterface
     {
         $nom = 'selection_'.$individu->getId();
         return $this->get('form.factory')  -> createNamedBuilder($nom, FormType::class, null, ['csrf_protection' => false ])

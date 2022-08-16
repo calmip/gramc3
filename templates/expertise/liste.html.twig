@@ -73,9 +73,9 @@
                 {% for expertise in expertises_thematique.expertises %}
                 {% if (expertise.expert == true) %}
                     <tr class="gras" >
-				{% else %}
-				    <tr class="leger" >
-			    {% endif %}
+                {% else %}
+                    <tr class="leger" >
+                {% endif %}
                         <td>{{ expertise.projetId }}</td>
                         <td>
                             {% if( expertise.expert == true) %}
@@ -118,12 +118,12 @@
           {% for expertise in expertises_hors_thematique %}
                 {% if( expertise.expert == true) %}
                     <tr class="gras" >
-				{% else %}
-				    <tr class="leger" >
-			    {% endif %}
+                {% else %}
+                    <tr class="leger" >
+                {% endif %}
                         <td>{{ expertise.projetId }}</td>
                         <td>
-							{% if( expertise.expert == true) %}
+                            {% if( expertise.expert == true) %}
                                 <a href="{{ path('expertise_modifier', { 'id' : expertise.expertise.id } ) }}">
                                 <img src="{{ asset('icones/modifier.png') }}" alt="Expertiser" title="Expertiser le projet" class="bouton_poussoir"></a>
                             {% else %}
@@ -143,23 +143,23 @@
 </section>
 {% endif %}
 
-{% if mes_commentaires_flag != null %}
-	<h2>Commentaires généraux</h2>
-	<section>
-	{% if mes_commentaires_maj != null %}
-		<p><strong><a href="{{ path('cree_ou_modif', { 'annee' : mes_commentaires_maj }) }}">Créer ou modifier</a></strong> le commentaire de l'année <strong>{{mes_commentaires_maj}}</strong></p>
-	{% endif %}
+{% if mes_commentaires_flag == true %}
+    <h2>Commentaires généraux</h2>
+    <section>
+    {% if mes_commentaires_maj != null %}
+        <p><strong><a href="{{ path('cree_ou_modif', { 'annee' : mes_commentaires_maj }) }}">Créer ou modifier</a></strong> le commentaire de l'année <strong>{{mes_commentaires_maj}}</strong></p>
+    {% endif %}
 
-	{% if mes_commentaires != null %}
-		{% for comm in mes_commentaires %}
-		<h3>{{comm.annee}}</h3>
-		<p><em>Dernière mise à jour le {{comm.majstamp|date('Y-m-d H:i:s')}}</em></p>
-		<p>{{comm.commentaire| e | nl2br}}</p>
-		{% endfor %}
-	{% else %}
-		<p><em>Vous n'avez entré aucun commentaire</em></p>
-	{% endif %}
-	</section>
+    {% if mes_commentaires != null %}
+        {% for comm in mes_commentaires %}
+        <h3>{{comm.annee}}</h3>
+        <p><em>Dernière mise à jour le {{comm.majstamp|date('Y-m-d H:i:s')}}</em></p>
+        <p>{{comm.commentaire| e | nl2br}}</p>
+        {% endfor %}
+    {% else %}
+        <p><em>Vous n'avez entré aucun commentaire</em></p>
+    {% endif %}
+    </section>
 {% endif %}
 
 <h2>Anciennes expertises</h2>
@@ -184,7 +184,8 @@
             <td>{{ expertise.projetId }}</td>
             <td>{{ expertise.sessionId }}</td>
             <td>
-                <a href="{{ path('consulter_version', { 'id' : expertise.projetId, 'version' : expertise.versionId } ) }}">
+                {#<a href="{{ path('consulter_version', { 'id' : expertise.projetId, 'version' : expertise.versionId } ) }}">#}
+                <a href="{{ path('consulter_expertise', { 'id' : expertise.id } ) }}">
                     <img src="{{ asset('icones/consulter.png') }}" alt="Expertiser" title="Lire le projet" class="bouton_poussoir">
                 </a>
             </td>

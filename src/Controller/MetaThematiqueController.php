@@ -32,6 +32,9 @@ use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Doctrine\ORM\EntityManagerInterface;
+
 
 /**
  * Metathematique controller.
@@ -40,7 +43,7 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class MetaThematiqueController extends AbstractController
 {
-    public function __construct(private AuthorizationCheckerInterface $ac) {}
+    public function __construct(private AuthorizationCheckerInterface $ac, private EntityManagerInterface $em) {}
 
     /**
      * Lists all metaThematique entities.
@@ -49,11 +52,11 @@ class MetaThematiqueController extends AbstractController
      * @Route("/", name="metathematique_index", methods={"GET"})
      * Method("GET")
      */
-    public function indexAction()
+    public function indexAction(): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
-        $metaThematiques = $em->getRepository('App:MetaThematique')->findAll();
+        $metaThematiques = $em->getRepository(MetaThematique::class)->findAll();
 
         return $this->render('metathematique/index.html.twig', array(
             'metaThematiques' => $metaThematiques,
@@ -64,17 +67,17 @@ class MetaThematiqueController extends AbstractController
      * @Route("/gerer",name="gerer_metaThematiques", methods={"GET"} )
      * @Security("is_granted('ROLE_OBS')")
      */
-    public function gererAction()
+    public function gererAction(): Response
     {
         $ac = $this->ac;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $menu = $ac->isGranted('ROLE_ADMIN') ? [ ['ok' => true,'name' => 'ajouter_metaThematique' ,'lien' => 'Ajouter une metathématique','commentaire'=> 'Ajouter une metathématique'] ] : [];
         return $this->render(
             'metathematique/liste.html.twig',
             [
             'menu' => $menu,
-            'metathematiques' => $em->getRepository('App:MetaThematique')->findBy([], ['libelle' => 'ASC'])
+            'metathematiques' => $em->getRepository(MetaThematique::class)->findBy([], ['libelle' => 'ASC'])
             ]
         );
     }
@@ -87,14 +90,14 @@ class MetaThematiqueController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method({"GET", "POST"})
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request): Response
     {
         $metaThematique = new Metathematique();
         $form = $this->createForm('App\Form\MetaThematiqueType', $metaThematique, ['ajouter'  => true,]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($metaThematique);
             $em->flush($metaThematique);
 
@@ -123,9 +126,9 @@ class MetaThematiqueController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method("GET")
      */
-    public function supprimerAction(Request $request, MetaThematique $thematique)
+    public function supprimerAction(Request $request, MetaThematique $thematique): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->remove($thematique);
         $em->flush($thematique);
         return $this->redirectToRoute('gerer_metaThematiques');
@@ -138,7 +141,7 @@ class MetaThematiqueController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method({"GET", "POST"})
      */
-    public function modifyAction(Request $request, MetaThematique $thematique)
+    public function modifyAction(Request $request, MetaThematique $thematique): Response
     {
         $editForm = $this->createForm(
             'App\Form\MetaThematiqueType',
@@ -150,7 +153,7 @@ class MetaThematiqueController extends AbstractController
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
             return $this->redirectToRoute('gerer_metaThematiques');
         }
 
@@ -175,7 +178,7 @@ class MetaThematiqueController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method("GET")
      */
-    public function showAction(MetaThematique $metaThematique)
+    public function showAction(MetaThematique $metaThematique): Response
     {
         $deleteForm = $this->createDeleteForm($metaThematique);
 
@@ -192,14 +195,14 @@ class MetaThematiqueController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method({"GET", "POST"})
      */
-    public function editAction(Request $request, MetaThematique $metaThematique)
+    public function editAction(Request $request, MetaThematique $metaThematique): Response
     {
         $deleteForm = $this->createDeleteForm($metaThematique);
         $editForm = $this->createForm('App\Form\MetaThematiqueType', $metaThematique);
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('metathematique_edit', array('id' => $metaThematique->getId()));
         }
@@ -218,13 +221,13 @@ class MetaThematiqueController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method("DELETE")
      */
-    public function deleteAction(Request $request, MetaThematique $metaThematique)
+    public function deleteAction(Request $request, MetaThematique $metaThematique): Response
     {
         $form = $this->createDeleteForm($metaThematique);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->remove($metaThematique);
             $em->flush($metaThematique);
         }
@@ -239,7 +242,7 @@ class MetaThematiqueController extends AbstractController
      *
      * @return \Symfony\Component\Form\Form The form
      */
-    private function createDeleteForm(MetaThematique $metaThematique)
+    private function createDeleteForm(MetaThematique $metaThematique): Response
     {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('metathematique_delete', array('id' => $metaThematique->getId())))

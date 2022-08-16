@@ -40,8 +40,8 @@ use App\GramcServices\ServiceProjets;
 use App\GramcServices\ServiceSessions;
 use App\GramcServices\ServiceVersions;
 use App\GramcServices\Workflow\Rallonge\RallongeWorkflow;
-use App\Utils\Etat;
-use App\Utils\Signal;
+use App\GramcServices\Etat;
+use App\GramcServices\Signal;
 use App\Utils\Functions;
 use App\AffectationExperts\AffectationExperts;
 use App\AffectationExperts\AffectationExpertsRallonge;
@@ -55,10 +55,13 @@ use Symfony\Component\HttpFoundation\Response;
 
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * Rallonge controller.
@@ -75,14 +78,15 @@ class RallongeController extends AbstractController
         private ServiceVersions $sv,
         private RallongeWorkflow $rw,
         private FormFactoryInterface $ff,
-        private ValidatorInterface $vl
+        private ValidatorInterface $vl,
+        private EntityManagerInterface $em
     ) {}
 
     /**
      * A partir d'une rallonge, renvoie version, projet, session
      *
      *************************************/
-    private function getVerProjSess(Rallonge $rallonge)
+    private function getVerProjSess(Rallonge $rallonge): array
     {
         $version = $rallonge->getVersion();
         $projet = null;
@@ -103,11 +107,11 @@ class RallongeController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method("GET")
      */
-    public function indexAction()
+    public function indexAction(): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
-        $rallonges = $em->getRepository('App:Rallonge')->findAll();
+        $rallonges = $em->getRepository(Rallonge::class)->findAll();
 
         return $this->render('rallonge/index.html.twig', array(
             'rallonges' => $rallonges,
@@ -121,14 +125,14 @@ class RallongeController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method({"GET", "POST"})
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request): Response
     {
         $rallonge = new Rallonge();
         $form = $this->createForm('App\Form\RallongeType', $rallonge);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($rallonge);
             $em->flush();
 
@@ -148,13 +152,13 @@ class RallongeController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method("GET")
      */
-    public function creationAction(Request $request, Projet $projet, LoggerInterface $lg)
+    public function creationAction(Request $request, Projet $projet, LoggerInterface $lg): Response
     {
         $sm = $this->sm;
         $ss = $this->ss;
         $sj = $this->sj;
         $sp = $this->sp;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // ACL
         if ($sm->rallonge_creation($projet)['ok'] == false) {
@@ -198,7 +202,7 @@ class RallongeController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method("GET")
      */
-    public function showAction(Rallonge $rallonge)
+    public function showAction(Rallonge $rallonge): Response
     {
         $deleteForm = $this->createDeleteForm($rallonge);
 
@@ -215,14 +219,14 @@ class RallongeController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method({"GET", "POST"})
      */
-    public function editAction(Request $request, Rallonge $rallonge)
+    public function editAction(Request $request, Rallonge $rallonge): Response
     {
         $deleteForm = $this->createDeleteForm($rallonge);
         $editForm = $this->createForm('App\Form\RallongeType', $rallonge);
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('rallonge_edit', array('id' => $rallonge->getId()));
         }
@@ -241,7 +245,7 @@ class RallongeController extends AbstractController
      * @Security("is_granted('ROLE_DEMANDEUR')")
      * Method("GET")
      */
-    public function consulterAction(Request $request, Rallonge $rallonge)
+    public function consulterAction(Request $request, Rallonge $rallonge): Response
     {
         $sm = $this->sm;
         $sp = $this->sp;
@@ -276,12 +280,12 @@ class RallongeController extends AbstractController
     * @Security("is_granted('ROLE_DEMANDEUR')")
     * Method({"GET", "POST"})
     */
-    public function modifierAction(Request $request, Rallonge $rallonge)
+    public function modifierAction(Request $request, Rallonge $rallonge): Response
     {
         $sm = $this->sm;
         $sj = $this->sj;
         $sval = $this->vl;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // ACL
         if ($sm->rallonge_modifier($rallonge)['ok'] == false) {
@@ -338,13 +342,13 @@ class RallongeController extends AbstractController
     * @Security("is_granted('ROLE_EXPERT')")
     * Method({"GET", "POST"})
     */
-    public function expertiserAction(Request $request, Rallonge $rallonge)
+    public function expertiserAction(Request $request, Rallonge $rallonge): Response
     {
         $sm = $this->sm;
         $ss = $this->ss;
         $sj = $this->sj;
         $sval = $this->vl;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // ACL
         if ($sm->rallonge_expertiser($rallonge)['ok'] == false) {
@@ -428,7 +432,7 @@ class RallongeController extends AbstractController
 
     ////////////////////////////////////////////////////////////////////////////////////////////
 
-    private function getFinaliserForm(Rallonge $rallonge)
+    private function getFinaliserForm(Rallonge $rallonge): FormInterface
     {
         $nbHeuresAttrib = [ 'required' => false ];
         if ($rallonge->getValidation() === false) {
@@ -462,12 +466,12 @@ class RallongeController extends AbstractController
      * @Security("is_granted('ROLE_PRESIDENT')")
      * Method({"GET", "POST"})
      */
-    public function avantFinaliserAction(Request $request, Rallonge $rallonge, LoggerInterface $lg)
+    public function avantFinaliserAction(Request $request, Rallonge $rallonge, LoggerInterface $lg): Response
     {
         $ss = $this->ss;
         $sj = $this->sj;
         $sval = $this->vl;
-        $em = $this->getdoctrine()->getManager();
+        $em = $this->em;
 
         $erreurs = [];
         $validation =   $rallonge->getValidation(); //  tout cela juste à cause de validation disabled
@@ -534,7 +538,7 @@ class RallongeController extends AbstractController
      * @Security("is_granted('ROLE_EXPERT')")
      * Method("GET")
      */
-    public function avantEnvoyerPresidentAction(Request $request, Rallonge $rallonge)
+    public function avantEnvoyerPresidentAction(Request $request, Rallonge $rallonge): Response
     {
         $sm = $this->sm;
         $sj = $this->sj;
@@ -570,7 +574,7 @@ class RallongeController extends AbstractController
      * @Security("is_granted('ROLE_DEMANDEUR')")
      * Method("GET")
      */
-    public function avantEnvoyerAction(Request $request, Rallonge $rallonge)
+    public function avantEnvoyerAction(Request $request, Rallonge $rallonge): Response
     {
         $sm = $this->sm;
         $sj = $this->sj;
@@ -603,7 +607,7 @@ class RallongeController extends AbstractController
      * @Security("is_granted('ROLE_DEMANDEUR')")
      * Method("GET")
      */
-    public function envoyerAction(Request $request, Rallonge $rallonge)
+    public function envoyerAction(Request $request, Rallonge $rallonge): Response
     {
         $sm = $this->sm;
         $sj = $this->sj;
@@ -649,7 +653,7 @@ class RallongeController extends AbstractController
      * @Security("is_granted('ROLE_PRESIDENT')")
      * Method("GET")
      */
-    public function finaliserAction(Request $request, Rallonge $rallonge)
+    public function finaliserAction(Request $request, Rallonge $rallonge): Response
     {
         $sj = $this->sj;
         $sval = $this->vl;
@@ -693,7 +697,7 @@ class RallongeController extends AbstractController
         * @Security("is_granted('ROLE_EXPERT')")
         * Method("GET")
         */
-    public function envoyerPresidentAction(Request $request, Rallonge $rallonge)
+    public function envoyerPresidentAction(Request $request, Rallonge $rallonge): Response
     {
         $sm = $this->sm;
         $sj = $this->sj;
@@ -744,9 +748,9 @@ class RallongeController extends AbstractController
      * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_PRESIDENT')")
      */
-    public function affectationAction(Request $request)
+    public function affectationAction(Request $request): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sp = $this->sp;
         $sv = $this->sv;
         $affectationExperts = $this->sr;
@@ -857,7 +861,7 @@ class RallongeController extends AbstractController
     // elle permet d'écrire les rallonges de manière ordonnée
     // D'abord les projets qui ont une rallonge en état "non actif"
     //
-    private static function cmpProjetsByRallonges($a, $b)
+    private static function cmpProjetsByRallonges($a, $b): int
     {
         if ($a['rstate'] == $b['rstate']) {
             return 0;
@@ -874,13 +878,13 @@ class RallongeController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method("DELETE")
      */
-    public function deleteAction(Request $request, Rallonge $rallonge)
+    public function deleteAction(Request $request, Rallonge $rallonge): Response
     {
         $form = $this->createDeleteForm($rallonge);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->remove($rallonge);
             $em->flush();
         }
@@ -895,7 +899,7 @@ class RallongeController extends AbstractController
      *
      * @return \Symfony\Component\Form\Form The form
      */
-    private function createDeleteForm(Rallonge $rallonge)
+    private function createDeleteForm(Rallonge $rallonge):FormInterface
     {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('rallonge_delete', array('id' => $rallonge->getId())))

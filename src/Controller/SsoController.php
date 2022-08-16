@@ -30,6 +30,9 @@ use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * Sso controller.
@@ -39,17 +42,22 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class SsoController extends AbstractController
 {
+
+    public function __construct(
+        private EntityManagerInterface $em
+    ) {}
+
     /**
      * Lists all sso entities.
      *
      * @Route("/", name="sso_index",methods={"GET"})
      * Method("GET")
      */
-    public function indexAction()
+    public function indexAction(): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
-        $ssos = $em->getRepository('App:Sso')->findAll();
+        $ssos = $em->getRepository(Sso::class)->findAll();
 
         return $this->render('sso/index.html.twig', array(
             'ssos' => $ssos,
@@ -62,14 +70,14 @@ class SsoController extends AbstractController
      * @Route("/new", name="sso_new",methods={"GET","POST"})
      * Method({"GET", "POST"})
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request): Response
     {
         $sso = new Sso();
         $form = $this->createForm('App\Form\SsoType', $sso);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($sso);
             $em->flush($sso);
 
@@ -88,7 +96,7 @@ class SsoController extends AbstractController
      * @Route("/{id}", name="sso_show",methods={"GET"})
      * Method("GET")
      */
-    public function showAction(Sso $sso)
+    public function showAction(Sso $sso): Response
     {
         $deleteForm = $this->createDeleteForm($sso);
 
@@ -104,14 +112,14 @@ class SsoController extends AbstractController
      * @Route("/{id}/edit", name="sso_edit",methods={"GET","POST"})
      * Method({"GET", "POST"})
      */
-    public function editAction(Request $request, Sso $sso)
+    public function editAction(Request $request, Sso $sso): Response
     {
         $deleteForm = $this->createDeleteForm($sso);
         $editForm = $this->createForm('App\Form\SsoType', $sso);
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('sso_edit', array('id' => $sso->getId()));
         }
@@ -129,13 +137,13 @@ class SsoController extends AbstractController
      * @Route("/{id}", name="sso_delete",methods={"DELETE"})
      * Method("DELETE")
      */
-    public function deleteAction(Request $request, Sso $sso)
+    public function deleteAction(Request $request, Sso $sso): Response
     {
         $form = $this->createDeleteForm($sso);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->remove($sso);
             $em->flush($sso);
         }
@@ -150,7 +158,7 @@ class SsoController extends AbstractController
      *
      * @return \Symfony\Component\Form\Form The form
      */
-    private function createDeleteForm(Sso $sso)
+    private function createDeleteForm(Sso $sso): Response
     {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('sso_delete', array('id' => $sso->getId())))

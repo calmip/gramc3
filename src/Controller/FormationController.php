@@ -31,6 +31,10 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Form\FormInterface;
+use Doctrine\ORM\EntityManagerInterface;
+
 
 /**
  * Formation controller.
@@ -39,16 +43,16 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class FormationController extends AbstractController
 {
-    public function __construct(private AuthorizationCheckerInterface $ac) {}
+    public function __construct(private AuthorizationCheckerInterface $ac, private EntityManagerInterface $em) {}
 
     /**
      * @Route("/gerer",name="gerer_formations", methods={"GET"} )
      * @Security("is_granted('ROLE_OBS')")
      */
-    public function gererAction()
+    public function gererAction(): Response
     {
         $ac = $this->ac;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // Si on n'est pas admin on n'a pas accès au menu
         $menu = $ac->isGranted('ROLE_ADMIN') ? [ ['ok' => true,'name' => 'ajouter_formation' ,'lien' => 'Ajouter une formation','commentaire'=> 'Ajouter une formation'] ] : [];
@@ -69,14 +73,14 @@ class FormationController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method({"GET", "POST"})
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request): Response
     {
         $formation = new formation();
         $form = $this->createForm('App\Form\FormationType', $formation, ['ajouter' => true ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($formation);
             $em->flush($formation);
 
@@ -105,14 +109,14 @@ class FormationController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method({"GET", "POST"})
      */
-    public function modifyAction(Request $request, Formation $formation)
+    public function modifyAction(Request $request, Formation $formation): Response
     {
         $deleteForm = $this->createDeleteForm($formation);
         $editForm = $this->createForm('App\Form\FormationType', $formation, ['modifier' => true ]);
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('gerer_formations');
         }
@@ -139,11 +143,10 @@ class FormationController extends AbstractController
      * @Route("/{id}/supprimer", name="supprimer_formation", methods={"GET"})
      * @Route("/{id}/supprimer", name="formation_delete", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
-     * Method("GET")
      */
-    public function supprimerAction(Request $request, Formation $formation)
+    public function supprimerAction(Request $request, Formation $formation): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->remove($formation);
         $em->flush($formation);
         return $this->redirectToRoute('gerer_formations');
@@ -156,7 +159,7 @@ class FormationController extends AbstractController
       *
       * @return \Symfony\Component\Form\Form The form
       */
-    private function createDeleteForm(formation $formation)
+    private function createDeleteForm(formation $formation): FormInterface
     {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('formation_delete', array('id' => $formation->getId())))
@@ -165,3 +168,4 @@ class FormationController extends AbstractController
         ;
     }
 }
+

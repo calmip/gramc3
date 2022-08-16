@@ -45,6 +45,8 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
+use Doctrine\ORM\EntityManagerInterface;
+
 /**
  * Publication controller.
  *
@@ -57,7 +59,8 @@ class PublicationController extends AbstractController
         private ServiceSessions $ss,
         private FormFactoryInterface $ff,
         private TokenStorageInterface $tok,
-        private AuthorizationCheckerInterface $ac
+        private AuthorizationCheckerInterface $ac,
+        private EntityManagerInterface $em
     ) {}
 
     /**
@@ -67,10 +70,10 @@ class PublicationController extends AbstractController
      * @Security("is_granted('ROLE_DEMANDEUR')")
      * Method({"POST","GET"})
      */
-    public function autocompleteAction(Request $request)
+    public function autocompleteAction(Request $request): Response
     {
         $sj = $this->sj;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $sj->debugMessage('autocompleteAction ' .  print_r($_POST, true));
         $form = $this->ff
@@ -132,11 +135,11 @@ class PublicationController extends AbstractController
      * Method("GET")
      * @Security("is_granted('ROLE_ADMIN')")
      */
-    public function indexAction()
+    public function indexAction(): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
-        $publications = $em->getRepository('App:Publication')->findAll();
+        $publications = $em->getRepository(Publication::class)->findAll();
 
         return $this->render('publication/index.html.twig', array(
             'publications' => $publications,
@@ -147,10 +150,10 @@ class PublicationController extends AbstractController
      * @Route("/{id}/gerer",name="gerer_publications", methods={"GET","POST"} )
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
-    public function gererAction(Projet $projet, Request $request, LoggerInterface $lg)
+    public function gererAction(Projet $projet, Request $request, LoggerInterface $lg): Response
     {
         $sj = $this->sj;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $publication    = new Publication();
         $form = $this->createForm('App\Form\PublicationType', $publication);
@@ -206,7 +209,7 @@ class PublicationController extends AbstractController
      * @Route("/{id}/consulter",name="consulter_publications", methods={"GET"} )
      * @Security("is_granted('ROLE_EXPERT')")
      */
-    public function consulterAction(Projet $projet, Request $request)
+    public function consulterAction(Projet $projet, Request $request): Response
     {
         return $this->render(
             'publication/consulter.html.twig',
@@ -222,12 +225,12 @@ class PublicationController extends AbstractController
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      * Method({"GET", "POST"})
      */
-    public function AnneeAction(Request $request)
+    public function AnneeAction(Request $request): Response
     {
         $ss    = $this->ss;
         $data  = $ss->selectAnnee($request); // formulaire
         $annee = $data['annee'];
-        $em    = $this->getDoctrine()->getManager();
+        $em    = $this->em;
         $publications = $em->getRepository(Publication::class)->findBy(['annee' => $annee ]);
 
         return $this->render(
@@ -245,9 +248,9 @@ class PublicationController extends AbstractController
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      * Method({"GET", "POST"})
      */
-    public function AnneeCsvAction($annee)
+    public function AnneeCsvAction($annee): Response
     {
-        $em    = $this->getDoctrine()->getManager();
+        $em    = $this->em;
         $publications = $em->getRepository(Publication::class)->findBy(['annee' => $annee ]);
 
         $header  = [
@@ -279,14 +282,14 @@ class PublicationController extends AbstractController
      * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request): Response
     {
         $publication = new Publication();
         $form = $this->createForm('App\Form\PublicationType', $publication);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($publication);
             $em->flush();
 
@@ -306,7 +309,7 @@ class PublicationController extends AbstractController
      * Method("GET")
      * @Security("is_granted('ROLE_ADMIN')")
      */
-    public function showAction(Publication $publication)
+    public function showAction(Publication $publication): Response
     {
         $deleteForm = $this->createDeleteForm($publication);
 
@@ -323,14 +326,14 @@ class PublicationController extends AbstractController
      * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
-    public function editAction(Request $request, Publication $publication)
+    public function editAction(Request $request, Publication $publication): Response
     {
         $deleteForm = $this->createDeleteForm($publication);
         $editForm = $this->createForm('App\Form\PublicationType', $publication);
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('publication_edit', array('id' => $publication->getId()));
         }
@@ -350,10 +353,10 @@ class PublicationController extends AbstractController
      * @Security("is_granted('ROLE_DEMANDEUR')")
      * Method({"GET", "POST"})
      */
-    public function modifyAction(Request $request, Publication $publication, Projet $projet, LoggerInterface $lg)
+    public function modifyAction(Request $request, Publication $publication, Projet $projet, LoggerInterface $lg): Response
     {
         $sj = $this->sj;
-        $em = $this->getdoctrine()->getManager();
+        $em = $this->em;
 
         $editForm = $this->createForm('App\Form\PublicationType', $publication);
         $editForm->handleRequest($request);
@@ -386,13 +389,13 @@ class PublicationController extends AbstractController
      * @Route("/{id}", name="publication_delete", methods={"DELETE"})
      * Method("DELETE")
      */
-    public function deleteAction(Request $request, Publication $publication)
+    public function deleteAction(Request $request, Publication $publication): Response
     {
         $form = $this->createDeleteForm($publication);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->remove($publication);
             $em->flush();
         }
@@ -407,12 +410,12 @@ class PublicationController extends AbstractController
      * @Route("/{id}/{projet}/supprimer", name="supprimer_publication", methods={"GET","DELETE"})
      * Method({ "GET","DELETE"})
      */
-    public function supprimerAction(Request $request, Publication $publication, Projet $projet, LoggerInterface $lg)
+    public function supprimerAction(Request $request, Publication $publication, Projet $projet, LoggerInterface $lg): Response
     {
         $ac = $this->ac;
         $token = $this->tok->getToken();
         $sj = $this->sj;
-        $em = $this->getdoctrine()->getManager();
+        $em = $this->em;
 
         // ACL
         if (! $projet->isCollaborateur($token->getUser()) && ! $ac->isGranted('ROLE_ADMIN')) {
@@ -425,7 +428,7 @@ class PublicationController extends AbstractController
         Functions::sauvegarder($publication, $em, $lg);
 
         if ($publication->getProjet() == null) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->remove($publication);
             $em->flush();
         }
@@ -441,7 +444,7 @@ class PublicationController extends AbstractController
      *
      * @return \Symfony\Component\Form\Form The form
      */
-    private function createDeleteForm(Publication $publication)
+    private function createDeleteForm(Publication $publication): Response
     {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('publication_delete', ['id' => $publication->getId() ]))

@@ -1,10 +1,34 @@
 <?php
 
+/**
+ * This file is part of GRAMC (Computing Ressource Granting Software)
+ * GRAMC stands for : Gestion des Ressources et de leurs Attributions pour Mésocentre de Calcul
+ *
+ * GRAMC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ *  GRAMC is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with GRAMC.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *  authors : Emmanuel Courcelle - C.N.R.S. - UMS 3667 - CALMIP
+ *            Nicolas Renon - Université Paul Sabatier - CALMIP
+ **/
 
-
-/****
- * Ce service traite les exceptionsss
- ************/
+/***
+ * class ExceptionListener = Ce service intercepte les exceptions et les traite de la manière suivante:
+ *                            - En mode DEBUG, affiche l'exception et sort
+ *                            - En mode NON DEBUG, écrit dans le fichier de log ou dans le journal, puis redirige vers la page d'accueil
+ *                            - TODO - refaire tout ça de manière symfoniquement correcte !
+ *
+ *
+ **********************/
  
 // src/EventListener/ExceptionListener.php
 namespace App\EventListener;
@@ -13,7 +37,7 @@ use App\Entity\Individu;
 use App\Utils\Functions;
 use App\GramcServices\ServiceJournal;
 
-use App\Exception\UserException;
+//use App\Exception\UserException;
 
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
@@ -61,11 +85,8 @@ class ExceptionListener
         //dd($exception);
 
         // En mode debug, on affiche l'exception
-        // Commenter ces trois lignes pour voir ce qui se passe en prod !
-        if( $this->kernel_debug == true ) {
-            $response =  new Response( '<pre>' . $exception . '</pre>');
-            return $response;
-        }
+        // Commenter cette ligne pour récupérer le comportement de la prod !
+        if( $this->kernel_debug == true ) return;
  
         // nous captons des erreurs de la page d'accueil
         if( $event->getRequest()->getPathInfo() == '/' )
@@ -91,43 +112,46 @@ class ExceptionListener
 
         }   
 
+        // On essaie d'aller voir une url sans être authentifié
+        elseif ( $exception instanceof HttpException && $exception->getPrevious() instanceof InsufficientAuthenticationException)
+        {
+
+            // On garde l'url de destination dans la session
+            $event->getRequest()->getSession()->set('url', $event->getRequest()->getUri() );
+
+            // Pas la peine d'encombrer les logs
+            //$this->sj->warningMessage(__METHOD__ . ":" . __LINE__ ." accès anonyme à la page " . $event->getRequest()->getPathInfo());
+
+            // On renvoie sur l'écran de login'
+            if( $this->kernel_debug == true )
+                $response =  new RedirectResponse( $this->router->generate('connexion_dbg') );
+            else
+                $response =  new RedirectResponse( $this->router->generate('connexion') );
+            
+            $event->setResponse($response);
+        }
+
         //   AccessDeniedHttpException
         //   problème avec access_control dans security.yml (IP par exemple) ou un mauvais rôle
         elseif( $exception instanceof AccessDeniedHttpException /*or $exception instanceof AccessDeniedException*/)
         {
             //dd($exception);
             $this->sj->warningMessage(__METHOD__ . ":" . __LINE__ ." accès à la page " . $event->getRequest()->getPathInfo() . " non autorisé");
-            $response =  new RedirectResponse($this->router->generate('index') );
+            $response = new RedirectResponse($this->router->generate('accueil') );
             $event->setResponse($response);
         }
-        // pas de rôle pour le moment
-        // elseif( $exception instanceof InsufficientAuthenticationException )
-        elseif( $exception instanceof InsufficientAuthenticationException )
-        {
-            $event->getRequest()->getSession()->set('url', $event->getRequest()->getUri() );
-            
-            $this->sj->warningMessage(__METHOD__ . ":" . __LINE__ ." accès anonyme à la page " . $event->getRequest()->getPathInfo());
-        
-            if( $this->kernel_debug == true )
-                $response =  new RedirectResponse( $this->router->generate('connexion_dbg') );
-            else
-                $response =  new RedirectResponse( $this->router->generate('connexion') );
-            
-            //$event->setResponse($response);    
-        }
 
+        // Erreur 404
         elseif( $exception instanceof NotFoundHttpException )
         {
-            // uniquement en production nous redirigeons vers la page 'accueil' - pas de log
-            if( $this->kernel_debug == false )
-            {
-                $response =  new RedirectResponse($this->router->generate('accueil') );
-                $event->setResponse($response); 
-            }
+            // Nous redirigeons vers la page 'accueil' - pas de log
+            $response =  new RedirectResponse($this->router->generate('accueil') );
+            $event->setResponse($response); 
         }
+
+        // comportement général
         else
         {
-            // comportement général
             $this->logger->warning("Error to " .  $event->getRequest()->getRequestUri(),
                     [
                     'exception' => $exception,
@@ -137,13 +161,9 @@ class ExceptionListener
             $this->sj->warningMessage(__METHOD__ . ":" . __LINE__ ." Exception " . get_class($exception) . ' : ' . $exception->getMessage() .
                                       "  À partir de URL : " .  $event->getRequest()->getPathInfo() );
 
-           // uniquement en production nous redirigeons vers la page 'index'
-           if( $this->kernel_debug == false )
-           {
-                $response =  new RedirectResponse($this->router->generate('accueil') );
-                $event->setResponse($response); 
-           }
-            
+            // Nous redirigeons vers la page d'accueil
+            $response =  new RedirectResponse($this->router->generate('accueil') );
+            $event->setResponse($response); 
         }
     }
 }

@@ -8,7 +8,12 @@
 # - vendor
 # - config
 
-chmod -R a-w composer.json composer.lock symfony.lock config public/index.php vendor
+for f in symfony.lock composer.lock
+do
+    [ -r $f ] && chmod a-w $f
+done
+
+chmod -R a-w composer.json config public/index.php vendor
 
 
 

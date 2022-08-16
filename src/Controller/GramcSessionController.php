@@ -24,6 +24,34 @@
 
 namespace App\Controller;
 
+use App\Form\IndividuType;
+use App\Entity\Version;
+use App\Entity\Projet;
+use App\Entity\CollaborateurVersion;
+use App\Entity\Individu;
+use App\Entity\Invitation;
+use App\Entity\Scalar;
+use App\Entity\Sso;
+use App\Entity\CompteActivation;
+use App\Entity\Journal;
+
+use App\Utils\Functions;
+
+use App\GramcServices\Etat;
+use App\GramcServices\Workflow\Projet\ProjetWorkflow;
+use App\GramcServices\ServiceMenus;
+use App\GramcServices\ServiceIndividus;
+use App\GramcServices\ServicePhpSessions;
+use App\GramcServices\ServiceJournal;
+use App\GramcServices\ServiceNotifications;
+use App\GramcServices\ServiceProjets;
+use App\GramcServices\ServiceSessions;
+use App\GramcServices\ServiceVersions;
+use App\GramcServices\PropositionExperts\PropositionExpertsType1;
+use App\GramcServices\PropositionExperts\PropositionExpertsType2;
+use App\GramcServices\GramcDate;
+use App\Security\User\UserChecker;
+
 use Psr\Log\LoggerInterface;
 
 use Symfony\Component\Routing\Annotation\Route;
@@ -35,29 +63,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\PhpBridgeSessionStorage;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-
-use App\Form\IndividuType;
-use App\Entity\Individu;
-use App\Entity\Scalar;
-use App\Entity\Sso;
-use App\Entity\CompteActivation;
-use App\Entity\Journal;
-
-use App\Utils\Functions;
-use App\Utils\IDP;
-
-use App\GramcServices\Workflow\Projet\ProjetWorkflow;
-use App\GramcServices\ServiceMenus;
-use App\GramcServices\ServicePhpSessions;
-use App\GramcServices\ServiceJournal;
-use App\GramcServices\ServiceNotifications;
-use App\GramcServices\ServiceProjets;
-use App\GramcServices\ServiceSessions;
-use App\GramcServices\ServiceVersions;
-use App\GramcServices\PropositionExperts\PropositionExpertsType1;
-use App\GramcServices\PropositionExperts\PropositionExpertsType2;
-use App\GramcServices\GramcDate;
-use App\Security\User\UserChecker;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -72,11 +77,10 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
-
-
 use Symfony\Component\Mailer\Mailer;
 
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 use Twig\Environment;
 
@@ -91,6 +95,8 @@ function c_cmp($a, $b): bool
 class GramcSessionController extends AbstractController
 {
     public function __construct(
+        private GramcDate $grdt,
+        private ServiceIndividus $sid,
         private ServiceNotifications $sn,
         private ServiceJournal $sj,
         private ServiceMenus $sm,
@@ -106,7 +112,8 @@ class GramcSessionController extends AbstractController
         private ValidatorInterface $vl,
         private TokenStorageInterface $ts,
         private AuthorizationCheckerInterface $ac,
-        private Environment $tw
+        private Environment $tw,
+        private EntityManagerInterface $em
     ) {}
 
     /**
@@ -114,10 +121,11 @@ class GramcSessionController extends AbstractController
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
     **/
 
-    public function adminAccueilAction()
+    public function adminAccueilAction(): Response
     {
         $sm      = $this->sm;
         $menu1[] = $sm->individu_gerer();
+        $menu1[] = $sm->invitations();
 
         $menu2[] = $sm->gerer_sessions();
         $menu2[] = $sm->bilan_session();
@@ -163,7 +171,7 @@ class GramcSessionController extends AbstractController
     /**
      * @Route("/mentions_legales", name="mentions_legales", methods={"GET"} )
      */
-    public function mentionsAction()
+    public function mentionsAction(): Response
     {
         return $this->render('default/mentions.html.twig');
     }
@@ -171,7 +179,7 @@ class GramcSessionController extends AbstractController
     /**
     * @Route("/aide", name="aide", methods={"GET"} )
     */
-    public function aideAction()
+    public function aideAction(): Response
     {
         return $this->render('default/aide.html.twig');
     }
@@ -180,10 +188,11 @@ class GramcSessionController extends AbstractController
     * @Route("/", name="accueil", methods={"GET"} )
     *
     */
-    public function accueilAction()
+    public function accueilAction(): Response
     {
-        $sm     = $this->sm;
-        $ss     = $this->ss;
+        $sm = $this->sm;
+        $ss = $this->ss;
+        $sid = $this->sid;
         $session= $ss->getSessionCourante();
 
         // Lors de l'installation, aucune session n'existe: redirection
@@ -225,6 +234,16 @@ class GramcSessionController extends AbstractController
         $menu[] = $m;
         $menu[] = $sm->aide();
 
+        $token = $this->ts->getToken();
+        if ($token != null)
+        {
+            $individu = $this->ts->getToken()->getUser();
+            if (! $sid->validerProfil($individu))
+            {
+                return $this->redirectToRoute('profil');
+            };
+        }
+        
         if ($seulement_demandeur) {
             return $this->redirectToRoute('projet_accueil');
         } else {
@@ -243,7 +262,7 @@ class GramcSessionController extends AbstractController
      * @Route("/president", name="president_accueil", methods={"GET"} )
      * @Security("is_granted('ROLE_PRESIDENT')")
      */
-    public function presidentAccueilAction()
+    public function presidentAccueilAction(): Response
     {
         $sm     = $this->sm;
         $menu[] = $sm->affectation();
@@ -261,10 +280,11 @@ class GramcSessionController extends AbstractController
     * @Security("is_granted('ROLE_DEMANDEUR')")
 
     **/
-    public function profilAction(Request $request)
+    public function profilAction(Request $request): Response
     {
         $sj = $this->sj;
-
+        $em = $this->em;
+        
         $individu = $this->ts->getToken()->getUser();
 
         if ($individu == 'anon.' || ! ($individu instanceof Individu)) {
@@ -274,7 +294,8 @@ class GramcSessionController extends AbstractController
         $form = $this->createForm(IndividuType::class, $individu, ['mail' => false ]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid())
+        {
             if ($old_individu->isPermanent() != $individu->isPermanent() && $individu->isPermanent() == false) {
                 $sj->warningMessage(__METHOD__ . ':' . __LINE__ . " " . $individu . " cesse d'être permanent !!");
             }
@@ -297,20 +318,56 @@ class GramcSessionController extends AbstractController
                 . " vers " . $new_laboratoire);
             }
 
-            $em = $this->getDoctrine()->getManager();
             $em->persist($individu);
             $em->flush();
+
+            // On recopie le nouveau profil dans les projets actifs ou en cours d'édition
+            $projetRepository = $em->getRepository(Projet::class);
+            $cvRepository = $em->getRepository(CollaborateurVersion::class);
+            $list_projets = $projetRepository-> getProjetsCollab($individu->getId(), true, true);
+            foreach ($list_projets as $projet)
+            {
+                foreach ($projet->getVersion() as $v)
+                {
+                    if ($v->getEtatVersion() != Etat::TERMINE && $v->getEtatVersion() != Etat::ANNULE)
+                    {
+                        
+                        foreach ($v->getCollaborateurVersion() as $cv)
+                        {
+                            $c = $cv->getCollaborateur();
+                            if ( $c->isEqualTo($individu))
+                            {
+                                $cv->setStatut($individu->getStatut());
+                                $cv->setLabo($individu->getLabo());
+                                $cv->setEtab($individu->getEtab());
+                                $em->persist($cv);
+                                $em->flush();
+
+                                // Si le responsable a changé de labo il faut poitionner le champ de la version
+                                if ($cv->getResponsable())
+                                {
+                                    $v->setPrjLLabo(Functions::string_conversion($c->getLabo()));
+                                    $em->persist($v);
+                                    $em->flush();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             return $this->redirectToRoute('accueil');
-        } else {
+        }
+        else
+        {
             return $this->render('default/profil.html.twig', ['form' => $form->createView() ]);
         }
     }
 
-
     /**
     * @Route("/nouveau_compte", name="nouveau_compte", methods={"GET","POST"})
     */
-    public function nouveau_compteAction(Request $request, LoggerInterface $lg)
+    public function nouveau_compteAction(Request $request, LoggerInterface $lg): Response
     {
         $sj = $this->sj;
         $ff = $this->ff;
@@ -377,11 +434,11 @@ class GramcSessionController extends AbstractController
      * @Route("/nouveau_profil",name="nouveau_profil", methods={"GET","POST"})
      *
      */
-    public function nouveau_profilAction(Request $request, LoggerInterface $lg)
+    public function nouveau_profilAction(Request $request, LoggerInterface $lg): Response
     {
         $sn = $this->sn;
         $sj = $this->sj;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $session = $request->getSession();
 
@@ -492,9 +549,9 @@ class GramcSessionController extends AbstractController
      * @Route("/connexions", name="connexions", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
-    public function connexionsAction(Request $request)
+    public function connexionsAction(Request $request): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sps = $this->sps;
         $sj = $this->sj;
 
@@ -544,7 +601,7 @@ class GramcSessionController extends AbstractController
      * Method({"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
      *********************************************/
-    public function infoAction(Request $request)
+    public function infoAction(Request $request): Response
     {
         ob_start();
         phpinfo();
@@ -554,6 +611,163 @@ class GramcSessionController extends AbstractController
 
     ///////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * @Route("/{clef}/repinvit", name="repinvit", methods={"GET"})
+     */
+    public function repinvitAction(Request $request, Invitation $invitation=null): Response
+    {
+        $em = $this->em;
+        $sj = $this->sj;
+        $ts = $this->ts;
+
+        // Invitation non valide = on déconnecte et on redirige vers la page d'accueil
+        if ( ! $this->validInvit($request, $invitation))
+        {
+            $ts->setToken(null);
+            //$request->getSession()->invalidate();
+            return $this->redirectToRoute('accueil');
+        }
+        
+        // Invitation valide = on redirige vers repinvitok
+        // Cette fois il faudra s'authentifier
+        return $this->redirectToRoute('repinvitok', ['clef' => $invitation->getClef()]);
+    }
+
+    /**
+     * @Route("/{clef}/repinvitok", name="repinvitok", methods={"GET","POST"})
+     * @Security("is_granted('ROLE_DEMANDEUR')")
+     */
+    public function repinvitokAction(Request $request, Invitation $invitation=null): Response
+    {
+        // Date OK - On vérifie les users
+        $invited = $invitation->getInvited();
+        $connected = $this->ts->getToken()->getUser();
+        
+        if ($invited->getId() === $connected->getId())
+        {
+            // L'invitation est à usage unique, on la supprime
+            $em->remove($invitation);
+            $em->flush();
+
+            // On oblige l'utilisateur à vérifier son profil
+            return $this->redirectToRoute('profil');
+        }
+        else
+        {
+            // On supprimera l'invitation dans choisirMail seulement lorsque l'utilisateur
+            // aura choisi son mail !
+            return $this->choisirMail($request, $connected, $invitation);
+        }        
+    }
+
+    /*******************************************************************************
+     * Vérifie que l'invitation passée en paramètres est valide
+     * c'est-à-dire qu'elle existe et qu'elle n'a pas expiré
+     *
+     * Si non valide: Met un message d'erreur dans le flasjbag et renvoie false
+     * Si valide: renvoie true (met ne la supprime pas encore)
+     *
+     *****************************************************************************/
+    private function validInvit(Request $request, Invitation $invitation=null) : bool
+    {
+        $sj = $this->sj;
+        // Invitation supprimée !
+        if ( $invitation == null)
+        {
+            $message = "Cette invitation n'existe pas, ou a été supprimée";
+            $request->getSession()->getFlashbag()->add("flash erreur",$message . " - Merci de vous rapprocher de CALMIP");
+            $sj->warningMessage(__METHOD__ . ':' . __LINE__ . $message);
+            return false;
+        }
+
+        // Invitation OK - On vérifie la date
+        $now = $this->grdt;
+        $invit_duree = $this->getParameter('invit_duree');
+        $expiration = $invitation->getCreationStamp()->add(new \DateInterval($invit_duree));
+
+        // On supprime les invitations expirées
+        if ($now > $expiration)
+        {
+            // L'invitation est à usage unique, on la supprime
+            $em->remove($invitation);
+            $em->flush();
+        
+            $message = "Cette invitation a expiré ";
+            $request->getSession()->getFlashbag()->add("flash erreur",$message . " - Merci de vous rapprocher de CALMIP");
+            $sj->warningMessage(__METHOD__ . ':' . __LINE__ . $message . " de " . $invitation->getInviting() . " pour " .$invitation->getInvited());
+            return false;
+        }
+
+        return true;
+
+    }
+    /*************************
+     * Fonction appelée par repinvitAction lorsque l'adresse de l'invité ne colle pas avec l'adresse du profil
+     **********************************************/
+    private function choisirMail(Request $request, Individu $connected, Invitation $invitation): Response
+    {
+        $em = $this->em;
+        $ff = $this->ff;
+        $sid = $this->sid;
+        $sj = $this->sj;
+
+        $mail_connected = $connected->getMail();
+        $mail_invited = $invitation->getInvited()->getMail();
+        $form = Functions::createFormBuilder($ff)
+                    ->add('mail',
+                    ChoiceType::class,
+                    [
+                        'required' => false,
+                        'label'    => '',
+                        'expanded' => true,
+                        'multiple' => false,
+                        'choices' => [ $mail_connected => $mail_connected, $mail_invited => $mail_invited ],
+                        'placeholder' => false,
+                        'label' => ' '
+                    ]
+                )
+                ->add('OK', SubmitType::class, ['label' => "OK"])
+                ->getForm();
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            // L'invitation est à usage unique, on la supprime
+            $em->remove($invitation);
+            $em->flush();
+        
+            $mail = $form->getData()['mail'];
+
+            // On fusionne invité -> connecté puis on supprime le connecté
+            $sid->fusionnerIndividus($invitation->getInvited(), $connected);
+            $em->remove($invitation->getInvited());
+            $em->flush();
+
+            // On veut garder le mail de l'invité, il faut donc changer le mail du connecté
+            if ($mail === $mail_invited)
+            {
+                $connected->setMail($mail_invited);
+                $em->persist($connected);
+                $em->flush();
+            }
+
+            // oups qu'est-ce que c'est que cette adresse ?
+            // ne devrait jamais arriver
+            else if ($mail != $mail_connected)
+            {
+                $message = "mail connected = " . $connected->getMail() . " - mail invited = " . $invitation->getInvited()->getMail() . " - réponse au formulaire = " . $mail;
+                $sj->warningMessage(__METHOD__ . ':' . __LINE__ . $message);
+                $request->getSession()->getFlashbag()->add("flash erreur","Problème de mail, rapprochez-vous de " . $this->getParameter('mesoc'));
+            }
+            return $this->redirectToRoute('profil');
+        }
+
+        return $this->render('individu/repinvit.html.twig',
+                            ['invitation' => $invitation,
+                             'connected' => $connected,
+                             'form' => $form->createView()
+                            ]);
+    }
 
 
     /**
@@ -561,7 +775,7 @@ class GramcSessionController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      **/
 
-    public function md5Action()
+    public function md5Action(): Response
     {
         $salt = random_int(1, 10000000000) . microtime();
         $key = md5($salt);
@@ -573,7 +787,7 @@ class GramcSessionController extends AbstractController
      * @Security("is_granted('ROLE_DEMANDEUR')")
      **/
 
-    public function uri(Request $request)
+    public function uri(Request $request): Response
     {
         $IDPprod    =   $this->getParameter('IDPprod');
         return new Response(Functions::show($IDPprod));

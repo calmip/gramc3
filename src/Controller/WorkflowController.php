@@ -32,8 +32,8 @@ use App\Entity\Thematique;
 
 use App\Utils\Functions;
 use App\Utils\Menu;
-use App\Utils\Etat;
-use App\Utils\Signal;
+use App\GramcServices\Etat;
+use App\GramcServices\Signal;
 use App\GramcServices\ServiceJournal;
 use App\GramcServices\Workflow\Projet\ProjetWorkflow;
 use App\GramcServices\Workflow\Version\VersionWorkflow;
@@ -54,6 +54,8 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 
 use Symfony\Component\Form\FormFactoryInterface;
 
+use Doctrine\ORM\EntityManagerInterface;
+
 /**
  * Workflow controller pour faire des tests.
  * @Security("is_granted('ROLE_ADMIN')")
@@ -65,7 +67,8 @@ class WorkflowController extends AbstractController
         private ServiceJournal $sj,
         private ProjetWorkflow $pw,
         private SessionWorkflow $sw,
-        private FormFactoryInterface $ff
+        private FormFactoryInterface $ff,
+        private EntityManagerInterface $em
     ) { }
 
     /**
@@ -74,11 +77,11 @@ class WorkflowController extends AbstractController
      * @Route("/", name="workflow_index",methods={"GET","POST"})
      * Method({"GET", "POST"})
      */
-    public function indexAction(Request $request, LoggerInterface $lg)
+    public function indexAction(Request $request, LoggerInterface $lg): Response
     {
         $ff = $this->ff;
         $sj = $this->sj;
-        $em = $this->getdoctrine()->getManager();
+        $em = $this->em;
         $signal_view_forms = [];
         $etat_view_forms = [];
 
@@ -183,11 +186,11 @@ class WorkflowController extends AbstractController
     * @Route("/{id}/modify", name="worklow_modifier_session",methods={"GET","POST"})
     * Method({"GET", "POST"})
     */
-    public function modifySessionAction(Request $request, Session $session, LoggerInterface $lg)
+    public function modifySessionAction(Request $request, Session $session, LoggerInterface $lg): Response
     {
         $sj = $this->sj;
         $ff = $this->ff;
-        $em = $this->getdoctrine()->getManager();
+        $em = $this->em;
 
         $session_form = Functions::createFormBuilder($ff)
             ->add(
@@ -276,11 +279,11 @@ class WorkflowController extends AbstractController
      * @Route("/{id}/signal", name="workflow_signal_projet",methods={"GET","POST"})
      * Method({"GET", "POST"})
      */
-    public function signalProjetAction(Request $request, Projet $projet, LoggerInterface $lg)
+    public function signalProjetAction(Request $request, Projet $projet, LoggerInterface $lg): Response
     {
         $sj = $this->sj;
         $ff = $this->ff;
-        $em = $this->getdoctrine()->getManager();
+        $em = $this->em;
 
 
         $versions = $projet->getVersion();
@@ -302,7 +305,7 @@ class WorkflowController extends AbstractController
                 EntityType::class,
                 [
                     'multiple' => false,
-                    'class' => 'App:Session',
+                    'class' => Session::class,
                     'required'  =>  true,
                     'label'     => 'Session',
                     'choices' =>  $sessions,
@@ -392,7 +395,6 @@ class WorkflowController extends AbstractController
                                 'RENOUVELABLE'                  =>   Etat::RENOUVELABLE,
                                 'NON_RENOUVELABLE'              =>   Etat::NON_RENOUVELABLE,
                                 'EDITION_DEMANDE'               =>   Etat::EDITION_DEMANDE,
-                                'EDITION_TEST   '               =>   Etat::EDITION_TEST,
                                 'EDITION_EXPERTISE'             =>   Etat::EDITION_EXPERTISE,
                                 'EN_ATTENTE'                    =>   Etat::EN_ATTENTE,
                                 'ACTIF'                         =>   Etat::ACTIF,
@@ -433,7 +435,6 @@ class WorkflowController extends AbstractController
                     'choices' =>
                                 [
                                 'EDITION_DEMANDE'               =>   Etat::EDITION_DEMANDE,
-                                'EDITION_TEST'                  =>   Etat::EDITION_TEST,
                                 'EDITION_EXPERTISE'             =>   Etat::EDITION_EXPERTISE,
                                 'EN_ATTENTE'                    =>   Etat::EN_ATTENTE,
                                 'ACTIF'                         =>   Etat::ACTIF,
@@ -473,9 +474,9 @@ class WorkflowController extends AbstractController
     * @Route("/{id}/reset", name="workflow_reset_version",methods={"GET","POST"})
     * Method({"GET", "POST"})
     */
-    public function resetVersionAction(Request $request, Version $version, LoggerInterface $lg)
+    public function resetVersionAction(Request $request, Version $version, LoggerInterface $lg): Response
     {
-        $em = $this->getdoctrine()->getManager();
+        $em = $this->em;
 
         $version->setEtatVersion(Etat::EDITION_DEMANDE);
         Functions::sauvegarder($version, $em, $lg);

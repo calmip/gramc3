@@ -36,7 +36,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 use App\Utils\Functions;
-use App\Utils\Etat;
+use App\GramcServices\Etat;
 
 use App\Entity\Projet;
 use App\Entity\Version;
@@ -55,6 +55,8 @@ use App\GramcServices\ServiceVersions;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 
+use Doctrine\ORM\EntityManagerInterface;
+
 /**
  * AdminUx controller: Commandes curl envoyées par l'administrateur unix
  *
@@ -68,7 +70,8 @@ class AdminuxController extends AbstractController
         private ServiceProjets $sp,
         private ServiceSessions $ss,
         private GramcDate $sd,
-        private ServiceVersions $sv
+        private ServiceVersions $sv,
+        private EntityManagerInterface $em
     ) {}
 
     /**
@@ -80,9 +83,9 @@ class AdminuxController extends AbstractController
      * @Route("/compta_update_batch", name="compta_update_batch", methods={"PUT"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
-    public function UpdateComptaBatchAction(Request $request)
+    public function UpdateComptaBatchAction(Request $request): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sj = $this->sj;
         
         if ($this->getParameter('noconso')==true) {
@@ -167,9 +170,9 @@ class AdminuxController extends AbstractController
      */
 
     // exemple: curl --insecure --netrc -X POST -d '{ "loginname": "toto", "idIndividu": "6543", "projet": "P1234" }'https://.../adminux/users/setloginname
-    public function setloginnameAction(Request $request, LoggerInterface $lg)
+    public function setloginnameAction(Request $request, LoggerInterface $lg): Response
     {
-        $em = $this->getdoctrine()->getManager();
+        $em = $this->em;
         $sj = $this->sj;
 
         if ($this->getParameter('noconso')==true) {
@@ -267,9 +270,9 @@ class AdminuxController extends AbstractController
 
     // curl --netrc -H "Content-Type: application/json" -X POST -d '{ "loginname": "toto", "password": "azerty", "cpassword": "qwerty" }' https://.../adminux/utilisateurs/setpassword
 
-    public function setpasswordAction(Request $request, LoggerInterface $lg)
+    public function setpasswordAction(Request $request, LoggerInterface $lg): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sj = $this->sj;
         //$sp = $this->sp;
         //$rep= $em->getRepository(Projet::class);
@@ -357,9 +360,9 @@ class AdminuxController extends AbstractController
 
     // curl --netrc -H "Content-Type: application/json" -X POST -d '{ "loginname": "toto" }' https://.../adminux/users/clearpassword
 
-    public function clearpasswordAction(Request $request, LoggerInterface $lg)
+    public function clearpasswordAction(Request $request, LoggerInterface $lg): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sj = $this->sj;
 
         if ($this->getParameter('noconso')==true) {
@@ -417,9 +420,9 @@ class AdminuxController extends AbstractController
 
     // curl --netrc -H "Content-Type: application/json" -X POST -d '{ "loginname": "toto", "projet":"P1234" }' https://.../adminux/utilisateurs/clearloginname
 
-    public function clearloginnameAction(Request $request, LoggerInterface $lg)
+    public function clearloginnameAction(Request $request, LoggerInterface $lg): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sj = $this->sj;
 
         if ($this->getParameter('noconso')==true) {
@@ -485,10 +488,10 @@ class AdminuxController extends AbstractController
         return new Response(json_encode(['OK' => '']));
     }
 
-    private function __getVersionInfo($v, bool $long)
+    private function __getVersionInfo($v, bool $long): array
     {
         $sp    = $this->sp;
-        $em    = $this->getDoctrine()->getManager();
+        $em    = $this->em;
 
         $annee = 2000 + $v->getSession()->getAnneeSession();
         $attr  = $v->getAttrHeures() - $v->getPenalHeures();
@@ -569,9 +572,9 @@ class AdminuxController extends AbstractController
      */
     // curl --netrc -H "Content-Type: application/json" -X POST -d '{ "projet": "P1234" }' https://.../adminux/projets/get
 
-    public function projetsGetAction(Request $request)
+    public function projetsGetAction(Request $request): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sp = $this->sp;
         $sj = $this->sj;
         $rep= $em->getRepository(Projet::class);
@@ -671,7 +674,7 @@ class AdminuxController extends AbstractController
      */
      public function versionGetAction(Request $request): Response
      {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sp = $this->sp;
         $sj = $this->sj;
         
@@ -823,7 +826,7 @@ class AdminuxController extends AbstractController
      */
      public function projetsSetQuotaAction(Request $request): Response
      {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sp = $this->sp;
         $sj = $this->sj;
 
@@ -990,9 +993,9 @@ class AdminuxController extends AbstractController
 
     // curl --netrc -H "Content-Type: application/json" -X POST  -d '{ "projet" : "P1234", "mail" : null, "session" : "19A" }' https://.../adminux/utilisateurs/get
 
-    public function utilisateursGetAction(Request $request)
+    public function utilisateursGetAction(Request $request): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $raw_content = $request->getContent();
         $sj = $this->sj;
         
@@ -1160,9 +1163,9 @@ class AdminuxController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      */
     // curl --netrc -H "Content-Type: application/json" -X GET https://.../adminux/getloginnames/P1234/projet
-    public function getloginnamesAction($idProjet)
+    public function getloginnamesAction($idProjet): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sj = $this->sj;
         
         if ($this->getParameter('noconso')==true) {
@@ -1220,7 +1223,7 @@ class AdminuxController extends AbstractController
      * @Route("/quota_check", name="quota_check", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
-    public function quotaCheckAction(Request $request)
+    public function quotaCheckAction(Request $request): Response
     {
         $sd = $this->sd;
         $sn = $this->sn;
@@ -1267,9 +1270,9 @@ class AdminuxController extends AbstractController
      * curl --netrc -H "Content-Type: application/json" https://.../adminux/utilisateurs/checkpassword
      *
      */
-    public function checkPasswordAction(Request $request, LoggerInterface $lg)
+    public function checkPasswordAction(Request $request, LoggerInterface $lg): Response
     {
-        $em = $this->getdoctrine()->getManager();
+        $em = $this->em;
         $sj = $this->sj;
         
         if ($this->getParameter('noconso')==true) {

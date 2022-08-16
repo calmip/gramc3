@@ -82,7 +82,7 @@ class NettCompta extends Command
         $this->addArgument('year', InputArgument::REQUIRED, "année considérée pour faire le ménage");
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // this method must return an integer number with the "exit status code"
         // of the command.

@@ -32,20 +32,17 @@ use App\GramcServices\ServicePhpSessions;
 
 use App\Utils\Functions;
 
-use App\Utils\Etat;
-use App\Utils\Signal;
+use App\GramcServices\Etat;
+use App\GramcServices\Signal;
 use App\Entity\Session;
 use App\Entity\Projet;
 use App\Entity\Version;
 
 class SessionTransition extends Transition
 {
-    public function canExecute($session)
+    public function canExecute(object $session): bool
     {
-        if (!$session instanceof Session) {
-            throw new \InvalidArgumentException();
-        }
-
+        $session instanceof Session || throw new \InvalidArgumentException();
         $rtn = true;
         if (Transition::FAST == false && $this->getPropageSignal()) {
             // Propagation vers les versions
@@ -67,11 +64,9 @@ class SessionTransition extends Transition
         return $rtn;
     }
 
-    public function execute($session)
+    public function execute(object $session): bool
     {
-        if (!$session instanceof Session) {
-            throw new \InvalidArgumentException();
-        }
+        $session instanceof Session || throw new \InvalidArgumentException();
         $rtn = true;
 
         // Si on ne peut pas remettre toutes les sessions php à zéro, renvoie false

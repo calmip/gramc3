@@ -60,6 +60,7 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Esxtension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Doctrine\ORM\EntityManagerInterface;
 
 include_once(__DIR__.'/../../jpgraph/JpGraph.php');
 
@@ -75,7 +76,8 @@ class StatistiquesController extends AbstractController
         private ServiceJournal $sj,
         private ServiceMenus $sm,
         private ServiceProjets $sp,
-        private ServiceSessions $ss
+        private ServiceSessions $ss,
+        private EntityManagerInterface $em
     ) {}
 
     /**
@@ -83,7 +85,7 @@ class StatistiquesController extends AbstractController
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      * Method({"GET","POST"})
      */
-    public function homepageAction(Request $request)
+    public function homepageAction(Request $request): Response
     {
         return $this->render('default/base_test.html.twig');
 
@@ -97,12 +99,12 @@ class StatistiquesController extends AbstractController
       * @Route("/", name="statistiques",methods={"GET","POST"})
       * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
       */
-    public function indexAction(Request $request)
+    public function indexAction(Request $request): Response
     {
         $sm      = $this->sm;
         $ss      = $this->ss;
         $sp      = $this->sp;
-        $em      = $this->getDoctrine()->getManager();
+        $em      = $this->em;
         $prj_rep = $em->getRepository(Projet::class);
         $ver_rep = $em->getRepository(Version::class);
 
@@ -168,7 +170,7 @@ class StatistiquesController extends AbstractController
         $sm = $this->sm;
         $ss = $this->ss;
         $sj = $this->sj;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // Si on trouve les données dans la session, OK. Sinon on redirige sur la page de stats générale
         if ($request->getSession()->has('statistiques_annee'))
@@ -265,11 +267,11 @@ class StatistiquesController extends AbstractController
      * @Route("/collaborateur", name="statistiques_collaborateur",methods={"GET"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
-    public function collaborateurAction(Request $request)
+    public function collaborateurAction(Request $request): Response
     {
         $sm = $this->sm;
         $ss = $this->ss;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // Si on trouve les données dans la session, OK. Sinon on redirige sur la page de stats générale
         if ($request->getSession()->has('statistiques_annee'))
@@ -566,7 +568,7 @@ class StatistiquesController extends AbstractController
      * @Route("/laboratoire", name="statistiques_laboratoire",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
-    public function laboratoireAction(Request $request)
+    public function laboratoireAction(Request $request): Response
     {
         return $this->parCritere($request, "getAcroLaboratoire", "laboratoire");
     }
@@ -575,7 +577,7 @@ class StatistiquesController extends AbstractController
      * @Route("/etablissement", name="statistiques_etablissement",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
      */
-    public function etablissementAction(Request $request): response
+    public function etablissementAction(Request $request): Response
     {
         return $this->parCritere($request, "getAcroEtablissement", "établissement");
     }
@@ -617,9 +619,9 @@ class StatistiquesController extends AbstractController
     }
 
     /* Cette fonction est appelée par laboratoireCSVAction, etablissementCSVAction etc. */
-    private function parCritereCSV(Request $request, $annee, $critere, $titre)
+    private function parCritereCSV(Request $request, $annee, $critere, $titre): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // Si on trouve les données dans la session, OK. Sinon on envoie un csv vide
         if ($request->getSession()->has('statistiques_annee'))
@@ -672,7 +674,7 @@ class StatistiquesController extends AbstractController
      * @Route("/{annee}/metathematique_csv", name="statistiques_métathématique_csv",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
-    public function metathematiqueCSVAction(Request $request, $annee)
+    public function metathematiqueCSVAction(Request $request, $annee): Response
     {
         return $this->parCritereCSV($request, $annee, "getAcroMetaThematique", "métathématique");
     }
@@ -681,7 +683,7 @@ class StatistiquesController extends AbstractController
      * @Route("/{annee}/thematique_csv", name="statistiques_thématique_csv",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
-    public function thematiqueCSVAction(Request $request, $annee)
+    public function thematiqueCSVAction(Request $request, $annee): Response
     {
         return $this->parCritereCSV($request, $annee, "getAcroThematique", "thématique");
     }
@@ -690,7 +692,7 @@ class StatistiquesController extends AbstractController
      * @Route("/{annee}/laboratoire_csv", name="statistiques_laboratoire_csv",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
-    public function laboratoireCSVAction(Request $request, $annee)
+    public function laboratoireCSVAction(Request $request, $annee): Response
     {
         return $this->parCritereCSV($request, $annee, "getAcroLaboratoire", "laboratoire");
     }
@@ -699,7 +701,7 @@ class StatistiquesController extends AbstractController
      * @Route("/{annee}/etablissement_csv", name="statistiques_établissement_csv",methods={"GET","POST"})
      * @Security("is_granted('ROLE_OBS') or is_granted('ROLE_PRESIDENT')")
      */
-    public function etablissementCSVAction(Request $request, $annee)
+    public function etablissementCSVAction(Request $request, $annee): Response
     {
         return $this->parCritereCSV($request, $annee, "getAcroEtablissement", "établissement");
     }
@@ -772,7 +774,7 @@ class StatistiquesController extends AbstractController
 
     ///////////////////////////////////////////
 
-    private function camembert($data, $acros, $titre = "Titre")
+    private function camembert($data, $acros, $titre = "Titre"): string
     {
         // Décommenter pour utiliser dd
         // return null;
@@ -852,7 +854,7 @@ class StatistiquesController extends AbstractController
     ////////////////////////////////////////////////////////////////////////////////
 
 
-    private function histogram($titre, $donnees, $legende = "abc")
+    private function histogram($titre, $donnees, $legende = "abc"): string
     {
         // Initialisation du graphique
         \JpGraph\JpGraph::load();

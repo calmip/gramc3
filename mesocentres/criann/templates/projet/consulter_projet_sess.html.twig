@@ -619,21 +619,21 @@ Le laboratoire associé au projet est le laboratoire du responsable
             <th class="horiz">Nombre d'heures attribuées</th>
             <td>{{  expertise.nbHeuresAtt|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
         </tr>
-{% if not is_granted('ROLE_ADMIN') %}
-        <tr>
-           <th class="horiz">Commentaire</th>
-           <td>{{ expertise.commentaireExterne | e | nl2br}}</td>
-        </tr>
-{% else %}
-        <tr>
-           <th class="horiz">Commentaire pour le responsable</th>
-           <td>{{ expertise.commentaireExterne | e | nl2br}}</td>
-        </tr>
-        <tr>
-           <th class="horiz">Commentaire pour le comité</th>
-           <td>{{ expertise.commentaireInterne | e | nl2br}}</td>
-        </tr>
-{% endif %}
+        {% if is_granted('ROLE_ADMIN') or version.isExpertDe(app.user) %}
+            <tr>
+               <th class="horiz">Commentaire pour le responsable</th>
+               <td>{{ expertise.commentaireExterne | e | nl2br}}</td>
+            </tr>
+            <tr>
+               <th class="horiz">Commentaire pour le comité</th>
+               <td>{{ expertise.commentaireInterne | e | nl2br}}</td>
+            </tr>
+        {% else %}
+            <tr>
+               <th class="horiz">Commentaire</th>
+               <td>{{ expertise.commentaireExterne | e | nl2br}}</td>
+            </tr>
+        {% endif %}
 </tbody>
 </table>
 
@@ -655,12 +655,7 @@ Le laboratoire associé au projet est le laboratoire du responsable
             <th class="horiz">Nombre d'heures attribuées</th>
             <td>{{  r.nbHeuresAtt|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
         </tr>
-{% if not is_granted('ROLE_ADMIN') %}
-        <tr>
-           <th class="horiz">Commentaire</th>
-           <td>{{ r.commentaireExterne | e | nl2br}}</td>
-        </tr>
-{% else %}
+    {% if is_granted('ROLE_ADMIN') or version.isExpertDe(app.user) %}
         <tr>
            <th class="horiz">Commentaire pour le responsable</th>
            <td>{{ r.commentaireExterne | e | nl2br}}</td>
@@ -669,7 +664,13 @@ Le laboratoire associé au projet est le laboratoire du responsable
            <th class="horiz">Commentaire pour le comité</th>
            <td>{{ r.commentaireInterne | e | nl2br}}</td>
         </tr>
-{% endif %}
+    {% else %}
+        <tr>
+           <th class="horiz">Commentaire</th>
+           <td>{{ r.commentaireExterne | e | nl2br}}</td>
+        </tr>
+    {% endif %}
+
 {% endfor %}
 </tbody>
 </table>

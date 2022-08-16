@@ -24,7 +24,7 @@
 
 namespace App\Repository;
 
-use App\Utils\Etat;
+use App\GramcServices\Etat;
 use App\Entity\Session;
 use App\Entity\Projet;
 

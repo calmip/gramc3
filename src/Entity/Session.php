@@ -27,13 +27,13 @@ namespace App\Entity;
 //use App\App;
 use Doctrine\ORM\Mapping as ORM;
 
-use App\Utils\Etat;
+use App\GramcServices\Etat;
 use App\Utils\Functions;
 
 /**
  * Session
  *
- * @ORM\Table(name="session", indexes={@ORM\Index(name="etat_session", columns={"etat_session"}), @ORM\Index(name="id_president", columns={"id_president"})})
+ * @ORM\Table(name="session", indexes={@ORM\Index(name="etat_session", columns={"etat_session"})} )
  * @ORM\Entity(repositoryClass="App\Repository\SessionRepository")
  * @ORM\HasLifecycleCallbacks()
  */
@@ -91,16 +91,6 @@ class Session
     private $idSession;
 
     /**
-     * @var \App\Entity\Individu
-     *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Individu",cascade={"persist"})
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="id_president", referencedColumnName="id_individu")
-     * })
-     */
-    private $president;
-
-    /**
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToMany(targetEntity="\App\Entity\Version", mappedBy="session")
@@ -129,8 +119,8 @@ class Session
     */
     //public function clearCacheSessionCourante()
     //{
-    //   if (App::getSession()->has('SessionCourante')) {
-    //       App::getSession()->remove('SessionCourante');
+    //   if (getSession()->has('SessionCourante')) {
+    //       getSession()->remove('SessionCourante');
     //   } // clear cache
     //}
     /////////////////////////
@@ -316,30 +306,6 @@ class Session
     }
 
     /**
-     * Set president
-     *
-     * @param \App\Entity\Individu $president
-     *
-     * @return Session
-     */
-    public function setPresident(\App\Entity\Individu $president = null)
-    {
-        $this->president = $president;
-
-        return $this;
-    }
-
-    /**
-     * Get president
-     *
-     * @return \App\Entity\Individu
-     */
-    public function getPresident()
-    {
-        return $this->president;
-    }
-
-    /**
      * Add version
      *
      * @param \App\Entity\Version $version
@@ -426,7 +392,7 @@ class Session
     }
 
     //public function getSubWorkflow()        { return new \App\Workflow\ProjetWorkflow(); }
-    //public function getSubObjects()         { return App::getRepository(Projet::class)->findNonTermines();  }
+    //public function getSubObjects()         { return getRepository(Projet::class)->findNonTermines();  }
 
 
     ///////////////////////////////////////

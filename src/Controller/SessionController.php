@@ -42,12 +42,11 @@ use App\BilanSession\BilanSessionA;
 use App\BilanSession\BilanSessionB;
 
 use App\Utils\Functions;
-use App\Utils\Etat;
-use App\Utils\Signal;
+use App\GramcServices\Etat;
+use App\GramcServices\Signal;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 
 use Symfony\Component\HttpFoundation\Request;
@@ -56,6 +55,9 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\FormInterface;
+
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * Session controller.
@@ -72,7 +74,8 @@ class SessionController extends AbstractController
         private ServiceProjets $sp,
         private ServiceSessions $ss,
         private GramcDate $sd,
-        private SessionWorkflow $sw
+        private SessionWorkflow $sw,
+        private EntityManagerInterface $em
     ) {}
 
     /**
@@ -82,10 +85,10 @@ class SessionController extends AbstractController
      * @Route("/", name="session_index",methods={"GET"})
      * Method("GET")
      */
-    public function indexAction()
+    public function indexAction(): Response
     {
-        $em = $this->getDoctrine()->getManager();
-        $sessions = $em->getRepository('App:Session')->findAll();
+        $em = $this->em;
+        $sessions = $em->getRepository(Session::class)->findAll();
 
         return $this->render('session/index.html.twig', array(
             'sessions' => $sessions,
@@ -99,7 +102,7 @@ class SessionController extends AbstractController
      * @Route("/gerer", name="gerer_sessions",methods={"GET"})
      * Method("GET")
      */
-    public function gererAction(Request $request)
+    public function gererAction(Request $request): Response
     {
         $sm = $this->sm;
         $sj = $this->sj;
@@ -110,7 +113,7 @@ class SessionController extends AbstractController
         " parce que : " . $sm->gerer_sessions()['raison']);
         }
 
-        $em       = $this->getDoctrine()->getManager();
+        $em       = $this->em;
         $sessions = $em->getRepository(Session::class)->findBy([], ['idSession' => 'DESC']);
         if (count($sessions)==0) {
             $menu[] = [
@@ -156,11 +159,11 @@ class SessionController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method({"GET", "POST"})
      */
-    public function ajouterAction(Request $request)
+    public function ajouterAction(Request $request): Response
     {
         $sd = $this->sd;
         $ss = $this->ss;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $session = $ss->nouvelleSession();
         return $this->modifyAction($request, $session);
     }
@@ -171,10 +174,10 @@ class SessionController extends AbstractController
      * @security("is_granted('ROLE_ADMIN')")
      * Method({"GET", "POST"})
      */
-    public function modifyAction(Request $request, Session $session)
+    public function modifyAction(Request $request, Session $session): Response
     {
         $sd = $this->sd;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // On supprime de la session php la référence à la SessionCourante Gramc
         $request->getSession()->remove('SessionCourante');
@@ -220,10 +223,10 @@ class SessionController extends AbstractController
      * Method("GET")
      */
      // On vient de cliquer sur le bouton Expertises
-    public function terminerSaisieAction(Request $request)
+    public function terminerSaisieAction(Request $request): Response
     {
         $ss = $this->ss;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // On supprime de la session php la référence à la SessionCourante Gramc
         $request->getSession()->remove('SessionCourante');
@@ -275,12 +278,12 @@ class SessionController extends AbstractController
       * Method("GET")
       *
       */
-    public function avantActiverAction($rtn, $ctrl)
+    public function avantActiverAction($rtn, $ctrl): Response
     {
         $ss  = $this->ss;
         $sps = $this->sps;
         $sj  = $this->sj;
-        $em  = $this->getDoctrine()->getManager();
+        $em  = $this->em;
 
         $session = $ss->getSessionCourante();
         $connexions = $sps->getConnexions();
@@ -302,9 +305,9 @@ class SessionController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method("GET")
      */
-    public function activerAction(Request $request)
+    public function activerAction(Request $request): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sd = $this->sd;
         $sps = $this->sps;
         $ss = $this->ss;
@@ -382,10 +385,10 @@ class SessionController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_PRESIDENT')")
      * Method("GET")
      */
-    public function envoyerExpertisesAction(Request $request)
+    public function envoyerExpertisesAction(Request $request): Response
     {
         $ss = $this->ss;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $session_courante = $ss->getSessionCourante();
         $workflow = $this->sw;
@@ -417,11 +420,11 @@ class SessionController extends AbstractController
      * Method("GET")
      */
      // On vient de cliquer sur le bouton Demandes
-    public function demarrerSaisieAction(Request $request)
+    public function demarrerSaisieAction(Request $request): Response
     {
         $ss = $this->ss;
         $sps = $this->sps;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // On supprime de la session php la référence à la SessionCourante Gramc
         $request->getSession()->remove('SessionCourante');
@@ -456,14 +459,14 @@ class SessionController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method({"GET", "POST"})
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request): Response
     {
         $session = new Session();
         $form = $this->createForm('App\Form\SessionType', $session, ['all' => true ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($session);
             $em->flush($session);
 
@@ -483,7 +486,7 @@ class SessionController extends AbstractController
      * @Route("/{id}/show", name="session_show",methods={"GET"})
      * Method("GET")
      */
-    public function showAction(Session $session)
+    public function showAction(Session $session): Response
     {
         $deleteForm = $this->createDeleteForm($session);
 
@@ -500,7 +503,7 @@ class SessionController extends AbstractController
      * @Route("/{id}/consulter", name="consulter_session",methods={"GET"})
      * Method("GET")
      */
-    public function consulterAction(Session $session)
+    public function consulterAction(Session $session): Response
     {
         $sm = $this->sm;
         $menu = [ $sm->gerer_sessions() ];
@@ -518,14 +521,14 @@ class SessionController extends AbstractController
      * @Route("/{id}/edit", name="session_edit",methods={"GET","POST"})
      * Method({"GET", "POST"})
      */
-    public function editAction(Request $request, Session $session)
+    public function editAction(Request $request, Session $session): Response
     {
         $deleteForm = $this->createDeleteForm($session);
         $editForm = $this->createForm('App\Form\SessionType', $session, [ 'all' => true ]);
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('session_edit', array('id' => $session->getId()));
         }
@@ -545,7 +548,7 @@ class SessionController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method({"GET", "POST"})
      */
-    public function commentairesAction(Request $request)
+    public function commentairesAction(Request $request): Response
     {
         $sm = $this->sm;
         $ss = $this->ss;
@@ -563,7 +566,7 @@ class SessionController extends AbstractController
         $menu[] = $sm->envoyerExpertises();
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
         }
 
         return $this->render(
@@ -583,7 +586,7 @@ class SessionController extends AbstractController
      *
      * @return \Symfony\Component\Form\Form The form
      */
-    private function createDeleteForm(Session $session)
+    private function createDeleteForm(Session $session):FormInterface
     {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('session_delete', array('id' => $session->getId())))
@@ -598,9 +601,9 @@ class SessionController extends AbstractController
      * @Security("is_granted('ROLE_OBS')")
      * Method({"GET","POST"})
      */
-    public function bilanAction(Request $request)
+    public function bilanAction(Request $request): Response
     {
-        $em      = $this->getDoctrine()->getManager();
+        $em      = $this->em;
         $ss      = $this->ss;
         $sp      = $this->sp;
         $sv      = $this->sv;
@@ -610,25 +613,11 @@ class SessionController extends AbstractController
         $form    = $data['form']->createView();
 
         $versions = $em->getRepository(Version::class)->findBy(['session' => $session ]);
-
-        // Juin 2021 - Suppression des projets test
-        //$versions = $em->getRepository(Version::class)->findVersionsSessionTypeSess($session);
-        //$versions_suppl = [];
-        //foreach ($versions as $v) {
-        //    $versions_suppl[$v->getIdVersion()]['conso'] = $sp->getConsoCalculVersion($v);
-        //}
-
-        $versions_suppl = [];
-        foreach ($versions as $v) {
-            $versions_suppl[$v->getIdVersion()]['conso'] = $sp->getConsoCalculVersion($v);
-            $f = $sv -> buildFormations($v);
-            $versions_suppl[$v->getIdVersion()]['formation'] = $f;
-        }
         $form_labels = [];
         $form_total = [];
         if (count($versions)>0) {
             $v0 = $versions[0];
-            $formation = $versions_suppl[$v0->getIdVersion()]['formation'];
+            $formation = $sv -> buildFormations($v0);
             foreach ($formation as $f) {
                 // cf. buildFormations ALL_EMPTY
                 if (is_bool($f)) continue;
@@ -641,7 +630,7 @@ class SessionController extends AbstractController
         }
 
         foreach ($versions as $v) {
-            $formation = $versions_suppl[$v->getIdVersion()]['formation'];
+            $formation = $sv -> buildFormations($v);
             foreach ($formation as $f) {
                 if ($f['acro']=='ALL_EMPTY') continue;
                 $form_total[$f['acro']] += intval($f['rep']);
@@ -653,7 +642,6 @@ class SessionController extends AbstractController
             'form'      => $form,
             'idSession' => $session->getIdSession(),
             'versions'  => $versions,
-            'versions_suppl' => $versions_suppl,
             'form_labels' => $form_labels,
             'form_total' => $form_total
         ]
@@ -666,7 +654,7 @@ class SessionController extends AbstractController
      * @Security("is_granted('ROLE_OBS')")
      * Method({"GET","POST"})
      */
-    public function bilanAnnuelAction(Request $request)
+    public function bilanAnnuelAction(Request $request): Response
     {
         $ss   = $this->ss;
         $sd   = $this->sd;
@@ -700,10 +688,10 @@ class SessionController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method("GET")
      */
-    public function questionnaireCsvAction(Request $request, Session $session)
+    public function questionnaireCsvAction(Request $request, Session $session): response
     {
         $sp = $this->sp;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $entetes =  [
             'Projet',
@@ -787,11 +775,11 @@ class SessionController extends AbstractController
      * Method("GET")
      *
      */
-    public function bilanAnnuelCsvAction(Request $request, $annee)
+    public function bilanAnnuelCsvAction(Request $request, $annee): Response
     {
         $sd      = $this->sd;
         $sp      = $this->sp;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $entetes = ['Projet','Thématique','Titre','Responsable','Quota'];
 
@@ -905,7 +893,7 @@ class SessionController extends AbstractController
      * Method("GET")
      *
      */
-    public function bilanLaboCsvAction(Request $request, $annee)
+    public function bilanLaboCsvAction(Request $request, $annee): Response
     {
         $entetes = ['Laboratoire','Nombre de projets','Heures demandées','Heures attribuées','Heure consommées','projets'];
         $sortie  = join("\t", $entetes) . "\n";
@@ -941,7 +929,7 @@ class SessionController extends AbstractController
      * Method("GET")
      *
      */
-    public function bilanThemaCsvAction(Request $request, $annee)
+    public function bilanThemaCsvAction(Request $request, $annee): Response
     {
         $entetes = ['Thématique','Nombre de projets','Heures demandées','Heures attribuées','Heure consommées','projets'];
         $sortie  = join("\t", $entetes) . "\n";
@@ -977,11 +965,11 @@ class SessionController extends AbstractController
      * Method("GET")
      *
      */
-    public function bilanUserCsvAction(Request $request, $annee)
+    public function bilanUserCsvAction(Request $request, $annee): Response
     {
         $entetes = ['Nom','Prénom','Login','mail','Statut','Heures cpu','Heures GPU'];
         $sortie  = join("\t", $entetes) . "\n";
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sp = $this->sp;
         
         // Les collaborateurs-versions de cette année
@@ -1026,9 +1014,9 @@ class SessionController extends AbstractController
      * @Route("/{id}/bilan_csv", name="bilan_session_csv",methods={"GET"})
      * Method("GET")
      */
-    public function bilanCsvAction(Request $request, Session $session)
+    public function bilanCsvAction(Request $request, Session $session): Response
     {
-        $em                 = $this->getDoctrine()->getManager();
+        $em                 = $this->em;
         $ss                 = $this->ss;
         $grdt               = $this->sd;
         $sp                 = $this->sp;
@@ -1053,13 +1041,13 @@ class SessionController extends AbstractController
     }
 
     // type session A ou B
-    public static function typeSession(Session $session)
+    public static function typeSession(Session $session): string
     {
         return substr($session->getIdSession(), -1);
     }
 
     // années
-    public static function codeSession(Session $session)
+    public static function codeSession(Session $session): int
     {
         return intval(substr($session->getIdSession(), 0, -1));
     }
