@@ -36,7 +36,7 @@ use App\GramcServices\ServiceJournal;
 use Doctrine\ORM\EntityManager;
 
 /**************************************************************************
- * Ce formulaire est utilisé par l'écran des collaborateurs
+ * Cette classe (qui ne dérive PAS de form !) est utilisée par l'écran des collaborateurs
  * A chaque ligne correspond un IndividuForm
  ************************************************************************/
 class IndividuForm
@@ -221,14 +221,14 @@ class IndividuForm
     }
 
     /*****
+     * 
      * Synchronise l'entité $individu à partir du formulaire
+     * (à l'exception du mail qui sert à identifier l'individu)
+     * 
      *****/
     public function modifyIndividu(Individu $individu, ServiceJournal $sj)
     {
         if ($individu != null) {
-            //$individu->setMail( $this->getMail() );  // mail n'est pas transmis
-            //$this->setMail($individu->getMail());
-
             if ($individu->getNom() != $this->getNom()) {
                 $sj->warningMessage("Le nom de l'individu " .$individu . " id(" . $individu->getIdIndividu() . ") a été modifié de " .
                                     $individu->getNom() . " vers " . $this->getNom());
@@ -258,7 +258,6 @@ class IndividuForm
                                     $individu->getStatut() . " vers " . $this->getStatut());
                 $individu->setStatut($this->getStatut());
             }
-
         }
         return $individu;
     }

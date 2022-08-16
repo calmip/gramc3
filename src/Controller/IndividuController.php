@@ -1005,7 +1005,7 @@ class IndividuController extends AbstractController
 
         // On vient de soumettre le formulaire via son adresse mail
         if ($form->isSubmitted() && $form->isValid()) {
-            // On recherche l'individu ayant le bon mail et on complète l'objet $collaborateur'
+            // On recherche l'individu ayant le bon mail et on complète l'objet $collaborateur
             $individu = $em->getRepository(Individu::class)->findOneBy(['mail' => $collaborateur->getMail() ]);
             if ($individu != null) {
                 if ($individu->getMail() != null) {
