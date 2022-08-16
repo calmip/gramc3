@@ -50,6 +50,7 @@ class ServiceIndividus
      *
      * Utilisé lorsqu'on fusionne des comptes: tous les objets liés à $individu
      * sont maintenant attribués à $new_individu
+     * NOTE - C'est le code appelant qui devra faire le flush()
      *************************************************************************/
     public function fusionnerIndividus(Individu $individu, Individu $new_individu): void
     {
@@ -71,7 +72,7 @@ class ServiceIndividus
 
         // Supprimer les thématiques dont $individu est expert
         // Attention, $new_individu ne reprend pas ces thématiques
-        // il faudra éventuellement refaire l'affectation'
+        // il faudra éventuellement refaire l'affectation
         foreach ($individu->getThematique() as $item) {
             //$em->persist($item);
             $item->getExpert()->removeElement($individu);
@@ -120,10 +121,6 @@ class ServiceIndividus
         // Le profil: si le profil de $new_individu est incomplet, on prend les informations de $individu
         //            Seulement nom/prénom/statut/laboratoire/établissement
         $this->copierProfil($individu, $new_individu);
-            
-        // Une entrée de journal
-        $sj->infoMessage('Utilisateur ' . $individu . '(' .  $individu->getIdIndividu()
-            . ') fusionné vers ' . $new_individu . ' (' .  $new_individu->getIdIndividu() . ')');
     }
 
     /*********************************************************
@@ -144,7 +141,6 @@ class ServiceIndividus
         if ($new_individu->getStatut() == null) $new_individu->setStatut($individu->getStatut());
 
         $em->persist($new_individu);
-        $em->flush();
     }
     
     /*********************************

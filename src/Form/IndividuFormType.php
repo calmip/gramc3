@@ -94,6 +94,11 @@ class IndividuFormType extends AbstractType
                 'required'  => false,
             ]
         );
+        
+        // NOTE - si text_fields vaut true, cela veut dire que les champs
+        //        prenom, nom, statut, laboratoire, etablissement sont disabled
+        //        (cf. le paramètre resp_peut_modif_collabs)
+        //
         $builder->add(
             'prenom',
             TextType::class,
@@ -101,6 +106,7 @@ class IndividuFormType extends AbstractType
                 'label'     => 'prénom',
                 'attr'      => [ 'size' => '50' ],
                 'required'  => false,
+                'disabled'  => $options['text_fields']
             ]
         )
         ->add(
@@ -110,10 +116,10 @@ class IndividuFormType extends AbstractType
                 'label'     => 'nom',
                 'attr'      => [ 'size' => '50' ],
                 'required'  => false,
+                'disabled'  => $options['text_fields']
             ]
         );
         if ($options['text_fields']==true)
-        //if(true)
         {
             $builder->add(
                 'statut',
