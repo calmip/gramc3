@@ -25,7 +25,7 @@
                     <img class="bouton_poussoir" src="{{ asset('icones/petitdelete.png') }}" alt="Supprimer" />
                     </a>
                 </td>
-                <td>{{ invit.invited }}</td>
+                <td>{{ invit.invited.mail }}</td>
                 <td>{{ invit.inviting }}</td>
                 <td>{{ invit.creationstamp | date("d-m-Y")  }}</td>
                 <td>{{ invit.creationstamp.add(duree) | date("d-m-Y") }}</td>

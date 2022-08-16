@@ -229,8 +229,8 @@ $(document).ready(
                             html += msg;
                             html += '</p>';
                             //alert(msg);
-                            $("#dialog-suppression").html(html);
-                            $("#dialog-suppression").dialog({
+                            $("#dialog-invitation").html(html);
+                            $("#dialog-invitation").dialog({
                                 resizable: false,
                                 height: "auto",
                                 width: 400,
