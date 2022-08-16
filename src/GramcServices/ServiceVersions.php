@@ -756,7 +756,7 @@ class ServiceVersions
             }
             else
             {
-                $individuForm = new IndividuForm($individu);
+                $individuForm = new IndividuForm($individu, $this->resp_peut_modif_collabs);
                 $individuForm->setLogin($cv->getLogin());
                 $individuForm->setClogin($cv->getClogin());
                 $individuForm->setResponsable($cv->getResponsable());
@@ -827,7 +827,7 @@ class ServiceVersions
      * $individu_forms = Tableau contenant un formulaire par individu
      * $version        = La version considérée
      ****************************************************************/
-    public function handleIndividuForms($individu_forms, Version $version): void
+    public function handleIndividuForms(array $individu_forms, Version $version): void
     {
         $em   = $this->em;
         $sj   = $this->sj;
@@ -880,9 +880,12 @@ class ServiceVersions
             // --------------> Maintenant des cas réalistes !
             // L'individu existe déjà
             elseif ($individu != null) {
-                // On modifie l'individu
-                $individu = $individu_form->modifyIndividu($individu, $sj);
-                $em->persist($individu);
+                // On modifie l'individu... si on a le droit
+                if ($this->resp_peut_modif_collabs)
+                {
+                    $individu = $individu_form->modifyIndividu($individu, $sj);
+                    $em->persist($individu);
+                }
 
                 // Il devient collaborateur
                 if (! $version->isCollaborateur($individu)) {

@@ -160,7 +160,7 @@ class IndividuController extends AbstractController
 
         $erreurs  =   [];
 
-        // utilisateur peu actif peut être effacé même s'il peut se connecter'
+        // utilisateur peu actif peut être effacé même s'il peut se connecter
         if ($CollaborateurVersion == null && $Expertise == null && $Rallonge == null) {
 
             foreach ($individu->getThematique() as $item) {
@@ -172,11 +172,15 @@ class IndividuController extends AbstractController
                 $em->remove($item);
             }
 
-            $sj->infoMessage('Utilisateur ' . $individu . ' (' .  $individu->getIdIndividu() . ') directement effacé ');
-
-            $em->remove($individu);
-
-            $em->flush();
+            try
+            {
+                $sj->infoMessage('Utilisateur ' . $individu . ' (' .  $individu->getIdIndividu() . ') directement effacé ');
+                $em->remove($individu);
+                $em->flush();
+            }
+            catch (\Exception $e) {
+                $request->getSession()->getFlashbag()->add("flash erreur","Pas possible de supprimer $individu " . $e->getMessage());
+            }
             return $this->redirectToRoute('individu_gerer');
         }
 
@@ -188,10 +192,19 @@ class IndividuController extends AbstractController
             $new_individu = $em->getRepository(Individu::class)->findOneBy(['mail'=>$mail]);
 
             if ($new_individu != null) {
-
-                $sid->fusionnerIndividus($individu, $new_individu);
-                $em->remove($individu);
-                $em->flush();
+                try
+                {
+                    $sid->fusionnerIndividus($individu, $new_individu);
+                    $em->remove($individu);
+                    $em->flush();
+                    
+                    // Une entrée de journal
+                    $sj->infoMessage('Utilisateur ' . $individu . '(' .  $individu->getIdIndividu()
+                    . ') fusionné vers ' . $new_individu . ' (' .  $new_individu->getIdIndividu() . ')');
+                }
+                catch (\Exception $e) {
+                    $request->getSession()->getFlashbag()->add("flash erreur","Pas possible de fusionner $individu avec $new_individu " . $e->getMessage());
+                }                
                 return $this->redirectToRoute('individu_gerer');
             } else {
                 $erreurs[] = "Le mail du nouvel utilisateur \"" . $mail . "\" ne correspond à aucun utilisateur existant";
@@ -1005,7 +1018,7 @@ class IndividuController extends AbstractController
 
         // On vient de soumettre le formulaire via son adresse mail
         if ($form->isSubmitted() && $form->isValid()) {
-            // On recherche l'individu ayant le bon mail et on complète l'objet $collaborateur'
+            // On recherche l'individu ayant le bon mail et on complète l'objet $collaborateur
             $individu = $em->getRepository(Individu::class)->findOneBy(['mail' => $collaborateur->getMail() ]);
             if ($individu != null) {
                 if ($individu->getMail() != null) {
