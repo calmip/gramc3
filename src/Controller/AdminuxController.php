@@ -55,6 +55,8 @@ use App\GramcServices\ServiceVersions;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 
+use Doctrine\ORM\EntityManagerInterface;
+
 /**
  * AdminUx controller: Commandes curl envoyées par l'administrateur unix
  *
@@ -68,7 +70,8 @@ class AdminuxController extends AbstractController
         private ServiceProjets $sp,
         private ServiceSessions $ss,
         private GramcDate $sd,
-        private ServiceVersions $sv
+        private ServiceVersions $sv,
+        private EntityManagerInterface $em
     ) {}
 
     /**
@@ -82,7 +85,7 @@ class AdminuxController extends AbstractController
      */
     public function UpdateComptaBatchAction(Request $request): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sj = $this->sj;
         
         if ($this->getParameter('noconso')==true) {
@@ -169,7 +172,7 @@ class AdminuxController extends AbstractController
     // exemple: curl --insecure --netrc -X POST -d '{ "loginname": "toto", "idIndividu": "6543", "projet": "P1234" }'https://.../adminux/users/setloginname
     public function setloginnameAction(Request $request, LoggerInterface $lg): Response
     {
-        $em = $this->getdoctrine()->getManager();
+        $em = $this->em;
         $sj = $this->sj;
 
         if ($this->getParameter('noconso')==true) {
@@ -269,7 +272,7 @@ class AdminuxController extends AbstractController
 
     public function setpasswordAction(Request $request, LoggerInterface $lg): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sj = $this->sj;
         //$sp = $this->sp;
         //$rep= $em->getRepository(Projet::class);
@@ -359,7 +362,7 @@ class AdminuxController extends AbstractController
 
     public function clearpasswordAction(Request $request, LoggerInterface $lg): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sj = $this->sj;
 
         if ($this->getParameter('noconso')==true) {
@@ -419,7 +422,7 @@ class AdminuxController extends AbstractController
 
     public function clearloginnameAction(Request $request, LoggerInterface $lg): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sj = $this->sj;
 
         if ($this->getParameter('noconso')==true) {
@@ -488,7 +491,7 @@ class AdminuxController extends AbstractController
     private function __getVersionInfo($v, bool $long): array
     {
         $sp    = $this->sp;
-        $em    = $this->getDoctrine()->getManager();
+        $em    = $this->em;
 
         $annee = 2000 + $v->getSession()->getAnneeSession();
         $attr  = $v->getAttrHeures() - $v->getPenalHeures();
@@ -571,7 +574,7 @@ class AdminuxController extends AbstractController
 
     public function projetsGetAction(Request $request): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sp = $this->sp;
         $sj = $this->sj;
         $rep= $em->getRepository(Projet::class);
@@ -671,7 +674,7 @@ class AdminuxController extends AbstractController
      */
      public function versionGetAction(Request $request): Response
      {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sp = $this->sp;
         $sj = $this->sj;
         
@@ -823,7 +826,7 @@ class AdminuxController extends AbstractController
      */
      public function projetsSetQuotaAction(Request $request): Response
      {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sp = $this->sp;
         $sj = $this->sj;
 
@@ -992,7 +995,7 @@ class AdminuxController extends AbstractController
 
     public function utilisateursGetAction(Request $request): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $raw_content = $request->getContent();
         $sj = $this->sj;
         
@@ -1162,7 +1165,7 @@ class AdminuxController extends AbstractController
     // curl --netrc -H "Content-Type: application/json" -X GET https://.../adminux/getloginnames/P1234/projet
     public function getloginnamesAction($idProjet): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sj = $this->sj;
         
         if ($this->getParameter('noconso')==true) {
@@ -1269,7 +1272,7 @@ class AdminuxController extends AbstractController
      */
     public function checkPasswordAction(Request $request, LoggerInterface $lg): Response
     {
-        $em = $this->getdoctrine()->getManager();
+        $em = $this->em;
         $sj = $this->sj;
         
         if ($this->getParameter('noconso')==true) {

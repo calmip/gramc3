@@ -61,7 +61,7 @@ class Sendamail extends Command
         $this->addArgument('dest', InputArgument::REQUIRED, 'Adresse destinataire');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // ... put here the code to create the user
 

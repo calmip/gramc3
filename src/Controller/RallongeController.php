@@ -61,6 +61,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
+use Doctrine\ORM\EntityManagerInterface;
+
 /**
  * Rallonge controller.
  * @Route("rallonge")
@@ -76,7 +78,8 @@ class RallongeController extends AbstractController
         private ServiceVersions $sv,
         private RallongeWorkflow $rw,
         private FormFactoryInterface $ff,
-        private ValidatorInterface $vl
+        private ValidatorInterface $vl,
+        private EntityManagerInterface $em
     ) {}
 
     /**
@@ -106,9 +109,9 @@ class RallongeController extends AbstractController
      */
     public function indexAction(): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
-        $rallonges = $em->getRepository('App:Rallonge')->findAll();
+        $rallonges = $em->getRepository(Rallonge::class)->findAll();
 
         return $this->render('rallonge/index.html.twig', array(
             'rallonges' => $rallonges,
@@ -129,7 +132,7 @@ class RallongeController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($rallonge);
             $em->flush();
 
@@ -155,7 +158,7 @@ class RallongeController extends AbstractController
         $ss = $this->ss;
         $sj = $this->sj;
         $sp = $this->sp;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // ACL
         if ($sm->rallonge_creation($projet)['ok'] == false) {
@@ -223,7 +226,7 @@ class RallongeController extends AbstractController
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('rallonge_edit', array('id' => $rallonge->getId()));
         }
@@ -282,7 +285,7 @@ class RallongeController extends AbstractController
         $sm = $this->sm;
         $sj = $this->sj;
         $sval = $this->vl;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // ACL
         if ($sm->rallonge_modifier($rallonge)['ok'] == false) {
@@ -345,7 +348,7 @@ class RallongeController extends AbstractController
         $ss = $this->ss;
         $sj = $this->sj;
         $sval = $this->vl;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // ACL
         if ($sm->rallonge_expertiser($rallonge)['ok'] == false) {
@@ -468,7 +471,7 @@ class RallongeController extends AbstractController
         $ss = $this->ss;
         $sj = $this->sj;
         $sval = $this->vl;
-        $em = $this->getdoctrine()->getManager();
+        $em = $this->em;
 
         $erreurs = [];
         $validation =   $rallonge->getValidation(); //  tout cela juste à cause de validation disabled
@@ -747,7 +750,7 @@ class RallongeController extends AbstractController
      */
     public function affectationAction(Request $request): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sp = $this->sp;
         $sv = $this->sv;
         $affectationExperts = $this->sr;
@@ -881,7 +884,7 @@ class RallongeController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->remove($rallonge);
             $em->flush();
         }

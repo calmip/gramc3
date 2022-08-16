@@ -24,6 +24,12 @@
 
 namespace App\Form;
 
+use App\Entity\Statut;
+use App\Entity\Laboratoire;
+use App\Entity\Etablissement;
+
+use App\Form\IndividuForm\IndividuForm;
+
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -34,8 +40,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
-//use App\Utils\IndividuForm;
-use App\Form\IndividuForm\IndividuForm;
+
 
 class IndividuFormType extends AbstractType
 {
@@ -54,7 +59,7 @@ class IndividuFormType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         if ($this->coll_login == true)
         {
@@ -88,8 +93,8 @@ class IndividuFormType extends AbstractType
                 'attr'      => [ 'size' => '50' ],
                 'required'  => false,
             ]
-        )
-        ->add(
+        );
+        $builder->add(
             'prenom',
             TextType::class,
             [
@@ -106,44 +111,79 @@ class IndividuFormType extends AbstractType
                 'attr'      => [ 'size' => '50' ],
                 'required'  => false,
             ]
-        )
-        ->add(
-            'statut',
-            EntityType ::class,
-            [
-                'label'      => 'statut',
-                'multiple'   => false,
-                'expanded'   => false,
-                'required'   => false,
-                'class'      => 'App:Statut',
-                'placeholder' => '-- Indiquez le statut',
-            ]
-        )
-        ->add(
-            'laboratoire',
-            EntityType ::class,
-            [
-                'label'     => 'laboratoire',
-                'multiple'  => false,
-                'expanded'  => false,
-                'required'   => false,
-                'class'     => 'App:Laboratoire',
-                'placeholder' => '-- Indiquez le laboratoire',
-            ]
-        )
-        ->add(
-            'etablissement',
-            EntityType ::class,
-            [
-                'label'     => 'établissement',
-                'multiple'  => false,
-                'expanded'  => false,
-                'required'   => false,
-                'class'     => 'App:Etablissement',
-                'placeholder' => "-- Indiquez l'établissment",
-            ]
-        )
-        ->add(
+        );
+        if ($options['text_fields']==true)
+        //if(true)
+        {
+            $builder->add(
+                'statut',
+                TextType::class,
+                [
+                    'label'      => 'statut',
+                    'disabled'   => true,
+                    'required' => false
+                ]
+            )
+            ->add(
+                'laboratoire',
+                TextType::class,
+                [
+                    'label' => 'laboratoire',
+                    'disabled' => true,
+                    'required' => false,
+                ]
+            )
+            ->add(
+                'etablissement',
+                TextType::class,
+                [
+                    'label'     => 'établissement',
+                    'disabled' => true,
+                    'required'   => false,
+                ]
+            )
+            ;
+        }
+        else
+        {
+            $builder->add(
+                'statut',
+                EntityType ::class,
+                [
+                    'label'      => 'statut',
+                    'multiple'   => false,
+                    'expanded'   => false,
+                    'required'   => false,
+                    'class'      => Statut::class,
+                    'placeholder' => '-- Indiquez le statut',
+                ]
+            )
+            ->add(
+                'laboratoire',
+                EntityType ::class,
+                [
+                    'label'     => 'laboratoire',
+                    'multiple'  => false,
+                    'expanded'  => false,
+                    'required'   => false,
+                    'class'     => Laboratoire::class,
+                    'placeholder' => '-- Indiquez le laboratoire',
+                ]
+            )
+            ->add(
+                'etablissement',
+                EntityType ::class,
+                [
+                    'label'     => 'établissement',
+                    'multiple'  => false,
+                    'expanded'  => false,
+                    'required'   => false,
+                    'class'     => Etablissement::class,
+                    'placeholder' => "-- Indiquez l'établissement",
+                ]
+            );
+        }
+        $builder->add(
             'delete',
             CheckboxType::class,
             [
@@ -157,18 +197,18 @@ class IndividuFormType extends AbstractType
             [
 
             ]
-        )
-        ;
+        );
     }
 
     /**
      * {@inheritdoc}
      */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults(
             [
             'data_class' => IndividuForm::class,
+            'text_fields' => false
             ]
         );
     }
@@ -176,7 +216,7 @@ class IndividuFormType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function getBlockPrefix()
+    public function getBlockPrefix(): string
     {
         return 'Individu';
     }

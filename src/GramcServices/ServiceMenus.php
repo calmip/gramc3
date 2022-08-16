@@ -394,9 +394,9 @@ class ServiceMenus
 
         $etat_session   =   $session->getEtatSession();
         //$this->sj-> debugMessage(__METHOD__ . ':' . __LINE__ . "countProjetsTestResponsable = " .
-        //     $this->em->getRepository(Projet::class)->countProjetsTestResponsable( App::getUser() ));
+        //     $this->em->getRepository(Projet::class)->countProjetsTestResponsable( getUser() ));
 
-        //if( ! App::getUser() instanceof Individu )
+        //if( ! getUser() instanceof Individu )
         $user = $this->token->getUser();
         if (! $user instanceof Individu) {
             $menu['raison'] = "Vous n'êtes pas connecté";
@@ -477,6 +477,22 @@ class ServiceMenus
         $menu['name']   =   'individu_gerer';
         $menu['commentaire']    =   "Gérer les utilisateurs de gramc";
         $menu['lien']           =   "Utilisateurs";
+
+        if ($this->ac->isGranted('ROLE_ADMIN')) {
+            $menu['ok'] = true;
+        } else {
+            $menu['ok'] = false;
+            $menu['raison'] = "Vous n'êtes pas un administrateur";
+        }
+
+        return $menu;
+    }
+
+    public function invitations():array
+    {
+        $menu['name'] = 'invitations';
+        $menu['commentaire'] = "Récapituler les invitations en cours";
+        $menu['lien'] = "Invitations";
 
         if ($this->ac->isGranted('ROLE_ADMIN')) {
             $menu['ok'] = true;

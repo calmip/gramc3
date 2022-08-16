@@ -78,6 +78,8 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
+use Doctrine\ORM\EntityManagerInterface;
+
 use Twig\Environment;
 
 /**
@@ -94,54 +96,26 @@ use Twig\Environment;
 
 class ProjetSpecController extends AbstractController
 {
-    private $sj;
-    private $sm;
-    private $sp;
-    private $ss;
-    private $gcl;
-    private $gstk;
-    private $gall;
-    private $sd;
-    private $sv;
-    private $se;
-    private $pw;
-    private $ff;
     private $token;
-    private $tw;
-    private $ac;
-
     public function __construct(
-        ServiceJournal $sj,
-        ServiceMenus $sm,
-        ServiceProjets $sp,
-        ServiceSessions $ss,
-        Calcul $gcl,
-        Stockage $gstk,
-        CalculTous $gall,
-        GramcDate $sd,
-        ServiceVersions $sv,
-        ServiceExperts $se,
-        ProjetWorkflow $pw,
-        FormFactoryInterface $ff,
-        TokenStorageInterface $tok,
-        Environment $tw,
-        AuthorizationCheckerInterface $ac
+        private ServiceJournal $sj,
+        private ServiceMenus $sm,
+        private ServiceProjets $sp,
+        private ServiceSessions $ss,
+        private Calcul $gcl,
+        private Stockage $gstk,
+        private CalculTous $gall,
+        private GramcDate $sd,
+        private ServiceVersions $sv,
+        private ServiceExperts $se,
+        private ProjetWorkflow $pw,
+        private FormFactoryInterface $ff,
+        private TokenStorageInterface $tok,
+        private Environment $tw,
+        private AuthorizationCheckerInterface $ac,
+        private EntityManagerInterface $em
     ) {
-        $this->sj  = $sj;
-        $this->sm  = $sm;
-        $this->sp  = $sp;
-        $this->ss  = $ss;
-        $this->gcl = $gcl;
-        $this->gstk= $gstk;
-        $this->gall= $gall;
-        $this->sd  = $sd;
-        $this->sv  = $sv;
-        $this->se  = $se;
-        $this->pw  = $pw;
-        $this->ff  = $ff;
-        $this->token= $tok->getToken();
-        $this->tw  = $tw;
-        $this->ac  = $ac;
+        $this->token = $tok->getToken();
     }
 
     /**
@@ -157,7 +131,7 @@ class ProjetSpecController extends AbstractController
         $ss                  = $this->ss;
         $sp                  = $this->sp;
         $token               = $this->token;
-        $em                  = $this->getDoctrine()->getManager();
+        $em                  = $this->em;
         $individu            = $token->getUser();
         $id_individu         = $individu->getIdIndividu();
 
@@ -354,7 +328,7 @@ class ProjetSpecController extends AbstractController
 
         $etat_session   =   $session->getEtatSession();
         //$this->sj-> debugMessage(__METHOD__ . ':' . __LINE__ . "countProjetsTestResponsable = " .
-        //     $this->em->getRepository(Projet::class)->countProjetsTestResponsable( App::getUser() ));
+        //     $this->em->getRepository(Projet::class)->countProjetsTestResponsable( getUser() ));
 
         //if ($this->em->getRepository(Projet::class)->countProjetsTestResponsable($user) > 0) {
         //    $menu['raison'] = "Vous êtes déjà responsable d'un projet test";
@@ -380,40 +354,53 @@ class ProjetSpecController extends AbstractController
      * Affiche un projet avec un menu pour choisir la version
      *
      * @Route("/{id}/consulter", name="consulter_projet",methods={"GET","POST"})
-     * @Route("/{id}/consulter/{warn_type}", name="consulter_projet",methods={"GET","POST"})
      * @Route("/{id}/consulter/{version}", name="consulter_version",methods={"GET","POST"})
      * 
      * Method({"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
-    public function consulterAction(Projet $projet, Version $version = null, Request $request, $warn_type=0)
+
+     // SUPPRIME ! PASSE PAR LA SESSION ! Route("/{id}/consulter/{warn_type}", name="consulter_projet",methods={"GET","POST"})
+    public function consulterAction(Request $request, Projet $projet, Version $version = null)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sp = $this->sp;
         $sj = $this->sj;
         $coll_vers_repo= $em->getRepository(CollaborateurVersion::class);
         $token = $this->token;
 
+        // On récupère warn_type depuis la session, où il peut avoir été sauvegardé !
+        $warn_type = $request->getSession()->get('warn_type');
+        if (empty($warn_type)) $warn_type = 0;
+        
         // choix de la version
-        if ($version == null) {
+        if ($version == null)
+        {
             $version =  $projet->getVersionDerniere();
-            if ($version == null) {
+            if ($version == null)
+            {
                 $sj->throwException(__METHOD__ . ':' . __LINE__ .' Projet ' . $projet . ': la dernière version est nulle !');
             }
-        } else {
+        }
+        else
+        {
             $projet =   $version->getProjet();
         } // nous devons être sûrs que le projet corresponde à la version
 
-        if (! $sp->projetACL($projet)) {
+        if (! $sp->projetACL($projet))
+        {
             $sj->throwException(__METHOD__ . ':' . __LINE__ .' problème avec ACL');
         }
 
         // Calcul du loginname, pour affichage de la conso
         $loginname = null;
         $cv = $coll_vers_repo->findOneBy(['version' => $version, 'collaborateur' => $token->getUser()]);
-        if ($cv != null) {
+        if ($cv != null)
+        {
             $loginname = $cv -> getLoginname() == null ? 'nologin' : $cv -> getLoginname();
-        } else {
+        }
+        else
+        {
             $loginname = 'nologin';
         }
 
@@ -435,7 +422,7 @@ class ProjetSpecController extends AbstractController
     // Consulter les projets de type 1
     private function consulterType1(Projet $projet, Version $version, $loginname, Request $request, $warn_type)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sm = $this->sm;
         $sp = $this->sp;
         $ac = $this->ac;
@@ -443,14 +430,13 @@ class ProjetSpecController extends AbstractController
         $sj = $this->sj;
         $ff = $this->ff;
 
-
         $session_form = Functions::createFormBuilder($ff, ['version' => $version ])
         ->add(
             'version',
             EntityType::class,
             [
             'multiple' => false,
-            'class'    => 'App:Version',
+            'class'    => Version::class,
             'required' =>  true,
             'label'    => '',
             'choices'  =>  $projet->getVersion(),
@@ -459,9 +445,9 @@ class ProjetSpecController extends AbstractController
             }
             ]
         )
-    ->add('submit', SubmitType::class, ['label' => 'Changer'])
-    ->getForm();
-
+        ->add('submit', SubmitType::class, ['label' => 'Changer'])
+        ->getForm();
+        
         $session_form->handleRequest($request);
 
         if ($session_form->isSubmitted() && $session_form->isValid()) {
@@ -693,7 +679,7 @@ class ProjetSpecController extends AbstractController
         }
 
         $session = $ss->getSessionCourante();
-        $projetRepository = $this->getDoctrine()->getManager()->getRepository(Projet::class);
+        $projetRepository = $this->em->getRepository(Projet::class);
         $id_individu      = $token->getUser()->getIdIndividu();
 
         return $this->render(
@@ -714,7 +700,7 @@ class ProjetSpecController extends AbstractController
      */
     public function TransformerAction(Request $request, Projet $projet)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $m = $this->menu_transformer($projet);
         if ($m['ok'] == false) {

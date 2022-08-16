@@ -33,15 +33,15 @@ class CollaborateurVersionType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $builder->add('responsable')->add('login')->add('statut')->add('version')->add('labo')->add('etab')->add('collaborateur')        ;
+        $builder->add('responsable')->add('login')->add('statut')->add('version')->add('labo')->add('etab')->add('collaborateur');
     }
 
     /**
      * {@inheritdoc}
      */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults(array(
             'data_class' => 'App\Entity\CollaborateurVersion'
@@ -51,7 +51,7 @@ class CollaborateurVersionType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function getBlockPrefix()
+    public function getBlockPrefix(): string
     {
         return 'appbundle_collaborateurversion';
     }

@@ -29,6 +29,7 @@ use App\Entity\Projet;
 use App\Entity\User;
 use App\Entity\Session;
 use App\Entity\Individu;
+use App\Entity\Thematique;
 use App\Entity\CollaborateurVersion;
 use App\Entity\RapportActivite;
 use App\Entity\Rattachement;
@@ -45,8 +46,7 @@ use App\GramcServices\Workflow\Projet\ProjetWorkflow;
 use App\Utils\Functions;
 use App\GramcServices\Etat;
 use App\GramcServices\Signal;
-//use App\Utils\GramcDate;
-use App\Form/IndividuForm\IndividuForm;
+use App\Form\IndividuForm\IndividuForm;
 use App\Form\IndividuFormType;
 use App\Repository\FormationRepository;
 
@@ -57,7 +57,6 @@ use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 
 use Symfony\Component\HttpFoundation\Request;
@@ -76,11 +75,12 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 use Twig\Environment;
 
@@ -105,7 +105,8 @@ class VersionSpecController extends AbstractController
         private ValidatorInterface $vl,
         private LoggerInterface $lg,
         private Environment $tw,
-        private TokenStorageInterface $tok
+        private TokenStorageInterface $tok,
+        private EntityManagerInterface $em
     ) {}
 
     /**
@@ -124,7 +125,7 @@ class VersionSpecController extends AbstractController
         $ss                  = $this->ss;
         $sp                  = $this->sp;
         $token               = $this->tok->getToken();
-        $em                  = $this->getDoctrine()->getManager();
+        $em                  = $this->em;
         $individu            = $token->getUser();
         $id_individu         = $individu->getIdIndividu();
 
@@ -312,7 +313,7 @@ class VersionSpecController extends AbstractController
         $sm = $this->sm;
         $sj = $this->sj;
         $vl = $this->vl;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // ACL
         if ($sm->modifier_version($version)['ok'] == false) {
@@ -341,9 +342,7 @@ class VersionSpecController extends AbstractController
      * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
-    public function modifierAction(Request $request,
-                                Version $version,
-                                bool $renouvellement): Response
+    public function modifierAction(Request $request, Version $version, bool $renouvellement=false): Response
     {
         $sm = $this->sm;
         $sv = $this->sv;
@@ -490,9 +489,10 @@ class VersionSpecController extends AbstractController
                                    ): Response
     {
         $sj   = $this->sj;
+        $sv = $this->sv;
         $ss   = $this->ss;
         $sval = $this->vl;
-        $em   = $this->getDoctrine()->getManager();
+        $em   = $this->em;
 
         // formulaire principal
         $form_builder = $this->createFormBuilder($version);
@@ -542,25 +542,25 @@ class VersionSpecController extends AbstractController
         return $this->render(
             'version/modifier_projet_sess.html.twig',
             [
-        'session' => $session,
-            'form'      => $form->createView(),
-            'version'   => $version,
-            'img_expose_1'   => $image_forms['img_expose_1']->createView(),
-            'img_expose_2'   => $image_forms['img_expose_2']->createView(),
-            'img_expose_3'   => $image_forms['img_expose_3']->createView(),
-            'imageExp1'    => $this->image('img_expose_1', $version),
-            'imageExp2'    => $this->image('img_expose_2', $version),
-            'imageExp3'    => $this->image('img_expose_3', $version),
-            'img_justif_renou_1'    =>  $image_forms['img_justif_renou_1']->createView(),
-            'img_justif_renou_2'    =>  $image_forms['img_justif_renou_2']->createView(),
-            'img_justif_renou_3'    =>  $image_forms['img_justif_renou_3']->createView(),
-            'imageJust1'    =>   $this->image('img_justif_renou_1', $version),
-            'imageJust2'    =>   $this->image('img_justif_renou_2', $version),
-            'imageJust3'    =>   $this->image('img_justif_renou_3', $version),
-            'collaborateur_form' => $collaborateur_form->createView(),
-            'todo'          => $this->versionValidate($version),
-            'renouvellement'    => $renouvellement,
-        'nb_form'       => $nb_form
+                'session' => $session,
+                'form'      => $form->createView(),
+                'version'   => $version,
+                'img_expose_1'   => $image_forms['img_expose_1']->createView(),
+                'img_expose_2'   => $image_forms['img_expose_2']->createView(),
+                'img_expose_3'   => $image_forms['img_expose_3']->createView(),
+                'imageExp1'    => $sv->image2Base64('img_expose_1', $version),
+                'imageExp2'    => $sv->image2Base64('img_expose_2', $version),
+                'imageExp3'    => $sv->image2Base64('img_expose_3', $version),
+                'img_justif_renou_1'    =>  $image_forms['img_justif_renou_1']->createView(),
+                'img_justif_renou_2'    =>  $image_forms['img_justif_renou_2']->createView(),
+                'img_justif_renou_3'    =>  $image_forms['img_justif_renou_3']->createView(),
+                'imageJust1'    =>   $sv->image2Base64('img_justif_renou_1', $version),
+                'imageJust2'    =>   $sv->image2Base64('img_justif_renou_2', $version),
+                'imageJust3'    =>   $sv->image2Base64('img_justif_renou_3', $version),
+                'collaborateur_form' => $collaborateur_form->createView(),
+                'todo'          => static::versionValidate($version),
+                'renouvellement'    => $renouvellement,
+                'nb_form'       => $nb_form
             ]
         );
     }
@@ -576,7 +576,7 @@ class VersionSpecController extends AbstractController
      */
     private function validDemHeures($version): void
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $ss = $this->ss;
         $projet = $version->getProjet();
         $type = $projet->getTypeProjet();
@@ -607,7 +607,7 @@ class VersionSpecController extends AbstractController
     /* Les champs de la partie I */
     private function modifierType1PartieI($version, &$form): void
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $form
             ->add('prjTitre', TextType::class, [ 'required'       =>  false ])
             ->add(
@@ -616,7 +616,7 @@ class VersionSpecController extends AbstractController
                 [
                 'required'    => false,
                 'multiple'    => false,
-                'class'       => 'App:Thematique',
+                'class'       => Thematique::class,
                 'label'       => '',
                 'placeholder' => '-- Indiquez la thématique',
                 ]
@@ -632,7 +632,7 @@ class VersionSpecController extends AbstractController
                     'required'    => false,
                     'multiple'    => false,
                     'expanded'    => true,
-                    'class'       => 'App:Rattachement',
+                    'class'       => Rattachement::class,
                     'empty_data'  => null,
                     'label'       => '',
                     'placeholder' => 'AUCUN',
@@ -915,7 +915,7 @@ class VersionSpecController extends AbstractController
     /* Les champs de la partie V */
     private function modifierType1PartieV($version, &$form, &$nb_form) : void
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $formations = $em->getRepository(\App\Entity\Formation::class)->getFormationsPourVersion();
 
         $nb_form = 0;
@@ -941,7 +941,7 @@ class VersionSpecController extends AbstractController
     {
         $sj = $this->sj;
         $sval = $this->vl;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         if ($this->has('heures_projet_test')) {
             $heures_projet_test = $this->getParameter('heures_projet_test');
@@ -958,7 +958,7 @@ class VersionSpecController extends AbstractController
                 [
                     'required'       =>  false,
                     'multiple' => false,
-                    'class' => 'App:Thematique',
+                    'class' => Thematique::class,
                     'label'     => '',
                     'placeholder' => '-- Indiquez la thématique',
                     ]
@@ -972,7 +972,7 @@ class VersionSpecController extends AbstractController
                     'required'    => false,
                     'multiple'    => false,
                     'expanded'    => true,
-                    'class'       => 'App:Rattachement',
+                    'class'       => Rattachement::class,
                     'empty_data'  => null,
                     'label'       => '',
                     'placeholder' => 'AUCUN',
@@ -1097,7 +1097,7 @@ class VersionSpecController extends AbstractController
             if ($form->get('valider')->isClicked()) {
                 //$sj->debugMessage("Entree dans le traitement du formulaire données");
                 //$this->handleCallistoForms( $form, $version );
-                $em = $this->getDoctrine()->getManager();
+                $em = $this->em;
                 $em->persist($version);
                 $em->flush();
             }
@@ -1128,7 +1128,7 @@ class VersionSpecController extends AbstractController
         $version->setDataMetaDataFormat($form->get('dataMetadataFormat')->getData());
         $version->setDataNombreDatasets($form->get('dataNombreDatasets')->getData());
         $version->setDataTailleDatasets($form->get('dataTailleDatasets')->getData());
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->persist($version);
         $em->flush();
     }
@@ -1146,7 +1146,7 @@ class VersionSpecController extends AbstractController
         $sv = $this->sv;
         $sj = $this->sj;
         $projet_workflow = $this->pw;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // ACL
         //if( $sm->renouveler_version($version)['ok'] == false && (  $this->container->hasParameter('kernel.debug') && $this->getParameter('kernel.debug') == false ) )
@@ -1253,7 +1253,7 @@ class VersionSpecController extends AbstractController
     private function versionValidate(Version $version) : array
     {
         $sv = $this->sv;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $nodata = $this->getParameter('nodata');
 
         $todo   =   [];
@@ -1374,4 +1374,6 @@ class VersionSpecController extends AbstractController
 
         return $todo;
     }
+}
+
 

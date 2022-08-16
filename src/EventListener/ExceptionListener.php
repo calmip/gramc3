@@ -25,6 +25,7 @@
  * class ExceptionListener = Ce service intercepte les exceptions et les traite de la manière suivante:
  *                            - En mode DEBUG, affiche l'exception et sort
  *                            - En mode NON DEBUG, écrit dans le fichier de log ou dans le journal, puis redirige vers la page d'accueil
+ *                            - TODO - refaire tout ça de manière symfoniquement correcte !
  *
  *
  **********************/
@@ -84,11 +85,8 @@ class ExceptionListener
         //dd($exception);
 
         // En mode debug, on affiche l'exception
-        // Commenter ces trois lignes pour voir ce qui se passe en prod !
-        if( $this->kernel_debug == true ) {
-            $response =  new Response( '<pre>' . $exception . '</pre>');
-            return $response;
-        }
+        // Commenter cette ligne pour récupérer le comportement de la prod !
+        if( $this->kernel_debug == true ) return;
  
         // nous captons des erreurs de la page d'accueil
         if( $event->getRequest()->getPathInfo() == '/' )
@@ -114,43 +112,46 @@ class ExceptionListener
 
         }   
 
+        // On essaie d'aller voir une url sans être authentifié
+        elseif ( $exception instanceof HttpException && $exception->getPrevious() instanceof InsufficientAuthenticationException)
+        {
+
+            // On garde l'url de destination dans la session
+            $event->getRequest()->getSession()->set('url', $event->getRequest()->getUri() );
+
+            // Pas la peine d'encombrer les logs
+            //$this->sj->warningMessage(__METHOD__ . ":" . __LINE__ ." accès anonyme à la page " . $event->getRequest()->getPathInfo());
+
+            // On renvoie sur l'écran de login'
+            if( $this->kernel_debug == true )
+                $response =  new RedirectResponse( $this->router->generate('connexion_dbg') );
+            else
+                $response =  new RedirectResponse( $this->router->generate('connexion') );
+            
+            $event->setResponse($response);
+        }
+
         //   AccessDeniedHttpException
         //   problème avec access_control dans security.yml (IP par exemple) ou un mauvais rôle
         elseif( $exception instanceof AccessDeniedHttpException /*or $exception instanceof AccessDeniedException*/)
         {
             //dd($exception);
             $this->sj->warningMessage(__METHOD__ . ":" . __LINE__ ." accès à la page " . $event->getRequest()->getPathInfo() . " non autorisé");
-            $response =  new RedirectResponse($this->router->generate('index') );
+            $response = new RedirectResponse($this->router->generate('accueil') );
             $event->setResponse($response);
         }
-        // pas de rôle pour le moment
-        // elseif( $exception instanceof InsufficientAuthenticationException )
-        elseif( $exception instanceof InsufficientAuthenticationException )
-        {
-            $event->getRequest()->getSession()->set('url', $event->getRequest()->getUri() );
-            
-            $this->sj->warningMessage(__METHOD__ . ":" . __LINE__ ." accès anonyme à la page " . $event->getRequest()->getPathInfo());
-        
-            if( $this->kernel_debug == true )
-                $response =  new RedirectResponse( $this->router->generate('connexion_dbg') );
-            else
-                $response =  new RedirectResponse( $this->router->generate('connexion') );
-            
-            //$event->setResponse($response);    
-        }
 
+        // Erreur 404
         elseif( $exception instanceof NotFoundHttpException )
         {
-            // uniquement en production nous redirigeons vers la page 'accueil' - pas de log
-            if( $this->kernel_debug == false )
-            {
-                $response =  new RedirectResponse($this->router->generate('accueil') );
-                $event->setResponse($response); 
-            }
+            // Nous redirigeons vers la page 'accueil' - pas de log
+            $response =  new RedirectResponse($this->router->generate('accueil') );
+            $event->setResponse($response); 
         }
+
+        // comportement général
         else
         {
-            // comportement général
             $this->logger->warning("Error to " .  $event->getRequest()->getRequestUri(),
                     [
                     'exception' => $exception,
@@ -160,13 +161,9 @@ class ExceptionListener
             $this->sj->warningMessage(__METHOD__ . ":" . __LINE__ ." Exception " . get_class($exception) . ' : ' . $exception->getMessage() .
                                       "  À partir de URL : " .  $event->getRequest()->getPathInfo() );
 
-           // uniquement en production nous redirigeons vers la page 'index'
-           if( $this->kernel_debug == false )
-           {
-                $response =  new RedirectResponse($this->router->generate('accueil') );
-                $event->setResponse($response); 
-           }
-            
+            // Nous redirigeons vers la page d'accueil
+            $response =  new RedirectResponse($this->router->generate('accueil') );
+            $event->setResponse($response); 
         }
     }
 }

@@ -1,6 +1,7 @@
 {% extends 'default/base.html.twig' %}
 
 {% block myjavascripts %}
+ <script> var NOINVITATION = {{ noinvitation }}; </script>
  <script  src="{{ asset('js/gerer_collaborateurs.js') }}" ></script>
 {% endblock myjavascripts %}
 

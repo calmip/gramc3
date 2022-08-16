@@ -79,7 +79,7 @@ class KeepOnly extends Rgpd
         $this->addArgument('keeponly', InputArgument::REQUIRED, "Projets à conserver: P123456,P234567");
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // this method must return an integer number with the "exit status code"
         // of the command.

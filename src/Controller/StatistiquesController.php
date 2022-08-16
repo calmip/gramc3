@@ -60,6 +60,7 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Esxtension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Doctrine\ORM\EntityManagerInterface;
 
 include_once(__DIR__.'/../../jpgraph/JpGraph.php');
 
@@ -75,7 +76,8 @@ class StatistiquesController extends AbstractController
         private ServiceJournal $sj,
         private ServiceMenus $sm,
         private ServiceProjets $sp,
-        private ServiceSessions $ss
+        private ServiceSessions $ss,
+        private EntityManagerInterface $em
     ) {}
 
     /**
@@ -102,7 +104,7 @@ class StatistiquesController extends AbstractController
         $sm      = $this->sm;
         $ss      = $this->ss;
         $sp      = $this->sp;
-        $em      = $this->getDoctrine()->getManager();
+        $em      = $this->em;
         $prj_rep = $em->getRepository(Projet::class);
         $ver_rep = $em->getRepository(Version::class);
 
@@ -168,7 +170,7 @@ class StatistiquesController extends AbstractController
         $sm = $this->sm;
         $ss = $this->ss;
         $sj = $this->sj;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // Si on trouve les données dans la session, OK. Sinon on redirige sur la page de stats générale
         if ($request->getSession()->has('statistiques_annee'))
@@ -269,7 +271,7 @@ class StatistiquesController extends AbstractController
     {
         $sm = $this->sm;
         $ss = $this->ss;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // Si on trouve les données dans la session, OK. Sinon on redirige sur la page de stats générale
         if ($request->getSession()->has('statistiques_annee'))
@@ -619,7 +621,7 @@ class StatistiquesController extends AbstractController
     /* Cette fonction est appelée par laboratoireCSVAction, etablissementCSVAction etc. */
     private function parCritereCSV(Request $request, $annee, $critere, $titre): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // Si on trouve les données dans la session, OK. Sinon on envoie un csv vide
         if ($request->getSession()->has('statistiques_annee'))

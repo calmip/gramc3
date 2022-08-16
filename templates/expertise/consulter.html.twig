@@ -1,0 +1,25 @@
+{% extends 'default/base.html.twig' %}
+{% import "default/macros.html.twig" as gramcmacros %}
+
+{% block body %}
+
+<h1>Expertise de la version {{expertise.version}} par {{ expertise.expert }}</h1>
+
+<h3>Commentaire pour le comité:</h3>
+
+<p>{{ expertise.commentaireInterne }}</p>
+
+<h3>Commentaire envoyé au responsable de projets</h3>
+
+<p>{{ expertise.commentaireExterne}}</p>
+
+<h3>Heures attribuées:</h3>
+<p>{{ expertise.nbHeuresAtt}}
+{% if expertise.nbHeuresAttEte != 0 %} dont {{ expertise.nbHeuresAttEte }} cet été. {% endif %}
+</p>
+
+<a href="{{ path('consulter_version', { 'id': expertise.version.projet.idProjet, 'version': expertise.version.idVersion }) }}"><strong>Consulter la version: </strong> </a>
+
+{{ gramcmacros.menu(menu) }}
+
+{% endblock %}

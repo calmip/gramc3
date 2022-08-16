@@ -56,7 +56,6 @@ use App\GramcServices\GramcGraf\Calcul;
 use Psr\Log\LoggerInterface;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -79,6 +78,8 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
+use Doctrine\ORM\EntityManagerInterface;
+
 use Twig\Environment;
 
 /**
@@ -93,54 +94,27 @@ use Twig\Environment;
 
 class ProjetSpecController extends AbstractController
 {
-    private $sj;
-    private $sm;
-    private $sp;
-    private $ss;
-    private $gcl;
-    private $gstk;
-    private $gall;
-    private $sd;
-    private $sv;
-    private $se;
-    private $pw;
-    private $ff;
     private $token;
-    private $tw;
-    private $ac;
-
     public function __construct(
-        ServiceJournal $sj,
-        ServiceMenus $sm,
-        ServiceProjets $sp,
-        ServiceSessions $ss,
-        Calcul $gcl,
-        Stockage $gstk,
-        CalculTous $gall,
-        GramcDate $sd,
-        ServiceVersions $sv,
-        ServiceExperts $se,
-        ProjetWorkflow $pw,
-        FormFactoryInterface $ff,
-        TokenStorageInterface $tok,
-        Environment $tw,
-        AuthorizationCheckerInterface $ac
-    ) {
-        $this->sj  = $sj;
-        $this->sm  = $sm;
-        $this->sp  = $sp;
-        $this->ss  = $ss;
-        $this->gcl = $gcl;
-        $this->gstk= $gstk;
-        $this->gall= $gall;
-        $this->sd  = $sd;
-        $this->sv  = $sv;
-        $this->se  = $se;
-        $this->pw  = $pw;
-        $this->ff  = $ff;
-        $this->token= $tok->getToken();
-        $this->tw  = $tw;
-        $this->ac  = $ac;
+        private ServiceJournal $sj,
+        private ServiceMenus $sm,
+        private ServiceProjets $sp,
+        private ServiceSessions $ss,
+        private Calcul $gcl,
+        private Stockage $gstk,
+        private CalculTous $gall,
+        private GramcDate $sd,
+        private ServiceVersions $sv,
+        private ServiceExperts $se,
+        private ProjetWorkflow $pw,
+        private FormFactoryInterface $ff,
+        private TokenStorageInterface $tok,
+        private Environment $tw,
+        private AuthorizationCheckerInterface $ac,
+        private EntityManagerInterface $em
+    )
+    {
+        $this->token = $tok->getToken();
     }
 
     /**
@@ -156,7 +130,7 @@ class ProjetSpecController extends AbstractController
         $ss                  = $this->ss;
         $sp                  = $this->sp;
         $token               = $this->token;
-        $em                  = $this->getDoctrine()->getManager();
+        $em                  = $this->em;
         $individu            = $token->getUser();
         $id_individu         = $individu->getIdIndividu();
 
@@ -295,19 +269,25 @@ class ProjetSpecController extends AbstractController
      * Affiche un projet avec un menu pour choisir la version
      *
      * @Route("/{id}/consulter", name="consulter_projet",methods={"GET","POST"})
-     * @Route("/{id}/consulter/{warn_type}", name="consulter_projet",methods={"GET","POST"})
      * @Route("/{id}/consulter/{version}", name="consulter_version",methods={"GET","POST"})
      * 
      * Method({"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
+
+     // SUPPRIME ! PASSE PAR LA SESSION ! Route("/{id}/consulter/{warn_type}", name="consulter_projet",methods={"GET","POST"})
     public function consulterAction(Projet $projet, Version $version = null, Request $request, $warn_type=0)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sp = $this->sp;
         $sj = $this->sj;
         $coll_vers_repo= $em->getRepository(CollaborateurVersion::class);
         $token = $this->token;
+
+        // On récupère warn_type depuis la session, où il peut avoir été sauvegardé !
+        // NOTE - warn_type NON UTILISE par le Criann
+        $warn_type = $request->getSession()->get('warn_type');
+        if (empty($warn_type)) $warn_type = 0;
 
         // choix de la version
         if ($version == null) {
@@ -355,7 +335,7 @@ class ProjetSpecController extends AbstractController
     // Consulter les projets de type 1 (projets PROJET_SESS) ou type 3 (PROJET_FIL)
     private function consulterType1_3(Projet $projet, Version $version, $loginname, Request $request, $warn_type)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sm = $this->sm;
         $sp = $this->sp;
         $ac = $this->ac;
@@ -370,7 +350,7 @@ class ProjetSpecController extends AbstractController
             EntityType::class,
             [
             'multiple' => false,
-            'class'    => 'App:Version',
+            'class'    => Version::class,
             'required' =>  true,
             'label'    => '',
             'choices'  =>  $projet->getVersion(),

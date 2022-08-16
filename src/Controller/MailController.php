@@ -49,6 +49,8 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\ResetType;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Form\FormFactoryInterface;
+use Doctrine\ORM\EntityManagerInterface;
+
 
 /////////////////////////////////////////////////////
 
@@ -64,7 +66,8 @@ class MailController extends AbstractController
         private ServiceNotifications $sn,
         private ServiceJournal $sj,
         private ServiceProjets $sp,
-        private FormFactoryInterface $ff
+        private FormFactoryInterface $ff,
+        private EntityManagerInterface $em
     ) {}
 
     /**
@@ -75,7 +78,7 @@ class MailController extends AbstractController
 
     public function mailToResponsablesFicheAction(Request $request, Session $session): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sn = $this->sn;
         $sj = $this->sj;
         $ff = $this->ff;
@@ -142,7 +145,7 @@ class MailController extends AbstractController
     private function getResponsablesFiche(Session $session): array
     {
         $sj = $this->sj;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $responsables = [];
 
         $all_versions = $em->getRepository(Version::class)->findBy(['session' => $session, 'prjFicheVal' => false]);
@@ -179,7 +182,7 @@ class MailController extends AbstractController
     **/
     public function mailToResponsablesAction(Request $request, Session $session): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sn = $this->sn;
         $sj = $this->sj;
         $ff = $this->ff;
@@ -254,7 +257,7 @@ class MailController extends AbstractController
     {
         $sp = $this->sp;
         $sj = $this->sj;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $type_session = $session->getLibelleTypeSession();
         if ($type_session =='B') {

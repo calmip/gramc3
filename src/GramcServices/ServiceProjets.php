@@ -1089,7 +1089,7 @@ class ServiceProjets
 
     /*
      * Le user connecté a-t-il accès à $projet ?
-     * Si OBS (donc ADMIN) ou PREIDENT = La réponse est Oui
+     * Si OBS (donc ADMIN) ou PRESIDENT = La réponse est Oui
      * Sinon c'est plus compliqué, on appelle userProjetACL...
      *
      * param:  $projet

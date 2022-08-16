@@ -184,7 +184,8 @@
             <td>{{ expertise.projetId }}</td>
             <td>{{ expertise.sessionId }}</td>
             <td>
-                <a href="{{ path('consulter_version', { 'id' : expertise.projetId, 'version' : expertise.versionId } ) }}">
+                {#<a href="{{ path('consulter_version', { 'id' : expertise.projetId, 'version' : expertise.versionId } ) }}">#}
+                <a href="{{ path('consulter_expertise', { 'id' : expertise.id } ) }}">
                     <img src="{{ asset('icones/consulter.png') }}" alt="Expertiser" title="Lire le projet" class="bouton_poussoir">
                 </a>
             </td>

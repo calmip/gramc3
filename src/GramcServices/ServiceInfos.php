@@ -50,9 +50,9 @@ class ServiceInfos
     public function __construct(private GramcDate $grdte, private EntityManagerInterface $em)
     {
         // un bogue obscur de symfony (lié à la console)
-        try {
+//        try {
             $this->sessions_non_terminees =
-                $em->getRepository('App:Session')->get_sessions_non_terminees();
+                $em->getRepository(Session::class)->get_sessions_non_terminees();
 
             if (isset($this->sessions_non_terminees[0])) {
                 $this->session_courante = $this->sessions_non_terminees[0];
@@ -67,8 +67,8 @@ class ServiceInfos
                 }
                 $this->id_session_courante = $this->session_courante->getIdSession();
             }
-        } catch (\Exception $e) {
-        };
+//        } catch (\Exception $e) {
+//        };
     }
 
     public function getLibelleEtatSessionCourante(): string
@@ -128,7 +128,8 @@ class ServiceInfos
         return strftime($format, $date->getTimestamp());
     } // function strftime_fr
 
-    public function tronquer_chaine($s, $l): string
+
+    public function tronquer_chaine(?string $s, string|int $l): ?string
     {
         if (grapheme_strlen($s)>=intval($l)) {
             return grapheme_substr($s, 0, intval($l)).'...';

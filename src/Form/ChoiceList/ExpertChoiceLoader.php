@@ -32,8 +32,7 @@ use Symfony\Component\Form\ChoiceList\Loader\ChoiceLoaderInterface;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
-
-//use App\App;
+use Symfony\Component\Form\ChoiceList\ChoiceListInterface; 
 use App\Utils\Functions;
 
 use App\Entity\Individu;
@@ -125,7 +124,7 @@ class ExpertChoiceLoader implements ChoiceLoaderInterface
 
     //////////////////////////////////////////////////
 
-    public function loadChoiceList($value = null)
+    public function loadChoiceList($value = null): ChoiceListInterface
     {
         //Functions::debugMessage(__METHOD__ . " choices : " . Functions::show( $this->choices ) );
         return new ArrayChoiceList($this->choices);
@@ -133,7 +132,7 @@ class ExpertChoiceLoader implements ChoiceLoaderInterface
 
     /////////////////////////////////////////////////////////
 
-    public function loadChoicesForValues(array $values, $value = null)
+    public function loadChoicesForValues(array $values, $value = null): array
     {
         $result =   [];
         //Functions::debugMessage(__METHOD__ . " values : " . Functions::show( $values ) );
@@ -151,7 +150,7 @@ class ExpertChoiceLoader implements ChoiceLoaderInterface
 
     ////////////////////////////////////////////////////////////////
 
-    public function loadValuesForChoices(array $choices, $value = null)
+    public function loadValuesForChoices(array $choices, $value = null): array
     {
         $result = [ ];
         //Functions::debugMessage(__METHOD__ . " choices : " . Functions::show( $choices ) );
