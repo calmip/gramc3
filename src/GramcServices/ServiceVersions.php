@@ -391,6 +391,8 @@ class ServiceVersions
 
     /***************************************************
      * Renvoie true si le fichier pdf de signature est présent
+     * TODO - Le champ prjFicheVal de l'entité Version n'est pas utilisé !
+     *        On devrait pouvoir le supprimer ?
      *********************************************************/
     public function isSigne(Version $version) : bool
     {

@@ -1591,7 +1591,7 @@ class ServiceMenus
             $menu['commentaire']    =   "Télécharger la fiche projet en tant qu'administrateur";
         } elseif (! $version->isCollaborateur($this->token->getUser())) {
             $menu['raison']         =   "Vous n'êtes pas un collaborateur du projet";
-        } elseif ($version->getPrjFicheVal() == true) {
+        } elseif (($this->sv->isSigne($version) == true)) {
             $menu['raison']         =   "La fiche projet signée a déjà été téléversée";
         } else {
             $menu['ok']             =   true;
@@ -1621,7 +1621,7 @@ class ServiceMenus
             $menu['commentaire']    =   "Téléverser la fiche projet en tant qu'administrateur";
         } elseif (! $version->isCollaborateur($this->token->getUser())) {
             $menu['raison']         =   "Vous n'êtes pas un collaborateur du projet";
-        } elseif ($version->getPrjFicheVal() == true) {
+        } elseif ($this->sv->isSigne($version) == true) {
             $menu['raison']         =   "La fiche projet signée a déjà été téléversée";
         } else {
             $menu['ok']          = true;

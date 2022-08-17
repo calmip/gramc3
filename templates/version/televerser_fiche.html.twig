@@ -5,7 +5,7 @@
 
 <section>
     <h2>Téléversement de la fiche projet</h2>
-    {% if version.prjficheval == false %}
+    {% if serviceVersions.signe(version) == false %}
         <div class="information attention">Le fichier doit être <strong>un pdf de taille inférieure à {{max_size_doc}} Mo</strong></div>
 
         <div class="televerser">
@@ -14,6 +14,8 @@
                 <input name="submit" value="Téléverser" type="submit"></p>
             {{ form_end(form) }}
         </div>
+    {% else %}
+        <p class="centrage"><em>La fiche a déjà été téléchargée</em></p>
     {% endif %}
     <p>&nbsp;</p>
     {% if( not ( version == null ) and  not ( version.projet == null )   ) %}
