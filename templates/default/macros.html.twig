@@ -208,44 +208,6 @@
 {% endmacro %}
 
 
-{# ################################################## #}
-{# Affichage d'un menu à partir d'un array de texte
-   Les items sont générés par la fonction generer_lien (cf. lib/navigation.php)
-   Pas très esprit mvc, mais rend le portage vers twig beaucoup plus simple !
-#}
-{#
-{% macro menu(menu)%}
-<nav>
-    <ul>
-        {% for item in menu %}
-        <li>{{ item|raw }}</li>
-        {% endfor %}
-    </ul>
-</nav>
-{% endmacro %}
-#}
-
-{# ################################################# #}
-{# Affichages de messages d'information, de warning, d'erreur (cf. lib/notifications.php) #}
-
-{% macro info(titre,msg) %}
-<div class="message info"><h2>{{ titre }}</h2>
-<p>{{ msg|raw }}</p>
-</div>
-{% endmacro %}
-
-{% macro warning(titre,msg) %}
-<div class="message warning"><h2>{{ titre }}</h2>
-<p>{{ msg|raw }}</p>
-</div>
-{% endmacro %}
-
-{% macro erreur(titre,msg) %}
-<div class="message erreur"><h2>{{ titre }}</h2>
-<p>{{ msg|raw }}</p>
-</div>
-{% endmacro %}
-
 {# ################################################# #}
 {# Portage de chaines.php                            #}
 {# ################################################# #}
