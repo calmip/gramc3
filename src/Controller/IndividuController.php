@@ -160,7 +160,7 @@ class IndividuController extends AbstractController
 
         $erreurs  =   [];
 
-        // utilisateur peu actif peut être effacé même s'il peut se connecter'
+        // utilisateur peu actif peut être effacé même s'il peut se connecter
         if ($CollaborateurVersion == null && $Expertise == null && $Rallonge == null) {
 
             foreach ($individu->getThematique() as $item) {
@@ -172,11 +172,18 @@ class IndividuController extends AbstractController
                 $em->remove($item);
             }
 
-            $sj->infoMessage('Utilisateur ' . $individu . ' (' .  $individu->getIdIndividu() . ') directement effacé ');
+            try
+            {
+                $em->remove($individu);
+                $em->flush();
+            }
+            catch (\Exception $e)
+            {
+                $request->getSession()->getFlashbag()->add("flash erreur",$e->getMessage());
+                $sj->warningMessage('Utilisateur ' . $individu . ' (' .  $individu->getIdIndividu() . ') ne peut être effacé ');
+            }
 
-            $em->remove($individu);
-
-            $em->flush();
+            $request->getSession()->getFlashbag()->add("flash info",$individu. " supprimé");
             return $this->redirectToRoute('individu_gerer');
         }
 
@@ -188,12 +195,23 @@ class IndividuController extends AbstractController
             $new_individu = $em->getRepository(Individu::class)->findOneBy(['mail'=>$mail]);
 
             if ($new_individu != null) {
-
-                $sid->fusionnerIndividus($individu, $new_individu);
-                $em->remove($individu);
-                $em->flush();
+                try
+                {
+                    $sid->fusionnerIndividus($individu, $new_individu);
+                    $em->remove($individu);
+                    $em->flush();
+                }
+                catch (\Exception $e)
+                {
+                    $request->getSession()->getFlashbag()->add("flash erreur",$e->getMessage());
+                    $sj->warningMessage('Utilisateur ' . $individu . ' (' .  $individu->getIdIndividu() . ') ne peut être effacé ');
+                }
+    
+                $request->getSession()->getFlashbag()->add("flash info",$individu. " supprimé");
                 return $this->redirectToRoute('individu_gerer');
-            } else {
+            }
+            else
+            {
                 $erreurs[] = "Le mail du nouvel utilisateur \"" . $mail . "\" ne correspond à aucun utilisateur existant";
             }
         }
