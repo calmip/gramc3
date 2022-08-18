@@ -25,7 +25,7 @@
         </form>
     </div>
 
-    <br />
+    <br>
     {% if noconso==false %}
     {% if isRecupAutomne and isRecupPrintemps %}
     <div class="message erreur">
@@ -54,9 +54,9 @@
 
     <div id="legende">
         <h3>Légende</h3>
-        <span id="legende_conso_1">Consommation dépassant {{conso_seuil_1}} %</span><br />
-        <span id="legende_conso_2">Consommation dépassant {{conso_seuil_2}} %</span><br />
-        <span id="legende_alerte">Incohérence entre quota machine et heures attribuées</span><br />
+        <span id="legende_conso_1">Consommation dépassant {{conso_seuil_1}} %</span><br>
+        <span id="legende_conso_2">Consommation dépassant {{conso_seuil_2}} %</span><br>
+        <span id="legende_alerte">Incohérence entre quota machine et heures attribuées</span><br>
     </div>
     {% endif %}
 
@@ -186,14 +186,14 @@
         
         <table>
             <tr>
-                <th colspan="2">Prévisionnel<br /><em class="light petit">(sans compter les projets entreprises)</em></th>
+                <th colspan="2">Prévisionnel<br><em class="light petit">(sans compter les projets entreprises)</em></th>
             </tr>
             <tr>
                 <th>Heures pour une année</th>
                 <td>{{ heures_par_an|number_format(0, ',', ' ') }}</td>
             </tr>
             <tr>
-                <th>Heures déjà attribuées<br />(y compris rallonges et pénalités)</th>
+                <th>Heures déjà attribuées<br>(y compris rallonges et pénalités)</th>
                 <td id="stats_attribuees">{{ total.attrHeuresP|number_format(0, ',', ' ') }}</td>
             </tr>
             {% if noconso==false %}

@@ -28,8 +28,8 @@
     {% if noconso==false %}
     <div id="legende">
         <h3>Légende</h3>
-        <span id="legende_conso_1">Occupation dépassant {{conso_seuil_1}} %</span><br />
-        <span id="legende_conso_2">Occupation dépassant {{conso_seuil_2}} %</span><br />
+        <span id="legende_conso_1">Occupation dépassant {{conso_seuil_1}} %</span><br>
+        <span id="legende_conso_2">Occupation dépassant {{conso_seuil_2}} %</span><br>
     </div>
     {% endif %}
 
@@ -55,15 +55,15 @@
                         <td>{{total.demstk}}</td>
                     </tr>
                      <tr>
-                        <th>Stockage alloué<br />suite à demande (To)</th>
+                        <th>Stockage alloué<br>suite à demande (To)</th>
                         <td>{{total.attrstk}}</td>
                     </tr>
                     <tr>
-                        <th>Stockage attribué<br />automatiquement (To)</th>
+                        <th>Stockage attribué<br>automatiquement (To)</th>
                         <td>{{total.autostk}}</td>
                     </tr>
                     <tr>
-                        <th>Stockage attribué<br />au total (To)</th>
+                        <th>Stockage attribué<br>au total (To)</th>
                         <td>{{total.attrstk+total.autostk}}</td>
                     </tr>
                  </table>
@@ -91,7 +91,7 @@
                         <th>Thématique</th>
                         <th>Responsable</th>
                         <th>Laboratoire</th>
-                        <th>Demandes<br />(To)</th>
+                        <th>Demandes<br>(To)</th>
                         {% if noconso==false %}
                         <th>Quota (To)</th>
                         <th>Occupation (To)</th>

@@ -58,7 +58,7 @@ test('horizontal rules', function () {
 
 test('line breaks', function () {
   runTestCases([
-    ['Hello<br />world', 'Hello  \nworld']
+    ['Hello<br>world', 'Hello  \nworld']
   ])
 })
 

@@ -103,7 +103,7 @@
             {% if app.debug %}
                 <p class="etat_session">
                 {% for session in infos.sessions_non_terminees() %}
-                    ETAT DE LA SESSION <strong>{{session.IdSession}}</strong>=<strong>{{session.LibelleEtat}}</strong><br />
+                    ETAT DE LA SESSION <strong>{{session.IdSession}}</strong>=<strong>{{session.LibelleEtat}}</strong><br>
                 {% endfor %}
                 </p>
             {% endif %}

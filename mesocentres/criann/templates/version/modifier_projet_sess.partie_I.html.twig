@@ -97,7 +97,7 @@
         <div id="rapport_activite">
         <h4>Rapport d'activité de l'année précédente</h4>
         {% if version.typeSession == 'B'  %}
-            <div class="message info">Vous n'avez pas besoin de téléverser de rapport d'activité lors d'une session B. <br />Nous vous le demanderons à la fin de l'année</div>
+            <div class="message info">Vous n'avez pas besoin de téléverser de rapport d'activité lors d'une session B. <br>Nous vous le demanderons à la fin de l'année</div>
         {% elseif version.anneeRapport == 0 %}
             <div class="message info">Vous n'avez pas besoin de téléverser de rapport d'activité maintenant. Nous vous le demanderons à la fin de l'année</div>
         {% else %}
@@ -119,7 +119,7 @@
     </tr>
     <tr><td class="center">
         <p><em>Justifiez votre demande de ressources par rapport à l'évolution de votre projet: Si la demande est importante (> 1Mh),
-         vous pouvez présenter un plan de calcul détaillé.<br />
+         vous pouvez présenter un plan de calcul détaillé.<br>
          Citez les codes utilisés (et n'oubliez pas, le cas échéant, de mettre à jour le champ de formulaire consacré
          au code le plus utilisé)</em>
         </p>
@@ -191,7 +191,7 @@
             <td>{{ form_widget(form.prjGenciHeures) }}</td>
         </tr>
         <tr>
-            <th class="horiz"><label for="prj_genci_dari">N° de projet Dari le plus récent<br />
+            <th class="horiz"><label for="prj_genci_dari">N° de projet Dari le plus récent<br>
             <small>(exemple: A0070911xxx)</small></label></th>
             <td>{{ form_widget(form.prjGenciDari) }}</td>
         </tr>

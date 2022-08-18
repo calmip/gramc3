@@ -48,7 +48,7 @@
 {% if not todo is empty %}
 <div class="message warning">
     <h2>Champs à compléter</h2>
-    Les champs ci-dessous <strong>doivent être complétés</strong> avant que vous puissiez envoyer votre projet en expertise.<br />
+    Les champs ci-dessous <strong>doivent être complétés</strong> avant que vous puissiez envoyer votre projet en expertise.<br>
 
     {% if 'prj_titre' in todo %}<a href="#form_prjTitre" class="gerer_onglets">titre du projet</a><br>{% endif %}
     {% if 'dem_heures' in todo %}<a href="#form_demHeures" class="gerer_onglets">Heures CPU</a><br>{% endif %}
@@ -128,7 +128,7 @@
 
 <div id="quitter">
     {% if renouvellement %}
-		<input class="invisible_if_no_js" name="RENOUVELER" id="Renouveler" value="Renouvellement" title="Renouveler le projet" type="submit"><br />
+		<input class="invisible_if_no_js" name="RENOUVELER" id="Renouveler" value="Renouvellement" title="Renouveler le projet" type="submit"><br>
     {% else %}
 		<input class="invisible_if_no_js"  type="submit" name="ENREGISTRER" id="Enregistrer" value="Enregistrer" title="Enregistrer le projet sans le fermer" />
     {{ form_widget( form.annuler, { 'attr': { 'title' : 'Abandonner les modifications' } }) }}

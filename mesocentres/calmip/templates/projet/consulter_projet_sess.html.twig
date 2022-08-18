@@ -231,7 +231,7 @@
                             {% if(version.getQuota > 0) %}
                                 ({{ (version.consocalcul * 100 / version.quota) |number_format(1)}} %)
                             {% endif %}
-                            <br /> #}
+                            <br> #}
                             {{ conso|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}
                             {% if(quota!=0) %} 
                                 ({{consop|number_format(1)}} %) 
