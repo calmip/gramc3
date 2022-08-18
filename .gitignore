@@ -18,6 +18,8 @@ src/cache/*
 /app/config/parameters.yml
 /app/config/parameters.*.yml
 parameters.yaml
+public/css/colors.css
+
 /build/
 /phpunit.xml
 !/var/CACHEDIR.TAG
