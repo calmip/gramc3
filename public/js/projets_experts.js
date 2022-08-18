@@ -120,7 +120,7 @@ $( document ).ready(function() {
 
     // Connecté aux evenements change des checkboxes
     function change_cb() {
-        $( "#projets tr" ).show();
+        $( ".liste tr" ).show();
          $("input.cb").each(function(){
              cl = '.' + $(this).attr("id");
              if (!$(this).is(":checked")) {
@@ -234,7 +234,7 @@ $( document ).ready(function() {
     // Le dialogue utilisé pour fermer un projet
     formulaire_confirmation = $( "#formulaire_confirmation" ).dialog({autoOpen: false,
             height: 500,
-            width: 400,
+            width: 500,
             modal: true
     });
 

@@ -7,14 +7,15 @@
 <section>
     <h2>Générer et télécharger le bilan de session</h2>
 
+    <div class="inputrond submitdyn">
     {{ form_start(form) }}
         {{ form_widget(form.session) }}{{ form_widget(form.submit) }}
     {{ form_end(form) }}
-
-    <br />
+    </div>
+    <br>
 
     <form action="{{ path('bilan_session_csv', {'id': idSession }) }}">
-        <input type="submit" value="Générer le bilan de la session {{ idSession }} en csv" />
+        <input class="telecharger_csv" type="submit" value="Générer le bilan de la session {{ idSession }} en csv" />
     </form>
 
 
@@ -27,13 +28,12 @@
     <h2>Réponses au questionnaire (session {{ idSession }})</h2>
 
     <form action="{{ path('questionnaire_csv', {'id': idSession } ) }}">
-            <input type="submit" value="Télécharger en csv" />
+            <input class="telecharger_csv" type="submit" value="Télécharger en csv" />
     </form>
 
 
     <br>
 
-    <div id="projets">
         <table id="bilan_session">
         <thead>
             <tr>
@@ -78,10 +78,10 @@
             <td>{{ version.demHeurestotal }}</td>
             <td>{{ version.attrHeurestotal }}</td>
             <td>{{ serviceProjets.ConsoCalculVersion(version)}}</td>
-            <td>{{ version.prjTitre }}</td>
+            <td>{{ gramcmacros.afftitre(version.prjtitre) }}</td>
             <td>{{ version.prjThematique }}</td>
             <td>{{ version.responsable }}</td>
-            <td>{{ version.labo }}</td>
+            <td>{{ version.acrolaboratoire }}</td>
             <td>{% if version.codeC %} C {% endif %}{% if version.codeCpp %} C++ {% endif %}{% if version.codeFor %} Fortran {% endif %}{{ version.codeLangage }}</td>
             <td>{{ version.gpu }}</td>
             <td>{{ version.codeNom }}</td>
@@ -136,21 +136,21 @@
                                 <td>{{ formation[label.acro].rep }}</td>
                             {% endif %}
                         {% endfor %}
-                        <td>{{version.demFormAutresAutres}}</td>
+                        <td class="autres" >{{version.demFormAutresAutres}}</td>
                     </tr>
                     {% endif %}
             {% endfor %}
             <tr>
                 <th>TOTAL</th><td>&nbsp;</td>
                 {% for lbl,ttl in form_total %}
-                    {% if lbl != 'ALL_EMPTY' %}<td>{{ttl}}</td>{% endif %}
+                    {% if lbl != 'ALL_EMPTY' %}<td class="total">{{ttl}}</td>{% endif %}
                 {% endfor %}
             </tr>
             
         </tbody>
         </table>
  
-    </div>
+
 </section>
 
 {% endblock body %}

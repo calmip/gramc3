@@ -8,10 +8,7 @@
 
 {% block body %}
 
-<section class="section_projet_session" style="stroke: black">
-
-
-    {# ################################################################################## #}
+<section id="section_bilans_listes" style="stroke: black">
 
     <h1>Utilisateurs de gramc</h1>
 
@@ -27,7 +24,7 @@
         <a id="ajout" class="lien_actif" href="{{ path('individu_ajouter') }}?" title="Créer un utilisateur">{{ icones.nouveauProjet}}Nouvel utilisateur</a>
     </li></ul></nav>
 
-    <div class="formulaire">
+    <div class="formulaire inputrond">
     {# VIEUX
     {{ form_start(form) }}
     {{ form_row(form.all) }}
@@ -38,81 +35,70 @@
     {{ form_widget(form.filtre) }}{{ form_widget(form.filtrer)}} {{form_widget(form.all)}} sur tous les utilisateurs
     {{ form_end(form) }}
     </div>
-    <hr>
+    <hr class="separateur">
     <div class="tableaux">
-    <div id="bilan_legende"><div id="bilan">
+        <div class="bilan_legende">
+            <div class="bilan">
+                <table>
+                    <tr>
+                        <th colspan="2">Utilisateurs</th>
+                    </tr>
+                    <tr>
+                        <th>Total</th>
+                        <td>{{ total }}</td>
+                    </tr>
+                    <tr>
+                        <th>Actifs</th>
+                        <td>{{ actifs }}</td>
+                    </tr>
+                </table>
+                <table>
+                    <tr>
+                        <th colspan="2">Fournisseurs d'identité</th>
+                    </tr>
+                    {% for key,value in idps %}
+                        <tr>
+                        <th>{{ key }}</th>
+                        <td>{{ value }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
 
-    <table>
-        <tr>
-            <th colspan="2">Utilisateurs</th>
-        </tr>
-        <tr>
-            <th>Total</th>
-            <td>{{ total }}</td>
-        </tr>
-        <tr>
-            <th>Actifs</th>
-            <td>{{ actifs }}</td>
-        </tr>
-    </table>
-
-
-    <table>
-        <tr>
-            <th colspan="2">Fournisseurs d'identité</th>
-        </tr>
-        {% for key,value in idps %}
-            <tr>
-            <th>{{ key }}</th>
-            <td>{{ value }}</td>
-            </tr>
-        {% endfor %}
-    </table>
-
-    </div></div>
-
-   {# ################################################################################## #}
-
-    <div id="projets">
-        <table id="utilisateurs">
-        <thead>
-            <tr>
-                <th>&nbsp;</th>
-                <th>&nbsp;</th>
-                <th>&nbsp;</th>
-                <th>Activé</th>
-                <th><span title="Expert">&nbsp;&nbsp;&nbsp;E&nbsp;&nbsp;&nbsp;</span></th>
-                <th><span title="Président">P</span></th>
-                <th><span title="Admin">A</span></th>
-                <th><span title="Observateur">O</span></th>
-                <th><span title="Admin sys">AS</span></th>
-                <th>Prénom</th>
-                <th>Nom</th>
-                <th>Courriel</th>
-                <th>Idp</th>
-                <th>Date</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            {% for individu in individus %}
-            <tr>
-               {% include 'individu/ligne.html.twig' %}
-            </tr>
-            {% endfor %}
-        </tbody>
-
-        </table>
-    </div>
-
-    {# ################################################################################## #}
-
-
-    </div>
+        <div class="liste">
+            <table id="utilisateurs">
+                <thead>
+                    <tr>
+                        <th>&nbsp;</th>
+                        <th>&nbsp;</th>
+                        <th>&nbsp;</th>
+                        <th>Activé</th>
+                        <th><span title="Expert">&nbsp;&nbsp;&nbsp;E&nbsp;&nbsp;&nbsp;</span></th>
+                        <th><span title="Président">P</span></th>
+                        <th><span title="Admin">A</span></th>
+                        <th><span title="Observateur">O</span></th>
+                        <th><span title="Admin sys">AS</span></th>
+                        <th>Prénom</th>
+                        <th>Nom</th>
+                        <th>Courriel</th>
+                        <th>Idp</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for individu in individus %}
+                    <tr>
+                       {% include 'individu/ligne.html.twig' %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div> {# tableaux #}
     <div id="formulaire_profil"></div>
     <div id="formulaire_thematiques"></div>
 
 </section>
-
-
 {% endblock %}
+

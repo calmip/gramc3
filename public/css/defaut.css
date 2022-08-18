@@ -27,7 +27,6 @@ body{
     padding: 0;
     background: white;
     font-family: sans-serif;
-
 }
 
 p{
@@ -53,9 +52,9 @@ h2, h1{
 
 /* Une mention au centre (généralement en <em>) */
 p.centrage {
-       text-align: center;
-       width: 70%;
-       margin: 1em auto;
+   text-align: center;
+   width: 70%;
+   margin: 1em auto;
 }
 
 /* Des trucs écrits en petits caractères */
@@ -64,7 +63,7 @@ p.centrage {
  }
 
 /* remplace le vieux tag <center> qui n'existe plus en html5 */
-/* TODO - Utiliser plutôt centrage ! */
+/* NOTE - Différent de centrage qui ne s'applique qu'aux paragraphes */
 td.center,h3.center {
     text-align: center;
 }
@@ -90,6 +89,12 @@ span.attention {
     color: red;
     font-weight: bold;
     font-style: italic;
+}
+
+/* ===== TOUTES LES ICONES QUI ONT BESOIN DE FILL ===== */
+svg .fill{
+    fill: black;
+    stroke: none;
 }
 
 /* ===== HEADER ===== */
@@ -194,7 +199,7 @@ header img {
     color: var(--second-color);
 }
 
-/* ===== FLASH ===== */
+/* ===== MESSAGES FLASH ===== */
 div.flash.info{
     border: 2px solid #64c145;
     color: #64c145;
@@ -204,6 +209,7 @@ div.flash.info{
     border-radius: 15px;
     box-shadow: 0px 5px 4px 0px;
     background-color: white;
+    padding: .3em;
 }
 div.flash.erreur{
     border: 2px solid var(--second-color);
@@ -214,6 +220,7 @@ div.flash.erreur{
     border-radius: 15px;
     box-shadow: 0px 5px 4px 0px;
     background-color: white;
+    padding: .3em;
 }
 
 /* ===== BOUTON RETOUR VERS LE HAUT ===== */
@@ -249,7 +256,6 @@ div.flash.erreur{
 /* ===== FORMULAIRE PROFIL ===== */
 
 /* Pour l'admin = Changement d'eppn */
-
 #profil fieldset, #a_eppn fieldset, #s_eppn fieldset {
     max-width: 40em;
     margin: auto;
@@ -302,7 +308,7 @@ table#profil_horiz tr td.suppr {
     background: repeating-linear-gradient(45deg, black, white 2%, black 7%);
 }
 
-/* ===== RÔLE ADMIN ===== */
+/* ===== INDICATEUR DE ROLE ADMIN ===== */
 .role_admin{
     position: fixed;
     z-index: 5;
@@ -344,16 +350,6 @@ table#profil_horiz tr td.suppr {
     display: none;
 }
 
-
-
-/* ===== TOUTES LES ICONES QUI ONT BESOIN DE FILL ===== */
-svg .fill{
-    fill: black;
-    stroke: none;
-}
-
-
-
 /* ===== FOOTER ===== */
 .footer{
     background: white;
@@ -383,9 +379,8 @@ svg .fill{
     color: var(--first-color);
 }
 
-
-
 /* ========== TOUS LES FORMULAIRES ========== */
+/* form_data pas utilisé ! */
 #form_data{
     border-radius: 11px;
     background: white;
@@ -396,14 +391,20 @@ svg .fill{
     cursor: pointer;
     outline: none;
 }
+#form_data option:hover{
+    background-color: red;
+}
 
 select:hover{
     cursor: pointer;
 }
 
-/* TODO - Un peu le bordel ! */
-#form_connect, #form_submit, #sess_lbl_submit, #tri_filtrer, .form_submit, #form_reset, #sso_reset, #sso_submit, .rallonge_fermer button, .televerser input
- {
+/*
+ * joli champ input ou select entouré avec des bords arrondis:
+ * mettez-le dans un conteneur de classe inputrond
+ */
+.inputrond input, .inputrond select, .inputrond button, #formulaire_confirmation form input
+{
     border-radius: 50px;
     background: white;
     border: 1px solid var(--third-color);
@@ -411,23 +412,45 @@ select:hover{
     cursor: pointer;
 }
 
-.rallonge_fermer button {
-    width: 10em;
+.inputrond input, .inputrond select, .inputrond button {
+    margin-right: 1em;
 }
 
-#form_connect:hover, #form_submit:hover{
+/*
+ * joli submit qui fonce au survol de la souris:
+ * mettez-le dans un conteneur de classe submitdyn
+ */
+.submitdyn input:hover, .submitdyn button:hover
+{
     background: var(--third-color);
     border: 1px solid var(--third-color);
     color: white;
 }
 
-#form_data option:hover{
-    background-color: red;
+/* ========== FORMULAIRES DE CONFIRMATION ========= */
+/*
+ * Petits formulaires, on doit répondre par OUI ou NON !
+ *
+ * HTML:
+    <div id="formulaire_confirmation">
+        ...
+        <form method="post" action="">
+            <input type="submit" id="confirm_oui" name="confirmation" value="OUI" />
+            <input type="submit" id="confirm_non" name="confirmation" value="NON" />
+        </form>
+    </div>
+ */
+
+#formulaire_confirmation form {
+    width: 11em;
+    margin: auto;
 }
 
+#formulaire_confirmation form input:nth-of-type(1) {
+    margin-right: 1em;
+}
 
-
-/* ========== TOUTES LES INFORMATIONS ========== */
+/* ========== LES ENCARTS AVEC LES INFORMATIONS ========== */
 .information{
     border: 1px solid;
     border-radius: 20px;
@@ -481,7 +504,6 @@ select:hover{
 .information.error p{
     color: var(--error-color);
 }
-
 
 /* ========== TOUS LES MENUS ========== */
 nav{
@@ -562,8 +584,6 @@ nav li svg{
     color: var(--first-color);
 }
 
-
-
 /* ===== TOUS LES TABLEAUX ===== */
 table{
     width: 90%;
@@ -620,8 +640,9 @@ tbody tr.rallonge{
 }
 
 
-
 /* ========== TOUS LES TOP_BODY ==========  */
+/* Tout en haut de la page, la flèche pour revenir en arrière */
+
 .top_body{
     /*display: flex;*/
     align-items: center;
@@ -648,7 +669,7 @@ tbody tr.rallonge{
 /* Un lien entoure par un truc arrondi très joli */
 
 /* Etait:
- * .consulter_projet .supplement .lien_supplementaire
+ * #consulter_projet .supplement .lien_supplementaire
  * maintenant c'est un truc générique !
  */
 
@@ -693,8 +714,24 @@ tbody tr.rallonge{
     margin-bottom: 1rem;
 }
 
+/* ========== TOUS LES POPUPS POUR LA COMPTA =============*/
+#dialog-compta h2{
+    margin: 50px 0 0;
+}
 
+#dialog-compta .conso{
+    stroke: black;
+}
 
+#dialog-compta li{
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+#dialog-compta li svg:hover{
+    cursor: pointer;
+}
 
 /* ========== TOUS LES PANNEAUX ENREGISTRER / ANNULER / FERMER ==========  */
 #panneau_enregistrer{
@@ -790,14 +827,161 @@ tbody tr.rallonge{
     margin-top: 0.25rem;
 }
 
+/* ========== TABLEAUX ET STATISTIQUES (role administrateur) ==========
+ * Exemple: Projets par session, par année, tous les projets, utilisateurs, etc.
+ *
+ * HTML:
+   <section id="bilans_listes">
+      <div class="formulaire inputrond submitdyn">
+         Un petit formulaire (année, sessions, filtre utilisateurs, ...)
+         Un bouton de téléchargement csv
+      </div>
+      <hr class="separateur">
+      <div class="tableaux">
+          <div class="bilan_legende">
+              legende
+              <div class="bilan">
+                  <table>...</table>
+                  <table>...</table>
+              </div>
+          <div class="liste">
+              <table>...</table>
+          </div>
+      </div>
+   </section>
+ */
 
+#section_bilans_listes .formulaire{
+    display: flex;
+    align-items: center;
+}
+
+#section_bilans_listes #form_session,#sess_lbl_sess_lbl, #section_bilans_listes #form_annee {
+    padding: 5px 20px 5px 10px;
+    border-radius: 11px;
+    background: none;
+    margin: 0 20px;
+}
+
+.telecharger_csv{
+    background: none;
+    border: 1px solid var(--first-color);
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    margin: 0 20px;
+}
+
+#section_bilans_listes .telecharger_csv:hover{
+    background: var(--first-color-hover);
+    color: white;
+}
+
+#section_bilans_listes .separateur{
+    margin: 2rem 10px 0 0;
+}
+
+#section_bilans_listes .tableaux{
+    display: flex;
+    height: 85vh;
+}
+
+#section_bilans_listes .tableaux .bilan_legende{
+    margin: 0 1em;
+    width: 25%;
+    position: initial;
+    overflow-y: scroll;
+}
+
+#section_bilans_listes .tableaux .bilan_legende .bilan table{
+    margin: 1.5rem 0;
+}
+
+#section_bilans_listes .tableaux .bilan_legende .bilan tr:first-of-type{
+    font-size: 1rem;
+}
+
+#section_bilans_listes .tableaux .bilan_legende .bilan tr{
+    height: 20px;
+    font-size: .7em;
+}
+
+#section_bilans_listes .tableaux .liste {
+    font-size: 0.7em;
+    min-width: 75%;
+    margin: 0 10px 0 0;
+    overflow: scroll;
+    border-left: 1px solid grey;
+    border-bottom: 1px solid grey;
+    margin-right: 10px;
+}
+
+#section_bilans_listes .tableaux .liste #table_projets_session{
+    border-collapse: collapse;
+}
+
+/* CODE DE COULEURS POUR MARQUER LA CONSO
+ *
+ * HTML
+
+    <div id="legende">
+        <span id="legende_conso_1">...</span>
+        <span id="legende_conso_2">...</span>
+        <span id="legende_conso_3">...</span>
+    </div>
+ */
+
+#legende_conso_1 {
+    color: #FF9E00;
+    font-weight: bold;
+}
+
+#legende_conso_2 {
+    color: red;
+    font-weight: bold;
+}
+
+#legende_alerte {
+    background-color: #FE2E2E;
+    color: white;
+    font-weight: bold;
+    font-style: italic;
+}
+
+#legende {
+    margin: 3em;
+    font-size: .4em;
+}
+#legende br {
+    margin-bottom: 1em;
+}
+
+/* CODE DE COULEUR POUR MARQUER DES INCOHERENCES ENTRE ATTRIBUTIONS ET QUOTAS
+ * OU POUR MARQUER DES CONSOS IMPORTANTES*/
+
+.conso_seuil_1 td {
+    color: #FF9E00;
+    font-weight: bold;
+    }
+
+.conso_seuil_2 td {
+    color: red;
+    font-weight: bold;
+    }
+
+.alerte td { 
+    background-color: #FE2E2E;
+    color: white;
+    font-weight: bold;
+    font-style: italic;
+    }
+
+/* ================ FIN DES DEFINITIONS GENERIQUES ===================*/
 
 /* ========== Connexion DBG ========== */
 .section_dbg form{
     text-align: center;
 }
-
-
 
 /* ========== AIDE ========== */
 .section_aide p{
@@ -817,8 +1001,6 @@ tbody tr.rallonge{
 .section_aide a{
     color: var(--first-color);
 }
-
-
 
 /* ========== Connexion ========== */
 .titre_login{
@@ -853,60 +1035,58 @@ tbody tr.rallonge{
     color: var(--first-color);
 }
 
-
-
-/* ========== PROJETS ========== */
-.section_projets h3{
+/* ========== LA PAGE DEMANDEUR ========== */
+#section_demandeur h3{
     margin-left: 10rem;
     margin-bottom: 3rem;
 }
 
-.section_projets nav{
+#section_demandeur nav{
     width: fit-content;
     margin: 0 0 0 auto;
 }
 
-.section_projets nav li{
+#section_demandeur nav li{
     border: none;
     margin: 0;
     width: auto;
 }
 
-.section_projets nav li:hover{
+#section_demandeur nav li:hover{
     background: none;
 }
 
-.section_projets nav li a{
+#section_demandeur nav li a{
     flex-direction: column;
 }
 
-.section_projets nav li:hover a{
+#section_demandeur nav li:hover a{
     color: initial;
     stroke: var(--third-color);
 }
 
-.section_projets table a{
+#section_demandeur table a{
     text-decoration: none;
     stroke: black;
 }
 
-.section_projets table tbody .seuil_0{
+#section_demandeur table tbody .seuil_0{
     color: black;
     stroke: black;
 }
 
-.section_projets table tbody .seuil_1{
+#section_demandeur table tbody .seuil_1{
     color: var(--warning-color);
     stroke: var(--warning-color);
 }
 
-.section_projets table tbody .seuil_2{
+#section_demandeur table tbody .seuil_2{
     color: var(--second-color);
     stroke: var(--second-color);
     font-weight: bold;
 }
 
-.section_projets table tbody .consommation svg{
+#section_demandeur table tbody .consommation svg{
     cursor: pointer;
 }
 
@@ -914,28 +1094,8 @@ tbody tr.rallonge{
     margin-top: 7rem;
 }
 
-#dialog-compta h2{
-    margin: 50px 0 0;
-}
-
-#dialog-compta .conso{
-    stroke: black;
-}
-
-#dialog-compta li{
-    display: flex;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-
-#dialog-compta li svg:hover{
-    cursor: pointer;
-}
-
-
-
-/* ========== CONSULTER PROJETS ========== */
-.consulter_projet .info_debug{
+/* ========== CONSULTER PROJET ========== */
+#consulter_projet .info_debug{
     width: fit-content;
     border: 1px solid var(--first-color);
     padding: 20px;
@@ -943,7 +1103,7 @@ tbody tr.rallonge{
     margin: 1em 0;
 }
 
-.consulter_projet .menu{
+#consulter_projet .menu{
     display: flex;
     align-items: flex-start;
     width: 85%;
@@ -951,11 +1111,11 @@ tbody tr.rallonge{
     margin-bottom: 2rem;
 }
 
-.consulter_projet .menu nav{
+#consulter_projet .menu nav{
     width: 100%;
 }
 
-.consulter_projet .separateur{
+#consulter_projet .separateur{
     width: 70%;
     height: 1px;
     margin: auto;
@@ -963,20 +1123,20 @@ tbody tr.rallonge{
     margin-bottom: 3.5rem;
 }
 
-.consulter_projet .supplement {
+#consulter_projet .supplement {
     width: 85%;
 }
-.consulter_projet .supplement .conso:hover svg path:first-of-type{
+#consulter_projet .supplement .conso:hover svg path:first-of-type{
     stroke: var(--first-color-hover);
 }
 
-.consulter_projet .supplement .conso svg{
+#consulter_projet .supplement .conso svg{
     width: 23%;
     height: auto;
     cursor: pointer;
 }
 
-.consulter_projet .historique{
+#consulter_projet .historique{
     display: flex;
     align-items: center;
     width: 85%;
@@ -985,46 +1145,46 @@ tbody tr.rallonge{
     margin-bottom: 2rem;
 }
 
-.consulter_projet .historique h3{
+#consulter_projet .historique h3{
     margin-right: 3rem;
 }
 
-.consulter_projet #form_version{
+#consulter_projet #form_version{
     padding: 5px 20px 5px 10px;
     border-radius: 11px;
     background: none;
 }
 
-.consulter_projet #form_submit{
+#consulter_projet #form_submit{
     margin-left: 20px;
 }
 
-.consulter_projet details{
+#consulter_projet details{
     width: 90%;
     margin: auto;
 }
 
-.consulter_projet details[open]{
+#consulter_projet details[open]{
     margin-bottom: 5rem;
 }
 
-.consulter_projet svg:nth-of-type(2){
+#consulter_projet svg:nth-of-type(2){
     display: none;
 }
 
-.consulter_projet details[open] summary svg:nth-of-type(1){
+#consulter_projet details[open] summary svg:nth-of-type(1){
     display: none;
 }
 
-.consulter_projet details[open] summary svg:nth-of-type(2){
+#consulter_projet details[open] summary svg:nth-of-type(2){
     display: initial;
 }
 
-.consulter_projet .I{
+#consulter_projet #I{
     margin-top: 3rem;
 }
 
-.consulter_projet details summary{
+#consulter_projet details summary{
     display: flex;
     align-items: center;
     font-size: 1.25rem;
@@ -1034,36 +1194,36 @@ tbody tr.rallonge{
     cursor: pointer;
 }
 
-.consulter_projet details summary::marker{
+#consulter_projet details summary::marker{
     content: "";
 }
 
-.consulter_projet details summary svg{
+#consulter_projet details summary svg{
     margin-right: 1.5rem;
     stroke: var(--first-color);
 }
 
-.consulter_projet details .chapitre {
+#consulter_projet details .chapitre {
     max-height: 70vh;
     overflow-y: scroll;
 }
 
-.consulter_projet .I .presentation{
+#consulter_projet #I .presentation{
     margin-bottom: 3rem;
 }
 
-.consulter_projet details h4{
+#consulter_projet details h4{
     text-decoration: #5e5f5f69 solid underline;
     text-underline-position: under;
     margin-top: 7rem;
 }
 
-.consulter_projet .I .financement{
+#consulter_projet #I .financement{
     width: 90%;
     margin: auto;
 }
 
-.consulter_projet .II .description{
+#consulter_projet #II .description{
     border: 1px solid var(--first-color);
     border-radius: 20px;
     padding: 20px;
@@ -1072,44 +1232,44 @@ tbody tr.rallonge{
     text-align: justify;
 }
 
-.consulter_projet .II .description .figures{
+#consulter_projet #II .description .figures{
     display: flex;
     justify-content: space-evenly;
     align-items: center;
     margin-top: 2rem;
 }
 
-.consulter_projet .II .description .figures div{
+#consulter_projet #II .description .figures div{
     text-align: center;
 }
 
-.consulter_projet .II .description .figure{
+#consulter_projet #II .description .figure{
     border: 1px solid var(--first-color);
     border-radius: 10px;
     width: 300px;
 }
 
-.consulter_projet .III .tableaux{
+#consulter_projet #III .tableaux{
     display: flex;
     width: 90%;
     margin: auto;
 }
 
-.consulter_projet .III .tableaux table{
+#consulter_projet #III .tableaux table{
     width: 45%;
 }
 
-.consulter_projet .III tbody tr:last-of-type {
+#consulter_projet #III tbody tr:last-of-type {
     border-bottom: none;
 }
 
-.consulter_projet .III .tableaux table th{
+#consulter_projet #III .tableaux table th{
     width: 50%;
     padding-right: 2rem;
     border-right: 1px solid #00000078;
 }
 
-.consulter_projet .III .tableaux table td{
+#consulter_projet #III .tableaux table td{
     padding-left: 2rem;
 }
 
@@ -1120,8 +1280,10 @@ tbody tr.rallonge{
     cursor: pointer;
 }
 
-/* ========== NOUVEAU PROJET ========== */
-.section_nouveauProjet .projets{
+/* ========== NOUVEAU PROJET ==========
+ * (Ecran d'alerte lorsqu'on crée un nouveau projet)
+ */
+#section_nouveauProjet .projets{
     display: flex;
     justify-content: space-around;
     width: 90%;
@@ -1129,11 +1291,11 @@ tbody tr.rallonge{
     margin-top: 4rem;
 }
 
-.section_nouveauProjet ul{
+#section_nouveauProjet ul{
     padding: 0;
 }
 
-.section_nouveauProjet li{
+#section_nouveauProjet li{
     list-style: none;
     width: fit-content;
     margin-bottom: 1rem;
@@ -1141,7 +1303,7 @@ tbody tr.rallonge{
     align-items: center;
 }
 
-.section_nouveauProjet a{
+#section_nouveauProjet a{
     text-decoration: none;
     color: black;
     border: var(--first-color) 2px solid;
@@ -1150,37 +1312,33 @@ tbody tr.rallonge{
     margin-right: 3rem;
 }
 
-.section_nouveauProjet a:hover{
+#section_nouveauProjet a:hover{
     background: var(--first-color-hover);
     color: white;
 }
 
-.section_nouveauProjet .separation{
+#section_nouveauProjet .separation{
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-.section_nouveauProjet .separation span{
+#section_nouveauProjet .separation span{
     background: var(--first-color);
     width: 1px;
     height: 50%;
 }
 
-.section_nouveauProjet .separation p{
+#section_nouveauProjet .separation p{
     padding: 20px;
 }
 
-.section_nouveauProjet .nouveau_projet{
+#section_nouveauProjet .nouveau_projet{
     display: flex;
     align-items: center;
 }
 
-
-
-/* ========== MODIFIER PROJET ========== */
-
-/* Onglets dans la page nouveau projet */
+/* ONGLETS DANS LA PAGE DE MODIFICATION DES PROJETS */
 #onglets {
     margin-top: 1em;
     border: none;
@@ -1220,17 +1378,18 @@ tbody tr.rallonge{
 }
 
 
-.section_modifierProjet .information a{
+/* ========== MODIFIER PROJET ========== */
+#section_modifierProjet .information a{
     color: var(--first-color);
 }
 
-.section_modifierProjet .information h2{
+#section_modifierProjet .information h2{
     text-align: center;
     width: 100%;
     margin: 0 0 2rem;
 }
 
-.section_modifierProjet h2{
+#section_modifierProjet h2{
     color: var(--first-color);
     margin: 50px auto;
     width: 90%;
@@ -1238,17 +1397,17 @@ tbody tr.rallonge{
     padding: 0;
 }
 
-.section_modifierProjet h4{
+#section_modifierProjet h4{
     text-decoration: #5e5f5f69 solid underline;
     text-underline-position: under;
     margin: 7rem 0 3rem;
 }
 
-.section_modifierProjet #quitter{
+#section_modifierProjet #quitter{
     z-index: 5;
 }
 
-.section_modifierProjet #ul_formulaire li{
+#section_modifierProjet #ul_formulaire li{
  /*   margin-right: -10px; */
     border-radius: 10px 10px 2px 2px ;
 /*    width: initial;*/
@@ -1259,17 +1418,17 @@ tbody tr.rallonge{
     font-weight: bold;
 }
 
-.section_modifierProjet #ul_formulaire li a{
+#section_modifierProjet #ul_formulaire li a{
     color: white;
 }
 
-.section_modifierProjet #ul_formulaire li.ui-tabs-active {
+#section_modifierProjet #ul_formulaire li.ui-tabs-active {
     background-color: var(--warning-color);
     border: none;
 }
 
-.section_modifierProjet .presentation_generale,
-.section_modifierProjet .genci{
+#section_modifierProjet .presentation_generale,
+#section_modifierProjet .genci{
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
@@ -1278,7 +1437,7 @@ tbody tr.rallonge{
     margin-bottom: 5rem;
 }
 
-.section_modifierProjet .inputs{
+#section_modifierProjet .inputs{
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
@@ -1287,47 +1446,47 @@ tbody tr.rallonge{
     margin-bottom: 5rem;
 }
 
-.section_modifierProjet .input{
+#section_modifierProjet .input{
     display: flex;
     flex-direction: column;
     width: 40%;
     margin-bottom: 3rem;
 }
 
-.section_modifierProjet .inputs_checkbox{
+#section_modifierProjet .inputs_checkbox{
     display: flex;
     justify-content: space-between;
 }
 
-.section_modifierProjet .inputs_checkbox div{
+#section_modifierProjet .inputs_checkbox div{
     max-width: 25%;
 }
 
-.section_modifierProjet .inputs_checkbox .autre{
+#section_modifierProjet .inputs_checkbox .autre{
     display: flex;
     align-items: flex-start;
     max-width: 40%;
 }
 
-.section_modifierProjet .inputs_checkbox .autre input[type="text"]{
+#section_modifierProjet .inputs_checkbox .autre input[type="text"]{
     width: 100%;
 }
 
-.section_modifierProjet .input label{
+#section_modifierProjet .input label{
     font-weight: bold;
     margin-bottom: 1rem;
 }
 
-.section_modifierProjet .input>div{
+#section_modifierProjet .input>div{
     margin-bottom: 1rem;
 }
 
-.section_modifierProjet .input span{
+#section_modifierProjet .input span{
     color: var(--second-color);
 }
 
-.section_modifierProjet .input input,
-.section_modifierProjet .input select{
+#section_modifierProjet .input input,
+#section_modifierProjet .input select{
     border-top: none;
     border-right: none;
     border-left: none;
@@ -1336,11 +1495,11 @@ tbody tr.rallonge{
     background: none;
 }
 
-.section_modifierProjet .information .sessionB{
+#section_modifierProjet .information .sessionB{
     margin-top: 3rem;
 }
 
-.section_modifierProjet .add{
+#section_modifierProjet .add{
     margin-top: 1rem;
     stroke: var(--third-color);
     color: var(--third-color);
@@ -1350,35 +1509,35 @@ tbody tr.rallonge{
     cursor: pointer;
 }
 
-.section_modifierProjet .add svg{
+#section_modifierProjet .add svg{
     vertical-align: sub;
     margin-right: 0.5rem;
 }
 
-.section_modifierProjet .financement{
+#section_modifierProjet .financement{
     width: 100%;
     margin: auto;
 }
 
-.section_modifierProjet .financement div{
+#section_modifierProjet .financement div{
     width: 80%;
     margin: auto;
 }
 
-.section_modifierProjet .financement input{
+#section_modifierProjet .financement input{
     width: 40%;
 }
 
-.section_modifierProjet .financement .info_supplementaire{
+#section_modifierProjet .financement .info_supplementaire{
     margin: 1rem 0;
 }
 
-.section_modifierProjet .pas_genci{
+#section_modifierProjet .pas_genci{
     width: fit-content;
     margin: auto;
 }
 
-.section_modifierProjet .pas_genci input{
+#section_modifierProjet .pas_genci input{
     display: inline-block;
     background: none;
     outline: none;
@@ -1388,32 +1547,32 @@ tbody tr.rallonge{
     cursor: pointer;
 }
 
-.section_modifierProjet .pas_genci input:hover{
+#section_modifierProjet .pas_genci input:hover{
     background: var(--first-color-hover);
     color: white;
 }
 
-.section_modifierProjet .ajax-upload-dragdrop{
+#section_modifierProjet .ajax-upload-dragdrop{
     border: dotted 2px var(--first-color);
     margin: auto;
 }
 
-.section_modifierProjet .textarea{
+#section_modifierProjet .textarea{
     display: flex;
     justify-content: flex-start;
     margin: 7rem 0;
 }
 
-.section_modifierProjet .textarea h4{
+#section_modifierProjet .textarea h4{
     margin-top: 0;
 }
 
-.section_modifierProjet .textarea div{
+#section_modifierProjet .textarea div{
     width: 35%;
     text-align: justify;
 }
 
-.section_modifierProjet .textarea textarea{
+#section_modifierProjet .textarea textarea{
     border: 1px solid var(--first-color);
     border-radius: 10px;
     max-width: 60%;
@@ -1422,14 +1581,14 @@ tbody tr.rallonge{
     padding: 10px;
 }
 
-.section_modifierProjet .figures{
+#section_modifierProjet .figures{
     display: flex;
     justify-content: space-evenly;
     margin-bottom: 2rem;
     align-items: flex-end;
 }
 
-.section_modifierProjet .figure{
+#section_modifierProjet .figure{
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1439,40 +1598,40 @@ tbody tr.rallonge{
     border-radius: 15px;
 }
 
-.section_modifierProjet .figure .fileremover svg{
+#section_modifierProjet .figure .fileremover svg{
     vertical-align: text-bottom;
 }
 
-.section_modifierProjet .uploaders{
+#section_modifierProjet .uploaders{
     display: flex;
     justify-content: space-evenly;
 }
 
-.section_modifierProjet .uploaders .fileuploader .ajax-upload-dragdrop{
+#section_modifierProjet .uploaders .fileuploader .ajax-upload-dragdrop{
     width: 230px !important;
     text-align: center;
 }
 
-.section_modifierProjet .uploaders .fileuploader .ajax-upload-dragdrop .ajax-file-upload,
-.section_modifierProjet .fileuploader .ajax-upload-dragdrop .ajax-file-upload{
+#section_modifierProjet .uploaders .fileuploader .ajax-upload-dragdrop .ajax-file-upload,
+#section_modifierProjet .fileuploader .ajax-upload-dragdrop .ajax-file-upload{
     background: var(--first-color);
 }
 
-.section_modifierProjet .uploaders .uploadstatus{
+#section_modifierProjet .uploaders .uploadstatus{
     width: 200px;
     margin: 1rem auto 0;
 }
 
-.section_modifierProjet #tab2 .fileuploader .ajax-upload-dragdrop{
+#section_modifierProjet #tab2 .fileuploader .ajax-upload-dragdrop{
     text-align: center;
 }
 
-.section_modifierProjet .quitter{
+#section_modifierProjet .quitter{
     background: none;
     border: none;
 }
 
-.section_modifierProjet .quitter button{
+#section_modifierProjet .quitter button{
     background: none;
     border: 2px solid var(--first-color);
     padding: 8px;
@@ -1480,214 +1639,37 @@ tbody tr.rallonge{
     cursor: pointer;
 }
 
-.section_modifierProjet .quitter button:hover{
+#section_modifierProjet .quitter button:hover{
     background: var(--first-color-hover);
     color: white;
 }
 
-.section_modifierProjet #tab5{
+#section_modifierProjet #tab5{
     text-align: initial;
 }
 
-
-
-/* ========== ADMINISTRATEUR ========== */
-.section_administrateur div{
+/* ========== ECRAN ADMINISTRATEUR ========== */
+#section_administrateur div{
     display: flex;
     width: 85%;
     margin: 0 auto 2rem;
 }
 
-.section_administrateur div h3{
+#section_administrateur div h3{
     width: 20%;
 }
 
-.section_administrateur div nav ul li{
+#section_administrateur div nav ul li{
     width: 12rem;
 }
 
-.section_administrateur div nav ul li a{
+#section_administrateur div nav ul li a{
     flex-direction: column;
 }
 
-.section_administrateur div nav ul li a svg{
+#section_administrateur div nav ul li a svg{
     margin: 0;
 }
-
-/* ========== ADMINISTRATEUR LISTE D'UTILISATEURS ==========  */
-/* TODO - MUTUALISER */
-.section_projet_session #tri_filtre {
-    padding: 5px 20px 5px 10px;
-    border-radius: 11px;
-    background: none;
-    margin: 0 20px;
-}
-
-
-
-/* ========== ADMINISTRATEUR PROJETS SESSION ==========  */
-.section_projet_session .formulaire{
-    display: flex;
-    align-items: center;
-}
-
-.section_projet_session #form_session,#sess_lbl_sess_lbl, .section_projet_session #form_annee {
-    padding: 5px 20px 5px 10px;
-    border-radius: 11px;
-    background: none;
-    margin: 0 20px;
-}
-
-.section_projet_session .telecharger_csv{
-    background: none;
-    border: 1px solid var(--first-color);
-    padding: 10px 20px;
-    border-radius: 10px;
-    cursor: pointer;
-    margin: 0 20px;
-}
-
-.section_projet_session .telecharger_csv:hover{
-    background: var(--first-color-hover);
-    color: white;
-}
-
-.section_projet_session .separateur{
-    margin: 2rem 10px 0 0;
-}
-
-.section_projet_session .tableaux{
-    display: flex;
-    height: 85vh;
-}
-
-.section_projet_session .tableaux #bilan_legende{
-    margin: 0 1em;
-    width: 25%;
-    position: initial;
-    overflow-y: scroll;
-}
-
-.section_projet_session .tableaux #bilan_legende #bilan table{
-    margin: 1.5rem 0;
-}
-
-.section_projet_session .tableaux #bilan_legende  #bilan tr:first-of-type{
-    font-size: 1rem;
-}
-
-.section_projet_session .tableaux #bilan_legende  #bilan tr{
-    height: 20px;
-    font-size: .7em;
-}
-
-.section_projet_session .tableaux #projets {
-    font-size: 0.7em;
-    min-width: 75%;
-    margin: 0 10px 0 0;
-    overflow: scroll;
-    border-left: 1px solid grey;
-    border-bottom: 1px solid grey;
-    margin-right: 10px;
-}
-
-.section_projet_session .tableaux #projets #table_projets_session{
-    border-collapse: collapse;
-}
-
-/* ========== ADMINISTRATEUR PROJETS PAR ANNEE ==========  */
-/* === Emmanuel ==== */
-/* === TODO = Factoriser avec Consulter Projet === */
-
-/**** Supprimé depuis que .lien_supplementaire est devenu générique ! ******/
-/*
-#bilan_legende .supplement{
-    width: 85%;
-    margin: auto;
-    display: flex;
-    padding: 0;
-}
-#bilan_legende .supplement .lien_supplementaire {
-    display: flex;
-    flex-direction: column;
-    margin-right: 1rem;
-    align-items: center;
-    stroke: black;
-    text-decoration: none;
-    color: black;
-    border: 1px solid var(--first-color);
-    padding: 0.5rem;
-    border-radius: 10px;
-    font-size: 0.75rem;
-    height: 60px;
-}
-
-#bilan_legende .supplement .lien_supplementaire:hover {
-    stroke: white;
-    color: white;
-    background: var(--first-color-hover);
-    cursor: pointer;
-}
-
-#bilan_legende .supplement .lien_supplementaire svg {
-    margin-bottom: 1rem;
-}
-
-
-#bilan_legende .supplement .conso:hover svg path:first-of-type{
-    stroke: var(--first-color-hover);
-}
-
-#bilan_legende .supplement .conso svg{
-    /* width: 23%; *//*
-    height: auto;
-    cursor: pointer;
-}
-*/
-
-/* Pour marquer la conso */
-#legende_conso_1 {
-    color: #FF9E00;
-    font-weight: bold;
-}
-
-#legende_conso_2 {
-    color: red;
-    font-weight: bold;
-}
-
-#legende_alerte {
-    background-color: #FE2E2E;
-    color: white;
-    font-weight: bold;
-    font-style: italic;
-}
-#legende {
-    margin: 3em;
-    font-size: .4em;
-}
-#legende br {
-    margin-bottom: 1em;
-}
-/* Alerte du tableau projets par année si quota != attr_heures ou des seuils_conso */
-
-.conso_seuil_1 td {
-    color: #FF9E00;
-    font-weight: bold;
-    }
-
-.conso_seuil_2 td {
-    color: red;
-    font-weight: bold;
-    }
-
-.alerte td { 
-    background-color: #FE2E2E;
-    color: white;
-    font-weight: bold;
-    font-style: italic;
-    }
-
 
 /* ========== ADMINISTRATEUR - ECRAN DATA ========= */
 /* Tableau projet data si pas demandes */
@@ -1744,8 +1726,6 @@ tbody tr.rallonge{
 #section_expert .anciennes_expertises svg{
     stroke: black;
 }
-
-
 
 /* ========== EXPERTISER UN PROJET ==========  */
 #expertise #panneau_enregistrer .fleches{
@@ -1923,8 +1903,6 @@ tbody tr.rallonge{
     height: fit-content;
 }
 
-
-
 /* ========== VALIDATION EXPERTISE ==========  */
 #section_validation_expertise .recapitulatif {
     width: 80%;
@@ -1999,8 +1977,6 @@ tbody tr.rallonge{
     color: white;
 }
 
-
-
 /* ========== COMMENTAIRE DE L'ANNÉE ==========  */
 #section_commentaire_annee h2{
     margin: 50px 0;
@@ -2063,8 +2039,6 @@ tbody tr.rallonge{
     color: white;
 }
 
-
-
 /* ========== CONSULTER ANCIENNE EXPERTISE ==========  */
 #section_anciennes_expertises{
     width: 90%;
@@ -2111,16 +2085,24 @@ tbody tr.rallonge{
     background: var(--first-color-hover);
     color: white;
 }
+/* =========== BILAN DE SESSION =========== */
+#formations th {
+    padding: .5em;
+}
+#formations td {
+    text-align: center;
+}
+#formations td.autres {
+    text-align: left;
+}
+#formations td.total {
+    font-weight: bold;
+}
 
 /* =========== STATISTIQUES =============== */
-/* ===== TODO -> en faire un truc générique ? */
 .engros {
     font-size: 1.7em;
     font-weight: 800;
-}
-
-#index_statistiques .supplement {
-    width: 250px;
 }
 
 .bilan_statistiques th, .bilan_statistiques td {
@@ -2233,5 +2215,9 @@ img.dfct {
     padding: 1em;
     border: 2px solid black;
     background-color: grey;
+}
+#donnees_conso {
+    width:60em;
+    margin: auto;
 }
 

@@ -8,7 +8,7 @@
     {% if serviceVersions.signe(version) == false %}
         <div class="information attention">Le fichier doit être <strong>un pdf de taille inférieure à {{max_size_doc}} Mo</strong></div>
 
-        <div class="televerser">
+        <div class="televerser inputrond">
             {{ form_start( form  )  }}
                 <p><label><strong>Fiche projet à téléverser </strong>{{ form_widget( form.fichier ) }}
                 <input name="submit" value="Téléverser" type="submit"></p>

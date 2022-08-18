@@ -1,4 +1,5 @@
 {% extends 'default/base.html.twig' %}
+{% import "default/icone.html.twig" as icones %}
 
 {% block myjavascripts %}
 <script  src="{{ asset('js/gerer_publis.js') }}" ></script>
@@ -21,22 +22,25 @@
     </thead>
     <tbody><tr><td>
     {% for projet in publication.projet %}
-         &nbsp;{{ projet }}
+         &nbsp;<big>{{ projet }}</big>
     {% endfor %}
     </td></tr></tbody>
 </table>
 
 {% include('publication/form.html.twig') %}
 
-{{ form_start(delete_form) }}
-<input type="submit" value="Retirer cette publication de la liste des publications associées au projet {{ projet }}">
-{{ form_end(delete_form) }}
+<div class="inputrond submitdyn">
+    {{ form_start(delete_form) }}
+    <input type="submit" value="Retirer cette publication de la liste des publications associées au projet {{ projet }}">
+    {{ form_end(delete_form) }}
+</div>
 
 <br>
+
 <nav>
     <ul>
-        <li><a class="modification"href="{{ path('gerer_publications',{'id' : projet.idProjet }) }}"
-            title="liste des publications du projet {{ projet }}">Publications</a>
+        <li><a class="lien_actif" href="{{ path('gerer_publications',{'id' : projet.idProjet }) }}"
+            title="liste des publications du projet {{ projet }}">{{icones.publications}}Publications</a>
         </li>
     </ul>
 </nav>

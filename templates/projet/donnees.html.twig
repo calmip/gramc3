@@ -12,10 +12,10 @@
 
 <div id="dialog-compta"></div>
 
-<section class="section_projet_session" style="stroke:black">
+<section id="section_bilans_listes" style="stroke:black">
     <h2>Gestion et valorisation des données ({{annee}})</h2>
 
-    <div class = "formulaire">
+    <div class="formulaire inputrond">
         {{ form_start(form) }}
             {{ form_widget(form.annee) }}{{ form_widget(form.submit) }}
         {{ form_end(form) }}
@@ -36,156 +36,156 @@
     <hr />
 
     <div class="tableaux">
-    <div id="bilan_legende">
-    <div id="bilan">
-         <table>
-            <tr>
-                <th colspan="2">Stockage</th>
-            </tr>
-            <tr>
-                <th>Nombre de projets total</th>
-                <td>{{total.prj}}</td>
-            </tr>
-            <tr>
-                <th>Nombre de demandes de stockage</th>
-                <td>{{total.sprj}}</td>
-            </tr>
-             <tr>
-                <th>Stockage demandé (To)</th>
-                <td>{{total.demstk}}</td>
-            </tr>
-             <tr>
-                <th>Stockage alloué<br />suite à demande (To)</th>
-                <td>{{total.attrstk}}</td>
-            </tr>
-            <tr>
-                <th>Stockage attribué<br />automatiquement (To)</th>
-                <td>{{total.autostk}}</td>
-            </tr>
-            <tr>
-                <th>Stockage attribué<br />au total (To)</th>
-                <td>{{total.attrstk+total.autostk}}</td>
-            </tr>
-         </table>
-         <table>
-            <tr>
-                <th colspan="2">Partage</th>
-            </tr>
-             <tr>
-                <th>Nombre de projets</th>
-                <td>{{total.pprj}}</td>
-            </tr>
-         </table>
-    </div>
-    </div>
+        <div class="bilan_legende">
+            <div class="bilan">
+                 <table>
+                    <tr>
+                        <th colspan="2">Stockage</th>
+                    </tr>
+                    <tr>
+                        <th>Nombre de projets total</th>
+                        <td>{{total.prj}}</td>
+                    </tr>
+                    <tr>
+                        <th>Nombre de demandes de stockage</th>
+                        <td>{{total.sprj}}</td>
+                    </tr>
+                     <tr>
+                        <th>Stockage demandé (To)</th>
+                        <td>{{total.demstk}}</td>
+                    </tr>
+                     <tr>
+                        <th>Stockage alloué<br />suite à demande (To)</th>
+                        <td>{{total.attrstk}}</td>
+                    </tr>
+                    <tr>
+                        <th>Stockage attribué<br />automatiquement (To)</th>
+                        <td>{{total.autostk}}</td>
+                    </tr>
+                    <tr>
+                        <th>Stockage attribué<br />au total (To)</th>
+                        <td>{{total.attrstk+total.autostk}}</td>
+                    </tr>
+                 </table>
+                 <table>
+                    <tr>
+                        <th colspan="2">Partage</th>
+                    </tr>
+                     <tr>
+                        <th>Nombre de projets</th>
+                        <td>{{total.pprj}}</td>
+                    </tr>
+                 </table>
+            </div>
+        </div>
     
-    <div id="projets" >
-        <table id="table_projets_data" class="dataTable no-footer" >
-            <thead>
-                <tr>
-                    <th>N°</th>
-                    <th title="Demande: S=stockage, P=partage, N=aucune">D</th>
-                    <th></th>
-                    {% if noconso==false %}<th title="Consommation">C</th>{% endif %}
-                    <th>Titre</th>
-                    <th>Thématique</th>
-                    <th>Responsable</th>
-                    <th>Laboratoire</th>
-                    <th>Demandes<br />(To)</th>
-                    {% if noconso==false %}
-                    <th>Quota (To)</th>
-                    <th>Occupation (To)</th>
-                    <th>Occupation (%)</th>
-                    {% endif %}
-                    <th>meta</th>
-                    <th>nombre</th>
-                    <th>taille</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for k,prj_array in projets %}
-    
-                {% if prj_array != null %}
-                    {% set projet=prj_array.p %}
+        <div class="liste" >
+            <table id="table_projets_data" class="dataTable no-footer" >
+                <thead>
+                    <tr>
+                        <th>N°</th>
+                        <th title="Demande: S=stockage, P=partage, N=aucune">D</th>
+                        <th></th>
+                        {% if noconso==false %}<th title="Consommation">C</th>{% endif %}
+                        <th>Titre</th>
+                        <th>Thématique</th>
+                        <th>Responsable</th>
+                        <th>Laboratoire</th>
+                        <th>Demandes<br />(To)</th>
                         {% if noconso==false %}
-                            {% set cls="" %}
-                            {% if prj_array.cp >= conso_seuil_2 %}     {% set cls="conso_seuil_2 " %}
-                            {% elseif prj_array.cp >= conso_seuil_1 %} {% set cls="conso_seuil_1 " %}
-                            {% endif %}
-                        {%endif%}
-                        {% if not prj_array.stk and not prj_array.ptg %} {% set cls=cls~"pasdem "  %} {% endif %}
-                        {% if not cls == "" %} <tr class="{{cls}}">{% else %}<tr>{% endif %}
-                        <td title="{% if prj_array.stk %} stockage {% endif %} {% if prj_array.ptg %} partage {% endif %}{% if not prj_array.stk and not prj_array.ptg %}pas de demande{% endif %}" >{{ projet.id }}</td>
-                        <td>{% if prj_array.stk %} S {% endif %}{% if prj_array.ptg %} P {% endif %}{% if not prj_array.stk and not prj_array.ptg %}N{% endif %}</td>
-                        <td>
-                            {% set version=annee|slice(2,2) ~ 'A' ~ projet %}
-                            <a href="{{ path('consulter_version', { 'id':projet.idprojet,'version': version }) }}" title="Consulter le projet">
-                                {{ icones.details}}
-                            </a>
-                        </td>
-    
-                        {% if noconso==false %}
-                        <td class="w15">
-                            <a id="bconso_{{ projet.idProjet }}" title="{{ projet.idProjet }}: Evolution de la consommation pour {{annee}}"
-                            data-href="{{ absolute_url(path('projet_conso', { 'id': projet.idProjet, 'annee' : annee })) }}">
-                                {{icones.consommation(25,25)}}
-                            </a>
-                        </td>
+                        <th>Quota (To)</th>
+                        <th>Occupation (To)</th>
+                        <th>Occupation (%)</th>
                         {% endif %}
-    
-                        <td>
-                            {{ gramcmacros.afftitre(projet.titre) }}
-                        </td>
-                        <td>
-                            {{ gramcmacros.tronquer_chaine(projet.thematique,20) }}
-                        </td>
-                        <td>
-                            <a href="mailto:{{ projet.responsable.mail }}">
-                                <span title="Envoyer un mail" >{{icones.mail_send}}</span>
-                            </a>
-                            {{ projet.responsable.prenom }} {{ projet.responsable.nom }}
-                        </td>
-                        <td>
-                            {{ gramcmacros.tronquer_chaine(projet.laboratoire,20) }}
-                        </td>
-                        <td title="{{prj_array.sondJustifDonnPerm}}">
-                            {{prj_array.sondVolDonnPermTo}}
-                        </td>
-                        {% if noconso==false %}
-                        <td>
-                            {{prj_array.qt}}
-                            {% if '<' in prj_array.sondVolDonnPermTo or 'sais pas' in prj_array.sondVolDonnPermTo %}
-                                {% if (prj_array.qt != 1) %}
-                                    <span title="Pas de demande le quota devrait avoir la valeur par défaut">{{icones.attention(25,25)}}</span>
+                        <th>meta</th>
+                        <th>nombre</th>
+                        <th>taille</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for k,prj_array in projets %}
+        
+                    {% if prj_array != null %}
+                        {% set projet=prj_array.p %}
+                            {% if noconso==false %}
+                                {% set cls="" %}
+                                {% if prj_array.cp >= conso_seuil_2 %}     {% set cls="conso_seuil_2 " %}
+                                {% elseif prj_array.cp >= conso_seuil_1 %} {% set cls="conso_seuil_1 " %}
                                 {% endif %}
-                            {% else %}
-                                 {% if (prj_array.qt != prj_array.sondVolDonnPermTo) %}
-                                    <span title="Quota différent de la demande">{{icones.attention(25,25)}}</span>
-                                 {% endif %}
+                            {%endif%}
+                            {% if not prj_array.stk and not prj_array.ptg %} {% set cls=cls~"pasdem "  %} {% endif %}
+                            {% if not cls == "" %} <tr class="{{cls}}">{% else %}<tr>{% endif %}
+                            <td title="{% if prj_array.stk %} stockage {% endif %} {% if prj_array.ptg %} partage {% endif %}{% if not prj_array.stk and not prj_array.ptg %}pas de demande{% endif %}" >{{ projet.id }}</td>
+                            <td>{% if prj_array.stk %} S {% endif %}{% if prj_array.ptg %} P {% endif %}{% if not prj_array.stk and not prj_array.ptg %}N{% endif %}</td>
+                            <td>
+                                {% set version=annee|slice(2,2) ~ 'A' ~ projet %}
+                                <a href="{{ path('consulter_version', { 'id':projet.idprojet,'version': version }) }}" title="Consulter le projet">
+                                    {{ icones.details}}
+                                </a>
+                            </td>
+        
+                            {% if noconso==false %}
+                            <td class="w15">
+                                <a id="bconso_{{ projet.idProjet }}" title="{{ projet.idProjet }}: Evolution de la consommation pour {{annee}}"
+                                data-href="{{ absolute_url(path('projet_conso', { 'id': projet.idProjet, 'annee' : annee })) }}">
+                                    {{icones.consommation(25,25)}}
+                                </a>
+                            </td>
                             {% endif %}
-                        </td>
-                        <td>
-                            {{ (prj_array.c / (1024*1024*1024))|number_format(2, ',', ' ')}}
-                        </td>
-                        <td>
-                            {{ prj_array.cp|number_format(0, ',', ' ')}}
-                        </td>
-                        <td>
-                            {{ prj_array.dataMetaDataFormat }}
-                        </td>
-                        <td>
-                            {{ prj_array.dataNombreDatasets }}
-                        </td>
-                        <td>
-                            {{ prj_array.dataTailleDatasets }}
-                        </td>
+        
+                            <td>
+                                {{ gramcmacros.afftitre(projet.titre) }}
+                            </td>
+                            <td>
+                                {{ gramcmacros.tronquer_chaine(projet.thematique,20) }}
+                            </td>
+                            <td>
+                                <a href="mailto:{{ projet.responsable.mail }}">
+                                    <span title="Envoyer un mail" >{{icones.mail_send}}</span>
+                                </a>
+                                {{ projet.responsable.prenom }} {{ projet.responsable.nom }}
+                            </td>
+                            <td>
+                                {{ gramcmacros.tronquer_chaine(projet.laboratoire,20) }}
+                            </td>
+                            <td title="{{prj_array.sondJustifDonnPerm}}">
+                                {{prj_array.sondVolDonnPermTo}}
+                            </td>
+                            {% if noconso==false %}
+                            <td>
+                                {{prj_array.qt}}
+                                {% if '<' in prj_array.sondVolDonnPermTo or 'sais pas' in prj_array.sondVolDonnPermTo %}
+                                    {% if (prj_array.qt != 1) %}
+                                        <span title="Pas de demande le quota devrait avoir la valeur par défaut">{{icones.attention(25,25)}}</span>
+                                    {% endif %}
+                                {% else %}
+                                     {% if (prj_array.qt != prj_array.sondVolDonnPermTo) %}
+                                        <span title="Quota différent de la demande">{{icones.attention(25,25)}}</span>
+                                     {% endif %}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ (prj_array.c / (1024*1024*1024))|number_format(2, ',', ' ')}}
+                            </td>
+                            <td>
+                                {{ prj_array.cp|number_format(0, ',', ' ')}}
+                            </td>
+                            <td>
+                                {{ prj_array.dataMetaDataFormat }}
+                            </td>
+                            <td>
+                                {{ prj_array.dataNombreDatasets }}
+                            </td>
+                            <td>
+                                {{ prj_array.dataTailleDatasets }}
+                            </td>
+                            {% endif %}
                         {% endif %}
-                    {% endif %}
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
     <div id="formulaire_confirmation"></div>
 

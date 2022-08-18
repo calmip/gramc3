@@ -12,14 +12,14 @@
 <section id="index_statistiques" class="section_projet_session" style="stroke:black">
 
     <p><strong>Choisissez une année...</strong></p>
-    <div class="formulaire">
+    <div class="formulaire inputrond submitdyn">
         {{ form_start(form) }}
         {{ form_widget(form.annee) }}{{ form_widget(form.submit) }}
         {{ form_end(form) }}
     </div>
 
     <p>&nbsp;</p><p><strong>...et une session:</strong></p>
-    <div class="formulaire">
+    <div class="formulaire inputrond submitdyn">
         {{ form_start(forms) }}
         {{ form_widget(forms.sess_lbl) }}{{ form_widget(forms.submit) }}
         {{ form_end(forms) }}

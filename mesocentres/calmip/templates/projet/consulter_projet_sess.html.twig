@@ -9,7 +9,7 @@
 
 {% block body %}
 
-    <section class="consulter_projet" style="stroke:black">
+    <section id="consulter_projet" style="stroke:black">
 
         <div class="top_body">
             {% if app.debug %}
@@ -37,7 +37,7 @@
         </h2>
 
         {% if version_form is defined %}
-            <section class="historique">
+            <section class="historique inputrond submitdyn">
                 <h3>Version :
                 </h3> {{ form_start(version_form) }} {{ form_widget(version_form.version) }}{{ form_widget(version_form.submit) }} {{ form_end(version_form) }}
             </section>
@@ -127,10 +127,10 @@
         </section>
 
 {% if pdf is defined %}
-    <div class="I details">
+    <div id="I" class="details">
         <h3>I - Présentation générale</h3>
 {% else %}
-    <details class="I">
+    <details id="I">
         <summary>{{icones.plus_summary}}{{icones.trait_summary}}I - Présentation générale</summary>
 {% endif %}
 
@@ -396,10 +396,10 @@
 {% endif %}
 
 {% if pdf is defined %}
-    <div class="II details">
+    <div id="II" class="details">
         <h3>II - Description scientifique du projet de recherche</h3>
 {% else %}
-    <details class="II">
+    <details id="II">
         <summary>{{icones.plus_summary}}{{icones.trait_summary}}II - Description scientifique du projet de recherche</summary>
 {% endif %}
 
@@ -437,10 +437,10 @@
 {% endif %}
 
 {% if pdf is defined %}
-    <div class="III details">
+    <div id="III" class="details">
         <h3>III - Description technique du projet</h3>
 {% else %}
-    <details class="III">
+    <details id="III">
         <summary>{{icones.plus_summary}}{{icones.trait_summary}}III - Description technique du projet</summary>
 {% endif %}
 

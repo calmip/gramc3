@@ -28,14 +28,14 @@
 
     <div class="formulaire">
     {{ form_start( form  )  }}
-    
     <table>
-    <tr><td class="center" ><label><strong>projet </strong></label></td><td>{{ form_widget( form.projet ) }}</td></tr>
-    <tr><td class="center" ><label> <strong>Type de document </strong></td><td>{{ form_widget( form.type ) }}</td></tr>
-    <tr><td class="center" ><label><strong>Session (def {{def_sess}})</strong><br /><small>Pour une fiche projet</small> </td><td></label>{{ form_widget( form.session ) }}</td></tr>
-    <tr><td class="center" ><label> <strong>Année (def {{def_annee}})</strong><br /><small>Pour un rapport d'activité</small></label></td><td>{{ form_widget( form.annee) }}</td></tr>
-    <tr><td class="center" ><label><strong>Fichier à téléverser</strong></td><td>{{ form_widget( form.file) }}</td></tr>
-    <tr><td>&nbsp;</td><td><input class="form_submit" name="submit" value="Téléverser" type="submit"></td></tr></table>
+        <tr><td class="center" ><label><strong>projet </strong></label></td><td>{{ form_widget( form.projet ) }}</td></tr>
+        <tr class="inputrond"><td class="center" ><label> <strong>Type de document </strong></td><td>{{ form_widget( form.type ) }}</td></tr>
+        <tr><td class="center" ><label><strong>Session (def {{def_sess}})</strong><br /><small>Pour une fiche projet</small> </td><td></label>{{ form_widget( form.session ) }}</td></tr>
+        <tr><td class="center" ><label> <strong>Année (def {{def_annee}})</strong><br /><small>Pour un rapport d'activité</small></label></td><td>{{ form_widget( form.annee) }}</td></tr>
+        <tr class="inputrond" ><td class="center" ><label><strong>Fichier à téléverser</strong></td><td>{{ form_widget( form.file) }}</td></tr>
+        <tr class="inputrond submitdyn"><td>&nbsp;</td><td><input name="submit" value="Téléverser" type="submit"></td></tr>
+    </table>
     {{ form_end(form) }}
     
     <h2>Modifier l'attribution de la version</h2>
@@ -50,10 +50,11 @@
     
     {{ form_start(form1) }}
     <table>
-    <tr><td class="center" ><label><strong>version </strong></label></td><td>{{ form_widget( form1.version ) }}</td></tr>
-    <tr><td class="center" ><label> <strong>Attribution </strong></td><td>{{ form_widget( form1.attrHeures ) }}</td></tr>
-    <tr><td class="center" ><label> <strong>Attribution <br /><small>pour l'été</small> </strong></td><td>{{ form_widget( form1.attrHeuresEte ) }}</td></tr>
-    <tr><td>&nbsp;</td><td><input class="form_submit" name="submit" value="Entrer" type="submit"></td></tr></table>
+        <tr><td class="center" ><label><strong>version </strong></label></td><td>{{ form_widget( form1.version ) }}</td></tr>
+        <tr><td class="center" ><label> <strong>Attribution </strong></td><td>{{ form_widget( form1.attrHeures ) }}</td></tr>
+        <tr><td class="center" ><label> <strong>Attribution <br /><small>pour l'été</small> </strong></td><td>{{ form_widget( form1.attrHeuresEte ) }}</td></tr>
+        <tr class="inputrond submitdyn" ><td>&nbsp;</td><td><input name="submit" value="Entrer" type="submit"></td></tr>
+    </table>
     
     {{ form_end(form1) }}
     </div>

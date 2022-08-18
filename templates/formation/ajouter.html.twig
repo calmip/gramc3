@@ -5,9 +5,10 @@
 <h2>Ajouter une formation</h2>
     {% import "default/macros.html.twig" as gramcmacros %}
     {{ gramcmacros.menu(menu) }}
-    {{ gramcmacros.info('',"Les numéros d'ordre doivent être compris entre <strong>0 et 10</strong> (pas plus de 10 formations) et être <strong>différents</strong>.<br />
-        Ils sont reliés aux champs demFormN de la table version") }}
-
+    <div class="information">
+        <p>Les numéros d'ordre doivent être compris entre <strong>0 et 10</strong> (pas plus de 10 formations) et être <strong>différents</strong>.<br />
+        Ils sont reliés aux champs demFormN de la table version</p>
+    </div>
     
     {{ form_start(form) }}
     <table>
@@ -25,7 +26,7 @@
         </tr>
         <tr>
             <th></th>
-            <td>{{ form_widget(form.submit) }}{{ form_widget(form.reset) }}</td>
+            <td class="inputrond submitdyn">{{ form_widget(form.submit) }}{{ form_widget(form.reset) }}</td>
         </tr>    
     </table>
     {{ form_end(form) }}

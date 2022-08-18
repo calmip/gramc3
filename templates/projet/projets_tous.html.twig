@@ -9,18 +9,19 @@
 
 {% block body %}
 
-<section class="section_projet_session"  style="stroke:black">
+<section id="section_bilans_listes"  style="stroke:black">
 
     <h2>Projets enregistrés (toutes années)</h2>
 
-    <div class="formulaire">
+    <div class="formulaire inputrond submitdyn">
         <form action="{{ path('projet_tous_csv') }}">
             <input class="telecharger_csv" type="submit" value="Télécharger en csv" />
         </form>
     </div>
 
     <div class="tableaux">
-    <div id="bilan_legende"><div id="bilan">
+    <div class="bilan_legende">
+        <div class="bilan">
         <table>
             <tbody>
                 <tr><th colspan="3">Etats des projets</th></tr>
@@ -64,7 +65,7 @@
 
     </div></div>
 
-    <div id="projets"><div id="projets_tous_wrapper" class="dataTables_wrapper no-footer">
+    <div class="liste"><div id="projets_tous_wrapper" class="dataTables_wrapper no-footer">
         <table id="projets_tous" class="dataTable no-footer" role="grid">
             <thead>
                 <tr role="row">

@@ -12,10 +12,10 @@
 
 <div id="dialog-compta"></div>
 
-<section class="section_projet_session" style="stroke:black">
+<section id="section_bilans_listes" style="stroke:black">
     <h2>Projets de l'année {{ annee }}</h2>
 
-    <div class="formulaire">
+    <div class="formulaire inputrond submitdyn">
         {{ form_start(form) }}
         {{ form_widget(form.annee) }}{{ form_widget(form.submit) }}
         {{ form_end(form) }}
@@ -60,9 +60,11 @@
     </div>
     {% endif %}
 
-    <hr>
+    <hr class="separateur">
+    
     <div class="tableaux">
-    <div id="bilan_legende"><div id="bilan">
+    <div class="bilan_legende">
+        <div class="bilan">
         <table>
             <tr>
                 <th colspan="2">Session A</th>
@@ -241,7 +243,7 @@
     {% endif %}
 </div>
 
-<div id="projets" >
+<div class="liste" >
     <table id="table_projets_annee" class="scrtable dataTable no-footer" role="grid" >
         <thead>
             <tr>

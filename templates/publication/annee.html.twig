@@ -11,20 +11,23 @@
 
 {% import "default/macros.html.twig" as gramcmacros %}
 
+    <div class="inputrond submitdyn">
     {{ form_start(form) }}
         {{ form_widget(form.annee) }}{{ form_widget(form.submit) }}
     {{ form_end(form) }}
+    </div>
+    
+    <br>
 
-    <br />
     <form action="{{ path('publication_annee_csv', {'annee': annee }) }}">
-        <input type="submit" value="Télécharger en csv pour l'année {{ annee }}" />
+        <input class="telecharger_csv" type="submit" value="Télécharger en csv pour l'année {{ annee }}" />
     </form>
 
 <div class="information">Publications de {{annee}} citées par les collaborateurs de projets {{ mesoc }} et pour lesquelles les ressources de 
 calcul de {{ mesoc }} ont été utilisées</div>
 
 <div>
-    <table  class="projet" id="publis_projet" >
+    <table id="publis_projet" >
     <thead>
         <tr>
             <th>Réference</th>

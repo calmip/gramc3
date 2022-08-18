@@ -9,10 +9,10 @@
 
 {% block body %}
 <div id="dialog-compta"></div>
-<section class="section_projet_session" style="stroke:black">
+<section id="section_bilans_listes" style="stroke:black">
     <h2>Projets de la session {{ session }}</h2>
 
-    <div class="formulaire">
+    <div class="formulaire inputrond submitdyn">
         {{ form_start(form) }}
             {{ form_widget(form.session) }}{{ form_widget(form.submit) }}
         {{ form_end(form) }}
@@ -21,14 +21,10 @@
             <input class="telecharger_csv" type="submit" value="Télécharger en csv pour la session {{ idSession }}" />
         </form>
     </div>
-
     <hr class="separateur">
-
     <div class="tableaux">
-    
-        <div id="bilan_legende">
-            <div id="bilan">
-
+        <div class="bilan_legende">
+            <div class="bilan">
                 <table>
                     <tr>
                         <th colspan="3">Projets</th>
@@ -59,7 +55,6 @@
                         <td><input type="checkbox" class="cb" id="renouv" checked="checked" /></td>
                     </tr>
                 </table>
-
                 <table>
                     <tr>
                         <th colspan="3">Etats des projets</th>
@@ -178,9 +173,7 @@
                         <td><input type="checkbox" class="cb" id="avec_expert" checked="checked" /></td>
                     </tr>
                     {% endif %}
-
                 </table>
-
                 <table id="themas">
                     <tr>
                         <th colspan="3">Thématiques</th>
@@ -199,7 +192,6 @@
                         <td><input type="checkbox" id="tX" checked="checked" /></td>
                     </tr>
                 </table>
-
                 <table id="ratt">
                     <tr>
                         <th colspan="3">Rattachements</th>
@@ -221,7 +213,7 @@
             </div>
         </div>
 
-        <div id="projets" >
+        <div class="liste" >
             <table id="table_projets_session">
                 <thead>
                     <tr>
