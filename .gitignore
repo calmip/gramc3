@@ -18,7 +18,7 @@ src/cache/*
 /app/config/parameters.yml
 /app/config/parameters.*.yml
 parameters.yaml
-public/css/colors.css
+/mesocentres/**/colors.css
 
 /build/
 /phpunit.xml
@@ -35,8 +35,8 @@ public/css/colors.css
 !var/SymfonyRequirements.php
 /web/bundles/
 /mesocentres/**/banniere.png
+/mesocentres/**/header.png
 /mesocentres/**/favicon.ico
-config/packages/security.yaml
 
 altermeso
 config/adresses.txt
