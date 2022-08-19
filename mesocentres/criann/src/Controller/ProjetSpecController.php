@@ -56,7 +56,6 @@ use App\GramcServices\GramcGraf\Calcul;
 use Psr\Log\LoggerInterface;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -79,6 +78,8 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
+use Doctrine\ORM\EntityManagerInterface;
+
 use Twig\Environment;
 
 /**
@@ -93,54 +94,27 @@ use Twig\Environment;
 
 class ProjetSpecController extends AbstractController
 {
-    private $sj;
-    private $sm;
-    private $sp;
-    private $ss;
-    private $gcl;
-    private $gstk;
-    private $gall;
-    private $sd;
-    private $sv;
-    private $se;
-    private $pw;
-    private $ff;
     private $token;
-    private $tw;
-    private $ac;
-
     public function __construct(
-        ServiceJournal $sj,
-        ServiceMenus $sm,
-        ServiceProjets $sp,
-        ServiceSessions $ss,
-        Calcul $gcl,
-        Stockage $gstk,
-        CalculTous $gall,
-        GramcDate $sd,
-        ServiceVersions $sv,
-        ServiceExperts $se,
-        ProjetWorkflow $pw,
-        FormFactoryInterface $ff,
-        TokenStorageInterface $tok,
-        Environment $tw,
-        AuthorizationCheckerInterface $ac
-    ) {
-        $this->sj  = $sj;
-        $this->sm  = $sm;
-        $this->sp  = $sp;
-        $this->ss  = $ss;
-        $this->gcl = $gcl;
-        $this->gstk= $gstk;
-        $this->gall= $gall;
-        $this->sd  = $sd;
-        $this->sv  = $sv;
-        $this->se  = $se;
-        $this->pw  = $pw;
-        $this->ff  = $ff;
-        $this->token= $tok->getToken();
-        $this->tw  = $tw;
-        $this->ac  = $ac;
+        private ServiceJournal $sj,
+        private ServiceMenus $sm,
+        private ServiceProjets $sp,
+        private ServiceSessions $ss,
+        private Calcul $gcl,
+        private Stockage $gstk,
+        private CalculTous $gall,
+        private GramcDate $sd,
+        private ServiceVersions $sv,
+        private ServiceExperts $se,
+        private ProjetWorkflow $pw,
+        private FormFactoryInterface $ff,
+        private TokenStorageInterface $tok,
+        private Environment $tw,
+        private AuthorizationCheckerInterface $ac,
+        private EntityManagerInterface $em
+    )
+    {
+        $this->token = $tok->getToken();
     }
 
     /**
@@ -156,7 +130,7 @@ class ProjetSpecController extends AbstractController
         $ss                  = $this->ss;
         $sp                  = $this->sp;
         $token               = $this->token;
-        $em                  = $this->getDoctrine()->getManager();
+        $em                  = $this->em;
         $individu            = $token->getUser();
         $id_individu         = $individu->getIdIndividu();
 
@@ -243,7 +217,7 @@ class ProjetSpecController extends AbstractController
                     $pwd_expir = null;
                 } else {
                     $passwd = $u->getPassword();
-                    $passwd    = Functions::simpleDecrypt($passwd);
+                    $passwd = Functions::simpleDecrypt($passwd);
                     $pwd_expir = $u->getPassexpir();
                 }
             } else {
@@ -303,7 +277,7 @@ class ProjetSpecController extends AbstractController
      */
     public function consulterAction(Projet $projet, Version $version = null, Request $request, $warn_type=0)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sp = $this->sp;
         $sj = $this->sj;
         $coll_vers_repo= $em->getRepository(CollaborateurVersion::class);
@@ -355,7 +329,7 @@ class ProjetSpecController extends AbstractController
     // Consulter les projets de type 1 (projets PROJET_SESS) ou type 3 (PROJET_FIL)
     private function consulterType1_3(Projet $projet, Version $version, $loginname, Request $request, $warn_type)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sm = $this->sm;
         $sp = $this->sp;
         $ac = $this->ac;
@@ -370,7 +344,7 @@ class ProjetSpecController extends AbstractController
             EntityType::class,
             [
             'multiple' => false,
-            'class'    => 'App:Version',
+            'class'    => Version::class,
             'required' =>  true,
             'label'    => '',
             'choices'  =>  $projet->getVersion(),
@@ -407,33 +381,30 @@ class ProjetSpecController extends AbstractController
         if ($this->getParameter('nodata')==false) {
             $menu[] = $sm->donnees($version);
         }
-        $menu[] = $sm->telechargement_fiche($version);
-        $menu[] = $sm->televersement_fiche($version);
+        $menu[] = $sm->telechargement_fiche($version,ServiceMenus::BPRIO);
+        $menu[] = $sm->televerser_fiche($version,ServiceMenus::BPRIO);
 
         $etat_version = $version->getEtatVersion();
         if ($this->getParameter('rapport_dactivite')) {
             if (($etat_version == Etat::ACTIF || $etat_version == Etat::TERMINE) && ! $sp->hasRapport($projet, $version->getAnneeSession())) {
-                $menu[] = $sm->telecharger_modele_rapport_dactivite($version);
-                $menu[] = $sm->televerser_rapport_annee($version);
+                $menu[] = $sm->telecharger_modele_rapport_dactivite($version,ServiceMenus::BPRIO);
+                $menu[] = $sm->televerser_rapport_annee($version,ServiceMenus::BPRIO);
             }
         }
 
         $menu[]       = $sm->gerer_publications($projet);
-        $img_expose_1 = $sv->imageProperties('img_expose_1', $version);
-        $img_expose_2 = $sv->imageProperties('img_expose_2', $version);
-        $img_expose_3 = $sv->imageProperties('img_expose_3', $version);
+        $img_expose = [
+            $sv->imageProperties('img_expose_1', 'Figure 1', $version),
+            $sv->imageProperties('img_expose_2', 'Figure 2', $version),
+            $sv->imageProperties('img_expose_3', 'Figure 3', $version),
+        ];
         $document     = $sv->getdocument($version);
 
-        /*
-        if( $img_expose_1 == null )
-            $sj->debugMessage(__METHOD__.':'.__LINE__ ." img_expose1 null");
-        else
-            $sj->debugMessage(__METHOD__.':'.__LINE__ . " img_expose1 non null");
-        */
-
-        $img_justif_renou_1 = $sv->imageProperties('img_justif_renou_1', $version);
-        $img_justif_renou_2 = $sv->imageProperties('img_justif_renou_2', $version);
-        $img_justif_renou_3 = $sv->imageProperties('img_justif_renou_3', $version);
+        $img_justif_renou = [
+            $sv->imageProperties('img_justif_renou_1', 'Figure 1', $version),
+            $sv->imageProperties('img_justif_renou_2', 'Figure 2', $version),
+            $sv->imageProperties('img_justif_renou_3', 'Figure 3', $version)
+        ];
 
         $toomuch = false;
         if ($session->getLibelleTypeSession()=='B' && ! $sv->isNouvelle($version)) {
@@ -456,26 +427,22 @@ class ProjetSpecController extends AbstractController
         return $this->render(
             $tmpl,
             [
-                'warn_type'          => $warn_type,
-                'projet'             => $projet,
-                'loginname'          => $loginname,
-                'version_form'       => $session_form->createView(),
-                'version'            => $version,
-                'session'            => $session,
-                'menu'               => $menu,
-                'img_expose_1'       => $img_expose_1,
-                'img_expose_2'       => $img_expose_2,
-                'img_expose_3'       => $img_expose_3,
-                'img_justif_renou_1' => $img_justif_renou_1,
-                'img_justif_renou_2' => $img_justif_renou_2,
-                'img_justif_renou_3' => $img_justif_renou_3,
-                'conso_cpu'          => $sp->getConsoRessource($projet, 'cpu', $version->getAnneeSession()),
-                'conso_gpu'          => $sp->getConsoRessource($projet, 'gpu', $version->getAnneeSession()),
-                'rapport_1'          => $rapport_1,
-                'rapport'            => $rapport,
-                'document'           => $document,
-                'toomuch'            => $toomuch,
-                'formation'          => $formation
+                'warn_type' => $warn_type,
+                'projet' => $projet,
+                'loginname' => $loginname,
+                'version_form' => $session_form->createView(),
+                'version' => $version,
+                'session' => $session,
+                'menu' => $menu,
+                'img_expose' => $img_expose,
+                'img_justif_renou' => $img_justif_renou,
+                'conso_cpu' => $sp->getConsoRessource($projet, 'cpu', $version->getAnneeSession()),
+                'conso_gpu' => $sp->getConsoRessource($projet, 'gpu', $version->getAnneeSession()),
+                'rapport_1' => $rapport_1,
+                'rapport' => $rapport,
+                'document' => $document,
+                'toomuch' => $toomuch,
+                'formation' => $formation
             ]
         );
     }

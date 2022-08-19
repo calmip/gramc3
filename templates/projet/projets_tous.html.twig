@@ -1,6 +1,7 @@
 {% extends 'default/base.html.twig' %}
 {% import "default/macros.html.twig" as gramcmacros %}
 {% import "projet/terminer.html.twig" as terminermacros %}
+{% import "default/icone.html.twig" as icones %}
 
 {% block myjavascripts %}
 <script  type="text/javascript" src="{{ asset('js/projets_experts.js') }}" ></script>
@@ -8,14 +9,19 @@
 
 {% block body %}
 
-<section>
-    <h1>Projets enregistrés (toutes années)</h1>
+<section id="section_bilans_listes"  style="stroke:black">
 
-    <form action="{{ path('projet_tous_csv') }}">
-        <input type="submit" value="Télécharger en csv" />
-    </form></p>
+    <h2>Projets enregistrés (toutes années)</h2>
 
-    <div id="bilan_legende"><div id="bilan">
+    <div class="formulaire inputrond submitdyn">
+        <form action="{{ path('projet_tous_csv') }}">
+            <input class="telecharger_csv" type="submit" value="Télécharger en csv" />
+        </form>
+    </div>
+
+    <div class="tableaux">
+    <div class="bilan_legende">
+        <div class="bilan">
         <table>
             <tbody>
                 <tr><th colspan="3">Etats des projets</th></tr>
@@ -59,7 +65,7 @@
 
     </div></div>
 
-    <div id="projets"><div id="projets_tous_wrapper" class="dataTables_wrapper no-footer">
+    <div class="liste"><div id="projets_tous_wrapper" class="dataTables_wrapper no-footer">
         <table id="projets_tous" class="dataTable no-footer" role="grid">
             <thead>
                 <tr role="row">
@@ -83,21 +89,21 @@
                 <tr role="row" class="odd">
 
                     <td class="sorting_1">
-					{% if item.renouvelable %}
-	                    {% if (item.metaetat == 'standby' or item.metaetat == 'agarder') %}
-							{% if item.projet.nepasterminer==false %}
-								{{ terminermacros.onpeutterminer(item.projet) }}
-							{% else %}
-								{{ terminermacros.nepasterminer(item.projet) }}
-		                    {% endif %}
-	                    {% endif %}
-	                 {% endif %}
+                    {% if item.renouvelable %}
+                        {% if (item.metaetat == 'standby' or item.metaetat == 'agarder') %}
+                            {% if item.projet.nepasterminer==false %}
+                                {{ terminermacros.onpeutterminer(item.projet) }}
+                            {% else %}
+                                {{ terminermacros.nepasterminer(item.projet) }}
+                            {% endif %}
+                        {% endif %}
+                     {% endif %}
 
                     </td>
                     <td>{{ item.projet.idProjet }}</td>
                     <td>
                         <a href="{{ path('consulter_projet', { 'id': item.projet.idProjet }) }}" title="Consulter le projet">
-                            <img src="{{ asset('icones/consulter.png') }}" alt="Consulter" />
+                            {{icones.details}}
                         </a>
                     </td>
 
@@ -106,7 +112,7 @@
                     {% else %}
                         <td class="{{ item.metaetat|lower }}">
                     {% endif %}
-					{{ gramcmacros.metagraph(item.metaetat) }}
+                    {{ gramcmacros.metagraph(item.metaetat) }}
                         </td>
 
                     <td>
@@ -122,10 +128,12 @@
                         {% if( item.responsable != null) %}
                         {% if is_granted('ROLE_ADMIN') %}
                         <a class="sudo" href="{{ path('sudo',  { 'id': item.responsable.id }) }}?" title="Changer d'identité">
-                            <img class="bouton_poussoir" src="{{ asset('icones/sudo.png') }}" alt="Changer d'identité" /></a>
+                            {{icones.sudo(20,20)}}
+                        </a>
                         {% endif %}
                         <a href="mailto:{{ item.responsable.mail }}" title="Envoyer un courriel au responsable à l'adresse {{ item.responsable.mail }}">
-                            <img src="{{ asset('icones/mail_send.png') }}" alt="Envoyer un mail" /></a>
+                            {{icones.mail_send}}
+                        </a>
                         {{ item.responsable.prenom }} {{ item.responsable.nom }}
                         {% endif %}
                     </td>
@@ -143,6 +151,7 @@
         </table>
         </div></div>
 
+ </div>
  <div id="formulaire_confirmation"></div>
  </section>
 {% endblock %}

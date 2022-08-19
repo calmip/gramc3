@@ -78,6 +78,8 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
+use Doctrine\ORM\EntityManagerInterface;
+
 use Twig\Environment;
 
 /**
@@ -94,54 +96,26 @@ use Twig\Environment;
 
 class ProjetSpecController extends AbstractController
 {
-    private $sj;
-    private $sm;
-    private $sp;
-    private $ss;
-    private $gcl;
-    private $gstk;
-    private $gall;
-    private $sd;
-    private $sv;
-    private $se;
-    private $pw;
-    private $ff;
     private $token;
-    private $tw;
-    private $ac;
-
     public function __construct(
-        ServiceJournal $sj,
-        ServiceMenus $sm,
-        ServiceProjets $sp,
-        ServiceSessions $ss,
-        Calcul $gcl,
-        Stockage $gstk,
-        CalculTous $gall,
-        GramcDate $sd,
-        ServiceVersions $sv,
-        ServiceExperts $se,
-        ProjetWorkflow $pw,
-        FormFactoryInterface $ff,
-        TokenStorageInterface $tok,
-        Environment $tw,
-        AuthorizationCheckerInterface $ac
+        private ServiceJournal $sj,
+        private ServiceMenus $sm,
+        private ServiceProjets $sp,
+        private ServiceSessions $ss,
+        private Calcul $gcl,
+        private Stockage $gstk,
+        private CalculTous $gall,
+        private GramcDate $sd,
+        private ServiceVersions $sv,
+        private ServiceExperts $se,
+        private ProjetWorkflow $pw,
+        private FormFactoryInterface $ff,
+        private TokenStorageInterface $tok,
+        private Environment $tw,
+        private AuthorizationCheckerInterface $ac,
+        private EntityManagerInterface $em
     ) {
-        $this->sj  = $sj;
-        $this->sm  = $sm;
-        $this->sp  = $sp;
-        $this->ss  = $ss;
-        $this->gcl = $gcl;
-        $this->gstk= $gstk;
-        $this->gall= $gall;
-        $this->sd  = $sd;
-        $this->sv  = $sv;
-        $this->se  = $se;
-        $this->pw  = $pw;
-        $this->ff  = $ff;
-        $this->token= $tok->getToken();
-        $this->tw  = $tw;
-        $this->ac  = $ac;
+        $this->token = $tok->getToken();
     }
 
     /**
@@ -157,7 +131,7 @@ class ProjetSpecController extends AbstractController
         $ss                  = $this->ss;
         $sp                  = $this->sp;
         $token               = $this->token;
-        $em                  = $this->getDoctrine()->getManager();
+        $em                  = $this->em;
         $individu            = $token->getUser();
         $id_individu         = $individu->getIdIndividu();
 
@@ -246,7 +220,7 @@ class ProjetSpecController extends AbstractController
                     $pwd_expir = null;
                 } else {
                     $passwd = $u->getPassword();
-                    $passwd    = Functions::simpleDecrypt($passwd);
+                    $passwd = Functions::simpleDecrypt($passwd);
                     $pwd_expir = $u->getPassexpir();
                 }
             } else {
@@ -303,6 +277,7 @@ class ProjetSpecController extends AbstractController
         $menu['commentaire']    =   "Vous ne pouvez pas créer de nouveau projet actuellement";
         $menu['name']   =   'avant_nouveau_projet';
         $menu['params'] =   [ 'type' =>  Projet::PROJET_SESS ];
+        $menu['icone']   =   'nouveauProjet';
         $menu['lien']   =   'Nouveau projet';
         $menu['ok'] = false;
 
@@ -322,6 +297,7 @@ class ProjetSpecController extends AbstractController
             $menu['ok'] = true;
         } else {
             $menu['raison'] = 'Nous ne sommes pas en période de demande, pas possible de créer un nouveau projet';
+            $menu['icone']   =   'nouveauProjet';
         }
 
         return $menu;
@@ -339,22 +315,25 @@ class ProjetSpecController extends AbstractController
         $menu['commentaire']    =   "Vous ne pouvez pas créer de nouveau projet test actuellement";
         $menu['name']   =   'avant_nouveau_projet';
         $menu['params'] =   [ 'type' =>  Projet::PROJET_FIL ];
-        $menu['lien']   =   'Nouveau projet test';
+        $menu['icone']   =   'nouveauProjet';
+        $menu['lien']   =   'Nouveau projet TEST';
         $menu['ok'] = false;
 
         $session =  $this->ss->getSessionCourante();
-        if ($session == null) {
+        if ($session == null)
+        {
             $menu['raison'] = "Il n'y a pas de session courante";
             return $menu;
         }
-        if ($user == null) {
+        if ($user == null)
+        {
             $menu['raison'] = "Connection anonyme ?";
             return $menu;
         }
 
         $etat_session   =   $session->getEtatSession();
         //$this->sj-> debugMessage(__METHOD__ . ':' . __LINE__ . "countProjetsTestResponsable = " .
-        //     $this->em->getRepository(Projet::class)->countProjetsTestResponsable( App::getUser() ));
+        //     $this->em->getRepository(Projet::class)->countProjetsTestResponsable( getUser() ));
 
         //if ($this->em->getRepository(Projet::class)->countProjetsTestResponsable($user) > 0) {
         //    $menu['raison'] = "Vous êtes déjà responsable d'un projet test";
@@ -363,10 +342,14 @@ class ProjetSpecController extends AbstractController
 
         // manu, 11 juin 2019: tout le monde peut créer un projet test. Vraiment ???
         // manu, Octobre 2021: ben non si on autorise ici ça va coincer plus tard !
-        if( ! $user->peut_creer_projets() ) {
+        if( ! $user->peut_creer_projets() )
+        {
             $menu['raison'] = "Vous n'avez pas le droit de créer un projet test, peut-être faut-il mettre à jour votre profil ?";
             return $menu;
-        } elseif ($etat_session != Etat::ACTIF) {
+        }
+
+        elseif ($etat_session != Etat::ACTIF)
+        {
             $menu['raison'] = "Il n'est pas possible de créer un projet test en période d'attribution";
             return $menu;
         }
@@ -388,7 +371,7 @@ class ProjetSpecController extends AbstractController
      */
     public function consulterAction(Projet $projet, Version $version = null, Request $request, $warn_type=0)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sp = $this->sp;
         $sj = $this->sj;
         $coll_vers_repo= $em->getRepository(CollaborateurVersion::class);
@@ -435,7 +418,7 @@ class ProjetSpecController extends AbstractController
     // Consulter les projets de type 1
     private function consulterType1(Projet $projet, Version $version, $loginname, Request $request, $warn_type)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sm = $this->sm;
         $sp = $this->sp;
         $ac = $this->ac;
@@ -450,7 +433,7 @@ class ProjetSpecController extends AbstractController
             EntityType::class,
             [
             'multiple' => false,
-            'class'    => 'App:Version',
+            'class'    => Version::class,
             'required' =>  true,
             'label'    => '',
             'choices'  =>  $projet->getVersion(),
@@ -479,42 +462,40 @@ class ProjetSpecController extends AbstractController
         if ($ac->isGranted('ROLE_ADMIN')) {
             $menu[] = $sm->rallonge_creation($projet);
         }
-        $menu[] = $sm->changer_responsable($version);
+
         $menu[] = $sm->renouveler_version($version);
         $menu[] = $sm->modifier_version($version);
         $menu[] = $sm->envoyer_expert($version);
+        $menu[] = $sm->changer_responsable($version);
         $menu[] = $sm->modifier_collaborateurs($version);
+
         if ($this->getParameter('nodata')==false) {
             $menu[] = $sm->donnees($version);
         }
+        $menu[] = $sm->gerer_publications($projet);
         $menu[] = $sm->telechargement_fiche($version);
-        $menu[] = $sm->televersement_fiche($version);
+        $menu[] = $sm->televerser_fiche($version);
 
         $etat_version = $version->getEtatVersion();
         if ($this->getParameter('rapport_dactivite')) {
             if (($etat_version == Etat::ACTIF || $etat_version == Etat::TERMINE) && ! $sp->hasRapport($projet, $version->getAnneeSession())) {
-                $menu[] = $sm->telecharger_modele_rapport_dactivite($version);
-                $menu[] = $sm->televerser_rapport_annee($version);
+                $menu[] = $sm->telecharger_modele_rapport_dactivite($version,ServiceMenus::BPRIO);
+//                $menu[] = $sm->televerser_rapport_annee($version,ServiceMenus::BPRIO);
             }
         }
-
-        $menu[]       = $sm->gerer_publications($projet);
-        $img_expose_1 = $sv->imageProperties('img_expose_1', $version);
-        $img_expose_2 = $sv->imageProperties('img_expose_2', $version);
-        $img_expose_3 = $sv->imageProperties('img_expose_3', $version);
+        $img_expose = [
+            $sv->imageProperties('img_expose_1', 'Figure 1', $version),
+            $sv->imageProperties('img_expose_2', 'Figure 2', $version),
+            $sv->imageProperties('img_expose_3', 'Figure 3', $version),
+        ];
         $document     = $sv->getdocument($version);
 
-        /*
-        if( $img_expose_1 == null )
-            $sj->debugMessage(__METHOD__.':'.__LINE__ ." img_expose1 null");
-        else
-            $sj->debugMessage(__METHOD__.':'.__LINE__ . " img_expose1 non null");
-        */
-
-        $img_justif_renou_1 = $sv->imageProperties('img_justif_renou_1', $version);
-        $img_justif_renou_2 = $sv->imageProperties('img_justif_renou_2', $version);
-        $img_justif_renou_3 = $sv->imageProperties('img_justif_renou_3', $version);
-
+        $img_justif_renou = [
+            $sv->imageProperties('img_justif_renou_1', 'Figure 1', $version),
+            $sv->imageProperties('img_justif_renou_2', 'Figure 2', $version),
+            $sv->imageProperties('img_justif_renou_3', 'Figure 3', $version)
+        ];
+        
         $toomuch = false;
         if ($session->getLibelleTypeSession()=='B' && ! $sv->isNouvelle($version)) {
             $version_prec = $version->versionPrecedente();
@@ -543,12 +524,8 @@ class ProjetSpecController extends AbstractController
                 'version'            => $version,
                 'session'            => $session,
                 'menu'               => $menu,
-                'img_expose_1'       => $img_expose_1,
-                'img_expose_2'       => $img_expose_2,
-                'img_expose_3'       => $img_expose_3,
-                'img_justif_renou_1' => $img_justif_renou_1,
-                'img_justif_renou_2' => $img_justif_renou_2,
-                'img_justif_renou_3' => $img_justif_renou_3,
+                'img_expose'         => $img_expose,
+                'img_justif_renou'   => $img_justif_renou,
                 'conso_cpu'          => $sp->getConsoRessource($projet, 'cpu', $version->getAnneeSession()),
                 'conso_gpu'          => $sp->getConsoRessource($projet, 'gpu', $version->getAnneeSession()),
                 'rapport_1'          => $rapport_1,
@@ -693,7 +670,7 @@ class ProjetSpecController extends AbstractController
         }
 
         $session = $ss->getSessionCourante();
-        $projetRepository = $this->getDoctrine()->getManager()->getRepository(Projet::class);
+        $projetRepository = $this->em->getRepository(Projet::class);
         $id_individu      = $token->getUser()->getIdIndividu();
 
         return $this->render(
@@ -714,7 +691,7 @@ class ProjetSpecController extends AbstractController
      */
     public function TransformerAction(Request $request, Projet $projet)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $m = $this->menu_transformer($projet);
         if ($m['ok'] == false) {

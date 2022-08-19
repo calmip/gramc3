@@ -1,12 +1,84 @@
-{% extends 'default/base.html.twig' %}
-
 {% import "default/macros.html.twig" as gramcmacros %} 
+{% import "default/icone.html.twig" as icones %}
 
-       
-{# ######################################################################### #}
+{{ info|raw }}
 
-{% block body %}
-<section>
-	{{ info|raw }}
-</section>
-{% endblock body %}
+<hr />
+    <h2 style="text-align: center">Icones utilisables dans gramc3</h2>
+
+    {% set liste_icones= [ 'indefinit',
+                           'scrollTop',
+                           'nouveauProjet',
+                           'details',
+                           'supprimer',
+                           'consommation',
+                           'croix',
+                           'valide',
+                           'actif',
+                           'renouveler',
+                           'modifier',
+                           'envoyer',
+                           'telecharger',
+                           'televerser',
+                           'pdf',
+                           'fleche_retour',
+                           'trait_summary',
+                           'plus_summary',
+                           'fleche_gauche',
+                           'fleche_droite',
+                           'liste_utilisateur',
+                           'projet_session',
+                           'annee',
+                           'tous',
+                           'donnees',
+                           'televersement_generique',
+                           'sessions',
+                           'bilan',
+                           'formation',
+                           'mail',
+                           'laboratoire',
+                           'rattachement',
+                           'thematique',
+                           'statistiques',
+                           'publications',
+                           'lire_journal',
+                           'personnes_connectees',
+                           'avancer_temps',
+                           'nettoyage',
+                           'technique',
+                           'euro',
+                           'mail_send',
+                           'process_stop',
+                           'nepasterminer',
+                           'onpeutterminer',
+                           'attente',
+                           'standby',
+                           'agarder',
+                           'expertise',
+                           'nonrenouvelle',
+                           'back',
+                           'forward',
+                           'bientotactif',
+                           'refuse',
+                           'forbidden',
+                           'expert',
+                           'president',
+                           'admin',
+                           'obs',
+                           'sysadmin',
+                           'attention',
+                           'norecup',
+                           'recup',
+                           ] %}
+    <div class="center">
+    <table style="stroke: black">
+    <style>
+    .fill{
+        fill: black;
+    }
+    </style>
+        {% for i in liste_icones %}
+        <tr><td class="e">{{i}}</td><td class="v">{{ gramcmacros.menuIcones(i) }}</td></tr>
+        {% endfor %}
+    </table>
+    </div>

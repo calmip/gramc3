@@ -6,18 +6,31 @@
 {# ######################################################################### #}
 
 {% block body %}
-<section>
-    <h3 class="center">Les utilisateurs</h3>
-    {{ gramcmacros.menu(menu1) }}
-    <h3 class="center">Les projets</h3>
-    {{ gramcmacros.menu(menu3) }}
-    <h3 class="center">Les sessions</h3>
-    {{ gramcmacros.menu(menu2) }}
-    <h3 class="center">Les thématiques</h3>
-    {{ gramcmacros.menu(menu4) }}
-    <h3 class="center">Bilans et statistiques</h3>
-    {{ gramcmacros.menu(menu5) }}
-    <h3 class="center">Maintenance</h3>
-    {{ gramcmacros.menu(menu6) }}
+<section id="section_administrateur">
+    <h2>Menu</h2>
+    <div>
+        <h3>Les utilisateurs</h3>
+        {{ gramcmacros.menu(menu1) }}
+    </div>
+    <div>
+        <h3>Les projets</h3>
+        {{ gramcmacros.menu(menu3) }}
+    </div>
+    <div>
+        <h3>Les sessions</h3>
+        {{ gramcmacros.menu(menu2) }}
+    </div>
+    <div>
+        <h3>Tables de l'application</h3>
+        {{ gramcmacros.menu(menu4) }}
+    </div>
+    <div>
+        <h3>Bilans et statistiques</h3>
+        {{ gramcmacros.menu(menu5) }}
+    </div>
+    <div>
+        <h3>Maintenance</h3>
+        {{ gramcmacros.menu(menu6) }}
+    </div>
 </section>
 {% endblock body %}

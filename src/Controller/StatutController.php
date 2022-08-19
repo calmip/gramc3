@@ -33,6 +33,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Form\FormInterface;
 
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * Statut controller.
@@ -42,6 +43,10 @@ use Symfony\Component\Form\FormInterface;
  */
 class StatutController extends AbstractController
 {
+    public function __construct(
+        private EntityManagerInterface $em
+    ) {}
+
     /**
      * Lists all statut entities.
      *
@@ -50,9 +55,9 @@ class StatutController extends AbstractController
      */
     public function indexAction(): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
-        $statuts = $em->getRepository('App:Statut')->findAll();
+        $statuts = $em->getRepository(Statut::class)->findAll();
 
         return $this->render('statut/index.html.twig', array(
             'statuts' => $statuts,
@@ -72,7 +77,7 @@ class StatutController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($statut);
             $em->flush($statut);
 
@@ -114,7 +119,7 @@ class StatutController extends AbstractController
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('statut_edit', array('id' => $statut->getId()));
         }
@@ -138,7 +143,7 @@ class StatutController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->remove($statut);
             $em->flush($statut);
         }

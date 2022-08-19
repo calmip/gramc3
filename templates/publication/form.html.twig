@@ -1,17 +1,17 @@
 {{ form_start( form ) }}
 
-<fieldset><table class="projet">
+<table class="projet">
     <tbody>
         <tr>
             <th>Référence bibliographique<br><span class="petit">(champ obligatoire)</span></th>
             <td>{{ form_widget( form.refbib,
-                { 'attr': { 'size': '80', 'class' : 'refbib ui-autocomplete-input' , 'id' : 'refbib', 'data-autocomplete': path('publication_autocomplete')  } }
-                    ) }}</td>
+                { 'attr': { 'size': '100', 'class' : 'refbib ui-autocomplete-input' , 'id' : 'refbib', 'data-autocomplete': path('publication_autocomplete')  } }
+                    ) }}
+            </td>
         </tr>
         <tr>
             <th>Année de publication<br><span class="petit">(champ obligatoire)</span></th>
-             <td>{{ form_widget( form.annee ) }}{{ form_widget( form.idPubli , { 'attr': {  style : "display:NONE" } }   ) }}</td> 
-            {# <td>{{ form_widget( form.annee ) }}</td> #}
+             <td class="inputrond">{{ form_widget( form.annee ) }}{{ form_widget( form.idPubli , { 'attr': {  style : "display:NONE" } }   ) }}</td> 
         </tr>
         <tr>
             <th>doi <small>(cf. <a href="http://www.doi.org/" target="_blank">www.doi.org</a>)</small><br><span class="petit">(champ optionnel)</span></th>
@@ -22,11 +22,11 @@
             <td>{{ form_widget( form.openUrl,  { 'attr': { 'size': '60' }}) }}</td>
         </tr>
     </tbody>
-</table></fieldset>
+</table>
 
-<fieldset>
-    <input value="Enregistrer" type="submit"><input value="Effacer les modifications dans le formulaire" type="reset">
-</fieldset>
+<div class="formulaire inputrond submitdyn">
+    <input value="Enregistrer" type="submit"><input value="Annuler" type="reset">
+</div>
     
 {{ form_end( form ) }}
 

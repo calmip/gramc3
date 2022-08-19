@@ -77,11 +77,10 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
-
-
 use Symfony\Component\Mailer\Mailer;
 
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 use Twig\Environment;
 
@@ -113,7 +112,8 @@ class GramcSessionController extends AbstractController
         private ValidatorInterface $vl,
         private TokenStorageInterface $ts,
         private AuthorizationCheckerInterface $ac,
-        private Environment $tw
+        private Environment $tw,
+        private EntityManagerInterface $em
     ) {}
 
     /**
@@ -140,23 +140,19 @@ class GramcSessionController extends AbstractController
         }
         $menu3[] = $sm->televersement_generique();
 
-        if ($this->getParameter('norattachement')==false) {
-            $menu4[] = $sm->rattachements();
-        }
+        $menu4[] = $sm->formations();
+        $menu4[] = $sm->laboratoires();
+        if ($this->getParameter('norattachement')==false) $menu4[] = $sm->rattachements();
         $menu4[] = $sm->thematiques();
         $menu4[] = $sm->metathematiques();
-        $menu4[] = $sm->laboratoires();
-        $menu4[] = $sm->formations();
 
         $menu5[] = $sm->bilan_annuel();
         $menu5[] = $sm->statistiques();
         $menu5[] = $sm->publications();
 
-        $menu6[] = $sm->connexions();
         $menu6[] = $sm->journal();
-        if ($this->getParameter('kernel.debug')) {
-            $menu6[] = $sm->avancer();
-        }
+        $menu6[] = $sm->connexions();
+        if ($this->getParameter('kernel.debug')) $menu6[] = $sm->avancer();
         $menu6[] = $sm->info();
         $menu6[] = $sm->nettoyer();
 
@@ -283,7 +279,7 @@ class GramcSessionController extends AbstractController
     public function profilAction(Request $request): Response
     {
         $sj = $this->sj;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         
         $individu = $this->ts->getToken()->getUser();
 
@@ -438,7 +434,7 @@ class GramcSessionController extends AbstractController
     {
         $sn = $this->sn;
         $sj = $this->sj;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $session = $request->getSession();
 
@@ -551,7 +547,7 @@ class GramcSessionController extends AbstractController
      */
     public function connexionsAction(Request $request): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sps = $this->sps;
         $sj = $this->sj;
 
@@ -616,7 +612,7 @@ class GramcSessionController extends AbstractController
      */
     public function repinvitAction(Request $request, Invitation $invitation=null): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sj = $this->sj;
         $ts = $this->ts;
 
@@ -706,7 +702,7 @@ class GramcSessionController extends AbstractController
      **********************************************/
     private function choisirMail(Request $request, Individu $connected, Invitation $invitation): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $ff = $this->ff;
         $sid = $this->sid;
         $sj = $this->sj;

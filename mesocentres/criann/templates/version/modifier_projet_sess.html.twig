@@ -31,7 +31,7 @@
     {%- else -%}
         {% set form_method = "POST" %}
     {%- endif -%}
-    <form name="{{ name }}" method="{{ form_method|lower }}"{% if action != '' %} action="{{ action }}"{% endif %}{% for attrname, attrvalue in attr %} {{ attrname }}="{{ attrvalue }}"{% endfor %}enctype="multipart/form-data">
+    <form name="{{ name }}" method="{{ form_method|lower }}"{% if action != '' %} action="{{ action }}"{% endif %}{% for attrname, attrvalue in attr %} {{ attrname }}="{{ attrvalue }}"{% endfor %} enctype="multipart/form-data">
     {%- if form_method != method -%}
         <input type="hidden" name="_method" value="{{ method }}" />
     {%- endif -%}
@@ -40,18 +40,22 @@
 
 {# ####################################################################################################### #}
 
+{% import "default/macros_panneau_enregistrer.html.twig" as panneau_enregistrer %}
+
 
 {% block body %}
+
+<section id="section_modifierProjet">
 
 <h1>Demande de ressources - projet {{ version.projet }} (session {{ version.session }})</h1>
 
 {% if not todo is empty %}
-<div class="message warning">
+<div class="information attention">
     <h2>Champs à compléter</h2>
-    Les champs ci-dessous <strong>doivent être complétés</strong> avant que vous puissiez envoyer votre projet en expertise.<br />
+    Les champs ci-dessous <strong>doivent être complétés</strong> avant que vous puissiez envoyer votre projet en expertise.<br>
 
     {% if 'prj_titre' in todo %}<a href="#form_prjTitre" class="gerer_onglets">titre du projet</a><br>{% endif %}
-    {% if 'dem_heures' in todo %}<a href="#form_demHeures" class="gerer_onglets">Heures CPU</a><br>{% endif %}
+    {% if 'dem_heures' in todo %}<a href="#form_demHeures" class="gerer_onglets">Nombre d'heures demandées</a><br>{% endif %}
     {% if 'dem_heures_gpu' in todo %}<a href="#form_demHeuresGpu" class="gerer_onglets">Heures GPU</a><br>{% endif %}
     {% if 'prj_id_thematique' in todo %}<a href="#form_prjThematique" class="gerer_onglets">Choix d'une thématique</a><br>{% endif %}
     {% if 'prj_resume' in todo %}<a href="#form_prjResume" class="gerer_onglets">Résumé du projet</a><br>{% endif %}
@@ -68,7 +72,7 @@
     {% if 'code_nb_fich_perm' in  todo %}<a href="#form_codeNbFichPerm" class="gerer_onglets">Nombre de fichiers à stocker</a><br>{% endif %}
     {% if 'dem_post_trait' in todo %}<a href="#form_demPostTrait" class="gerer_onglets">Visualisation à distance</a><br>{% endif %}
     {% if 'gpu' in todo %}<a href="#form_gpu" class="gerer_onglets">Utilisation du GPU</a><br>{% endif %}
-	{% if 'genci' in todo %}<a href="#form_genci" class="gerer_onglets">Heures sur les centres nationaux</a><br>{% endif %}
+    {% if 'genci' in todo %}<a href="#form_genci" class="gerer_onglets">Heures sur les centres nationaux</a><br>{% endif %}
 
     {% if 'sond_vol_donn_perm' in todo %}
         <a href="#form_sondVolDonnPerm" class="gerer_onglets">Besoins en stockage permanent: Volume</a><br>{% endif %}
@@ -79,8 +83,8 @@
         <a href="#liste_des_collaborateurs" class="gerer_onglets">Liste des collaborateurs</a><br>{% endif %}
     {% if 'rapport_activite' in todo %}<a href="#rapport_activite" class="gerer_onglets">Téléverser le rapport d'activité de l'année précédente</a><br>{% endif %}
     {% if 'Format de métadonnées' in todo %}<a href="#form_dataMetadataFormat" class="gerer_onglets">Format de métadonnées</a><br>{% endif %}
-	{% if 'Nombre de jeux de données' in todo %}<a href="#form_dataNombreDatasets" class="gerer_onglets">Nombre de jeux de données</a><br>{% endif %}
-	{% if 'Taille de chaque jeu de données' in todo %}<a href="#form_dataTailleDatasets" class="gerer_onglets">Taille de chaque jeu de données</a><br>{% endif %}
+    {% if 'Nombre de jeux de données' in todo %}<a href="#form_dataNombreDatasets" class="gerer_onglets">Nombre de jeux de données</a><br>{% endif %}
+    {% if 'Taille de chaque jeu de données' in todo %}<a href="#form_dataTailleDatasets" class="gerer_onglets">Taille de chaque jeu de données</a><br>{% endif %}
 </div>
 {% endif %} {# {% if not todo is empty %}  #}
 
@@ -98,10 +102,10 @@
         <a href="#tab1">I. Présentation</a>
     </li>
     <li >
-        <a href="#tab2">II. Description scientifique</a>
+        <a href="#tab2">II. La science</a>
     </li>
     <li>
-        <a href="#tab3">III. Description technique</a>
+        <a href="#tab3">III. La technique</a>
     </li>
     {% if nodata == false %}
     <li >
@@ -126,19 +130,15 @@
 
 </div>
 
-<div id="quitter">
-    {% if renouvellement %}
-		<input class="invisible_if_no_js" name="RENOUVELER" id="Renouveler" value="Renouvellement" title="Renouveler le projet" type="submit"><br />
-    {% else %}
-		<input class="invisible_if_no_js"  type="submit" name="ENREGISTRER" id="Enregistrer" value="Enregistrer" title="Enregistrer le projet sans le fermer" />
-    {{ form_widget( form.annuler, { 'attr': { 'title' : 'Abandonner les modifications' } }) }}
-    {{ form_widget( form.fermer, { 'attr': { 'title' : 'Enregistrer et fermer le projet'  } }) }}
-    {% endif %}
-</div>
+
+{# Les boutons pour enregistrer / fermer #}
+{{ panneau_enregistrer.panneau_enregistrer(form,false) }}
 
 {{ form_end(form) }}
+
 
 <div id="enregistrer_message" ></div>
 
 <p class="center"><small><strong>Protection de vos données personnelles: <a href="{{ path('mentions_legales') }}" title="Lire les mentions légales" target="_blank" >voir ici</a> notre charte de protection des données.</strong></small></p>
+</section>
 {% endblock %}

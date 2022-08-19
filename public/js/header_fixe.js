@@ -1,3 +1,4 @@
+/*
 $(window).scroll(function(){
 	var style = $('#header').css( "left" ); // récupère la valeur du margin-left
 	
@@ -17,4 +18,4 @@ $(window).scroll(function(){
     });
 	}
 });
-
+*/

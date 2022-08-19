@@ -77,6 +77,8 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
+use Doctrine\ORM\EntityManagerInterface;
+
 use Twig\Environment;
 
 // Pour le tri numérique sur les années, en commençant par la plus grande - cf. resumesAction
@@ -110,7 +112,8 @@ class ProjetController extends AbstractController
         private FormFactoryInterface $ff,
         private TokenStorageInterface $tok,
         private Environment $tw,
-        private AuthorizationCheckerInterface $ac
+        private AuthorizationCheckerInterface $ac,
+        private EntityManagerInterface $em
     ) {}
 
     //private static $count;
@@ -124,9 +127,9 @@ class ProjetController extends AbstractController
      */
     public function indexAction(): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
-        $projets = $em->getRepository('App:Projet')->findAll();
+        $projets = $em->getRepository(Projet::class)->findAll();
 
         return $this->render('projet/index.html.twig', array(
             'projets' => $projets,
@@ -157,7 +160,7 @@ class ProjetController extends AbstractController
      */
     public function sessionCSVAction(Session $session): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sp = $this->sp;
         $sv = $this->sv;
         $sortie = 'Projets de la session ' . $session->getId() . "\n";
@@ -221,7 +224,7 @@ class ProjetController extends AbstractController
     public function tousCSVAction(): Response
     {
         $sd = $this->sd;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $entetes =
                 [
@@ -306,7 +309,7 @@ class ProjetController extends AbstractController
      */
     public function nepasterminerAction(Projet $projet, Request $request): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $projet->setNepasterminer(true);
         $em->persist($projet);
@@ -328,7 +331,7 @@ class ProjetController extends AbstractController
      */
     public function onpeutterminerAction(Projet $projet, Request $request): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $projet->setNepasterminer(false);
         $em->persist($projet);
@@ -359,7 +362,7 @@ class ProjetController extends AbstractController
                     $workflow->execute(Signal::CLK_ARR, $version->getProjet());
                     // Supprime toutes les expertises
                     $expertises = $version->getExpertise()->toArray();
-                    $em = $this->getDoctrine()->getManager();
+                    $em = $this->em;
                     foreach ($expertises as $e) {
                         $em->remove($e);
                     }
@@ -388,7 +391,7 @@ class ProjetController extends AbstractController
     public function fwdAction(Version $version, Request $request, LoggerInterface $lg): Response
     {
         $se = $this->se;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         if ($request->isMethod('POST')) {
             $confirmation = $request->request->get('confirmation');
 
@@ -421,7 +424,7 @@ class ProjetController extends AbstractController
      */
     public function sessionAction(Request $request): Response
     {
-        $em             = $this->getDoctrine()->getManager();
+        $em             = $this->em;
         $ss             = $this->ss;
         $sp             = $this->sp;
         $sv             = $this->sv;
@@ -986,7 +989,7 @@ class ProjetController extends AbstractController
      */
     public function tousAction(): Response
     {
-        $em      = $this->getDoctrine()->getManager();
+        $em      = $this->em;
         $projets = $em->getRepository(Projet::class)->findAll();
         $sp      = $this->sp;
 
@@ -1046,7 +1049,7 @@ class ProjetController extends AbstractController
      */
     public function gererAction(): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $projets = $em->getRepository(Projet::class)->findAll();
 
         return $this->render('projet/gerer.html.twig', array(
@@ -1067,7 +1070,7 @@ class ProjetController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($projet);
             $em->flush();
 
@@ -1100,7 +1103,7 @@ class ProjetController extends AbstractController
         }
 
         $session = $ss->getSessionCourante();
-        $projetRepository = $this->getDoctrine()->getManager()->getRepository(Projet::class);
+        $projetRepository = $this->em->getRepository(Projet::class);
         $id_individu      = $token->getUser()->getIdIndividu();
         $renouvelables    = $projetRepository-> getProjetsCollab($id_individu, true, true, true);
 
@@ -1135,7 +1138,7 @@ class ProjetController extends AbstractController
         $sv = $this->sv;
         $sj = $this->sj;
         $token = $this->tok->getToken();
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // Si changement d'état de la session alors que je suis connecté !
            // + contournement d'un problème lié à Doctrine
@@ -1254,7 +1257,7 @@ class ProjetController extends AbstractController
 
     public function consoRessourceAction(Projet $projet, $utype, $ress_id, $loginname, $annee): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sp = $this->sp;
         $sj = $this->sj;
 
@@ -1335,7 +1338,7 @@ class ProjetController extends AbstractController
 
     public function consoTousAction($ressource, $annee, $mois=false): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         if ($ressource != 'cpu' && $ressource != 'gpu') {
             return "";

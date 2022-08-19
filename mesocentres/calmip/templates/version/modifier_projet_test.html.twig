@@ -5,6 +5,14 @@
 {{ parent() }}
 
 <script   src="{{ asset('js/compteur_caracteres.js') }}" ></script>
+<script   src="{{ asset('js/formulaire_onglet.js') }}" ></script>
+
+<script>
+  $( function()
+    {
+    $( "#onglets" ).tabs( { classes: { "ui-tabs": "highlight" } });
+    });
+</script>
 
 {% endblock myjavascripts %}
 
@@ -29,17 +37,19 @@
 {# ####################################################################################################### #}
 
 {% import _self as macrosmodifier %}
+{% import "default/macros_panneau_enregistrer.html.twig" as panneau_enregistrer %}
 
 
 
 {% block body %}
+<section id="section_modifierProjet">
 
 <h1>Demande de projet test {{ version.projet }} pour l'année  {{ version.fullAnnee }}</h1>
 
 {% if not todo is empty %}
-<div class="message warning">
+<div class="information attention">
     <h2>Champs à compléter</h2>
-    Les champs ci-dessous <strong>doivent être complétés</strong> avant que vous puissiez envoyer votre projet en expertise.<br />
+    Les champs ci-dessous <strong>doivent être complétés</strong> avant que vous puissiez envoyer votre projet en expertise.<br>
 
     {% if 'prj_titre' in todo %}<a href="#form_prjTitre" class="gerer_onglets">titre du projet</a><br>{% endif %}
     {% if 'dem_heures' in todo %}<a href="#form_demHeures" class="gerer_onglets">Nombre d'heures demandées</a><br>{% endif %}
@@ -73,158 +83,255 @@
 
 {{ form_start( form , { 'attr': { 'id': 'form_projet' } } )  }}
 
+<div id="onglets" >
 
+<nav id="menu_formulaire">
+  <ul id="ul_formulaire" >
+    <li >
+        <a href="#tab1">I. Présentation</a>
+    </li>
+    <li >
+        <a href="#tab2">II. Détails</a>
+    </li>
+  </ul>
+</nav>
+
+<div id="tab1" class="onglet" >
     <br><br>
-    <h3>Informations générales</h3>
-    <table class="projet"><tbody>
-    <tr>
-        <th class="horiz">{{ form_label( form.prjTitre  ,"Titre du projet *" ) }}</th>
-        <td>{{ form_widget( form.prjTitre  ,
-                { 'attr':
-                    {
-                    'size': '90',
-                    'style' : ''
-                     }
-                })
-            }}
-        </td>
-    </tr>
-    <tr>
-        <th class="horiz">{{ form_label( form.prjThematique, "Thématique principale du projet" ) }} </th>
-        <td>{{ form_widget( form.prjThematique ) }}</td>
-    </tr>
-    </tbody></table>
+    <h2>I. Présentation générale</h2>
 
-    {% if norattachement==false %}
-    <table class="projet"><tbody>
-    <tr>
-        <th class="horiz">{{ form_label( form.prjRattachement, "Rattachement du projet" ) }} </th>
-        <td>{{ form_widget( form.prjRattachement ) }}</td>
-    </tr>
-    </tbody></table>
-    {% endif %}
-    
-    <div class="message warning">Les heures sont comptées en heures normalisées</div>
-    
-    <table class="projet"><tbody>
+    <div class="inputs">
+        <div class="input">
+            <div>
+                <span>*</span> {{ form_label( form.prjTitre  ,"Titre du projet" ) }}
+            </div> {{ form_widget( form.prjTitre  ,{ 'attr':{'size': '90','style' : ''}})}}
+        </div>
 
-    <tr>
-        <th class="horiz">{{ form_label( form.demHeures, "Nombre d'heures demandées") }} </th>
-        <td>{{ form_widget( form.demHeures) }}</td>
-    </tr>
-    <tbody></table>
+        <div class="input"> 
+            <div>
+                <span>*</span> {{ form_label( form.prjThematique, "Thématique principale du projet" ) }} 
+            </div>
+                {{ form_widget( form.prjThematique ) }}
+        </div>
 
-    <h4>Laboratoire et responsable du projet</h4>
-    <div class="message warning">Le laboratoire associé au projet est le laboratoire du responsable</div>
+        {% if norattachement == false %}
+            <div class="input"> {{ form_label( form.prjRattachement, "Rattachement du projet" ) }} {{ form_widget( form.prjRattachement ) }}
+            </div>
+        {% endif %}
 
-    <table class="projet"><tbody>
-        <tr>
-            <th class="petite_col">Nom</th>
-            <th>Mail</th>
-            <th>Statut</th>
-            <th>Laboratoire</th>
-        </tr>
-        <tr>
-            <td>{{  version.responsable }}</td>
-            <td>{% if( not version.responsable == null ) %}{{  version.responsable.mail }}{% endif %}</td>
-            <td>{% if( not version.responsable == null ) %}{{  version.responsable.statut }}{% endif %}</td>
-            <td>{% if( not version.responsable == null ) %}{{  version.responsable.labo }}{% endif %}</td>
-        </tr>
-    </tbody></table>
-
-    <h4 id="collabs">Personnes participant au projet</h4>
-    <div class="message warning"><strong>Astuce:</strong> Commencez par l'adresse mail !</div>
-    <div class="message warning"><strong>ATTENTION:</strong> Au moins un de vos collaborateurs doit avoir la case login cochée !</div>
-
-    <div id="liste_des_collaborateurs">
-    {{ form_widget(collaborateur_form) }}
     </div>
 
-    <h3>Justification du projet test</h3>
+    <div class="information ok">
+        <h2>A savoir...</h2>
+        <h3>Heures normalisées</h3>
 
+        <ul>
+            <li>Les heures que vous demandez seront utilisables indifféremment sur des noeuds CPU ou des noeuds avec GPU.</li>
+            <li>Sur un nœud GPU:
+                <ul>
+                    <li>Les heures utilisées seront converties en heures cpu avec un coefficient de conversion égal à 33 par GPU.</li>
+                    <li>Les heures CPU
+                        <strong>ne seront pas comptées</strong>
+                    </li>
+                </ul>
+            </li>
+            <li>Si vous pensez utiliser les noeuds GPU
+                <strong>vous devez prendre en compte ce coefficient de conversion</strong>.</li>
+            <li>Votre demande d'heures totale intègre vos besoins en usage des noeuds CPU
+                <strong>et vos besoins en usage des noeuds GPU</strong>.</li>
+        </ul>
 
-    <table class="projet"><tbody>
-        <tr>
-            <th>Justification de votre demande de projet test (environ 2000 caractères)<br><span id="form_prjResume_cpt" class="petit"></span></th>
-        </tr>
-        <tr>
-            <td class="center">{{ form_widget(form.prjResume,
-                { 'attr': { 'class': 'compteur', 'rows' : 12, 'cols' : 70 } }) }}
-            </td>
-        </tr>
-    </tbody></table>
+        <h3>Quelques exemples:</h3>
+        <ul>
+            <li>Un calcul utilisant
+                <strong>1 cœur</strong>
+                et
+                <strong>1 GPU</strong>
+                durant
+                <strong>1 heure</strong>
+                comptera
+                <strong>33 heures</strong>
+            </li>
+            <li>Un calcul utilisant
+                <strong>2 cœurs</strong>
+                et
+                <strong>2 GPUs</strong>
+                durant
+                <strong>1 heure</strong>
+                comptera 2x33=<strong>66 heures</strong>
+            </li>
+            <li>Un calcul utilisant
+                <strong>36 cœurs</strong>
+                et
+                <strong>4 GPUs</strong>
+                durant
+                <strong>1 heure</strong>
+                comptera 4x33 =
+                <strong>132 heures</strong>
+            </li>
+        </ul>
 
-    <h3>Description technique du projet</h3>
-    <table class="projet"><tbody>
-    <tr>
-        <th>Nature du code et informations sur le code utilisé</th>
-    </tr>
-    <tr>
-        <td><table class="invi"><tbody>
-        <tr>
-            <td class="droite">{{ form_label(form.codeNom, "Nom du principal logiciel que vous allez utiliser")}}</td>
-            <td class="gauche">{{ form_widget(form.codeNom) }}<br><br></td>
-        </tr>
-        <tr>
-            <td class="droite">Langage dans lequel est programmé le logiciel<br></td>
-        </tr>
-        <tr>
-            <td class="droite">{{ form_label(form.codeC, "C")}}</td>
-            <td class="gauche">{{ form_widget(form.codeC) }}</td>
-        </tr>
-        <tr>
-            <td class="droite">{{ form_label(form.codeCpp, "C++")}}</td>
-            <td class="gauche">{{ form_widget(form.codeCpp) }}</td>
-        </tr>
-        <tr>
-            <td class="droite">{{ form_label(form.codeFor, "Fortran")}}</td>
-            <td class="gauche">{{ form_widget(form.codeFor) }}</td>
-        </tr>
-        <tr>
-            <td class="droite">{{ form_label(form.codeAutre, "Autre")}}</td>
-            <td class="gauche">{{ form_widget(form.codeAutre) }} Lequel ? {{ form_widget(form.codeLangage) }} </td>
-        </tr>{# #}
-        <tr>
-            <td class="droite">{{ form_label(form.gpu, "Existe-t-il un binaire GPU pour votre application ?" ) }}</td>
-            <td class="gauche">{{ form_widget(form.gpu) }}<br><br></td>
-        </tr>
-        <tr>
-            <td class="droite">{{ form_label(form.codeLicence, "Licence de ce logiciel (libre, commercial, autre, je ne sais pas)" ) }}<br></td>
-            <td class="gauche">{{ form_widget(form.codeLicence, { 'attr': { 'rows' : 3, 'cols' : 50 } }) }}<br><br></td>
-        </tr>{# #}
-        <tr>
-            <td class="droite">Avez vous déjà utilisé ce code sur une ou plusieurs machines?"
-                <br><strong>Machines de GENCI</strong>: précisez le nom<br>
-                <strong>Serveur ou cluster de labo</strong> : précisez son type (processeurs, OS)</td>
-                <td class="gauche"><br>{{ form_widget(form.codeUtilSurMach, { 'attr': { 'rows' : 7, 'cols' : 50 } }) }}
-                <br>
-                <br>
-            </td>
-        </tr>
-        <tr>
-            <td class="droite">{{ form_label(form.demLogiciels, "Autres logiciels nécessaires au projet" ) }}<br></td>
-            <td class="gauche">{{ form_widget(form.demLogiciels, { 'attr': { 'rows' : 5, 'cols' : 50 } }) }}<br><br></td>
-        </tr>
-        <tr>
-            <td class="droite">{{ form_label(form.demBib, "Bibliothèques nécessaires" ) }}<br></td>
-            <td class="gauche">{{ form_widget(form.demBib, { 'attr': { 'rows' : 5, 'cols' : 50 } }) }}<br><br></td>
-        </tr>
-    </td>
-</tr></tbody></table>
+        <p>Plus de détails
+            <a href="{{mesoc_web}}">
+                <strong>sur notre site web</strong>
+            </a>
+        </p>
 
+        {% if version.typeSession == 'B'  %}
+        <h2 class="sessionB">Session B</h2>
+        <p>Les heures que vous allez demander viennent
+            <strong>en supplément</strong>
+            des heures que vous avez déjà reçues en session A (attribution initiale et rallonges).</p>
+        {% endif %}
+    </div>
+    
+    <div class="inputs">
+        <div class="input">
+        {{ form_label( form.demHeures, "Nombre d'heures demandées") }}
+        {{ form_widget( form.demHeures) }}
+        </div>
+    </div>
 
-<div id="quitter">
+    <h4>Laboratoire et responsable du projet :</h4>
 
+    <table class="projet">
+        <tbody>
+            <tr>
+                <th class="petite_col">Nom</th>
+                <th>Mail</th>
+                <th>Statut</th>
+                <th>Laboratoire</th>
+            </tr>
+            <tr>
+                <td>{{  version.responsable }}</td>
+                <td>
+                    {% if( not version.responsable == null ) %} {{  version.responsable.mail }}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if( not version.responsable == null ) %} {{  version.responsable.statut }}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if( not version.responsable == null ) %} {{  version.responsable.labo }}
+                    {% endif %}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <p class="info_supplementaire">* Le laboratoire associé au projet est le laboratoire du responsable</p>
 
-<input class="invisible_if_no_js"  type="submit" name="ENREGISTRER" id="Enregistrer" value="Enregistrer" title="Enregistrer le projet sans le fermer" />
-{{ form_widget( form.annuler, { 'attr': { 'title' : 'Abandonner les modifications' } }) }}
-{{ form_widget( form.fermer, { 'attr': { 'title' : 'Enregistrer et fermer le projet'  } }) }}
+    <h4 id="collabs">Personnes participant au projet :</h4>
+    <div class="information attention">
+        <p><strong>Astuce :</strong>
+        Commencez par l'adresse mail !</p></br>
+        <p><strong>ATTENTION:</strong>
+        Au moins un de vos collaborateurs doit avoir la case login cochée !</p>
+    </div>
 
+    <div id="liste_des_collaborateurs"> {{ form_widget(collaborateur_form) }}</div>
 
 </div>
+<div id="tab1" class="onglet" >
+
+    <h3>Exposé de la demande :</h3>
+
+    <div class="textarea">
+        <div>
+            <h4>Résumé du projet test (environ 2000 caractères) :<br><span id="form_prjResume_cpt" class="petit"></span></h4>
+        </div>
+        {{ form_widget(form.prjResume,
+                    { 'attr': { 'class': 'compteur', 'rows' : 12, 'cols' : 70 } }) }}
+    </div>
+
+    <div class="information attention">
+        <h2>Confidentialité des données</h2>
+        {{mesoc}} se réserve le droit de faire figurer sur son site web le résumé du projet,
+        ainsi que le nom du responsable du projet et de son laboratoire.
+        Merci de ne pas écrire ici de données confidentielles
+    </div>
+
+    <h3>Description technique du projet</h3>
+
+    <div class="inputs">
+
+        <div class="input">
+            {{ form_label(form.codeNom, "Nom du principal logiciel que vous allez utiliser :")}}
+            {{ form_widget(form.codeNom) }}
+        </div>
+
+        <div class="input">
+            <label>Langage dans lequel est programmé le logiciel</label>
+            <div class="inputs_checkbox">
+                <div>
+                {{ form_widget(form.codeC) }}
+                {{ form_label(form.codeC, "C")}}
+                </div>
+
+                <div>
+                {{ form_widget(form.codeCpp) }}
+                {{ form_label(form.codeCpp, "C++")}}
+                </div>
+
+                <div>
+                {{ form_widget(form.codeFor) }}
+                {{ form_label(form.codeFor, "Fortran")}}
+                </div>
+
+                <div class="autre">
+                {{ form_widget(form.codeAutre) }} 
+                {{ form_label(form.codeAutre, "Autre")}}
+                {{ form_widget(form.codeLangage) }} 
+                </div>
+            </div>
+        </div>
+
+        <div class="input">
+            {{ form_label(form.gpu, "Existe-t-il un binaire GPU pour votre application ?" ) }}
+            {{ form_widget(form.gpu) }}
+        </div>
+
+    </div>
+
+    <div class="textarea">
+        <div>
+            <h4>{{ form_label(form.codeLicence, "Licence de ce logiciel (libre, commercial, autre, je ne sais pas) :" ) }}</h4>
+        </div>
+        {{ form_widget(form.codeLicence, { 'attr': { 'rows' : 12, 'cols' : 70 } }) }}
+    </div>
+
+    <div class="textarea">
+        <div>
+            <h4>Avez vous déjà utilisé ce code sur une ou plusieurs machines ?</h4>
+            <ul>
+                <li><strong>Machines de GENCI</strong>: précisez le nom
+                <li><strong>Serveur ou cluster de labo</strong> : précisez son type (processeurs, OS)
+            </ul>
+        </div>
+        {{ form_widget(form.codeUtilSurMach, { 'attr': { 'rows' : 12, 'cols' : 70 } }) }}
+    </div>
+
+    <div class="textarea">
+        <div>
+            <h4>{{ form_label(form.demLogiciels, "Autres logiciels nécessaires au projet :" ) }}</h4>
+            </div>
+        {{ form_widget(form.demLogiciels, { 'attr': { 'rows' : 5, 'cols' : 50 } }) }}
+    </div>
+           
+    <div class="textarea">
+        <div>
+            <h4>{{ form_label(form.demBib, "Bibliothèques nécessaires :" ) }}</h4>
+        </div>
+        {{ form_widget(form.demBib, { 'attr': { 'rows' : 5, 'cols' : 50 } }) }}
+    </div>
+
+    {# Les boutons pour enregistrer / fermer #}
+    {{ panneau_enregistrer.panneau_enregistrer(form,false) }}
+
+</div></div> {# onglets #}
 
 {{ form_end(form) }}
 
-<div id="enregistrer_message" ></div>
+</section>
 
 {% endblock %}

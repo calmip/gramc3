@@ -222,9 +222,10 @@ class ServiceExperts
     /*********************************************
      * traitementFormulaires
      * Traite les formulaires d'affectation des experts pour les demandes sélectionnées
+     * Retourne un bool: Si true, notifications envoyées, si false pas de notifications envoyées
      *
      ********/
-    public function traitementFormulaires(Request $request)
+    public function traitementFormulaires(Request $request): bool
     {
         $this->clearNotifications();
         $demandes = $this->demandes;
@@ -270,6 +271,11 @@ class ServiceExperts
 
         if ($form_buttons->get('sub1')->isClicked()) {
             $this->notifierExperts();
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
 
@@ -525,6 +531,7 @@ class ServiceExperts
     {
         return ($a["expert"]->getNom()<=$b["expert"]->getNom()) ? -1 : 1;
     }
+
     private static function cmpExpertises($a, $b)
     {
         return $a->getId() > $b ->getId();

@@ -1,5 +1,6 @@
 {% extends 'default/base.html.twig' %}
 {% import "default/macros.html.twig" as gramcmacros %}
+{% import "default/icone.html.twig" as icones %}
 
 {% block myjavascripts %}
 <script  type="text/javascript" src="{{ asset('js/projets_experts.js') }}" ></script>
@@ -8,406 +9,416 @@
 
 {% block body %}
 <div id="dialog-compta"></div>
-<section>
+<section id="section_bilans_listes" style="stroke:black">
     <h2>Projets de la session {{ session }}</h2>
 
-    {{ form_start(form) }}
-        {{ form_widget(form.session) }}{{ form_widget(form.submit) }}
-    {{ form_end(form) }}
+    <div class="formulaire inputrond submitdyn">
+        {{ form_start(form) }}
+            {{ form_widget(form.session) }}{{ form_widget(form.submit) }}
+        {{ form_end(form) }}
 
-    <br>
+        <form action="{{ path('projet_session_csv', {'id': idSession }) }}">
+            <input class="telecharger_csv" type="submit" value="Télécharger en csv pour la session {{ idSession }}" />
+        </form>
+    </div>
+    <hr class="separateur">
+    <div class="tableaux">
+        <div class="bilan_legende">
+            <div class="bilan">
+                <table>
+                    <tr>
+                        <th colspan="3">Projets</th>
+                    </tr>
+                    <tr>
+                        <th>Nombre de projets</th>
+                        <td>{{ nombreProjets }}</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <th>Heures demandées</th>
+                        <td>{{ demHeures|number_format(0, ',', ' ') }}</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <th>Heures attribuées</th>
+                        <td>{{ attrHeures|number_format(0, ',', ' ') }}</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <th>Nouveaux projets</th>
+                        <td>{{ nombreNouveaux }}</td>
+                        <td><input type="checkbox" class="cb" id="nouveau" checked="checked" /></td>
+                    </tr>
+                    <tr>
+                        <th>Renouvellements</th>
+                        <td>{{ nombreProjets - nombreNouveaux }}</td>
+                        <td><input type="checkbox" class="cb" id="renouv" checked="checked" /></td>
+                    </tr>
+                </table>
+                <table>
+                    <tr>
+                        <th colspan="3">Etats des projets</th>
+                    </tr>
+                    <tr>
+                        <th>Projets Sess acceptés</th>
+                        <td>{{ nombreAcceptesSess }}</td>
+                        <td><input type="checkbox" class="cb" id="accepte" checked="checked" /></td>
+                    </tr>
+                    {% if( nombreTermines > 0 ) %}
+                    <tr>
+                        <th>Projets terminés</th>
+                        <td>{{ nombreTermines }}</td>
+                        <td><input type="checkbox" class="cb" id="termine" checked="checked" /></td>
+                    </tr>
+                    {% endif %}
+                    {% if( nombreSignes > 0 ) %}
+                    <tr>
+                        <th>Projets signés</th>
+                        <td>{{ nombreSignes }}</td>
+                        <td><input type="checkbox" class="cb" id="prj_fiche_val" checked="checked" /></td>
+                    </tr>
+                    {% endif %}
+                    {% if( nombreRapports > 0 ) %}
+                    <tr>
+                        <th>Projets avec RA</th>
+                        <td>{{  nombreRapports }}</td>
+                        <td><input type="checkbox" class="cb" id="rapport_activite" checked="checked" /></td>
+                    </tr>
+                    {% endif %}
+                    <tr>
+                        <th>Projets Fil acceptés</th>
+                        <td>{{ nombreAcceptesFil }}</td>
+                        <td><input type="checkbox" class="cb" id="accepteFil" checked="checked" /></td>
+                    </tr>
+                    {% if( nombreEditionFil > 0 ) %}
+                    <tr>
+                        <th>Projets Fil en édition</th>
+                        <td>{{ nombreEditionFil }}</td>
+                        <td><input type="checkbox" class="cb" id="editionFil" checked="checked" /></td>
+                    </tr>
+                    {% endif %}
 
-    <form action="{{ path('projet_session_csv', {'id': idSession }) }}">
-        <input type="submit" value="Télécharger en csv pour la session {{ idSession }}" />
-    </form>
-<hr>
- <div id="bilan_legende"><div id="bilan">
+                    {% if( nombreExpertiseFil > 0 ) %}
+                    <tr>
+                        <th>Projets Fil en expertise</th>
+                        <td>{{ nombreExpertiseFil }}</td>
+                        <td><input type="checkbox" class="cb" id="expertiseFil" checked="checked" /></td>
+                    </tr>
+                    {% endif %}
 
- <table>
-    <tr>
-        <th colspan="3">Projets</th>
-    </tr>
-    <tr>
-        <th>Nombre de projets</th>
-        <td>{{ nombreProjets }}</td>
-        <td>&nbsp;</td>
-    </tr>
-     <tr>
-        <th>Heures demandées</th>
-        <td>{{ demHeures|number_format(0, ',', ' ') }}</td>
-        <td>&nbsp;</td>
-    </tr>
-    <tr>
-        <th>Heures attribuées</th>
-        <td>{{ attrHeures|number_format(0, ',', ' ') }}</td>
-        <td>&nbsp;</td>
-    </tr>
-    <tr>
-        <th>Nouveaux projets</th>
-        <td>{{ nombreNouveaux }}</td>
-        <td><input type="checkbox" class="cb" id="nouveau" checked="checked" /></td>
-    </tr>
-    <tr>
-        <th>Renouvellements</th>
-        <td>{{ nombreProjets - nombreNouveaux }}</td>
-        <td><input type="checkbox" class="cb" id="renouv" checked="checked" /></td>
-    </tr>
- </table>
+                    {% if( nombreEditionSess > 0 ) %}
+                    <tr>
+                        <th>Projets en édition</th>
+                        <td>{{ nombreEditionSess }}</td>
+                        <td><input type="checkbox" class="cb" id="editionSess" checked="checked" /></td>
+                    </tr>
+                    {% endif %}
 
- <table>
-    <tr>
-        <th colspan="3">Etats des projets</th>
-    </tr>
-    <tr>
-        <th>Projets Sess acceptés</th>
-        <td>{{ nombreAcceptesSess }}</td>
-        <td><input type="checkbox" class="cb" id="accepte" checked="checked" /></td>
-     </tr>
-     {% if( nombreTermines > 0 ) %}
-     <tr>
-        <th>Projets terminés</th>
-        <td>{{ nombreTermines }}</td>
-        <td><input type="checkbox" class="cb" id="termine" checked="checked" /></td>
-     </tr>
-     {% endif %}
-     {% if( nombreSignes > 0 ) %}
-     <tr>
-        <th>Projets signés</th>
-        <td>{{ nombreSignes }}</td>
-        <td><input type="checkbox" class="cb" id="prj_fiche_val" checked="checked" /></td>
-    </tr>
-    {% endif %}
-    {% if( nombreRapports > 0 ) %}
-    <tr>
-        <th>Projets avec RA</th>
-        <td>{{  nombreRapports }}</td>
-        <td><input type="checkbox" class="cb" id="rapport_activite" checked="checked" /></td>
-    </tr>
-    {% endif %}
-    <tr>
-        <th>Projets Fil acceptés</th>
-        <td>{{ nombreAcceptesFil }}</td>
-        <td><input type="checkbox" class="cb" id="accepteFil" checked="checked" /></td>
-     </tr>
-    {% if( nombreEditionFil > 0 ) %}
-    <tr>
-        <th>Projets Fil en édition</th>
-        <td>{{ nombreEditionFil }}</td>
-        <td><input type="checkbox" class="cb" id="editionFil" checked="checked" /></td>
-    </tr>
-    {% endif %}
-
-    {% if( nombreExpertiseFil > 0 ) %}
-    <tr>
-        <th>Projets Fil en expertise</th>
-        <td>{{ nombreExpertiseFil }}</td>
-        <td><input type="checkbox" class="cb" id="expertiseFil" checked="checked" /></td>
-    </tr>
-    {% endif %}
-
-    {% if( nombreEditionSess > 0 ) %}
-    <tr>
-        <th>Projets en édition</th>
-        <td>{{ nombreEditionSess }}</td>
-        <td><input type="checkbox" class="cb" id="editionSess" checked="checked" /></td>
-     </tr>
-     {% endif %}
-
-    {% if( nombreExpertiseSess > 0 ) %}
-    <tr>
-        <th>Projets en expertise</th>
-        <td>{{ nombreExpertiseSess }}</td>
-        <td><input type="checkbox" class="cb" id="expertiseSess" checked="checked" /></td>
-     </tr>
-     {% endif %}
-
-
-    {% if( nombreAttente > 0 ) %}
-    <tr>
-        <th>Projets en attente</th>
-        <td>{{ nombreAttente }}</td>
-        <td><input type="checkbox" class="cb" id="attente" checked="checked" /></td>
-     </tr>
-     {% endif %}
+                    {% if( nombreExpertiseSess > 0 ) %}
+                    <tr>
+                        <th>Projets en expertise</th>
+                        <td>{{ nombreExpertiseSess }}</td>
+                        <td><input type="checkbox" class="cb" id="expertiseSess" checked="checked" /></td>
+                    </tr>
+                    {% endif %}
 
 
-    {% if( nombreActif > 0 ) %}
-    <tr>
-        <th>Projets actifs</th>
-        <td>{{ nombreActif }}</td>
-        <td><input type="checkbox" class="cb" id="actif" checked="checked" /></td>
-     </tr>
-     {% endif %}
+                    {% if( nombreAttente > 0 ) %}
+                    <tr>
+                        <th>Projets en attente</th>
+                        <td>{{ nombreAttente }}</td>
+                        <td><input type="checkbox" class="cb" id="attente" checked="checked" /></td>
+                    </tr>
+                    {% endif %}
 
 
-    {% if( nombreNouvelleDem > 0 ) %}
-    <tr>
-        <th>Projets dont le renouvellement est accepté</th>
-        <td>{{ nombreNouvelleDem }}</td>
-        <td><input type="checkbox" class="cb" id="nouvelleDem" checked="checked" /></td>
-     </tr>
-     {% endif %}
+                    {% if( nombreActif > 0 ) %}
+                    <tr>
+                        <th>Projets actifs</th>
+                        <td>{{ nombreActif }}</td>
+                        <td><input type="checkbox" class="cb" id="actif" checked="checked" /></td>
+                    </tr>
+                    {% endif %}
 
-    {#
-    {% if( nombreTermine > 0 ) %}
-    <tr>
-        <th>Projets terminés</th>
-        <td>{{ nombreTermine }}</td>
-        <td><input type="checkbox" class="cb" id="nbTermine" checked="checked" /></td>
-     </tr>
-     {% endif %}
-    #}
 
-    {% if( nombreAnnule > 0 ) %}
-    <tr>
-        <th>Projets annulés</th>
-        <td>{{ nombreAnnule }}</td>
-        <td><input type="checkbox" class="cb" id="annule" checked="checked" /></td>
-     </tr>
-     {% endif %}
-    {% if(  nombreExperts > 0 ) %}
-    <tr>
-        <th>Projets avec expert affecté</th>
-        <td>{{ nombreExperts }}</td>
-        <td><input type="checkbox" class="cb" id="avec_expert" checked="checked" /></td>
-    </tr>
-    {% endif %}
+                    {% if( nombreNouvelleDem > 0 ) %}
+                    <tr>
+                        <th>Projets dont le renouvellement est accepté</th>
+                        <td>{{ nombreNouvelleDem }}</td>
+                        <td><input type="checkbox" class="cb" id="nouvelleDem" checked="checked" /></td>
+                    </tr>
+                    {% endif %}
 
-</table>
+                    {#
+                    {% if( nombreTermine > 0 ) %}
+                    <tr>
+                        <th>Projets terminés</th>
+                        <td>{{ nombreTermine }}</td>
+                        <td><input type="checkbox" class="cb" id="nbTermine" checked="checked" /></td>
+                    </tr>
+                    {% endif %}
+                    #}
 
- <table id="themas">
-    <tr>
-        <th colspan="3">Thématiques</th>
-    </tr>
-    {% for key,value in thematiques %}
-    <tr>
-        <th>{{ key }}</th>
-        <td>{{ value }}</td>
-        <td><input type="checkbox" class="cb" id="t{{ idThematiques[key] }}" checked="checked" /></td>
-    </tr>
+                    {% if( nombreAnnule > 0 ) %}
+                    <tr>
+                        <th>Projets annulés</th>
+                        <td>{{ nombreAnnule }}</td>
+                        <td><input type="checkbox" class="cb" id="annule" checked="checked" /></td>
+                    </tr>
+                    {% endif %}
+                    {% if(  nombreExperts > 0 ) %}
+                    <tr>
+                        <th>Projets avec expert affecté</th>
+                        <td>{{ nombreExperts }}</td>
+                        <td><input type="checkbox" class="cb" id="avec_expert" checked="checked" /></td>
+                    </tr>
+                    {% endif %}
+                </table>
+                <table id="themas">
+                    <tr>
+                        <th colspan="3">Thématiques</th>
+                    </tr>
+                    {% for key,value in thematiques %}
+                    <tr>
+                        <th>{{ key }}</th>
+                        <td>{{ value }}</td>
+                        <td><input type="checkbox" class="cb" id="t{{ idThematiques[key] }}" checked="checked" /></td>
+                    </tr>
 
-    {% endfor %}
-    <tr>
-        <th>Tout décocher</th>
-        <td>&nbsp;</td>
-        <td><input type="checkbox" id="tX" checked="checked" /></td>
-    </tr>
- </table>
+                    {% endfor %}
+                    <tr>
+                        <th>Tout décocher</th>
+                        <td>&nbsp;</td>
+                        <td><input type="checkbox" id="tX" checked="checked" /></td>
+                    </tr>
+                </table>
+                <table id="ratt">
+                    <tr>
+                        <th colspan="3">Rattachements</th>
+                    </tr>
+                    {% for key,value in rattachements %}
+                    <tr>
+                        <th>{{ key }}</th>
+                        <td>{{ value }}</td>
+                        <td><input type="checkbox" class="cb" id="r{{ idRattachements[key] }}" checked="checked" /></td>
+                    </tr>
 
- <table id="ratt">
-    <tr>
-        <th colspan="3">Rattachements</th>
-    </tr>
-    {% for key,value in rattachements %}
-    <tr>
-        <th>{{ key }}</th>
-        <td>{{ value }}</td>
-        <td><input type="checkbox" class="cb" id="r{{ idRattachements[key] }}" checked="checked" /></td>
-    </tr>
+                    {% endfor %}
+                    <tr>
+                        <th>Tout décocher</th>
+                        <td>&nbsp;</td>
+                        <td><input type="checkbox" id="rX" checked="checked" /></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
 
-    {% endfor %}
-    <tr>
-        <th>Tout décocher</th>
-        <td>&nbsp;</td>
-        <td><input type="checkbox" id="rX" checked="checked" /></td>
-    </tr>
- </table>
+        <div class="liste" >
+            <table id="table_projets_session">
+                <thead>
+                    <tr>
+                        <th title="Nouveaux projets">N</th>
+                        <th></th>
+                        <th>N°</th>
+                        <th>Type</th>
+                        <th>&nbsp;</th>
+                        <th title="Etat">E</th>
+                        <th>Titre</th>
+                        <th>Thématique</th>
+                        <th>Rattachement</th>
+                        <th>dari</th>
+                        <th>Responsable</th>
+                        <th>Laboratoire</th>
+                        <th>Expert</th>
+                        <th>H dem</th>
+                        <th>H attr</th>
+                        <th>H cons</th>
+                        <th>Signature</th>
+                        {% if( showRapport == true )%}
+                        <th>Rapport d'Activité</th>
+                        {% endif %}
+                        {% if app.debug %}
+                        <th>Etat prj</th>
+                        <th>Etat version</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                {% for version in versions %}
+                {% if( version != null and version.projet != null ) %}
+                    <tr>
+                        {% if( serviceVersions.isnouvelle(version) ) %}
+                            <td class="nouveau"><strong>N</strong></td>
+                        {% else %}
+                            <td class="renouv">&nbsp;</td>
+                        {% endif %}
+                    <td>
+                            {% if( version.projet.libelleEtat == 'STANDBY' ) %}
+                            <a class="fermeture" href="{{ path('fermer_projet', { 'id': version.projet.idProjet }) }}" title="Fermer le projet">
+                                {{icones.process_stop}}
+                            </a>
+                            {% elseif( version.libelleEtat == 'EDITION_EXPERTISE') %}
+                            <a class="arriere" href="{{ path('back_version', { 'id': version.idVersion }) }}" title="Revenir en édition">
+                                {{ icones.back(25, 25) }}
+                            </a>
+                            {% elseif( version.libelleEtat == 'EXPERTISE_TEST' ) %}
+                            <a class="arriere" href="{{ path('back_version', { 'id': version.idVersion }) }}" title="Revenir en édition">
+                                {{ icones.back(25, 25) }}
+                            </a>
+                            {% elseif( version.libelleEtat == 'EDITION_DEMANDE') %}
+                            <a href="{{ path('fwd_version', { 'id': version.idVersion }) }}" title="Envoyer pour expertise">
+                                {{ icones.forward(25,25) }}
+                            </a>
+                            {% elseif( version.libelleEtat == 'EDITION_TEST') %}
+                            <a href="{{ path('fwd_version', { 'id': version.idVersion }) }}" title="Envoyer pour expertise">
+                                {{ icones.forward(25,25) }}
+                            </a>
+                            {% else %}
+                            &nbsp;
+                            {% endif %}
+                        </td>
+                        <td>{{ version.projet.idProjet }}</td>
+                        <td><strong>{{ version.projet.libelletype }}</strong></td>
+                        <td>
+                            <a href="{{ path('consulter_version', { 'id': version.projet.idProjet, 'version': version.idVersion }) }}" title="Consulter le projet">
+                            {{icones.details}}
+                            </a>
+                            {% if( version.projet.derniereVersion != null and version.projet.derniereVersion.isEdited ) %}
+                            <a href="{{ path('version_avant_supprimer',
+                            { 'id': version.projet.derniereVersion.idVersion, 'rtn' : 'projet_session' })}}" title="Supprimer le projet {{ version.projet.idProjet }}">
+                            {{icones.supprimer}}
+                            </a>
+                            {% endif %}
+                            {% if noconso==false %}
+                            {% if( not serviceVersions.isnouvelle(version) ) %}
+                                {% if version.typeSession=='A' %}
+                                    {% set annee_conso = version.anneeSession - 1 %}
+                                {% else %}
+                                    {% set annee_conso = version.anneeSession %}
+                                {% endif %}
+                                <a id="bconso_{{ version.projet.idProjet }}"  class="conso" 
+                                title="{{ version.projet.idProjet }}: Evolution de la consommation pour {{annee_conso}}" 
+                                    data-href="{{ absolute_url(path('projet_conso', { 'id': version.projet.idProjet, 'annee' : annee_conso })) }}">
+                                    {{icones.consommation(25,30)}}
+                                </a>
+                            {% endif %}
+                            {% endif %}
 
-</div></div>
 
-<div id="projets" ><table id="table_projets_session">
-    <thead>
-        <tr>
-            <th title="Nouveaux projets">N</th>
-            <th></th>
-            <th>N°</th>
-            <th>Type</th>
-            <th>&nbsp;</th>
-            <th title="Etat">E</th>
-            <th>Titre</th>
-            <th>Thématique</th>
-            <th>Rattachement</th>
-            <th>dari</th>
-            <th>Responsable</th>
-            <th>Laboratoire</th>
-            <th>Expert</th>
-            <th>H dem</th>
-            <th>H attr</th>
-            <th>H cons</th>
-            <th>Signature</th>
-            {% if( showRapport == true )%}
-            <th>Rapport d'Activité</th>
-            {% endif %}
-            {% if app.debug %}
-            <th>Etat prj</th>
-            <th>Etat version</th>
-            {% endif %}
-        </tr>
-    </thead>
-    <tbody>
-    {% for version in versions %}
-    {% if( version != null and version.projet != null ) %}
-        <tr>
-            {% if( serviceVersions.isnouvelle(version) ) %}
-                <td class="nouveau"><strong>N</strong></td>
-            {% else %}
-                <td class="renouv">&nbsp;</td>
-            {% endif %}
-           <td>
-                {% if( version.projet.libelleEtat == 'STANDBY' ) %}
-                <a class="fermeture" href="{{ path('fermer_projet', { 'id': version.projet.idProjet }) }}" title="Fermer le projet">
-                    <img src="{{ asset('icones/process-stop.png') }}" alt="Fermer" />
-                </a>
-                {% elseif( version.libelleEtat == 'EDITION_EXPERTISE') %}
-                <a class="arriere" href="{{ path('back_version', { 'id': version.idVersion }) }}" title="Revenir en édition">
-                    <img src="{{ asset('icones/back.png') }}" alt="En arrière" />
-                </a>
-                {% elseif( version.libelleEtat == 'EXPERTISE_TEST' ) %}
-                <a class="arriere" href="{{ path('back_version', { 'id': version.idVersion }) }}" title="Revenir en édition">
-                    <img src="{{ asset('icones/back.png') }}" alt="En arrière" />
-                </a>
-                {% elseif( version.libelleEtat == 'EDITION_DEMANDE') %}
-                <a href="{{ path('fwd_version', { 'id': version.idVersion }) }}" title="Envoyer pour expertise">
-                    <img src="{{ asset('icones/forward.png') }}" alt="En avant" />
-                </a>
-                {% elseif( version.libelleEtat == 'EDITION_TEST') %}
-                <a href="{{ path('fwd_version', { 'id': version.idVersion }) }}" title="Envoyer pour expertise">
-                    <img src="{{ asset('icones/forward.png') }}" alt="En avant" />
-                </a>
+                        </td>
+                            <td class="{{ serviceProjets.metaetat(version.projet) | lower }}">{{ gramcmacros.metagraph(serviceProjets.metaetat(version.projet)) }}</td>
+                        <td>
+                            {% if( version != null) %}
+                                {{ gramcmacros.afftitre(version.prjtitre) }}
+                            {% endif %}
+                        </td>
+                        {% if( version.prjThematique != null ) %}
+                        <td class="t{{ idThematiques[version.prjThematique.libelleThematique] }}">{{ version.prjThematique }}
+                        {% else %}
+                        <td>
+                        {% endif %}
+                        </td>
+                        {% if version.prjRattachement != null %}
+                            <td class="r{{ idRattachements[version.prjRattachement.libelleRattachement] }}">{{ version.prjRattachement }}
+                        {% else %}
+                        <td>
+                        {% endif %}
+                        </td>
+
+                        <td>
+                            {{ version.prjGenciDari }}
+                        </td>
+                        <td>
+                            {% if( version.responsable != null ) %}
+                            {% if ( is_granted('ROLE_ADMIN') ) %}
+                            <a class="sudo" href="{{ path('sudo',  { 'id': version.responsable.id }) }}?" title="Changer d'identité">
+                                {{icones.sudo(20,20)}}
+                            </a>
+                            {% endif %}
+                            <a href="mailto:{{ version.responsable.mail }}" title="Envoyer un courriel au responsable à l'adresse {{ version.responsable.mail }}">
+                                {{icones.mail_send}}
+                            </a>
+                            {{ version.responsable.prenom }} {{ version.responsable.nom }}
+                                {% if(  version.responsable.peut_creer_projets == false ) %}
+                                <span title="Responsable non éligible">{{icones.attention(20,20)}}</span>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if( version != null) %}
+                                <span title="{{ version.PrjLLabo }}">{{ version.acroLaboratoire }}</span>
+                            {% endif %}
+                        </td>
+                        {% if( version.experts|length > 0 ) %}
+                        <td class="avec_expert" >
+                            {% for exp in version.experts %}
+                            {# exp peut être nul si le système n'a pas pu affecter d'expert automatiquement ! #}
+                            {% if exp != null %}
+                                {% if ( is_granted('ROLE_ADMIN')) %}
+                                <a class="sudo" href="{{ path('sudo',  { 'id': exp.id }) }}?" title="Changer d'identité">
+                                    {{icones.sudo(20,20)}}
+                                </a>
+                                {% endif %}
+                                <a href="mailto:{{ exp.mail }}" title="Envoyer un courriel à l'expert à l'adresse {{ exp.mail }}">
+                                    {{icones.mail_send}}
+                                </a>
+                                {{ exp.prenom }} {{ exp.nom }}<br>
+                            {% endif %}
+                            {% endfor %}
+                        {% else %}
+                        <td>
+                        {% endif %}
+                        </td>
+                        <td>{{ version.demHeures|number_format(0, ',', ',')|raw }}</td>
+                        <td>{{ version.attrHeures|number_format(0, ',', ',')|raw }}</td>
+                        <td>{{ serviceProjets.getConsoCalculVersion(version) }}</td>
+                            {% if serviceVersions.issigne(version) %}
+                            <td class="prj_fiche_val">
+                                <a href="{{ path('signature',  { 'id': version.idVersion }) }}?">
+                                    {{icones.pdf(25,25)}}
+                                </a><br>
+                                <small>({{ serviceVersions.sizesigne(version) }}K)</small>
+                            </td>
+                            {% else %}
+                            <td>-</td>
+                            {% endif %}
+                        {% if( showRapport ==true ) %}
+                            {% set sizerapport = serviceProjets.sizerapport(version.projet,version.anneesession-1) %}
+                            {% if( serviceVersions.isnouvelle(version) ) %}
+                                <td  class="rapport_activite">N/A
+                            {% elseif sizerapport == 0 %}
+                                <td>
+                            {% else %}
+                                <td  class="rapport_activite">
+                                <a href="{{ path('rapport',  { 'id': version.idVersion }) }}?">
+                                    {{icones.pdf(25,25)}}
+                                </a><br>
+                                <small>({{ sizerapport }}K)</small>
+                            {% endif %}
+                            </td>
+                        {% endif %}
+                        {% if app.debug %}
+                        <td>{{ version.projet.libelleEtat }}</td>
+                        <td>{{ version.libelleEtat }}</td>
+                        {% endif %}
+                    </tr>
                 {% else %}
-                &nbsp;
-                {% endif %}
-            </td>
-            <td>{{ version.projet.idProjet }}</td>
-            <td><strong>{{ version.projet.libelletype }}</strong></td>
-            <td>
-                <a href="{{ path('consulter_version', { 'id': version.projet.idProjet, 'version': version.idVersion }) }}" title="Consulter le projet">
-                <img src="{{ asset('icones/consulter.png') }}" alt="Consulter" /></a>
-                {% if( version.projet.derniereVersion != null and version.projet.derniereVersion.isEdited ) %}
-                   <a href="{{ path('version_avant_supprimer',
-                   { 'id': version.projet.derniereVersion.idVersion, 'rtn' : 'projet_session' })}}" title="Supprimer le projet {{ version.projet.idProjet }}">
-                   <img class="bouton_poussoir" src="{{ asset('icones/poubelle16.png') }}" alt="Supprimer" /></a>
-                {% endif %}
-                {% if noconso==false %}
-                {% if( not serviceVersions.isnouvelle(version) ) %}
-                    {% if version.typeSession=='A' %}
-                        {% set annee_conso = version.anneeSession - 1 %}
-                    {% else %}
-                        {% set annee_conso = version.anneeSession %}
-                    {% endif %}
-                    <img id="bconso_{{ version.projet.idProjet }}"  class="bouton_poussoir conso" src="{{ asset('icones/courbe.png') }}"
-                    title="{{ version.projet.idProjet }}: Evolution de la consommation pour {{annee_conso}}" alt="{{ version.projet.idProjet }}: Evolution de la consommation pour {{annee_conso}}"
-                        data-href="{{ absolute_url(path('projet_conso', { 'id': version.projet.idProjet, 'annee' : annee_conso })) }}" />
-                {% endif %}
-                {% endif %}
-
-
-            </td>
-                <td class="{{ serviceProjets.metaetat(version.projet) | lower }}">{{ gramcmacros.metagraph(serviceProjets.metaetat(version.projet)) }}</td>
-            <td>
-                {% if( version != null) %}
-                    {{ gramcmacros.afftitre(version.prjtitre) }}
-                {% endif %}
-            </td>
-            {% if( version.prjThematique != null ) %}
-            <td class="t{{ idThematiques[version.prjThematique.libelleThematique] }}">{{ version.prjThematique }}
-            {% else %}
-            <td>
-            {% endif %}
-            </td>
-            {% if version.prjRattachement != null %}
-                <td class="r{{ idRattachements[version.prjRattachement.libelleRattachement] }}">{{ version.prjRattachement }}
-            {% else %}
-            <td>
-            {% endif %}
-            </td>
-
-            <td>
-                {{ version.prjGenciDari }}
-            </td>
-            <td>
-                {% if( version.responsable != null ) %}
-                {% if ( is_granted('ROLE_ADMIN') ) %}
-                <a class="sudo" href="{{ path('sudo',  { 'id': version.responsable.id }) }}?" title="Changer d'identité">
-                            <img class="bouton_poussoir" src="{{ asset('icones/sudo.png') }}" alt="Changer d'identité" /></a>
-                {% endif %}
-                <a href="mailto:{{ version.responsable.mail }}" title="Envoyer un courriel au responsable à l'adresse {{ version.responsable.mail }}">
-                            <img src="{{ asset('icones/mail_send.png') }}" alt="Envoyer un mail" /></a>
-                {{ version.responsable.prenom }} {{ version.responsable.nom }}
-                    {% if(  version.responsable.peut_creer_projets == false ) %}
-                    <img class="bouton_poussoir" src="{{ asset('icones/attention.png') }}" title="Le responsable non éligible" />
+                <tr><h2>
+                {% if( version == null ) %}
+                Attention : Version nulle !
+                {% else %}
+                    {% if( version != null and version.projet == null ) %}
+                    Attention : Version {{ version.idVersion }} sans projet !
                     {% endif %}
                 {% endif %}
-            </td>
-            <td>
-                {% if( version != null) %}
-                    <span title="{{ version.PrjLLabo }}">{{ version.acroLaboratoire }}</span>
-                {% endif %}
-            </td>
-            {% if( version.experts|length > 0 ) %}
-            <td class="avec_expert" >
-                {% for exp in version.experts %}
-                {# exp peut être nul si le système n'a pas pu affecter d'expert automatiquement ! #}
-                {% if exp != null %}
-                    {% if ( is_granted('ROLE_ADMIN')) %}
-                    <a class="sudo" href="{{ path('sudo',  { 'id': exp.id }) }}?" title="Changer d'identité">
-                                <img class="bouton_poussoir" src="{{ asset('icones/sudo.png') }}" alt="Changer d'identité" /></a>
-                    {% endif %}
-                    <a href="mailto:{{ exp.mail }}" title="Envoyer un courriel à l'expert à l'adresse {{ exp.mail }}">
-                                <img src="{{ asset('icones/mail_send.png') }}" alt="Envoyer un mail" /></a>
-                    {{ exp.prenom }} {{ exp.nom }}<br />
+                </h2>
+                </tr>
                 {% endif %}
                 {% endfor %}
-            {% else %}
-            <td>
-            {% endif %}
-            </td>
-            <td>{{ version.demHeures }}</td>
-            <td>{{ version.attrHeures }}</td>
-            <td>{{ serviceProjets.getConsoCalculVersion(version) }}</td>
-                {% if serviceVersions.issigne(version) %}
-                <td class="prj_fiche_val">
-                    <a href="{{ path('signature',  { 'id': version.idVersion }) }}?">
-                    <img src="{{ asset('icones/pdf.png') }}" alt="Fichier pdf" /></a>
-                    <small>({{ serviceVersions.sizesigne(version) }}K)</small>
-                </td>
-                {% else %}
-                <td>-</td>
-                {% endif %}
-            {% if( showRapport ==true ) %}
-                {% set sizerapport = serviceProjets.sizerapport(version.projet,version.anneesession-1) %}
-                {% if( serviceVersions.isnouvelle(version) ) %}
-                    <td  class="rapport_activite">N/A
-                {% elseif sizerapport == 0 %}
-                    <td>
-                {% else %}
-                    <td  class="rapport_activite">
-                    <a href="{{ path('rapport',  { 'id': version.idVersion }) }}?">
-                    <img src="{{ asset('icones/pdf.png') }}" alt="Fichier pdf" /></a>
-                    <small>({{ sizerapport }}K)</small>
-                {% endif %}
-                </td>
-            {% endif %}
-            {% if app.debug %}
-            <td>{{ version.projet.libelleEtat }}</td>
-            <td>{{ version.libelleEtat }}</td>
-            {% endif %}
-        </tr>
-    {% else %}
-    <tr><h2>
-    {% if( version == null ) %}
-    Attention : Version nulle !
-    {% else %}
-        {% if( version != null and version.projet == null ) %}
-        Attention : Version {{ version.idVersion }} sans projet !
-        {% endif %}
-    {% endif %}
-    </h2>
-    </tr>
-    {% endif %}
-    {% endfor %}
-    </tbody>
-    </table></div>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <div id="formulaire_confirmation"></div>
 

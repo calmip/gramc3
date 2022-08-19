@@ -75,6 +75,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 use App\Form\ChoiceList\ExpertChoiceLoader;
 
+use Doctrine\ORM\EntityManagerInterface;
+
 /**
  * Expertise controller.
  *
@@ -98,7 +100,8 @@ class ExpertiseController extends AbstractController
         private FormFactoryInterface $ff,
         private ValidatorInterface $vl,
         private TokenStorageInterface $tok,
-        private AuthorizationCheckerInterface $ac
+        private AuthorizationCheckerInterface $ac,
+        private EntityManagerInterface $em
     ) {
         $this->token = $tok->getToken();
     }
@@ -115,7 +118,7 @@ class ExpertiseController extends AbstractController
         $ss = $this->ss;
         $sp = $this->sp;
         $se = $this->se;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $session  = $ss->getSessionCourante();
         $annee    = $session->getAnneeSession();
@@ -194,7 +197,7 @@ class ExpertiseController extends AbstractController
         $ss = $this->ss;
         $sp = $this->sp;
         $sv = $this->sv;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $affectationExperts = $this->se;
 
         $session      = $ss->getSessionCourante();
@@ -202,9 +205,9 @@ class ExpertiseController extends AbstractController
         $session      = $session_data['session']!=null ? $session_data['session'] : $session;
         $session_form = $session_data['form'];
         $versions     = $em->getRepository(Version::class)->findSessionVersions($session);
+        usort($versions, "self::cmpVersionsByEtat");
         $etatSession  = $session->getEtatSession();
 
-        //$affectationExperts = new AffectationExperts($request, $versions, $this->get('form.factory'), $this->getDoctrine());
         $affectationExperts->setDemandes($versions);
 
         //
@@ -234,6 +237,8 @@ class ExpertiseController extends AbstractController
 
         $sessionForm      = $session_data['form']->createView();
         $titre            = "Affectation des experts aux projets de la session " . $session;
+
+        
         return $this->render(
             'expertise/affectation.html.twig',
             [
@@ -248,6 +253,11 @@ class ExpertiseController extends AbstractController
             'attHeures'     => $attHeures,
             ]
         );
+    }
+
+    private static function cmpVersionsByEtat(Version $a, Version $b): int
+    {
+        return (Etat::cmpEtatExpertise($a->getEtatVersion(),$b->getEtatVersion()));
     }
     
     /**
@@ -283,7 +293,7 @@ class ExpertiseController extends AbstractController
      */
     public function indexAction(): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $expertises = $em->getRepository(Expertise::class)->findAll();
         $projets =  $em->getRepository(Projet::class)->findAll();
@@ -324,7 +334,7 @@ class ExpertiseController extends AbstractController
         $sp  = $this->sp;
         $sj  = $this->sj;
         $token = $this->token;
-        $em  = $this->getDoctrine()->getManager();
+        $em  = $this->em;
 
         $moi = $token->getUser();
         if (is_string($moi)) {
@@ -492,7 +502,7 @@ class ExpertiseController extends AbstractController
         }
         catch (\InvalidArgumentException $e) {};
         
-        $mes_commentaires = $em->getRepository('App:CommentaireExpert')->findBy(['expert' => $moi ]);
+        $mes_commentaires = $em->getRepository(CommentaireExpert::class)->findBy(['expert' => $moi ]);
 
         ///////////////////////
 
@@ -525,7 +535,7 @@ class ExpertiseController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($expertise);
             $em->flush($expertise);
 
@@ -569,7 +579,7 @@ class ExpertiseController extends AbstractController
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('expertise_edit', array('id' => $expertise->getId()));
         }
@@ -613,7 +623,7 @@ class ExpertiseController extends AbstractController
         $ac = $this->ac;
         $sval = $this->vl;
         $token = $this->token;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // ACL
         $moi = $token->getUser();
@@ -896,7 +906,7 @@ class ExpertiseController extends AbstractController
         $sn = $this->sn;
         $sj = $this->sj;
         $ac = $this->ac;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $token = $this->token;
 
         // ACL
@@ -1016,7 +1026,7 @@ class ExpertiseController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->remove($expertise);
             $em->flush($expertise);
         }

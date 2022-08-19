@@ -1,9 +1,13 @@
 {% extends 'default/base.html.twig' %}
 
+{% import "default/icone.html.twig" as icones %}
+
 {% block body %}
 
+<section id="section_expert">
+
 {% if rallonges | length > 0 %}
-    <section>
+    <section class="rallonge" style="stroke:black" >
     <h2>Demandes de rallonges (session en cours)</h2>
     <table id="RALLONGE" class="projet">
         <thead>
@@ -18,35 +22,35 @@
             </tr>
         </thead>
         <tbody>
-    {% for rallonge in rallonges %}
-            <tr class="gras">
-                <td>{{ rallonge.projet }}</td>
-                <td>
-                    <a href="{{ path('consulter_projet', { 'id' : rallonge.projet.idProjet } ) }}">
-                        <img src="{{ asset('icones/consulter.png') }}" alt="Projet" title="Lire le projet" class="bouton_poussoir">
-                    </a>
-                </td>
-                <td>{{ rallonge.version.prjTitre }}</td>
-                <td>{{ rallonge.version.demHeures }}</td>
-                <td>{{ rallonge.version.attrHeures }}</td>
-                <td>{{ rallonge.consocalcul }}</td>
-                <td>{{ rallonge.version.responsable }}</td>
-            </tr>
-            {% for item in rallonge.rallonges %}
-            <tr>
-                <td>{{ item.idRallonge }}</td>
-                <td><a href="{{ path('rallonge_expertiser', { 'id' : item.idRallonge } ) }}">
-                    <img src="{{ asset('icones/modifier.png') }}" alt="Projet" title="Expertiser la demande" class="bouton_poussoir">
-                    </a>
-                </td>
-                <td>&nbsp;</td>
-                <td>{{ item.demHeures }}</td>
-                <td>{{ item.attrHeures }}</td>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-            </tr>
-            {% endfor %}
-    {% endfor %}
+        {% for rallonge in rallonges %}
+        <tr class="gras">
+            <td>{{ rallonge.projet }}</td>
+            <td>
+                <a href="{{ path('consulter_projet', { 'id' : rallonge.projet.idProjet } ) }}">
+                    {{ icones.details}}
+                </a>
+            </td>
+            <td rowspan="{{ rallonge.rallonges|length + 1 }}">{{ rallonge.version.prjTitre }}</td>
+            <td>{{ rallonge.version.demHeures }}</td>
+            <td>{{ rallonge.version.attrHeures }}</td>
+            <td rowspan>{{ rallonge.consocalcul }}</td>
+            <td rowspan="{{ rallonge.rallonges|length + 1 }}">{{ rallonge.version.responsable }}</td>
+        </tr>
+        {% for item in rallonge.rallonges %}
+        <tr>
+            <td>{{ item.idRallonge }}</td>
+            <td><a href="{{ path('rallonge_expertiser', { 'id' : item.idRallonge } ) }}" title="Expertiser la demande">
+                {{icones.modifier}}
+                </a>
+            </td>
+            <td>&nbsp;</td>
+            <td>{{ item.demHeures }}</td>
+            <td>{{ item.attrHeures }}</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+        </tr>
+        {% endfor %}
+        {% endfor %}
         </tbody>
     </table>
     </section>
@@ -55,7 +59,7 @@
 {# ################################################################### #}
 
 {% for expertises_thematique in expertises_by_thematique %}
-    <section>
+    <section class="liste_projets">
         {% if expertises_thematique.expertises | length > 0 %}
         <h2>Thématique {{ expertises_thematique.thematique }}</h2>
             <table id="THEM" class="projet">
@@ -79,11 +83,13 @@
                         <td>{{ expertise.projetId }}</td>
                         <td>
                             {% if( expertise.expert == true) %}
-                                <a href="{{ path('expertise_modifier', { 'id' : expertise.expertise.id } ) }}">
-                                <img src="{{ asset('icones/modifier.png') }}" alt="Expertiser" title="Expertiser le projet" class="bouton_poussoir"></a>
+                                <a href="{{ path('expertise_modifier', { 'id' : expertise.expertise.id } ) }}" title="Expertiser le projet">
+                                {{icones.modifier}}
+                                </a>
                             {% else %}
-                                <a href="{{ path('consulter_projet', { 'id' : expertise.projetId } ) }}">
-                                <img src="{{ asset('icones/consulter.png') }}" alt="Lire" title="Lire le projet" class="bouton_poussoir"></a>
+                                <a href="{{ path('consulter_projet', { 'id' : expertise.projetId } ) }}" title="Lire le projet">
+                                {{icones.details}}
+                                </a>
                             {% endif %}
                         </td>
                         <td>{{ expertise.thematique }}</td>
@@ -101,7 +107,7 @@
 {# ################################################################### #}
 
 {% if( not ( expertises_hors_thematique == null ) ) %}
-<section>
+<section style="stroke:black">
     <h2>Autres thématiques</h2>
     <table id="HORS_THEM" class="projet">
     <thead>
@@ -125,10 +131,12 @@
                         <td>
                             {% if( expertise.expert == true) %}
                                 <a href="{{ path('expertise_modifier', { 'id' : expertise.expertise.id } ) }}">
-                                <img src="{{ asset('icones/modifier.png') }}" alt="Expertiser" title="Expertiser le projet" class="bouton_poussoir"></a>
+                                    {{ icones.modifier }}
+                                </a>
                             {% else %}
                                 <a href="{{ path('consulter_projet', { 'id' : expertise.projetId } ) }}">
-                                <img src="{{ asset('icones/consulter.png') }}" alt="Expertiser" title="Lire le projet" class="bouton_poussoir"></a>
+                                    {{ icones.details }}
+                                </a>
                             {% endif %}
                         </td>
                         <td>{{ expertise.thematique }}</td>
@@ -145,27 +153,31 @@
 
 {% if mes_commentaires_flag == true %}
     <h2>Commentaires généraux</h2>
-    <section>
+    <section class="commentaires">
+    <div class="commentaire_annee">
     {% if mes_commentaires_maj != null %}
-        <p><strong><a href="{{ path('cree_ou_modif', { 'annee' : mes_commentaires_maj }) }}">Créer ou modifier</a></strong> le commentaire de l'année <strong>{{mes_commentaires_maj}}</strong></p>
+        <a href="{{ path('cree_ou_modif', { 'annee' : mes_commentaires_maj }) }}">Créer ou modifier</a> <p>le commentaire de l'année <strong>{{mes_commentaires_maj}}</strong></p>
     {% endif %}
+    </div>
 
+    <div class="commentaire_tous">
     {% if mes_commentaires != null %}
         {% for comm in mes_commentaires %}
         <h3>{{comm.annee}}</h3>
         <p><em>Dernière mise à jour le {{comm.majstamp|date('Y-m-d H:i:s')}}</em></p>
-        <p>{{comm.commentaire| e | nl2br}}</p>
+        <p class="commentaire">{{comm.commentaire| e | nl2br}}</p>
         {% endfor %}
     {% else %}
         <p><em>Vous n'avez entré aucun commentaire</em></p>
     {% endif %}
+    </div>
     </section>
 {% endif %}
 
 <h2>Anciennes expertises</h2>
-<section>
+<section class="anciennes_expertises">
 {% if( not ( old_expertises == null ) ) %}
-    <table id="old_expertises">
+    <table id="old_expertises" class="anciennes_expertises">
     <thead>
         <tr>
             <th>Projet</th>
@@ -185,8 +197,8 @@
             <td>{{ expertise.sessionId }}</td>
             <td>
                 {#<a href="{{ path('consulter_version', { 'id' : expertise.projetId, 'version' : expertise.versionId } ) }}">#}
-                <a href="{{ path('consulter_expertise', { 'id' : expertise.id } ) }}">
-                    <img src="{{ asset('icones/consulter.png') }}" alt="Expertiser" title="Lire le projet" class="bouton_poussoir">
+                <a href="{{ path('consulter_expertise', { 'id' : expertise.id } ) }}" title="Lire le projet">
+                    {{icones.details}}
                 </a>
             </td>
             <td>{{ expertise.thematique }}</td>
@@ -203,5 +215,7 @@
 <p><em>Vous n'avez pas d'anciennes expertises</em></p>
 </section>
 {% endif %}
+
+</section>
 
 {% endblock %}

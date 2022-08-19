@@ -33,6 +33,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 
+use Doctrine\ORM\EntityManagerInterface;
+
 /**
  * Rattachement controller.
  *
@@ -40,7 +42,7 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class RattachementController extends AbstractController
 {
-    public function __construct(private AuthorizationCheckerInterface $ac) {}
+    public function __construct(private AuthorizationCheckerInterface $ac, private EntityManagerInterface $em) {}
 
     /**
       * @Route("/gerer",name="gerer_rattachements", methods={"GET"} )
@@ -49,7 +51,7 @@ class RattachementController extends AbstractController
     public function gererAction()
     {
         $ac = $this->ac;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // Si on n'est pas admin on n'a pas accès au menu
         $menu = $ac->isGranted('ROLE_ADMIN') ? [ ['ok' => true,'name' => 'ajouter_rattachement' ,'lien' => 'Ajouter un rattachement','commentaire'=> 'Ajouter un rattachement'] ] : [];
@@ -58,7 +60,7 @@ class RattachementController extends AbstractController
             'rattachement/liste.html.twig',
             [
             'menu' => $menu,
-            'rattachements' => $em->getRepository('App:Rattachement')->findBy([], ['libelleRattachement' => 'ASC'])
+            'rattachements' => $em->getRepository(Rattachement::class)->findBy([], ['libelleRattachement' => 'ASC'])
             ]
         );
     }
@@ -72,7 +74,7 @@ class RattachementController extends AbstractController
      */
     public function newAction(Request $request)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $rattachement = new Rattachement();
         $form = $this->createForm(
             'App\Form\RattachementType',
@@ -85,7 +87,7 @@ class RattachementController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($rattachement);
             $em->flush();
 
@@ -115,7 +117,7 @@ class RattachementController extends AbstractController
      */
     public function modifyAction(Request $request, Rattachement $rattachement)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $editForm = $this->createForm(
             'App\Form\RattachementType',
             $rattachement,
@@ -156,9 +158,16 @@ class RattachementController extends AbstractController
      */
     public function supprimerAction(Request $request, Rattachement $rattachement)
     {
-        $em = $this->getDoctrine()->getManager();
-        $em->remove($rattachement);
-        $em->flush($rattachement);
+        $em = $this->em;
+        try
+        {
+            $em->remove($rattachement);
+            $em->flush($rattachement);
+        }
+        catch (\Exception $e)
+        {
+            $request->getSession()->getFlashbag()->add("flash erreur",$e->getMessage());
+        }
         return $this->redirectToRoute('gerer_rattachements');
     }
 }

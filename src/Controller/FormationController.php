@@ -33,6 +33,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Form\FormInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 
 /**
@@ -42,7 +43,7 @@ use Symfony\Component\Form\FormInterface;
  */
 class FormationController extends AbstractController
 {
-    public function __construct(private AuthorizationCheckerInterface $ac) {}
+    public function __construct(private AuthorizationCheckerInterface $ac, private EntityManagerInterface $em) {}
 
     /**
      * @Route("/gerer",name="gerer_formations", methods={"GET"} )
@@ -51,7 +52,7 @@ class FormationController extends AbstractController
     public function gererAction(): Response
     {
         $ac = $this->ac;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // Si on n'est pas admin on n'a pas accès au menu
         $menu = $ac->isGranted('ROLE_ADMIN') ? [ ['ok' => true,'name' => 'ajouter_formation' ,'lien' => 'Ajouter une formation','commentaire'=> 'Ajouter une formation'] ] : [];
@@ -79,7 +80,7 @@ class FormationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($formation);
             $em->flush($formation);
 
@@ -115,7 +116,7 @@ class FormationController extends AbstractController
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('gerer_formations');
         }
@@ -145,7 +146,7 @@ class FormationController extends AbstractController
      */
     public function supprimerAction(Request $request, Formation $formation): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->remove($formation);
         $em->flush($formation);
         return $this->redirectToRoute('gerer_formations');

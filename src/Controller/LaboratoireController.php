@@ -33,6 +33,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * Laboratoire controller.
@@ -41,7 +42,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class LaboratoireController extends AbstractController
 {
-    public function __construct(private AuthorizationCheckerInterface $ac) {}
+    public function __construct(private AuthorizationCheckerInterface $ac, private EntityManagerInterface $em) {}
 
     /**
      * Liste tous les laboratoires
@@ -52,7 +53,7 @@ class LaboratoireController extends AbstractController
     public function gererAction(): Response
     {
         $ac = $this->ac;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         // Si on n'est pas admin on n'a pas accès au menu
         $menu = $ac->isGranted('ROLE_ADMIN') ? [ ['ok' => true,'name' => 'ajouter_laboratoire' ,'lien' => 'Ajouter un laboratoire','commentaire'=> 'Ajouter un laboratoire'] ] : [];
@@ -61,7 +62,7 @@ class LaboratoireController extends AbstractController
             'laboratoire/liste.html.twig',
             [
             'menu' => $menu,
-            'laboratoires' => $em->getRepository('App:Laboratoire')->findBy([], ['numeroLabo' => 'ASC'])
+            'laboratoires' => $em->getRepository(Laboratoire::class)->findBy([], ['numeroLabo' => 'ASC'])
             ]
         );
     }
@@ -80,7 +81,7 @@ class LaboratoireController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($laboratoire);
             if (Functions::Flush($em,$request)) return $this->redirectToRoute('gerer_laboratoires');
         }
@@ -109,7 +110,7 @@ class LaboratoireController extends AbstractController
      */
     public function modifyAction(Request $request, Laboratoire $laboratoire): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $editForm = $this->createForm('App\Form\LaboratoireType', $laboratoire, ['modifier' => true ]);
         $editForm->handleRequest($request);
 
@@ -141,11 +142,11 @@ class LaboratoireController extends AbstractController
      */
     public function supprimerAction(Request $request, Laboratoire $laboratoire): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->remove($laboratoire);
 
         try {
-            $em->flush($laboratoire);
+            $em->flush();
         }
         catch ( \Exception $e) {
             $request->getSession()->getFlashbag()->add("flash erreur",$e->getMessage());

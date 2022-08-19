@@ -9,87 +9,91 @@
 
 {% block body %}
 
-<section>
+<section class="section_projet_session">
 
-<h1>Répartition des heures par {{ titre }} - {{ annee }}
-{% if sess_lbl != 'AB' %} - session {{ sess_lbl }} {% endif %}
-</h1>
-
-<div class="message info">
-{% if sess_lbl=='AB' %}
-<p>Sont pris en compte tous les projets <strong>de session</strong> ou <strong>fil de l'eau</strong> qui ont démarré ou ont
-été renouvelés en {{ annee }}</p>
-{% else %}
-<p>Sont pris en compte <strong>seulement les projets de session</strong> qui ont démarré ou ont
-été renouvelés en {{ annee }} lors de la session {{ sess_lbl }}</p>
-{% endif %}
-<p>Ne sont pas pris en compte les versions de projets <strong>en cours d'édition</strong></p>
-</div>
-{% set route='statistiques_' ~ titre ~ '_csv' %}
-<form action="{{ path(route, { 'annee' : annee }) }}">
-    {% if sess_lbl == 'AB' %}
-    <input type="submit" value="csv - statistiques par {{titre}} - année {{ annee }}">
+    <h1>Répartition des heures par {{ titre }} - {{ annee }}
+    {% if sess_lbl != 'AB' %} - session {{ sess_lbl }} {% endif %}
+    </h1>
+    
+    <div class="information">
+    {% if sess_lbl=='AB' %}
+    <p>Sont pris en compte tous les projets <strong>de session</strong> ou <strong>fil de l'eau</strong> qui ont démarré ou ont
+    été renouvelés en {{ annee }}</p>
     {% else %}
-    <input type="submit" value="csv - statistiques par {{titre}} - année {{ annee }} - session {{ sess_lbl }}">
+    <p>Sont pris en compte <strong>seulement les projets de session</strong> qui ont démarré ou ont
+    été renouvelés en {{ annee }} lors de la session {{ sess_lbl }}</p>
     {% endif %}
-</form>
-
-<br />
-
-<table>
-    <thead>
-        <tr>
-            <th>{{titre}}</th>
-            <th>Nombre de projets</th>
-            {% if sess_lbl!='AB' %}<th>Nouveaux projets</th><th>Renouvellements</th>{% endif %}
-            <th>Heures demandées</th>
-            <th>Heures attribuées</th>
-            {% if sess_lbl == 'AB' %}<th>Consommation</th>{% endif %}
-        </tr>
-    </thead>
-    <tbody>
-        {% for acro in acros %}
-        <tr>
-            <td>{{ acro }}</td>
-            <td>{{ num_projets[acro] }}</td>
-            {% if sess_lbl!='AB' %}<td>{{ num_projets_n[acro] }}</td><td>{{ num_projets_r[acro] }}</td>{% endif %}
-            <td>{{ dem_heures[acro] }}</td>
-            <td>{{ attr_heures[acro] }}</td>
-            {% if sess_lbl == 'AB' %}<td>{{ conso[acro] }}</td>{% endif %}
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-<table>
-    <tbody>
-        <tr>
-            <td>
-                <img class="figure" src="data:image/png;base64, {{ image_projets }}"  title="cliquez pour afficher la figure en taille réelle" >
-            </td>
-            <td>
-                <img class="figure" src="data:image/png;base64, {{ image_dem }}"   title="cliquez pour afficher la figure en taille réelle">
-            </td>
-            <td>
-                <img class="figure" src="data:image/png;base64, {{ image_attr }}"   title="cliquez pour afficher la figure en taille réelle">
-            </td>
+    <p>Ne sont pas pris en compte les versions de projets <strong>en cours d'édition</strong></p>
+    </div>
+    
+    <div class="formulaire">
+        {% set route='statistiques_' ~ titre ~ '_csv' %}
+        <form action="{{ path(route, { 'annee' : annee }) }} class="formulaire">
             {% if sess_lbl == 'AB' %}
-            <td>
-                <img class="figure" src="data:image/png;base64, {{ image_conso }}"   title="cliquez pour afficher la figure en taille réelle">
-            </td>
+            <input class="telecharger_csv" type="submit" value="csv - statistiques par {{titre}} - année {{ annee }}">
+            {% else %}
+            <input class="telecharger_csv" type="submit" value="csv - statistiques par {{titre}} - année {{ annee }} - session {{ sess_lbl }}">
             {% endif %}
-        </tr>
-        <tr>
-            <td>Nombre de projets par {{titre}}</td>
-            <td>Nombre d'heures demandées par {{titre}}</td>
-            <td>Nombre d'heures attribuées par {{titre}}</td>
-            {% if sess_lbl == 'AB' %}<td>Nombre d'heures consommées par {{titre}}</td>{% endif %}
-        <tr>
-    </tbody>
-</table>
-<div id="dialog"></div>
+        </form>
+    </div>
+    
+    <br>
+    
+    <table class="bilan_statistiques">
+        <thead>
+            <tr>
+                <th>{{titre}}</th>
+                <th>Nombre de projets</th>
+                {% if sess_lbl!='AB' %}<th>Nouveaux projets</th><th>Renouvellements</th>{% endif %}
+                <th>Heures demandées</th>
+                <th>Heures attribuées</th>
+                {% if sess_lbl == 'AB' %}<th>Consommation</th>{% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for acro in acros %}
+            <tr>
+                <td>{{ acro }}</td>
+                <td>{{ num_projets[acro] }}</td>
+                {% if sess_lbl!='AB' %}<td>{{ num_projets_n[acro] }}</td><td>{{ num_projets_r[acro] }}</td>{% endif %}
+                <td>{{ dem_heures[acro] }}</td>
+                <td>{{ attr_heures[acro] }}</td>
+                {% if sess_lbl == 'AB' %}<td>{{ conso[acro] }}</td>{% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <table id="camembers">
+        <tbody>
+            <tr>
+                <td>
+                    <img class="figure" src="data:image/png;base64, {{ image_projets }}"  title="cliquez pour afficher la figure en taille réelle" >
+                </td>
+                <td>
+                    <img class="figure" src="data:image/png;base64, {{ image_dem }}"   title="cliquez pour afficher la figure en taille réelle">
+                </td>
+                <td>
+                    <img class="figure" src="data:image/png;base64, {{ image_attr }}"   title="cliquez pour afficher la figure en taille réelle">
+                </td>
+                {% if sess_lbl == 'AB' %}
+                <td>
+                    <img class="figure" src="data:image/png;base64, {{ image_conso }}"   title="cliquez pour afficher la figure en taille réelle">
+                </td>
+                {% endif %}
+            </tr>
+            <tr>
+                <td>Nombre de projets par {{titre}}</td>
+                <td>Nombre d'heures demandées par {{titre}}</td>
+                <td>Nombre d'heures attribuées par {{titre}}</td>
+                {% if sess_lbl == 'AB' %}<td>Nombre d'heures consommées par {{titre}}</td>{% endif %}
+            <tr>
+        </tbody>
+    </table>
 
-<nav><ul><a class="lien_actif" href="{{ path('statistiques') }}" title="Statistiques">Retour aux statistiques</a></ul></nav>
+    <div id="dialog"></div>
+    
+    <nav><ul><li><a class="lien_actif" href="{{ path('statistiques') }}" title="Statistiques">Retour aux statistiques</a></li></ul></nav>
 
 </section>
 

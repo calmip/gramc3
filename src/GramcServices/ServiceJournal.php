@@ -52,7 +52,6 @@ class ServiceJournal
         private AuthorizationCheckerInterface $ac,
         private EntityManagerInterface $em
     ) {
-        $this->token = $this->tok->getToken();
     }
 
     /**
@@ -69,7 +68,7 @@ class ServiceJournal
     {
         $rs    = $this->rs;
         $log   = $this->log;
-        $token = $this->token;
+        $token = $this->tok->getToken();
         $em    = $this->em;
 
         $journal = new Journal();
@@ -89,9 +88,9 @@ class ServiceJournal
             $journal->setGramcSessId($rs->getCurrentRequest()->getSession()->getId());
         }
 
-        if ($rs->getMasterRequest() != null
-        && $rs->getMasterRequest()->getClientIp() != null) {
-            $ip = $rs->getMasterRequest()->getClientIp();
+        if ($rs->getMainRequest() != null
+        && $rs->getMainRequest()->getClientIp() != null) {
+            $ip = $rs->getMainRequest()->getClientIp();
         } else {
             $ip = '0.0.0.0';
         }

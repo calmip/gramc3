@@ -1,7 +1,7 @@
 
 # INSTALLATION sur une Debian ou dérivés
 
-**Note** - Cette documentation est validée sur Debian 10 Buster
+**Note** - Cette documentation est validée sur Debian 10 Buster et Debian 11 Bullseye
 
 Installations de paquets
 -----
@@ -200,6 +200,15 @@ cd reprise
 sudo -u www-data ./reload-db un-dump-de-la-bd.sql
 ~~~~
 
+**ATTENTION:**
+Si votre dump provient d'une version 3.5 ou 3.6 de gramc3, il est nécessaire d'initaliser certains champs. Cela se fait année par année:
+
+~~~~
+bin/console app:InitTypeVersion 2022
+~~~~
+
+A exécuter pour chaque année se trouvant dans votre base de données.
+
 **Installation d'une base de données vide sur une instance de développement:**
 
 ~~~~
@@ -260,9 +269,17 @@ ln -s chemin/vers/gramc3/public gramc3
 
 Sécuriser l'installation:
 ----
-
+Le script secu-on.bash passe l'essentiel des fichiers en readonly
 ~~~~
 ./secu-on.bash
+~~~~
+
+Revenir en mode "mise à jour"
+----
+Pour mettre à jour Symfony ou pour d'autres opérations de maintenance, il faut repasser tous les fichiers en rw:
+
+~~~~
+./secu-off.bash
 ~~~~
 
 Fin de la configuration:

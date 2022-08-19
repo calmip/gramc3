@@ -21,6 +21,7 @@ $(document).ready(function() { // table projets par session
         "bPaginate": false,
         "bFilter":     false,
         "info":         false,
+        "columnDefs":[{ type: "num-fmt", targets: [13,14] }],
         "aoColumnDefs": [{bSortable: false,aTargets: [ 1,4,6 ]}]
     });
 });
@@ -62,14 +63,14 @@ $(document).ready(function() { // table anciennes expertises
     });
 });
 
-$(document).ready(function() { // table d'affectation des experts
+/*$(document).ready(function() { // table d'affectation des experts
     $('#affecte_experts').DataTable( {
         "bPaginate": false,
         "bFilter":     false,
         "info":         false,
         "aoColumnDefs": [{bSortable: false,aTargets: [4]}]
     });
-});
+});*/
 
 $(document).ready(function() { // table statistiques laboratoires
     $('#tab_statistiques_labo').DataTable( {

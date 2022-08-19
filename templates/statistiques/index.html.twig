@@ -1,5 +1,6 @@
 {% extends 'default/base.html.twig' %}
 {% import "default/macros.html.twig" as gramcmacros %}
+{% import "default/icone.html.twig" as icones %}
 
 {% block myjavascripts %}
 <script  type="text/javascript" src="{{ asset('js/projet.js') }}" ></script>
@@ -8,153 +9,165 @@
 
 {% block body %}
 
-<section>
+<section id="index_statistiques" class="section_projet_session" style="stroke:black">
 
-<h1>Statistiques de l'année {{ annee }}{% if sess_lbl != 'AB' %} - session {{ sess_lbl }}{% endif %} </h1>
+    <p><strong>Choisissez une année...</strong></p>
+    <div class="formulaire inputrond submitdyn">
+        {{ form_start(form) }}
+        {{ form_widget(form.annee) }}{{ form_widget(form.submit) }}
+        {{ form_end(form) }}
+    </div>
 
-<h3>Année</h3>
-{{ form_start(form) }}
-{{ form_widget(form.annee) }}{{ form_widget(form.submit) }}
-{{ form_end(form) }}
+    <p>&nbsp;</p><p><strong>...et une session:</strong></p>
+    <div class="formulaire inputrond submitdyn">
+        {{ form_start(forms) }}
+        {{ form_widget(forms.sess_lbl) }}{{ form_widget(forms.submit) }}
+        {{ form_end(forms) }}
+    </div>
 
-<h3>Session</h3>
-{{ form_start(forms) }}
-{{ form_widget(forms.sess_lbl) }}{{ form_widget(forms.submit) }}
-{{ form_end(forms) }}
+    <h1>Statistiques de l'année {{ annee }}{% if sess_lbl != 'AB' %} - session {{ sess_lbl }}{% endif %} </h1>
 
-<div class="message info">
-{% if sess_lbl=='AB' %}
-<p>Sont pris en compte tous les projets <strong>de session</strong> ou <strong>fil de l'eau</strong> qui ont démarré ou ont
-été renouvelés en {{ annee }}</p>
-{% else %}
-<p>Les données de consommation (heures de calcul ou stockage) ne sont pas affichées - Pour les voir regardez les statistiques sur l'année {{ annee }} (les deux sessions)</p>
-{% endif %}
-<p>Les versions de projets <strong>en cours d'édition</strong> ne sont pas prises en compte</p>
-</div>
-
-
-<div>
-{% if sess_lbl == 'AB' %}
-    <p class="centrage"><img id="bconso_allcpu" class="bouton_poussoir conso" src="{{ asset('icones/conso64.png') }}"
-        alt="Consommation cpu {{annee}} - Tous les projets" title="Visualiser la consommation cpu {{annee}} - Tous les projets"
-        data-href="{{ absolute_url(path('tous_projets_conso', { 'ressource' : 'cpu', 'annee' : annee})) }}"/>
-    <img id="bconso_allgpu" class="bouton_poussoir conso" src="{{ asset('icones/conso64.png') }}"
-        alt="Consommation gpu {{annee}} - Tous les projets" title="Visualiser la consommation gpu {{annee}} - Tous les projets"
-        data-href="{{ absolute_url(path('tous_projets_conso', { 'ressource' : 'gpu', 'annee' : annee})) }}"/></p>
-{% endif %}
-
-<table id="tab_nb_projets_total_annee">
+    <div class="information">
+    {% if sess_lbl=='AB' %}
+    <p>Sont pris en compte tous les projets <strong>de session</strong> ou <strong>fil de l'eau</strong> qui ont démarré ou ont
+    été renouvelés en {{ annee }}</p>
+    {% else %}
+    <p>Les données de consommation (heures de calcul ou stockage) ne sont pas affichées - Pour les voir regardez les statistiques sur l'année {{ annee }} (les deux sessions)</p>
+    {% endif %}
+    <p>Les versions de projets <strong>en cours d'édition</strong> ne sont pas prises en compte</p>
+    </div>
+    
+    <h2>
+        {% if sess_lbl == 'AB' %}<th colspan="4">Demandes, attributions, consommation pour {{ annee }}</th>{% else %}
+                                 <th colspan="4">Demandes et attributions pour {{ annee }} - session {{ sess_lbl }} </th> {% endif %}
+    </h2>
+    <p class="centrage">En <span class="engros">{{ annee }}</span> {% if sess_lbl != 'AB' %}(session <span class="engros">{{ sess_lbl }}</span>){% endif %}, il y avait <span class="engros">{{ total.sess.prj + total.fil.prj }}</span> projets dont
+     <span class="engros">{{ total.fil.prj }}</span> projets test et <span class="engros">{{ (total.sess.rall + total.fil.rall )}}</span> rallonges.</p>
+    
+    <h2>Projets</h2>
+    <table class="bilan_statistiques">
     <tbody>
         <tr>
-            <th colspan="2">Bilan des projets - {{ annee }}{% if sess_lbl != 'AB' %} - session {{ sess_lbl }}{% endif %}</th>
+            <th>&nbsp;</th><th>Session</th><th>Fil de l'eau</th><th>Total</th>
         </tr>
         <tr>
-            <th>Nombre de projets</th><td>{{ total.sess.prj + total.fil.prj }}</td>
+            <th>Nombre de projets</th>
+            <td>{{ total.sess.prj}}</td>
+            <td>{{ total.fil.prj}}</td>
+            <td>{{ total.sess.prj + total.fil.prj}}</td>
+        </tr>
+        <tr>
+            <th>Demandes initiales</th>
+            <td>{{ (total.sess.demHeuresA + total.sess.demHeuresB) | number_format(0, ',', ' ') }}</td>
+            <td>{{ (total.fil.demHeuresA + total.fil.demHeuresB) | number_format(0, ',', ' ')}}</td>
+            <td>{{ (total.sess.demHeuresA + total.sess.demHeuresB + total.fil.demHeuresA + total.fil.demHeuresB ) | number_format(0, ',', ' ') }}</td>
+        </tr>
+        <tr>
+            <th>Attributions initiales</th>
+            <td>{{(total.sess.attrHeuresA + total.sess.attrHeuresB) | number_format(0, ',', ' ')}}</td>
+            <td>{{(total.fil.attrHeuresA + total.fil.attrHeuresB) | number_format(0, ',', ' ')}}</td>
+            <td>{{(total.sess.attrHeuresA + total.sess.attrHeuresB + total.fil.attrHeuresA + total.fil.attrHeuresB ) |number_format(0, ',', ' ')}}</td>
         </tr>
     </tbody>
-</table>
+    </table>
+    
+    <h2>Rallonges</h2>
+    
+    <table class="bilan_statistiques">
+    <tbody>
+        <tr>
+            <th>&nbsp;</th><th>Session</th><th>Fil de l'eau</th><th>Total</th>
+        </tr>
+        <tr>
+            <th>Nombre de rallonges</th>
+            <td>{{ total.sess.rall }}</td>
+            <td>{{ total.fil.rall }}</td>
+            <td>{{ (total.sess.rall + total.fil.rall )}}</td>
+        </tr>
+        <tr>
+            <th>Demandes</th>
+            <td>{{ total.sess.demHeuresR | number_format(0, ',', ' ') }}</td>
+            <td>{{ total.fil.demHeuresR | number_format(0, ',', ' ') }}</td>
+            <td>{{ ( total.sess.demHeuresR + total.fil.demHeuresR) | number_format(0, ',', ' ')}}</td>
+        </tr>
+        <tr>
+            <th>Attributions</th>
+            <td>{{ total.sess.attrHeuresR | number_format(0, ',', ' ') }}</td>
+            <td>{{ total.fil.attrHeuresR | number_format(0, ',', ' ') }}</td>
+            <td>{{ ( total.sess.attrHeuresR + total.fil.attrHeuresR) | number_format(0, ',', ' ')}}</td>
+        </tr>
+    </tbody>
+    </table>
+    
+    {% if sess_lbl == 'AB' %}
 
-<h2>
-    {% if sess_lbl == 'AB' %}<th colspan="4">Demandes, attributions, consommation pour {{ annee }}</th>{% else %}
-                             <th colspan="4">Demandes et attributions pour {{ annee }} - session {{ sess_lbl }} </th> {% endif %}
-</h2>
+    <h2>Données de consommation</h2>
 
-<table>
-<tbody>
-    <tr>
-        <th>&nbsp;</th><th>Session</th><th>Fil de l'eau</th><th>Total</th>
-    </tr>
-    <tr>
-        <th class="left">Nombre de projets</th>
-        <td class="right">{{ total.sess.prj}}</td>
-        <td class="right">{{ total.fil.prj}}</td>
-        <td class="right">{{ total.sess.prj + total.fil.prj}}</td>
-    </tr>
-    <tr>
-        <th class="left">Demandes initiales</th>
-        <td class="right">{{ (total.sess.demHeuresA + total.sess.demHeuresB) | number_format(0, ',', ' ') }}</td>
-        <td class="right">{{ (total.fil.demHeuresA + total.fil.demHeuresB) | number_format(0, ',', ' ')}}</td>
-        <td class="right">{{ (total.sess.demHeuresA + total.sess.demHeuresB + total.fil.demHeuresA + total.fil.demHeuresB ) | number_format(0, ',', ' ') }}</td>
-    </tr>
-    <tr>
-        <th class="left">Attributions initiales</th>
-        <td class="right">{{(total.sess.attrHeuresA + total.sess.attrHeuresB) | number_format(0, ',', ' ')}}</td>
-        <td class="right">{{(total.fil.attrHeuresA + total.fil.attrHeuresB) | number_format(0, ',', ' ')}}</td>
-        <td class="right">{{(total.sess.attrHeuresA + total.sess.attrHeuresB + total.fil.attrHeuresA + total.fil.attrHeuresB ) |number_format(0, ',', ' ')}}</td>
-    </tr>
-</tbody>
-</table>
+    {% if sess_lbl == 'AB' %}
+    <div class="supplement">
+        <a id="bconso_allcpu" class="lien_supplementaire conso" title="Visualiser la consommation cpu {{annee}} - Tous les projets"
+            data-href="{{ absolute_url(path('tous_projets_conso', { 'ressource' : 'cpu', 'annee' : annee})) }}">
+            {{icones.consommation(80,80)}}<br>conso cpu
+        </a>
+        <a id="bconso_allgpu" class="lien_supplementaire conso" title="Visualiser la consommation gpu {{annee}} - Tous les projets"
+            data-href="{{ absolute_url(path('tous_projets_conso', { 'ressource' : 'gpu', 'annee' : annee})) }}">
+            {{icones.consommation(80,80)}}<br>conso gpu
+        </a>
+    </div>
+    {% endif %}
+    
+    <table class="bilan_statistiques">
+    <tbody>
+        <tr>
+            <th>&nbsp;</th><th>Session</th><th>Fil de l'eau</th><th>Total</th>
+        </tr>
+        <tr>
+            <th>Consommation CPU</th>
+            <td>{{ total.sess.consoHeuresCPU | number_format(0, ',', ' ') }}</td>
+            <td>{{ total.fil.consoHeuresCPU | number_format(0, ',', ' ') }}</td>
+            <td>{{ ( total.sess.consoHeuresCPU + total.fil.consoHeuresCPU) | number_format(0, ',', ' ')}}</td>
+        </tr>
+        <tr>
+            <th>Consommation GPU</th>
+            <td>{{ total.sess.consoHeuresGPU | number_format(0, ',', ' ') }}</td>
+            <td>{{ total.fil.consoHeuresGPU | number_format(0, ',', ' ') }}</td>
+            <td>{{ ( total.sess.consoHeuresGPU + total.fil.consoHeuresGPU) | number_format(0, ',', ' ')}}</td>
+        </tr>
+    </tbody>
+    </table>
 
-<table>
-<tbody>
-    <tr>
-        <th>&nbsp;</th><th>Session</th><th>Fil de l'eau</th><th>Total</th>
-    </tr>
-    <tr>
-        <th class="left">Nombre de rallonges</th>
-        <td class="right">{{ total.sess.rall }}</td>
-        <td class="right">{{ total.fil.rall }}</td>
-        <td class="right">{{ (total.sess.rall + total.fil.rall )}}</td>
-    </tr>
-    <tr>
-        <th class="left">Demandes</th>
-        <td class="right">{{ total.sess.demHeuresR | number_format(0, ',', ' ') }}</td>
-        <td class="right">{{ total.fil.demHeuresR | number_format(0, ',', ' ') }}</td>
-        <td class="right">{{ ( total.sess.demHeuresR + total.fil.demHeuresR) | number_format(0, ',', ' ')}}</td>
-    </tr>
-    <tr>
-        <th class="left">Attributions</th>
-        <td class="right">{{ total.sess.attrHeuresR | number_format(0, ',', ' ') }}</td>
-        <td class="right">{{ total.fil.attrHeuresR | number_format(0, ',', ' ') }}</td>
-        <td class="right">{{ ( total.sess.attrHeuresR + total.fil.attrHeuresR) | number_format(0, ',', ' ')}}</td>
-    </tr>
-</tbody>
-</table>
+    <h2>Stockage</h2>
 
-{% if sess_lbl == 'AB' %}
-<table>
-<tbody>
-    <tr>
-        <th class="left">Consommation CPU</th>
-        <td class="right">{{ total.sess.consoHeuresCPU | number_format(0, ',', ' ') }}</td>
-        <td class="right">{{ total.fil.consoHeuresCPU | number_format(0, ',', ' ') }}</td>
-        <td class="right">{{ ( total.sess.consoHeuresCPU + total.fil.consoHeuresCPU) | number_format(0, ',', ' ')}}</td>
-    </tr>
-    <tr>
-        <th class="left">Consommation GPU</th>
-        <td class="right">{{ total.sess.consoHeuresGPU | number_format(0, ',', ' ') }}</td>
-        <td class="right">{{ total.fil.consoHeuresGPU | number_format(0, ',', ' ') }}</td>
-        <td class="right">{{ ( total.sess.consoHeuresGPU + total.fil.consoHeuresGPU) | number_format(0, ',', ' ')}}</td>
-    </tr>
-</tbody>
-</table>
-
-<table>
-<tbody>
-    <tr><th colspan="2">Stockage (To)</th></tr>
-    <tr>
-        <th class="left">Demandes</th>
-        <td class="right">{{ (total.sess.sondVolDonnPerm + total.fil.sondVolDonnPerm)|number_format(0, ',', ' ')}}</td>
-    </tr>
-    <tr>
-        <th class="left">Occupation</th>
-        <td class="right">{{ ((total.sess.consoVolDonnPerm + total.fil.consoVolDonnPerm)/(1024.0 * 1024.0 * 1024.0))|number_format(0, ',', ' ')}}</td>
-    </tr>
-    <tr>
-        <th class="left">Quota</th>
-        <td class="right">{{ ((total.sess.quotaVolDonnPerm + total.fil.quotaVolDonnPerm)/(1024.0 * 1024.0 * 1024.0))|number_format(0, ',', ' ')}}</td>
-    </tr>
-</tbody>
-</table>
-{% endif %}
-
-
-{{ gramcmacros.menu(menu) }}
-
-<div id="dialog-compta"></div>
-</div>
-
-
+    <table class="bilan_statistiques">
+    <tbody>
+        <tr><th colspan="2">Stockage (To)</th></tr>
+        <tr>
+            <th>Demandes</th>
+            <td>{{ (total.sess.sondVolDonnPerm + total.fil.sondVolDonnPerm)|number_format(0, ',', ' ')}}</td>
+        </tr>
+        <tr>
+            <th>Occupation</th>
+            <td>{{ ((total.sess.consoVolDonnPerm + total.fil.consoVolDonnPerm)/(1024.0 * 1024.0 * 1024.0))|number_format(0, ',', ' ')}}</td>
+        </tr>
+        <tr>
+            <th>Quota</th>
+            <td>{{ ((total.sess.quotaVolDonnPerm + total.fil.quotaVolDonnPerm)/(1024.0 * 1024.0 * 1024.0))|number_format(0, ',', ' ')}}</td>
+        </tr>
+    </tbody>
+    </table>
+    {% else %}
+    <div class="information">
+        <p><em>Pour avoir les données de consommation d'heures de calcul ou de stockage, demandez les deux sessions</em>
+    </div>
+    {% endif %}
+    
+    
+    {{ gramcmacros.menu(menu) }}
+    
+    <div id="dialog-compta"></div>
+    </div>
+    
+    
 </section>
 
 {# dump(struct_data) #}

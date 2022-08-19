@@ -37,6 +37,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
+use Doctrine\ORM\EntityManagerInterface;
+
 
 /**
  * Commentaireexpert controller. Les experts peuvent entrer un commentaire
@@ -49,7 +51,8 @@ class CommentaireExpertController extends AbstractController
     public function __construct(
         private GramcDate $grdt,
         private ServiceJournal $sj,
-        private TokenStorageInterface $tok
+        private TokenStorageInterface $tok,
+        private EntityManagerInterface $em
     ) {}
 
    /**
@@ -62,7 +65,7 @@ class CommentaireExpertController extends AbstractController
     ************************/
     public function modifyAction(Request $request, CommentaireExpert $commentaireExpert): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $sj = $this->sj;
         $token = $this->tok->getToken();
         $moi = $token->getUser();
@@ -131,10 +134,10 @@ class CommentaireExpertController extends AbstractController
     {
         $token = $this->tok->getToken();
         $grdt = $this->grdt;
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $moi = $token->getUser();
-        $commentaireExpert = $em->getRepository('App:CommentaireExpert')->findOneBy(['expert' => $moi, 'annee' => $annee ]);
+        $commentaireExpert = $em->getRepository(CommentaireExpert::class)->findOneBy(['expert' => $moi, 'annee' => $annee ]);
         if ($commentaireExpert==null) {
             $commentaireExpert = new Commentaireexpert();
             $commentaireExpert->setAnnee($annee);
@@ -156,8 +159,8 @@ class CommentaireExpertController extends AbstractController
     **********/
     public function listeAction(Request $request, $annee): Response
     {
-        $em = $this->getDoctrine()->getManager();
-        $commentairesExperts = $em->getRepository('App:CommentaireExpert')->findBy(['annee' => $annee ]);
+        $em = $this->em;
+        $commentairesExperts = $em->getRepository(CommentaireExpert::class)->findBy(['annee' => $annee ]);
 
         return $this->render('commentaireexpert/liste_annee.html.twig', ['annee' => $annee, 'commentairesExperts' => $commentairesExperts]);
     }

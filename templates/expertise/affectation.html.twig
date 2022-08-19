@@ -1,5 +1,6 @@
 {% extends 'default/base.html.twig' %}
 {% import "default/macros.html.twig" as gramcmacros %}
+{% import "default/icone.html.twig" as icones %}
 
 {% block myjavascripts %}
  <script   src="{{ asset('js/projets_experts.js') }}" ></script>
@@ -7,11 +8,11 @@
 
 {% block body %}
 
-<section>
+<section id="section_bilans_listes" style="stroke:black">
 
 <h1>{{ titre }}</h1>
 {% if forms|length > 0 %}
-<div class="message info"><em>Commencez par sélectionner une ou plusieurs demandes</em></div>
+<div class="information ok"><em>Commencez par sélectionner une ou plusieurs demandes</em></div>
 {% endif %}
 
 <p>&nbsp;</p>
@@ -23,15 +24,13 @@
     <hr />
 {% endif %}
 
-{% include('expertise/affectation_bilans.html.twig') %}
+<form name="affecter_les_experts" method="post">
+<div class="tableaux">
+    {% include('expertise/affectation_bilans.html.twig') %}
 
-
-{# #################################################################### #}
-
-    <form name="affecter_les_experts" method="post">
-    <div id="projets">
+    <div class="liste inputrond">
         <table id="affecte_experts">
-            <thead>
+        <thead>
             <tr>
             <th title="Cocher la case pour sélectionner ce projet ou cochez Inverser la sélection (en bas)">S</th>
             <th >N</th>
@@ -50,36 +49,37 @@
             <th >Attribution</th>
             {% if noconso==false %}<th >Conso</th>{% endif %}
             </tr>
-            </thead>
-            <tbody>
+        </thead>
+        <tbody>
+
             {% for version in versions %}
-        <tr>
-        <td >
-            {% if forms['selection_' ~ version.getIdVersion()] is defined %}
-            {{ form_widget( forms['selection_' ~ version.getIdVersion()].sel ) }}
-            {% endif %}
-        </td>
-        {% set cls="w15 " %}
-        {% if ( version.getExpert() == null ) %} 
-            {% set cls=cls ~ "sansexperts " %}
-        {% else %}
-            {% if (serviceVersions.isnouvelle(version)) %} {% set cls=cls ~ "nouveau " %} {% else %} {% set cls=cls ~ "renouv " %} {% endif %}
-            {% for e in version.expertise %}
-            {% if e.expert != null %}
-                {% set cls=cls ~ e.expert.idIndividu %}
-            {% endif %}
-            {% endfor %}
-        {% endif %}
-        {% if( serviceVersions.isnouvelle(version) ) %}
-        <td class="{{cls}}"><strong>N</strong></td>
-        {% else %}
-        <td class="{{cls}}">&nbsp;</td>
-        {% endif %}
+            <tr>
+                <td >
+                    {% if forms['selection_' ~ version.getIdVersion()] is defined %}
+                    {{ form_widget( forms['selection_' ~ version.getIdVersion()].sel ) }}
+                    {% endif %}
+                </td>
+                {% set cls="w15 " %}
+                {% if ( version.getExpert() == null ) %} 
+                    {% set cls=cls ~ "sansexperts " %}
+                {% else %}
+                    {% if (serviceVersions.isnouvelle(version)) %} {% set cls=cls ~ "nouveau " %} {% else %} {% set cls=cls ~ "renouv " %} {% endif %}
+                    {% for e in version.expertise %}
+                    {% if e.expert != null %}
+                        {% set cls=cls ~ e.expert.idIndividu %}
+                    {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% if( serviceVersions.isnouvelle(version) ) %}
+                <td class="{{cls}}"><strong>N</strong></td>
+                {% else %}
+                <td class="{{cls}}">&nbsp;</td>
+                {% endif %}
                 <td> <strong>{{version.projet.libelletype}}</strong></td>
-        <td > {{ version.projet }}</td>
+                <td > {{ version.projet }}</td>
                 <td >
                     <a href="{{ path('consulter_projet', { 'id' : version.projet.idProjet } ) }}">
-                    <img class="bouton_poussoir" src="{{ asset('icones/consulter.png') }}" alt="Consulter">
+                        {{icones.details}}
                     </a>
                 </td>
                 <td >{{ gramcmacros.metagraph(serviceProjets.metaetat(version.projet)) }}</td>
@@ -91,80 +91,104 @@
                 {% else %}
                 <td ></td>
                 {% endif %}
-
+        
                 {% if( version.prjRattachement != null ) %}
                 <td class="r{{ version.prjRattachement.idRattachement }} w170">{{version.prjRattachement}}</td>
                 {% else %}
                 <td ></td>
                 {% endif %}
-
+        
                 <td >
-                {% if( version.responsable != null ) %}
-            <a class="sudo" href="{{ path('sudo',  { 'id': version.responsable.id }) }}?" title="Changer d'identité">
-            <img class="bouton_poussoir" src="{{ asset('icones/sudo.png') }}" alt="Changer d'identité" /></a>
-            <a href="mailto:{{ version.responsable.mail }}" title="Envoyer un courriel au responsable à l'adresse {{ version.responsable.mail }}">
-            <img src="{{ asset('icones/mail_send.png') }}" alt="Envoyer un mail" /></a>
-            {{ version.responsable.prenom }} {{ version.responsable.nom }}
-                {% endif %}
+                    {% if( version.responsable != null ) %}
+                    <a class="sudo" href="{{ path('sudo',  { 'id': version.responsable.id }) }}?" title="Changer d'identité">
+                        {{icones.sudo(20,20)}}
+                    </a>
+                    <a href="mailto:{{ version.responsable.mail }}" title="Envoyer un courriel au responsable à l'adresse {{ version.responsable.mail }}">
+                        {{icones.mail_send}}
+                    </a>
+                    {{ version.responsable.prenom }} {{ version.responsable.nom }}
+                    {% endif %}
                 </td>
-
+        
                 <td >{% if( version.labo != null ) %}{{ version.labo.acrolabo }}{% else %} - {% endif %}</td>
                 <td >
                     {% if( version.hasExpert ) %}
-             <img src="{{ asset('icones/actif.png') }}" alt="Expert affecté" title="Expert affecté"><span class="invisible">affecté</span>
+                        <span class="invisible">affecté</span>{{ icones.valide(15,15)}}
                     {% endif %}
                 </td>
-
+        
                 {% if( not (version.getExpert() == null ) ) %}
-                <td class="e{{ version.getExpert().idIndividu }} w170">
+                <td class="e{{ version.getExpert().idIndividu }}">
                 {% else %}
                 <td >
                 {% endif %}
-                
-        {% if forms[version.getIdVersion()] is defined %}
-                <span class="invisible">{% for e in version.expertise %}{{ e.expert}}{% endfor %}</span>
+                    
+                {% if forms[version.getIdVersion()] is defined %}
+                    <span class="invisible">{% for e in version.expertise %}{{ e.expert}}{% endfor %}</span>
                     {# {{ form_start( forms[version.getIdVersion()] ) }} #}
                     {% for e in version.expertise %}
-            {% if e.expert != null %}
-                    <a class="sudo" href="{{ path('sudo',  { 'id': e.expert.id }) }}?" title="Changer d'identité">
-                    <img class="bouton_poussoir" src="{{ asset('icones/sudo.png') }}" alt="Changer d'identité" /></a>
-            {% if 'ROLE_PRESIDENT' in e.expert.roles %}<strong>{{e.expert}}</strong>{% else %}{{e.expert}}{% endif %}                    {% endif %}
-            <br />
-            {% endfor %}
-                    {% for f in forms[version.getIdVersion()] %}{{ form_widget( f.expert, {'attr' : {'class' : 'bouton_affecter'}} ) }}<br />{% endfor %}
+                    {% if e.expert != null %}
+                        <a class="sudo" href="{{ path('sudo',  { 'id': e.expert.id }) }}?" title="Changer d'identité">
+                            {{icones.sudo(20,20)}}
+                        </a>
+                        {% if 'ROLE_PRESIDENT' in e.expert.roles %}
+                            <strong>{{e.expert}}</strong>
+                        {% else %}
+                            {{e.expert}}
+                        {% endif %}
+                    {% endif %}
+                    <br>
+                    {% endfor %}
+                    {% for f in forms[version.getIdVersion()] %}
+                        {{ form_widget( f.expert, {'attr' : {'class' : 'bouton_affecter'}} ) }}
+                        <br >
+                    {% endfor %}
                     {# {{ form_end( forms[version.getIdVersion()] ) }} #}
-
                 {% else %}
-
-            {% for e in version.expertise %}
+                    {% for e in version.expertise %}
                     <a class="sudo" href="{{ path('sudo',  { 'id': e.expert.id }) }}?" title="Changer d'identité">
-                        <img class="bouton_poussoir" src="{{ asset('icones/sudo.png') }}" alt="Changer d'identité" /></a>
-                        {% if 'ROLE_PRESIDENT' in e.expert.roles %}<strong>{{e.expert}}</strong>{% else %}{{e.expert}}{% endif %}
-                        <br />
+                        {{icones.sudo(20,20)}}
+                    </a>
+                    {% if 'ROLE_PRESIDENT' in e.expert.roles %}
+                        <strong>{{e.expert}}</strong>
+                    {% else %}
+                        {{e.expert}}
+                    {% endif %}
+                    <br>
                     {% endfor %}
                 {% endif %}
                 </td>
-
+    
                 <td >{{ version.demHeures }}</td>
                 <td >{% if version.idVersion is defined and attHeures[version.idVersion] is defined %}{{ attHeures[version.idVersion] }}{% endif %}</td>
                 {% if noconso==false %}
                 <td >{{ serviceProjets.getConsoCalculVersion(version) }}</td>
-                {% endif %}
+                        {% endif %}
             </tr>
-            {% endfor %}
-            </tbody>
+        {% endfor %}
+        </tbody>
         </table>
         {% if forms['BOUTONS'] is defined %}
-        <div id="bouton_affecter" >
-            <h2>Pour la sélection</h2>
-            {#{{ form_start( forms['BOUTONS'] ) }}#}
-            {{ form_widget( forms['BOUTONS'].sub1 ) }}
-            {{ form_widget( forms['BOUTONS'].sub2 ) }}
-            {% if max_expertises_nb > 1 %}
-                {{ form_widget( forms['BOUTONS'].sub3 ) }}
-                {{ form_widget( forms['BOUTONS'].sub4 ) }}
-            {% endif %}
-            {#{{ form_end( forms['BOUTONS'] ) }}#}
+        <div id="panneau_enregistrer" > {# ANCIENNEMENT "BOUTON_AFFECTER" #}
+            <div class="panneau">
+                <h2>Pour la sélection</h2>
+                <div class="boutons">
+                    {#{{ form_start( forms['BOUTONS'] ) }}#}
+                    {{ form_widget( forms['BOUTONS'].sub1 ) }}
+                    {{ form_widget( forms['BOUTONS'].sub2 ) }}
+                    {% if max_expertises_nb > 1 %}
+                        {{ form_widget( forms['BOUTONS'].sub3 ) }}
+                        {{ form_widget( forms['BOUTONS'].sub4 ) }}
+                    {% endif %}
+                </div>
+                {#{{ form_end( forms['BOUTONS'] ) }}#}
+            </div>
+
+            <div class="menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
         </div>
         {% endif %}
     </div>

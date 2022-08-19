@@ -70,6 +70,10 @@ class Etat
             self::NON_RENOUVELABLE          =>  'NON_RENOUVELABLE',
         ];
 
+    // Pour utiliser avec cmpEtatExpertise
+    // L'ordre sera d'abord les projets en expertise ou en attente, PUIS les projets actifs
+    public const ORDRE_ETAT = [ 3, 4, 2, 5, 1, 0 ];
+    
     public static function getLibelle($etat): string
     {
         if ($etat != null && array_key_exists($etat, Etat::LIBELLE_ETAT)) {
@@ -88,5 +92,17 @@ class Etat
         } else {
             return null;
         }
+    }
+
+    // Compare les états en mettant en PREMIER les états utiles pour affectation des experts
+    // NOTE - Résultat indéfini si $a ou $b sont négatifs !
+    public static function cmpEtatExpertise(int $a, int $b): int
+    {
+        if ($a == $b) return 0;
+        if ($a > 5 && $b > 5) return 0;
+        if ($a > 5 && $b <= 5) return -1;
+        if ($b > 5 && $a <= 5) return 1;
+        if (self::ORDRE_ETAT[$a] > self::ORDRE_ETAT[$b]) return -1;
+        return 1;
     }
 }

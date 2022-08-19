@@ -24,6 +24,13 @@
 
 namespace App\Form;
 
+use App\Entity\Statut;
+use App\Entity\Laboratoire;
+use App\Entity\Etablissement;
+
+use App\Form\IndividuForm\IndividuForm;
+
+
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -33,9 +40,6 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-
-//use App\Utils\IndividuForm;
-use App\Form\IndividuForm\IndividuForm;
 
 class IndividuFormType extends AbstractType
 {
@@ -149,7 +153,7 @@ class IndividuFormType extends AbstractType
                     'multiple'   => false,
                     'expanded'   => false,
                     'required'   => false,
-                    'class'      => 'App:Statut',
+                    'class'      => Statut::class,
                     'placeholder' => '-- Indiquez le statut',
                 ]
             )
@@ -161,7 +165,7 @@ class IndividuFormType extends AbstractType
                     'multiple'  => false,
                     'expanded'  => false,
                     'required'   => false,
-                    'class'     => 'App:Laboratoire',
+                    'class'     => Laboratoire::class,
                     'placeholder' => '-- Indiquez le laboratoire',
                 ]
             )
@@ -173,7 +177,7 @@ class IndividuFormType extends AbstractType
                     'multiple'  => false,
                     'expanded'  => false,
                     'required'   => false,
-                    'class'     => 'App:Etablissement',
+                    'class'     => Etablissement::class,
                     'placeholder' => "-- Indiquez l'établissement",
                 ]
             );
@@ -198,7 +202,7 @@ class IndividuFormType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults(
             [
@@ -211,7 +215,7 @@ class IndividuFormType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function getBlockPrefix()
+    public function getBlockPrefix(): string
     {
         return 'Individu';
     }

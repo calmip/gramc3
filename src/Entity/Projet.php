@@ -493,7 +493,7 @@ class Projet
 
     //public function countVersions()
     //{
-    //return App::getRepository(Version::class)->countVersions($this);
+    //return getRepository(Version::class)->countVersions($this);
     //}
 
     public function derniereSession()
@@ -557,7 +557,7 @@ class Projet
     /* Supprimé car non utilisé
         //public function getCollaborateurs( $versions = [] )
         //{
-            //if( $versions == [] ) $versions = App::getRepository(Version::class)->findVersions( $this );
+            //if( $versions == [] ) $versions = getRepository(Version::class)->findVersions( $this );
 
             //$collaborateurs = [];
             //foreach( $versions as $version )

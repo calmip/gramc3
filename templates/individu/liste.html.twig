@@ -1,4 +1,5 @@
 {% extends 'default/base.html.twig' %}
+{% import "default/icone.html.twig" as icones %}
 
 {% block myjavascripts %}
 <script  type="text/javascript" src="{{ asset('js/gerer_utilisateurs.js') }}"></script>
@@ -7,106 +8,97 @@
 
 {% block body %}
 
-<section>
-
-    {# ################################################################################## #}
+<section id="section_bilans_listes" style="stroke: black">
 
     <h1>Utilisateurs de gramc</h1>
 
-    <div class="message warning">
+    <div class="information attention">
         <h2>AVERTISSEMENT</h2>
         Si la case <strong>Filtrer sur tous les utilisateurs</strong>
         est décochée, seuls les utilisateurs qui peuvent se connecter, qui sont admins ou experts, seront considérés.
-        <br />
-        <strong>On peut restreindre l'affichage</strong> en entrant un filtre sur les adresses mail
+        <br>
+        <strong>On peut restreindre l'affichage</strong> en entrant un filtre sur les adresses mail/nom/prénom
     </div>
 
-    {{ form_start(form) }}
-    {{ form_row(form.all) }}
-    <div>{{ form_row(form.filtre) }}{{ form_row(form.filtrer) }}</div>
-
     <nav><ul><li>
-        <a id="ajout" class="lien_actif" href="{{ path('individu_ajouter') }}?" title="Créer un utilisateur">Nouvel utilisateur</a>
-        <div class="infobulleok" data-title="Créer un utilisateur">
-            <img src="{{ asset('icones/q16.png') }}" alt="?" />
-        </div>
+        <a id="ajout" class="lien_actif" href="{{ path('individu_ajouter') }}?" title="Créer un utilisateur">{{ icones.nouveauProjet}}Nouvel utilisateur</a>
     </li></ul></nav>
 
+    <div class="formulaire inputrond">
+    {# VIEUX
+    {{ form_start(form) }}
+    {{ form_row(form.all) }}
+    {{ form_row(form.filtre) }}{{ form_row(form.filtrer) }}
+    {{ form_end(form) }}
+    #}
+    {{ form_start(form) }}
+    {{ form_widget(form.filtre) }}{{ form_widget(form.filtrer)}} {{form_widget(form.all)}} sur tous les utilisateurs
+    {{ form_end(form) }}
+    </div>
+    <hr class="separateur">
+    <div class="tableaux">
+        <div class="bilan_legende">
+            <div class="bilan">
+                <table>
+                    <tr>
+                        <th colspan="2">Utilisateurs</th>
+                    </tr>
+                    <tr>
+                        <th>Total</th>
+                        <td>{{ total }}</td>
+                    </tr>
+                    <tr>
+                        <th>Actifs</th>
+                        <td>{{ actifs }}</td>
+                    </tr>
+                </table>
+                <table>
+                    <tr>
+                        <th colspan="2">Fournisseurs d'identité</th>
+                    </tr>
+                    {% for key,value in idps %}
+                        <tr>
+                        <th>{{ key }}</th>
+                        <td>{{ value }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
 
-
-    {# ################################################################################## #}
-
-    <div id="bilan_legende"><div id="bilan">
-
-    <table>
-        <tr>
-            <th colspan="2">Utilisateurs</th>
-        </tr>
-        <tr>
-            <th>Total</th>
-            <td>{{ total }}</td>
-        </tr>
-        <tr>
-            <th>Actifs</th>
-            <td>{{ actifs }}</td>
-        </tr>
-    </table>
-
-
-    <table>
-        <tr>
-            <th colspan="2">Fournisseurs d'identité</th>
-        </tr>
-        {% for key,value in idps %}
-            <tr>
-            <th>{{ key }}</th>
-            <td>{{ value }}</td>
-            </tr>
-        {% endfor %}
-    </table>
-
-    </div></div>
-
-   {# ################################################################################## #}
-
-    <div id="projets"><table id="utilisateurs">
-        <thead>
-            <tr>
-                <th>&nbsp;</th>
-                <th>&nbsp;</th>
-                <th>&nbsp;</th>
-                <th>Activé</th>
-                <th><span title="Expert">&nbsp;&nbsp;&nbsp;E&nbsp;&nbsp;&nbsp;</span></th>
-                <th><span title="Président">P</span></th>
-                <th><span title="Admin">A</span></th>
-                <th><span title="Observateur">O</span></th>
-                <th><span title="Admin sys">AS</span></th>
-                <th>Prénom</th>
-                <th>Nom</th>
-                <th>Courriel</th>
-                <th>Idp</th>
-                <th>Date</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            {% for individu in individus %}
-            <tr>
-               {% include 'individu/ligne.html.twig' %}
-            </tr>
-            {% endfor %}
-        </tbody>
-
-    </table></div>
-
-    {# ################################################################################## #}
-
-     {{ form_end(form)  }}
-
+        <div class="liste">
+            <table id="utilisateurs">
+                <thead>
+                    <tr>
+                        <th>&nbsp;</th>
+                        <th>&nbsp;</th>
+                        <th>&nbsp;</th>
+                        <th>Activé</th>
+                        <th><span title="Expert">&nbsp;&nbsp;&nbsp;E&nbsp;&nbsp;&nbsp;</span></th>
+                        <th><span title="Président">P</span></th>
+                        <th><span title="Admin">A</span></th>
+                        <th><span title="Observateur">O</span></th>
+                        <th><span title="Admin sys">AS</span></th>
+                        <th>Prénom</th>
+                        <th>Nom</th>
+                        <th>Courriel</th>
+                        <th>Idp</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for individu in individus %}
+                    <tr>
+                       {% include 'individu/ligne.html.twig' %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div> {# tableaux #}
     <div id="formulaire_profil"></div>
     <div id="formulaire_thematiques"></div>
 
 </section>
-
-
 {% endblock %}
+
