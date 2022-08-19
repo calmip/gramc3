@@ -240,7 +240,7 @@ $( document ).ready(function() {
 
     // Tout cocher ou décocher: thematiques
     $( "#tX" ).click(function(event) {
-        //alert("HOHO " + $(this).is(':checked') );
+        alert("HOHO " + $(this).is(':checked') );
         if ( $(this).is(':checked') ) {
             $("#themas tr td input.cb").prop('checked','checked');
             $(this).parent().parent().children('th').html('Tout décocher');

@@ -1801,6 +1801,7 @@ tbody tr.rallonge{
 
 #expertise h3{
     margin-top: 2rem;
+    margin-left: 3em;
     color: var(--first-color);
 }
 
@@ -1851,7 +1852,7 @@ tbody tr.rallonge{
 #expertise .textarea{
     display: flex;
     justify-content: flex-start;
-    margin: 7rem auto;
+    margin: 4rem auto;
     width: 90%;
 }
 
@@ -1863,11 +1864,12 @@ tbody tr.rallonge{
     margin: 0;
 }
 
-#expertise .textarea textarea{
+#expertise .textarea textarea, #expertise .textarea .texte {
     border: 1px solid var(--first-color);
     border-radius: 10px;
     outline: none;
     margin-left: 2rem;
+    padding: .4em;
 }
 
 #expertise .proposition{

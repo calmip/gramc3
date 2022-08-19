@@ -39,7 +39,7 @@
             {% else %}
                 <p>Merci de renseigner le formulaire ci-dessous <strong>en prenant en compte l'avis des autres experts</strong>. <br>
                     {% if msg_explain %} {{msg_explain }}<br> {% endif %}
-                    <em><strong>Lorsque vous aurez terminé, n'oubliez pas de cliquer sur "Envoyer"</strong></em>
+                    {% if peut_envoyer %}<em><strong>Lorsque vous aurez terminé, n'oubliez pas de cliquer sur "Envoyer"</strong></em>{% endif %}
                 </p>
             {% endif %}
         {% else %}
@@ -67,7 +67,7 @@
     {% endif %}
     
     {% if not peut_envoyer %}
-        <div class="message warning">
+        <div class="information attention">
             <h2>EXPERTISE EN EDITION SEULEMENT</h2>
                 <p>Pour l'instant vous ne pouvez pas envoyer votre expertise.
                 Vous pouvez cependant l'éditer et la sauvegarder</p>
@@ -123,23 +123,27 @@
         <h3>Expertise de {{ expertise.expert.prenom }} {{ expertise.expert.nom }}</h3>
         
         {% if expertise.definitif == false %}
-            <div class="information warning">
+            <div class="information attention">
                 <p>Cette expertise n'est pas terminée</p>
             </div>
         {% else %}
-            <div class="textarea">
-                <h4>Commentaire interne : </h4>
-                {{ expertise.commentaireInterne }}
+            <div class="textarea commentaire_externe">
+                <div>
+                    <h4>Commentaire :</h4>
+                    <small>Ce commentaire restera dans le comité</small></th>
+                </div>
+                <div class="texte">{{ expertise.commentaireInterne }}</div>
             </div>
-
-            <div class="proposition">
-                <h4>Proposition :</h4>
-                <p>
+            <div class="textarea commentaire_externe">
+                <div>
+                    <h4>Proposition :</h4>
+                </div>
+                <div class="texte">
                     {{ expertise.nbheuresatt }}
                     {% if expertise.nbheuresattete != 0 %}
                         (dont {{ expertise.nbheuresattete }} pour l'été)
                     {% endif %}
-                </p>
+                </div>
             </div>
         {% endif %}
     {% endfor %}
@@ -217,7 +221,6 @@
         {{ form_widget(edit_form.nbHeuresAttEte) }}
     </div>
             {% endif %}
-
 
 
 
