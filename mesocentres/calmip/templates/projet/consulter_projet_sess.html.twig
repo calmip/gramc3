@@ -43,11 +43,13 @@
             </section>
         {% endif %}
 
-        <div class="menu">
-            {{ gramcmacros.menu(menu) }}
-        </div>
+        {% if version.collaborateur(app.token.user) or is_granted('ROLE_ADMIN') %}
+            <div class="menu">
+                {{ gramcmacros.menu(menu) }}
+            </div>
+        {% endif %}
 
-        {% if not is_granted('ROLE_ADMIN') and not pdf is defined %}
+        {% if version.collaborateur(app.token.user) and not pdf is defined %}
             <div class="information ok">
                 <h2>Liste de choses à faire pour la session {{ session }}</h2>
                 <ol>
@@ -167,20 +169,22 @@
                     <td>{{ version.prjSousThematique }}</td>
                 </tr>
 
-                <tr>
-                    {% if norattachement == false %}
-                    <th>Rattachement du projet</th>
-                    <td>{{ version.prjRattachement }}</td>
-                    {% endif %}
-                </tr>
+                {% if norattachement == false %}
+                    <tr>
+                        <th>Rattachement du projet</th>
+                        <td>{{ version.prjRattachement }}</td>
+                    </tr>
+                {% endif %}
 
                 {% set versionPrec = version.versionPrecedente1 %}
                 {% if versionPrec != null %}
                     {% if versionPrec.anneeSession == version.anneeSession %}
+                    <tr>
                         <th>Heures demandées session {{ versionPrec.session }}
                             <span class="petit">Y compris les rallonges</span>
                         </th>
                         <td>{{ (versionPrec.getDemHeuresTotal)|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}</td>
+                    </tr>
                     {% endif %}
                 {% endif %}
 

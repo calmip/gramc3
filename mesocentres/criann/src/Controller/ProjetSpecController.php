@@ -217,7 +217,7 @@ class ProjetSpecController extends AbstractController
                     $pwd_expir = null;
                 } else {
                     $passwd = $u->getPassword();
-                    $passwd    = Functions::simpleDecrypt($passwd);
+                    $passwd = Functions::simpleDecrypt($passwd);
                     $pwd_expir = $u->getPassexpir();
                 }
             } else {
@@ -381,33 +381,30 @@ class ProjetSpecController extends AbstractController
         if ($this->getParameter('nodata')==false) {
             $menu[] = $sm->donnees($version);
         }
-        $menu[] = $sm->telechargement_fiche($version);
-        $menu[] = $sm->televersement_fiche($version);
+        $menu[] = $sm->telechargement_fiche($version,ServiceMenus::BPRIO);
+        $menu[] = $sm->televerser_fiche($version,ServiceMenus::BPRIO);
 
         $etat_version = $version->getEtatVersion();
         if ($this->getParameter('rapport_dactivite')) {
             if (($etat_version == Etat::ACTIF || $etat_version == Etat::TERMINE) && ! $sp->hasRapport($projet, $version->getAnneeSession())) {
-                $menu[] = $sm->telecharger_modele_rapport_dactivite($version);
-                $menu[] = $sm->televerser_rapport_annee($version);
+                $menu[] = $sm->telecharger_modele_rapport_dactivite($version,ServiceMenus::BPRIO);
+                $menu[] = $sm->televerser_rapport_annee($version,ServiceMenus::BPRIO);
             }
         }
 
         $menu[]       = $sm->gerer_publications($projet);
-        $img_expose_1 = $sv->imageProperties('img_expose_1', 'Figure 1', $version);
-        $img_expose_2 = $sv->imageProperties('img_expose_2', 'Figure 2', $version);
-        $img_expose_3 = $sv->imageProperties('img_expose_3', 'Figure 3', $version);
+        $img_expose = [
+            $sv->imageProperties('img_expose_1', 'Figure 1', $version),
+            $sv->imageProperties('img_expose_2', 'Figure 2', $version),
+            $sv->imageProperties('img_expose_3', 'Figure 3', $version),
+        ];
         $document     = $sv->getdocument($version);
 
-        /*
-        if( $img_expose_1 == null )
-            $sj->debugMessage(__METHOD__.':'.__LINE__ ." img_expose1 null");
-        else
-            $sj->debugMessage(__METHOD__.':'.__LINE__ . " img_expose1 non null");
-        */
-
-        $img_justif_renou_1 = $sv->imageProperties('img_justif_renou_1', 'Figure 1', $version);
-        $img_justif_renou_2 = $sv->imageProperties('img_justif_renou_2', 'Figure 2', $version);
-        $img_justif_renou_3 = $sv->imageProperties('img_justif_renou_3', 'Figure 3', $version);
+        $img_justif_renou = [
+            $sv->imageProperties('img_justif_renou_1', 'Figure 1', $version),
+            $sv->imageProperties('img_justif_renou_2', 'Figure 2', $version),
+            $sv->imageProperties('img_justif_renou_3', 'Figure 3', $version)
+        ];
 
         $toomuch = false;
         if ($session->getLibelleTypeSession()=='B' && ! $sv->isNouvelle($version)) {
@@ -430,26 +427,22 @@ class ProjetSpecController extends AbstractController
         return $this->render(
             $tmpl,
             [
-                'warn_type'          => $warn_type,
-                'projet'             => $projet,
-                'loginname'          => $loginname,
-                'version_form'       => $session_form->createView(),
-                'version'            => $version,
-                'session'            => $session,
-                'menu'               => $menu,
-                'img_expose_1'       => $img_expose_1,
-                'img_expose_2'       => $img_expose_2,
-                'img_expose_3'       => $img_expose_3,
-                'img_justif_renou_1' => $img_justif_renou_1,
-                'img_justif_renou_2' => $img_justif_renou_2,
-                'img_justif_renou_3' => $img_justif_renou_3,
-                'conso_cpu'          => $sp->getConsoRessource($projet, 'cpu', $version->getAnneeSession()),
-                'conso_gpu'          => $sp->getConsoRessource($projet, 'gpu', $version->getAnneeSession()),
-                'rapport_1'          => $rapport_1,
-                'rapport'            => $rapport,
-                'document'           => $document,
-                'toomuch'            => $toomuch,
-                'formation'          => $formation
+                'warn_type' => $warn_type,
+                'projet' => $projet,
+                'loginname' => $loginname,
+                'version_form' => $session_form->createView(),
+                'version' => $version,
+                'session' => $session,
+                'menu' => $menu,
+                'img_expose' => $img_expose,
+                'img_justif_renou' => $img_justif_renou,
+                'conso_cpu' => $sp->getConsoRessource($projet, 'cpu', $version->getAnneeSession()),
+                'conso_gpu' => $sp->getConsoRessource($projet, 'gpu', $version->getAnneeSession()),
+                'rapport_1' => $rapport_1,
+                'rapport' => $rapport,
+                'document' => $document,
+                'toomuch' => $toomuch,
+                'formation' => $formation
             ]
         );
     }
