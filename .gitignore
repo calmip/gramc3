@@ -13,8 +13,7 @@ data/*
 *~
 tests_fonctionnels/sql/*
 web/tmp/*
-src/cache/*
-
+*.lock
 /app/config/parameters.yml
 /app/config/parameters.*.yml
 parameters.yaml

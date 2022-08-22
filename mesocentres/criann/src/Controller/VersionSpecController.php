@@ -29,7 +29,6 @@ use App\Entity\Projet;
 use App\Entity\Session;
 use App\Entity\Individu;
 use App\Entity\Thematique;
-
 use App\Entity\CollaborateurVersion;
 use App\Entity\RapportActivite;
 use App\Entity\Rattachement;

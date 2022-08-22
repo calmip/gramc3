@@ -57,14 +57,14 @@ class CollaborateurVersion
     /**
      * @var boolean
      *
-     * @ORM\Column(name="login", type="boolean", nullable=false)
+     * @ORM\Column(name="login", type="boolean", nullable=true)
      */
     private $login = false;
 
     /**
      * @var boolean
      *
-     * @ORM\Column(name="clogin", type="boolean", nullable=false)
+     * @ORM\Column(name="clogin", type="boolean", nullable=true)
      */
     private $clogin = false;
 

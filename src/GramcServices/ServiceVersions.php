@@ -888,12 +888,15 @@ class ServiceVersions
         $dataNR =   [];    // Les autres collaborateurs
         foreach ($version->getCollaborateurVersion() as $cv) {
             $individu = $cv->getCollaborateur();
-            if ($individu == null) {
+            if ($individu == null)
+            {
                 $sj->errorMessage("ServiceVersion:modifierCollaborateurs : collaborateur null pour CollaborateurVersion ".
                          $cv->getId());
                 continue;
-            } else {
-                $individuForm = new IndividuForm($individu);
+            }
+            else
+            {
+                $individuForm = new IndividuForm($individu, $this->resp_peut_modif_collabs);
                 $individuForm->setLogin($cv->getLogin());
                 $individuForm->setClogin($cv->getClogin());
                 $individuForm->setResponsable($cv->getResponsable());
@@ -931,9 +934,11 @@ class ServiceVersions
             // Si le resp ne peut pas modifier les profils des collabs, on ne teste pas ça
             if ($definitif == true && $resp_peut_modif_collabs == true &&
                 (
-                   $individu_form->getPrenom() == null   || $individu_form->getNom() == null
-                || $individu_form->getEtablissement() == null
-                || $individu_form->getLaboratoire() == null || $individu_form->getStatut() == null
+                   $individu_form->getPrenom() == null
+                   || $individu_form->getNom() == null
+                   || $individu_form->getEtablissement() == null
+                   || $individu_form->getLaboratoire() == null
+                   || $individu_form->getStatut() == null
                 )
             )
             {
@@ -962,133 +967,149 @@ class ServiceVersions
      * $individu_forms = Tableau contenant un formulaire par individu
      * $version        = La version considérée
      ****************************************************************/
-    public function handleIndividuForms($individu_forms, Version $version): void
+    public function handleIndividuForms(array $individu_forms, Version $vers): void
     {
         $em   = $this->em;
         $sj   = $this->sj;
         $sval = $this->vl;
 
-        foreach ($individu_forms as $individu_form) {
-            $id =  $individu_form->getId();
+        // On fait la modification sur 1 ou 2 versions suivant les cas:
+        //    - Version active
+        //    - Dernière version
+        $projet = $vers->getProjet();
+        $verder = $projet->getVersionDerniere();
+        $versions = [];
+        if ($projet->getVersionActive() != null) $versions[] = $projet->getVersionActive();
+        if ($projet->getVersionDerniere() != null && $projet->getVersionDerniere() != $projet->getVersionActive()) $versions[] = $projet->getVersionDerniere();
 
-            // Le formulaire correspond à un utilisateur existant
-            if ($id != null) {
-                $individu = $em->getRepository(Individu::class)->find($id);
-            }
-            
-            // On a renseigné le mail de l'utilisateur mais on n'a pas encore l'id: on recherche l'utilisateur !
-            // Si $utilisateur == null, il faudra le créer (voir plus loin)
-            elseif ($individu_form->getMail() != null) {
-                $individu = $em->getRepository(Individu::class)->findOneBy([ 'mail' =>  $individu_form->getMail() ]);
-                if ($individu!=null) {
-                    $sj->debugMessage(__METHOD__ . ':' . __LINE__ . ' mail=' . $individu_form->getMail() . ' => trouvé ' . $individu);
-                } else {
-                    $sj->debugMessage(__METHOD__ . ':' . __LINE__ . ' mail=' . $individu_form->getMail() . ' => Individu à créer !');
+        foreach ($versions as $version)
+        {
+            foreach ($individu_forms as $individu_form)
+            {
+                $id =  $individu_form->getId();
+    
+                // Le formulaire correspond à un utilisateur existant
+                if ($id != null) {
+                    $individu = $em->getRepository(Individu::class)->find($id);
                 }
-            }
-
-            // Pas de mail -> pas d'utilisateur !
-            else {
-                $individu = null;
-            }
-
-            // Cas d'erreur qui ne devraient jamais se produire
-            if ($individu == null && $id != null) {
-                $sj->errorMessage(__METHOD__ . ':' . __LINE__ .' idIndividu ' . $id . 'du formulaire ne correspond pas à un utilisateur');
-            }
-
-            elseif (is_array($individu_form)) {
-                // TODO je ne vois pas le rapport
-                $sj->errorMessage(__METHOD__ . ':' . __LINE__ .' individu_form est array ' . Functions::show($individu_form));
-            }
-
-            elseif (is_array($individu)) {
-                // TODO pareil un peu nawak
-                $sj->errorMessage(__METHOD__ . ':' . __LINE__ .' individu est array ' . Functions::show($individu));
-            }
-
-            elseif ($individu != null && $individu_form->getMail() != null && $individu_form->getMail() != $individu->getMail()) {
-                $sj->errorMessage(__METHOD__ . ':' . __LINE__ ." l'adresse mails de l'utilisateur " .
-                    $individu . ' est incorrecte dans le formulaire :' . $individu_form->getMail() . ' != ' . $individu->getMail());
-            }
-
-            // --------------> Maintenant des cas réalistes !
-            // L'individu existe déjà
-            elseif ($individu != null) {
-                // On modifie l'individu
-                $individu = $individu_form->modifyIndividu($individu, $sj);
-                $em->persist($individu);
-
-                // Il devient collaborateur
-                if (! $version->isCollaborateur($individu)) {
-                    $sj->infoMessage(__METHOD__ . ':' . __LINE__ .' individu ' .
-                        $individu . ' ajouté à la version ' .$version);
-                    $collaborateurVersion   =   new CollaborateurVersion($individu);
-                    $collaborateurVersion->setDeleted(false);
-                    $collaborateurVersion->setVersion($version);
-                    if ($this->coll_login) {
-                        $collaborateurVersion->setLogin($individu_form->getLogin());
-                    };
-                    if ($this->nodata == false) {
-                        $collaborateurVersion->setClogin($individu_form->getClogin());
-                    };
-                    $collaborateurVersion->setLogin($individu_form->getLogin());
-                    $collaborateurVersion->setClogin($individu_form->getClogin());
-                    $em->persist($collaborateurVersion);
-                }
-
-                // il était déjà collaborateur
-                else {
-                    $sj->debugMessage(__METHOD__ . ':' . __LINE__ .' individu ' .
-                        $individu . ' confirmé pour la version '.$version);
-
-                    // Modif éventuelle des cases de login
-                    $this->modifierLogin($version, $individu, $individu_form->getLogin(), $individu_form->getClogin());
-
-                    // modification du labo du projet
-                    if ($version->isResponsable($individu)) {
-                        $this->setLaboResponsable($version, $individu);
-                    }
-
-                    // modification éventuelle du flag deleted
-                    $this->syncDeleted($version, $individu, $individu_form->getDelete());
-                }
-                $em -> flush();
-            }
-
-            // Le formulaire correspond à un nouvel utilisateur (adresse mail pas trouvée)
-            elseif ($individu_form->getMail() != null && $individu_form->getDelete() == false) {
                 
-                // Création d'un individu à partir du formulaire
-                // Renvoie null si la validation est négative
-                $individu = $individu_form->nouvelIndividu($sval);
-                if ($individu != null) {
-                    $collaborateurVersion   =   new CollaborateurVersion($individu);
-                    $collaborateurVersion->setLogin($individu_form->getLogin());
-                    $collaborateurVersion->setClogin($individu_form->getClogin());
-                    $collaborateurVersion->setVersion($version);
-
-                    $sj->infoMessage(__METHOD__ . ':' . __LINE__ . ' nouvel utilisateur ' . $individu .
-                        ' créé et ajouté comme collaborateur à la version ' . $version);
-
-                    $em->persist($individu);
-                    $em->persist($collaborateurVersion);
-                    $em->persist($version);
-                    $em->flush();
-                    $sj->warningMessage('Utilisateur ' . $individu . '(' . $individu->getMail() . ') id(' . $individu->getIdIndividu() . ') a été créé');
-
-                    // Envoie une invitation à ce nouvel utilisateur
-                    $connected = $this->tok->getToken()->getUser();
-                    if ($connected != null)
-                    {
-                        $this->sid->sendInvitation($connected, $individu);
+                // On a renseigné le mail de l'utilisateur mais on n'a pas encore l'id: on recherche l'utilisateur !
+                // Si $utilisateur == null, il faudra le créer (voir plus loin)
+                elseif ($individu_form->getMail() != null) {
+                    $individu = $em->getRepository(Individu::class)->findOneBy([ 'mail' =>  $individu_form->getMail() ]);
+                    if ($individu!=null) {
+                        $sj->debugMessage(__METHOD__ . ':' . __LINE__ . ' mail=' . $individu_form->getMail() . ' => trouvé ' . $individu);
+                    } else {
+                        $sj->debugMessage(__METHOD__ . ':' . __LINE__ . ' mail=' . $individu_form->getMail() . ' => Individu à créer !');
                     }
                 }
-            }
-
-            // Ligne vide
-            elseif ($individu_form->getMail() == null && $id == null) {
-                $sj->debugMessage(__METHOD__ . ':' . __LINE__ . ' nouvel utilisateur vide ignoré');
+    
+                // Pas de mail -> pas d'utilisateur !
+                else {
+                    $individu = null;
+                }
+    
+                // Cas d'erreur qui ne devraient jamais se produire
+                if ($individu == null && $id != null) {
+                    $sj->errorMessage(__METHOD__ . ':' . __LINE__ .' idIndividu ' . $id . 'du formulaire ne correspond pas à un utilisateur');
+                }
+    
+                elseif (is_array($individu_form)) {
+                    // TODO je ne vois pas le rapport
+                    $sj->errorMessage(__METHOD__ . ':' . __LINE__ .' individu_form est array ' . Functions::show($individu_form));
+                }
+    
+                elseif (is_array($individu)) {
+                    // TODO pareil un peu nawak
+                    $sj->errorMessage(__METHOD__ . ':' . __LINE__ .' individu est array ' . Functions::show($individu));
+                }
+    
+                elseif ($individu != null && $individu_form->getMail() != null && $individu_form->getMail() != $individu->getMail()) {
+                    $sj->errorMessage(__METHOD__ . ':' . __LINE__ ." l'adresse mails de l'utilisateur " .
+                        $individu . ' est incorrecte dans le formulaire :' . $individu_form->getMail() . ' != ' . $individu->getMail());
+                }
+    
+                // --------------> Maintenant des cas réalistes !
+                // L'individu existe déjà
+                elseif ($individu != null) {
+                    // On modifie l'individu... si on a le droit
+                    if ($this->resp_peut_modif_collabs)
+                    {
+                        $individu = $individu_form->modifyIndividu($individu, $sj);
+                        $em->persist($individu);
+                    }
+    
+                    // Il devient collaborateur
+                    if (! $version->isCollaborateur($individu)) {
+                        $sj->infoMessage(__METHOD__ . ':' . __LINE__ .' individu ' .
+                            $individu . ' ajouté à la version ' .$version);
+                        $collaborateurVersion   =   new CollaborateurVersion($individu);
+                        $collaborateurVersion->setDeleted(false);
+                        $collaborateurVersion->setVersion($version);
+                        if ($this->coll_login) {
+                            $collaborateurVersion->setLogin($individu_form->getLogin());
+                        };
+                        if ($this->nodata == false) {
+                            $collaborateurVersion->setClogin($individu_form->getClogin());
+                        };
+                        $collaborateurVersion->setLogin($individu_form->getLogin());
+                        $collaborateurVersion->setClogin($individu_form->getClogin());
+                        $em->persist($collaborateurVersion);
+                    }
+    
+                    // il était déjà collaborateur
+                    else {
+                        $sj->debugMessage(__METHOD__ . ':' . __LINE__ .' individu ' .
+                            $individu . ' confirmé pour la version '.$version);
+    
+                        // Modif éventuelle des cases de login
+                        $this->modifierLogin($version, $individu, $individu_form->getLogin(), $individu_form->getClogin());
+    
+                        // modification du labo du projet
+                        if ($version->isResponsable($individu)) {
+                            $this->setLaboResponsable($version, $individu);
+                        }
+    
+                        // modification éventuelle du flag deleted
+                        $this->syncDeleted($version, $individu, $individu_form->getDelete());
+                    }
+                    $em -> flush();
+                }
+    
+                // Le formulaire correspond à un nouvel utilisateur (adresse mail pas trouvée)
+                elseif ($individu_form->getMail() != null && $individu_form->getDelete() == false) {
+                    
+                    // Création d'un individu à partir du formulaire
+                    // Renvoie null si la validation est négative
+                    $individu = $individu_form->nouvelIndividu($sval);
+                    if ($individu != null) {
+                        $collaborateurVersion   =   new CollaborateurVersion($individu);
+                        $collaborateurVersion->setLogin($individu_form->getLogin());
+                        $collaborateurVersion->setClogin($individu_form->getClogin());
+                        $collaborateurVersion->setVersion($version);
+    
+                        $sj->infoMessage(__METHOD__ . ':' . __LINE__ . ' nouvel utilisateur ' . $individu .
+                            ' créé et ajouté comme collaborateur à la version ' . $version);
+    
+                        $em->persist($individu);
+                        $em->persist($collaborateurVersion);
+                        $em->persist($version);
+                        $em->flush();
+                        $sj->warningMessage('Utilisateur ' . $individu . '(' . $individu->getMail() . ') id(' . $individu->getIdIndividu() . ') a été créé');
+    
+                        // Envoie une invitation à ce nouvel utilisateur
+                        $connected = $this->tok->getToken()->getUser();
+                        if ($connected != null)
+                        {
+                            $this->sid->sendInvitation($connected, $individu);
+                        }
+                    }
+                }
+    
+                // Ligne vide
+                elseif ($individu_form->getMail() == null && $id == null) {
+                    $sj->debugMessage(__METHOD__ . ':' . __LINE__ . ' nouvel utilisateur vide ignoré');
+                }
             }
         }
     }

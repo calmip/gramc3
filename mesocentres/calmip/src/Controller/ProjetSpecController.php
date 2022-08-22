@@ -363,13 +363,14 @@ class ProjetSpecController extends AbstractController
      * Affiche un projet avec un menu pour choisir la version
      *
      * @Route("/{id}/consulter", name="consulter_projet",methods={"GET","POST"})
-     * @Route("/{id}/consulter/{warn_type}", name="consulter_projet",methods={"GET","POST"})
      * @Route("/{id}/consulter/{version}", name="consulter_version",methods={"GET","POST"})
      * 
      * Method({"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
-    public function consulterAction(Projet $projet, Version $version = null, Request $request, $warn_type=0)
+
+     // SUPPRIME ! PASSE PAR LA SESSION ! Route("/{id}/consulter/{warn_type}", name="consulter_projet",methods={"GET","POST"})
+    public function consulterAction(Request $request, Projet $projet, Version $version = null)
     {
         $em = $this->em;
         $sp = $this->sp;
@@ -377,26 +378,38 @@ class ProjetSpecController extends AbstractController
         $coll_vers_repo= $em->getRepository(CollaborateurVersion::class);
         $token = $this->token;
 
+        // On récupère warn_type depuis la session, où il peut avoir été sauvegardé !
+        $warn_type = $request->getSession()->get('warn_type');
+        if (empty($warn_type)) $warn_type = 0;
+        
         // choix de la version
-        if ($version == null) {
+        if ($version == null)
+        {
             $version =  $projet->getVersionDerniere();
-            if ($version == null) {
+            if ($version == null)
+            {
                 $sj->throwException(__METHOD__ . ':' . __LINE__ .' Projet ' . $projet . ': la dernière version est nulle !');
             }
-        } else {
+        }
+        else
+        {
             $projet =   $version->getProjet();
         } // nous devons être sûrs que le projet corresponde à la version
 
-        if (! $sp->projetACL($projet)) {
+        if (! $sp->projetACL($projet))
+        {
             $sj->throwException(__METHOD__ . ':' . __LINE__ .' problème avec ACL');
         }
 
         // Calcul du loginname, pour affichage de la conso
         $loginname = null;
         $cv = $coll_vers_repo->findOneBy(['version' => $version, 'collaborateur' => $token->getUser()]);
-        if ($cv != null) {
+        if ($cv != null)
+        {
             $loginname = $cv -> getLoginname() == null ? 'nologin' : $cv -> getLoginname();
-        } else {
+        }
+        else
+        {
             $loginname = 'nologin';
         }
 
@@ -426,7 +439,6 @@ class ProjetSpecController extends AbstractController
         $sj = $this->sj;
         $ff = $this->ff;
 
-
         $session_form = Functions::createFormBuilder($ff, ['version' => $version ])
         ->add(
             'version',
@@ -442,9 +454,9 @@ class ProjetSpecController extends AbstractController
             }
             ]
         )
-    ->add('submit', SubmitType::class, ['label' => 'Changer'])
-    ->getForm();
-
+        ->add('submit', SubmitType::class, ['label' => 'Changer'])
+        ->getForm();
+        
         $session_form->handleRequest($request);
 
         if ($session_form->isSubmitted() && $session_form->isValid()) {

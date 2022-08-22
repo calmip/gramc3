@@ -636,6 +636,7 @@ class GramcSessionController extends AbstractController
     public function repinvitokAction(Request $request, Invitation $invitation=null): Response
     {
         // Date OK - On vérifie les users
+        $em = $this->em;
         $invited = $invitation->getInvited();
         $connected = $this->ts->getToken()->getUser();
         

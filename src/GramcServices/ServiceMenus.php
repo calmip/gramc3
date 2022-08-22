@@ -54,7 +54,6 @@ use App\Controller\VersionModifController;
 
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-//use Symfony\Component\Security\Core\Authentication\Token\Storage\UsageTrackingTokenStorage;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -874,12 +873,12 @@ class ServiceMenus
 
     public function modifier_version(Version $version, int $priorite=self::HPRIO):array
     {
-        $menu['name']        = 'modifier_version';
-        $menu['param']       = $version->getIdVersion();
-        $menu['lien']        = "Modifier";
-        $menu['icone']       = "modifier";
-        $menu['commentaire'] =   "Vous ne pouvez pas modifier ce projet";
-        $menu['ok']          = false;
+        $menu['name'] = 'modifier_version';
+        $menu['param'] = $version->getIdVersion();
+        $menu['lien'] = "Modifier";
+        $menu['icone'] = "modifier";
+        $menu['commentaire'] = "Vous ne pouvez pas modifier ce projet";
+        $menu['ok'] = false;
 
         if ($this->ac->isGranted('ROLE_ADMIN')) {
             $menu['commentaire']    =   "Modifier le projet en tant qu'administrateur";
@@ -924,7 +923,7 @@ class ServiceMenus
     {
         $user = $this->token->getUser();
 
-        $menu['name']  = 'avant_modifier_collaborateurs';
+        $menu['name']  = 'modifier_collaborateurs';
         $menu['param'] = $version->getIdVersion();
         $menu['lien']  = "Collaborateurs";
         $menu['priorite'] =   $priorite;
@@ -936,6 +935,10 @@ class ServiceMenus
             $menu['ok']          = false;
             $menu['commentaire'] = 'Bouton inactif';
             $menu['raison']      = "Seul le responsable du projet peut ajouter ou supprimer des collaborateurs";
+        } elseif ($version->getEtat() === Etat::TERMINE || $version->getEtat() === Etat::ANNULE) {
+            $menu['ok'] = false;
+            $menu['commentaire'] = 'Bouton inactif';
+            $menu['raison']      = "Cette version est terminée !";
         } else {
             $menu['ok']          = true;
             $menu['commentaire'] = "Modifier la liste des collaborateurs du projet";
@@ -1889,6 +1892,10 @@ class ServiceMenus
             $menu['ok']          = false;
             $menu['commentaire'] = "Bouton inactif";
             $menu['raison']      = "Vous n'êtes pas responsable du projet";
+        } elseif ($version->getEtat() === Etat::TERMINE || $version->getEtat() === Etat::ANNULE) {
+            $menu['ok'] = false;
+            $menu['commentaire'] = 'Bouton inactif';
+            $menu['raison']      = "Cette version est terminée !";
         } else {
             $menu['ok']          = true;
             $menu['commentaire'] = "Gestion et valorisation des données";
