@@ -489,7 +489,8 @@ class ServiceExperts
 
             $nbProjets++;
 
-            $nbDemHeures    +=  $demande->getDemHeures();
+            $nbDemHeures += $demande->getDemHeures();
+            $nbAttHeures += $demande->getAttrHeures();
         }
         $stats = ["nbProjets"      => $nbProjets,
                   "nouveau"        => $nouveau,

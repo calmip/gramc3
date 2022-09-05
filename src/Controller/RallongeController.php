@@ -670,6 +670,7 @@ class RallongeController extends AbstractController
             return $this->redirectToRoute('avant_rallonge_finaliser', [ 'id' => $rallonge->getId() ]);
         }
 
+        $rallonge->setAttrHeures($rallonge->getNbHeuresAtt());
         if ($rallonge->getValidation() == true) {
             $workflow->execute(Signal::CLK_VAL_PRS, $rallonge);
         } else {
