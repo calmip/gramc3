@@ -37,4 +37,5 @@ twig:
        fichier_attache: '%fichier_attache%'
        coll_login: '%coll_login%'
        noinvitation: '%noinvitation%'
+       resp_peut_modif_collabs: '%resp_peut_modif_collabs%'
        
