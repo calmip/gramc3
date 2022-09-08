@@ -1,12 +1,14 @@
+{% import "default/icone.html.twig" as icones %}
+
 <td>
     <a class="suppression"  href="{{ path('remplacer_utilisateur',  { 'id': individu.id }) }}?" title="Supprimer">
-    <img class="bouton_poussoir" src="{{ asset('icones/petitdelete.png') }}" alt="Supprimer" />
+    {{icones.supprimer}}
     </a>
 </td>
 
 <td>
     <a class="modification" href="{{ path('individu_modify',  { 'id': individu.id }) }}?" title="Modifier le profil">
-    <img class="bouton_poussoir" src="{{ asset('icones/modifier.png') }}" alt="Modifier" />
+        {{icones.details}}
     </a>
 </td>
 
@@ -16,7 +18,7 @@
 
 <td>
     <a class="sudo" href="{{ path('sudo',  { 'id': individu.id }) }}?" title="Changer d'identité">
-    <img class="bouton_poussoir" src="{{ asset('icones/sudo.png') }}" alt="Changer d'identité" />
+        {{icones.sudo(20,20)}}
     </a>
 </td>
 
@@ -33,10 +35,11 @@
 {% if( individu.desactive) == true %}
 
 <td style="text-align:center">
-        <img src="{{ asset('icones/inactif.png') }}" alt="rouge" title="Désactivé par l'administrateur" />
+        <span title="Désactivé par l'administrateur">{{icones.refuse(20,20)}}</span>
         &nbsp;
         <a class="activation" href="{{ path('activer_utilisateur',  { 'id': individu.id }) }}?" title="Réactiver">
-        <img class="bouton_on" src="{{ asset('icones/forbidden.png') }}" alt="Désactiver" /></a>
+            {{icones.forbidden(20,20)}}
+        </a>
         <span style="display:none">0</span>
 
 </td>
@@ -44,20 +47,22 @@
 {% elseif( individu.IDP == null ) %}
 
 <td style="text-align:center">
-        <img src="{{ asset('icones/bientotactif.png') }}" alt="jaune" title="Peut activer son compte à gramc" />
+        <span title="Le compte peut être activé">{{icones.bientotactif(20,20)}}</span>
         &nbsp;
         <a class="activation" href="{{ path('desactiver_utilisateur',  { 'id': individu.id }) }}?" title="Désactiver">
-        <img class="bouton_off" src="{{ asset('icones/forbidden.png') }}" alt="Désactiver" /></a>
+            {{icones.forbidden(20,20)}}
+        </a>
         <span style="display:none">1</span>
 </td>
 
 {% elseif( individu.desactive) == false %}
 
 <td style="text-align:center">
-        <img src="{{ asset('icones/actif.png') }}" alt="vert" title="Peut se connecter à gramc" />
+        {{icones.valide(20,20)}}
         &nbsp;
         <a class="activation" href="{{ path('desactiver_utilisateur',  { 'id': individu.id }) }}?" title="Désactiver">
-        <img class="bouton_off" src="{{ asset('icones/forbidden.png') }}" alt="Désactiver" /></a>
+            {{icones.forbidden(20,20)}}
+        </a>
         <span style="display:none">1</span>
 </td>
 
@@ -71,18 +76,19 @@
 
 <td style="text-align:center">
     <a class="expert" href="{{ path('devenir_expert',  { 'id': individu.id }) }}?" title="Devenir expert">
-    <img class="bouton_off" src="{{ asset('icones/expert.png') }}" alt="Devenir expert" />
+        {{icones.expert(20,20)}}
     </a>
     <span style="display:none">0</span>
 </td>
 
 {% else %}
 
-<td style="text-align:center">
+<td style="text-align:center; background-color:#eeeeee;">
     <a class="thematiques" href="{{ path('choisir_thematique', { 'id': individu.id }) }}?" title="Choisir les thématiques de cet expert">
-    <img class="bouton_off" src="{{ asset('icones/thematiques.png') }}" alt="Choisir les thématiques"></a>
+        {{icones.thematique(20,20)}}
+    </a>
     <a class="expert" href="{{ path('plus_expert', { 'id': individu.id }) }}?" title="Cesser d'être expert">
-    <img class="bouton_on" src="{{ asset('icones/expert.png') }}" alt="Cesser d'être expert" />
+        {{icones.expert(20,20)}}
     </a>
     <span style="display:none">1</span>
 </td>
@@ -93,9 +99,9 @@
 
 {% if( individu.president) == true %}
 
-<td style="text-align:right">
+<td style="text-align:right; background-color:#eeeeee;">
     <a class="admin" href="{{ path('plus_president',  { 'id': individu.id }) }}?" title="Retirer les droits de président">
-    <img class="bouton_on" src="{{ asset('icones/president.png') }}" alt="Ne plus être président" />
+        {{icones.president(20,20)}}
     </a>
     <span style="display:none">1</span>
 </td>
@@ -104,7 +110,7 @@
 
 <td style="text-align:left">
     <a class="admin" href="{{ path('devenir_president',  { 'id': individu.id }) }}?" title="Devenir président">
-   <img class="bouton_off" src="{{ asset('icones/president.png') }}" alt="Devenir président" />
+        {{icones.president(20,20)}}
     </a>
     <span style="display:none">0</span>
 </td>
@@ -115,9 +121,9 @@
 
 {% if( individu.admin) == true %}
 
-<td style="text-align:right">
+<td style="text-align:right; background-color:#eeeeee;">
     <a class="admin" href="{{ path('plus_admin',  { 'id': individu.id }) }}?" title="Retirer les droits admin">
-    <img class="bouton_on" src="{{ asset('icones/admin.png') }}" alt="Ne plus être admin" />
+        {{icones.president(20,20)}}
     </a>
     <span style="display:none">1</span>
 </td>
@@ -126,7 +132,7 @@
 
 <td style="text-align:left">
     <a class="admin" href="{{ path('devenir_admin',  { 'id': individu.id }) }}?" title="Devenir admin">
-   <img class="bouton_off" src="{{ asset('icones/admin.png') }}" alt="Devenir admin" />
+        {{icones.president(20,20)}}
     </a>
     <span style="display:none">0</span>
 </td>
@@ -137,9 +143,9 @@
 
 {% if( individu.obs) == true %}
 
-<td style="text-align:right">
+<td style="text-align:right; background-color:#eeeeee;">
     <a class="obs" href="{{ path('plus_obs',  { 'id': individu.id }) }}?" title="Retirer les droits obs">
-    <img class="bouton_on" src="{{ asset('icones/obs.png') }}" alt="Ne plus être obs" />
+        {{icones.obs(20,20)}}
     </a>
     <span style="display:none">1</span>
 </td>
@@ -148,7 +154,7 @@
 
 <td style="text-align:left">
     <a class="obs" href="{{ path('devenir_obs',  { 'id': individu.id }) }}?" title="Devenir obs">
-   <img class="bouton_off" src="{{ asset('icones/obs.png') }}" alt="Devenir obs" />
+        {{icones.obs(20,20)}}
     </a>
     <span style="display:none">0</span>
 </td>
@@ -159,9 +165,9 @@
 
 {% if( individu.sysadmin) == true %}
 
-<td style="text-align:right">
+<td style="text-align:right; background-color:#eeeeee;">
     <a class="sysadmin" href="{{ path('plus_sysadmin',  { 'id': individu.id }) }}?" title="Retirer les droits sysadmin">
-    <img class="bouton_on" src="{{ asset('icones/sysadmin.png') }}" alt="Ne plus être sysadmin" />
+        {{icones.sysadmin(20,20)}}
     </a>
     <span style="display:none">1</span>
 </td>
@@ -170,7 +176,7 @@
 
 <td style="text-align:left">
     <a class="sysadmin" href="{{ path('devenir_sysadmin',  { 'id': individu.id }) }}?" title="Devenir sysadmin">
-   <img class="bouton_off" src="{{ asset('icones/sysadmin.png') }}" alt="Devenir sysadmin" />
+        {{icones.sysadmin(20,20)}}
     </a>
     <span style="display:none">0</span>
 </td>

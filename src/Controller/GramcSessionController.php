@@ -140,23 +140,19 @@ class GramcSessionController extends AbstractController
         }
         $menu3[] = $sm->televersement_generique();
 
-        if ($this->getParameter('norattachement')==false) {
-            $menu4[] = $sm->rattachements();
-        }
+        $menu4[] = $sm->formations();
+        $menu4[] = $sm->laboratoires();
+        if ($this->getParameter('norattachement')==false) $menu4[] = $sm->rattachements();
         $menu4[] = $sm->thematiques();
         $menu4[] = $sm->metathematiques();
-        $menu4[] = $sm->laboratoires();
-        $menu4[] = $sm->formations();
 
         $menu5[] = $sm->bilan_annuel();
         $menu5[] = $sm->statistiques();
         $menu5[] = $sm->publications();
 
-        $menu6[] = $sm->connexions();
         $menu6[] = $sm->journal();
-        if ($this->getParameter('kernel.debug')) {
-            $menu6[] = $sm->avancer();
-        }
+        $menu6[] = $sm->connexions();
+        if ($this->getParameter('kernel.debug')) $menu6[] = $sm->avancer();
         $menu6[] = $sm->info();
         $menu6[] = $sm->nettoyer();
 
@@ -640,6 +636,7 @@ class GramcSessionController extends AbstractController
     public function repinvitokAction(Request $request, Invitation $invitation=null): Response
     {
         // Date OK - On vérifie les users
+        $em = $this->em;
         $invited = $invitation->getInvited();
         $connected = $this->ts->getToken()->getUser();
         

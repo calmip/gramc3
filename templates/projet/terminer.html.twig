@@ -1,14 +1,16 @@
 {% macro onpeutterminer(projet) %}
-	<a class="fermeture" href="{{ path('fermer_projet', { 'id': projet.idProjet }) }}?" title="Fermer le projet">
-		<img src="{{ asset('icones/process-stop.png') }}" style="width: 16px" alt="Fermer">
-	</a>
-	<a class="termineroupas" href="{{ path('nepasterminer_projet', { 'id': projet.idProjet }) }}?" title="Garder le projet en standby">
-		<img src="{{ asset('icones/nepasterminer.png') }}" style="width: 16px" alt="Garder le projet">
-	</a>
+    {% import "default/icone.html.twig" as icones %}
+    <a class="fermeture" href="{{ path('fermer_projet', { 'id': projet.idProjet }) }}?" title="Fermer le projet">
+        {{ icones.process_stop(25,25)}}
+    </a>
+    <a class="termineroupas" href="{{ path('nepasterminer_projet', { 'id': projet.idProjet }) }}?" title="Garder le projet en standby">
+        {{ icones.nepasterminer(25,12)}}
+    </a>
 {% endmacro %}
 
 {% macro nepasterminer(projet) %}
-	<a class="termineroupas" href="{{ path('onpeutterminer_projet', { 'id': projet.idProjet }) }}?" title="Permettre de terminer le projet">
-		<img src="{{ asset('icones/onpeutterminer.png') }}" alt="Permettre la fermeture" style="width: 16px" >
-	</a>
+    {% import "default/icone.html.twig" as icones %}
+    <a class="termineroupas" href="{{ path('onpeutterminer_projet', { 'id': projet.idProjet }) }}?" title="Permettre de terminer le projet">
+        {{ icones.onpeutterminer(25,12)}}
+    </a>
 {% endmacro %}

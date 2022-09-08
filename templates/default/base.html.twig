@@ -1,5 +1,9 @@
 {# app/Resources/views/default/base.html.twig #}
 
+{% import "default/macros.html.twig" as gramcmacros %}
+
+{% import "default/icone.html.twig" as icones %}
+
 <!DOCTYPE html>
 <html lang="fr">
     <head>
@@ -12,8 +16,8 @@
         <link href="{{ absolute_url(asset('js/jquery-upload-file-master/css/uploadfile.css') ) }}" rel="stylesheet" type="text/css" media="screen" />
         <link href="{{ absolute_url(asset('js/DataTables-1.11.5/css/jquery.dataTables.min.css') ) }}" rel="stylesheet" type="text/css" media="screen" />
 
-        <link href="{{ absolute_url(asset('css/defaut.css'))  }}" rel="stylesheet" type="text/css" media="screen" />
-        <link href="{{ absolute_url(asset('css/gramc2.css') ) }}" rel="stylesheet" type="text/css" media="screen" />
+        <link href="{{ absolute_url(asset('css/colors.css'))  }}" rel="stylesheet" type="text/css" media="screen" />
+        <link href="{{ absolute_url(asset('css/gramc3.css'))  }}" rel="stylesheet" type="text/css" media="screen" />
 {% endblock stylesheets %}
 
 {% block mystyles %}
@@ -23,6 +27,7 @@
         <script   src="{{ absolute_url(asset('js/jquery-3.6.0.min.js') ) }}" ></script>
         <script   src="{{ absolute_url(asset('js/jquery-ui/jquery-ui.js') ) }}" ></script>
         <script   src="{{ absolute_url(asset('js/header_fixe.js') ) }}" ></script>
+        <script   src="{{ absolute_url(asset('js/base.js') ) }}" ></script>
 {% endblock %}
 
 {% block myjavascripts %}
@@ -37,77 +42,123 @@
 
 
     <body>
+        {% if not app.request.xmlhttprequest %}
         {% block header %}
-        <header id="header">
-            <img src="{{ asset('icones/banniere.png') }}" alt="logo" />
+        <header class="header">
+{#{{app.request.attributes.get('_route')}}#}
+            <a class="lien_accueil" href="{{ path('accueil') }}"><img src="{{ asset('icones/banniere.png') }}" alt="logo" /></a>
+        
+            <nav class="nav">
+                {% if (app.request.attributes.get('_route') == 'accueil') or (app.request.attributes.get('_route') == 'connexion') or (app.request.attributes.get('_route') == 'connexion_dbg') %}
+                    <a class="lien_nav actif" href="{{ path('accueil') }}" title="Accéder à l'accueil">Accueil</a> 
+                {% else %}
+                    <a class="lien_nav" href="{{ path('accueil') }}" title="Accéder à l'accueil">Accueil</a> 
+                {% endif %}
 
-            <div id="co_deco">
+                {% if is_granted('ROLE_DEMANDEUR') %}
+                    {% if (app.request.attributes.get('_route') == 'projet_accueil') or (app.request.attributes.get('_route') == 'consulter_projet') %}
+                        <a class="lien_nav actif" href="{{ path('projet_accueil') }}" title="Accéder à l'espace demandeur">Demandeur</a> 
+                    {% else %}
+                        <a class="lien_nav" href="{{ path('projet_accueil') }}" title="Accéder à l'espace demandeur">Demandeur</a> 
+                    {% endif %}
+                {% endif %}
+
+                {% if is_granted('ROLE_EXPERT') %}
+                    {% if app.request.attributes.get('_route') == 'expertise_liste' %}
+                        <a class="lien_nav actif" href="{{ path('expertise_liste') }}" title="Accéder à l'espace Expert">Expert</a> 
+                    {% else %}
+                        <a class="lien_nav" href="{{ path('expertise_liste') }}" title="Accéder à l'espace Expert">Expert</a> 
+                    {% endif %}
+                {% endif %}
+
+                {% if is_granted('ROLE_OBS') %}
+                    {% if app.request.attributes.get('_route') == 'admin_accueil' %}
+                        <a class="lien_nav actif" href="{{ path('admin_accueil') }}" title="Accéder à l'espace Administrateur">Administrateur</a> 
+                    {% else %}
+                        <a class="lien_nav" href="{{ path('admin_accueil') }}"  title="Accéder à l'espace Administrateur">Administrateur</a> 
+                    {% endif %}
+                {% endif %}
+
+                {% if is_granted('ROLE_PRESIDENT') %}
+                    {% if app.request.attributes.get('_route') == 'president_accueil' %}
+                        <a class="lien_nav actif" href="{{ path('president_accueil') }}" title="Accéder à l'espace Président">Président</a> 
+                    {% else %}
+                        <a class="lien_nav" href="{{ path('president_accueil') }}" title="Accéder à l'espace Président">Président</a> 
+                    {% endif %}
+                {% endif %}
+
+                {% if app.request.attributes.get('_route') == 'aide' %}
+                    <a class="aide_nav actif" href="{{ path('aide') }}">?</a>
+                {% else %}
+                    <a class="aide_nav" href="{{ path('aide') }}">?</a>
+                {% endif %}
+            </nav>
+            <img src="{{ asset('icones/header.png') }}" alt="élément graphique" class="elm_graphique"/>
+
+
+        </header>
+
+
+        <div class="sous_header">
             {% if app.debug %}
-                <p class="gauche petit">
+                <p class="etat_session">
                 {% for session in infos.sessions_non_terminees() %}
-                    ETAT DE LA SESSION <strong>{{session.IdSession}}</strong>=<strong>{{session.LibelleEtat}}</strong><br />
+                    ETAT DE LA SESSION <strong>{{session.IdSession}}</strong>=<strong>{{session.LibelleEtat}}</strong><br>
                 {% endfor %}
                 </p>
             {% endif %}
 
-            {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-                <div>
-                <p class="droite">
-                {% if is_granted('IS_IMPERSONATOR') %}
-                    SUDO par {{ app.token.originalToken.user }}</p><p class="droite">
-                {% endif %}
-                {% if app.debug %}
-                    {{ app.user.prenom }} {{ app.user.nom }} ({{ app.user.id}})
+            {% include "default/flash.html.twig" %}
+
+            <div class="profil">
+
+                {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                    <div>
+                    {% if is_granted('IS_IMPERSONATOR') %}
+                        <p> SUDO par {{ app.token.originalToken.user }}</p>
+                    {% endif %}
+                    {% if app.debug %}
+                        <p>Connecté en tant que : <a href="{{ path('profil') }}" class="nom_profil">{{ app.user.prenom }} {{ app.user.nom }} ({{ app.user.id}})</a></p>
+                    {% else %}
+                        <p>Connecté en tant que : <a href="{{ path('profil') }}" class="nom_profil">{{ app.user.prenom }} {{ app.user.nom }} ({{ app.user.id}})</a></p>
+                    {% endif %}
+                    </div>
+
+                    <a href=" {{ path('deconnexion') }}" class="deconnexion_profil">Déconnexion</a>
+
                 {% else %}
-                    {{ app.user.prenom }} {{ app.user.nom }}
+                    <p><a href=" {{ path('connexion') }}" class="connexion_profil">connexion</a>
+                    {% if app.debug %}
+
+                        <p><a href=" {{ path('connexion_dbg') }}" class="connexion_profil">connexion (DBG)</a>
+                    {% endif %}
                 {% endif %}
-                </p>
-                <p class="droite">{{ app.user.statut }} {{ app.user.etab }}</p>
-                <p class="droite">{{  infos.tronquer_chaine(app.user.labo,15) }}</p>
+
                 </div>
-
-                <p class="droite"><a href=" {{ path('profil') }}">Mettre à jour mon profil</a>
-                <a href=" {{ path('deconnexion') }}">Déconnexion</a></p>
-
-            {% else %}
-                <p class="droite"><a class="droite" href=" {{ path('connexion') }}">connexion</a></p>
-                {% if app.debug %}
-
-                    <p class="droite"><a href=" {{ path('connexion_dbg') }}">connexion (DBG)</a></p>
-                {% endif %}
-            {% endif %}
-
             </div>
-            <br />
-        </header>
+
+
+            {% set scrollTop = "fleche" %}
+
+            <div id="scrollTop">
+                <a class="fleche">
+                    {{ icones.scrollTop }}
+                </a>
+            </div>
+
+        {% if is_granted('ROLE_ADMIN')  %}
+
+            <div class="role_admin" title="Vous êtres administrateur">
+                <span></span>
+                <p>ADMINISTRATEUR</p>
+            </div>
+
+        {% endif %}
+
         {% endblock header %}
 
-    {% include "default/flash.html.twig" %}
+    {% endif %} {# si ajax on saute tout ça}
     
-    {% block fil_ariane %}
-
-        <div id="fil_ariane">
-        <br>
-        <a class="a_ariane" href="{{ path('accueil') }}">Accueil</a> >
-        {% if is_granted('ROLE_DEMANDEUR') %}
-            <a class="a_ariane" href="{{ path('projet_accueil') }}">Demandeur</a> |
-        {% endif %}
-        {% if is_granted('ROLE_EXPERT') %}
-            <a class="a_ariane" href="{{ path('expertise_liste') }}">Expert</a> |
-        {% endif %}
-        {% if is_granted('ROLE_OBS') %}
-            <a class="a_ariane" href="{{ path('admin_accueil') }}">Administrateur</a> |
-        {% endif %}
-        {% if is_granted('ROLE_PRESIDENT') %}
-            <a class="a_ariane" href="{{ path('president_accueil') }}">Président</a> |
-        {% endif %}
-        <a class="a_ariane" href="{{ path('aide') }}">aide</a>
-
-        </div> <!-- fil_ariane -->
-
-    {% endblock fil_ariane %}
-
-
     {# ###################################################################### #}
 
     {% block menu %}
@@ -130,53 +181,58 @@
 
     {% block footer %}
         {# footer #}
-        <footer>
-            {{ infos.gramc_date('Y-m-d') }} -
+        <footer class="footer">
+            <div>
+                {{ infos.gramc_date('Y-m-d') }} -
 
-            {% block message %}
+                {% block message %}
 
-                {% if  infos.getLibelleEtatSessionCourante == 'CREE_ATTENTE' %}
-                    La prochaine session d'attribution sera ouverte le <strong>{{ infos.prochaine_session }}</strong>
+                    {% if  infos.getLibelleEtatSessionCourante == 'CREE_ATTENTE' %}
+                        La prochaine session d'attribution sera ouverte le <strong>{{ infos.prochaine_session }}</strong>
 
-                {% elseif  infos.getLibelleEtatSessionCourante == 'EDITION_DEMANDE'%}
+                    {% elseif  infos.getLibelleEtatSessionCourante == 'EDITION_DEMANDE'%}
 
-                    {% if infos.cette_session()['jours'] == 0 %}
-                    Vous avez encore <strong>JUSQU'A CE SOIR</strong> pour envoyer votre projet pour expertise
+                        {% if infos.cette_session()['jours'] == 0 %}
+                        Vous avez encore <strong>JUSQU'A CE SOIR</strong> pour envoyer votre projet pour expertise
 
-                    {% elseif infos.cette_session()['jours'] > 0 %}
-                        Vous avez jusqu'au <strong>{{ infos.cette_session()['fin_sess'] }}  </strong> pour envoyer votre projet pour expertise
+                        {% elseif infos.cette_session()['jours'] > 0 %}
+                            Vous avez jusqu'au <strong>{{ infos.cette_session()['fin_sess'] }}  </strong> pour envoyer votre projet pour expertise
 
-                    {% else %}
-                    ATTENTION, la date de fin de session est dépassée
-                        {% if infos.cette_session()['jours'] == -1 %}
-                            <strong>d'un jour</strong>
-                       {% else %}
-                            <strong>de {{ - infos.cette_session()['jours'] }} jours</strong>
+                        {% else %}
+                        ATTENTION, la date de fin de session est dépassée
+                            {% if infos.cette_session()['jours'] == -1 %}
+                                <strong>d'un jour</strong>
+                        {% else %}
+                                <strong>de {{ - infos.cette_session()['jours'] }} jours</strong>
+                            {% endif %}
+
                         {% endif %}
 
-                    {% endif %}
-
-                {% else %}
-                Prochaine session d'attribution: <strong>
-                    {%  if infos.prochaine_session_saison.type == 'P' %}
-                    Printemps {{  infos.prochaine_session_saison.annee }}
                     {% else %}
-                    Automne {{  infos.prochaine_session_saison.annee }}
+                    Prochaine session d'attribution: <strong>
+                        {%  if infos.prochaine_session_saison.type == 'P' %}
+                        Printemps {{  infos.prochaine_session_saison.annee }}
+                        {% else %}
+                        Automne {{  infos.prochaine_session_saison.annee }}
+                        {% endif %}
+                    </strong>
                     {% endif %}
-                </strong>
+
+                {% endblock message %}
+
+            </div>
+
+            <div class="liens_importants_footer">
+                {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                    <span>gramc {{ infos.VERSION }} - design <a href="https://fr.linkedin.com/in/ugo-mariotto-952aa21b8" target='_blank'>Ugo Mariotto</a> - <a href="mailto:{{ mailadmin }}" class="lien_footer">{{ mailadmin }}</a></span>
+                {% else %}
+                    <span>gramc {{ infos.VERSION }} - design <a href="https://fr.linkedin.com/in/ugo-mariotto-952aa21b8" target='_blank'>Ugo Mariotto</a> - {{ infos.mail_replace(mailadmin) }}</span>
                 {% endif %}
-
-            {% endblock message %}
-
-            {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-                <span class="petit">gramc {{ infos.VERSION }} <a href="mailto:{{ mailadmin }}">{{ mailadmin }}</a></span>
-            {% else %}
-                <span class="petit">gramc {{ infos.VERSION }} {{ infos.mail_replace(mailadmin) }}</span>
-            {% endif %}
-            <span class="petit"><a href="{{ path('mentions_legales') }}" title="Lire les mentions légales">Mentions légales</a></span>
-            {% if mesoc_cgu != null %}
-            <span class="petit"><a href="{{ mesoc_cgu }}" title="Lire les cgu du calculateur">cgu</a></span>
-            {% endif %}
+                &nbsp;-&nbsp;<a href="{{ path('mentions_legales') }}" class="lien_footer" title="Lire les mentions légales">Mentions légales</a>&nbsp;-&nbsp;
+                {% if mesoc_cgu != null %}
+                <a href="{{ mesoc_cgu }}" class="lien_footer" title="Lire les cgu du calculateur">cgu</a>
+                {% endif %}
+            </div>
 
         </footer>
 

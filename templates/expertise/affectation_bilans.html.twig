@@ -1,21 +1,21 @@
 
-<div id="bilan_legende">
-	<div id="bilan">
+<div class="bilan_legende">
+    <div class="bilan">
        <table>
             <tbody>
                 <tr>
-					<th colspan="2">Sélection des expertises</th>
+                    <th colspan="2">Sélection des expertises</th>
                 </tr>
                 <tr>
                     <th>Inverser la sélection</th>
-                    <td style="text-align: center"><img id="invsel" class="bouton_off" src="{{ asset('icones/invsel.png') }}" alt="Inverser la sélection" /></td>
+                    <td style="text-align: center"><input id="invsel" type="checkbox"></td>
                 </tr>
             </tbody>
        </table>
         <table>
             <tbody>
                 <tr>
-					<th colspan="3">Projets</th>
+                    <th colspan="3">Projets</th>
                 </tr>
                 <tr>
                     <th>Nombre de projets</th>
@@ -32,7 +32,7 @@
                     <td>{{ stats.nbAttHeures}}</td>
                     <td>&nbsp;</td>
                </tr>
-				{% if (stats.nouveau!=null and stats.renouvellement!=null) %}
+                {% if (stats.nouveau!=null and stats.renouvellement!=null) %}
                 <tr>
                     <th colspan="3">Projets avec experts affectés</th>
                 </tr>
@@ -46,8 +46,8 @@
                     <td>{{ stats.renouvellement }}</td>
                     <td><input type="checkbox" class="cb" id="renouv" checked="checked"></td>
                 </tr>
-				{% endif %}
-				{% if (stats.sansexperts != null) %}
+                {% endif %}
+                {% if (stats.sansexperts != null) %}
                <tr>
                     <th colspan="3">Projets sans experts</th>
                </tr>
@@ -149,6 +149,6 @@
         </table>
 {% endif %}
 
-	</div>
+    </div>
 </div>
 

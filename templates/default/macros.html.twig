@@ -3,117 +3,210 @@
 
 {% import _self as macros %}
 
-{% macro img_consulter() %}{{ asset('icones/consulter.png') }}{% endmacro %}
-{% macro img_supprimer() %}{{ asset('icones/petitdelete.png') }}{% endmacro %}
-{% macro img_modifier() %}{{ asset('icones/modifier.png') }}{% endmacro %}
+{# Affichage d'une icone à partir d'une valeur #}
 
+{% macro menuIcones(value) %}
 
+    {% import "default/icone.html.twig" as icones %}
 
-{% macro ko(text) %}
-    <div class="infobulleko" data-title="{{ text }}" >
-    <img src="{{ asset('icones/q16.png') }}" alt="?" />
-    </div>
+    {% if value == "indefinit" %}
+        {{icones.indefinit}}
+    {% elseif value == "scrollTop" %}
+        {{icones.scrollTop}}
+    {% elseif value == "nouveauProjet" %}
+        {{icones.nouveauProjet}}
+    {% elseif value == "details" %}
+        {{icones.details}}
+    {% elseif value == "supprimer" %}
+        {{icones.supprimer}}
+    {% elseif value == "consommation" %}
+        {{icones.consommation}}
+    {% elseif value == "termine" %}
+        {{icones.termine}}
+    {% elseif value == "valide" %}
+        {{icones.valide}}
+    {% elseif value == "accepte" %}
+        {{icones.accepte}}
+    {% elseif value == "renouveler" %}
+        {{icones.renouveler}}
+    {% elseif value == "edition" %}
+        {{icones.edition}}
+    {% elseif value == "modifier" %}
+        {{icones.modifier}}
+    {% elseif value == "envoyer" %}
+        {{icones.envoyer}}
+    {% elseif value == "telecharger" %}
+        {{icones.telecharger}}
+    {% elseif value == "televerser" %}
+        {{icones.televerser}}
+    {% elseif value == "pdf" %}
+        {{icones.pdf}}
+    {% elseif value == "fleche_retour" %}
+        {{icones.fleche_retour}}
+    {% elseif value == "trait_summary" %}
+        {{icones.trait_summary}}
+    {% elseif value == "plus_summary" %}
+        {{icones.plus_summary}}
+    {% elseif value == "fleche_gauche" %}
+        {{icones.fleche_gauche}}
+    {% elseif value == "fleche_droite" %}
+        {{icones.fleche_droite}}
+    {% elseif value == "liste_utilisateur" %}
+        {{icones.liste_utilisateur}}
+    {% elseif value == "projet_session" %}
+        {{icones.projet_session}}
+    {% elseif value == "annee" %}
+        {{icones.annee}}
+    {% elseif value == "tous" %}
+        {{icones.tous}}
+    {% elseif value == "donnees" %}
+        {{icones.donnees}}
+    {% elseif value == "televersement_generique" %}
+        {{icones.televersement_generique}}
+    {% elseif value == "sessions" %}
+        {{icones.sessions}}
+    {% elseif value == "bilan" %}
+        {{icones.bilan}}
+    {% elseif value == "formation" %}
+        {{icones.formation}}
+    {% elseif value == "mail" %}
+        {{icones.mail}}
+    {% elseif value == "laboratoire" %}
+        {{icones.laboratoire}}
+    {% elseif value == "rattachement" %}
+        {{icones.rattachement}}
+    {% elseif value == "thematique" %}
+        {{icones.thematique}}
+    {% elseif value == "statistiques" %}
+        {{icones.statistiques}}
+    {% elseif value == "publications" %}
+        {{icones.publications}}
+    {% elseif value == "lire_journal" %}
+        {{icones.lire_journal}}
+    {% elseif value == "personnes_connectees" %}
+        {{icones.personnes_connectees}}
+    {% elseif value == "avancer_temps" %}
+        {{icones.avancer_temps}}
+    {% elseif value == "nettoyage" %}
+        {{icones.nettoyage}}
+    {% elseif value == "technique" %}
+        {{icones.technique}}
+    {% elseif value == "euro" %}
+        {{icones.euro}}
+    {% elseif value == "mail_send" %}
+        {{icones.mail_send}}
+    {% elseif value == "process_stop" %}
+        {{icones.process_stop}}
+    {% elseif value == "nepasterminer" %}
+        {{icones.nepasterminer}}
+    {% elseif value == "onpeutterminer" %}
+        {{icones.onpeutterminer}}
+    {% elseif value == "attente" %}
+        {{icones.attente}}
+    {% elseif value == "standby" %}
+        {{icones.standby}}
+    {% elseif value == "agarder" %}
+        {{icones.agarder}}
+    {% elseif value == "expertise" %}
+        {{icones.expertise}}
+    {% elseif value == "nonrenouvele" %}
+        {{icones.nonrenouvele}}
+    {% elseif value == "back" %}
+        {{icones.back}}
+    {% elseif value == "forward" %}
+        {{icones.forward}}
+    {% elseif value == "bientotactif" %}
+        {{icones.bientotactif}}
+    {% elseif value == "refuse" %}
+        {{icones.refuse}}
+    {% elseif value == "forbidden" %}
+        {{icones.forbidden}}
+    {% elseif value == "expert" %}
+        {{icones.expert}}
+    {% elseif value == "president" %}
+        {{icones.president}}
+    {% elseif value == "admin" %}
+        {{icones.admin}}
+    {% elseif value == "obs" %}
+        {{icones.obs}}
+    {% elseif value == "sysadmin" %}
+        {{icones.sysadmin}}
+    {% elseif value == "attention" %}
+        {{icones.attention}}
+    {% elseif value == "norecup" %}
+        {{icones.norecup}}
+    {% elseif value == "recup" %}
+        {{icones.recup}}
+    {% endif %}
+
 {% endmacro %}
 
-{# ################################################## #}
-
-{% macro inactif(link,title,message) %}
-    {% import _self as macros %}
-    <a  class="lien_inactif"
-     {% if(  app.debug ) %} href="{{ path( link ) }}" {% endif %}
-    title="{{ title }}">{{ title }}</a>
-{{ macros.ko(message) }}
-{% endmacro %}
-
-{# ################################################## #}
-
-{% macro actif(link,title,message) %}
-    <a  class="lien_actif" href="{{ path( link ) }}" title="{{ title }}">{{ title }}</a>
-    <div class="infobulleok" data-title="{{ message|default('Vous pouvez y accéder') }}" >
-        <img src="{{ asset('icones/q16.png') }}" alt="?" />
-    </div>
-{% endmacro %}
 
 {# ################################################## #}
 {# Affichage d'un menu à partir d'un array d'array  (cf. lib/navigation.php)
 #}
 
 {% macro menu(menu) %}
+
+{% from _self import menuIcones %}
+
+{# Variable à faire passer dans la macro des icones (celle-ci sert à appeler l'icone indefinit) #}
+{% set indefinit = "indefinit" %}
+
+
 <nav>
     <ul>
         {% for item in menu %}
         {% if not item==null %}
-	        {% if item.ok %}
-	        <li><a class="lien_actif" title="{{ item.commentaire }}"
-	                {% if item.param is defined %}
-	                    href="{{ path(item.name, { 'id' : item.param }) }}"
-	                {% elseif item.params is defined %}
-	                    href="{{ path(item.name, item.params) }}"
-	                {% else %}
-	                    href="{{ path(item.name) }}"
-	                {% endif %}
-	            >{{ item.lien }}</a>
-	            <div class="infobulleok" data-title="{{ item.commentaire }}" ><img src="{{ asset('icones/q16.png') }}" alt="?" /></div>
-	        </li>
-	        {% else %}
-	        <li><a class="lien_inactif"
-	            {% if  app.debug %}
-	                {% if item.param is defined %}
-	                    href="{{ path(item.name, { 'id' : item.param }) }}"
-	                {% elseif item.params is defined %}
-	                    href="{{ path(item.name, item.params) }}"
-	                {% else %}
-	                    href="{{ path(item.name) }}"
-	                {% endif %}
-	            {% endif %}
-	            title="{{ item.commentaire }} - {{ item.raison }}">{{ item.lien }}</a>
-	            <div class="infobulleko" data-title="{{ item.commentaire }} - {{ item.raison }}" ><img src="{{ asset('icones/q16.png') }}" alt="?" /></div>
-	        </li>
-	        {% endif %}
-	    {% endif %}
+            {% if item.ok %}
+            <li {% if item.priorite is defined %}
+                    class="priorite{{item.priorite}}"
+                {% endif %}
+            ><a class="lien_actif" title="{{ item.commentaire }}"
+                    {% if item.param is defined %}
+                        href="{{ path(item.name, { 'id' : item.param }) }}"
+                    {% elseif item.params is defined %}
+                        href="{{ path(item.name, item.params) }}"
+                    {% else %}
+                        href="{{ path(item.name) }}"
+                    {% endif %}
+                >
+                {% if item.icone is defined %}
+                   {{ menuIcones(item.icone) }} {{ item.lien }}</a>
+                {% else %}
+                   {{ menuIcones(indefinit) }} {{ item.lien }}</a>
+                {% endif %}
+            </li>
+            {% else %}
+            <li {% if item.priorite is defined %}
+                    class="priorite{{item.priorite}}"
+                {% endif %}
+            ><a class="lien_inactif"
+                {% if  app.debug %}
+                    {% if item.param is defined %}
+                        href="{{ path(item.name, { 'id' : item.param }) }}"
+                    {% elseif item.params is defined %}
+                        href="{{ path(item.name, item.params) }}"
+                    {% else %}
+                        href="{{ path(item.name) }}"
+                    {% endif %}
+                {% endif %}
+                title="{{ item.commentaire }} - {{ item.raison }}"
+                >
+                {% if item.icone is defined %}
+                    {{ menuIcones(item.icone) }} {{ item.lien }}</a>
+                {% else %}
+                    {{ menuIcones(indefinit) }} {{ item.lien }}</a>
+                {% endif %}
+            </li>
+            {% endif %}
+        {% endif %}
         {% endfor %}
+        <li class="more">En voir plus...</li>
     </ul>
 </nav>
 {% endmacro %}
 
-
-{# ################################################## #}
-{# Affichage d'un menu à partir d'un array de texte
-   Les items sont générés par la fonction generer_lien (cf. lib/navigation.php)
-   Pas très esprit mvc, mais rend le portage vers twig beaucoup plus simple !
-#}
-{#
-{% macro menu(menu)%}
-<nav>
-    <ul>
-        {% for item in menu %}
-        <li>{{ item|raw }}</li>
-        {% endfor %}
-    </ul>
-</nav>
-{% endmacro %}
-#}
-
-{# ################################################# #}
-{# Affichages de messages d'information, de warning, d'erreur (cf. lib/notifications.php) #}
-
-{% macro info(titre,msg) %}
-<div class="message info"><h2>{{ titre }}</h2>
-<p>{{ msg|raw }}</p>
-</div>
-{% endmacro %}
-
-{% macro warning(titre,msg) %}
-<div class="message warning"><h2>{{ titre }}</h2>
-<p>{{ msg|raw }}</p>
-</div>
-{% endmacro %}
-
-{% macro erreur(titre,msg) %}
-<div class="message erreur"><h2>{{ titre }}</h2>
-<p>{{ msg|raw }}</p>
-</div>
-{% endmacro %}
 
 {# ################################################# #}
 {# Portage de chaines.php                            #}
@@ -136,13 +229,13 @@
 {% endmacro %}
 
 {# #################################################### #}
-{# Affichage des méta etats par une icône               #}
-{# --> cf. aussi le fichier macros_graphiques.html.twig #}
+{# Affichage des méta etats par une icône svg           #}
 {# #################################################### #}
 
 {% macro metagraph(etat) %}
-{% set src=asset('icones/%ETAT%')|replace({'%ETAT%' : etat|lower}) %}
-<span class="invisible">{{etat}}</span><img src="{{src}}.png" alt="{{etat}}" title="{{etat}}" />
+{% from _self import menuIcones %}
+{% set svg=etat|lower %}
+<span class="invisible">{{etat}}</span><span title="{{etat}}">{{ menuIcones(svg)}}</span>
 {% endmacro %}
 
 {# ################################################# #}
@@ -159,14 +252,8 @@
 {# ################################################# #}
 
 {% macro info_televersement(img_1,img_2,img_3) %}
-    <div class="message info" style="font-size:.8em"><h2>Téléversement par glisser-déposer</h2>
-        Vous pouvez téléverser des figures pour illustrer vos propos.
-        <ol style="text-align:left" >
-            <li><strong>Merci de redimensionner</strong> au préalable vos images à <strong>800x400 pixels max</strong></li>
-            <li>Vous pouvez glisser-déposer vos fichiers dans l'une des zônes ci-dessus</li>
-        </ol>
-    </div>
-    <div class="message info" style="font-size:.8em"><h2>... ou Téléversement classique</h2>
+    <div>
+        <h4>Téléversement classique :</h4>
         <ul style="text-align: left;">
             <li>
                 <strong>Figure 1 {{ form_errors( img_1.filename ) }}</strong>
@@ -185,6 +272,14 @@
         <div class="quitter" >
             <button type="submit" id="form_fermer" name="form[fermer]" title="Enregistrer et fermer le projet">Fermer</button>
         </div>
+    </div>
+    <div>
+        <h4>Téléversement par glisser-déposer :</h4>
+        Vous pouvez téléverser des figures pour illustrer vos propos.
+        <ol style="text-align:left" >
+            <li><strong>Merci de redimensionner</strong> au préalable vos images à <strong>800x400 pixels max</strong></li>
+            <li>Vous pouvez glisser-déposer vos fichiers dans l'une des zônes ci-dessus</li>
+        </ol>
     </div>
 {% endmacro %}
 

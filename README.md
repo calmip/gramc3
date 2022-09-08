@@ -6,7 +6,7 @@
 Installations de paquets
 -----
 
-- fonctionne en php 8.0 MINIMUM, validé avec mariadb 10.3
+- fonctionne en **php 8.0 MINIMUM**, validé avec mariadb 10.3
 
 - Installer apache/php 8.0:
 ```
@@ -95,6 +95,30 @@ C'est dans ce répertoire que vont se trouver:
 
 Configuration, personnalisation:
 ----
+
+### Répertoire altermeso:
+
+Créer un lien symbolique vers calmip ou criann.
+
+`ln -s mesocentres/calmip altermeso`
+
+### Charte graphique:
+
+Vous pouvez modifier les couleurs ainsi que les logos afin de les faire coller à votre charte graphique. 
+
+#### Logos:
+
+Il faut générer **trois fichiers png**:
+
+- La bannière (en haut à gauche de l'écran): `altermeso/public/icones/banniere.png`
+- Le favicon: `altermeso/public/icones/favicon.ico`
+- Un élément graphique tirée de votre charte et qui sera affiché en haut à droite: `altermeso/public/icones/header.png`
+
+Des fichiers `.dist` sont fournis, ils peuvent servir d'exemple *(à ne pas prendre pour une installation qui ne dépendrait pas de calmip)*.
+
+#### Couleurs:
+
+Vous devez copier le fichier `altermeso/public/css/colors.css.dist` sur `colors.css` et l'éditer afin de faire correspondre les couleurs de l'application à celles de votre charte graphique:
 
 ### Fichier parameters.yaml:
 

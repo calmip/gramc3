@@ -35,7 +35,7 @@ class RapportActiviteType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $builder->add('annee')->add('nomFichier')->add('taille')->add('filedata')->add('projet')        ;
+        $builder->add('annee')->add('nomFichier')->add('taille')->add('projet')        ;
     }
 
     /**

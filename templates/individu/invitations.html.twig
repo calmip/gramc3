@@ -1,5 +1,6 @@
 {% extends 'default/base.html.twig' %}
 {% import "default/macros.html.twig" as gramcmacros %}
+{% import "default/icone.html.twig" as icones %}
 
 {% block body %}
 <section>
@@ -22,7 +23,7 @@
             <tr>
                 <td>
                     <a class="suppression"  href="{{ path('supprimer_invitation',  { 'id': invit.idinvitation }) }}" title="Supprimer">
-                    <img class="bouton_poussoir" src="{{ asset('icones/petitdelete.png') }}" alt="Supprimer" />
+                        {{icones.supprimer}}
                     </a>
                 </td>
                 <td>{{ invit.invited.mail }}</td>

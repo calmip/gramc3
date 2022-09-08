@@ -13,9 +13,6 @@
 {% block javascripts %}
 {% endblock javascripts %}
 
-{% block fil_ariane %}
-{% endblock fil_ariane %}
-
 {% block menu %}
 {% endblock menu %}
 
@@ -60,9 +57,9 @@ annuel d'activité si le responsable du projet en fait la demande
 {% block footer %}
 <p class="nomprenom"><strong>Responsable: prénom, nom :</strong> __________________________________</p>
 <p class="signature"><strong>Signature</strong></p>
-<p class="nomprenom"><strong>Direction: prénom, nom :</strong> _____________________________________<br /><strong>Fonction:</strong> _____________________________________</p>
+<p class="nomprenom"><strong>Direction: prénom, nom :</strong> _____________________________________<br><strong>Fonction:</strong> _____________________________________</p>
 <p class="signature"><strong>Date, signature et cachet du laboratoire</strong></p>
 <br><br><br><br>
 <hr />
-<p class="foot">Merci de téléverser cette fiche signée par la direction du laboratoire<br />{{ absolute_url('/') }}</p>
+<p class="foot">Merci de téléverser cette fiche signée par la direction du laboratoire<br>{{ absolute_url('/') }}</p>
 {% endblock footer %}

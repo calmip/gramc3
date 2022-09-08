@@ -6,6 +6,7 @@
 *.bkp
 *.tar
 *.tgz
+*.lock
 var.*
 data/*
 *#
@@ -16,6 +17,8 @@ web/tmp/*
 /app/config/parameters.yml
 /app/config/parameters.*.yml
 parameters.yaml
+/mesocentres/**/colors.css
+
 /build/
 /phpunit.xml
 !/var/CACHEDIR.TAG
@@ -31,8 +34,8 @@ parameters.yaml
 !var/SymfonyRequirements.php
 /web/bundles/
 /mesocentres/**/banniere.png
+/mesocentres/**/header.png
 /mesocentres/**/favicon.ico
-config/packages/security.yaml
 
 altermeso
 config/adresses.txt

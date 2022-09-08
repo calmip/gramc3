@@ -6,11 +6,16 @@
 
 {% block body %}
 
-{{ form_start(form) }}
-    {{ form_errors(form) }}
-    {{ form_widget(form.data) }}
-{{ form_end(form) }}
+    <h1 class="titre_login">Bienvenue sur la plateforme d'attribution de ressources de {{mesoc}}</h1>
+    <h2>Veuillez vous identifier</h2>
+    <div class="section_login">
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+            {{ form_widget(form.data) }}
+        {{ form_end(form) }}
 
+        <p>* Vous devez utiliser les identifiants de votre établissement d'appartenance. (Si vous ne comprenez pas ce message, merci de <a class="contact_login" href="mailto:admin.calmip@univ-toulouse.fr">prendre contact avec nous</a>)</p>
+    </div>
 
 {% endblock %}
 

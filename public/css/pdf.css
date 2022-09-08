@@ -1,0 +1,29 @@
+html, body {
+    height: 100%;
+    top: 0;
+    font-family: sans-serif;
+}
+
+#banniere {
+    width: 20%;
+}
+
+.consulter_projet .nopdf {
+    display: none;
+}
+
+.consulter_projet div .chapitre {
+    max-height: none;
+}
+
+.consulter_projet .details{
+    width: 90%;
+    margin: auto;
+}
+.consulter_projet h3{
+    align-items: center;
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: var(--first-color);
+    margin-bottom: 3rem;
+}

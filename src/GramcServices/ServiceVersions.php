@@ -32,12 +32,16 @@ use App\Entity\User;
 use App\Entity\CollaborateurVersion;
 
 use App\GramcServices\Etat;
+use App\GramcServices\ServiceForms;
 use App\GramcServices\ServiceInvitations;
 use App\Form\IndividuFormType;
 
 use App\Utils\Functions;
 
+use App\Validator\Constraints\PagesNumber;
+
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -57,12 +61,14 @@ class ServiceVersions
     public function __construct(
                                 private $attrib_seuil_a,
                                 private $prj_prefix,
+                                private $rapport_directory,
                                 private $fig_directory,
                                 private $signature_directory,
                                 private $coll_login,
                                 private $nodata,
                                 private $max_fig_width,
                                 private $max_fig_height,
+                                private $max_size_doc,
                                 private $resp_peut_modif_collabs,
                                 private ServiceJournal $sj,
                                 private ServiceInvitations $sid,
@@ -117,26 +123,36 @@ class ServiceVersions
      * informations à propos d'une image liée à une version
      *
      * params: $filename Nom du fichier image
+     *         $displayName Nom pouvant être affiché (ex: figure 1)
      *         $version  Version associée
      *
      * return: Plein d'informations
      *
      ***************************/
-    public function imageProperties($filename, Version $version): array
+    public function imageProperties(string $filename, string $displayName, Version $version): array
     {
         $full_filename = $this->imagePath($filename, $version);
-        if (file_exists($full_filename) && is_file($full_filename)) {
+        if (file_exists($full_filename) && is_file($full_filename))
+        {
             $imageinfo  =   [];
-            $my_image_info = getimagesize($full_filename, $imageinfo);
+            $imgSize = getimagesize($full_filename, $imageinfo);
+            
             return [
-        'contents'  =>  base64_encode(file_get_contents($full_filename)),
-        'width'     =>  $my_image_info[0],
-        'height'    =>  $my_image_info[1],
-        'balise'    =>  $my_image_info[2],
-        'mime'      =>  $my_image_info['mime'],
-        ];
-        } else {
-            return [];
+                'contents' => base64_encode(file_get_contents($full_filename)),
+                'width'    => $imgSize[0],
+                'height'   => $imgSize[1],
+                'balise'   => $imgSize[2],
+                'mime'     => $imgSize['mime'],
+                'name'     => $filename,
+                'displayName' => $displayName
+            ];
+        }
+        else
+        {
+            return [
+                'name'     => $filename,
+                'displayName' => $displayName
+            ];
         }
     }
 
@@ -158,24 +174,171 @@ class ServiceVersions
         }
     }
 
+    /**************************************************
+     * Crée un formulaire qui permettra de téléverser un fichier pdf
+     * Gère le mécanisme de soumission et validation
+     * Renvoie un json: soit OK soit les erreurs.
+     * 
+     * Fonctionne aussi bien en ajax avec jquery-upload-file-master
+     * que de manière "normale"
+     *
+     * Appelé par VersionController::televerserAction
+     *
+     * params = request
+     *          dirname : répertoire de destination
+     *          filename: nom définitif du fichier
+     *
+     * return = la form si pas encore soumise
+     *          ou une string: "OK"
+     *          ou un message d'erreur
+     *
+     ********************************/
+    public function televerserFichier(Request $request,
+                                      Version $version,
+                                      string $dirname,
+                                      string $filename,
+                                      string $type): Form|string
+    {
+        $sj = $this->sj;
+        $ff = $this->ff;
+        $sf = $this->sf;
+        $max_size_doc = intval($this->max_size_doc);
+        $maxSize = strval(1024 * $max_size_doc) . 'k';
+
+        // Les contraintes ne sont pas les mêmes suivant le type de fichier
+        $format_fichier = '';
+        $constraints = [];
+        switch ($type)
+        {
+            case "pdf":
+                $format_fichier = new \Symfony\Component\Validator\Constraints\File(
+                    [
+                        'mimeTypes'=> [ 'application/pdf' ],
+                        'mimeTypesMessage'=>' Le fichier doit être un fichier pdf. ',
+                        'maxSize' => $maxSize,
+                        'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
+                        'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
+                    ]
+                );
+                $constraints = [$format_fichier , new PagesNumber() ];
+                break;
+
+            case "jpg":
+                $format_fichier = new \Symfony\Component\Validator\Constraints\File(
+                    [
+                        'mimeTypes'=> [ 'image/jpeg' ],
+                        'mimeTypesMessage'=>" L'image doit être au format jpeg.",
+                        'maxSize' => $maxSize,
+                        'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
+                        'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
+                    ]
+                );
+                $constraints = [$format_fichier ];
+                break;
+            
+            default:
+                $sj->errorMessage(__METHOD__ . ":" . __LINE__ . " Erreur interne - type $type pas supporté");
+                break;
+        }
+
+        $form = $ff
+        ->createNamedBuilder('fichier', FormType::class, [], ['csrf_protection' => false ])
+        ->add(
+            'fichier',
+            FileType::class,
+            [
+                'required'          =>  true,
+                'label'             => "Fichier à téléverser",
+                'constraints'       => $constraints
+            ]
+        )
+        ->getForm();
+
+        $form->handleRequest($request);
+
+        // form soumise et valide = On met le fichier à sa place et on retourne OK
+        $rvl = [];
+        $rvl['OK'] = false;
+        if ($form->isSubmitted() && $form->isValid())
+        {
+            $tempFilename = $form->getData()['fichier'];
+
+            if (is_file($tempFilename) && ! is_dir($tempFilename))
+            {
+                $file = new File($tempFilename);
+            }
+            elseif (is_dir($tempFilename))
+            {
+                return "Erreur interne : Le nom  " . $tempFilename . " correspond à un répertoire" ;
+            }
+            else
+            {
+                return "Erreur interne : Le fichier " . $tempFilename . " n'existe pas" ;
+            }
+
+            $file->move($dirname, $filename);
+            
+            $sj->debugMessage(__METHOD__ . ':' . __LINE__ . " Fichier -> " . $filename);
+            $rvl['OK'] = true;
+
+            // Si le type est 'jpg', c'est une image: on la renvoie !
+            if ($type == 'jpg')
+            {
+                $rvl['properties'] = $this->imageProperties($filename, 'image au format jpeg', $version);
+            }
+            return json_encode($rvl);
+        }
+
+        // formulaire non valide ou autres cas d'erreur = On retourne un message d'erreur
+        elseif ($form->isSubmitted() && ! $form->isValid())
+        {
+            if (isset($form->getData()['fichier']))
+            {
+                $rvl['message'] = $sf->formError($form->getData()['fichier'], $constraints);
+                return json_encode($rvl);
+            }
+            else
+            {
+                $rvl['message'] = "<strong>Erreurs :</strong>Fichier trop gros ou autre problème";
+                return json_encode($rvl);
+            }
+        }
+        
+        elseif ($request->isXMLHttpRequest())
+        {
+            $rvl['message'] = "Le formulaire n'a pas été soumis";
+            return json_encode($rvl);
+        }
+
+        // formulaire non soumis = On retourne le formulaire
+        else
+        {
+            return $form;
+        }
+    }
+
+    /*************************************************************
+     *
+     * IMAGES ET DOC ATTACHE
+     *
+     *************************************************************/
     /*************************
-     * Calcule le nom de fichier de l'image
+     * Calcule le chemin de fichier de l'image
      *
      * param = $filename Nom du fichier, sans le répertoire ni l'extension
-     * 		   $version  Version associée
+     *         $version  Version associée
      *
      * return = Le chemin complet (si le fichier existe)
      *          Le chemin avec répertoire mais sans extension sinon
      *          TODO - Pas clair du tout !
      *
      ************************************/
-    public function imagePath($filename, Version $version): string
+    public function imagePath(string $filename, Version $version): string
     {
         $full_filename = $this->imageDir($version) .'/'.  $filename;
 
-        if (file_exists($full_filename . ".png") && is_file($full_filename . ".png")) {
-            $full_filename  =  $full_filename. ".png";
-        } elseif (file_exists($full_filename . ".jpeg") && is_file($full_filename . ".jpeg")) {
+        if (file_exists($full_filename . ".jpeg") && is_file($full_filename . ".jpeg"))
+        {
             $full_filename  =  $full_filename. ".jpeg";
         }
         return $full_filename;
@@ -192,8 +355,10 @@ class ServiceVersions
     public function imageDir(Version $version): string
     {
         $dir = $this->fig_directory;
-        if (! is_dir($dir)) {
-            if (file_exists($dir) && is_file($dir)) {
+        if (! is_dir($dir))
+        {
+            if (file_exists($dir) && is_file($dir))
+            {
                 unlink($dir);
             }
             mkdir($dir);
@@ -217,6 +382,144 @@ class ServiceVersions
         }
         return $dir;
     }
+
+    /***********************************************************************
+     *
+     * SIGNATURES
+     *
+     *************************************************************/
+
+    /***************************************************
+     * Renvoie true si le fichier pdf de signature est présent
+     * TODO - Le champ prjFicheVal de l'entité Version n'est pas utilisé !
+     *        On devrait pouvoir le supprimer ?
+     *********************************************************/
+    public function isSigne(Version $version) : bool
+    {
+        $file = $this->getSignePath($version);
+        if (file_exists($file) && ! is_dir($file))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /*****************
+     * Retourne le chemin vers le fichier de signature correspondant à cette version
+     *          null si pas de fichier de signature
+     ****************/
+    public function getSigne(Version $version): ?string
+    {
+        if ( $this->isSigne($version) )
+        {
+            return $this->getSignePath($version);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    /*****************************
+     * Retourne la taille du fichier de signature arrondi au Ko inférieur
+     *****************************/
+    public function getSizeSigne(Version $version): int
+    {
+        $signe = $this->getSigne($version);
+        if ($signe == null)
+        {
+            return 0;
+        }
+        else
+        {
+            return intdiv(filesize($signe), 1024);
+        }
+    }
+
+    /*************************
+     * Calcule le chemin de fichier de la fiche signée
+     *
+     * param = $version  Version
+     *
+     * return = Le chemin complet (que le fichier existe ou non)
+     *
+     ************************************/
+     public function getSignePath(Version $version): string
+     {
+         return $this->getSigneDir($version) . '/' . $version . '.pdf';
+     }
+
+     /*******************************
+     * Crée si besoin le répertoire pour les fiches signées
+     *
+     * param = $version  La version associée
+     *
+     * return = Le chemin complet vers le répertoire
+     *
+     *******************************************/
+    public function getSigneDir(Version $version): string
+    {
+        $dir = $this->signature_directory . '/' . $version->getSession();
+        if (! is_dir($dir))
+        {
+            if (file_exists($dir) && is_file($dir))
+            {
+                unlink($dir);
+            }
+            mkdir($dir);
+            $this->sj->warningMessage("Répertoire pour les fiches signées " . $dir . " créé !");
+        }
+        return $dir;
+    }
+
+    /***********************************************************************
+     *
+     * RAPPORTS D'ACTIVITE
+     *
+     *************************************************************/
+
+    /*******************************
+     * Crée si besoin le répertoire pour les rapports d'activité
+     *
+     * param = $version  La version associée
+     *
+     * return = Le chemin complet vers le répertoire
+     *
+     *******************************************/
+    public function rapportDir(Version $version): string
+    {
+        $annee = $version->anneeRapport();
+        $dir = $this->rapport_directory . '/' . $annee;
+        if (! is_dir($dir))
+        {
+            if (file_exists($dir) && is_file($dir))
+            {
+                unlink($dir);
+            }
+            mkdir($dir);
+            $this->sj->warningMessage("rapport_directory " . $dir . " créé !");
+        }
+        
+        return $dir;
+    }
+    public function rapportDir1(Projet $projet, string $annee): string
+    {
+        $dir = $this->rapport_directory . '/' . $annee;
+        if (! is_dir($dir))
+        {
+            if (file_exists($dir) && is_file($dir))
+            {
+                unlink($dir);
+            }
+            mkdir($dir);
+            $this->sj->warningMessage("rapport_directory " . $dir . " créé !");
+        }        
+        return $dir;
+    }
+
 
     /**************************************
      * Changer le responsable d'une version
@@ -372,63 +675,6 @@ class ServiceVersions
         }
     }
 
-    /***********************************************************************
-     *
-     * SIGNATURES
-     *
-     *************************************************************/
-
-    /***************************************************
-     * Renvoie true si le fichier pdf de signature est présent
-     *********************************************************/
-    public function isSigne(Version $version) : bool
-    {
-        $dir = $this->signature_directory;
-        if ($dir == null) {
-            $this->sj->errorMessage("ServiceVersions:isSigne parameter signature_directory absent !");
-            return false;
-        }
-        $file   =  $dir . '/' . $version->getSession()->getIdSession() . '/' . $version->getIdVersion() . '.pdf';
-        if (file_exists($file) && ! is_dir($file)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /*****************
-     * Retourne le chemin vers le fichier de signature correspondant à cette version
-     *          null si pas de fichier de signature
-     ****************/
-    public function getSigne(Version $version): ?string
-    {
-        $dir = $this->signature_directory;
-        if ($dir == null) {
-            //$sj->errorMessage("Version:isSigne parameter signature_directory absent !" );
-            return null;
-        }
-
-        $file   =  $dir . '/' . $version->getSession()->getIdSession() . '/' . $version->getIdVersion() . '.pdf';
-        if (file_exists($file) && ! is_dir($file)) {
-            return $file;
-        } else {
-            return null;
-        }
-    }
-
-    /*****************************
-     * Retourne la taille du fichier de signature
-     *****************************/
-    public function getSizeSigne(Version $version): int
-    {
-        $signe    =   $this->getSigne($version);
-        if ($signe == null) {
-            return 0;
-        } else {
-            return intdiv(filesize($signe), 1024);
-        }
-    }
-
     ////////////////////////////////////////////////////
     public function setLaboResponsable(Version $version, Individu $individu): void
     {
@@ -523,6 +769,34 @@ class ServiceVersions
      ********************************************/
      
     /*************************************************************
+     * Efface un seul fichier lié à une version de projet
+     *
+     *  - Les fichiers img_* et *.pdf du répertoire des figures
+     *  - Le fichier de signatures s'il existe
+     *  - N'EFFACE PAS LE RAPPORT D'ACTIVITE !
+     *    cf. ServiceProjets pour cela
+     *************************************************************/
+    public function effacerFichier(Version $version, string $filename): void
+    {
+        // Les figures et les doc attachés
+        $img_dir = $this->imageDir($version);
+
+        $fichiers = [ 'img_expose_1',
+                      'img_expose_2',
+                      'img_expose_3',
+                      'img_justif_renou_1',
+                      'img_justif_renou_2',
+                      'img_justif_renou_3'
+                    ];
+
+        if (in_array($filename, $fichiers))
+        {
+            $path = $img_dir . '/' . $filename;
+            unlink($path);
+        }
+    }
+
+    /*************************************************************
      * Lit un fichier image et renvoie la version base64 pour affichage
      * dans le html
      *************************************************************/
@@ -539,140 +813,6 @@ class ServiceVersions
         else
         {
             return null;
-        }
-    }
-
-    /*************************************************************
-     * Génère et renvoie un form pour téléverser les images
-     *************************************************************/
-    public function imageForm(string $name, bool $csrf_protection = true): FormInterface
-    {
-        $format_fichier = $this->imageConstraints();
-        $form           = $this ->ff
-                                ->createNamedBuilder($name, FormType::class, [], ['csrf_protection' => $csrf_protection ])
-                                ->add('filename', HiddenType::class, [ 'data' => $name,])
-                                ->add(
-                                    'image',
-                                    FileType::class,
-                                    ['required' => false,
-                                        'label' => 'Fig',
-                                        'constraints'=>[$format_fichier] ]
-                                )
-                                ->getForm();
-        return $form;
-    }
-
-    /**************************************************************************
-     * Contraintes de type et de taille sur les images - Utilisé par imageForm
-     **************************************************************************/ 
-    private function imageConstraints() : \Symfony\Component\Validator\Constraints\File
-    {
-        return new \Symfony\Component\Validator\Constraints\File(
-            [
-                'mimeTypes'=> [ 'image/jpeg', 'image/gif', 'image/png' ],
-                'mimeTypesMessage'=>' Le fichier doit être un fichier jpeg, gif ou png. ',
-                'maxSize' => "2048k",
-                'uploadIniSizeErrorMessage' => ' Le fichier doit avoir moins de {{ limit }} {{ suffix }}. ',
-                'maxSizeMessage' => ' Le fichier est trop grand ({{ size }} {{ suffix }}), il doit avoir moins de {{ limit }} {{ suffix }}. ',
-                ]
-        );
-    }
-
-    /*************************************************************
-     * Récupère l'image qui vient d'être téléchargée
-     * Fonction appelée par les controleurs
-     *
-     * Renvoie un tableau qui sera transformé en fichier json (ajax)
-     * 
-     * 
-     *************************************************************/
-    public function imageHandle(FormInterface $form, Version $version, Request $request): array
-    {
-        $sf = $this->sf;
-        $sj = $this->sj;
-        $em = $this->em;
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) { //return ['etat' => 'OKK'];
-            $filename = $form->getData()['filename'];
-            $image = $form['image']->getData();
-
-            //$sj->debugMessage(__METHOD__ . ':' . __LINE__ .' form submitted filename = ' . $filename .' , image = ' . $image);
-
-            $dir = $this->imageDir($version);
-            $full_filename = $dir .'/' . $filename;
-
-            if (is_file($form->getData()['image'])) {
-                $tempFilename = $form->getData()['image'];
-                $this->imageRedim($tempFilename);
-
-                //$sj->debugMessage(__METHOD__ . ':' . __LINE__ .' $tempFilename = ' . $form->getData()['image'] );
-                $contents = file_get_contents($tempFilename);
-
-                // On dépose le fichier à sa place définitive en écrasant au besoin le fichier précédent
-                $file = new File($form->getData()['image']);
-                if (file_exists($full_filename) && is_file($full_filename))
-                {
-                    unlink($full_filename);
-                }
-                if (! file_exists($full_filename))
-                {
-                    $file->move($dir, $filename);
-                }
-                else
-                {
-                    $sj->debugMessage('ServiceVersion imageHandle : mauvais fichier pour la version ' . $version->getIdVersion());
-                }
-
-                return ['etat' => 'OK', 'contents' => $contents, 'filename' => $filename ];
-            }
-
-            // On renvoie une erreur
-            else
-            {
-                $sj->errorMessage('ServiceVersion:imageHandle $tempFilename = (' . $form->getData()['image'] . ") n'existe pas");
-                return ['etat' => 'KO'];
-            }
-            
-        }
-
-        // Form submitted mais Validation KO
-        elseif ($form->isSubmitted() && ! $form->isValid())
-        {
-            //$sj->debugMessage(__METHOD__ . ':' . __LINE__ .' wrong form submitted filename = ' . $filename .' , image = ' . $image);
-            if (isset($form->getData()['filename']))
-            {
-                $filename   =  $form->getData()['filename'];
-            }
-            else
-            {
-                $filename   =  'unkonwn';
-            }
-
-            if (isset($form->getData()['image']))
-            {
-                $image  =    $form->getData()['image'];
-            }
-            else
-            {
-                return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => 'Erreur indeterminée' ];
-            }
-
-            return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => $sf->formError($image, [ $this->imageConstraints() ]) ];
-
-        //$sj->debugMessage('VersionController:imageHandle form for ' . $filename . '('. $form->getData()['image'] . ') is not valide, error = ' .
-            //    (string) $form->getErrors(true,false)->current() );
-            //return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => (string) $form->getErrors(true,false)->current() ];
-            //return ['etat' => 'nonvalide', 'filename' => $filename, 'error' => (string) $form->getErrors(true,false)->current() ];
-
-        }
-
-        // Ne devrait arriver...
-        else
-        {
-            //$sj->debugMessage('VersionController:imageHandle form not submitted');
-            return ['etat' => null ];
         }
     }
 
