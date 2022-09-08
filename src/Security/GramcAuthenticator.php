@@ -202,7 +202,7 @@ class GramcAuthenticator extends AbstractAuthenticator
     {
         $individu = $token->getUser();
         $this->sj->infoMessage($token->getUser() . " vient de s'authentifier");
-        $request->getSession()->getFlashbag()->add("flash info","Vous êtes authentifié");
+        // $request->getSession()->getFlashbag()->add("flash info","Vous êtes authentifié");
 
         return null;
     }
