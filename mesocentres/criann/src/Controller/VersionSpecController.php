@@ -173,7 +173,26 @@ class VersionSpecController extends AbstractController
         $collaborateur_form->handleRequest($request);
         $data   =   $collaborateur_form->getData();
 
-        if ($data != null && array_key_exists('individus', $data)) {
+        $individu_forms = $collaborateur_form->getData()['individus'];
+        $validated = $sv->validateIndividuForms($individu_forms);
+        if (! $validated) {
+            $message = "Pour chaque personne vous <strong>devez renseigner</strong>: email, prénom, nom";
+            $request->getSession()->getFlashbag()->add("flash erreur",$message);
+        //    return $this->redirectToRoute('modifier_collaborateurs', ['id' => $version ]);
+        }
+        else
+        {
+            if ($data != null && array_key_exists('individus', $data)) {
+                $sj->debugMessage('modifierAction traitement des collaborateurs');
+                $sv->handleIndividuForms($data['individus'], $version);
+    
+                // ACTUCE : le mail est disabled en HTML et en cas de POST il est annulé
+                // nous devons donc refaire le formulaire pour récupérer ces mails
+                $collaborateur_form = $sv->getCollaborateurForm($version);
+            }
+       }
+
+       if ($data != null && array_key_exists('individus', $data)) {
             $sj->debugMessage('modifierAction traitement des collaborateurs');
             $sv->handleIndividuForms($data['individus'], $version);
 

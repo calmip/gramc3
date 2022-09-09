@@ -37,7 +37,7 @@ use Doctrine\ORM\EntityManager;
 
 /**************************************************************************
  * Cette classe (qui ne dérive PAS de form !) est utilisée par l'écran des collaborateurs
- * A chaque ligne correspond un IndividuForm
+ * A chaque ligne du tableau correspond un IndividuForm
  ************************************************************************/
 class IndividuForm
 {

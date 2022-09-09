@@ -20,6 +20,10 @@ $(document).ready(
                             '_add" type="submit" title="Ajouter une ligne">+</button>');
             $(this).find(".collection-tbody-old").find("input[id$='_mail'][type='text']")
                 .attr("class","mail ui-autocomplete-input").prop('disabled', true);
+            $(this).find(".collection-tbody-old").find("input[id$='_prenom'][type='text']")
+                .attr("class","mail ui-autocomplete-input").prop('disabled', true);
+            $(this).find(".collection-tbody-old").find("input[id$='_nom'][type='text']")
+                .attr("class","mail ui-autocomplete-input").prop('disabled', true);
         
             // Le controleur envoie automatiquement une nouvelle ligne
             //nouvelle_ligne($(this));
@@ -205,6 +209,8 @@ $(document).ready(
                     $("[id$='_etablissement']", context.parent().parent() ).val( $('#Individu_etablissement', input).val());
                     $("[id$='_id']", context.parent().parent() ).val( $('#Individu_id', input).val());
                     $("[id$='_mail'][type='text']", context.parent().parent() ).prop("disabled",true);
+                    $("[id$='_prenom']", context.parent().parent() ).prop("disabled",true);
+                    $("[id$='_nom']", context.parent().parent() ).prop("disabled",true);
                 }
 
                 // Il faut créer le compte

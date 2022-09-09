@@ -926,26 +926,25 @@ class ServiceVersions
         $coll_login = $this->coll_login;
         $resp_peut_modif_collabs = $this->resp_peut_modif_collabs;
         $one_login = false;
+
+        //dd($individu_forms);
         foreach ($individu_forms as  $individu_form) {
 
             // On ne teste pas la validité des collaborateur supprimés !
             if ($individu_form->getDelete()) continue;
 
-            // On a au moins 1 login
+            // Tiens, un login !
             if ($individu_form->getLogin()) {
                 $one_login = true;
             }
-            // Si pas définitif, on ne teste pas ça
-            if ($definitif == true &&
-                (
-                   $individu_form->getPrenom() == null
-                   || $individu_form->getNom() == null
-                )
-            )
+
+            // nom, prénom vides sur un nouveau collaborateur !
+            if ($individu_form->getMail() != null &&
+                ($individu_form->getPrenom() == null || $individu_form->getNom() == null))
             {
+                //dd($individu_form);
                 return false;
             }
-
 
             // Si le resp ne peut pas modifier les profils des collabs, on ne teste pas ça
             if ($definitif == true && $resp_peut_modif_collabs == true &&
@@ -1046,18 +1045,12 @@ class ServiceVersions
                 // --------------> Maintenant des cas réalistes !
                 // L'individu existe déjà
                 elseif ($individu != null) {
-                    // On modifie le profil de l'individu
-                    //    - soit tout le profil (sauf le mail)
-                    //    - soit seulement nom et prénom
+                    // On modifie le profil de l'individu si on en a le droit
                     if ($this->resp_peut_modif_collabs)
                     {
                         $individu = $individu_form->modifyIndividu($individu, $sj, true);
+                        $em->persist($individu);
                     }
-                    else
-                    {
-                        $individu = $individu_form->modifyIndividu($individu, $sj, false);
-                    }
-                    $em->persist($individu);
     
                     // Il devient collaborateur
                     if (! $version->isCollaborateur($individu)) {

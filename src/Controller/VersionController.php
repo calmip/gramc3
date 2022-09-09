@@ -679,15 +679,11 @@ class VersionController extends AbstractController
                 $individu_forms =  $collaborateur_form->getData()['individus'];
                 $validated = $sv->validateIndividuForms($individu_forms);
                 if (! $validated) {
-                    return $this->render(
-                        'version/collaborateurs_invalides.html.twig',
-                        [
-                        'projet' => $idProjet,
-                        'version'   =>  $version,
-                        'session'   =>  $version->getSession(),
-                        ]
-                    );
+                    $message = "Pour chaque personne vous <strong>devez renseigner</strong>: email, prénom, nom";
+                    $request->getSession()->getFlashbag()->add("flash erreur",$message);
+                    return $this->redirectToRoute('modifier_collaborateurs', ['id' => $version ]);
                 }
+                
                 // On traite les formulaires d'individus un par un
                 $sv->handleIndividuForms($individu_forms, $version);
             }

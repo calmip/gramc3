@@ -117,6 +117,7 @@ class IndividuFormType extends AbstractType
                 'disabled'  => false,
             ]
         );
+        
         if ($options['text_fields']==true)
         {
             $builder->add(
