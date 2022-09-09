@@ -224,11 +224,14 @@ class IndividuForm
      * 
      * Synchronise l'entité $individu à partir du formulaire
      * (à l'exception du mail qui sert à identifier l'individu)
+     *
+     * $onlyNom = Si true, la modif ne concerne QUE nom et prénom
      * 
      *****/
-    public function modifyIndividu(Individu $individu, ServiceJournal $sj)
+    public function modifyIndividu(Individu $individu, ServiceJournal $sj, bool $onlyNom)
     {
-        if ($individu != null) {
+        if ($individu != null)
+        {
             if ($individu->getNom() != $this->getNom()) {
                 $sj->warningMessage("Le nom de l'individu " .$individu . " id(" . $individu->getIdIndividu() . ") a été modifié de " .
                                     $individu->getNom() . " vers " . $this->getNom());
@@ -241,22 +244,26 @@ class IndividuForm
                 $individu->setPrenom($this->getPrenom());
             }
 
-            if ($individu->getLabo() != $this->getLaboratoire()) {
-                $sj->warningMessage("Le laboratoire de l'individu " .$individu . " id(" . $individu->getIdIndividu() . ") a été modifié de " .
-                                    $individu->getLabo() . " vers " . $this->getLaboratoire());
-                $individu->setLabo($this->getLaboratoire());
-            }
+            if ($onlyNom)
+            {
 
-            if ($individu->getEtab() != $this->getEtablissement()) {
-                $sj->warningMessage("L'établissement de l'individu " .$individu . " id(" . $individu->getIdIndividu() . ") a été modifié de " .
-                                    $individu->getEtab() . " vers " . $this->getEtablissement());
-                $individu->setEtab($this->getEtablissement());
-            }
-
-            if ($individu->getStatut() != $this->getStatut()) {
-                $sj->warningMessage("Le statut de l'individu " .$individu . " id(" . $individu->getIdIndividu() . ") a été modifié de " .
-                                    $individu->getStatut() . " vers " . $this->getStatut());
-                $individu->setStatut($this->getStatut());
+                if ($individu->getLabo() != $this->getLaboratoire()) {
+                    $sj->warningMessage("Le laboratoire de l'individu " .$individu . " id(" . $individu->getIdIndividu() . ") a été modifié de " .
+                                        $individu->getLabo() . " vers " . $this->getLaboratoire());
+                    $individu->setLabo($this->getLaboratoire());
+                }
+    
+                if ($individu->getEtab() != $this->getEtablissement()) {
+                    $sj->warningMessage("L'établissement de l'individu " .$individu . " id(" . $individu->getIdIndividu() . ") a été modifié de " .
+                                        $individu->getEtab() . " vers " . $this->getEtablissement());
+                    $individu->setEtab($this->getEtablissement());
+                }
+    
+                if ($individu->getStatut() != $this->getStatut()) {
+                    $sj->warningMessage("Le statut de l'individu " .$individu . " id(" . $individu->getIdIndividu() . ") a été modifié de " .
+                                        $individu->getStatut() . " vers " . $this->getStatut());
+                    $individu->setStatut($this->getStatut());
+                }
             }
         }
         return $individu;
