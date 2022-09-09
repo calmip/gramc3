@@ -117,45 +117,42 @@
 
 
 {% block body %}
-
-{% form_theme collaborateur_form _self %}
-
-<h2>Modifier la liste des collaborateurs - projet {{ projet }} (session {{ session }})</h2>
-{% if resp_peut_modif_collabs %}
-    <div class="message info">
-        <p><strong>Pour ajouter un collaborateur:</strong></p>
-        <ol>
-        <li>Ajoutez votre collaborateur <strong>en commençant par l'adresse mail</strong></li>
-        <li>Renseignez <strong>au moins</strong> le prénom et le nom</li>
-        <li>Eventuellement ajoutez une ligne au formulaire pour entrer un nouveau collaborateur</li>
-        <li>Cliquez sur le bouton <strong>Sauvegarder</strong></li>
-        </ol>
-
-        <p><strong>NOTE - </strong> Il <em>n'est pas nécessaire</em> de déclarer ici les personnes qui collaborent au projet
-        sans utiliser la machine (c-à-d les personnes n'ayant pas de login calcul ou données)</p>
-    </div>
-{% else %}
-    <div class="message info">
-        <p><strong>Pour ajouter un collaborateur:</strong></p>
-        <ol>
-        <li>Renseignez <strong>d'abord</strong> son adresse de courriel, <strong>puis</strong> ses nom et prénom</li>
-        <li>Il ou elle pourra recevoir une invitation pour se connecter à cette plateforme, et <strong>complètera son profil</strong> à cette occasion</li>
-        <li>Eventuellement ajoutez une ligne au formulaire pour entrer à nouveau un <strong>collaborateur</strong></li>
-        <li>Cliquez sur le bouton <strong>Sauvegarder</strong></li>
-        </ol>
+    <h2>Modifier la liste des collaborateurs - projet {{ projet }} (session {{ session }})</h2>
+    <div class="information ok">
+    {% if resp_peut_modif_collabs %}
+        <div class="message info">
+            <p><strong>Pour ajouter un collaborateur:</strong></p>
+            <ol>
+            <li>Ajoutez votre collaborateur <strong>en commençant par l'adresse mail</strong></li>
+            <li>Renseignez <strong>au moins</strong> le prénom et le nom</li>
+            <li>Eventuellement ajoutez une ligne au formulaire pour entrer un nouveau collaborateur</li>
+            <li>Cliquez sur le bouton <strong>Sauvegarder</strong></li>
+            </ol>
     
-        <p><strong>NOTE - </strong> Il <em>n'est pas nécessaire</em> de déclarer ici les personnes qui collaborent au projet
-        mais qui ne demandent pas d'accès aux services de calcul ou de données</p>
-    </div>
-{% endif %}
+            <p><strong>NOTE - </strong> Il <em>n'est pas nécessaire</em> de déclarer ici les personnes qui collaborent au projet
+            sans utiliser la machine (c-à-d les personnes n'ayant pas de login calcul ou données)</p>
+        </div>
+    {% else %}
+        <div class="message info">
+            <p><strong>Pour ajouter un collaborateur:</strong></p>
+            <ol>
+            <li>Renseignez <strong>d'abord</strong> son adresse de courriel, <strong>puis</strong> ses nom et prénom</li>
+            <li>Il ou elle pourra recevoir une invitation pour se connecter à cette plateforme, et <strong>complètera son profil</strong> à cette occasion</li>
+            <li>Eventuellement ajoutez une ligne au formulaire pour entrer à nouveau un <strong>collaborateur</strong></li>
+            <li>Cliquez sur le bouton <strong>Sauvegarder</strong></li>
+            </ol>
+        
+            <p><strong>NOTE - </strong> Il <em>n'est pas nécessaire</em> de déclarer ici les personnes qui collaborent au projet
+            mais qui ne demandent pas d'accès aux services de calcul ou de données - <strong>Au moins une personne</strong> doit avoir un login !</p>
+        </div>
+    {% endif %}
+</div>
 
-{{ form_start(collaborateur_form) }}
-{{ form_widget(collaborateur_form) }}
-{{ form_end(collaborateur_form) }}
+<div id="collaborateurs_version">
+    {% form_theme collaborateur_form _self %}
+    {{ form_start(collaborateur_form) }}
+    {{ form_widget(collaborateur_form) }}
+    {{ form_end(collaborateur_form) }}
+</div>
 
-<form action="{{ path('modifier_collaborateurs', { 'id': version.idVersion }) }}">
-    <input type="submit" value="Annuler" />
-</form>
-
-<a class="lien_actif center" href="{{ path('consulter_projet',{'id' : projet }) }}" title="Consulter le projet {{ projet }}">Retour vers le projet {{ projet }}</a>
 {% endblock %}

@@ -652,6 +652,11 @@ class VersionController extends AbstractController
                                    ])
                                    ->add('submit', SubmitType::class, [
                                         'label' => 'Sauvegarder',
+                                        'attr' => ['title' => "Sauvegarder et revenir au projet"],
+                                   ])
+                                   ->add('annuler', SubmitType::class, [
+                                        'label' => 'Annuler',
+                                        'attr' => ['title' => "Annuler et revenir au projet"],
                                    ])
                                    ->getForm();
 
@@ -666,34 +671,41 @@ class VersionController extends AbstractController
         }
 
         if ($collaborateur_form->isSubmitted() && $collaborateur_form->isValid()) {
-            // Un formulaire par individu
-            $individu_forms =  $collaborateur_form->getData()['individus'];
-            $validated = $sv->validateIndividuForms($individu_forms);
-            if (! $validated) {
-                return $this->render(
-                    'version/collaborateurs_invalides.html.twig',
-                    [
-                    'projet' => $idProjet,
-                    'version'   =>  $version,
-                    'session'   =>  $version->getSession(),
-                    ]
-                );
-            }
-            // On traite les formulaires d'individus un par un
-            $sv->handleIndividuForms($individu_forms, $version);
 
+            // Annuler ou Sauvegarder ?
+            if ($collaborateur_form->get('submit')->isClicked())
+            {
+                // Un formulaire par individu
+                $individu_forms =  $collaborateur_form->getData()['individus'];
+                $validated = $sv->validateIndividuForms($individu_forms);
+                if (! $validated) {
+                    return $this->render(
+                        'version/collaborateurs_invalides.html.twig',
+                        [
+                        'projet' => $idProjet,
+                        'version'   =>  $version,
+                        'session'   =>  $version->getSession(),
+                        ]
+                    );
+                }
+                // On traite les formulaires d'individus un par un
+                $sv->handleIndividuForms($individu_forms, $version);
+            }
+
+            // On retourne à la page du projet
+            return $this->redirectToRoute('consulter_version', ['id' => $version->getProjet() ]);
 
             // return new Response( Functions::show( $resultat ) );
             // return new Response( print_r( $mail, true ) );
             //return new Response( print_r($request->request,true) );
 
             // TODO - SI ON VIRE ça ON N'A PLUS LES MAILS: POURQUOI ???????????????
-            return $this->redirectToRoute(
-                'modifier_collaborateurs',
-                [
-                'id'    => $version->getIdVersion() ,
-            ]
-            );
+            //return $this->redirectToRoute(
+            //    'modifier_collaborateurs',
+            //    [
+            //    'id'    => $version->getIdVersion() ,
+           // ]
+           // );
         }
 
         //return new Response( dump( $collaborateur_form->createView() ) );

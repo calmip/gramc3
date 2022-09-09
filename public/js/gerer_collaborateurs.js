@@ -17,7 +17,7 @@ $(document).ready(
         
             // ajout d'un paramètre id unique au bouton
             $(this).append('<button class="add" id="' + $(this).parent().parent().attr('id') +
-                            '_add" type="submit">Nouvelle ligne</button>');
+                            '_add" type="submit" title="Ajouter une ligne">+</button>');
             $(this).find(".collection-tbody-old").find("input[id$='_mail'][type='text']")
                 .attr("class","mail ui-autocomplete-input").prop('disabled', true);
         
