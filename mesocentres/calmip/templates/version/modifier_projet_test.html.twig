@@ -37,9 +37,8 @@
 {# ####################################################################################################### #}
 
 {% import _self as macrosmodifier %}
+
 {% import "default/macros_panneau_enregistrer.html.twig" as panneau_enregistrer %}
-
-
 
 {% block body %}
 <section id="section_modifierProjet">
@@ -350,10 +349,11 @@
         {{ form_widget(form.demBib, { 'attr': { 'rows' : 5, 'cols' : 50 } }) }}
     </div>
 
-    {# Les boutons pour enregistrer / fermer #}
-    {{ panneau_enregistrer.panneau_enregistrer(form,false) }}
+</div> {# tab2 #}
+</div> {# onglets #}
 
-</div></div> {# onglets #}
+{# Les boutons pour enregistrer / fermer #}
+{{ panneau_enregistrer.panneau_enregistrer(form,false) }}
 
 {{ form_end(form) }}
 
