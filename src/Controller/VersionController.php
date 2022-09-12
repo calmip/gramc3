@@ -180,9 +180,9 @@ class VersionController extends AbstractController
         $sj = $this->sj;
 
         // ACL
-        if ($sm->modifier_version($version)['ok'] == false) {
+        if ($sm->modifierVersion($version)['ok'] == false) {
             $sj->throwException(__METHOD__ . ':' . __LINE__ . " impossible de supprimer la version " . $version->getIdVersion().
-                " parce que : " . $sm->modifier_version($version)['raison']);
+                " parce que : " . $sm->modifierVersion($version)['raison']);
         }
 
         return $this->render(
@@ -209,9 +209,9 @@ class VersionController extends AbstractController
         $sj = $this->sj;
 
         // ACL
-        if ($sm->modifier_version($version)['ok'] == false) {
+        if ($sm->supprimerVersion($version)['ok'] == false) {
             $sj->throwException(__METHOD__ . ':' . __LINE__ . " impossible de supprimer la version " . $version->getIdVersion().
-                " parce que : " . $sm->modifier_version($version)['raison']);
+                " parce que : " . $sm->supprimerVersion($version)['raison']);
         }
 
         $etat = $version->getEtatVersion();
@@ -290,9 +290,9 @@ class VersionController extends AbstractController
         $ac = $this->ac;
 
         // ACL - Les mêmes que pour supprimer version !
-        if ($sm->modifier_version($version)['ok'] == false) {
+        if ($sm->modifierVersion($version)['ok'] == false) {
             $sj->throwException(__METHOD__ . ':' . __LINE__ . " impossible de supprimer des images de cette version " . $version->getIdVersion().
-                " parce que : " . $sm->modifier_version($version)['raison']);
+                " parce que : " . $sm->modifierVersion($version)['raison']);
         }
 
         $etat = $version->getEtatVersion();
@@ -406,9 +406,9 @@ class VersionController extends AbstractController
         $projet =  $version->getProjet();
 
         // ACL
-        if ($sm->telechargement_fiche($version)['ok'] == false) {
+        if ($sm->telechargerFiche($version)['ok'] == false) {
             $sj->throwException(__METHOD__ . ':' . __LINE__ . " impossible de télécharger la fiche du projet " . $projet .
-                " parce que : " . $sm->telechargement_fiche($version)['raison']);
+                " parce que : " . $sm->telechargerFiche($version)['raison']);
         }
 
         $session = $version->getSession();
@@ -443,9 +443,9 @@ class VersionController extends AbstractController
         $sj = $this->sj;
 
         // ACL
-        if ($sm->televerser_fiche($version)['ok'] == false) {
+        if ($sm->televerserFiche($version)['ok'] == false) {
             $sj->throwException(__METHOD__ . ':' . __LINE__ . " impossible de téléverser la fiche de la version " . $version .
-                " parce que : " . $sm -> telechargement_fiche($version)['raison']);
+                " parce que : " . $sm -> televerserFiche($version)['raison']);
         }
 
         $rtn = $this->televerser($request, $version, "fiche.pdf");
@@ -517,9 +517,9 @@ class VersionController extends AbstractController
             $sj->throwException(__METHOD__ .":". __LINE__ .' version null');
         }
 
-        if ($sm->changer_responsable($version)['ok'] == false) {
+        if ($sm->changerResponsable($version)['ok'] == false) {
             $sj->throwException(__METHOD__ . ":" . __LINE__ .
-                    " impossible de changer de responsable parce que " . $sm->changer_responsable($version)['raison']);
+                    " impossible de changer de responsable parce que " . $sm->changerResponsable($version)['raison']);
         }
 
         // préparation de la liste des responsables potentiels
@@ -624,9 +624,9 @@ class VersionController extends AbstractController
         $em = $this->em;
 
 
-        if ($sm->modifier_collaborateurs($version)['ok'] == false) {
+        if ($sm->modifierCollaborateurs($version)['ok'] == false) {
             $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de modifier la liste des collaborateurs de la version " . $version .
-                " parce que : " . $sm->modifier_collaborateurs($version)['raison']);
+                " parce que : " . $sm->modifierCollaborateurs($version)['raison']);
         }
 
         $text_fields = true;
@@ -697,7 +697,7 @@ class VersionController extends AbstractController
 
             // TODO - SI ON VIRE ça ON N'A PLUS LES MAILS: POURQUOI ???????????????
             //return $this->redirectToRoute(
-            //    'modifier_collaborateurs',
+            //    'modifierCollaborateurs',
             //    [
             //    'id'    => $version->getIdVersion() ,
            // ]
@@ -746,7 +746,7 @@ class VersionController extends AbstractController
     /**
      * envoyer à l'expert
      *
-     * @Route("/{id}/envoyer", name="envoyer_expert",methods={"GET","POST"})
+     * @Route("/{id}/envoyer", name="envoyer_en_expertise",methods={"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
     public function envoyerAction(Version $version, Request $request, LoggerInterface $lg): Response
@@ -759,9 +759,9 @@ class VersionController extends AbstractController
 
         $em = $this->em;
 
-        if ($sm->envoyer_expert($version)['ok'] == false) {
+        if ($sm->envoyerEnExpertise($version)['ok'] == false) {
         $sj->throwException(__METHOD__ . ":" . __LINE__ .
-            " impossible d'envoyer en expertise parce que " . $sm->envoyer_expert($version)['raison']);
+            " impossible d'envoyer en expertise parce que " . $sm->envoyerEnExpertise($version)['raison']);
         }
 
         $projet  = $version->getProjet();
@@ -823,7 +823,7 @@ class VersionController extends AbstractController
         }
 
         return $this->render(
-            'version/envoyer_expert.html.twig',
+            'version/envoyer_en_expertise.html.twig',
             [ 'projet' => $projet,
               'form' => $form->createView(),
               'session' => $session
@@ -1075,9 +1075,9 @@ class VersionController extends AbstractController
         $sj = $this->sj;
 
         // ACL - Mêmes ACL que modification de version !
-        if ($sm->modifier_version($version)['ok'] == false) {
+        if ($sm->modifierVersion($version)['ok'] == false) {
             $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de modifier la version " . $version->getIdVersion().
-        " parce que : " . $sm->modifier_version($version)['raison']);
+        " parce que : " . $sm->modifierVersion($version)['raison']);
         }
 
         $rtn = $this->televerser($request, $version, $filename);

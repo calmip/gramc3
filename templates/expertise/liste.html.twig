@@ -39,7 +39,7 @@
         {% for item in rallonge.rallonges %}
         <tr>
             <td>{{ item.idRallonge }}</td>
-            <td><a href="{{ path('rallonge_expertiser', { 'id' : item.idRallonge } ) }}" title="Expertiser la demande">
+            <td><a href="{{ path('expertiser_rallonge', { 'id' : item.idRallonge } ) }}" title="Expertiser la demande">
                 {{icones.modifier}}
                 </a>
             </td>

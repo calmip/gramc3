@@ -121,9 +121,9 @@ class VersionSpecController extends AbstractController
         $em = $this->em;
 
         // ACL
-        if ($sm->modifier_version($version)['ok'] == false) {
+        if ($sm->modifierVersion($version)['ok'] == false) {
             $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de modifier la version " . $version->getIdVersion().
-                " parce que : " . $sm->modifier_version($version)['raison']);
+                " parce que : " . $sm->modifierVersion($version)['raison']);
         }
         if ($this->versionValidate($version) != []) {
             return $this->render(
@@ -133,7 +133,7 @@ class VersionSpecController extends AbstractController
                 ]);
         }
         else {
-            return $this->redirectToRoute('envoyer_expert', [ 'id' => $version->getIdVersion() ]);
+            return $this->redirectToRoute('envoyer_en_expertise', [ 'id' => $version->getIdVersion() ]);
         }
     }
 
@@ -156,9 +156,9 @@ class VersionSpecController extends AbstractController
         $html = [];
         
         // ACL
-        if ($sm->modifier_version($version)['ok'] == false) {
+        if ($sm->modifierVersion($version)['ok'] == false) {
             $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de modifier la version " . $version->getIdVersion().
-        " parce que : " . $sm->modifier_version($version)['raison']);
+        " parce que : " . $sm->modifierVersion($version)['raison']);
         }
 
         // ON A CLIQUE SUR ANNULER
@@ -740,8 +740,8 @@ class VersionSpecController extends AbstractController
         }
 
         /* Si le bouton modifier est actif, on doit impérativement passer par là ! */
-        $modifier_version_menu = $sm->modifier_version($version);
-        if ($modifier_version_menu['ok'] == true) {
+        $modifierVersion_menu = $sm->modifierVersion($version);
+        if ($modifierVersion_menu['ok'] == true) {
             return $this->redirectToRoute($modifier_version_menu['name'], ['id' => $version, '_fragment' => 'tab4']);
         }
 
@@ -817,8 +817,7 @@ class VersionSpecController extends AbstractController
         $em = $this->em;
 
         // ACL
-        //if( $sm->renouveler_version($version)['ok'] == false && (  $this->container->hasParameter('kernel.debug') && $this->getParameter('kernel.debug') == false ) )
-        if ($sm->renouveler_version($version)['ok'] == false) {
+        if ($sm->renouvelerVersion($version)['ok'] == false) {
             $sj->throwException("VersionController:renouvellementAction impossible de renouveler la version " . $version->getIdVersion());
         }
 

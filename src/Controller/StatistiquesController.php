@@ -135,13 +135,13 @@ class StatistiquesController extends AbstractController
         $sess_lbl= $datas['sess_lbl'];
         $request->getSession()->set('statistiques_sess_lbl',$sess_lbl);
 
-        $menu[] = $sm->statistiques_laboratoire();
-        $menu[] = $sm->statistiques_etablissement($annee);
-        $menu[] = $sm->statistiques_thematique($annee);
-        $menu[] = $sm->statistiques_metathematique($annee);
-        $menu[] = $sm->statistiques_rattachement($annee);
-        $menu[] = $sm->statistiques_collaborateur($annee);
-        $menu[] = $sm->statistiques_repartition();
+        $menu[] = $sm->statistiquesLaboratoire();
+        $menu[] = $sm->statistiquesEtablissement($annee);
+        $menu[] = $sm->statistiquesThematique($annee);
+        $menu[] = $sm->statistiquesMetathematique($annee);
+        $menu[] = $sm->statistiquesRattachement($annee);
+        $menu[] = $sm->statistiquesCollaborateur($annee);
+        $menu[] = $sm->statistiquesRepartition();
 
         [$projets, $total] = $this->sp->projetsParAnnee($annee, false, false, $sess_lbl);
 

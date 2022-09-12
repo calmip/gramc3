@@ -108,9 +108,9 @@ class SessionController extends AbstractController
         $sj = $this->sj;
         $ss = $this->ss;
         
-        if ($sm->gerer_sessions()['ok'] == false) {
+        if ($sm->gererSessions()['ok'] == false) {
             $sj->throwException(__METHOD__ . ':' . __LINE__ . " Ecran interdit " .
-        " parce que : " . $sm->gerer_sessions()['raison']);
+        " parce que : " . $sm->gererSessions()['raison']);
         }
 
         $em       = $this->em;
@@ -506,7 +506,7 @@ class SessionController extends AbstractController
     public function consulterAction(Session $session): Response
     {
         $sm = $this->sm;
-        $menu = [ $sm->gerer_sessions() ];
+        $menu = [ $sm->gererSessions() ];
 
         return $this->render('session/consulter.html.twig', array(
             'session' => $session,

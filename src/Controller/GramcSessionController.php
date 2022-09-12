@@ -124,37 +124,37 @@ class GramcSessionController extends AbstractController
     public function adminAccueilAction(): Response
     {
         $sm      = $this->sm;
-        $menu1[] = $sm->individu_gerer();
-        $menu1[] = $sm->invitations();
+        $menu1[] = $sm->gererIndividu();
+        $menu1[] = $sm->gererInvitations();
 
-        $menu2[] = $sm->gerer_sessions();
-        $menu2[] = $sm->bilan_session();
+        $menu2[] = $sm->gererSessions();
+        $menu2[] = $sm->bilanSession();
         $menu2[] = $sm->mailToResponsables();
         $menu2[] = $sm->mailToResponsablesFiche();
 
-        $menu3[] = $sm->projet_session();
-        $menu3[] = $sm->projet_annee();
-        $menu3[] = $sm->projet_tous();
+        $menu3[] = $sm->projetsSession();
+        $menu3[] = $sm->projetsAnnee();
+        $menu3[] = $sm->projetsTous();
         if ($this->getParameter('nodata')==false) {
             $menu3[] = $sm->projet_donnees();
         }
-        $menu3[] = $sm->televersement_generique();
+        $menu3[] = $sm->televersementGenerique();
 
-        $menu4[] = $sm->formations();
-        $menu4[] = $sm->laboratoires();
-        if ($this->getParameter('norattachement')==false) $menu4[] = $sm->rattachements();
-        $menu4[] = $sm->thematiques();
-        $menu4[] = $sm->metathematiques();
+        $menu4[] = $sm->gererFormations();
+        $menu4[] = $sm->gererLaboratoires();
+        if ($this->getParameter('norattachement')==false) $menu4[] = $sm->gererRattachements();
+        $menu4[] = $sm->gererThematiques();
+        $menu4[] = $sm->gererMetathematiques();
 
-        $menu5[] = $sm->bilan_annuel();
+        $menu5[] = $sm->bilanAnnuel();
         $menu5[] = $sm->statistiques();
-        $menu5[] = $sm->publications();
+        $menu5[] = $sm->gererPublications();
 
-        $menu6[] = $sm->journal();
-        $menu6[] = $sm->connexions();
-        if ($this->getParameter('kernel.debug')) $menu6[] = $sm->avancer();
-        $menu6[] = $sm->info();
-        $menu6[] = $sm->nettoyer();
+        $menu6[] = $sm->lireJournal();
+        $menu6[] = $sm->afficherConnexions();
+        if ($this->getParameter('kernel.debug')) $menu6[] = $sm->tempsAvancer();
+        $menu6[] = $sm->phpInfo();
+        $menu6[] = $sm->nettoyerRgpd();
 
         return $this->render('default/accueil_admin.html.twig', ['menu1' => $menu1,
                                                                 'menu2' => $menu2,
@@ -247,7 +247,6 @@ class GramcSessionController extends AbstractController
             return $this->render(
                 'default/accueil.html.twig',
                 ['menu' => $menu,
-         //'projet_test' => $sm->nouveau_projet_test()['ok'],
          'projet_test' => false,
          'session' => $session ]
             );
@@ -261,12 +260,12 @@ class GramcSessionController extends AbstractController
     public function presidentAccueilAction(): Response
     {
         $sm     = $this->sm;
-        $menu[] = $sm->affectation();
+        $menu[] = $sm->affecterExperts();
         
         if ($this->getParameter('noedition_expertise')==false) {
             $menu[] = $sm->commSess();
         }
-        $menu[] = $sm->affectation_rallonges();
+        $menu[] = $sm->affecterExpertsRallonges();
         /* $menu[] = $sm->affectation_test(); */
         return $this->render('default/president.html.twig', ['menu' => $menu]);
     }

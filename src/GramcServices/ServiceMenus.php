@@ -352,21 +352,73 @@ class ServiceMenus
         return $menu;
     }
 
+    /***********************************************************************
+     * 
+     * Transformation d'un projet FIL ( ou projet test) en projet de session
+     *     - Seulement lors des sessions d'attribution
+     *     - La transformation inverse n'est pas possible
+     *
+     ***********************************************************************/
+    public function transformerProjet(Projet $projet, int $priorite=self::BPRIO):array
+    {
+        $token = $this->token;
+        $user = $token->getUser();
+        
+        $menu = [];
+        $menu['commentaire'] = "Impossible pour l'instant";
+        $menu['name'] = 'avant_transformer';
+        $menu['params'] = [ 'projet' => $projet ];
+        $menu['lien'] = 'Transformer';
+        $menu['ok'] = false;
+
+        $session = $this->ss->getSessionCourante();
+        if ($session == null) {
+            $menu['raison'] = "Il n'y a pas de session courante";
+        }
+        else
+        {
+            $etat_session   =   $session->getEtatSession();
+    
+            if ($user == null)
+            {
+                $menu['raison'] = "Connexion anonyme ?";
+            }
+            elseif (! $user->peutCrerProjets())
+            {
+                $menu['raison'] = "Commencez par changer de responsable, le responsable doit être membre permanent d'un laboratoire enregistré";
+            }
+            elseif ($etat_session == Etat::EDITION_DEMANDE)
+            {
+                $menu['raison'] = '';
+                $menu['commentaire'] = "Confirmez le test, créez un VRAI projet !";
+                $priorite = $priorite=self::HPRIO;
+                $menu['ok'] = true;
+            }
+            else
+            {
+                $menu['raison'] = 'Nous ne sommes pas en période de demande';
+            }
+        }
+
+        $this->__prio($menu, $priorite);
+        return $menu;
+    }
+
     /*******************
      * Gestion des projets et des versions
      ***************************************************/
 
-    public function nouveau_projet($type, int $priorite=self::HPRIO):array
+    public function nouveauProjet($type, int $priorite=self::HPRIO):array
     {
         switch ($type) {
         case Projet::PROJET_FIL:
-        return $this->nouveau_projet_fil($priorite);
+        return $this->nouveauProjetFil($priorite);
         break;
         case Projet::PROJET_SESS:
-        return $this->nouveau_projet_sess($priorite);
+        return $this->nouveauProjetSess($priorite);
         break;
         case Projet::PROJET_TEST:
-        return $this->nouveau_projet_test($priorite);
+        return $this->nouveauProjetTest($priorite);
         break;
     }
     }
@@ -378,7 +430,7 @@ class ServiceMenus
      *     - Créé seulement par un permanent, qui devient responsable du projet
      *
      */
-    private function nouveau_projet_sess(int $priorite=self::HPRIO):array
+    private function nouveauProjetSess(int $priorite=self::HPRIO):array
     {
         $menu   =   [];
         $menu['commentaire']    =   "Vous ne pouvez pas créer de nouveau projet actuellement";
@@ -390,19 +442,24 @@ class ServiceMenus
         $session =  $this->ss->getSessionCourante();
         if ($session == null) {
             $menu['raison'] = "Il n'y a pas de session courante";
-            return $menu;
         }
-
-        $etat_session   =   $session->getEtatSession();
-
-        if (! $this->peut_creer_projets()) {
-            $menu['raison'] = "Seuls les personnels permanents des laboratoires enregistrés peuvent créer un projet";
-        } elseif ($etat_session == Etat::EDITION_DEMANDE) {
-            $menu['raison'] = '';
-            $menu['commentaire'] = "Créez un nouveau projet, vous en serez le responsable";
-            $menu['ok'] = true;
-        } else {
-            $menu['raison'] = 'Nous ne sommes pas en période de demande, pas possible de créer un nouveau projet';
+        else
+        {
+            $etat_session   =   $session->getEtatSession();
+            if (! $this->peutCrerProjets())
+            {
+                $menu['raison'] = "Seuls les personnels permanents des laboratoires enregistrés peuvent créer un projet";
+            }
+            elseif ($etat_session == Etat::EDITION_DEMANDE)
+            {
+                $menu['raison'] = '';
+                $menu['commentaire'] = "Créez un nouveau projet, vous en serez le responsable";
+                $menu['ok'] = true;
+            }
+            else
+            {
+                $menu['raison'] = 'Nous ne sommes pas en période de demande, pas possible de créer un nouveau projet';
+            }
         }
 
         $this->__prio($menu, $priorite);
@@ -416,7 +473,7 @@ class ServiceMenus
      *     - Créé par n'importe qui, qui devient responsable du projet
      *
      */
-    public function nouveau_projet_test(int $priorite=self::HPRIO):array
+    public function nouveauProjetTest(int $priorite=self::HPRIO):array
     {
         $menu   =   [];
         $menu['commentaire']    =   "Vous ne pouvez pas créer de nouveau projet test actuellement";
@@ -426,26 +483,28 @@ class ServiceMenus
         $menu['ok'] = false;
 
         $session =  $this->ss->getSessionCourante();
-        if ($session == null) {
+        if ($session == null)
+        {
             $menu['raison'] = "Il n'y a pas de session courante";
-            return $menu;
-        }
-
-        //$etat_session   =   $session->getEtatSession();
-        $user = $this->token->getUser();
-        if (! $user instanceof Individu)
-        {
-            $menu['raison'] = "Vous n'êtes pas connecté";
-
-        }
-        elseif ($this->em->getRepository(Projet::class)->countProjetsTestResponsable($user) > 0)
-        {
-            $menu['raison'] = "Vous êtes déjà responsable d'un projet test";
         }
         else
         {
-            $menu['commentaire'] = "Créer un projet test: 5000h max, uniquement pour faire des essais et avoir une idée du nombre d'heures dont vous avez besoin.";
-            $menu['ok'] = true;
+            //$etat_session   =   $session->getEtatSession();
+            $user = $this->token->getUser();
+            if (! $user instanceof Individu)
+            {
+                $menu['raison'] = "Vous n'êtes pas connecté";
+    
+            }
+            elseif ($this->em->getRepository(Projet::class)->countProjetsTestResponsable($user) > 0)
+            {
+                $menu['raison'] = "Vous êtes déjà responsable d'un projet test";
+            }
+            else
+            {
+                $menu['commentaire'] = "Créer un projet test: 5000h max, uniquement pour faire des essais et avoir une idée du nombre d'heures dont vous avez besoin.";
+                $menu['ok'] = true;
+            }
         }
 
         $this->__prio($menu, $priorite);
@@ -459,7 +518,7 @@ class ServiceMenus
      *     - Créé seulement par un permanent, qui devient responsable du projet
      *
      */
-    private function nouveau_projet_fil(int $priorite=self::HPRIO):array
+    private function nouveauProjetFil(int $priorite=self::HPRIO):array
     {
         $menu   =   [];
 
@@ -470,33 +529,33 @@ class ServiceMenus
         $menu['ok']     = false;
 
         $session =  $this->ss->getSessionCourante();
-        if ($session == null) {
+        if ($session == null)
+        {
             $menu['raison'] = "Il n'y a pas de session courante";
-            return $menu;
         }
-
-        $etat_session   =   $session->getEtatSession();
-        if (! $this->peut_creer_projets()) {
-            $menu['raison'] = "Seuls les personnels permanents des laboratoires enregistrés peuvent créer un projet";
-        } else {
-            $menu['raison'] = '';
-            $menu['commentaire'] = "Créez un nouveau projet, vous en serez le responsable";
-            $menu['ok'] = true;
+        else
+        {
+            $etat_session   =   $session->getEtatSession();
+            if (! $this->peutCrerProjets()) {
+                $menu['raison'] = "Seuls les personnels permanents des laboratoires enregistrés peuvent créer un projet";
+            } else {
+                $menu['raison'] = '';
+                $menu['commentaire'] = "Créez un nouveau projet, vous en serez le responsable";
+                $menu['ok'] = true;
+            }
         }
 
         $this->__prio($menu, $priorite);
         return $menu;
     }
 
-    ////////////////////////////////
-
-    private function peut_creer_projets($user = null): bool
+    private function peutCrerProjets($user = null): bool
     {
         if ($user == null) {
             $user = $this->token->getUser();
         }
 
-        if ($user != null && $user->peut_creer_projets()) {
+        if ($user != null && $user->peutCrerProjets()) {
             return true;
         } else {
             return false;
@@ -509,7 +568,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function individu_gerer(int $priorite=self::HPRIO):array
+    public function gererIndividu(int $priorite=self::HPRIO):array
     {
         $menu['name']   =   'individu_gerer';
         $menu['commentaire']    =   "Gérer les utilisateurs de gramc";
@@ -526,7 +585,7 @@ class ServiceMenus
         return $menu;
     }
 
-    public function invitations():array
+    public function gererInvitations(int $priorite=self::HPRIO):array
     {
         $menu['name'] = 'invitations';
         $menu['commentaire'] = "Récapituler les invitations en cours";
@@ -539,13 +598,13 @@ class ServiceMenus
             $menu['ok'] = false;
             $menu['raison'] = "Vous n'êtes pas un administrateur";
         }
-
+        $this->__prio($menu, $priorite);
         return $menu;
     }
 
     //////////////////////////////////////
 
-    public function gerer_sessions(int $priorite=self::HPRIO): array
+    public function gererSessions(int $priorite=self::HPRIO): array
     {
         $menu['name']   =   'gerer_sessions';
         $menu['commentaire']    =   "Gérer les sessions d'attribution";
@@ -566,7 +625,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function bilan_session(int $priorite=self::HPRIO):array
+    public function bilanSession(int $priorite=self::HPRIO):array
     {
         $menu['name']   =   'bilan_session';
         $menu['commentaire']    =   "Générer et télécharger le bilan de session";
@@ -587,7 +646,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function bilan_annuel(int $priorite=self::HPRIO):array
+    public function bilanAnnuel(int $priorite=self::HPRIO):array
     {
         $menu['name']   =   'bilan_annuel';
         $menu['commentaire']    =   "Générer et télécharger le bilan annuel";
@@ -608,7 +667,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function projet_session(int $priorite=self::HPRIO):array
+    public function projetsSession(int $priorite=self::HPRIO):array
     {
         $menu['name']   =   'projet_session';
         $menu['commentaire']    =   "Gérer les projets par session";
@@ -628,7 +687,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function projet_annee(int $priorite=self::HPRIO):array
+    public function projetsAnnee(int $priorite=self::HPRIO):array
     {
         $menu['name']        =   'projet_annee';
         $menu['commentaire'] =   "Gérer les projets par année";
@@ -667,7 +726,7 @@ class ServiceMenus
     }
     //////////////////////////////////////
 
-    public function projet_tous(int $priorite=self::HPRIO):array
+    public function projetsTous(int $priorite=self::HPRIO):array
     {
         $menu['name']   =   'projet_tous';
         $menu['commentaire']    =   "Liste complète des projets";
@@ -688,7 +747,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function journal(int $priorite=self::HPRIO):array
+    public function lireJournal(int $priorite=self::HPRIO):array
     {
         $menu['name']   =   'journal_list';
         $menu['commentaire']    =   "Lire le journal des actions";
@@ -708,7 +767,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function info(int $priorite=self::BPRIO):array
+    public function phpInfo(int $priorite=self::BPRIO):array
     {
         $menu['name']        = 'phpinfo';
         $menu['commentaire'] = "Infos sur php et sur aussi sur gramc";
@@ -727,7 +786,7 @@ class ServiceMenus
     }
     //////////////////////////////////////
 
-    public function laboratoires(int $priorite=self::HPRIO):array
+    public function gererLaboratoires(int $priorite=self::HPRIO):array
     {
         $menu['name']   =   'gerer_laboratoires';
         $menu['commentaire']    =   "Gérer la liste des laboratoires enregistrés";
@@ -745,7 +804,7 @@ class ServiceMenus
         return $menu;
     }
 
-    public function formations(int $priorite=self::HPRIO):array
+    public function gererFormations(int $priorite=self::HPRIO):array
     {
         $menu['name']       =   'gerer_formations';
         $menu['commentaire']=   "Gérer la liste des formations";
@@ -765,7 +824,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function thematiques(int $priorite=self::BPRIO):array
+    public function gererThematiques(int $priorite=self::BPRIO):array
     {
         $menu['name']   =   'gerer_thematiques';
         $menu['commentaire']    =   "Gérer la liste des thématiques";
@@ -785,7 +844,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function rattachements(int $priorite=self::BPRIO):array
+    public function gererRattachements(int $priorite=self::BPRIO):array
     {
         $menu['name']   =   'gerer_rattachements';
         $menu['commentaire']    =   "Gérer la liste des rattachements";
@@ -805,7 +864,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function metathematiques(int $priorite=self::BPRIO):array
+    public function gererMetathematiques(int $priorite=self::BPRIO):array
     {
         $menu['name']   =   'gerer_metaThematiques';
         $menu['commentaire']    =   "Gérer la liste des méta-thématiques";
@@ -829,7 +888,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function changer_responsable(Version $version, int $priorite=2):array
+    public function changerResponsable(Version $version, int $priorite=2):array
     {
         $menu['name']   =   'changer_responsable';
         $menu['param']  =   $version->getIdVersion();
@@ -871,7 +930,7 @@ class ServiceMenus
 
     ////////////////////////////////////
 
-    public function modifier_version(Version $version, int $priorite=self::HPRIO):array
+    public function modifierVersion(Version $version, int $priorite=self::HPRIO):array
     {
         $menu['name'] = 'modifier_version';
         $menu['param'] = $version->getIdVersion();
@@ -919,7 +978,7 @@ class ServiceMenus
 
     ///////////////////////////////////////////////////////////
 
-    public function modifier_collaborateurs(Version $version, int $priorite=self::HPRIO):array
+    public function modifierCollaborateurs(Version $version, int $priorite=self::HPRIO):array
     {
         $user = $this->token->getUser();
 
@@ -950,7 +1009,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////
 
-    public function televerser_rapport_annee(Version $version, int $priorite=self::HPRIO):array
+    public function televerserRapportAnnee(Version $version, int $priorite=self::HPRIO):array
     {
         $menu['name']           =   'televerser_rapport_annee';
         $menu['ok']             =   false;
@@ -1010,7 +1069,7 @@ class ServiceMenus
     }
 
     ////////////////////////////////////////////////////////////
-    public function telecharger_modele_rapport_dactivite(Version $version, int $priorite=self::HPRIO):array
+    public function telechargerModeleRapportDactivite(Version $version, int $priorite=self::HPRIO):array
     {
         $menu['name']           =   'telecharger_modele';
         $menu['lien']           =   "Modèle de rapport d'activité";
@@ -1053,7 +1112,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////
 
-    public function gerer_publications(Projet $projet, int $priorite=self::HPRIO):array
+    public function gererPublications(Projet $projet, int $priorite=self::HPRIO):array
     {
         $menu['name']  = 'gerer_publications';
         $menu['param'] = $projet->getIdProjet();
@@ -1089,7 +1148,7 @@ class ServiceMenus
     }
 
     /////////////////////////////////////////////////////////////////////
-    public function renouveler_version(Version $version, int $priorite=self::HPRIO):array
+    public function renouvelerVersion(Version $version, int $priorite=self::BPRIO):array
     {
         $menu['name']        = 'renouveler_version';
         $menu['param']       = $version->getIdVersion();
@@ -1102,33 +1161,35 @@ class ServiceMenus
 
         if ($session == null) {
             $menu['raison']     =   "Nous ne sommes pas en période de demandes de ressources";
-            return $menu;
         }
-
-        $idVersion = $session->getIdSession() . $version->getProjet()->getIdProjet();
-
-        if ($this->em->getRepository(Version::class)->findOneBy([ 'idVersion' =>  $idVersion]) != null) {
-            $menu['raison'] = "Version initiale ou renouvellement déjà demandé";
-        } elseif ($version->getProjet()->getEtatProjet() == Etat::TERMINE) {
-            $menu['raison'] = "Votre projet est ou sera prochainement terminé";
-        } elseif ($version->isCollaborateur($this->token->getUser())) {
-            $menu['commentaire'] = "Demander de nouvelles ressources sur ce projet pour la session " . $session->getIdSession();
-            $menu['ok'] =   true;
-        } elseif ($this->ac->isGranted('ROLE_ADMIN')) {
-            $menu['commentaire'] = "Demander de nouvelles ressources sur ce projet pour la session "
-                .   $session->getIdSession() . " en tant qu'administrateur";
-            $menu['ok'] = true;
-        } else {
-            $menu['raison'] = "Vous n'avez pas le droit de renouveler ce projet, vous n'êtes pas un collaborateur";
+        else
+        {
+            $idVersion = $session->getIdSession() . $version->getProjet()->getIdProjet();
+    
+            if ($this->em->getRepository(Version::class)->findOneBy([ 'idVersion' =>  $idVersion]) != null) {
+                $menu['raison'] = "Version initiale ou renouvellement déjà demandé";
+            } elseif ($version->getProjet()->getEtatProjet() == Etat::TERMINE) {
+                $menu['raison'] = "Votre projet est ou sera prochainement terminé";
+            } elseif ($version->isCollaborateur($this->token->getUser())) {
+                $menu['commentaire'] = "Demander de nouvelles ressources sur ce projet pour la session " . $session->getIdSession();
+                $priorite = self::HPRIO;
+                $menu['ok'] =   true;
+            } elseif ($this->ac->isGranted('ROLE_ADMIN')) {
+                $menu['commentaire'] = "Demander de nouvelles ressources sur ce projet pour la session "
+                    .   $session->getIdSession() . " en tant qu'administrateur";
+                $priorite = self::HPRIO;
+                $menu['ok'] = true;
+            } else {
+                $menu['raison'] = "Vous n'avez pas le droit de renouveler ce projet, vous n'êtes pas un collaborateur";
+            }
         }
-        
         $this->__prio($menu, $priorite);
         return $menu;
     }
 
     //////////////////////////////////////////////////////////////////
 
-    public function envoyer_expert(Version $version, int $priorite=self::HPRIO):array
+    public function envoyerEnExpertise(Version $version, int $priorite=self::HPRIO):array
     {
         if ($version == null) {
             return [];
@@ -1137,7 +1198,7 @@ class ServiceMenus
         $projet = $version -> getProjet();
         $user   = $this->token->getUser();
 
-        $menu['name']           =   'envoyer_expert';
+        $menu['name']           =   'envoyer_en_expertise';
         $menu['param']          =   $version->getIdVersion();
         $menu['lien']           =   "Envoyer en expertise";
         $menu['icone']           =   "envoyer";
@@ -1169,7 +1230,7 @@ class ServiceMenus
 
         // manu - $priorite=self::HPRIO$priorite=self::HPRIO juin 20$priorite=self::HPRIO9 - Tout le monde peut créer un projet test !
         // manu - Je ne comprends pas ce truc !
-        elseif ($isProjetTest == false && $version->isResponsable($user) == true &&  ! $this->peut_creer_projets()) {
+        elseif ($isProjetTest == false && $version->isResponsable($user) == true &&  ! $this->peutCrerProjets()) {
             $menu['raison'] = "Le responsable du projet n'a pas le droit de créer des projets";
             $this->sj->warningMessage(__METHOD__ . ':' . __LINE__ ." Le responsable " . $this->token->getUser()
                 . " du projet " . $projet . " ne peut pas créer des projets");
@@ -1198,7 +1259,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function affectation(int $priorite=self::HPRIO):array
+    public function affecterExperts(int $priorite=self::HPRIO):array
     {
         $session = $this->ss->getSessionCourante();
 
@@ -1218,39 +1279,105 @@ class ServiceMenus
         return $menu;
     }
 
-    ////////////////////////////////////////////////////////////////////////////
-
-    public function affectation_test(int $priorite=self::HPRIO):array
+    public function affecterExpertsRallonges(int $priorite=self::HPRIO):array
     {
         //$session = $this->ss->getSessionCourante();
+        $menu['name']           =   'rallonge_affectation';
+        $menu['lien']           =   "Rallonge de ressources";
+        $menu['commentaire']    =   "Affecter les experts pour les rallonges";
+        $menu['ok']             =   false;
+        $menu['raison']         =   "Vous n'êtes pas président";
 
-        $menu['name']        =   'affectation_test';
-        $menu['lien']        =   "Projets test";
-
-        $menu['commentaire'] =   "Vous ne pouvez pas affecter les experts aux projets test de cette année";
-        $menu['ok']          =   false;
-        if (!$this->ac->isGranted('ROLE_PRESIDENT')) {
-            $menu['raison']     =   "Vous n'avez pas le rôprésident";
-        }
-        // Supprimé par manu - On peut affecter les experts en permanence, à cause des projets tests
-        /*
-        elseif ( $session->getEtatSession()!=Etat::EDITION_EXPERTISE && $session->getEtatSession()!=Etat::EN_ATTENTE)
-        {
-            $menu['raison']     =   "La session n'est pas en phase d'expertise";
-        }
-        */
-        else {
+        if ($this->ac->isGranted('ROLE_ADMIN') ||  $this->ac->isGranted('ROLE_PRESIDENT')) {
             $menu['ok']             =   true;
-            $menu['commentaire']    =   "Espace d'affectation des experts aux projets test";
+            $menu['commentaire']    =   "Affecter les experts pour les rallonges";
         }
 
         $this->__prio($menu, $priorite);
         return $menu;
     }
 
+    //////////////////////////////////////////////////////////////////////////
+
+    public function expertiserRallonge(Rallonge $rallonge, int $priorite=self::HPRIO):array
+    {
+        $menu['name']        =   'expertiser_rallonge';
+        $menu['param']       =   $rallonge->getIdRallonge();
+        $menu['lien']        =   "Expertiser la rallonge";
+        $menu['commentaire'] =   "Vous ne pouvez pas expertiser cette demande";
+        $menu['ok']          =   false;
+        $menu['raison']      =   "raison inconnue";
+        $user                = $this->token->getUser();
+
+        $version = $rallonge->getVersion();
+        if ($version != null) {
+            $projet = $version->getProjet();
+        } else {
+            $projet = null;
+        }
+
+        $etatRallonge   =  $rallonge->getEtatRallonge();
+
+        if ($version == null) {
+            $menu['raison']         =   "Cette rallonge n'est associée à aucun projet !";
+        }
+        //elseif( $version->getEtatVersion()  == Etat::NOUVELLE_VERSION_DEMANDEE )
+        //    $menu['raison']         =   "Un renouvellement du projet " . $projet . " est déjà accepté !";
+        elseif ($version->getProjet() == null) {
+            $menu['raison']     =   "Cette version du projet n'est associée à aucun projet";
+        } elseif ($version->getProjet()->getEtatProjet() == Etat::TERMINE) {
+            $menu['raison']     =   "Votre projet est ou sera prochainement terminé";
+        } elseif ($version->getEtatVersion() == Etat::ANNULE) {
+            $menu['raison']     =   "Votre projet est annulé";
+        } elseif ($version->getEtatVersion() == Etat::TERMINE) {
+            $menu['raison']     =   "Votre projet de cette session est déjà terminé";
+        } elseif ($etatRallonge == Etat::EDITION_DEMANDE) {
+            $menu['raison']     =   "Cette demande n'a pas encore été envoyée en expertise";
+        } elseif ($etatRallonge== Etat::ANNULE) {
+            $menu['raison']     =   "Cette demande a été annulée";
+        } elseif ($etatRallonge != Etat::EDITION_EXPERTISE) {
+            $menu['raison']     =   "Cette demande a déjà été envoyée au président";
+        } elseif ($this->ac->isGranted('ROLE_ADMIN')) {
+            $menu['ok']             =   true;
+            $menu['commentaire']    =   "Vous pouvez expertiser cette demande et l'envoyer au président en tant qu'administrateur !";
+        } elseif ($rallonge->isExpertDe($user)) {
+            $menu['commentaire']         =   "Vous pouvez expertiser cette demande et l'envoyer au président" ;
+            $menu['ok']             =   true;
+        } else {
+            $menu['raison']         = "Vous n'avez pas le droit d'expertiser cette demande, vous n'êtes pas l'expert designé";
+        }
+
+        $this->__prio($menu, $priorite);
+        return $menu;
+    }
+
+
     ////////////////////////////////////////////////////////////////////////////
 
-    public function avancer(int $priorite=self::BPRIO):array
+//    public function affectation_test(int $priorite=self::HPRIO):array
+//    {
+//        //$session = $this->ss->getSessionCourante();
+//
+//        $menu['name']        =   'affectation_test';
+//        $menu['lien']        =   "Projets test";
+//
+//        $menu['commentaire'] =   "Vous ne pouvez pas affecter les experts aux projets test de cette année";
+//        $menu['ok']          =   false;
+//        if (!$this->ac->isGranted('ROLE_PRESIDENT')) {
+//            $menu['raison']     =   "Vous n'avez pas le rôprésident";
+//        }
+//        else {
+//            $menu['ok']             =   true;
+//            $menu['commentaire']    =   "Espace d'affectation des experts aux projets test";
+//        }
+//
+//        $this->__prio($menu, $priorite);
+//        return $menu;
+//    }
+
+    ////////////////////////////////////////////////////////////////////////////
+
+    public function tempsAvancer(int $priorite=self::BPRIO):array
     {
         //$session = $this->ss->getSessionCourante();
         $menu['name']           =   'param_avancer';
@@ -1337,7 +1464,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function nettoyer(int $priorite=self::BPRIO):array
+    public function nettoyerRgpd(int $priorite=self::BPRIO):array
     {
         $menu['name']            = 'rgpd';
         $menu['lien']            = "Nettoyage pour conformité au RGPD";
@@ -1357,7 +1484,7 @@ class ServiceMenus
 
     /////////////////////////////////////////////////////////////////////////////////
 
-    public function connexions(int $priorite=self::HPRIO):array
+    public function afficherConnexions(int $priorite=self::HPRIO):array
     {
         $menu['name']           =   'connexions';
         $menu['lien']           =   "Personnes connectées";
@@ -1377,30 +1504,11 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function presidents(int $priorite=self::HPRIO):array
-    {
-        $menu['name']           =   'individu_president';
-        $menu['lien']           =   "Attribuer le rôle de président";
-        $menu['commentaire']    =   "Vous ne pouvez pas attribuer le rôle de président";
-        $menu['ok']             =   false;
-        $menu['raison']         =   "Vous n'êtes pas un administrateur";
-
-        if ($this->ac->isGranted('ROLE_ADMIN')) {
-            $menu['ok']             =   true;
-            $menu['commentaire']    =   "Vous pouvez attribuer la fonction du président à un utilisateur admin ou expert";
-        }
-
-        $this->__prio($menu, $priorite);
-        return $menu;
-    }
-
-    ////////////////////////////////////////////////////////////////////////////
-
-    public function rallonge_creation(Projet $projet, int $priorite=self::HPRIO):array
+    public function nouvelleRallonge(Projet $projet, int $priorite=self::HPRIO):array
     {
         $sp = $this->sp;
 
-        $menu['name']        = 'rallonge_creation';
+        $menu['name']        = 'nouvelle_rallonge';
         $menu['param']       = $projet->getIdProjet();
         $menu['lien']        = "Rallonge";
         $menu['commentaire'] = "Vous ne pouvez pas créer une nouvelle rallonge";
@@ -1416,7 +1524,6 @@ class ServiceMenus
         } elseif ($this->em->getRepository(Rallonge::class)->findRallongesOuvertes($sp->versionActive($projet)) != null) {
             $menu['raison']         =   "Une autre rallonge du projet " . $projet . " est déjà en cours de traitement !";
         }
-        // TODO - Mettre ce nombre en paramètre !!!!
         elseif (count($version->getRallonge()) >= $max_rall) {
             $menu['raison']         =   "Pas plus de $max_rall rallonges par session !";
         }
@@ -1433,9 +1540,9 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function rallonge_modifier(Rallonge $rallonge, int $priorite=self::HPRIO):array
+    public function modifierRallonge(Rallonge $rallonge, int $priorite=self::HPRIO):array
     {
-        $menu['name']           = 'rallonge_modifier';
+        $menu['name']           = 'modifier_rallonge';
         $menu['param']          = $rallonge->getIdRallonge();
         $menu['lien']           = "Modifier";
         $menu['icone']          = "modifier";
@@ -1485,7 +1592,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function rallonge_envoyer(Rallonge $rallonge, int $priorite=self::HPRIO):array
+    public function envoyerEnExpertiseRallonge(Rallonge $rallonge, int $priorite=self::HPRIO):array
     {
         $menu['name']        = 'avant_rallonge_envoyer';
         $menu['param']       = $rallonge->getIdRallonge();
@@ -1537,27 +1644,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function affectation_rallonges(int $priorite=self::HPRIO):array
-    {
-        //$session = $this->ss->getSessionCourante();
-        $menu['name']           =   'rallonge_affectation';
-        $menu['lien']           =   "Rallonge de ressources";
-        $menu['commentaire']    =   "Affecter les experts pour les rallonges";
-        $menu['ok']             =   false;
-        $menu['raison']         =   "Vous n'êtes pas président";
-
-        if ($this->ac->isGranted('ROLE_ADMIN') ||  $this->ac->isGranted('ROLE_PRESIDENT')) {
-            $menu['ok']             =   true;
-            $menu['commentaire']    =   "Affecter les experts pour les rallonges";
-        }
-
-        $this->__prio($menu, $priorite);
-        return $menu;
-    }
-
-    ////////////////////////////////////////////////////////////////////////////
-
-    public function televersement_generique(int $priorite=self::BPRIO):array
+    public function televersementGenerique(int $priorite=self::BPRIO):array
     {
         $menu['name']           =   'televersement_generique';
         $menu['lien']           =   "Téléversements génériques";
@@ -1578,7 +1665,7 @@ class ServiceMenus
     //////////////////////////////////////////////////////////////////////////////
 
 
-    public function telechargement_fiche(Version $version, int $priorite=self::HPRIO):array
+    public function telechargerFiche(Version $version, int $priorite=self::HPRIO):array
     {
         $menu['name']           =   'version_fiche_pdf';
         $menu['param']          =   $version->getIdVersion();
@@ -1606,7 +1693,7 @@ class ServiceMenus
     }
 
     //////////////////////////////////////////////////////////////////////////////
-    public function televerser_fiche(Version $version, int $priorite=self::HPRIO):array
+    public function televerserFiche(Version $version, int $priorite=self::HPRIO):array
     {
         $menu['name']           =   'version_televerser_fiche';
         //$menu['name']           =   'televerser';
@@ -1638,62 +1725,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function rallonge_expertiser(Rallonge $rallonge, int $priorite=self::HPRIO):array
-    {
-        $menu['name']        =   'rallonge_expertiser';
-        $menu['param']       =   $rallonge->getIdRallonge();
-        $menu['lien']        =   "Expertiser la rallonge";
-        $menu['commentaire'] =   "Vous ne pouvez pas expertiser cette demande";
-        $menu['ok']          =   false;
-        $menu['raison']      =   "raison inconnue";
-        $user                = $this->token->getUser();
-
-        $version = $rallonge->getVersion();
-        if ($version != null) {
-            $projet = $version->getProjet();
-        } else {
-            $projet = null;
-        }
-
-        $etatRallonge   =  $rallonge->getEtatRallonge();
-
-        if ($version == null) {
-            $menu['raison']         =   "Cette rallonge n'est associée à aucun projet !";
-        }
-        //elseif( $version->getEtatVersion()  == Etat::NOUVELLE_VERSION_DEMANDEE )
-        //    $menu['raison']         =   "Un renouvellement du projet " . $projet . " est déjà accepté !";
-        elseif ($version->getProjet() == null) {
-            $menu['raison']     =   "Cette version du projet n'est associée à aucun projet";
-        } elseif ($version->getProjet()->getEtatProjet() == Etat::TERMINE) {
-            $menu['raison']     =   "Votre projet est ou sera prochainement terminé";
-        } elseif ($version->getEtatVersion() == Etat::ANNULE) {
-            $menu['raison']     =   "Votre projet est annulé";
-        } elseif ($version->getEtatVersion() == Etat::TERMINE) {
-            $menu['raison']     =   "Votre projet de cette session est déjà terminé";
-        } elseif ($etatRallonge == Etat::EDITION_DEMANDE) {
-            $menu['raison']     =   "Cette demande n'a pas encore été envoyée en expertise";
-        } elseif ($etatRallonge== Etat::ANNULE) {
-            $menu['raison']     =   "Cette demande a été annulée";
-        } elseif ($etatRallonge != Etat::EDITION_EXPERTISE) {
-            $menu['raison']     =   "Cette demande a déjà été envoyée au président";
-        } elseif ($this->ac->isGranted('ROLE_ADMIN')) {
-            $menu['ok']             =   true;
-            $menu['commentaire']    =   "Vous pouvez expertiser cette demande et l'envoyer au président en tant qu'administrateur !";
-        } elseif ($rallonge->isExpertDe($user)) {
-            $menu['commentaire']         =   "Vous pouvez expertiser cette demande et l'envoyer au président" ;
-            $menu['ok']             =   true;
-        } else {
-            $menu['raison']         = "Vous n'avez pas le droit d'expertiser cette demande, vous n'êtes pas l'expert designé";
-        }
-
-        $this->__prio($menu, $priorite);
-        return $menu;
-    }
-
-
-    //////////////////////////////////////////////////////////////////////////
-
-    public function statistiques_etablissement(int $priorite=self::HPRIO): array
+    public function statistiquesEtablissement(int $priorite=self::HPRIO): array
     {
         $menu['name']           =   'statistiques_etablissement';
         $menu['lien']           =   "Etablissements";
@@ -1713,7 +1745,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques_laboratoire(int $priorite=self::HPRIO): array
+    public function statistiquesLaboratoire(int $priorite=self::HPRIO): array
     {
         $menu['name']           =   'statistiques_laboratoire';
         $menu['lien']           =   "Laboratoires";
@@ -1733,7 +1765,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques_thematique(int $priorite=self::HPRIO): array
+    public function statistiquesThematique(int $priorite=self::HPRIO): array
     {
         $menu['name']           =   'statistiques_thematique';
         $menu['lien']           =   "Thématiques";
@@ -1753,7 +1785,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques_metathematique(int $priorite=self::HPRIO): array
+    public function statistiquesMetathematique(int $priorite=self::HPRIO): array
     {
         $menu['name']           =   'statistiques_metathematique';
         $menu['lien']           =   "Métathématiques";
@@ -1774,7 +1806,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques_rattachement(int $priorite=self::HPRIO): array
+    public function statistiquesRattachement(int $priorite=self::HPRIO): array
     {
         $menu['name']           =   'statistiques_rattachement';
         $menu['lien']           =   "Rattachements";
@@ -1815,28 +1847,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function publications(int $priorite=self::HPRIO):array
-    {
-        $menu['name']           =   'publication_annee';
-        $menu['lien']           =   "Publications";
-        $menu['icone']          =   "publications";
-
-        if ($this->ac->isGranted('ROLE_OBS') || $this->ac->isGranted('ROLE_PRESIDENT')) {
-            $menu['ok']             =   true;
-            $menu['commentaire']    =   "Liste des publications par année";
-        } else {
-            $menu['ok']             =   false;
-            $menu['commentaire']    =   "Vous ne pouvez pas accéder aux publications  !";
-            $menu['raison']         =   "Vous devez être président ou observateur";
-        }
-
-        $this->__prio($menu, $priorite);
-        return $menu;
-    }
-
-    //////////////////////////////////////////////////////////////////////////
-
-    public function statistiques_collaborateur(int $priorite=self::HPRIO): array
+    public function statistiquesCollaborateur(int $priorite=self::HPRIO): array
     {
         $menu['name']           =   'statistiques_collaborateur';
         $menu['lien']           =   "Collaborateurs";
@@ -1856,7 +1867,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function statistiques_repartition(int $priorite=self::HPRIO): array
+    public function statistiquesRepartition(int $priorite=self::HPRIO): array
     {
         $menu['name']           =   'statistiques_repartition';
         $menu['lien']           =   "Projets";
@@ -1868,6 +1879,27 @@ class ServiceMenus
             $menu['ok']             =   false;
             $menu['commentaire']    =   "Vous ne pouvez pas accéder aux  statistiques concenrant la répartition des projets !";
             $menu['raison']         =   "Vous devez être président ou administrateur pour y accéder";
+        }
+
+        $this->__prio($menu, $priorite);
+        return $menu;
+    }
+
+    //////////////////////////////////////////////////////////////////////////
+
+    public function gererPublications(int $priorite=self::HPRIO):array
+    {
+        $menu['name']           =   'publication_annee';
+        $menu['lien']           =   "Publications";
+        $menu['icone']          =   "publications";
+
+        if ($this->ac->isGranted('ROLE_OBS') || $this->ac->isGranted('ROLE_PRESIDENT')) {
+            $menu['ok']             =   true;
+            $menu['commentaire']    =   "Liste des publications par année";
+        } else {
+            $menu['ok']             =   false;
+            $menu['commentaire']    =   "Vous ne pouvez pas accéder aux publications  !";
+            $menu['raison']         =   "Vous devez être président ou observateur";
         }
 
         $this->__prio($menu, $priorite);

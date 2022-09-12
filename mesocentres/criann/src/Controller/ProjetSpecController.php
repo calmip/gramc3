@@ -245,7 +245,7 @@ class ProjetSpecController extends AbstractController
         //$prefixes = $this->getParameter('prj_prefix');
         //foreach (array_keys($prefixes) as $t)
         //{
-        //    $menu[] = $sm->nouveau_projet($t);
+        //    $menu[] = $sm->nouveauProjet($t);
         //}
 
         $etat = 3;
@@ -253,7 +253,7 @@ class ProjetSpecController extends AbstractController
         {
             $etat = 1;
         }
-        $menu[] = $sm->nouveau_projet($etat);
+        $menu[] = $sm->nouveauProjet($etat);
         $menu = [];
         return $this->render(
             'projet/demandeur.html.twig',
@@ -377,28 +377,28 @@ class ProjetSpecController extends AbstractController
 
         $menu = [];
         if ($ac->isGranted('ROLE_ADMIN')) {
-            $menu[] = $sm->rallonge_creation($projet);
+            $menu[] = $sm->nouvelleRallonge($projet);
         }
-        $menu[] = $sm->changer_responsable($version);
-        $menu[] = $sm->renouveler_version($version);
-        $menu[] = $sm->modifier_version($version);
-        $menu[] = $sm->envoyer_expert($version);
-        $menu[] = $sm->modifier_collaborateurs($version);
+        $menu[] = $sm->changerResponsable($version);
+        $menu[] = $sm->renouvelerVersion($version);
+        $menu[] = $sm->modifierVersion($version);
+        $menu[] = $sm->envoyerEnExpertise($version);
+        $menu[] = $sm->modifierCollaborateurs($version);
         if ($this->getParameter('nodata')==false) {
             $menu[] = $sm->donnees($version);
         }
-        $menu[] = $sm->telechargement_fiche($version,ServiceMenus::BPRIO);
-        $menu[] = $sm->televerser_fiche($version,ServiceMenus::BPRIO);
+        $menu[] = $sm->telechargerFiche($version,ServiceMenus::BPRIO);
+        $menu[] = $sm->televerserFiche($version,ServiceMenus::BPRIO);
 
         $etat_version = $version->getEtatVersion();
         if ($this->getParameter('rapport_dactivite')) {
             if (($etat_version == Etat::ACTIF || $etat_version == Etat::TERMINE) && ! $sp->hasRapport($projet, $version->getAnneeSession())) {
-                $menu[] = $sm->telecharger_modele_rapport_dactivite($version,ServiceMenus::BPRIO);
-                $menu[] = $sm->televerser_rapport_annee($version,ServiceMenus::BPRIO);
+                $menu[] = $sm->telechargerModeleRapportDactivite($version,ServiceMenus::BPRIO);
+                $menu[] = $sm->televerserRapportAnnee($version,ServiceMenus::BPRIO);
             }
         }
 
-        $menu[]       = $sm->gerer_publications($projet);
+        $menu[]       = $sm->gererPublications($projet);
         $img_expose = [
             $sv->imageProperties('img_expose_1', 'Figure 1', $version),
             $sv->imageProperties('img_expose_2', 'Figure 2', $version),
@@ -463,11 +463,11 @@ class ProjetSpecController extends AbstractController
         $ac = $this->ac;
 
         if ($ac->isGranted('ROLE_ADMIN')) {
-            $menu[] = $sm->rallonge_creation($projet);
+            $menu[] = $sm->nouvelleRallonge($projet);
         }
-        $menu[] = $sm->modifier_version($version);
-        $menu[] = $sm->envoyer_expert($version);
-        $menu[] = $sm->modifier_collaborateurs($version);
+        $menu[] = $sm->modifierVersion($version);
+        $menu[] = $sm->envoyerEnExpertise($version);
+        $menu[] = $sm->modifierCollaborateurs($version);
 
         return $this->render(
             'projet/consulter_projet_test.html.twig',

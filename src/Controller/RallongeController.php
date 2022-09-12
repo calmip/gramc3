@@ -148,7 +148,7 @@ class RallongeController extends AbstractController
     /**
      * Creates a new rallonge entity.
      *
-     * @Route("/{id}/creation", name="rallonge_creation", methods={"GET"})
+     * @Route("/{id}/creation", name="nouvelle_rallonge", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
      * Method("GET")
      */
@@ -161,9 +161,9 @@ class RallongeController extends AbstractController
         $em = $this->em;
 
         // ACL
-        if ($sm->rallonge_creation($projet)['ok'] == false) {
+        if ($sm->nouvelleRallonge($projet)['ok'] == false) {
             $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de créer une nouvelle rallonge pour le projet" . $projet .
-                " parce que : " . $sm->rallonge_creation($projet)['raison']);
+                " parce que : " . $sm->nouvelleRallonge($projet)['raison']);
         }
         //return new Response( Functions::show( $em->getRepository(Rallonge::class)->findRallongesOuvertes($projet)   ) );
 
@@ -254,8 +254,8 @@ class RallongeController extends AbstractController
             $sj->throwException(__METHOD__ . ':' . __LINE__ .' problème avec ACL');
         }
 
-        $menu[]   = $sm->rallonge_modifier($rallonge);
-        $menu[]   = $sm->rallonge_envoyer($rallonge);
+        $menu[]   = $sm->modifierRallonge($rallonge);
+        $menu[]   = $sm->envoyerEnExpertiseRallonge($rallonge);
 
         return $this->render(
             'rallonge/consulter.html.twig',
@@ -272,7 +272,7 @@ class RallongeController extends AbstractController
     /**
     * Displays a form to edit an existing rallonge entity.
     *
-    * @Route("/{id}/modifier", name="rallonge_modifier", methods={"GET","POST"})
+    * @Route("/{id}/modifier", name="modifier_rallonge", methods={"GET","POST"})
     * @Security("is_granted('ROLE_DEMANDEUR')")
     * Method({"GET", "POST"})
     */
@@ -284,9 +284,9 @@ class RallongeController extends AbstractController
         $em = $this->em;
 
         // ACL
-        if ($sm->rallonge_modifier($rallonge)['ok'] == false) {
+        if ($sm->modifierRallonge($rallonge)['ok'] == false) {
             $sj->throwException(__METHOD__ . " impossible de modifier la rallonge " . $rallonge->getIdRallonge().
-                " parce que : " . $sm->rallonge_modifier($rallonge)['raison']);
+                " parce que : " . $sm->modifierRallonge($rallonge)['raison']);
         }
 
         $editForm = $this->createFormBuilder($rallonge)
@@ -330,7 +330,7 @@ class RallongeController extends AbstractController
     /**
     * Expertise d'une rallonge par un expert
     *
-    * @Route("/{id}/expertiser", name="rallonge_expertiser", methods={"GET","POST"})
+    * @Route("/{id}/expertiser", name="expertiser_rallonge", methods={"GET","POST"})
     * @Security("is_granted('ROLE_EXPERT')")
     * Method({"GET", "POST"})
     */
@@ -343,9 +343,9 @@ class RallongeController extends AbstractController
         $em = $this->em;
 
         // ACL
-        if ($sm->rallonge_expertiser($rallonge)['ok'] == false) {
+        if ($sm->expertiserRallonge($rallonge)['ok'] == false) {
             $sj->throwException(__METHOD__ . " impossible d'expertiser la rallonge " . $rallonge->getIdRallonge().
-                " parce que : " . $sm->rallonge_expertiser($rallonge)['raison']);
+                " parce que : " . $sm->expertiserRallonge($rallonge)['raison']);
         }
 
         $editForm = $this->createFormBuilder($rallonge)
@@ -532,9 +532,9 @@ class RallongeController extends AbstractController
         $workflow = $this->rw;
         
         // ACL
-        if ($sm->rallonge_expertiser($rallonge)['ok'] == false) {
+        if ($sm->expertiserRallonge($rallonge)['ok'] == false) {
             $sj->throwException(__METHOD__ . " impossible d'envoyer la demande " . $rallonge->getIdRallonge().
-                " au président parce que : " . $sm->rallonge_expertiser($rallonge)['raison']);
+                " au président parce que : " . $sm->expertiserRallonge($rallonge)['raison']);
         }
 
         [ $version, $projet, $session ] = $this->getVerProjSess($rallonge);
@@ -551,7 +551,7 @@ class RallongeController extends AbstractController
             // Bouton Annuler
             if ($editForm->get('annuler')->isClicked()) {
                 $request->getSession()->getFlashbag()->add("flash erreur","L'expertise de la rallonge $rallonge n'a pas été envoyée");
-                return $this->redirectToRoute('rallonge_expertiser', [ 'id' => $rallonge->getId() ]);
+                return $this->redirectToRoute('expertiser_rallonge', [ 'id' => $rallonge->getId() ]);
             }
 
             // Bouton Confirmer
@@ -569,7 +569,6 @@ class RallongeController extends AbstractController
             }
             $request->getSession()->getFlashbag()->add("flash info","L'expertise de la rallonge $rallonge a été envoyée");
             return $this->redirectToRoute('expertise_liste');
-            // return $this->redirectToRoute('rallonge_expertiser', [ 'id' => $rallonge->getId() ]);
         }
 
         // Ecran de confirmation: On utilise le même twig que pour l'expertise des projets
@@ -614,9 +613,9 @@ class RallongeController extends AbstractController
         $sval = $this->vl;
 
         // ACL
-        if ($sm->rallonge_envoyer($rallonge)['ok'] == false) {
+        if ($sm->envoyerEnExpertiseRallonge($rallonge)['ok'] == false) {
             $sj->throwException(__METHOD__ . " impossible d'envoyer la rallonge " . $rallonge->getIdRallonge().
-                " à l'expert parce que : " . $sm->rallonge_envoyer($rallonge)['raison']);
+                " à l'expert parce que : " . $sm->envoyerEnExpertiseRallonge($rallonge)['raison']);
         }
 
         [ $version, $projet, $session ] = $this->getVerProjSess($rallonge);
@@ -647,9 +646,9 @@ class RallongeController extends AbstractController
         $sval = $this->vl;
 
         // ACL
-        if ($sm->rallonge_envoyer($rallonge)['ok'] == false) {
+        if ($sm->envoyerEnExpertiseRallonge($rallonge)['ok'] == false) {
             $sj->throwException(__METHOD__ . " impossible de modifier la rallonge " . $rallonge->getIdRallonge().
-                " parce que : " . $sm->rallonge_envoyer($rallonge)['raison']);
+                " parce que : " . $sm->envoyerEnExpertiseRallonge($rallonge)['raison']);
         }
 
         $erreurs = Functions::dataError($sval, $rallonge);

@@ -472,27 +472,27 @@ class ProjetSpecController extends AbstractController
 
         $menu = [];
         if ($ac->isGranted('ROLE_ADMIN')) {
-            $menu[] = $sm->rallonge_creation($projet);
+            $menu[] = $sm->nouvelleRallonge($projet);
         }
 
-        $menu[] = $sm->renouveler_version($version);
-        $menu[] = $sm->modifier_version($version);
-        $menu[] = $sm->envoyer_expert($version);
-        $menu[] = $sm->changer_responsable($version);
-        $menu[] = $sm->modifier_collaborateurs($version);
+        $menu[] = $sm->renouvelerVersion($version);
+        $menu[] = $sm->modifierVersion($version);
+        $menu[] = $sm->envoyerEnExpertise($version);
+        $menu[] = $sm->changerResponsable($version);
+        $menu[] = $sm->modifierCollaborateurs($version);
 
         if ($this->getParameter('nodata')==false) {
             $menu[] = $sm->donnees($version);
         }
-        $menu[] = $sm->gerer_publications($projet);
-        $menu[] = $sm->telechargement_fiche($version);
-        $menu[] = $sm->televerser_fiche($version);
+        $menu[] = $sm->gererPublications($projet);
+        $menu[] = $sm->telechargerFiche($version);
+        $menu[] = $sm->televerserFiche($version);
 
         $etat_version = $version->getEtatVersion();
         if ($this->getParameter('rapport_dactivite')) {
             if (($etat_version == Etat::ACTIF || $etat_version == Etat::TERMINE) && ! $sp->hasRapport($projet, $version->getAnneeSession())) {
-                $menu[] = $sm->telecharger_modele_rapport_dactivite($version,ServiceMenus::BPRIO);
-//                $menu[] = $sm->televerser_rapport_annee($version,ServiceMenus::BPRIO);
+                $menu[] = $sm->telechargerModeleRapportDactivite($version,ServiceMenus::BPRIO);
+//                $menu[] = $sm->televerserRapportAnnee($version,ServiceMenus::BPRIO);
             }
         }
         $img_expose = [
@@ -558,13 +558,11 @@ class ProjetSpecController extends AbstractController
         $ac = $this->ac;
 
         if ($ac->isGranted('ROLE_ADMIN')) {
-            $menu[] = $sm->rallonge_creation($projet);
+            $menu[] = $sm->nouvelleRallonge($projet);
         }
-        //$menu[] = $this->menu_transformer($projet);
-        //$menu[] = $sm->renouveler_version($version);
-        $menu[] = $sm->modifier_version($version);
-        $menu[] = $sm->envoyer_expert($version);
-        $menu[] = $sm->modifier_collaborateurs($version);
+        $menu[] = $sm->modifierVersion($version);
+        $menu[] = $sm->envoyerEnExpertise($version);
+        $menu[] = $sm->modifierCollaborateurs($version);
 
         return $this->render(
             'projet/consulter_projet_test.html.twig',
@@ -589,13 +587,12 @@ class ProjetSpecController extends AbstractController
         $ac = $this->ac;
 
         if ($ac->isGranted('ROLE_ADMIN')) {
-            $menu[] = $sm->rallonge_creation($projet);
+            $menu[] = $sm->nouvelleRallonge($projet);
         }
-        $menu[] = $this->menu_transformer($projet);
-        //$menu[] = $sm->renouveler_version($version);
-        $menu[] = $sm->modifier_version($version);
-        $menu[] = $sm->envoyer_expert($version);
-        $menu[] = $sm->modifier_collaborateurs($version);
+        $menu[] = $sm->transformerProjet($projet);
+        $menu[] = $sm->modifierVersion($version);
+        $menu[] = $sm->envoyerEnExpertise($version);
+        $menu[] = $sm->modifierCollaborateurs($version);
 
         return $this->render(
             'projet/consulter_projet_test.html.twig',
@@ -611,55 +608,6 @@ class ProjetSpecController extends AbstractController
             ]
         );
     }
-
-    /*
-     * Transformation d'un projet FIL ( ou projet test) en projet de session
-     *     - Seulement lors des sessions d'attribution
-     *     - La transformation inverse n'est pas possible
-     *
-     * NOTE - Cette fonction a vocation à rejoindre le ServiceMenu, mais pour l'instant
-     *        on la laisse là (utilisée seulement par CALMIP)
-     *
-     */
-    private function menu_transformer(Projet $projet)
-    {
-        $token = $this->token;
-        $user = $token->getUser();
-        
-        $menu = [];
-        $menu['commentaire'] = "Impossible pour l'instant";
-        $menu['name'] = 'avant_transformer';
-        $menu['params'] = [ 'projet' => $projet ];
-        $menu['lien'] = 'Transformer';
-        $menu['ok'] = false;
-
-        $session = $this->ss->getSessionCourante();
-        if ($session == null) {
-            $menu['raison'] = "Il n'y a pas de session courante";
-            return $menu;
-        }
-
-        $etat_session   =   $session->getEtatSession();
-
-        if ($user == null)
-        {
-            $menu['raison'] = "Connexion anonyme ?";
-            return $menu;
-        }
-            
-        if (! $user->peut_creer_projets()) {
-            $menu['raison'] = "Commencez par changer de responsable, le responsable doit être membre permanent d'un laboratoire enregistré";
-        } elseif ($etat_session == Etat::EDITION_DEMANDE) {
-            $menu['raison'] = '';
-            $menu['commentaire'] = "Confirmez le test, créez un VRAI projet !";
-            $menu['ok'] = true;
-        } else {
-            $menu['raison'] = 'Nous ne sommes pas en période de demande';
-        }
-
-        return $menu;
-    }
-
     
     /**
      * Envoie un écran d'explication avant de transformer un projet Fil (=test)
@@ -676,7 +624,7 @@ class ProjetSpecController extends AbstractController
         $ss = $this->ss;
         $token = $this->token;
 
-        $m = $this->menu_transformer($projet);
+        $m = $sm->transformerProjet($projet);
         if ($m['ok'] == false) {
             $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de transformer le projet car " . $m['raison']);
         }
@@ -705,7 +653,7 @@ class ProjetSpecController extends AbstractController
     {
         $em = $this->em;
 
-        $m = $this->menu_transformer($projet);
+        $m = $sm->transformerProjet($projet);
         if ($m['ok'] == false) {
             $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de transformer le projet car " . $m['raison']);
         }
