@@ -3,19 +3,25 @@
 {% import "default/macros.html.twig" as gramcmacros %}
 
 {% block body %}
+<section id="section_commentaireSession">
     <h1>Commentaire de session (session {{ session }})</h1>
 
     {{ form_start(edit_form) }}
-    <div class="center">
+    <div class="center inputrond submitdyn">
         {{ form_widget(edit_form.commGlobal,{ 'attr': { 'class': 'compteur', 'rows' : 12, 'cols' : 70 } }) }} <br>
         <input type="submit" value="Entrer le commentaire de session" />
-    </div>
-    {{ form_end(edit_form) }}
 
-<div class="message warning">
-<h2>ATTENTION</h2>
-<p>Lorsque vous aurez rempli définitivement le commentaire de session, n'oubliez pas de cliquer sur "Envoyer les expertises"</p>
-</div>
-    {{ gramcmacros.menu(menu) }}
+        {{ form_end(edit_form) }}
+
+    <div class="information attention">
+    <h2>ATTENTION</h2>
+    <p>Lorsque vous aurez rempli définitivement le commentaire de session, n'oubliez pas de cliquer sur "Envoyer les expertises"</p>
+    </div>
+
+    <div id="menu">
+        {{ gramcmacros.menu(menu) }}
+    </div>
+
+</section>
 
 {% endblock %}

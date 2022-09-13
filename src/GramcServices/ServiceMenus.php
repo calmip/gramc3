@@ -1152,7 +1152,7 @@ class ServiceMenus
     {
         $menu['name']        = 'renouveler_version';
         $menu['param']       = $version->getIdVersion();
-        $menu['lien']        = "Renouvellement";
+        $menu['lien']        = "Renouveler";
         $menu['icone']       = "renouveler";
         $menu['commentaire'] = "Vous ne pouvez pas demander de renouvellement";
         $menu['ok']          = false;
