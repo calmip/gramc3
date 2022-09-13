@@ -767,7 +767,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function phpInfo(int $priorite=self::BPRIO):array
+    public function phpInfo(int $priorite=self::HPRIO):array
     {
         $menu['name']        = 'phpinfo';
         $menu['commentaire'] = "Infos sur php et sur aussi sur gramc";
@@ -824,7 +824,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function gererThematiques(int $priorite=self::BPRIO):array
+    public function gererThematiques(int $priorite=self::HPRIO):array
     {
         $menu['name']   =   'gerer_thematiques';
         $menu['commentaire']    =   "Gérer la liste des thématiques";
@@ -844,7 +844,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function gererRattachements(int $priorite=self::BPRIO):array
+    public function gererRattachements(int $priorite=self::HPRIO):array
     {
         $menu['name']   =   'gerer_rattachements';
         $menu['commentaire']    =   "Gérer la liste des rattachements";
@@ -864,7 +864,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function gererMetathematiques(int $priorite=self::BPRIO):array
+    public function gererMetathematiques(int $priorite=self::HPRIO):array
     {
         $menu['name']   =   'gerer_metaThematiques';
         $menu['commentaire']    =   "Gérer la liste des méta-thématiques";
@@ -1377,7 +1377,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function tempsAvancer(int $priorite=self::BPRIO):array
+    public function tempsAvancer(int $priorite=self::HPRIO):array
     {
         //$session = $this->ss->getSessionCourante();
         $menu['name']           =   'param_avancer';
@@ -1398,7 +1398,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function mailToResponsables(int $priorite=self::BPRIO):array
+    public function mailToResponsables(int $priorite=self::HPRIO):array
     {
         $session = $this->ss->getSessionCourante();
         if ($session != null) {
@@ -1464,7 +1464,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function nettoyerRgpd(int $priorite=self::BPRIO):array
+    public function nettoyerRgpd(int $priorite=self::HPRIO):array
     {
         $menu['name']            = 'rgpd';
         $menu['lien']            = "Nettoyage pour conformité au RGPD";
@@ -1644,7 +1644,7 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
-    public function televersementGenerique(int $priorite=self::BPRIO):array
+    public function televersementGenerique(int $priorite=self::HPRIO):array
     {
         $menu['name']           =   'televersement_generique';
         $menu['lien']           =   "Téléversements génériques";

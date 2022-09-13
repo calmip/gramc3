@@ -100,7 +100,7 @@
 
 
         <div class="sous_header">
-            {% if is_granted('ROLE_ADMIN')  %}
+            {% if is_granted('ROLE_OBS')  %}
                 {% include "default/etat_sessions.html.twig" %}
             {% else %}
                 <p>&nbsp;</p>
