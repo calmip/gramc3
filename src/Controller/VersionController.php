@@ -209,9 +209,9 @@ class VersionController extends AbstractController
         $sj = $this->sj;
 
         // ACL
-        if ($sm->supprimerVersion($version)['ok'] == false) {
+        if ($sm->modifierVersion($version)['ok'] == false) {
             $sj->throwException(__METHOD__ . ':' . __LINE__ . " impossible de supprimer la version " . $version->getIdVersion().
-                " parce que : " . $sm->supprimerVersion($version)['raison']);
+                " parce que : " . $sm->modifierVersion($version)['raison']);
         }
 
         $etat = $version->getEtatVersion();
