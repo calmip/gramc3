@@ -100,14 +100,11 @@
 
 
         <div class="sous_header">
-            {% if app.debug %}
-                <p class="etat_session">
-                {% for session in infos.sessions_non_terminees() %}
-                    ETAT DE LA SESSION <strong>{{session.IdSession}}</strong>=<strong>{{session.LibelleEtat}}</strong><br>
-                {% endfor %}
-                </p>
+            {% if is_granted('ROLE_ADMIN')  %}
+                {% include "default/etat_sessions.html.twig" %}
+            {% else %}
+                <p>&nbsp;</p>
             {% endif %}
-
             {% include "default/flash.html.twig" %}
 
             <div class="profil">
@@ -136,7 +133,6 @@
 
                 </div>
             </div>
-
 
             {% set scrollTop = "fleche" %}
 

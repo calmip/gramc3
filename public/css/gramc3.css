@@ -212,6 +212,26 @@ header img {
     color: var(--second-color);
 }
 
+/* ===== ETAT DES SESSIONS ===== */
+table.etat_session {
+    font-size: .7em;
+    margin-left: 1em;
+    width: 10em;
+}
+
+table.etat_session th, table.etat_session td {
+    padding: 0;
+    text-align: center;
+}
+
+table.etat_session th {
+   cursor: help;
+}
+table.etat_session tr {
+   margin: 0;
+   height: auto;
+}
+
 /* ===== MESSAGES FLASH ===== */
 div.flash.info{
     border: 2px solid #64c145;
@@ -642,12 +662,12 @@ thead tr{
 }
 
 th{
-    background: none;
     text-align: left;
     border: none;
     position: sticky;
     top: 0;
     z-index: 2;
+    background: none;
     background: white;
 }
 
@@ -1247,6 +1267,11 @@ tbody tr.rallonge{
 #consulter_projet details .chapitre {
     max-height: 70vh;
     overflow-y: scroll;
+    background-color: #fbfbfb;
+}
+
+#consulter_projet details .chapitre th{
+    background-color: #fbfbfb;
 }
 
 #consulter_projet #I .presentation{
