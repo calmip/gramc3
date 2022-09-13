@@ -339,7 +339,7 @@
                                 {{icones.mail_send}}
                             </a>
                             {{ version.responsable.prenom }} {{ version.responsable.nom }}
-                                {% if(  version.responsable.peut_creer_projets == false ) %}
+                                {% if(  version.responsable.peutCreerProjets == false ) %}
                                 <span title="Responsable non éligible">{{icones.attention(20,20)}}</span>
                                 {% endif %}
                             {% endif %}

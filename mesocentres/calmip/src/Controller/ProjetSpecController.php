@@ -289,7 +289,7 @@ class ProjetSpecController extends AbstractController
 
         $etat_session   =   $session->getEtatSession();
 
-        if (! $user->peut_creer_projets()) {
+        if (! $user->peutCreerProjets()) {
             $menu['raison'] = "Seuls les personnels permanents des laboratoires enregistrés peuvent créer un projet";
         } elseif ($etat_session == Etat::EDITION_DEMANDE) {
             $menu['raison'] = '';
@@ -342,7 +342,7 @@ class ProjetSpecController extends AbstractController
 
         // manu, 11 juin 2019: tout le monde peut créer un projet test. Vraiment ???
         // manu, Octobre 2021: ben non si on autorise ici ça va coincer plus tard !
-        if( ! $user->peut_creer_projets() )
+        if( ! $user->peutCreerProjets() )
         {
             $menu['raison'] = "Vous n'avez pas le droit de créer un projet test, peut-être faut-il mettre à jour votre profil ?";
             return $menu;
@@ -479,12 +479,12 @@ class ProjetSpecController extends AbstractController
         $menu[] = $sm->modifierVersion($version);
         $menu[] = $sm->envoyerEnExpertise($version);
         $menu[] = $sm->changerResponsable($version);
+        $menu[] = $sm->gererPublications($projet);
         $menu[] = $sm->modifierCollaborateurs($version);
 
         if ($this->getParameter('nodata')==false) {
             $menu[] = $sm->donnees($version);
         }
-        $menu[] = $sm->gererPublications($projet);
         $menu[] = $sm->telechargerFiche($version);
         $menu[] = $sm->televerserFiche($version);
 

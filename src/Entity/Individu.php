@@ -976,7 +976,7 @@ class Individu implements UserInterface, EquatableInterface, PasswordAuthenticat
 
     ///
 
-    public function peut_creer_projets()
+    public function peutCreerProjets()
     {
         if ($this->isPermanent() && $this->isFromLaboRegional()) {
             return true;

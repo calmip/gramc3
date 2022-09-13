@@ -383,7 +383,7 @@ class ServiceMenus
             {
                 $menu['raison'] = "Connexion anonyme ?";
             }
-            elseif (! $user->peutCrerProjets())
+            elseif (! $user->peutCreerProjets())
             {
                 $menu['raison'] = "Commencez par changer de responsable, le responsable doit être membre permanent d'un laboratoire enregistré";
             }
@@ -446,7 +446,7 @@ class ServiceMenus
         else
         {
             $etat_session   =   $session->getEtatSession();
-            if (! $this->peutCrerProjets())
+            if (! $this->peutCreerProjets())
             {
                 $menu['raison'] = "Seuls les personnels permanents des laboratoires enregistrés peuvent créer un projet";
             }
@@ -536,7 +536,7 @@ class ServiceMenus
         else
         {
             $etat_session   =   $session->getEtatSession();
-            if (! $this->peutCrerProjets()) {
+            if (! $this->peutCreerProjets()) {
                 $menu['raison'] = "Seuls les personnels permanents des laboratoires enregistrés peuvent créer un projet";
             } else {
                 $menu['raison'] = '';
@@ -549,13 +549,13 @@ class ServiceMenus
         return $menu;
     }
 
-    private function peutCrerProjets($user = null): bool
+    private function peutCreerProjets($user = null): bool
     {
         if ($user == null) {
             $user = $this->token->getUser();
         }
 
-        if ($user != null && $user->peutCrerProjets()) {
+        if ($user != null && $user->peutCreerProjets()) {
             return true;
         } else {
             return false;
@@ -1230,7 +1230,7 @@ class ServiceMenus
 
         // manu - $priorite=self::HPRIO$priorite=self::HPRIO juin 20$priorite=self::HPRIO9 - Tout le monde peut créer un projet test !
         // manu - Je ne comprends pas ce truc !
-        elseif ($isProjetTest == false && $version->isResponsable($user) == true &&  ! $this->peutCrerProjets()) {
+        elseif ($isProjetTest == false && $version->isResponsable($user) == true &&  ! $this->peutCreerProjets()) {
             $menu['raison'] = "Le responsable du projet n'a pas le droit de créer des projets";
             $this->sj->warningMessage(__METHOD__ . ':' . __LINE__ ." Le responsable " . $this->token->getUser()
                 . " du projet " . $projet . " ne peut pas créer des projets");
@@ -1887,7 +1887,7 @@ class ServiceMenus
 
     //////////////////////////////////////////////////////////////////////////
 
-    public function gererPublications(int $priorite=self::HPRIO):array
+    public function publicationsAnnee(int $priorite=self::HPRIO):array
     {
         $menu['name']           =   'publication_annee';
         $menu['lien']           =   "Publications";
