@@ -888,7 +888,7 @@ class ServiceMenus
 
     //////////////////////////////////////
 
-    public function changerResponsable(Version $version, int $priorite=2):array
+    public function changerResponsable(Version $version, int $priorite=self::HPRIO):array
     {
         $menu['name']   =   'changer_responsable';
         $menu['param']  =   $version->getIdVersion();

@@ -1346,6 +1346,31 @@ tbody tr.rallonge{
     cursor: pointer;
 }
 
+/* ========== CHANGER RESPONSABLE ======= */
+#section_changerResponsable {
+    width: 85%;
+    margin: auto;
+}
+
+#section_changerResponsable #formulaire {
+    width: 35%;
+    margin: auto;
+}
+
+/* ========== COMMENTAIRE DE SESSION ======= */
+#section_commentaireSession {
+    width: 85%;
+    margin: auto;
+}
+
+#section_commentaireSession input{
+    margin: 1rem auto 3rem auto;
+}
+#section_commentaireSession #menu {
+    width: 15%;
+    margin: auto;
+}
+
 /* ========== NOUVEAU PROJET ==========
  * (Ecran d'alerte lorsqu'on crée un nouveau projet)
  */
