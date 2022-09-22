@@ -32,6 +32,7 @@ use App\Entity\Session;
 use App\GramcServices\ServiceJournal;
 use App\GramcServices\ServiceNotifications;
 use App\GramcServices\ServiceProjets;
+use App\GramcServices\ServiceMenus;
 
 use App\Utils\Functions;
 use App\Utils\Menu;
@@ -65,8 +66,10 @@ class MailController extends AbstractController
     public function __construct(
         private ServiceNotifications $sn,
         private ServiceJournal $sj,
+        private ServiceMenus $sm,
         private ServiceProjets $sp,
         private FormFactoryInterface $ff,
+        
         private EntityManagerInterface $em
     ) {}
 
@@ -82,6 +85,12 @@ class MailController extends AbstractController
         $sn = $this->sn;
         $sj = $this->sj;
         $ff = $this->ff;
+        $sm = $this->sm;
+
+        // ACL
+        if ($sm->mailToResponsablesFiche()['ok'] == false) {
+            $sj->throwException(__METHOD__ . ':' . __LINE__ . " Action impossible - " . $sm->mailToResponsablesFiche()['raison']);
+        }
 
         $nb_msg = 0;
         $sujet   = \file_get_contents(__DIR__."/../../templates/notification/mail_to_responsables_fiche-sujet.html.twig");
@@ -192,6 +201,11 @@ class MailController extends AbstractController
         $sj = $this->sj;
         $ff = $this->ff;
 
+        // ACL
+        if ($sm->mailToResponsables()['ok'] == false) {
+            $sj->throwException(__METHOD__ . ':' . __LINE__ . " Action impossible - " . $sm->mailToResponsables()['raison']);
+        }
+
         $nb_msg = 0;
         $nb_projets = 0;
 
@@ -288,12 +302,14 @@ class MailController extends AbstractController
             if ($projet->getEtatProjet() == Etat::TERMINE ||  $projet->getEtatProjet() == Etat::ANNULE) {
                 continue;
             }
-            $derniereVersion    =  $projet->derniereVersion();
-            if ($derniereVersion != null
-            && $derniereVersion->getSession() != null
-            && $derniereVersion->getSession()->getAnneeSession() == $annee
-            &&  ($derniereVersion->getEtatVersion() == Etat::ACTIF || $derniereVersion->getEtatVersion() == Etat::TERMINE)
-            ) {
+            $derniereVersion = $projet->derniereVersion();
+            $versionActive = $projet->getVersionActive();
+            if ($derniereVersion == null) continue;
+            if ($versionActive == null) continue;
+            if ($derniereVersion->getSession() == null) continue;
+            if ($derniereVersion->getSession()->getAnneeSession() != $annee) continue;
+            if ($derniereVersion->getEtatVersion() == Etat::ACTIF || $derniereVersion->getEtatVersion() == Etat::TERMINE)
+            {
                 if ($type_session == 'A') {
                     $responsable    =  $derniereVersion->getResponsable();
                     if ($responsable != null) {
@@ -314,9 +330,8 @@ class MailController extends AbstractController
                 # Session de type B = On ne s'intéresse qu'aux projets qui ont une forte consommation
                 else
                 {
-                    if ($derniereVersion->getSession()->getLibelleTypeSession() == 'B') {
-                        continue;
-                    }
+                    if ($derniereVersion->getSession()->getLibelleTypeSession() == 'B') continue;
+
                     $conso = $sp->getConsoCalculVersion($derniereVersion);
 
                     if ($derniereVersion->getAttrHeures() > 0) {
