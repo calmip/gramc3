@@ -1431,6 +1431,37 @@ class ServiceMenus
 
     ////////////////////////////////////////////////////////////////////////////
 
+    public function mailToResponsablesRallonge(int $priorite=self::HPRIO):array
+    {
+        $session = $this->ss->getSessionCourante();
+        if ($session != null) {
+            $etatSession     = $session->getEtatSession();
+            $idSession       = $session->getIdSession();
+        } else {
+            $this->sj->errorMessage(__METHOD__ . ':' . __LINE__ . " La session courante est nulle !");
+            $etatSession     = null;
+            $idSession       = 'X';
+        }
+
+        $menu['name']        = 'mail_to_responsables_rallonge';
+        $menu['param']       = $idSession;
+        $menu['lien']        = "Mail - Proposition de rallonge";
+        $menu['commentaire'] = "Vous ne pouvez pas envoyer un mail aux responsables de projets";
+        $menu['ok']          = false;
+        $menu['raison']      = "Vous n'êtes pas un administrateur ou président";
+        $menu['icone']      = "mail";
+
+        if ($this->ac->isGranted('ROLE_ADMIN') || $this->ac->isGranted('ROLE_PRESIDENT')) {
+            $menu['ok']          = true;
+            $menu['commentaire'] = "Envoyer un rappel aux responsables des projets qui n'ont pas renouvelé !";
+        }
+
+        $this->__prio($menu, $priorite);
+        return $menu;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+
     public function mailToResponsablesFiche(int $priorite=self::HPRIO):array
     {
         $session = $this->ss->getSessionCourante();

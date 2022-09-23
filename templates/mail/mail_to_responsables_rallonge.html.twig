@@ -1,0 +1,45 @@
+{% extends 'default/base.html.twig' %}
+
+{% import "default/macros.html.twig" as gramcmacros %}
+
+
+{# ######################################################################### #}
+
+{% block body %}
+<h2>Responsables ayant au moins un gros projet en limite de quota</h2>
+
+<section>
+    <div class="information">Le message sera envoyé aux responsables des projets que vous avez sélectionnés </div>
+
+    <p>{{ form_start(form) }}</p>
+
+    <table><tbody>
+    {% for responsable in responsables %}
+    <tr>
+        <td>{{ form_widget(responsable.selform ) }}</td>
+        <td>{{ responsable.responsable.prenom }}</td>
+        <td>{{ responsable.responsable.nom }}</td>
+        <td>{{ responsable.responsable.mail }}</td>
+        <td>
+        {% for projet in responsable.projets %}
+            {% set c = serviceProjets.consoressource(projet,'cpu') %}
+            {% if c[1] == 0 %}
+                {% set conso = 0 %}
+            {% else %}
+                {% set conso = 100 * c[0] / c[1] %}
+            {% endif %}
+            {{ projet }} <small>({{ projet.versionactive.attrHeuresTotal|number_format(0, ',', ' ') }}h - {{conso | number_format(0, ',', ' ')}}%)</small>
+        {% endfor %}
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody></table>
+
+    <div class="center inputrond submitdyn ">
+    <p>
+    {{ form_widget( form)}}
+    {{ form_end(form) }}
+    </p>
+    </div>
+</section>
+{% endblock body %}

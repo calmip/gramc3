@@ -129,6 +129,8 @@ class GramcSessionController extends AbstractController
 
         $menu2[] = $sm->gererSessions();
         $menu2[] = $sm->bilanSession();
+
+        $menu2[] = $sm->mailToResponsablesRallonge();
         $menu2[] = $sm->mailToResponsables();
         $menu2[] = $sm->mailToResponsablesFiche();
 
