@@ -1268,6 +1268,7 @@ tbody tr.rallonge{
     max-height: 70vh;
     overflow-y: scroll;
     background-color: #fbfbfb;
+    border-radius: 20px;
 }
 
 #consulter_projet details .chapitre th{
