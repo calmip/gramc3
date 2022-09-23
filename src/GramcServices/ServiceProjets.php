@@ -246,9 +246,6 @@ class ServiceProjets
         $total['sess']['demHeuresB']  = 0;  // Heures demandées en B
         $total['sess']['attrHeuresB'] = 0;  // Heures attribuées en B
 
-        $total['sess']['penalitesA']  = 0;  // Pénalités de printemps (sous-consommation entre Janvier et Juin)
-        $total['sess']['penalitesB']  = 0;  // Pénalités d'Automne (sous-consommation l'été)
-
         // Données consolidées - projets tests
         // Plus utilisées à partir de 2022
         $total['prjTest']     = 0;  // Nombre de projets tests
@@ -262,11 +259,7 @@ class ServiceProjets
         $total['fil']['demHeuresB']  = 0;  // Heures demandées en B
         $total['fil']['attrHeuresB'] = 0;  // Heures attribuées en B
 
-        $total['fil']['penalitesA']  = 0;  // Pénalités de printemps (sous-consommation entre Janvier et Juin)
-        $total['fil']['penalitesB']  = 0;  // Pénalités d'Automne (sous-consommation l'été)
-
         // Rallonges
-
         $total['sess']['rall']        = 0;  // Nombre de rallonges
         $total['sess']['demHeuresR']  = 0;  // Heures demandées dans des rallonges
         $total['sess']['attrHeuresR'] = 0;  // Heures attribuées dans des rallonges
@@ -402,7 +395,7 @@ class ServiceProjets
                 $total['attrHeuresP'] += $v->getAttrHeures();
                 $total[$type]['demHeuresA']  += $v->getDemHeures();
                 $total[$type]['attrHeuresA'] += $v->getAttrHeures();
-                $total[$type]['penalitesA']  += $v->getPenalHeures();
+                $total['penalitesA']  += $v->getPenalHeures();
                 $total['attrHeuresP'] -= $v->getPenalHeures();
 
             }
@@ -503,8 +496,8 @@ class ServiceProjets
             $total['demHeuresP']  += $v->getDemHeures();
             $total['attrHeuresP'] += $v->getAttrHeures();
             $total[$type]['demHeuresB']  += $v->getDemHeures();
-            $total[$type]['attrHeuresB'] += $v->getAttrHeures();
-            $total[$type]['penalitesB']  += $v->getPenalHeures();
+            $total['attrHeuresB'] += $v->getAttrHeures();
+            $total['penalitesB']  += $v->getPenalHeures();
             $total['attrHeuresP'] -= $v->getPenalHeures();
 
             // La conso (attention à ne pas compter deux fois la conso pour les projets déjà entamés !)

@@ -71,11 +71,11 @@
             </tr>
             <tr>
                 <th>Heures demandées</th>
-            <td>{{ total.sess.demHeuresA|number_format(0, ',', ' ') }}</td>
+            <td>{{ total.sess.demHeuresA|number_format(0, ',', '&nbsp;')|raw }}</td>
             </tr>
             <tr>
                 <th>Heures attribuées</th>
-                <td>{{ total.sess.attrHeuresA|number_format(0, ',', ' ') }}</td>
+                <td>{{ total.sess.attrHeuresA|number_format(0, ',', '&nbsp;')|raw }}</td>
             </tr>
         </table>
         
@@ -85,11 +85,11 @@
             </tr>
             <tr>
                 <th>Heures demandées</th>
-                <td>{{ total.sess.demHeuresB|number_format(0, ',', ' ') }}</td>
+                <td>{{ total.sess.demHeuresB|number_format(0, ',', '&nbsp;')|raw }}</td>
             </tr>
             <tr>
                 <th>Heures attribuées</th>
-                <td>{{ total.sess.attrHeuresB|number_format(0, ',', ' ') }}</td>
+                <td>{{ total.sess.attrHeuresB|number_format(0, ',', '&nbsp;')|raw }}</td>
             </tr>
         </table>
         
@@ -103,11 +103,11 @@
             </tr>
             <tr>
                 <th>Heures demandées</th>
-                <td>{{ (total.fil.demHeuresA+total.fil.demHeuresB)|number_format(0, ',', ' ') }}</td>
+                <td>{{ (total.fil.demHeuresA+total.fil.demHeuresB)|number_format(0, ',', '&nbsp;')|raw }}</td>
             </tr>
             <tr>
                 <th>Heures attribuées</th>
-                <td>{{ (total.fil.attrHeuresA+total.fil.demHeuresB)|number_format(0, ',', ' ') }}</td>
+                <td>{{ (total.fil.attrHeuresA+total.fil.demHeuresB)|number_format(0, ',', '&nbsp;')|raw }}</td>
             </tr>
         </table>
     
@@ -121,11 +121,11 @@
             </tr>
             <tr>
                 <th>Heures demandées</th>
-                <td>{{ (total.sess.demHeuresR+total.fil.demHeuresR)|number_format(0, ',', ' ') }}</td>
+                <td>{{ (total.sess.demHeuresR+total.fil.demHeuresR)|number_format(0, ',', '&nbsp;')|raw }}</td>
             </tr>
             <tr>
                 <th>Heures attribuées</th>
-                <td>{{ (total.sess.attrHeuresR+total.fil.attrHeuresR)|number_format(0, ',', ' ') }}</td>
+                <td>{{ (total.sess.attrHeuresR+total.fil.attrHeuresR)|number_format(0, ',', '&nbsp;')|raw }}</td>
             </tr>
         </table>
     
@@ -137,11 +137,11 @@
                 <tr>
                 {# Le id est important seulement pour faire fonctionner les boutons javascript !!! #}
                 <th>Printemps</th>
-                {% if isRecupPrintemps %}<td id="stats_penal">{% else %}<td>{% endif %}{{ total.penalitesA|number_format(0, ',', ' ') }}</td>
+                {% if isRecupPrintemps %}<td id="stats_penal">{% else %}<td>{% endif %}{{ total.penalitesA|number_format(0, ',', '&nbsp;')|raw }}</td>
             </tr>
             <tr>
                 <th>Automne</th>
-                {% if isRecupAutomne %}<td id="stats_penal">{% else %}<td>{% endif %}{{ total.penalitesB|number_format(0, ',', ' ') }}</td>
+                {% if isRecupAutomne %}<td id="stats_penal">{% else %}<td>{% endif %}{{ total.penalitesB|number_format(0, ',', '&nbsp;')|raw }}</td>
             </tr>
         </table>
         {% endif %}
@@ -156,16 +156,16 @@
             </tr>
             <tr>
                 <th>Heures demandées</th>
-                <td>{{ total.demHeuresP|number_format(0, ',', ' ') }}</td>
+                <td>{{ total.demHeuresP|number_format(0, ',', '&nbsp;')|raw }}</td>
             </tr>
             <tr>
                 <th>Heures attribuées</th>
-                <td>{{ total.attrHeuresP|number_format(0, ',', ' ') }}</td>
+                <td>{{ total.attrHeuresP|number_format(0, ',', '&nbsp;')|raw }}</td>
             </tr>
             {% if noconso==false %}
             <tr>
                 <th>Heures consommées</th>
-                <td>{{ (total.sess.consoHeuresCPU+total.sess.consoHeuresGPU+total.fil.consoHeuresCPU+total.fil.consoHeuresGPU)|number_format(0, ',', ' ') }}</td>
+                <td>{{ (total.sess.consoHeuresCPU+total.sess.consoHeuresGPU+total.fil.consoHeuresCPU+total.fil.consoHeuresGPU)|number_format(0, ',', '&nbsp;')|raw }}</td>
             </tr>
             {% endif %}
         </table>
@@ -178,7 +178,7 @@
             {% for key,value in rattachements %}
             <tr>
                 <th>{{ key }}</th>
-                <td>{{ value|number_format(0, ',', ' ') }}</td>
+                <td>{{ value|number_format(0, ',', '&nbsp;')|raw }}</td>
             </tr>
             {% endfor %}
         </table>
@@ -190,18 +190,18 @@
             </tr>
             <tr>
                 <th>Heures pour une année</th>
-                <td>{{ heures_par_an|number_format(0, ',', ' ') }}</td>
+                <td>{{ heures_par_an|number_format(0, ',', '&nbsp;')|raw }}</td>
             </tr>
             <tr>
                 <th>Heures déjà attribuées<br>(y compris rallonges et pénalités)</th>
-                <td id="stats_attribuees">{{ total.attrHeuresP|number_format(0, ',', ' ') }}</td>
+                <td id="stats_attribuees">{{ total.attrHeuresP|number_format(0, ',', '&nbsp;')|raw }}</td>
             </tr>
             {% if noconso==false %}
             <tr>
                 <th>Heures récupérables</th>
                 <td id="stats_recuperables">
                     {% if isRecupPrintemps or isRecupAutomne %}
-                        {{ total.recupHeuresP|number_format(0, ',', ' ') }}
+                        {{ total.recupHeuresP|number_format(0, ',', '&nbsp;')|raw }}
                     {% else %}
                         N/A
                     {%endif%}
@@ -209,7 +209,7 @@
             </tr>
             <tr>
                 <th>Heures consommées</th>
-                <td>{{ (total.sess.consoHeuresCPU+total.sess.consoHeuresGPU+total.fil.consoHeuresCPU+total.fil.consoHeuresGPU)|number_format(0, ',', ' ') }}</td>
+                <td>{{ (total.sess.consoHeuresCPU+total.sess.consoHeuresGPU+total.fil.consoHeuresCPU+total.fil.consoHeuresGPU)|number_format(0, ',', '&nbsp;')|raw }}</td>
             </tr>
             <tr>
                 <th>Heures attribuables</th>
@@ -218,7 +218,7 @@
                     {% if isRecupPrintemps %}
                         {% set attribuables = heures_par_an/2 - (total.attrHeuresP-total.consoHeuresP) %}
                         {% if attribuables>0 %}
-                            {{ attribuables|number_format(0, ',', ' ') }}
+                            {{ attribuables|number_format(0, ',', '&nbsp;')|raw }}
                         {% else %}
                             0
                         {% endif %}
@@ -402,7 +402,7 @@
             </td>
             {% if noconso==false %}
             <td class="penalite" >
-                {{ -(prj_array.penal_a + prj_array.penal_b) }}
+                {{ prj_array.penal_a + prj_array.penal_b }}
             </td>
             {% endif %}
             <td class="attr" >
@@ -451,7 +451,7 @@
             {% endif %}
             {% if isRecupAutomne %}
                 {# Pas de pénalités sur les projets tests ! #}
-                {% if projet.id starts with 'P' %}
+                {% if not projet.isProjetTest %}
                     <td> {{ prj_array.attrete }}</td>
                     <td> {{ prj_array.consoete}} </td>
                     <td class="recuperable">
@@ -459,11 +459,11 @@
                     <td>
                         {% if prj_array.penal_b==0 %}{% set invisible_recup="" %} {% set invisible_norecup="invisible" %} {% endif %}
                         {% if prj_array.penal_b >0 %}{% set invisible_recup="invisible" %} {% set invisible_norecup="" %} {% endif %}
-                        {% if prj_array.penal_b>0 or prj_array.recuperable>0 %}
-                            <a href="{{ path('penal_version', { 'id': prj_array.va.idversion, 'penal' : prj_array.recuperable }) }}" class="bouton_penalite {{invisible_recup}}" title="Appliquer la pénalité" >
+                        {% if prj_array.penal_b >0 or prj_array.recuperable>0 %}
+                            <a href="{{ path('penal_version', { 'id': prj_array.vb.idversion, 'penal' : prj_array.recuperable }) }}" class="bouton_penalite {{invisible_recup}}" title="Appliquer la pénalité" >
                                 {{icones.recup(20,20)}}
                             </a>
-                            <a href="{{ path('penal_version', { 'id': prj_array.va.idversion, 'penal' : -prj_array.recuperable }) }}" class="bouton_penalite {{invisible_norecup}}" title="Supprimer la pénalité" >
+                            <a href="{{ path('penal_version', { 'id': prj_array.vb.idversion, 'penal' : -prj_array.recuperable }) }}" class="bouton_penalite {{invisible_norecup}}" title="Supprimer la pénalité" >
                                 {{icones.norecup(20,20)}}
                             </a>
                         {% else %}

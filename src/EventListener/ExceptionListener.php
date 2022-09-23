@@ -86,7 +86,7 @@ class ExceptionListener
 
         // En mode debug, on affiche l'exception
         // Commenter cette ligne pour récupérer le comportement de la prod !
-        if( $this->kernel_debug == true ) return;
+         if( $this->kernel_debug == true ) return;
  
         // nous captons des erreurs de la page d'accueil
         if( $event->getRequest()->getPathInfo() == '/' )
