@@ -1,0 +1,66 @@
+@startuml
+title Mécanisme de création de compte sur gramc et le supercalculateur
+
+actor Alice
+actor Bob
+actor sysadmin
+participant gramc
+participant calc
+
+note over Alice: Responsable\nde projet
+note over Bob: Collaborateur\n d'Alice
+
+gramc    <- calc: Logins à créer ?
+activate gramc
+return OK
+deactivate gramc
+
+Alice    -> gramc: crée un nouveau collab
+activate gramc
+Bob      <- gramc: Mail: invitation
+return OK
+
+...de temps en temps calc envoie une requête...
+
+gramc    <- calc: Logins à créer ?
+activate gramc
+sysadmin <- gramc: Mail: Merci de créer le user Bob
+return OK
+
+...quand sysadmin a le temps...
+sysadmin -> calc: Création d'un nouveau user
+activate calc
+gramc    <- calc: Dépose du mot de passe temporaire
+return OK
+
+...Quelques jours plus tard...
+
+group Bob répond [avant invit_duree jours\naprès envoi de l'invitation]
+    Bob      -> gramc: Se connecte à gramc et complète son profil
+    activate gramc
+    gramc    -> gramc: Supprime l'invitation
+    return OK
+end
+
+...De temps en temps...
+
+gramc    -> gramc: Supprime les invitations périmées
+
+...Quand bob a le temps...
+
+group Bob se connecte [avant pwd_duree jours\naprès création du compte]
+    Bob      -> gramc: Se connecte à gramc et récupère son mot de passe
+    activate gramc
+    return OK
+    Bob      -> calc:  Se connecte à calc et change son mot de passe
+    activate calc
+    return OK
+end
+
+...calc vérifie de temps en temps les mots de passe temporaires...
+gramc    <- calc:  Efface les mots de passes périmés ou changés
+activate calc
+return OK
+
+@enduml
+

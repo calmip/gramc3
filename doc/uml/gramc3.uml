@@ -1,0 +1,121 @@
+@startuml
+
+title =Les principales entités de gramc\nLe code se trouve dans src/Entity
+
+class Session {
+    -bool typeSession
+    -int etatSession
+    -string idSession
+    -string commGlobal
+    -date dateDebutSession
+    -date dateFinSession
+    +string getIdSession()
+}
+
+class Projet {
+    -int typeProjet
+    -int etatProjet
+    -string idProjet
+    -Version versionActive
+    -Version versionDerniere
+    + string getIdProjet()
+}
+
+class Version {
+    - int etatVersion
+    - string idVersion
+    - string demHeures
+    - string attrHeures
+    - string attrHeuresEte
+    + string getIdVersion()
+}
+
+class Rallonge {
+    - int etatRallonge
+    - string idRallonge
+    - int demHeures
+    - int attrHeures
+    - int nbHeuresAtt
+    - int commentaireInterne
+    - int commentaireExterne
+    - bool validation
+    - bool attrAccept
+    
+    + string getIdRallonge()
+}
+
+class Individu {
+    - int id
+    - string nom
+    - string prenom
+    - string mail
+    - bool admin
+    + getNom()
+    + getRoles()
+    + getUserName()    
+}
+
+class Sso {
+    - string eppn
+}
+
+class CollaborateurVersion {
+    - string labo
+    - string statut
+    - string etablissement
+    - bool login
+    - bool clogin
+}
+
+class Expertise {
+    - string commentaireExterne
+    - string commentaireInterne
+    - int nbHeuresAtt
+    - bool validation
+    - bool definitif
+    + getValidation()
+}
+
+interface UserInterface
+
+Session "1" o-- "0..n" Version
+Projet  "1" o-- "0..n" Version
+Version "1" o-- "0..n" Rallonge
+
+Individu --|> UserInterface
+
+Individu "1" o-- "0..n" CollaborateurVersion
+Individu "1" o-- "0..n" Sso
+Version "1" o-- "0..n" CollaborateurVersion
+Expertise "0..n" o-- "1" Individu
+Expertise "0..n" o-- "1" Version
+
+
+class Invitation {
+    - string clef
+    - string creationStamp
+    + string getClef()
+}
+
+note "personne invitée \net personne invitante" as N1
+Individu .. N1
+N1 .. Invitation
+Individu "2" o-- "1" Invitation
+
+class User {
+    - string loginname
+    - string password
+    - string cpassword
+    - date passexpir
+    + getLoginName()
+    
+}
+
+class Compta {
+    - date date;
+    - string ressource
+    - int conso
+    - int quota
+    + int getConso()
+}
+@enduml
