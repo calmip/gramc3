@@ -1,0 +1,29 @@
+@startuml
+
+title Etats d'une version\ngramc 3.x
+
+EDITION_DEMANDE: Id 2
+EDITION_EXPERTISE: Id 3
+EN_ATTENTE: Id 4
+ACTIF: Id 5
+NOUVELLE_VERSION_DEMANDEE: Id 6
+TERMINE: Id 9
+state ACTIF #red
+state NOUVELLE_VERSION_DEMANDEE #pink
+
+note left of EDITION_DEMANDE: Les demandeurs\nremplissent le formulaire
+note left of EDITION_EXPERTISE: L'expert analyse le dossier\nSi la session est EN_ATTENTE\nil ou elle peut envoyer la décision\nqui devient définitive
+note left of EN_ATTENTE: L'expert a envoyé son expertise\nMais la session n'a pas démarré
+note left of ACTIF: La session a démarré l'accès est ouvert
+
+[*]               --> EDITION_DEMANDE
+EDITION_DEMANDE   --> EDITION_EXPERTISE: CLK_VAL_DEM(10)
+EDITION_EXPERTISE --> EDITION_DEMANDE: CLK_ARR(14)
+EDITION_EXPERTISE --> EN_ATTENTE: CLK_VAL_EXP_OK (11)
+EDITION_EXPERTISE --> TERMINE: CLK_VAL_EXP_KO (12)
+EN_ATTENTE        --> ACTIF: CLK_SESS_DEB(20)
+ACTIF             --> NOUVELLE_VERSION_DEMANDEE: CLK_VAL_EXP_OK (11)
+ACTIF             --> TERMINE: CLK_SESS_FIN(21)
+NOUVELLE_VERSION_DEMANDEE --> TERMINE: CLK_SESS_FIN (21)
+TERMINE           --> [*]
+@enduml

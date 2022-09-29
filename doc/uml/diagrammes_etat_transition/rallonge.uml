@@ -1,0 +1,27 @@
+@startuml
+
+title Etats d'une rallonge\ngramc 3.x
+
+EDITION_DEMANDE: Id 2
+EDITION_EXPERTISE: Id 3
+EN_ATTENTE: Id 4
+ACTIF: Id 5
+ANNULE: Id 10
+TERMINE: Id 9
+state ACTIF #red
+
+note left of EDITION_DEMANDE: Les demandeurs\nremplissent le formulaire
+note left of EDITION_EXPERTISE: L'expert donne un avis
+note left of EN_ATTENTE: Le président décide
+
+[*]               --> EDITION_DEMANDE
+EDITION_DEMANDE   --> EDITION_EXPERTISE: CLK_VAL_DEM(10)
+EDITION_EXPERTISE --> EN_ATTENTE: CLK_VAL_EXP_OK (11)\nCLK_VAL_EXP_KO (12)
+EN_ATTENTE        --> ACTIF: CLK_VAL_PRS(5)
+EDITION_DEMANDE   --> ANNULE: CLK_SESS_FIN (21)\nCLK_FERM (22)
+EDITION_EXPERTISE --> ANNULE: CLK_SESS_FIN (21)\nCLK_FERM (22)
+EN_ATTENTE        --> ANNULE: CLK_SESS_FIN (21)\nCLK_FERM (22)
+ACTIF             --> TERMINE: CLK_SESS_FIN (21)\nCLK_FERM (22)
+TERMINE           --> [*]
+ANNULE            --> [*]
+@enduml

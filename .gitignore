@@ -49,3 +49,5 @@ public/index.php
 vendor/**
 tools/phpstan/**
 tools/php-cs-fixer/**
+
+doc/**/*.png
