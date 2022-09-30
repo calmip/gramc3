@@ -2317,3 +2317,17 @@ img.dfct {
     margin: auto;
 }
 
+/* =============== Réponse à une invitation ============== */
+#section_repinvit {
+    width: 70%;
+    margin: 1em auto;
+}
+
+#section_repinvit p{
+    margin-bottom: .5em;
+}
+
+#section_repinvit input {
+    margin-bottom: 1em;
+    margin-left: 2em;
+}

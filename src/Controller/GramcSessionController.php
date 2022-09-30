@@ -704,7 +704,7 @@ class GramcSessionController extends AbstractController
                     ->add('mail',
                     ChoiceType::class,
                     [
-                        'required' => false,
+                        'required' => true,
                         'label'    => '',
                         'expanded' => true,
                         'multiple' => false,
