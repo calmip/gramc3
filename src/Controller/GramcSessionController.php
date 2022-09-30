@@ -609,7 +609,7 @@ class GramcSessionController extends AbstractController
     ///////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @Route("/{clef}/repinvit", name="repinvit", methods={"GET"})
+     * @Route("/{clef}/repinvit", name="repinvit", methods={"GET","POST"})
      */
     public function repinvitAction(Request $request, Invitation $invitation=null): Response
     {
@@ -625,18 +625,7 @@ class GramcSessionController extends AbstractController
             return $this->redirectToRoute('accueil');
         }
         
-        // Invitation valide = on redirige vers repinvitok
-        // Cette fois il faudra s'authentifier
-        return $this->redirectToRoute('repinvitok', ['clef' => $invitation->getClef()]);
-    }
-
-    /**
-     * @Route("/{clef}/repinvitok", name="repinvitok", methods={"GET","POST"})
-     * @Security("is_granted('ROLE_DEMANDEUR')")
-     */
-    public function repinvitokAction(Request $request, Invitation $invitation=null): Response
-    {
-        // Date OK - On vérifie les users
+        // Invitation valide - On vérifie les users
         $em = $this->em;
         $invited = $invitation->getInvited();
         $connected = $this->ts->getToken()->getUser();
