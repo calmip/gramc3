@@ -78,13 +78,6 @@ class SelectJournalType extends AbstractType
                     [
                         'label'         => 'chercher',
                     ]
-                )
-                ->add(
-                    'all',
-                    SubmitType::class,
-                    [
-                        'label'         => 'AFFICHER TOUT',
-                    ]
                 );
     }
 
