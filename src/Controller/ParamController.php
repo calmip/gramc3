@@ -135,7 +135,6 @@ class ParamController extends AbstractController
     }
 
     /**
-     * Displays a form to edit an existing param entity.
      *
      * @Route("/avancer", name="param_avancer", methods={"GET","POST"})
      * Method({"GET", "POST"})

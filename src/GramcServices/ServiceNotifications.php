@@ -51,6 +51,18 @@ class ServiceNotifications
     }
 
     /*****
+     * Envoi d'une notification de test pour tester la configuration mail
+     *
+     * param $addr  Une adresse mail de destination
+     *
+     *******************************************/
+    public function sendTestMessage(string $addr)
+    {
+        $sujet = "Test d'envoi de mails depuis gramc";
+        $contenu = "Bonjour\nSi $addr reçoit ce mail le test est concluant\nBravo\ngramc";
+        $this->sendRawMessage($sujet, $contenu, [ $addr ]);
+    }
+    /*****
      * Envoi d'une notification
      *
      * param $twig_sujet, $twig_contenu Templates Twig des messages:

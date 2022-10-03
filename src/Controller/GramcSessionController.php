@@ -155,6 +155,7 @@ class GramcSessionController extends AbstractController
         $menu6[] = $sm->lireJournal();
         $menu6[] = $sm->afficherConnexions();
         if ($this->getParameter('kernel.debug')) $menu6[] = $sm->tempsAvancer();
+        $menu6[] = $sm->testerMail();
         $menu6[] = $sm->phpInfo();
         $menu6[] = $sm->nettoyerRgpd();
 
