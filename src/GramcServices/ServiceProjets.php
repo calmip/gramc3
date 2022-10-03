@@ -228,18 +228,17 @@ class ServiceProjets
         $total['sess'] = [];
         $total['fil'] = [];
 
-        $total['prj']         = 0;  // Nombre de projets (A ou B) (A JETER)
-        $total['demHeuresA']  = 0;  // Heures demandées en A (A JETER)
-        $total['attrHeuresA'] = 0;  // Heures attribuées en A (A JETER)
-        $total['demHeuresB']  = 0;  // Heures demandées en B (A JETER))
+        //$total['prj']         = 0;  // Nombre de projets (A ou B) (A JETER)
+        //$total['demHeuresA']  = 0;  // Heures demandées en A (A JETER)
+        //$total['attrHeuresA'] = 0;  // Heures attribuées en A (A JETER)
+        //$total['demHeuresB']  = 0;  // Heures demandées en B (A JETER))
         $total['sess']['prj'] = 0;  // Nombre de projets (A ou B)
-        $total['attrHeuresB'] = 0;  // Heures attribuées en B (A JETER)
         $total['penalitesA']  = 0;  // Pénalités de printemps (sous-consommation entre Janvier et Juin) (A JETER)
         $total['penalitesB']  = 0;  // Pénalités d'Automne (sous-consommation l'été) (A JETER)
         $total['rall']        = 0;  // Nombre de rallonges (A JETER))
-        $total['demHeuresR']  = 0;  // Heures demandées dans des rallonges (A JETER)
-        $total['attrHeuresR'] = 0;  // Heures attribuées dans des rallonges (A JETER)
-        $total['consoHeuresP']= 0;           // Heures consommées - A JETER ASAP
+        //$total['demHeuresR']  = 0;  // Heures demandées dans des rallonges (A JETER)
+        //$total['attrHeuresR'] = 0;  // Heures attribuées dans des rallonges (A JETER)
+        //$total['consoHeuresP']= 0;           // Heures consommées - A JETER ASAP
 
         $total['sess']['demHeuresA']  = 0;  // Heures demandées en A
         $total['sess']['attrHeuresA'] = 0;  // Heures attribuées en A
@@ -496,7 +495,7 @@ class ServiceProjets
             $total['demHeuresP']  += $v->getDemHeures();
             $total['attrHeuresP'] += $v->getAttrHeures();
             $total[$type]['demHeuresB']  += $v->getDemHeures();
-            $total['attrHeuresB'] += $v->getAttrHeures();
+            $total[$type]['attrHeuresB'] += $v->getAttrHeures();
             $total['penalitesB']  += $v->getPenalHeures();
             $total['attrHeuresP'] -= $v->getPenalHeures();
 

@@ -216,14 +216,7 @@ class JournalController extends AbstractController
             $data['niveau'] = Journal::INFO; // attention, cette valeur remplacée par la valeur dans Form/SelectJournalType
         }
 
-        // on regarde si le bouton 'chercher tout' défini dans SelectJournalType a été utilisé
-        if ($form->get('all')->isClicked()) {
-            $journals =  $em->getRepository(Journal::class)->findAll();
-        } else {
-            $journals =  $em->getRepository(Journal::class)->findData($data['dateDebut'], $data['dateFin'], $data['niveau']);
-        }
-        //  findData est défini dans JournalRepository - modèle
-
+        $journals =  $em->getRepository(Journal::class)->findData($data['dateDebut'], $data['dateFin'], $data['niveau']);
         return [ 'journals' => $journals, 'form' => $form ];
     }
 }
