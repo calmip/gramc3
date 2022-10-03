@@ -25,6 +25,7 @@ namespace App\GramcServices;
 
 use App\Entity\Individu;
 use App\Entity\CollaborateurVersion;
+use App\Entity\CommentaireExpert;
 use App\Entity\Expertise;
 use App\Entity\Journal;
 use App\Entity\Rallonge;
@@ -50,6 +51,7 @@ class ServiceIndividus
      *
      * Utilisé lorsqu'on fusionne des comptes: tous les objets liés à $individu
      * sont maintenant attribués à $new_individu
+     * 
      * NOTE - C'est le code appelant qui devra faire le flush()
      *************************************************************************/
     public function fusionnerIndividus(Individu $individu, Individu $new_individu): void
@@ -69,6 +71,7 @@ class ServiceIndividus
         $Rallonge = $em->getRepository(Rallonge::class)->findBy(['expert' => $individu]);
         $Sso = $em->getRepository(Sso::class)->findBy(['individu' => $individu]);
         $Thematique = $individu->getThematique();
+        $commentaires =  $em->getRepository(CommentaireExpert::class)->findBy(['expert' => $individu]);
 
         // Supprimer les thématiques dont $individu est expert
         // Attention, $new_individu ne reprend pas ces thématiques
@@ -105,6 +108,11 @@ class ServiceIndividus
 
         // Mes expertises
         foreach ($Expertise  as $item) {
+            $item->setExpert($new_individu);
+        }
+
+        // Mes commentaires d'expert
+        foreach ($commentaires as $item) {
             $item->setExpert($new_individu);
         }
 

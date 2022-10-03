@@ -1,4 +1,6 @@
 {% extends 'default/base.html.twig' %}
+{% import "default/icone.html.twig" as icones %}
+
 
 {% block body %}
 <section>
@@ -7,23 +9,23 @@
     {% import "default/macros.html.twig" as gramcmacros %}
     {{ gramcmacros.menu(menu) }}
 
-    <table id="laboratoires" >
+    <table id="laboratoires" style="stroke: black">
     <thead>
         <tr>
-			{% if is_granted('ROLE_ADMIN') %}<th colspan="2">&nbsp;</th>{% endif %}<th>Numéro d'ordre</th><th>Acronyme</th><th>Libellé</th>
+            {% if is_granted('ROLE_ADMIN') %}<th colspan="2">&nbsp;</th>{% endif %}<th>Numéro d'ordre</th><th>Acronyme</th><th>Libellé</th>
         </tr>
     </thead>
     <tbody>
     {% for labo in laboratoires %}
         <tr>
-			{% if is_granted('ROLE_ADMIN') %}
+            {% if is_granted('ROLE_ADMIN') %}
             <td>
                 <a class="suppression" href="{{ path('supprimer_laboratoire',{'id' : labo.idLabo }) }}" title="Supprimer">
-                <img class="bouton_poussoir" src="{{ gramcmacros.img_supprimer() }}" alt="Supprimer" /></a>
+                {{ icones.supprimer() }}</a>
             </td>
             <td>
                 <a class="modification" href="{{ path('modifier_laboratoire',{'id' : labo.idLabo }) }}" title="Modifier le libellé">
-                <img class="bouton_poussoir" src="{{ gramcmacros.img_modifier() }}" alt="Modifier" /></a>
+                {{ icones.modifier() }}</a>
             </td>
             {% endif %}
             <td>{{ labo.numeroLabo }}</td>

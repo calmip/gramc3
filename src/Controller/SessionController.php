@@ -108,9 +108,9 @@ class SessionController extends AbstractController
         $sj = $this->sj;
         $ss = $this->ss;
         
-        if ($sm->gerer_sessions()['ok'] == false) {
+        if ($sm->gererSessions()['ok'] == false) {
             $sj->throwException(__METHOD__ . ':' . __LINE__ . " Ecran interdit " .
-        " parce que : " . $sm->gerer_sessions()['raison']);
+        " parce que : " . $sm->gererSessions()['raison']);
         }
 
         $em       = $this->em;
@@ -237,31 +237,28 @@ class SessionController extends AbstractController
         if ($workflow->canExecute(Signal::DAT_FIN_DEM, $session_courante)) {
             $workflow->execute(Signal::DAT_FIN_DEM, $session_courante);
             $em->flush();
-        } else {
-            return $this->render(
-                'default/error.html.twig',
-                [
-                'message'   => 'Impossible terminer la saisie',
-                'titre'     =>  'Erreur',
-                ]
-            );
         }
 
+        else
+        {
+            $msg = "Impossible de changer l'état de la session, allez voir le journal";
+            $request->getSession()->getFlashbag()->add("flash erreur"," $msg");
+        }
+        
         // Si le paramètre noedition_expertise vaut true, on saute une étape dans le workflow !
         if ($this->getParameter('noedition_expertise')==true)
         {
-            if ($workflow->canExecute(Signal::CLK_ATTR_PRS, $session_courante)) {
+            if ($workflow->canExecute(Signal::CLK_ATTR_PRS, $session_courante))
+            {
                 $workflow->execute(Signal::CLK_ATTR_PRS, $session_courante);
                 $em->flush();
-            } else {
-                return $this->render(
-                    'default/error.html.twig',
-                    [
-                    'message'   => 'Impossible terminer la saisie',
-                    'titre'     =>  'Erreur',
-                    ]
-                );
-            };
+            }
+
+            else
+            {
+                $msg = "Impossible de changer l'état de la session, allez voir le journal";
+                $request->getSession()->getFlashbag()->add("flash erreur"," $msg");
+            }
         }
                 
         return $this->redirectToRoute('gerer_sessions');
@@ -326,7 +323,8 @@ class SessionController extends AbstractController
         $workflow = $this->sw;
 
         // On active une session A = trois signaux envoyés sur trois sessions différentes !
-        if ($mois == 1 ||  $mois == 12) {
+        if ($mois == 1 ||  $mois == 12)
+        {
             if ($workflow->canExecute(Signal::CLK_SESS_DEB, $session_courante) && $etat_session_courante == Etat::EN_ATTENTE) {
                 // On termine les deux sessions A et B de l'année précédente
                 foreach ($sessions as $session) {
@@ -345,7 +343,8 @@ class SessionController extends AbstractController
         }
 
         // On active une session B = deux signaux envoyés sur deux sessions différentes
-        elseif ($mois == 6 ||  $mois == 7) {
+        elseif ($mois == 6 ||  $mois == 7)
+        {
             // manu - corrigé le 20 juillet 2021
             //if( $workflow->canExecute(Signal::CLK_SESS_DEB , $session_courante)  && $etat_session_courante == Etat::EN_ATTENTE )
             //{
@@ -362,21 +361,21 @@ class SessionController extends AbstractController
                     $em->flush();
                 }
             }
-        } else {
-            $sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Une session ne peut être activée qu'en Décembre, en Janvier, en Juin ou en Juillet");
         }
 
-        if ($ok==true) {
+        else
+        {
+            $msg = "Une session ne peut être activée qu'en Décembre, Janvier, Juin ou Juillet";
+            $request->getSession()->getFlashbag()->add("flash erreur"," $msg");
+            $sj->errorMessage(__METHOD__ . ':' . __LINE__ . " $msg");
             return $this->redirectToRoute('gerer_sessions');
-        } else {
-            return $this->render(
-                'default/error.html.twig',
-                [
-                'message'   => "Impossible d'activer la session, allez voir le journal !",
-                'titre'     =>  'Erreur',
-            ]
-            );
         }
+
+        if ($ok==false) {
+            $msg = "Impossible d'activer la session, allez voir le journal !";
+            $request->getSession()->getFlashbag()->add("flash erreur"," $msg");
+        }
+        return $this->redirectToRoute('gerer_sessions');
     }
 
     /**
@@ -388,7 +387,15 @@ class SessionController extends AbstractController
     public function envoyerExpertisesAction(Request $request): Response
     {
         $ss = $this->ss;
+        $sm = $this->sm;
+        $sj = $this->sj;
         $em = $this->em;
+
+        // ACL
+        if ($sm->envoyerExpertises()['ok'] == false) {
+            $sj->throwException(__METHOD__ . ':' . __LINE__ . " impossible pour l'instant parce que : " .
+            $sm->envoyerExpertises()['raison']);
+        }
 
         $session_courante = $ss->getSessionCourante();
         $workflow = $this->sw;
@@ -396,24 +403,22 @@ class SessionController extends AbstractController
         // On supprime de la session php la référence à la SessionCourante Gramc
         $request->getSession()->remove('SessionCourante');
 
-        if ($workflow->canExecute(Signal::CLK_ATTR_PRS, $session_courante)) {
+        if ($workflow->canExecute(Signal::CLK_ATTR_PRS, $session_courante))
+        {
             $workflow->execute(Signal::CLK_ATTR_PRS, $session_courante);
             $em->flush();
-
-            return $this->redirectToRoute('gerer_sessions');
-        } else {
-            return $this->render(
-                'default/error.html.twig',
-                [
-                'message'   => "Impossible d'envoyer les expertises",
-                'titre'     =>  'Erreur',
-                ]
-            );
         }
+
+        else
+        {
+            $msg = "Impossible de passer la session en expertise, allez voir le journal !";
+            $request->getSession()->getFlashbag()->add("flash erreur"," $msg");
+        }
+
+        return $this->redirectToRoute('gerer_sessions');
     }
 
     /**
-     *
      *
      * @Route("/demarrer_saisie", name="demarrer_saisie",methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
@@ -436,19 +441,16 @@ class SessionController extends AbstractController
         // Supprimer toutes les sessions php, donc déloger les utilisateurs éventuellement connectés
         $sps->clearPhpSessions();
         
-        if ($workflow->canExecute(Signal::DAT_DEB_DEM, $session_courante)) {
+        if ($workflow->canExecute(Signal::DAT_DEB_DEM, $session_courante))
+        {
             $workflow->execute(Signal::DAT_DEB_DEM, $session_courante);
             $em->flush();
-            
-            return $this->redirectToRoute('gerer_sessions');
-        } else {
-            return $this->render(
-                'default/error.html.twig',
-                [
-                'message'   => "Impossible demarrer la saisie",
-                'titre'     =>  'Erreur',
-                ]
-            );
+        }
+
+        else
+        {
+            $msg = "Impossible de démarrer la saisie, allez voir le journal !";
+            $request->getSession()->getFlashbag()->add("flash erreur"," $msg");
         }
     }
 
@@ -506,7 +508,7 @@ class SessionController extends AbstractController
     public function consulterAction(Session $session): Response
     {
         $sm = $this->sm;
-        $menu = [ $sm->gerer_sessions() ];
+        $menu = [ $sm->gererSessions() ];
 
         return $this->render('session/consulter.html.twig', array(
             'session' => $session,
@@ -564,6 +566,7 @@ class SessionController extends AbstractController
         $editForm->handleRequest($request);
 
         $menu[] = $sm->envoyerExpertises();
+        $menu[0]['priorite'] = 1;   // On repasse en haute priorité pour voir toujours ce bouton en bas de l'écran !
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
             $this->em->flush();

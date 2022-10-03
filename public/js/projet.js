@@ -38,74 +38,73 @@
 *
 *****/
 function display_conso(e) {
-	var href = $(this).data('href');
-	var img_alt = $(this).attr('alt');
-	var width   = $(this).data("width");        // pas utilisé
-	var height  = $(this).data("height");       // pas utilisé
-	//$('#dialog').html('<img src="'+img_src+'" alt="'+img_alt+'" title="'+img_alt+'" />');
-	$.ajax({
-		url: href,
-		type: "GET",
-		context: $(this)
-	})
-	.done(function(data)
-	{
-		$('#dialog-compta').html(data);
-		$('#dialog-compta').dialog({autoOpen: false, modal: false });
-		$('#dialog-compta').dialog( "option", "title", img_alt );
-		$('#dialog-compta').dialog( "option", "height", 'auto' );
-		$('#dialog-compta').dialog( "option", "width", 'auto' );
-		$('#dialog-compta').dialog('open');
-		$('.dialog-close').on('click',function(){ $( '#dialog-compta' ).dialog('close') });
-	})
+    var href = $(this).data('href');
+    var img_alt = $(this).attr('alt');
+    var width   = $(this).data("width");        // pas utilisé
+    var height  = $(this).data("height");       // pas utilisé
+    //$('#dialog').html('<img src="'+img_src+'" alt="'+img_alt+'" title="'+img_alt+'" />');
+    $.ajax({
+        url: href,
+        type: "GET",
+        context: $(this)
+    })
+    .done(function(data)
+    {
+        $('#dialog-compta').html(data);
+        $('#dialog-compta').dialog({autoOpen: false, modal: false });
+        $('#dialog-compta').dialog( "option", "title", img_alt );
+        $('#dialog-compta').dialog( "option", "height", 'auto' );
+        $('#dialog-compta').dialog( "option", "width", 'auto' );
+        $('#dialog-compta').dialog('open');
+        $('.dialog-close').on('click',function(){ $( '#dialog-compta' ).dialog('close') });
+    })
 };
 
 $( document ).ready(function() {
 
-	/***************************
-	* Lorsqu'on clique sur la vignette, ouvre le dialog permettant de
-	* regarder les figures dans de bonnes conditions
-	***************************/
+    /***************************
+    * Lorsqu'on clique sur la vignette, ouvre le dialog permettant de
+    * regarder les figures dans de bonnes conditions
+    ***************************/
     $('.figure').on('click',function(e) {
-		var img_src = $(this).attr('src');
-		var img_alt = $(this).attr('alt');
-		var width   = $(this).data("width");        // pas utilisé
-		var height  = $(this).data("height");       // pas utilisé
-		$('#dialog').html('<img src="'+img_src+'" alt="'+img_alt+'" title="'+img_alt+'" />');
-		$('#dialog').dialog({autoOpen: false, modal: false });
-		$('#dialog').dialog( "option", "title", img_alt );
-		$('#dialog').dialog( "option", "height", 'auto' );
-		$('#dialog').dialog( "option", "width", 'auto' );
-		$('#dialog').dialog('open');
+        var img_src = $(this).attr('src');
+        var img_alt = $(this).attr('alt');
+        var width   = $(this).data("width");        // pas utilisé
+        var height  = $(this).data("height");       // pas utilisé
+        $('#dialog').html('<img src="'+img_src+'" alt="'+img_alt+'" title="'+img_alt+'" style="width: 100%;" />');
+        $('#dialog').dialog({autoOpen: false, modal: false });
+        $('#dialog').dialog( "option", "title", img_alt );
+        $('#dialog').dialog( "option", "height", 'auto' );
+        $('#dialog').dialog( "option", "width", '100vh' );
+        $('#dialog').dialog('open');
     });
 
-	/****************************
-	* Lorsqu'on clique sur un élément de classe conso, exécute display_conso
-	* Cela peut entrainer l'apparition d'un menu avec des éléments de classe conso,
-	* ils seront liés à la fonction display_conso dès que la souris survolera le popup (cf le .hover)
-	*****************************/
-	$('.conso').on('click',display_conso);
-	$( '#dialog-compta' ).hover(function() {
-		$('.conso').on('click',display_conso);
-	});
-	
-	/*********************************************************************************
-	* Lorsqu'on clique sur un bouton de class "cadenas", on ouvre le div correspondant
-	*********************************************************************/
+    /****************************
+    * Lorsqu'on clique sur un élément de classe conso, exécute display_conso
+    * Cela peut entrainer l'apparition d'un menu avec des éléments de classe conso,
+    * ils seront liés à la fonction display_conso dès que la souris survolera le popup (cf le .hover)
+    *****************************/
+    $('.conso').on('click',display_conso);
+    $( '#dialog-compta' ).hover(function() {
+        $('.conso').on('click',display_conso);
+    });
+    
+    /*********************************************************************************
+    * Lorsqu'on clique sur un bouton de class "cadenas", on ouvre le div correspondant
+    *********************************************************************/
     $('.cadenas').on('click',function(e) {
-		var div_name = $(this).attr("id");
-		prj = div_name.substring(7);
-		div_name = '#dialog_' + prj
-		//var div_name = " toto";
+        var div_name = $(this).attr("id");
+        prj = div_name.substring(7);
+        div_name = '#dialog_' + prj
+        //var div_name = " toto";
 
-		$(div_name).dialog({autoOpen: false, modal: false });
-		$(div_name).dialog( "option", "title", "Identifiants pour " + prj );
-		$(div_name).dialog( "option", "height", 'auto' );
-		$(div_name).dialog( "option", "width", '400');
-		$(div_name).dialog('open');
-		$('.dialog-close').on('click',function(){ $( '#dialog-compta' ).dialog('close') });
-		//alert("coucou " + div_name + " " + div_name.startsWith("bouton"));
-	});
+        $(div_name).dialog({autoOpen: false, modal: false });
+        $(div_name).dialog( "option", "title", "Identifiants pour " + prj );
+        $(div_name).dialog( "option", "height", 'auto' );
+        $(div_name).dialog( "option", "width", '400');
+        $(div_name).dialog('open');
+        $('.dialog-close').on('click',function(){ $( '#dialog-compta' ).dialog('close') });
+        //alert("coucou " + div_name + " " + div_name.startsWith("bouton"));
+    });
 
 });
-

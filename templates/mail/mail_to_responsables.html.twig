@@ -9,8 +9,7 @@
 <h2>Responsables n'ayant pas encore renouvelé leur projet pour la session {{session }}</h2>
 
 <section>
-{% if sent == false %}
-    <div class="message info">Le message sera envoyé aux responsables des projets que vous avez sélectionnés </div>
+    <div class="information">Le message sera envoyé aux responsables des projets que vous avez sélectionnés </div>
 
     <p>{{ form_start(form) }}</p>
 
@@ -31,17 +30,11 @@
     {% endfor %}
     </tbody></table>
 
-    <div class="center">
+    <div class="center inputrond submitdyn ">
     <p>
     {{ form_widget( form)}}
     {{ form_end(form) }}
     </p>
     </div>
-
-{% else %}
-
-    <div class="message info">{{ nb_msg }} messages envoyés pour {{ nb_projets }} projets</div>
-
-{% endif %}
 </section>
 {% endblock body %}

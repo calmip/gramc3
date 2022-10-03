@@ -5,45 +5,50 @@
 <section>
     <h2>Générer et télécharger le bilan annuel</h2>
 
-    {{ form_start(form) }}
-        {{ form_widget(form.annee) }}{{ form_widget(form.submit) }}
-    {{ form_end(form) }}
-
-    <br />
+    <div class="inputrond submitdyn">
+        {{ form_start(form) }}
+            {{ form_widget(form.annee) }}{{ form_widget(form.submit) }}
+        {{ form_end(form) }}
+    </div>
+    <br>
 
     {% if noconso==false %}
     <form action="{{ path('bilan_annuel_csv', {'annee': annee }) }}">
-        <input type="submit" value="Bilan annuel {{ annee }} en csv" />
+        <input class="telecharger_csv" type="submit" value="Bilan annuel {{ annee }} en csv" />
     </form>
     {% endif %}
     
-    <br />
+    <br>
 
     <form action="{{ path('bilan_annuel_labo_csv', {'annee': annee }) }}">
-        <input type="submit" value="Bilan par labo {{ annee }} en csv" />
+        <input class="telecharger_csv" type="submit" value="Bilan par labo {{ annee }} en csv" />
     </form>
 
-    <br />
+    <br>
 
     <form action="{{ path('bilan_annuel_thema_csv', {'annee': annee }) }}">
-        <input type="submit" value="Bilan par thématique {{ annee }} en csv" />
+        <input class="telecharger_csv" type="submit" value="Bilan par thématique {{ annee }} en csv" />
     </form>
 
-    <br />
+    <br>
     
     <form action="{{ path('bilan_annuel_users_csv', {'annee': annee }) }}">
-        <input type="submit" value="Bilan par utilisateur {{ annee }} en csv" />
+        <input class="telecharger_csv" type="submit" value="Bilan par utilisateur {{ annee }} en csv" />
     </form>
 
-    <br />
+    <br>
 
-    <form action="{{ path('projet_resumes', {'annee': annee }) }}">
+    <h3>Affichages sans feuille de style</h3>
+    <p><em>(pour copier-coller dans votre logiciel de bureautique)</em></p>
+
+    <form action="{{ path('projet_resumes', {'annee': annee }) }}" class="inputrond">
         <input type="submit" value="Afficher les résumés des projets de l'année {{ annee }}" />
     </form>
-
-    <br />
+    
+    <br>
+    
     {% if avec_commentaires %}
-        <form action="{{ path('commentaireexpert_liste', {'annee': annee }) }}">
+        <form action="{{ path('commentaireexpert_liste', {'annee': annee }) }}" class="inputrond">
             <input type="submit" value="Afficher les commentaires des experts pour l'année {{ annee }}" />
         </form>
     {% endif %}

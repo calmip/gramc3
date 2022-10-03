@@ -26,7 +26,6 @@ namespace App\Controller;
 
 use App\Entity\Version;
 use App\Entity\Projet;
-use App\Entity\User;
 use App\Entity\Session;
 use App\Entity\Individu;
 use App\Entity\Thematique;
@@ -39,7 +38,6 @@ use App\GramcServices\ServiceJournal;
 use App\GramcServices\ServiceMenus;
 use App\GramcServices\ServiceSessions;
 use App\GramcServices\ServiceVersions;
-use App\GramcServices\ServiceProjets;
 use App\GramcServices\ServiceForms;
 use App\GramcServices\Workflow\Projet\ProjetWorkflow;
 
@@ -49,7 +47,6 @@ use App\GramcServices\Signal;
 use App\Form\IndividuForm\IndividuForm;
 use App\Form\IndividuFormType;
 use App\Repository\FormationRepository;
-
 use App\Validator\Constraints\PagesNumber;
 
 use Psr\Log\LoggerInterface;
@@ -77,7 +74,6 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -98,207 +94,15 @@ class VersionSpecController extends AbstractController
         private ServiceMenus $sm,
         private ServiceSessions $ss,
         private ServiceVersions $sv,
-        private ServiceProjets $sp,
         private ServiceForms $sf,
         private ProjetWorkflow $pw,
         private FormFactoryInterface $ff,
         private ValidatorInterface $vl,
         private LoggerInterface $lg,
         private Environment $tw,
-        private TokenStorageInterface $tok,
         private EntityManagerInterface $em
     ) {}
 
-    /**
-     * Montre les projets d'un utilisateur
-     *
-     * NOTE - etait autrefois dans le controleur Projet, mais a été déplacé
-     *        ici pour avoir une version dépendant du mésocentre
-     * 
-     * @Route("/projet/accueil", name="projet_accueil",methods={"GET"})
-     * Method("GET")
-     * @Security("is_granted('ROLE_DEMANDEUR')")
-     */
-    public function accueilAction(): Response
-    {
-        $sm                  = $this->sm;
-        $ss                  = $this->ss;
-        $sp                  = $this->sp;
-        $token               = $this->tok->getToken();
-        $em                  = $this->em;
-        $individu            = $token->getUser();
-        $id_individu         = $individu->getIdIndividu();
-
-        $projetRepository    = $em->getRepository(Projet::class);
-        $cv_repo             = $em->getRepository(CollaborateurVersion::class);
-        $user_repo           = $em->getRepository(User::class);
-
-        $list_projets_collab = $projetRepository-> getProjetsCollab($id_individu, false, true);
-        $list_projets_resp   = $projetRepository-> getProjetsCollab($id_individu, true, false);
-
-        $projets_term        = $projetRepository-> get_projets_etat($id_individu, 'TERMINE');
-
-        $session_actuelle    = $ss->getSessionCourante();
-
-        // TODO - Faire en sorte pour que les erreurs soient proprement affichées dans l'API
-        // En attendant ce qui suit permet de se dépanner mais c'est franchement dégueu
-        //echo '<pre>'.strlen($_SERVER['CLE_DE_CHIFFREMENT'])."\n";
-        //echo SODIUM_CRYPTO_SECRETBOX_KEYBYTES.'</pre>';
-        //$enc = Functions::simpleEncrypt("coucou");
-        //$dec = Functions::simpleDecrypt($enc);
-        //echo "$dec\n";
-
-        // projets responsable
-        $projets_resp  = [];
-        foreach ($list_projets_resp as $projet) {
-            $versionActive  =   $sp->versionActive($projet);
-            if ($versionActive != null) {
-                $rallonges = $versionActive ->getRallonge();
-                $cpt_rall  = count($rallonges->toArray());
-            } else {
-                $rallonges = null;
-                $cpt_rall  = 0;
-            }
-
-            if ($versionActive != null) {
-                $cv    = $cv_repo->findOneBy(['version' => $versionActive, 'collaborateur' => $individu]);
-                $login = $cv->getLoginname()==null ? 'nologin' : $cv->getLoginname();
-                $u     = $user_repo->findOneBy(['loginname' => $login]);
-                if ($u==null) {
-                    $passwd    = null;
-                    $pwd_expir = null;
-                } else {
-                    $passwd    = $u->getPassword();
-                    $passwd    = Functions::simpleDecrypt($passwd);
-                    $pwd_expir = $u->getPassexpir();
-                }
-            } else {
-                $login  = 'nologin';
-                $passwd = null;
-                $pwd_expir = null;
-            }
-            $projets_resp[]   =
-            [
-                'projet'    => $projet,
-                'conso'     => $sp->getConsoCalculP($projet),
-                'rallonges' => $rallonges,
-                'cpt_rall'  => $cpt_rall,
-                'meta_etat' => $sp->getMetaEtat($projet),
-                'login'     => $login,
-                'passwd'    => $passwd,
-                'pwd_expir' => $pwd_expir
-            ];
-        }
-
-        // projets collaborateurs
-        $projets_collab  = [];
-        foreach ($list_projets_collab as $projet) {
-            $versionActive = $sp->versionActive($projet);
-
-            if ($versionActive != null) {
-                $rallonges = $versionActive ->getRallonge();
-                $cpt_rall  = count($rallonges->toArray());
-            } else {
-                $rallonges = null;
-                $cpt_rall  = 0;
-            }
-
-            $cv    = $cv_repo->findOneBy(['version' => $versionActive, 'collaborateur' => $individu]);
-            if ($cv != null) {
-                $login = $cv->getLoginname()==null ? 'nologin' : $cv->getLoginname();
-                $u     = $user_repo->findOneBy(['loginname' => $login]);
-                if ($u==null) {
-                    $passwd = null;
-                    $pwd_expir  = null;
-                } else {
-                    $passwd    = $u->getPassword();
-                    $pwd_expir = $u->getPassexpir();
-                }
-            } else {
-                $login  = 'nologin';
-                $passwd = null;
-                $pwd_expir = null;
-            }
-
-            $projets_collab[] =
-                [
-                    'projet'    => $projet,
-                    'conso'     => $sp->getConsoCalculP($projet),
-                    'rallonges' => $rallonges,
-                    'cpt_rall'  => $cpt_rall,
-                    'meta_etat' => $sp->getMetaEtat($projet),
-                    'login'     => $login,
-                    'passwd'    => $passwd,
-                    'pwd_expir' => $pwd_expir
-                ];
-        }
-
-        // projets collaborateurs
-        $projets_collab  = [];
-        foreach ($list_projets_collab as $projet) {
-            $versionActive = $sp->versionActive($projet);
-
-            if ($versionActive != null) {
-                $rallonges = $versionActive ->getRallonge();
-                $cpt_rall  = count($rallonges->toArray());
-            } else {
-                $rallonges = null;
-                $cpt_rall  = 0;
-            }
-
-            $cv    = $cv_repo->findOneBy(['version' => $versionActive, 'collaborateur' => $individu]);
-            if ($cv != null) {
-                $login = $cv->getLoginname()==null ? 'nologin' : $cv->getLoginname();
-                $u     = $user_repo->findOneBy(['loginname' => $login]);
-                if ($u==null) {
-                    $passwd = null;
-                    $pwd_expir = null;
-                } else {
-                    $passwd = $u->getPassword();
-                    $pwd_expir = $u->getPassexpir();
-                }
-            } else {
-                $login = 'nologin';
-                $passwd= null;
-                $pwd_expir = null;
-            }
-            $projets_collab[] =
-                [
-                'projet'    => $projet,
-                'conso'     => $sp->getConsoCalculP($projet),
-                'rallonges' => $rallonges,
-                'cpt_rall'  => $cpt_rall,
-                'meta_etat' => $sp->getMetaEtat($projet),
-                'login'     => $login,
-                'passwd'    => $passwd,
-                'pwd_expir' => $pwd_expir
-                ];
-        }
-
-        /*
-         * JUIN 2021 - On ne crée QUE des projets PROJET_FIL !
-         *             Eventuellement ils se transforment par la suite en PROJET_SESS
-         */
-        //$prefixes = $this->getParameter('prj_prefix');
-        //foreach (array_keys($prefixes) as $t)
-        //{
-        //    $menu[] = $sm->nouveau_projet($t);
-        //}
-        $menu = [];
-        $menu[] = $sm -> nouveau_projet(3);
-        //$menu[] = $this->menu_nouveau_projet_test();
-        //$menu[] = $this->menu_nouveau_projet_sess();
-
-        return $this->render(
-            'projet/demandeur.html.twig',
-            [
-                'projets_collab'  => $projets_collab,
-                'projets_resp'    => $projets_resp,
-                'projets_term'    => $projets_term,
-                'menu'            => $menu,
-                ]
-        );
-    }
 
     /**
      * Appelé par le bouton Envoyer à l'expert: si la demande est incomplète
@@ -316,9 +120,9 @@ class VersionSpecController extends AbstractController
         $em = $this->em;
 
         // ACL
-        if ($sm->modifier_version($version)['ok'] == false) {
+        if ($sm->modifierVersion($version)['ok'] == false) {
             $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de modifier la version " . $version->getIdVersion().
-                " parce que : " . $sm->modifier_version($version)['raison']);
+                " parce que : " . $sm->modifierVersion($version)['raison']);
         }
         if ($this->versionValidate($version) != []) {
             return $this->render(
@@ -328,7 +132,7 @@ class VersionSpecController extends AbstractController
                 ]);
         }
         else {
-            return $this->redirectToRoute('avant_envoyer_expert', [ 'id' => $version->getIdVersion() ]);
+            return $this->redirectToRoute('envoyer_en_expertise', [ 'id' => $version->getIdVersion() ]);
         }
     }
 
@@ -339,10 +143,9 @@ class VersionSpecController extends AbstractController
      *      2/ Ensuite on appelle modifierTypeX, car le formulaire dépend du type de projet
      *
      * @Route("/{id}/modifier", name="modifier_version",methods={"GET","POST"})
-     * Method({"GET", "POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
      */
-    public function modifierAction(Request $request, Version $version, bool $renouvellement=false): Response
+    public function modifierAction(Request $request, Version $version): Response
     {
         $sm = $this->sm;
         $sv = $this->sv;
@@ -351,9 +154,9 @@ class VersionSpecController extends AbstractController
         $html = [];
         
         // ACL
-        if ($sm->modifier_version($version)['ok'] == false) {
+        if ($sm->modifierVersion($version)['ok'] == false) {
             $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de modifier la version " . $version->getIdVersion().
-        " parce que : " . $sm->modifier_version($version)['raison']);
+        " parce que : " . $sm->modifierVersion($version)['raison']);
         }
 
         // ON A CLIQUE SUR ANNULER
@@ -365,88 +168,31 @@ class VersionSpecController extends AbstractController
             return $this->redirectToRoute('consulter_projet', ['id' => $version->getProjet()->getIdProjet() ]);
         }
 
-        // TELEVERSEMENT DES IMAGES PAR AJAX
-        // $sj->debugMessage('modifierAction ' .  print_r($_POST, true) );
-        $image_forms = [];
-
-        $image_forms['img_expose_1'] =   $sv->imageForm('img_expose_1', false);
-        $image_forms['img_expose_2'] =   $sv->imageForm('img_expose_2', false);
-        $image_forms['img_expose_3'] =   $sv->imageForm('img_expose_3', false);
-
-        $image_forms['img_justif_renou_1'] =   $sv->imageForm('img_justif_renou_1', false);
-        $image_forms['img_justif_renou_2'] =   $sv->imageForm('img_justif_renou_2', false);
-        $image_forms['img_justif_renou_3'] =   $sv->imageForm('img_justif_renou_3', false);
-
-
-        //$sj->debugMessage('modifierAction image_handle');
-        foreach ($image_forms as $my_form) {
-            $sv->imageHandle($my_form, $version, $request);
-        }
-        //$sj->debugMessage('modifierAction après image_handle');
-
-        //$sj->debugMessage('modifierAction ajax ');
-        // upload image ajax
-
-        $image_form = $sv->imageForm('image_form', false);
-        //$sj->debugMessage('modifierAction ajax form');
-
-        $ajax = $sv->imageHandle($image_form, $version, $request);
-        //$sj->debugMessage('modifierAction ajax handled');
-        // $sj->debugMessage('modifierAction ajax = ' .  print_r($ajax, true) );
-
-        // Téléversement des images
-        if ($ajax['etat'] != null) {
-            $div_sts  = substr($ajax['filename'], 0, strlen($ajax['filename'])-1).'sts'; // img_justif_renou_1 ==>  img_justif_renou_sts
-            //$sj->debugMessage(__METHOD__ . " koukou $div_sts");
-            if ($ajax['etat'] == 'OK') {
-                $html[$ajax['filename']]  = '<img class="dropped" src="data:image/png;base64, ' . base64_encode($ajax['contents']) .'" />';
-                $template                 = $twig->createTemplate('<img class="icone" src=" {{ asset(\'icones/poubelle32.png\') }}" alt="Supprimer cette figure" title="Supprimer cette figure" />');
-                $html[$ajax['filename']] .= $twig->render($template);
-                $html[$div_sts] = '<div class="message info">votre figure a été correctement téléversée</div>';
-            } elseif ($ajax['etat'] == 'KO') {
-                $html[$div_sts] = "Le téléchargement de l'image a échoué";
-            } elseif ($ajax['etat'] == 'nonvalide') {
-                $html[$div_sts] = '<div class="message warning">'.$ajax['error'].'</div>';
-            }
-
-            if ($request->isXMLHttpRequest()) {
-                return new Response(json_encode($html));
-            }
-        }
-
-        // SUPPRESSION DES IMAGES TELEVERSEES
-        $remove_form = $this->ff
-                ->createNamedBuilder('remove_form', FormType::class, [], [ 'csrf_protection' => false ])
-                ->add('filename', TextType::class, [ 'required'       =>  false,])
-                ->getForm();
-
-        $remove_form->handleRequest($request);
-        if ($remove_form->isSubmitted() &&  $remove_form->isValid()) {
-            $sj->debugMessage('remove_form is valid');
-            $filename  =   $remove_form->getData()['filename'];
-
-            $rem_nb        = substr($filename, strlen($filename)-1, 1);
-            $filename      = basename($filename); // sécurité !
-            $full_filename = $sv->imageDir($version).'/'.$filename;
-            if (file_exists($full_filename) && is_file($full_filename)) {
-                unlink($full_filename);
-            } else {
-                $sj->errorMessage('VersionController modifierAction Fichier '. $full_filename . " n'existe pas !");
-            }
-            $div_sts  = substr($filename, 0, strlen($filename)-1).'sts'; // img_justif_renou_1 ==>  img_justif_renou_sts
-
-            $html[$div_sts] = '<div class="message info">La figure ' . $rem_nb . ' a été supprimée</div>';
-            $html[$filename] = 'Figure ' . $rem_nb;
-
-            return new Response(json_encode($html));
-        }
-
         // FORMULAIRE DES COLLABORATEURS
         $collaborateur_form = $sv->getCollaborateurForm($version);
         $collaborateur_form->handleRequest($request);
         $data   =   $collaborateur_form->getData();
 
-        if ($data != null && array_key_exists('individus', $data)) {
+        $individu_forms = $collaborateur_form->getData()['individus'];
+        $validated = $sv->validateIndividuForms($individu_forms);
+        if (! $validated) {
+            $message = "Pour chaque personne vous <strong>devez renseigner</strong>: email, prénom, nom";
+            $request->getSession()->getFlashbag()->add("flash erreur",$message);
+        //    return $this->redirectToRoute('modifier_collaborateurs', ['id' => $version ]);
+        }
+        else
+        {
+            if ($data != null && array_key_exists('individus', $data)) {
+                $sj->debugMessage('modifierAction traitement des collaborateurs');
+                $sv->handleIndividuForms($data['individus'], $version);
+    
+                // ACTUCE : le mail est disabled en HTML et en cas de POST il est annulé
+                // nous devons donc refaire le formulaire pour récupérer ces mails
+                $collaborateur_form = $sv->getCollaborateurForm($version);
+            }
+       }
+
+       if ($data != null && array_key_exists('individus', $data)) {
             $sj->debugMessage('modifierAction traitement des collaborateurs');
             $sv->handleIndividuForms($data['individus'], $version);
 
@@ -459,13 +205,13 @@ class VersionSpecController extends AbstractController
         $type = $version->getProjet()->getTypeProjet();
         switch ($type) {
         case Projet::PROJET_SESS:
-        return $this->modifierType1($request, $version, $renouvellement, $image_forms, $collaborateur_form);
+        return $this->modifierType1($request, $version, $collaborateur_form);
 
         case Projet::PROJET_TEST:
-        return $this->modifierType2($request, $version, $renouvellement, $image_forms, $collaborateur_form);
+        return $this->modifierType2($request, $version, $collaborateur_form);
 
         case Projet::PROJET_FIL:
-        return $this->modifierType3($request, $version, $renouvellement, $image_forms, $collaborateur_form);
+        return $this->modifierType3($request, $version, $collaborateur_form);
 
         default:
            $sj->throwException(__METHOD__ . ":" . __LINE__ . " mauvais type de projet " . Functions::show($type));
@@ -476,23 +222,19 @@ class VersionSpecController extends AbstractController
      * Appelée par modifierAction pour les projets de type 1 (PROJET_SESS)
      *
      * params = $request, $version
-     *          $renouvellement (toujours true/false)
-     *          $image_forms (formulaire de téléversement d'images)
      *          $collaborateurs_form (formulaire des collaborateurs)
      *
      */
     private function modifierType1(Request $request,
                                    Version $version,
-                                   bool $renouvellement,
-                                   array $image_forms,
                                    FormInterface $collaborateur_form
                                    ): Response
     {
-        $sj   = $this->sj;
+        $sj = $this->sj;
+        $ss = $this->ss;
         $sv = $this->sv;
-        $ss   = $this->ss;
         $sval = $this->vl;
-        $em   = $this->em;
+        $em = $this->em;
 
         // formulaire principal
         $form_builder = $this->createFormBuilder($version);
@@ -507,7 +249,7 @@ class VersionSpecController extends AbstractController
 
         $form_builder
             ->add('fermer', SubmitType::class)
-                //->add( 'enregistrer',   SubmitType::Class )
+            ->add('enregistrer',   SubmitType::Class )
             ->add('annuler', SubmitType::class);
 
         $form = $form_builder->getForm();
@@ -537,30 +279,26 @@ class VersionSpecController extends AbstractController
             }
             return $this->redirectToRoute('consulter_projet', ['id' => $version->getProjet()->getIdProjet() ]);
         }
+        $img_expose = [$sv->imageProperties('img_expose_1', 'Figure 1', $version),
+                       $sv->imageProperties('img_expose_2', 'Figure 2', $version),
+                       $sv->imageProperties('img_expose_3', 'Figure 3', $version)];
+
+        $img_justif_renou = [$sv->imageProperties('img_justif_renou_1', 'Figure 1', $version),
+                             $sv->imageProperties('img_justif_renou_2', 'Figure 2', $version),
+                             $sv->imageProperties('img_justif_renou_3', 'Figure 3', $version)];
 
         $session = $ss -> getSessionCourante();
         return $this->render(
             'version/modifier_projet_sess.html.twig',
             [
                 'session' => $session,
-                'form'      => $form->createView(),
-                'version'   => $version,
-                'img_expose_1'   => $image_forms['img_expose_1']->createView(),
-                'img_expose_2'   => $image_forms['img_expose_2']->createView(),
-                'img_expose_3'   => $image_forms['img_expose_3']->createView(),
-                'imageExp1'    => $sv->image2Base64('img_expose_1', $version),
-                'imageExp2'    => $sv->image2Base64('img_expose_2', $version),
-                'imageExp3'    => $sv->image2Base64('img_expose_3', $version),
-                'img_justif_renou_1'    =>  $image_forms['img_justif_renou_1']->createView(),
-                'img_justif_renou_2'    =>  $image_forms['img_justif_renou_2']->createView(),
-                'img_justif_renou_3'    =>  $image_forms['img_justif_renou_3']->createView(),
-                'imageJust1'    =>   $sv->image2Base64('img_justif_renou_1', $version),
-                'imageJust2'    =>   $sv->image2Base64('img_justif_renou_2', $version),
-                'imageJust3'    =>   $sv->image2Base64('img_justif_renou_3', $version),
+                'form' => $form->createView(),
+                'version' => $version,
+                'img_expose' => $img_expose,
+                'img_justif_renou' => $img_justif_renou,
                 'collaborateur_form' => $collaborateur_form->createView(),
-                'todo'          => static::versionValidate($version),
-                'renouvellement'    => $renouvellement,
-                'nb_form'       => $nb_form
+                'todo' => $this->versionValidate($version),
+                'nb_form' => $nb_form
             ]
         );
     }
@@ -932,12 +670,10 @@ class VersionSpecController extends AbstractController
      * Appelée par modifierAction pour les projets de type 2 (PROJET_TEST)
      *
      * params = $request, $version
-     *          $renouvellement (toujours false)
-     *          $image_forms (formulaire de téléversement d'images)
      *          $collaborateurs_form (formulaire des collaborateurs)
      *
      */
-    private function modifierType2(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form) : Response
+    private function modifierType2(Request $request, Version $version, $collaborateur_form) : Response
     {
         $sj = $this->sj;
         $sval = $this->vl;
@@ -1037,20 +773,17 @@ class VersionSpecController extends AbstractController
         );
     }
 
-
     /*
      * Appelée par modifierAction pour les projets de type 3 (PROJET_FIL)
      *
      * params = $request, $version
-     *          $renouvellement (toujours false)
-     *          $image_forms (formulaire de téléversement d'images)
      *          $collaborateurs_form (formulaire des collaborateurs)
      *
      */
-    private function modifierType3(Request $request, Version $version, $renouvellement, $image_forms, $collaborateur_form): Response
+    private function modifierType3(Request $request, Version $version, $collaborateur_form): Response
     {
         # Même formulaire pour Type3 que pour Type1
-        return $this->modifierType1($request,$version,$renouvellement, $image_forms, $collaborateur_form, $this->lg);
+        return $this->modifierType1($request,$version, $collaborateur_form, $this->lg);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////
@@ -1072,7 +805,7 @@ class VersionSpecController extends AbstractController
         }
 
         /* Si le bouton modifier est actif, on doit impérativement passer par là ! */
-        $modifier_version_menu = $sm->modifier_version($version);
+        $modifier_version_menu = $sm->modifierVersion($version);
         if ($modifier_version_menu['ok'] == true) {
             return $this->redirectToRoute($modifier_version_menu['name'], ['id' => $version, '_fragment' => 'tab4']);
         }
@@ -1134,7 +867,7 @@ class VersionSpecController extends AbstractController
     }
 
     /**
-     * Displays a form to edit an existing version entity.
+     * 
      *
      * @Route("/{id}/renouveler", name="renouveler_version",methods={"GET","POST"})
      * @Security("is_granted('ROLE_DEMANDEUR')")
@@ -1149,8 +882,7 @@ class VersionSpecController extends AbstractController
         $em = $this->em;
 
         // ACL
-        //if( $sm->renouveler_version($version)['ok'] == false && (  $this->container->hasParameter('kernel.debug') && $this->getParameter('kernel.debug') == false ) )
-        if ($sm->renouveler_version($version)['ok'] == false) {
+        if ($sm->renouvelerVersion($version)['ok'] == false) {
             $sj->throwException("VersionController:renouvellementAction impossible de renouveler la version " . $version->getIdVersion());
         }
 
@@ -1375,5 +1107,3 @@ class VersionSpecController extends AbstractController
         return $todo;
     }
 }
-
-

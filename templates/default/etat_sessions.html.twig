@@ -1,0 +1,24 @@
+<table class="etat_session">
+    <tr>
+        <th title="Session">&nbsp;</th>
+        <th title="En attente">A</th>
+        <th title="Saisie des demandes">D</th>
+        <th title="Saisie des expertises">E</th>
+        {% if noedition_expertise == false %}
+            <th title="Envoi du commentaire de session, puis des expertises">C</th>
+        {% endif %}
+        <th title="Session active">A</th>
+    </tr>
+    {% for session in infos.sessions_non_terminees() %}
+    <tr>
+        <td>{{session}}</td>
+        <td>{% if session.etat == 1 %} &#x23fa; {% else %} . {% endif %}</td>
+        <td>{% if session.etat == 2 %} &#x23fa; {% else %} . {% endif %}</td>
+        <td>{% if session.etat == 3 %} &#x23fa; {% else %} . {% endif %}</td>
+        {% if noedition_expertise == false %}
+            <td>{% if session.etat == 4 %} &#x23fa; {% else %} . {% endif %}</td>
+        {% endif %}
+        <td>{% if session.etat == 5 %} &#x23fa; {% else %} . {% endif %}</td>
+    </tr>
+    {% endfor %}
+</table>

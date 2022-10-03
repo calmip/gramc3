@@ -1098,8 +1098,8 @@ class ProjetController extends AbstractController
         $ss = $this->ss;
         $token = $this->tok->getToken();
 
-        if ($sm->nouveau_projet($type)['ok'] == false) {
-            $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de créer un nouveau projet parce que " . $sm->nouveau_projet($type)['raison']);
+        if ($sm->nouveauProjet($type)['ok'] == false) {
+            $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de créer un nouveau projet parce que " . $sm->nouveauProjet($type)['raison']);
         }
 
         $session = $ss->getSessionCourante();
@@ -1145,7 +1145,7 @@ class ProjetController extends AbstractController
         $request->getSession()->remove('SessionCourante'); // remove cache
 
         // NOTE - Pour ce controleur, on identifie les types par un chiffre (voir Entity/Projet.php)
-        $m = $sm->nouveau_projet("$type");
+        $m = $sm->nouveauProjet("$type");
         if ($m == null || $m['ok']==false) {
             $raison = $m===null ? "ERREUR AVEC LE TYPE $type - voir le paramètre prj_type" : $m['raison'];
             $sj->throwException(__METHOD__ . ":" . __LINE__ . " impossible de créer un nouveau projet parce que $raison");

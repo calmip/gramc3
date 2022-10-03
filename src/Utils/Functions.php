@@ -283,7 +283,7 @@ class Functions
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////
     // TODO - A METTRE DANS ServicesForms
-    public static function dataError(ValidatorInterface $sval, $data, $groups = ['Default'])
+    public static function dataError(ValidatorInterface $sval, $data, $groups = ['Default']): array
     {
         if (is_string($groups)) {
             $groups = [$groups];

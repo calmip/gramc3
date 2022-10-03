@@ -5,8 +5,10 @@
 <h2>Ajouter un laboratoire</h2>
     {% import "default/macros.html.twig" as gramcmacros %}
     {{ gramcmacros.menu(menu) }}
-    {{ gramcmacros.info('',"Le numéro d'ordre permet de <strong>trier</strong> les laboratoires à votre convenance. Si vous ne spécifiez rien, ils seront triés
-        en ordre alphabétique du nom") }}
+    <div class="information">
+        <p>Le numéro d'ordre permet de <strong>trier</strong> les laboratoires à votre convenance. Si vous ne spécifiez rien, ils seront triés
+        en ordre alphabétique du nom"</p>
+    </div>
 
     
     {{ form_start(form) }}
@@ -25,7 +27,7 @@
         </tr>
         <tr>
             <th></th>
-            <td>{{ form_widget(form.submit) }}{{ form_widget(form.reset) }}</td>
+            <td class="inputrond submitdyn">{{ form_widget(form.submit) }}{{ form_widget(form.reset) }}</td>
         </tr>    
     </table>
     {{ form_end(form) }}

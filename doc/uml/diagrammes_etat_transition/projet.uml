@@ -1,0 +1,17 @@
+@startuml
+
+title Etats d'un projet\ngramc 3.x
+
+RENOUVELABLE: Id 41
+NON_RENOUVELABLE: Id 42
+TERMINE: Id 9
+state RENOUVELABLE #red
+
+note left of NON_RENOUVELABLE: Le projet sera bientôt fermé\non ne peut plus le renouveler
+note left of RENOUVELABLE: Le projet peut être renouvelé\nlors de la prochaine session
+
+[*]               --> RENOUVELABLE
+RENOUVELABLE   --> NON_RENOUVELABLE: CLK_VAL_EXP_KO(12)
+NON_RENOUVELABLE --> TERMINE: CLK_SESS_FIN (21)\nCLK_FERM(22)\nCLK_VAL_EXP_KO(12)
+TERMINE           --> [*]
+@enduml

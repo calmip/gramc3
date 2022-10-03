@@ -146,7 +146,7 @@ class LaboratoireController extends AbstractController
         $em->remove($laboratoire);
 
         try {
-            $em->flush($laboratoire);
+            $em->flush();
         }
         catch ( \Exception $e) {
             $request->getSession()->getFlashbag()->add("flash erreur",$e->getMessage());

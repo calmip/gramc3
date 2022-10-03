@@ -1,0 +1,26 @@
+@startuml
+
+title Etats d'une session\ngramc 3.x
+
+CREE_ATTENTE: Id 1
+EDITION_DEMANDE: Id 2
+EDITION_EXPERTISE: Id 3
+EN_ATTENTE: Id 4
+ACTIF: Id 5
+TERMINE: Id 9
+state ACTIF #red
+
+note left of CREE_ATTENTE: La session est créée,\non peut encore modifier ses propriétés\n(dates, ..)
+note left of EDITION_DEMANDE: Les demandeurs\nont l'accès aux formulaires projet
+note left of EDITION_EXPERTISE: Les experts peuvent lire les projets\net préparer leurs expertises
+note left of EN_ATTENTE: Le comité s'est réuni\nLes arbitrages sont définis\nLes experts peuvent finaliser\net envoyer leurs décisions
+note left of ACTIF: La session a démarré l'accès est ouvert
+
+[*]               --> CREE_ATTENTE
+CREE_ATTENTE      --> EDITION_DEMANDE: DAT_DEB_DEM(2)
+EDITION_DEMANDE   --> EDITION_EXPERTISE: DAT_FIN_DEM(3)
+EDITION_EXPERTISE --> EN_ATTENTE: CLK_ATTR_PRS (5)
+EN_ATTENTE        --> ACTIF: CLK_SESS_DEB(20)
+ACTIF             --> TERMINE: CLK_SESS_FIN(21)
+TERMINE           --> [*]
+@enduml

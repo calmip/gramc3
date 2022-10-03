@@ -52,7 +52,6 @@ class ServiceJournal
         private AuthorizationCheckerInterface $ac,
         private EntityManagerInterface $em
     ) {
-        $this->token = $this->tok->getToken();
     }
 
     /**
@@ -69,7 +68,7 @@ class ServiceJournal
     {
         $rs    = $this->rs;
         $log   = $this->log;
-        $token = $this->token;
+        $token = $this->tok->getToken();
         $em    = $this->em;
 
         $journal = new Journal();

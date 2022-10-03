@@ -1,0 +1,69 @@
+{# Téléversement d'images à partir d'un tableau de tableaux
+   cf. VersionSpecController::modifierType1
+       modifier_projet_sess.partie_I.html.twig
+       ServiceVersions::imageProperties
+#}
+
+
+{% macro upload_images(version, images) %}
+
+{% import "default/icone.html.twig" as icones %}
+
+    <div class="figures">
+        {% for img in images %}
+        <div class="figure">
+                <div id = "{{img.name}}">
+                    {% if img.contents is defined  %}
+                        <img class="figure_image" src="data:image/jpg;base64,{{ img.contents }}" data-width="{{ img.width }}" data-height="{{ img.height }}" alt="{{img.displayName}}" title="cliquez pour afficher la figure en taille réelle">
+                    {% else %}
+                        <img class="figure_image" src="toto.jpg" >
+                    {% endif %}
+                </div>
+                <p>{{img.displayName}} <a class="fileremover"  {% if img.contents is defined %}style="display:inline"{% else %}style="display:none"{% endif %} href="#" data-href="{{path('version_supprimer_fichier', { 'id' : version.idVersion, 'filename' : img.name }) }}">{{icones.supprimer}}</a></p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="uploaders">
+        {% for img in images %}
+        <div>
+            <div class="fileuploader">
+                <a href="{{ path('televerser', { 'id' : version.idVersion, 'filename' : img.name } ) }}" target="_blank" >
+                    <strong>{{img.displayName}}</strong>
+                </a>
+            </div>
+            <div class="uploadstatus"></div>
+        </div>
+        {% endfor %}
+    </div>
+
+{% endmacro %}
+
+{# Affichage d'images à partir d'un tableau de tableaux
+   cf. ProjetSpecController::consulterAction
+       consulter_projet_sess.html.twig
+       ServiceVersions::imageProperties
+#}
+
+{% macro display_images(images) %}
+    <div class="figures">
+        {% for img in images %}
+            {% if img.contents is defined %}
+                <div>
+                    <img class="figure" src="data:image/png;base64,{{ img.contents }}" data-width="{{ img.width }}" data-height="{{ img.height }}" alt="{{ img.displayName }}" title="cliquez pour afficher la _image en taille réelle">
+                    <p>{{ img.displayName }}</p>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endmacro %}
+
+{# Téléversement d'un document joint #}
+{% macro upload_document(version, doc) %}
+    <div class="uploadstatus"></div>
+    <div class="fileuploader">
+        <a href="{{ path('televerser', { 'id' : version.idVersion, 'filename' : doc } ) }}" target="_blank" >
+            <strong>Téléversez le fichier</strong>
+        </a>
+    </div>
+{% endmacro %}

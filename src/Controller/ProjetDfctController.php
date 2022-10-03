@@ -91,7 +91,7 @@ class ProjetDfctController extends AbstractController
         $emises = $dfct->getNbEmises($projet, $annee);
         $version= $dfct->getVersion($projet, $annee);
         $menu   = [];
-        $menu[] = $sm->projet_annee();
+        $menu[] = $sm->projetsAnnee();
 
         $jourdelan = new \DateTime($annee.'-01-01');
         $ssylvestre= new \DateTime($annee.'-12-31');

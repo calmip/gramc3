@@ -151,11 +151,11 @@ $( document ).ready(function() {
     };
 
     // Connecter aux fonctions click lors de l'initialisation
-    //////////////$( "a.modification" ).click(click_modification);
-    // Pas d'ajax pour la suppression, car en cas d'erreur (si la personne a des projets)
+    // Pas d'ajax pour la suppression/modification, car en cas d'erreur (si la personne a des projets)
     // la redirection ne se fait pas
     // Il faudra arranger ça, mais pour l'instant on vire l'ajax
-    //    $( "a.suppression" ).click(click_suppression);
+    // $( "a.modification" ).click(click_modification);
+    // $( "a.suppression" ).click(click_suppression);
     $( "a.activation" ).click(click_expactiv);
     $( "a.expert" ).click(click_expactiv);
     $( "a.admin").click(click_expactiv);

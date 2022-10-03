@@ -4,12 +4,14 @@
 <script  src="{{ asset('js/gerer_publis.js') }}" ></script>
 {% endblock myjavascripts %}
 
+{% import "default/icone.html.twig" as icones %}
+
 {% block body %}
 
 <section>
 
 <h1>Publications associées au projet {{ projet }}</h1>
-<div class="message info">
+<div class="information">
     Merci de renseigner à l'aide de ce formulaire les publications pour lesquelles les moyens de calcul {{mesoc}} ont été utilisés, dans le cadre du projet {{ projet }} et ce,
     <strong>quelque soit l'année</strong><br>
     Si vous renseignez l'oid, il sera simple d'aller sur le site du journal correspondant.<br>
@@ -20,7 +22,7 @@
 
     {% import "default/macros.html.twig" as gramcmacros %}
 
-<div>
+<div style="stroke:black">
     <table  class="projet" id="publis_projet" >
     <thead>
         <tr>
@@ -38,11 +40,13 @@
         <tr>
             <td>
                 <a class="suppression" href="{{ path('supprimer_publication',{'id' : publication.idPubli, 'projet' : projet.idProjet }) }}" title="Supprimer">
-                <img class="bouton_poussoir" src="{{ gramcmacros.img_supprimer() }}" alt="Supprimer" /></a>
+                    {{icones.supprimer}}
+                </a>
             </td>
             <td>
                 <a class="modification" href="{{ path('modifier_publication',{'id' : publication.idPubli , 'projet' : projet.idProjet}) }}" title="Modifier le publication">
-                <img class="bouton_poussoir" src="{{ gramcmacros.img_modifier() }}" alt="Modifier" /></a>
+                    {{icones.modifier}}
+                </a>
             </td>
             <td>{{ publication.refbib }}</td>
             <td>{% if( publication.annee > 0 ) %}{{ publication.annee }}{% endif %}</td>

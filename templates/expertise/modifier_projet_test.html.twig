@@ -51,7 +51,7 @@
             </tr>
             <tr>
                 <td class="center">{{ version.demHeures }}
-                {% if toomuch %} <img src="{{ asset('icones/attention16.png') }}" alt="Demande trop forte, cf. règles d'attribution" title="Demande trop forte, cf. règles d'attribution" /> {% endif %}
+                {% if toomuch %}<span title="Demande trop forte, cf. règles d'attribution"> {{ icones.attention }}</span> {% endif %}
                 </td>
             </tr>
         </tbody>
@@ -59,7 +59,7 @@
 
     <div id="menu_expertiser" class="center">
         <a href="{{ path('consulter_projet', { 'id' : expertise.version.projet.idProjet } ) }}" target="_blank">
-        <img class="bouton_poussoir" src="{{ asset('icones/consulter64.png') }}" title="Consulter le projet" alt="Consulter le projet" />
+            {{icones.details}}
         </a>
     </div>
 

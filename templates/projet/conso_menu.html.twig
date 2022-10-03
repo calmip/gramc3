@@ -1,3 +1,4 @@
+{% import "default/icone.html.twig" as icones %}
 
 {% for t in types %}
 	{% if t=='group' %}
@@ -5,10 +6,10 @@
 		<ul>
 		{% for k,r in ressources_conso_group %}
 			<li>
-				<img class="bouton_poussoir conso" src="{{ asset('icones/conso16.png') }}"
-	                 alt="Consommation - {{projet}} - {{annee}} - {{r.nom}}"
-	                 data-href="{{ absolute_url(path('projet_conso_ressource', { 'id': projet.idProjet, 'loginname': loginname, 'ress_id' : k, 'utype': t, 'annee' : annee }))}}" /> 
-	                 {{ projet }} ({{ annee }}) - {{ r.nom }}
+				<div class="conso" alt="Consommation - {{loginname}} - {{annee}} - {{r.nom}}" data-href="{{ absolute_url(path('projet_conso_ressource', { 'id': projet.idProjet, 'loginname': loginname, 'ress_id' : k, 'utype': t, 'annee' : annee }))}}" > 
+	                 {{ icones.consommation }}
+				</div>
+				{{ projet }} ({{ annee }}) - {{ r.nom }}
 	        </li>
 		{% endfor %}
 		</ul>
@@ -18,10 +19,10 @@
 		<ul>
 		{% for k,r in ressources_conso_user %}
 			<li>
-				<img class="bouton_poussoir conso" src="{{ asset('icones/conso16.png') }}"
-	                 alt="Consommation - {{loginname}} - {{annee}} - {{r.nom}}"
-	                 data-href="{{ absolute_url(path('projet_conso_ressource', { 'id': projet.idProjet, 'loginname': loginname, 'ress_id' : k, 'utype': t, 'annee' : annee }))}}" /> 
-	                 {{ loginname }} ({{ annee }}) - {{ r.nom }}
+				<div class="conso" alt="Consommation - {{loginname}} - {{annee}} - {{r.nom}}" data-href="{{ absolute_url(path('projet_conso_ressource', { 'id': projet.idProjet, 'loginname': loginname, 'ress_id' : k, 'utype': t, 'annee' : annee }))}}" > 
+	                 {{ icones.consommation }}
+				</div>
+				{{ loginname }} ({{ annee }}) - {{ r.nom }}
 	        </li>
 		{% endfor %}
 		</ul>

@@ -133,7 +133,7 @@ class Rallonge implements Demande
      * @var string
      *
      * @ORM\Column(name="commentaire_externe", type="text", length=65535, nullable=true)
-     * @Assert\NotBlank(message="Vous n'avez pas rempli le commentaire interne", groups={"president"})
+     * @Assert\NotBlank(message="Vous n'avez pas rempli le commentaire pour le responsable", groups={"president"})
      */
     private $commentaireExterne;
 
@@ -519,6 +519,24 @@ class Rallonge implements Demande
         return $this->expert;
     }
 
+    /**
+     * @ORM\PrePersist()
+     */
+    // cf. https://stackoverflow.com/questions/39272733/boolean-values-and-choice-symfony-type
+    public function prePersist()
+    {
+        $this->validation = (bool) $this->validation; //Force using boolean value of $this->active
+    }
+
+    /**
+     * @ORM\PreUpdate()
+     */
+    public function preUpdate()
+    {
+        $this->validation = (bool) $this->validation;
+    }    
+
+
     /***************************************************
      * Fonctions utiles pour la class Workflow
      * Autre nom pour getEtatRallonge/setEtatRallonge !
@@ -590,6 +608,8 @@ class Rallonge implements Demande
             return  'EXPERTISE';
         } elseif ($etat    ==  Etat::EN_ATTENTE) {
             return  'ATTENTE';
+        } elseif ($etat == Etat::ANNULE ) {
+            return 'TERMINE';
         } elseif ($this->getAttrAccept() == true) {
             return  'ACCEPTE';
         } elseif ($this->getAttrAccept() == false) {

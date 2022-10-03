@@ -2,7 +2,7 @@
 
 {% block body %}
     <h1>Journal</h1>
-    <div id="edit">
+    <div id="jnl_edit">
         {{ form_start(form) }}
         {{ form_widget(form) }}
         {{ form_end(form) }}
@@ -12,6 +12,7 @@
         <thead>
             <tr>
                 <th>Utilisateur</th>
+                <th>Id</th>
                 <th>Adresse Ip</th>
                 <th>Horodatage</th>
                 <th>Niveau</th>
@@ -22,11 +23,15 @@
         {% for journal in journals %}
             <tr>
                 <td>{% if journal.individu %}
-                        <a href="{{ path('individu_show', { 'id': journal.individu.idIndividu }) }}"> {{ journal.individu }}</a>
+                        {{ journal.individu }}
                     {% else %}
-                        {% if journal.IdIndividu %}
-                            <a href="{{ path('individu_show', { 'id': journal.idIndividu }) }}"> {{ journal.idindividu }}</a>
-                        {% endif %}
+                        <em>anonyme</em>
+                    {% endif %}
+                </td>
+                 <td>{% if journal.individu %}
+                        {{journal.individu.id}}
+                    {% else %}
+                        N/A
                     {% endif %}
                 </td>
                 <td>{{ journal.ip }}</td>

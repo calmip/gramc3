@@ -4,14 +4,18 @@
 {% block body %}
 
 {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-    <div class="message warning">
+    <div class="information attention">
 
     <h2>Erreur de déconnexion</h2>Vous ne devez pas accéder cette page directement, vous n'êtes pas déconnecté</div>
 {% else %}    
-    <div class="message warning">
+    <div class="information attention">
 
-    <h2>Déconnexion</h2>Veuillez arrêter <strong>complètement</strong> votre navigateur</div>
+    <h2>Déconnexion</h2>Pour finaliser la déconnexion, veuillez arrêter <strong>complètement</strong> votre navigateur</div>
+    
+    <script>document.querySelector('.fermer_navigateur').addEventListener('click', ()=>{window.open('', '_self', '');
+       window.close();})</script>
 {% endif %}
+
     
 {% endblock %}
  

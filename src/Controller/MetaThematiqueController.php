@@ -130,7 +130,12 @@ class MetaThematiqueController extends AbstractController
     {
         $em = $this->em;
         $em->remove($thematique);
-        $em->flush($thematique);
+        try {
+            $em->flush();
+        }
+        catch ( \Exception $e) {
+            $request->getSession()->getFlashbag()->add("flash erreur",$e->getMessage());
+        }
         return $this->redirectToRoute('gerer_metaThematiques');
     }
 

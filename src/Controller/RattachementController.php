@@ -159,8 +159,15 @@ class RattachementController extends AbstractController
     public function supprimerAction(Request $request, Rattachement $rattachement)
     {
         $em = $this->em;
-        $em->remove($rattachement);
-        $em->flush($rattachement);
+        try
+        {
+            $em->remove($rattachement);
+            $em->flush($rattachement);
+        }
+        catch (\Exception $e)
+        {
+            $request->getSession()->getFlashbag()->add("flash erreur",$e->getMessage());
+        }
         return $this->redirectToRoute('gerer_rattachements');
     }
 }

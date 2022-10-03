@@ -30,7 +30,7 @@
             <th>Libellé</th>
             <td>{{ form_widget(edit_form.libelleThematique) }}</td>
         </tr>
-        <tr>
+        <tr  class="inputrond">
             <th>Meta Thématique</th>
             <td>{{ form_widget(edit_form.metaThematique) }}</td>
         </tr>
@@ -40,7 +40,7 @@
         </tr>
         <tr>
             <th></th>
-            <td>{{ form_widget(edit_form.submit) }}{{ form_widget(edit_form.reset) }}</td>
+            <td class="inputrond submitdyn">{{ form_widget(edit_form.submit) }}{{ form_widget(edit_form.reset) }}</td>
         </tr>    
     </table>
     {{ form_end(edit_form) }}

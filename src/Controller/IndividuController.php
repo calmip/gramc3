@@ -174,13 +174,17 @@ class IndividuController extends AbstractController
 
             try
             {
-                $sj->infoMessage('Utilisateur ' . $individu . ' (' .  $individu->getIdIndividu() . ') directement effacé ');
                 $em->remove($individu);
                 $em->flush();
             }
-            catch (\Exception $e) {
-                $request->getSession()->getFlashbag()->add("flash erreur","Pas possible de supprimer $individu " . $e->getMessage());
+            catch (\Exception $e)
+            {
+                $request->getSession()->getFlashbag()->add("flash erreur",$e->getMessage());
+                $sj->warningMessage('Utilisateur ' . $individu . ' (' .  $individu->getIdIndividu() . ') ne peut être effacé ');
             }
+
+            $request->getSession()->getFlashbag()->add("flash info",$individu. " supprimé");
+            $sj->infoMessage('Utilisateur ' . $individu . ' (' .  $individu->getIdIndividu() . ') effacé ');
             return $this->redirectToRoute('individu_gerer');
         }
 
@@ -197,16 +201,20 @@ class IndividuController extends AbstractController
                     $sid->fusionnerIndividus($individu, $new_individu);
                     $em->remove($individu);
                     $em->flush();
-                    
-                    // Une entrée de journal
-                    $sj->infoMessage('Utilisateur ' . $individu . '(' .  $individu->getIdIndividu()
-                    . ') fusionné vers ' . $new_individu . ' (' .  $new_individu->getIdIndividu() . ')');
                 }
-                catch (\Exception $e) {
-                    $request->getSession()->getFlashbag()->add("flash erreur","Pas possible de fusionner $individu avec $new_individu " . $e->getMessage());
-                }                
+                catch (\Exception $e)
+                {
+                    $request->getSession()->getFlashbag()->add("flash erreur",$e->getMessage());
+                    $sj->warningMessage('Utilisateur ' . $individu . ' (' .  $individu->getIdIndividu() . ') ne peut être effacé ');
+                }
+    
+                $request->getSession()->getFlashbag()->add("flash info",$individu. " supprimé");
+                $sj->infoMessage('Utilisateur ' . $individu . '(' .  $individu->getIdIndividu()
+                . ') fusionné vers ' . $new_individu . ' (' .  $new_individu->getIdIndividu() . ')');
                 return $this->redirectToRoute('individu_gerer');
-            } else {
+            }
+            else
+            {
                 $erreurs[] = "Le mail du nouvel utilisateur \"" . $mail . "\" ne correspond à aucun utilisateur existant";
             }
         }
@@ -432,6 +440,10 @@ class IndividuController extends AbstractController
 
         // Nouvel EPPN
         $formSso = $this->ajoutEppn($request, $individu);
+        if ($formSso == null)
+        {
+            return $this->redirectToRoute('individu_modify', [ 'id' => $individu->getId() ]);
+        }
 
         // Supprimer un EPPN
         $ssos = $individu->getSso();
@@ -441,7 +453,7 @@ class IndividuController extends AbstractController
                 'Sso',
                 EntityType::class,
                 [
-                'label' => 'Les eppn valides ',
+                'label' => 'Les eppn de cet individu: ',
                 'multiple' => true,
                 'expanded' => true,
                 'class' => Sso::class,
@@ -451,7 +463,7 @@ class IndividuController extends AbstractController
                 ]
             )
             ->add('submit', SubmitType::class, ['label' => 'modifier' ])
-            ->add('reset', ResetType::class, ['label' => 'reset' ])
+            ->add('reset', ResetType::class, ['label' => 'Annuler' ])
             ->getForm();
 
         $formEppn->handleRequest($request);
@@ -493,7 +505,8 @@ class IndividuController extends AbstractController
         $token = $this->tok->getToken();
         $user = $token->getUser();
         $this->si->sendInvitation($user, $individu);
-        return $this->render('individu/invitation.html.twig');
+        $request->getSession()->getFlashbag()->add("flash info","Invitation envoyée à $individu");
+        return $this->redirectToRoute('individu_gerer');
     }
 
      /**
@@ -537,7 +550,7 @@ class IndividuController extends AbstractController
      * Ajout d'un nouvel eppn
      *
      **************************************/
-    private function ajoutEppn(Request $request, Individu $individu) : FormInterface
+    private function ajoutEppn(Request $request, Individu $individu) : ?FormInterface
     {
         $em = $this->em;
         $sso = new Sso();
@@ -559,7 +572,7 @@ class IndividuController extends AbstractController
             catch (UniqueConstraintViolationException $e)
             {
                 $request->getSession()->getFlashbag()->add("flash erreur","Cet eppn existe déjà !");
-                return $this->redirectToRoute('individu_modify', [ 'id' => $individu->getId() ]);
+                return null;
             };
         }
         return $formSso;        
@@ -1074,7 +1087,8 @@ class IndividuController extends AbstractController
         $ff = $this->ff;
         $em = $this->em;
 
-        $form = Functions::getFormBuilder($ff, 'tri', GererUtilisateurType::class, [])->getForm();
+        $form = $ff->createNamedBuilder('tri', GererUtilisateurType::class, [], []) -> getform();
+        //$form = Functions::getFormBuilder($ff, 'tri', GererUtilisateurType::class, [])->getForm();
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

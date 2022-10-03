@@ -189,13 +189,6 @@ class Version implements Demande
     private $prjUtilisation = false;
 
     /**
-     * @var string
-     *
-     * @ORM\Column(name="prj_fiche", type="blob", length=65535, nullable=true)
-     */
-    private $prjFiche = '';
-
-    /**
      * @var boolean
      *
      * @ORM\Column(name="prj_fiche_val", type="boolean", nullable=true)
@@ -1375,30 +1368,6 @@ class Version implements Demande
     public function getPrjUtilisation()
     {
         return $this->prjUtilisation;
-    }
-
-    /**
-     * Set prjFiche
-     *
-     * @param string $prjFiche
-     *
-     * @return Version
-     */
-    public function setPrjFiche($prjFiche)
-    {
-        $this->prjFiche = $prjFiche;
-
-        return $this;
-    }
-
-    /**
-     * Get prjFiche
-     *
-     * @return string
-     */
-    public function getPrjFiche()
-    {
-        return $this->prjFiche;
     }
 
     /**
@@ -3519,7 +3488,7 @@ class Version implements Demande
     /*
      * TODO - Serait mieux dans ServiceVersions
      *        Session 22A -> Renvoie la dernière année où il y a eu une version
-     *                       (normalement 2021)
+     *                       (normalement 2021, mais peut-être une année antérieure)
      *
      *
      *************************************/
@@ -3542,7 +3511,6 @@ class Version implements Demande
             return '0';
         }
     }
-
 
     ///////////////////////////////////////////////
 

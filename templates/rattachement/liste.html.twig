@@ -1,10 +1,12 @@
 {% extends 'default/base.html.twig' %}
+{% import "default/icone.html.twig" as icones %}
+
 
 {% block body %}
-<section>
+<section style="stroke:black;">
     <h1>Rattachements</h1>
     
-    <div class="message warning">Un rattachement est une institution à laquelle est rattachée le projet. Pour chaque rattachement il y a un ou plusieurs experts associés. 
+    <div class="information">Un rattachement est une institution à laquelle est rattachée le projet. Pour chaque rattachement il y a un ou plusieurs experts associés. 
     <strong>Le rattachement prend la priorité sur les thématiques pour le choix automatique des experts.</strong></div>
 
     {% import "default/macros.html.twig" as gramcmacros %}
@@ -13,20 +15,20 @@
     <table id="general" >
     <thead>
     <tr>
-		{% if is_granted('ROLE_ADMIN') %}<th colspan="2">&nbsp;</th>{% endif %}<th>Libellé</th>
+        {% if is_granted('ROLE_ADMIN') %}<th colspan="2">&nbsp;</th>{% endif %}<th>Libellé</th>
     </tr>
     </thead>
     <tbody>
     {% for ratt in rattachements %}
         <tr>
-			{% if is_granted('ROLE_ADMIN') %}
+            {% if is_granted('ROLE_ADMIN') %}
             <td>
                 <a class="suppression" href="{{ path('supprimer_rattachement',{'id' : ratt.idRattachement }) }}" title="Supprimer">
-                <img class="bouton_poussoir" src="{{ gramcmacros.img_supprimer() }}" alt="Supprimer" /></a>
+                {{ icones.supprimer }}
             </td>
             <td>
                 <a class="modification" href="{{ path('modifier_rattachement',{'id' : ratt.idRattachement }) }}" title="Modifier le libellé">
-                <img class="bouton_poussoir" src="{{ gramcmacros.img_modifier() }}" alt="Modifier" /></a>
+                {{ icones.modifier }}
             </td>
             {% endif %}
             <td>{{ ratt.libelleRattachement }}</td>
