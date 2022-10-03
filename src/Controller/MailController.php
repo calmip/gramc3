@@ -104,7 +104,6 @@ class MailController extends AbstractController
         return $this->mailToResponsablesBody($request, $session, 0, $responsables, $sujet, $body, $template);
     }
     
-    ////////////////////////////////////////////////////////////////////////
     /***********************************************************
      *
      * Renvoie la liste des responsables de projet (et des projets) qui n'ont pas (encore)
@@ -170,12 +169,6 @@ class MailController extends AbstractController
         $template = 'mail/mail_to_responsables_rallonge.html.twig';
 
         return $this->mailToResponsablesBody($request, $session, 0, $responsables, $sujet, $body, $template);
-
-
-
-
-
-        
     }
 
     /**
@@ -458,5 +451,54 @@ class MailController extends AbstractController
         return $this->get('form.factory')  -> createNamedBuilder($nom, FormType::class, null, ['csrf_protection' => false ])
                                             -> add('sel', CheckboxType::class, [ 'required' =>  false, 'label' => " " ])
                                             ->getForm();
+    }
+
+    /**
+     *
+     * @Route("/tester", name="mail_tester", methods={"GET","POST"})
+     * 
+     */
+    public function testerAction(Request $request): Response
+    {
+        $em = $this->em;
+        $sn = $this->sn;
+        $ff = $this->ff;
+
+/*        $now = $em->getRepository(Param::class)->findOneBy(['cle' => 'now']);
+        if ($now == null) {
+            $now = new Param();
+            $now->setCle('now');
+            //$em->persist( $now );
+        }
+
+        if ($now->getVal() == null) {
+            $date = new \DateTime();
+        } else {
+            $date = new \DateTime($now->getVal());
+        }
+*/
+
+    //    $defaults = [ 'date' => $date ];
+        $form = $ff->createBuilder(FormType::class, [])
+                        ->add('addr', textType::class, [ 'label' => "Destinataire" ])
+                        ->add('Envoyer', SubmitType::class)
+                        ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            
+            $addr = $form->getData()['addr'];
+            $sn -> sendTestMessage($addr);
+
+            $request->getSession()->getFlashbag()->add("flash info","Le mail est parti, on vous laisse vérifier qu'il est bien arrivé !");
+        }
+
+        return $this->render(
+            'mail/tester.html.twig',
+            [
+            'form' => $form->createView(),
+        ]
+        );
     }
 }

@@ -1351,29 +1351,25 @@ class ServiceMenus
         return $menu;
     }
 
-
     ////////////////////////////////////////////////////////////////////////////
 
-//    public function affectation_test(int $priorite=self::HPRIO):array
-//    {
-//        //$session = $this->ss->getSessionCourante();
-//
-//        $menu['name']        =   'affectation_test';
-//        $menu['lien']        =   "Projets test";
-//
-//        $menu['commentaire'] =   "Vous ne pouvez pas affecter les experts aux projets test de cette année";
-//        $menu['ok']          =   false;
-//        if (!$this->ac->isGranted('ROLE_PRESIDENT')) {
-//            $menu['raison']     =   "Vous n'avez pas le rôprésident";
-//        }
-//        else {
-//            $menu['ok']             =   true;
-//            $menu['commentaire']    =   "Espace d'affectation des experts aux projets test";
-//        }
-//
-//        $this->__prio($menu, $priorite);
-//        return $menu;
-//    }
+    public function testerMail(int $priorite=self::HPRIO):array
+    {
+        $menu['name']        = 'mail_tester';
+        $menu['lien']        = "Tester le système de mail";
+        $menu['commentaire'] = "Vous ne pouvez pas tester le mail";
+        $menu['ok']          = false;
+        $menu['raison']      = "Vous n'êtes pas un administrateur";
+        $menu['icone']       = "mail";
+
+        if ($this->ac->isGranted('ROLE_ADMIN')) {
+            $menu['ok']             =   true;
+            $menu['commentaire']    =   "Test du mail";
+        }
+
+        $this->__prio($menu, $priorite);
+        return $menu;
+    }
 
     ////////////////////////////////////////////////////////////////////////////
 
