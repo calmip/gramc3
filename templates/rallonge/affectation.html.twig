@@ -86,7 +86,7 @@
                     {% else %}
                      <td class="nouveau"><strong>{{ projet.NR }}</strong></td>
                     {% endif %}
-                    <td>{{ projet.projet }} {# projet.rstate #}</td>
+                    <td>{{ projet.projet }} <strong>{{ projet.rstate }}</strong></td>
                     <td>
                         <a href="{{ path('consulter_projet', { 'id' : projet.projet.idProjet } ) }}" title="consulter le projet">
                         {{ icones.details }}
