@@ -12,7 +12,7 @@
 
 {% block body %}
 
-<section class="section_modifierProjet">
+<section id="section_modifierProjet">
 
     <h1>Demande de rallonge pour le projet {{ projet }} (session {{ session }})</h1>
 
@@ -64,15 +64,6 @@
     </div>
 
     {{ form_end(edit_form) }}
-
-    <nav>
-        <ul>
-            <li>
-                <a class="lien_actif" href="{{ path('projet_accueil') }}" title="Retour à la page demandeur">Retour à la page demandeur</a>
-            </li>
-        </ul>
-    </nav>
-   
 
 </section>
 

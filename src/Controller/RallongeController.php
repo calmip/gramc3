@@ -697,14 +697,9 @@ class RallongeController extends AbstractController
         }
 
         $rallonge->setAttrHeures($rallonge->getNbHeuresAtt());
-        if ($rallonge->getValidation() == true) {
-            $workflow->execute(Signal::CLK_VAL_PRS, $rallonge);
-        } else {
-            $workflow->execute(Signal::CLK_FERM, $rallonge);
-        }
 
-        [ $version, $projet, $session ] = $this->getVerProjSess($rallonge);
-        $erreurs = Functions::dataError($sval, $rallonge, ['president']);
+        // [ $version, $projet, $session ] = $this->getVerProjSess($rallonge);
+        // $erreurs = Functions::dataError($sval, $rallonge, ['president']);
 
         $editForm = $this->createFormBuilder($rallonge)
             ->add('confirmer', SubmitType::class, ['label' =>  'Confirmer' ])
@@ -712,7 +707,7 @@ class RallongeController extends AbstractController
             ->getForm();
 
         $editForm->handleRequest($request);
-        if ($editForm->isSubmitted())
+        if ($editForm->isSubmitted() && $editForm->isValid())
         {
             // Bouton Annuler
             if ($editForm->get('annuler')->isClicked()) {
@@ -741,7 +736,7 @@ class RallongeController extends AbstractController
         return $this->render(
             'expertise/valider_projet_sess.html.twig',
             [
-            'erreurs'    => $erreurs,
+            //'erreurs'    => $erreurs,
             'expertise'  => $rallonge,
             'version'    => $rallonge->getVersion(),
             'edit_form'  => $editForm->createView(),
@@ -876,7 +871,7 @@ class RallongeController extends AbstractController
 
    private static function cmpProjetsByRallonges(array $a, array $b): int
     {
-        return (Etat::cmpEtatExpertise($a['rstate'],$b['rstate']));
+        return (Etat::cmpEtatExpertiseRall($a['rstate'],$b['rstate']));
     }
 
     /**

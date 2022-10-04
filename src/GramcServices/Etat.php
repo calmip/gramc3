@@ -70,9 +70,10 @@ class Etat
             self::NON_RENOUVELABLE          =>  'NON_RENOUVELABLE',
         ];
 
-    // Pour utiliser avec cmpEtatExpertise
+    // Pour utiliser avec cmpEtatExpertise ou cmpEtatExpertiseRall
     // L'ordre sera d'abord les projets en expertise ou en attente, PUIS les projets actifs
-    public const ORDRE_ETAT = [ 3, 4, 2, 5, 1, 0 ];
+    public const ORDRE_ETAT      = [ 10, 10, 2, 0, 4, 5, 6, 7, 8, 9, 10 ];
+    public const ORDRE_ETAT_RALL = [ 10, 10, 3, 2, 0, 4, 10, 10, 10, 9, 10 ];
     
     public static function getLibelle($etat): string
     {
@@ -96,13 +97,17 @@ class Etat
 
     // Compare les états en mettant en PREMIER les états utiles pour affectation des experts
     // NOTE - Résultat indéfini si $a ou $b sont négatifs !
+    // TODO - Refaire ça comme cmpEtatExpertiseRall
     public static function cmpEtatExpertise(int $a, int $b): int
     {
         if ($a == $b) return 0;
-        if ($a > 5 && $b > 5) return 0;
-        if ($a > 5 && $b <= 5) return -1;
-        if ($b > 5 && $a <= 5) return 1;
-        if (self::ORDRE_ETAT[$a] > self::ORDRE_ETAT[$b]) return -1;
-        return 1;
+        return (self::ORDRE_ETAT[$a] < self::ORDRE_ETAT_RALL[$b]) ? -1 : 1;
+    }
+
+    // La seule différence est l'ordre des états
+    public static function cmpEtatExpertiseRall(int $a, int $b): int
+    {
+        if ($a == $b) return 0;
+        return (self::ORDRE_ETAT_RALL[$a] < self::ORDRE_ETAT_RALL[$b]) ? -1 : 1;
     }
 }
