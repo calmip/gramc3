@@ -45,14 +45,12 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 
-//use App\GramcServices\ServiceNotifications;
-
-
+// the name of the command (the part after "bin/console")
+#[AsCommand( name: 'app:inittypeversion', )]
 class InitTypeVersion extends Command
 {
-    // the name of the command (the part after "bin/console")
-    protected static $defaultName = 'app:inittypeversion';
 
     public function __construct(private ServiceJournal $sj, private EntityManagerInterface $em)
     {

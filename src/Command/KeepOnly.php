@@ -54,15 +54,14 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 
 //use App\GramcServices\ServiceNotifications;
 
-
+// the name of the command (the part after "bin/console")
+#[AsCommand( name: 'app:keeponly', )]
 class KeepOnly extends Rgpd
 {
-    // the name of the command (the part after "bin/console")
-    protected static $defaultName = 'app:keeponly';
-
     public function __construct(protected $debug, protected GramcDate $sd, protected ServiceProjets $sp, protected ServiceVersions $sv, protected ServiceJournal $sj, protected EntityManagerInterface $em)
     {
         // best practices recommend to call the parent constructor first and

@@ -83,11 +83,12 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+// the name of the command (the part after "bin/console")
+#[AsCommand(name: 'app:brouillage',)]
 class Brouillage extends Command
 {
-    // the name of the command (the part after "bin/console")
-    protected static $defaultName = 'app:brouillage';
 
     private $sd = null;
     private $sp = null;

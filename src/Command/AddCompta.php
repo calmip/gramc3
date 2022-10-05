@@ -56,12 +56,12 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+// the name of the command (the part after "bin/console")
+#[AsCommand( name: 'app:addcompta', )]
 class AddCompta extends Command
 {
-    // the name of the command (the part after "bin/console")
-    protected static $defaultName = 'app:addcompta';
-
     public function __construct(private $debug, private GramcDate $sd, private ServiceProjets $sp, private ServiceVersions $sv, private ServiceJournal $sj, private EntityManagerInterface $em)
     {
         // best practices recommend to call the parent constructor first and

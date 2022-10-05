@@ -31,12 +31,13 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use App\GramcServices\ServiceNotifications;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+// the name of the command (the part after "bin/console")
+
+#[AsCommand( name: 'app:send-a-mail',)]
 class Sendamail extends Command
 {
-    // the name of the command (the part after "bin/console")
-    protected static $defaultName = 'app:send-a-mail';
-
     private $env;
     private $twig;
     private $sn;
