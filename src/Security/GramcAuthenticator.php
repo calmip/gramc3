@@ -7,7 +7,7 @@ use App\Entity\Sso;
 use App\GramcServices\ServiceJournal;
 
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
-use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
+//use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
@@ -71,7 +71,7 @@ class GramcAuthenticator extends AbstractAuthenticator
      *
      * @throws AuthenticationException
      */
-    public function authenticate(Request $request): PassportInterface
+    public function authenticate(Request $request): Passport
     {
         // vous devez avoir utilisé le paramètre
         // ShibUseHeaders On
@@ -185,9 +185,9 @@ class GramcAuthenticator extends AbstractAuthenticator
      *
      * @see AbstractAuthenticator
      *
-     * @param PassportInterface $passport The passport returned from authenticate()
+     * @param Passport $passport The passport returned from authenticate()
      */
-    //public function createAuthenticatedToken(PassportInterface $passport, string $firewallName): TokenInterface
+    //public function createAuthenticatedToken(Passport $passport, string $firewallName): TokenInterface
     
     /**
      * Called when authentication executed and was successful!
