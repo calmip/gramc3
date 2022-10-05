@@ -58,7 +58,7 @@ class VersionRepository extends \Doctrine\ORM\EntityRepository
     public function findVersions($projet)
     {
         return $this->getEntityManager()
-        ->createQuery('SELECT partial v.{idVersion,etatVersion,prjTitre,prjLLabo,demHeures,attrHeures,politique}  FROM App:Version v WHERE ( v.projet = :projet AND NOT v.etatVersion = :annule) ORDER BY v.idVersion ASC')
+        ->createQuery('SELECT partial v.{idVersion,etatVersion,prjTitre,prjLLabo,demHeures,attrHeures}  FROM App:Version v WHERE ( v.projet = :projet AND NOT v.etatVersion = :annule) ORDER BY v.idVersion ASC')
         ->setParameter('annule', Etat::getEtat('ANNULE'))
         ->setParameter('projet', $projet)
         ->getResult();
@@ -67,7 +67,7 @@ class VersionRepository extends \Doctrine\ORM\EntityRepository
     public function findSessionVersions($session)
     {
         return $this->getEntityManager()
-        ->createQuery('SELECT partial v.{idVersion,etatVersion,prjGenciDari,prjTitre,prjLLabo,demHeures,attrHeures,penalHeures,politique,sondVolDonnPerm,prjResume,dataMetaDataFormat}  FROM App:Version v JOIN v.session s WHERE ( s = :session AND NOT v.etatVersion = :annule)')
+        ->createQuery('SELECT partial v.{idVersion,etatVersion,prjGenciDari,prjTitre,prjLLabo,demHeures,attrHeures,penalHeures,sondVolDonnPerm,prjResume,dataMetaDataFormat}  FROM App:Version v JOIN v.session s WHERE ( s = :session AND NOT v.etatVersion = :annule)')
         ->setParameter('annule', Etat::getEtat('ANNULE'))
         ->setParameter('session', $session)
         ->getResult();
@@ -79,7 +79,7 @@ class VersionRepository extends \Doctrine\ORM\EntityRepository
         $subAnnee = substr(strval($annee), -2);
 
         return $this->getEntityManager()
-        ->createQuery('SELECT partial v.{idVersion,etatVersion,prjGenciDari,prjTitre,prjLLabo,demHeures,attrHeures,politique}  FROM App:Version v  WHERE ( v.idVersion LIKE :pattern AND NOT v.etatVersion = :annule)')
+        ->createQuery('SELECT partial v.{idVersion,etatVersion,prjGenciDari,prjTitre,prjLLabo,demHeures,attrHeures}  FROM App:Version v  WHERE ( v.idVersion LIKE :pattern AND NOT v.etatVersion = :annule)')
         ->setParameter('annule', Etat::getEtat('ANNULE'))
         ->setParameter('pattern', $subAnnee . '%')
         //->setParameter('pattern', $annee . 'T' . $annee)
@@ -97,7 +97,7 @@ class VersionRepository extends \Doctrine\ORM\EntityRepository
     public function findSessionVersionsActives($session)
     {
         return $this->getEntityManager()
-        ->createQuery('SELECT partial v.{idVersion,etatVersion,prjGenciDari,prjTitre,prjLLabo,demHeures,attrHeures,politique}  FROM App:Version v JOIN v.session s WHERE ( s = :session AND (v.etatVersion = :actif OR v.etatVersion = :nouvelle_version_demandee OR v.etatVersion = :en_attente))')
+        ->createQuery('SELECT partial v.{idVersion,etatVersion,prjGenciDari,prjTitre,prjLLabo,demHeures,attrHeures}  FROM App:Version v JOIN v.session s WHERE ( s = :session AND (v.etatVersion = :actif OR v.etatVersion = :nouvelle_version_demandee OR v.etatVersion = :en_attente))')
         ->setParameter('nouvelle_version_demandee', Etat::getetat('NOUVELLE_VERSION_DEMANDEE'))
         ->setParameter('en_attente', Etat::getetat('EN_ATTENTE'))
         ->setParameter('actif', Etat::getetat('ACTIF'))
@@ -108,7 +108,7 @@ class VersionRepository extends \Doctrine\ORM\EntityRepository
     public function findAnneeTestVersions($annee)
     {
         return $this->getEntityManager()
-        ->createQuery('SELECT partial v.{idVersion,etatVersion,prjGenciDari,prjTitre,prjLLabo,demHeures,attrHeures,politique}  FROM App:Version v  WHERE ( v.idVersion LIKE :pattern AND NOT v.etatVersion = :annule)')
+        ->createQuery('SELECT partial v.{idVersion,etatVersion,prjGenciDari,prjTitre,prjLLabo,demHeures,attrHeures}  FROM App:Version v  WHERE ( v.idVersion LIKE :pattern AND NOT v.etatVersion = :annule)')
         ->setParameter('annule', Etat::getEtat('ANNULE'))
         ->setParameter('pattern', '%T' . $annee . '%')
         //->setParameter('pattern', $annee . 'T' . $annee)

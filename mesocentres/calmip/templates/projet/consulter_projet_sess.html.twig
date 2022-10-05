@@ -228,13 +228,7 @@
                         <th>Nombre d'heures consommées<br>
                             <span class="petit">depuis le début de {{ session.getAnneeSession() + 2000 }}</span>
                         </th>
-                        {# TODOPOLITIQUE #}
-                        <td>{# {{ version.conso }}
-                            {% if(version.getQuota > 0) %}
-                                ({{ (version.consocalcul * 100 / version.quota) |number_format(1)}} %)
-                            {% endif %}
-                            <br> #}
-                            {{ conso|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}
+                        <td>{{ conso|number_format(0, ',', ' ')|replace({' ':'&nbsp;'})|raw }}
                             {% if(quota!=0) %} 
                                 ({{consop|number_format(1)}} %) 
                             {% endif %}

@@ -29,8 +29,6 @@ use App\GramcServices\Etat;
 use App\Utils\Functions;
 use App\Interfaces\Demande;
 
-use App\Politique\Politique;
-
 /**
  * Version
  *
@@ -88,14 +86,6 @@ class Version implements Demande
      * @ORM\Column(name="attr_heures", type="integer", nullable=true)
      */
     private $attrHeures = '0';
-
-    /**
-     * @var integer
-     *
-     * @ORM\Column(name="politique", type="integer", nullable=true)
-     */
-    private $politique = Politique::DEFAULT_POLITIQUE;
-
 
     /**
      * @var string
@@ -2855,30 +2845,6 @@ class Version implements Demande
     }
 
     /**
-     * Get politique
-     *
-     * @return integer
-     */
-    public function getPolitique()
-    {
-        return $this->politique;
-    }
-
-    /**
-     * Set politique
-     *
-     * @param integer $politique
-     *
-     * @return Version
-     */
-    public function setPolitique($politique)
-    {
-        $this->politique = $politique;
-
-        return $this;
-    }
-
-    /**
      * Set prjThematique
      *
      * @param \App\Entity\Thematique $prjThematique
@@ -3560,27 +3526,6 @@ class Version implements Demande
         $etat   =   $this->getEtatVersion();
         return $etat == Etat::EDITION_DEMANDE || $etat == Etat::EDITION_TEST;
     }
-
-    ///////////////////////////////////////////////////
-
-    ////    public function getData()
-    ////    {
-
-    //if( $this->getIdVersion()== '18BP18045' )
-    //    //$sj->debugMessage(__METHOD__ . ":" . __LINE__ . " La politique de la version " . $this->getIdVersion() . " est (" . $this->getPolitique() .")");
-    //return App::getPolitique( $this->getPolitique() )->getData( $this );
-
-    ////    if( $this->getPolitique() == Politique::POLITIQUE || Politique::getLibelle( $this->getPolitique() ) == 'UNKNOWN' )
-    ////        $politique = Politique::DEFAULT_POLITIQUE;
-    ////    else
-    ////       $politique = $this->getPolitique();
-
-    //if( $this->getPolitique() == 2 )
-    //    //$sj->debugMessage(__METHOD__ . ":" . __LINE__ . " La politique de la version " . $this->getIdVersion() . " est (" . $this->getPolitique() .")");
-
-    //return App::getPolitique( $this->getPolitique() )->getData( $this );
-    ////    return App::getPolitique( $politique )->getData( $this );
-    ////    }
 
     ////////////////////////////////////////////
 
