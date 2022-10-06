@@ -195,13 +195,6 @@ class Individu implements UserInterface, EquatableInterface, PasswordAuthenticat
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="\App\Entity\Session", mappedBy="president")
-     */
-    private $session;
-
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     *
      * @ORM\OneToMany(targetEntity="\App\Entity\Sso", mappedBy="individu")
      */
     private $sso;
@@ -332,7 +325,6 @@ class Individu implements UserInterface, EquatableInterface, PasswordAuthenticat
     {
         $this->thematique = new \Doctrine\Common\Collections\ArrayCollection();
         $this->rattachement = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->session = new \Doctrine\Common\Collections\ArrayCollection();
         $this->sso = new \Doctrine\Common\Collections\ArrayCollection();
         $this->collaborateurVersion = new \Doctrine\Common\Collections\ArrayCollection();
         $this->expertise = new \Doctrine\Common\Collections\ArrayCollection();
@@ -730,40 +722,6 @@ class Individu implements UserInterface, EquatableInterface, PasswordAuthenticat
     public function getRattachement()
     {
         return $this->rattachement;
-    }
-
-    /**
-     * Add session
-     *
-     * @param \App\Entity\Session $session
-     *
-     * @return Individu
-     */
-    public function addSession(\App\Entity\Session $session)
-    {
-        $this->session[] = $session;
-
-        return $this;
-    }
-
-    /**
-     * Remove session
-     *
-     * @param \App\Entity\Session $session
-     */
-    public function removeSession(\App\Entity\Session $session)
-    {
-        $this->session->removeElement($session);
-    }
-
-    /**
-     * Get session
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getSession()
-    {
-        return $this->session;
     }
 
     /**
