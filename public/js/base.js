@@ -72,20 +72,27 @@ $( document ).ready(function() {
     }
 })
 
-
+// Changer la classe du panneau "Administrateur" pour le réduire ou le développer
+// On fait une requête ajax afin que cela soit pérenne durant la session
+function admin_redexp() {    
+    if(this.className == 'role_admin_reduit'){
+        this.className = 'role_admin'
+    }
+    else{
+        this.className = 'role_admin_reduit'
+    }
+    let h = $(this).data('href');
+    $.ajax({
+        type: 'GET',
+        url: h, 
+        processData: false,
+        contentType: false,
+    });
+}
 $(document).ready(function() {
-    
-    //Changer la classe du panneau "Adinistrateur" pour le réduire en un point lors du click
-    $('.role_admin').on('click', function(){
-        if(this.className == 'role_admin_reduit'){
-            this.className = 'role_admin'
-        }
-        else{
-            this.className = 'role_admin_reduit'
-        }
-    })
+    $('.role_admin').on('click', admin_redexp);
+    $('.role_admin_reduit').on('click', admin_redexp);
 })
-
 
 // Réduire et développer le menu pour enregistrer / annuler / fermer
 $(document).ready(function() {

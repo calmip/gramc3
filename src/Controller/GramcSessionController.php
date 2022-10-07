@@ -757,7 +757,6 @@ class GramcSessionController extends AbstractController
                             ]);
     }
 
-
     /**
      * @Route("/md5", methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
@@ -782,5 +781,25 @@ class GramcSessionController extends AbstractController
         $output = $request->getUri();
         $output = $request->getPathInfo() ;
         return new Response('<pre>' . $output . '</pre>');
+    }
+
+   /**
+    * @Route("/admin_red", name="admin_red", methods={"GET"})
+    * @Security("is_granted('ROLE_ADMIN')")
+    **/
+    public function adminRedAction(Request $request): Response
+    {
+        $request->getSession()->set('admin_red',true);
+        return new Response(json_encode('OK'));
+    }
+
+   /**
+    * @Route("/admin_exp", name="admin_exp", methods={"GET"})
+    * @Security("is_granted('ROLE_ADMIN')")
+    **/
+    public function adminExpAction(Request $request): Response
+    {
+        $request->getSession()->set('admin_red',false);
+        return new Response(json_encode('OK'));
     }
 }
