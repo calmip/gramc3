@@ -106,7 +106,6 @@
                 <p>&nbsp;</p>
             {% endif %}
             {% include "default/flash.html.twig" %}
-
             <div class="profil">
 
                 {% if is_granted('IS_AUTHENTICATED_FULLY') %}
@@ -144,7 +143,12 @@
 
         {% if is_granted('ROLE_ADMIN')  %}
 
-            <div class="role_admin" title="Vous êtres administrateur">
+            <div {% if app.session.get('admin_red') %}
+                    class="role_admin_reduit" data-href="{{ path('admin_exp') }}" 
+                 {% else %}
+                    class="role_admin" data-href="{{ path('admin_red') }}"
+                 {% endif %}
+                 title="Vous êtes administrateur">
                 <span></span>
                 <p>ADMINISTRATEUR</p>
             </div>
