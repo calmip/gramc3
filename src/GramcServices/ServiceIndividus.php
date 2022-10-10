@@ -29,6 +29,7 @@ use App\Entity\CommentaireExpert;
 use App\Entity\Expertise;
 use App\Entity\Journal;
 use App\Entity\Rallonge;
+use App\Entity\Version;
 use App\Entity\Sso;
 use App\Entity\Thematique;
 
@@ -85,8 +86,16 @@ class ServiceIndividus
         foreach ($CollaborateurVersion  as $item) {
             if (! $item->getVersion()->isCollaborateur($new_individu)) {
                 $item->setCollaborateur($new_individu);
+                $em->persist($item);
             } else {
                 $em->remove($item);
+            }
+            $version = $item->getVersion();
+            $majInd = $version->getMajInd();
+            if ($majInd == $individu)
+            {
+                $version->setMajInd($new_individu);
+                $em->persist($version);
             }
         }
 

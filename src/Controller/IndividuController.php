@@ -157,11 +157,11 @@ class IndividuController extends AbstractController
         $Rallonge                   =   $em->getRepository(Rallonge::class)->findBy(['expert' => $individu]);
         $Sso                        =   $em->getRepository(Sso::class)->findBy(['individu' => $individu]);
         $Thematique                 =   $individu->getThematique();
-
         $erreurs  =   [];
 
-        // utilisateur peu actif peut être effacé même s'il peut se connecter
-        if ($CollaborateurVersion == null && $Expertise == null && $Rallonge == null) {
+        // utilisateur peu actif peut être effacé sauf s'il peut se connecter
+        if ($CollaborateurVersion == null && $Expertise == null && $Rallonge == null && count($Sso) == 0)
+        {
 
             foreach ($individu->getThematique() as $item) {
                 $em->persist($item);
