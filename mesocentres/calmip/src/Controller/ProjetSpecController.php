@@ -652,6 +652,7 @@ class ProjetSpecController extends AbstractController
     public function TransformerAction(Request $request, Projet $projet)
     {
         $em = $this->em;
+        $sm = $this->sm;
 
         $m = $sm->transformerProjet($projet);
         if ($m['ok'] == false) {
