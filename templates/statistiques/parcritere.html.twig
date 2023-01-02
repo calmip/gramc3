@@ -29,7 +29,7 @@
     
     <div class="formulaire">
         {% set route='statistiques_' ~ titre ~ '_csv' %}
-        <form action="{{ path(route, { 'annee' : annee }) }} class="formulaire">
+        <form action="{{ path(route, { 'annee' : annee }) }}" class="formulaire">
             {% if sess_lbl == 'AB' %}
             <input class="telecharger_csv" type="submit" value="csv - statistiques par {{titre}} - année {{ annee }}">
             {% else %}
