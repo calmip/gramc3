@@ -159,9 +159,10 @@ class ServiceSessions
     public function selectAnnee(Request $request, $annee = null): array
     {
         // Choix de l'année = année courante + 1, pour pouvoir utiliser les stats lors des sessions A, en fin d'année précédente
-        $annee_max = $this->grdt->showYear() + 1;
+        $annee_cour = $this->grdt->showYear();
+        $annee_max = $annee_cour + 1;
         if ($annee == null) {
-            $annee=$annee_max;
+            $annee=$annee_cour;
         }
 
         $choices = array_reverse(Functions::choicesYear(new \DateTime('2000-01-01'), new \DateTime($annee_max.'-01-01'), 0), true);
