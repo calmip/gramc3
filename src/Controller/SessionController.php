@@ -902,7 +902,7 @@ class SessionController extends AbstractController
         $sortie  = join("\t", $entetes) . "\n";
 
         $sp            = $this->sp;
-        $stats         = $sp->projetsParCritere($annee, 'getAcroLaboratoire');
+        $stats         = $sp->projetsParCritere($annee, 'AB', 'getAcroLaboratoire');
         $acros         = $stats[0];
         $num_projets   = $stats[1];
         $liste_projets = $stats[2];
@@ -925,7 +925,7 @@ class SessionController extends AbstractController
         return Functions::csv($sortie, 'bilan_annuel_par_labo'.$annee.'.csv');
     }
 
-        /**
+    /**
      *
      * @Route("/{annee}/bilan_annuel_thema_csv", name="bilan_annuel_thema_csv",methods={"GET"})
      * @Security("is_granted('ROLE_OBS')")
@@ -938,7 +938,7 @@ class SessionController extends AbstractController
         $sortie  = join("\t", $entetes) . "\n";
 
         $sp            = $this->sp;
-        $stats         = $sp->projetsParCritere($annee, 'getAcroThematique');
+        $stats         = $sp->projetsParCritere($annee, 'AB', 'getAcroThematique');
         $acros         = $stats[0];
         $num_projets   = $stats[1];
         $liste_projets = $stats[2];
