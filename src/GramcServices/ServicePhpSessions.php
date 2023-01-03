@@ -68,6 +68,7 @@ class ServicePhpSessions
      *
      * TODO - On fait du bas niveau ici peut-être y a-t-il
      *        des moyens plus symfoniques de faire la même chose !
+     *        voir https://stackoverflow.com/questions/21096689/symfony-how-to-return-all-logged-in-active-users
      * 
      **********************************************************/
     public function getConnexions(): array
@@ -96,7 +97,7 @@ class ServicePhpSessions
                 $contents = file_get_contents($dir . '/' . $filename);
                 session_decode($contents);
                 if (! array_key_exists('_sf2_attributes', $_SESSION)) {
-                    $sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Une session autre que gramc3 !");
+                    $sj->errorMessage(__METHOD__ . ':' . __LINE__ . "$filename: Session autre que gramc3 !");
                 }
                 else
                 {
@@ -123,8 +124,8 @@ class ServicePhpSessions
                         $rest_individu = null;                        
                     }
                     if ($individu == null && $rest_individu == null) {
-                        $sj->errorMessage(__METHOD__ . ':' . __LINE__ . " Problème d'individu ");
-                    //dd($secu_data);
+                        $sj->warningMessage(__METHOD__ . ':' . __LINE__ . " $filename: Pas d'authentification ");
+                        //dd($filename,$_SESSION);
                     }
                     else
                     {
