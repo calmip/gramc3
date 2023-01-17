@@ -223,11 +223,9 @@ class AdminuxController extends AbstractController
         $i=0;
         foreach ($versions as $version) {
             //echo $version->getIdVersion()."\n";
-            if ($version->getEtatVersion() == Etat::ACTIF             ||
-                $version->getEtatVersion() == Etat::ACTIF_TEST        ||
-                $version->getEtatVersion() == Etat::NOUVELLE_VERSION_DEMANDEE ||
-                $version->getEtatVersion() == Etat::EN_ATTENTE
-              ) {
+            if ($version->getEtatVersion() != Etat::TERMINE &&
+                $version->getEtatVersion() != Etat::ANNULE)
+            {
                 foreach ($version->getCollaborateurVersion() as $collaborateurVersion) {
                     $collaborateur  =  $collaborateurVersion->getCollaborateur() ;
                     if ($collaborateur != null && $collaborateur->isEqualTo($individu)) {
@@ -1177,9 +1175,9 @@ class AdminuxController extends AbstractController
             return new Response(json_encode(['KO' => 'No Projet ' . $idProjet ]));
         }
 
-        $versions    = $projet->getVersion();
-        $output      =   [];
-        $idProjet    =   $projet->getIdProjet();
+        $versions = $projet->getVersion();
+        $output   = [];
+        $idProjet = $projet->getIdProjet();
 
         foreach ($versions as $version) {
             if ($version->getEtatVersion() == Etat::ACTIF) {
