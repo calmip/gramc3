@@ -32,7 +32,7 @@
                 {% if item.login == 'nologin' %}
                     - 
                 {% else %} 
-                    {{item.login}} 
+                    <big><code><strong>{{item.login}}</strong></code></big>
                 {% endif %}
                 {% if item.passwd != null %}
                     &nbsp;&nbsp;<img id="bouton_{{item.projet}}" class="bouton_poussoir cadenas" src="{{ asset('icones/cadenas.png') }}" alt="Donnez-moi mon mot de passe" title="Donnez-moi mon mot de passe" /></a> {% endif %}
