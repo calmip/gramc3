@@ -166,8 +166,11 @@ class ProjetSpecController extends AbstractController
                 $cpt_rall  = 0;
             }
 
-            if ($versionActive != null) {
-                $cv    = $cv_repo->findOneBy(['version' => $versionActive, 'collaborateur' => $individu]);
+            // Si le projet est en standby, pas de version active
+            // mais les utilisateurs ont toujours leur compte
+            $versionCompte = $sp->getMetaEtat($projet)=='STANDBY' ? $projet -> getVersionDerniere() : $versionActive;
+            if ($versionCompte != null) {
+                $cv    = $cv_repo->findOneBy(['version' => $versionCompte, 'collaborateur' => $individu]);
                 $login = $cv->getLoginname()==null ? 'nologin' : $cv->getLoginname();
                 $u     = $user_repo->findOneBy(['loginname' => $login]);
                 if ($u==null) {
@@ -209,25 +212,42 @@ class ProjetSpecController extends AbstractController
                 $cpt_rall  = 0;
             }
 
-            $cv    = $cv_repo->findOneBy(['version' => $versionActive, 'collaborateur' => $individu]);
-            if ($cv != null) {
-                // TODO - Remonter au niveau du ProjetRepository (fonctions get_projet_etats et getProjetsCollab)
-                if ($cv->getDeleted() == true) continue;
-                $login = $cv->getLoginname()==null ? 'nologin' : $cv->getLoginname();
-                $u     = $user_repo->findOneBy(['loginname' => $login]);
-                if ($u==null) {
-                    $passwd = null;
-                    $pwd_expir = null;
-                } else {
-                    $passwd = $u->getPassword();
-                    $passwd = Functions::simpleDecrypt($passwd);
-                    $pwd_expir = $u->getPassexpir();
+            // Si le projet est en standby, pas de version active
+            // mais les utilisateurs ont toujours leur compte
+            
+            $versionCompte = $sp->getMetaEtat($projet)=='STANDBY' ? $projet -> getVersionDerniere() : $versionActive;
+            if ($versionCompte != null)
+            {
+                $cv    = $cv_repo->findOneBy(['version' => $versionCompte, 'collaborateur' => $individu]);
+                if ($cv != null)
+                {
+                    // TODO - Remonter au niveau du ProjetRepository (fonctions get_projet_etats et getProjetsCollab)
+                    if ($cv->getDeleted() == true) continue;
+                    $login = $cv->getLoginname()==null ? 'nologin' : $cv->getLoginname();
+                    $u     = $user_repo->findOneBy(['loginname' => $login]);
+                    if ($u==null) {
+                        $passwd = null;
+                        $pwd_expir = null;
+                    } else {
+                        $passwd = $u->getPassword();
+                        $passwd = Functions::simpleDecrypt($passwd);
+                        $pwd_expir = $u->getPassexpir();
+                    }
                 }
-            } else {
+                else
+                {
+                    $login = 'nologin';
+                    $passwd= null;
+                    $pwd_expir = null;
+                }
+            }
+            else
+            {
                 $login = 'nologin';
                 $passwd= null;
                 $pwd_expir = null;
             }
+            
             $projets_collab[] =
                 [
                 'projet'    => $projet,
