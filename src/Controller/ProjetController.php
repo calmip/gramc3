@@ -889,6 +889,8 @@ class ProjetController extends AbstractController
                     'quota machine',
                     'heures consommées',
                     'heures gpu',
+                    'code (session A)',
+                    'code (session B)'
                     ];
 
         $sortie     .=   join("\t", $header) . "\n";
@@ -916,6 +918,32 @@ class ProjetController extends AbstractController
             $line[] = $prj_array['q'];
             $line[] = $prj_array['c'];
             $line[] = $prj_array['g'];
+
+            // Ajout mars 2023
+            if ($va != null)
+            {
+                $line[] = $va->getCodeNom();
+            }
+            else
+            {
+                $line[] = 'n/a';
+            }
+            
+            if ($vb != null)
+            {
+                if ($va != null && $va->getCodeNom() == $vb->getcodeNom())
+                {
+                    $line[] = 'idem';
+                }
+                else
+                {
+                    $line[] = $vb->getCodeNom();
+                }
+            }
+            else
+            {
+                $line[] = 'n/a';
+            }
 
             $sortie     .=   join("\t", $line) . "\n";
         }
