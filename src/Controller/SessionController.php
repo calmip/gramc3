@@ -452,6 +452,7 @@ class SessionController extends AbstractController
             $msg = "Impossible de démarrer la saisie, allez voir le journal !";
             $request->getSession()->getFlashbag()->add("flash erreur"," $msg");
         }
+        return $this->redirectToRoute('gerer_sessions');
     }
 
     /**
