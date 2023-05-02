@@ -94,7 +94,14 @@ class ServicePhpSessions
                 $diff  = intval(($time - $mtime) / 60);
                 $min   = $diff % 60;
                 $heures= intVal($diff/60);
-                $contents = file_get_contents($dir . '/' . $filename);
+                try
+                {
+                    $contents = file_get_contents($dir . '/' . $filename);
+                }
+                catch ( \Exception $e)
+                {
+                    continue;
+                }
                 session_decode($contents);
                 if (! array_key_exists('_sf2_attributes', $_SESSION)) {
                     $sj->errorMessage(__METHOD__ . ':' . __LINE__ . "$filename: Session autre que gramc3 !");
