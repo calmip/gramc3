@@ -693,7 +693,7 @@ class IndividuController extends AbstractController
      * @Security("is_granted('ROLE_ADMIN')")
      * Method("GET")
      */
-    public function plusSysadminAction(Request $request, Individu $individu): Respone
+    public function plusSysadminAction(Request $request, Individu $individu): Response
     {
         $individu->setSysadmin(false);
         $em = $this->em;
