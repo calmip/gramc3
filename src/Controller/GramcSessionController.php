@@ -82,6 +82,8 @@ use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
+use Symfony\Component\HttpKernel\Kernel;
+
 use Twig\Environment;
 
 /////////////////////////////////////////////////////
@@ -601,10 +603,11 @@ class GramcSessionController extends AbstractController
      *********************************************/
     public function infoAction(Request $request): Response
     {
+        $sf_version = Kernel::VERSION;
         ob_start();
         phpinfo();
         $info = ob_get_clean();
-        return $this->render('default/phpinfo.html.twig', [ 'info' => $info ]);
+        return $this->render('default/phpinfo.html.twig', [ 'sfversion' => $sf_version, 'info' => $info ]);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////
