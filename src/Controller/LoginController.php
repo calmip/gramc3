@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-//use App\Utils\IDP;
 use App\Utils\Functions;
 use App\Entity\Scalar;
 use App\Entity\Individu;
@@ -21,6 +20,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
 
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -155,7 +155,8 @@ class LoginController extends AbstractController
         $em = $this->em;
         $ff = $this->ff;
         
-        if ($this->getParameter('kernel.debug') === false) {
+        if ($this->getParameter('kernel.debug') === false)
+        {
             $sj->errorMessage(__METHOD__ . ':' . __LINE__ .' tentative de se connecter connection_debug - Mode DEBUG FALSE');
             return $this->redirectToRoute('accueil');
         }
@@ -175,9 +176,7 @@ class LoginController extends AbstractController
         }
         ksort($choices);
     
-        //dd($choices);
-
-        $form = Functions::createFormBuilder($ff)
+        $form = $ff->createBuilder(FormType::class, null)
             ->add(
                 'data',
                 ChoiceType::class,
@@ -190,7 +189,9 @@ class LoginController extends AbstractController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid())
+        // NOTE - Pas de validation du CSRF, ce sera fait par GramcAuthenticator
+        //        Donc pas de isValid())
+        if ($form->isSubmitted() /*&& $form->isValid()*/)
         {
             // Rediriger là où on veut aller
             if( $request->getSession()->has('url') )
