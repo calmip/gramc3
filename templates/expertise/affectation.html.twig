@@ -47,7 +47,6 @@
             <th >Expert</th>
             <th >Demande</th>
             <th >Attribution</th>
-            {% if noconso==false %}<th >Conso</th>{% endif %}
             </tr>
         </thead>
         <tbody>
@@ -161,9 +160,6 @@
     
                 <td >{{ version.demHeures }}</td>
                 <td >{% if version.idVersion is defined and attHeures[version.idVersion] is defined %}{{ attHeures[version.idVersion] }}{% endif %}</td>
-                {% if noconso==false %}
-                <td >{{ serviceProjets.getConsoCalculVersion(version) }}</td>
-                        {% endif %}
             </tr>
         {% endfor %}
         </tbody>
