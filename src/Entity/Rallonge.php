@@ -104,7 +104,7 @@ class Rallonge implements Demande
     /**
      * @var \App\Entity\Version
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Version")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Version",inversedBy="rallonge")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="id_version", referencedColumnName="id_version")
      * })
