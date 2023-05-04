@@ -700,6 +700,10 @@ tbody tr.rallonge{
     border-bottom: none;
 }
 
+/* Utilisé exceptionnellment (rallonges) */
+tr.odd {
+    background-color: lightgrey;
+}
 
 /* ========== TOUS LES TOP_BODY ==========  */
 /* Tout en haut de la page, la flèche pour revenir en arrière */

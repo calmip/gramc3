@@ -4,57 +4,55 @@
 
 {% block body %}
 
-<section>
+<section id="section_validation_expertise">
     <h1>Confirmation d'envoi de l'expertise</h1>
 
-    <div class="message info">Merci de vérifier votre expertise avant envoi définitif</div>
+    <div class="information ok">Merci de vérifier votre expertise avant envoi définitif</div>
 
-    <table class="projet">
-        <tbody>
-            <tr>
-                <th>Numéro de projet</th>
-                <td>{{ expertise.version.projet }}</td>
-            </tr>
+    <div class="recapitulatif">
+        <div class="premiere_partie">
+            <div>
+                <h4>Numéro de projet :</h4>
+                <p>{{ expertise.version.projet }}</p>
+            </div>
             {% if max_expertises_nb == 1 or is_granted('ROLE_PRESIDENT') %}
-            <tr>
-                <th>Validation</th>
-                <td>
-                    <strong>
+            <div>
+                <h4>Validation :</h4>
+                    <p><strong>
                         {% if( expertise.validation == 0 ) %}
                         REFUSER ET FERMER LE PROJET
                         {% elseif( expertise.validation == 1 ) %}
                         ACCEPTER
                         {% endif %}
-                    </strong>
-                </td>
-            </tr>
+                    </strong></p>
+            </div>
             {% endif %}
-            <tr>
-                <th>Heures attribuées</th>
-                <td>{{ expertise.nbHeuresAtt}}</td>
-            </tr>
-            <tr>
-                <th>Commentaire interne</th>
-                <td>{{ expertise.commentaireInterne }}</td>
-            </tr>
-        </tbody>
-    </table>
+            <div>
+                <h4>Heures attribuées :</h4>
+                <p>{{ expertise.nbHeuresAtt}}</p>
+            </div>
+        </div>
+        
+        <div class="deuxieme_partie">
+            <div class="commentaire">
+                    <h4>Commentaire interne :</h4>
+                    <p>{{ expertise.commentaireInterne }}</p>
+            </div>
+            <div class="commentaire">
+                    <h4>Commentaire envoyé au responsable :</h4>
+                    <p>{{ expertise.commentaireExterne }}</p>
+            </div>
+        </div>
+    </div>
 
-	{% if is_granted("ROLE_PRESIDENT") %}
-    <div class="message info">
+    <div class="information ok notifications">
         <h2>Notifications</h2>
         <p>Si le projet est <strong>accepté</strong>,
         un courriel sera envoyé au responsable de projet avec votre commentaire<br>
-        <p>Si le projet est <strong>refusé</strong>, le président du comité d'attribution devra prendre contact avec l'utilisateur.</p>
+        <p>Si le projet est <strong>refusé</strong>, l'utilisateur ne sera pas notifié, vous devrez prendre contact avec lui.</p>
     </div>
-	{% else %}
-	    <div class="message info">
-	        <h2>Notifications</h2>
-	        <p>Un courriel sera envoyé au président du comité d'attribution avec votre commentaire et votre proposition.</p>
-	    </div>
-	{% endif %}
 
-        <div class="message warning">
+        <div class="information attention">
             <strong>Confirmez-vous cette expertise ? </strong><br>
             {{ form_start(edit_form)  }}
             {{ form_widget(edit_form)  }}

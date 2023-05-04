@@ -126,7 +126,6 @@ class ExpertiseController extends AbstractController
         $etatSession = $session->getEtatSession();
 
         $affectationExperts = $se;
-        //new AffectationExperts($request, $versions, $this->get('form.factory'), $this->getDoctrine());
         $affectationExperts->setDemandes($versions);
 
         //

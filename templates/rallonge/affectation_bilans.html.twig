@@ -1,0 +1,35 @@
+<div class="bilan_legende">
+    <div
+    class="bilan">
+       <table>
+            <tbody>
+                <tr>
+                    <th colspan="2">Sélection des expertises</th>
+                </tr>
+                <tr>
+                    <th>Inverser la sélection</th>
+                    <td style="text-align: center"><input id="invsel" type="checkbox"></td>
+                </tr>
+            </tbody>
+       </table>
+        <table>
+            <tbody>
+                <tr>
+                    <th colspan="2">Demandes</th>
+                </tr>
+                <tr>
+                    <th>Nombre de demandes</th>
+                    <td>{{ stats.nbProjets }}</td>
+                </tr>
+                <tr>
+                    <th>Heures demandées</th>
+                    <td>{{ stats.nbDemHeures}}</td>
+                </tr>
+                <tr>
+                    <th>Heures attribuées</th>
+                    <td>{{ stats.nbAttHeures}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
