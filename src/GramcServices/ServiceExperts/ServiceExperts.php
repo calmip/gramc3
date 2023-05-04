@@ -517,12 +517,13 @@ class ServiceExperts
     public function getAttHeures()
     {
         $attHeures = [];
-        $demandes  = $this->demandes;
+        $demandes = $this->demandes;
         foreach ($demandes as $demande) {
-            $etatDemande    =   $demande->getEtat();
+            $etatDemande = $demande->getEtat();
             if ($etatDemande == Etat::EDITION_DEMANDE || $etatDemande == Etat::ANNULE) {
                 continue;
             }
+            $attHeures[$demande->getId()] = $demande->getAttrHeures();
         }
         return $attHeures;
     }
