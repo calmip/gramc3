@@ -430,25 +430,23 @@
                 <td class="recuperable">
                     {% if prj_array.penal_a==0 %}{{prj_array.recuperable}}{% else %}0{% endif %}</td>
                 <td>
-                    {% if prj_array.penal_a==0 %}{% set invisible_recup="" %} {% set invisible_norecup="invisible" %} {% endif %}
-                    {% if prj_array.penal_a >0 %}{% set invisible_recup="invisible" %} {% set invisible_norecup="" %} {% endif %}
-                    {% if prj_array.penal_a > 0 or prj_array.recuperable > 0 %}
-                        {% if prj_array.penal_a > 0 %}
-                            <a href="{{ path('penal_version', { 'id': prj_array.va.idversion, 'penal' : prj_array.penal_a }) }}" class="bouton_penalite {{invisible_recup}}" title="Appliquer la pénalité" >
-                                {{icones.recup(20,20)}}
-                            </a>
-                            <a href="{{ path('penal_version', { 'id': prj_array.va.idversion, 'penal' : -prj_array.penal_a }) }}" class="bouton_penalite {{invisible_norecup}}" title="Supprimer la pénalité" >
-                                {{icones.norecup(20,20)}}
-                            </a>
-                        {% endif %}
-                        {% if prj_array.recuperable > 0 %}
-                            <a href="{{ path('penal_version', { 'id': prj_array.va.idversion, 'penal' : prj_array.recuperable }) }}" class="bouton_penalite {{invisible_recup}}" title="Appliquer la pénalité" >
-                                {{icones.recup(20,20)}}
-                            </a>
-                            <a href="{{ path('penal_version', { 'id': prj_array.va.idversion, 'penal' : -prj_array.recuperable }) }}" class="bouton_penalite {{invisible_norecup}}" title="Supprimer la pénalité" >
-                                {{icones.norecup(20,20)}}
-                            </a>
-                        {% endif %}
+                    {% set p = 0 %}
+                    {% if prj_array.penal_a==0 %}
+                        {% set invisible_recup="" %}
+                        {% set invisible_norecup="invisible" %}
+                        {% set p = prj_array.recuperable%}
+                    {% endif %}
+                     {% if prj_array.penal_a > 0 %}
+                        {% set invisible_recup="invisible" %}
+                        {% set invisible_norecup="" %}
+                        {% set p = prj_array.penal_a %}
+                    {% endif %}
+                    {% if p > 0 %}
+                        {% set urlp = path('penal_version', { 'id': prj_array.va.idversion, 'penal' : p }) %}
+                        {% set urlr = path('penal_version', { 'id': prj_array.va.idversion, 'penal' : -p }) %}
+                        {#{{ urlp}}{{urlr}}#}
+                        <a href="{{urlp}}" class="bouton_penalite {{invisible_recup}}" title="Appliquer la pénalité" >{{icones.recup(20,20)}}</a>
+                        <a href="{{urlr}}" class="bouton_penalite {{invisible_norecup}}" title="Annuler la pénalité" >{{icones.norecup(20,20)}}</a>
                     {% else %}
                         &nbsp;
                     {% endif %}
