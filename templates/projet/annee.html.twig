@@ -189,16 +189,16 @@
                 <th colspan="2">Prévisionnel<br><em class="light petit">(sans compter les projets entreprises)</em></th>
             </tr>
             <tr>
-                <th>Heures pour une année</th>
+                <th title="renseignées lors de l'initialisation de la session">Heures pour une année</th>
                 <td>{{ heures_par_an|number_format(0, ',', '&nbsp;')|raw }}</td>
             </tr>
             <tr>
-                <th>Heures déjà attribuées<br>(y compris rallonges et pénalités)</th>
+                <th title="y compris rallonges et pénalités">Heures déjà attribuées</th>
                 <td id="stats_attribuees">{{ total.attrHeuresP|number_format(0, ',', '&nbsp;')|raw }}</td>
             </tr>
             {% if noconso==false %}
             <tr>
-                <th>Heures récupérables</th>
+                <th title="en appliquant les pénalités">Heures récupérables</th>
                 <td id="stats_recuperables">
                     {% if isRecupPrintemps or isRecupAutomne %}
                         {{ total.recupHeuresP|number_format(0, ',', '&nbsp;')|raw }}
@@ -212,16 +212,16 @@
                 <td>{{ (total.sess.consoHeuresCPU+total.sess.consoHeuresGPU+total.fil.consoHeuresCPU+total.fil.consoHeuresGPU)|number_format(0, ',', '&nbsp;')|raw }}</td>
             </tr>
             <tr>
-                <th>Heures attribuables</th>
-                <td id="stats_attribuables" title="h_par_an/2 - (h_attribuees - h_consommees)">
+                <th title="calcul: (1 - z/365) * h_par_an - (h_attribuées - h_consommées)">Heures attribuables</th>
+                <td id="stats_attribuables">
                     {# Pertinent seulement à la fin Juin ! #}
                     {% if isRecupPrintemps %}
-                        {% set attribuables = heures_par_an/2 - (total.attrHeuresP - total.consoHeuresP) %}
-                        {% if attribuables > 0 %}
-                            <span title="Heures_par_an/2 - (heures_attribuées - heures_consommées)">{{ attribuables|number_format(0, ',', '&nbsp;')|raw }}</span>
+                        {% if attribuables >= 0 %}
+                            <span>{{ attribuables|number_format(0, ',', '&nbsp;')|raw }}</span>
                         {% else %}
-                            <span class="attention" title="Heures_par_an/2 - (heures_attribuées - heures_consommées)">{{ attribuables|number_format(0, ',', '&nbsp;')|raw }}</span>
+                            <span class="attention">{{ attribuables|number_format(0, ',', '&nbsp;')|raw }}</span>
                         {% endif %}
+                        
                     {% else %}
                             N/A
                     {% endif %}

@@ -728,19 +728,23 @@ class ProjetController extends AbstractController
             $hparannee= $sessions[0]->getHParAnnee();
         }
 
+        // Calcul des heures attribuables
+        $z = $sd->format('z');
+        $attribuables = (1 - $z/365.0)*$hparannee - ($total['attrHeuresP'] - $total['consoHeuresP']);
+        
         return $this->render(
             'projet/annee.html.twig',
             [
             'form' => $data['form']->createView(), // formulaire
-            'annee'     => $annee,
-            //'mois'    => $mois,
-            'projets'   => $projets,
-            'total'     => $total,
+            'annee' => $annee,
+            'projets' => $projets,
+            'total' => $total,
             'rattachements' => $rattachements,
-            'showRapport'   => false,
+            'showRapport' => false,
             'isRecupPrintemps' => $isRecupPrintemps,
-            'isRecupAutomne'   => $isRecupAutomne,
-            'heures_par_an'    => $hparannee
+            'isRecupAutomne' => $isRecupAutomne,
+            'heures_par_an' => $hparannee,
+            'attribuables' => $attribuables
             ]
         );
     }
