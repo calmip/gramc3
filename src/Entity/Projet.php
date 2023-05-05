@@ -26,7 +26,6 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-//use App\App;
 use App\GramcServices\Etat;
 use App\Utils\Functions;
 use App\Entity\Version;
@@ -46,9 +45,9 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
  */
 class Projet
 {
-    public const PROJET_SESS = 1;		// Projet créé lors d'une session d'attribution
-    public const PROJET_TEST = 2;		// Projet test, créé au fil de l'eau, non renouvelable
-    public const PROJET_FIL  = 3;		// Projet créé au fil de l'eau, renouvelable lors des sessions
+    public const PROJET_SESS = 1;   // Projet créé lors d'une session d'attribution
+    public const PROJET_TEST = 2;   // Projet test, créé au fil de l'eau, non renouvelable
+    public const PROJET_FIL  = 3;   // Projet créé au fil de l'eau, renouvelable lors des sessions
 
     public const LIBELLE_TYPE=
     [
@@ -85,7 +84,7 @@ class Projet
     /**
      * @var \App\Entity\Version
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Version")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Version",inversedBy="versionActive")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="id_veract", referencedColumnName="id_version", onDelete="SET NULL", nullable=true)
      * })
@@ -98,7 +97,7 @@ class Projet
     /**
      * @var \App\Entity\Version
      *
-     * @ORM\OneToOne(targetEntity="App\Entity\Version")
+     * @ORM\OneToOne(targetEntity="App\Entity\Version", inversedBy="versionDerniere")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="id_verder", referencedColumnName="id_version", onDelete="SET NULL", nullable=true )
      * })

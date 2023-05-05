@@ -722,7 +722,7 @@ class VersionController extends AbstractController
      * @Route("/{id}/version/{penal}/penalite", name="penal_version",methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
-    public function penalAction(Version $idversion, $penal): Response
+    public function penalAction(Version $idversion, int $penal): Response
     {
         $data = [];
         $em = $this->em;

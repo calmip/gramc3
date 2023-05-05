@@ -67,7 +67,7 @@ class RapportActivite
     /**
      * @var \App\Entity\Projet
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Projet")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Projet", inversedBy="rapportActivite")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="id_projet", referencedColumnName="id_projet")
      * })

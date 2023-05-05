@@ -228,28 +228,15 @@ class ServiceProjets
         $total['sess'] = [];
         $total['fil'] = [];
 
-        //$total['prj']         = 0;  // Nombre de projets (A ou B) (A JETER)
-        //$total['demHeuresA']  = 0;  // Heures demandées en A (A JETER)
-        //$total['attrHeuresA'] = 0;  // Heures attribuées en A (A JETER)
-        //$total['demHeuresB']  = 0;  // Heures demandées en B (A JETER))
         $total['sess']['prj'] = 0;  // Nombre de projets (A ou B)
         $total['penalitesA']  = 0;  // Pénalités de printemps (sous-consommation entre Janvier et Juin) (A JETER)
         $total['penalitesB']  = 0;  // Pénalités d'Automne (sous-consommation l'été) (A JETER)
         $total['rall']        = 0;  // Nombre de rallonges (A JETER))
-        //$total['demHeuresR']  = 0;  // Heures demandées dans des rallonges (A JETER)
-        //$total['attrHeuresR'] = 0;  // Heures attribuées dans des rallonges (A JETER)
-        //$total['consoHeuresP']= 0;           // Heures consommées - A JETER ASAP
 
         $total['sess']['demHeuresA']  = 0;  // Heures demandées en A
         $total['sess']['attrHeuresA'] = 0;  // Heures attribuées en A
         $total['sess']['demHeuresB']  = 0;  // Heures demandées en B
         $total['sess']['attrHeuresB'] = 0;  // Heures attribuées en B
-
-        // Données consolidées - projets tests
-        // Plus utilisées à partir de 2022
-        $total['prjTest']     = 0;  // Nombre de projets tests
-        $total['demHeuresT']  = 0;  // Heures demandées dans des projets tests
-        $total['attrHeuresT'] = 0;  // Heures attribuées dans des projets tests
 
         // Données consolidées - projets fil de l'eau
         $total['fil']['prj'] = 0;  // Nombre de projets (A ou B)
@@ -271,7 +258,8 @@ class ServiceProjets
         // Données consolidées - globales
         $total['demHeuresP']  = 0;  // Nombre d'heures demandées: A+B+Rallonges, sess+fil
         $total['attrHeuresP'] = 0;  // Heures attribuées aux Projets: A+B+Rallonges-Pénalité, sess+fil
-        $total['recupHeuresP']= 0;  // Heures récupérables
+        $total['consoHeuresP'] = 0; // Heures consommées
+        $total['recupHeuresP'] = 0; // Heures récupérables
 
         // Conso - Projets Fil de l'eau
         $total['fil']['consoHeuresCPU']= 0;  // Heures consommées - cpu
@@ -368,13 +356,6 @@ class ServiceProjets
                 if (! in_array($v->getEtatVersion(), $a_filtrer))
                 {
                     $total['rall']        += 1;
-
-                    //if ($type == 'sess')
-                    //{
-                    //    $total['demHeuresR']  += $r->getDemHeures();    // provisoire
-                    //    $total['attrHeuresR'] += $r->getAttrHeures();   // provisoire
-                    //}
-
                     $total[$type]['rall']        += 1;
                     $total[$type]['demHeuresR']  += $r->getDemHeures();
                     $total[$type]['attrHeuresR'] += $r->getAttrHeures();
@@ -398,20 +379,11 @@ class ServiceProjets
                 $total['attrHeuresP'] -= $v->getPenalHeures();
 
             }
-            if ($v->getProjet()->isProjetTest()) {
-                // filtrage
-                if (! in_array($v->getEtatVersion(), $a_filtrer))
-                {
-                    $total['prjTest']     += 1;
-                    $total['demHeuresT']  += $v->getDemHeures();
-                    $total['attrHeuresT'] += $v->getAttrHeures();
-                }
-            }
 
             // La conso
             $this->ppa_conso($p, $annee);
             
-            //$total['consoHeuresP'] += $p['c'];
+            $total['consoHeuresP'] += $p['c'];
             $total[$type]['consoHeuresCPU'] += $p['c'] - $p['g'];
             $total[$type]['consoHeuresGPU'] += $p['g'];
             $total[$type]['sondVolDonnPerm']+= intval($v->getSondVolDonnPerm());
@@ -424,8 +396,8 @@ class ServiceProjets
                 $statsRattachements[$ratt->getLibelleRattachement()] += $p['c'];
             }
 
-            // Récup de Printemps
-            if ($isRecupPrintemps==true) {
+            // Récup de Printemps si pas encore faite
+            if ($isRecupPrintemps==true && $p['penal_a'] === 0) {
                 $p['recuperable']       = $this->ss->calc_recup_heures_printemps($p['c'], intval($p['attrib'])+intval($p['r']));
                 $total['recupHeuresP'] += ($v->getPenalHeures()==0) ? $p['recuperable'] : 0;
             } else {
@@ -513,7 +485,7 @@ class ServiceProjets
             //        Si un projet est renouvelé sa conso sera celle de la session A !
             if ($this->sv->isNouvelle($v))
             {
-                //$total['consoHeuresP'] += $p['c'];
+                $total['consoHeuresP'] += $p['c'];
                 $total[$type]['consoHeuresCPU'] += $p['c'] - $p['g'];
                 $total[$type]['consoHeuresGPU'] += $p['g'];
                 $total[$type]['sondVolDonnPerm']+= intval($v->getSondVolDonnPerm());
@@ -545,8 +517,9 @@ class ServiceProjets
 
             $projets[$p_id] = $p;
         }
-
+        //dd($total);
         $total['rattachements'] = $statsRattachements;
+        //dd($projets);
         return [$projets,$total];
     }
 
