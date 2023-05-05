@@ -46,7 +46,7 @@ class Sso
     /**
      * @var \App\Entity\Individu
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Individu")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Individu", inversedBy="sso")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="id_individu", referencedColumnName="id_individu")
      * })

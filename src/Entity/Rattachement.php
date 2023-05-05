@@ -53,7 +53,7 @@ class Rattachement
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\ManyToMany(targetEntity="App\Entity\Individu", inversedBy="idRattachement")
+     * @ORM\ManyToMany(targetEntity="App\Entity\Individu", inversedBy="rattachement")
      * @ORM\JoinTable(name="rattachementExpert",
      *   joinColumns={
      *     @ORM\JoinColumn(name="id_rattachement", referencedColumnName="id_rattachement")
@@ -68,7 +68,7 @@ class Rattachement
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="\App\Entity\Version", mappedBy="rattachement")
+     * @ORM\OneToMany(targetEntity="\App\Entity\Version", mappedBy="prjRattachement")
      */
     private $version;
 

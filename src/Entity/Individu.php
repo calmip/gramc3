@@ -133,7 +133,7 @@ class Individu implements UserInterface, EquatableInterface, PasswordAuthenticat
     /**
      * @var \App\Entity\Projet
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Statut")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Statut", inversedBy="individu")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="id_statut", referencedColumnName="id_statut")
      * })
@@ -159,7 +159,7 @@ class Individu implements UserInterface, EquatableInterface, PasswordAuthenticat
     /**
      * @var \App\Entity\Laboratoire
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Laboratoire",cascade={"persist"})
+     * @ORM\ManyToOne(targetEntity="App\Entity\Laboratoire",cascade={"persist"},inversedBy="individu")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="id_labo", referencedColumnName="id_labo")
      * })
@@ -169,7 +169,7 @@ class Individu implements UserInterface, EquatableInterface, PasswordAuthenticat
     /**
      * @var \App\Entity\Etablissement
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Etablissement")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Etablissement",inversedBy="individu")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="id_etab", referencedColumnName="id_etab")
      * })
@@ -191,13 +191,6 @@ class Individu implements UserInterface, EquatableInterface, PasswordAuthenticat
     private $rattachement;
 
     ///////////////////////////////////////
-
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     *
-     * @ORM\OneToMany(targetEntity="\App\Entity\Session", mappedBy="president")
-     */
-    private $session;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -730,40 +723,6 @@ class Individu implements UserInterface, EquatableInterface, PasswordAuthenticat
     public function getRattachement()
     {
         return $this->rattachement;
-    }
-
-    /**
-     * Add session
-     *
-     * @param \App\Entity\Session $session
-     *
-     * @return Individu
-     */
-    public function addSession(\App\Entity\Session $session)
-    {
-        $this->session[] = $session;
-
-        return $this;
-    }
-
-    /**
-     * Remove session
-     *
-     * @param \App\Entity\Session $session
-     */
-    public function removeSession(\App\Entity\Session $session)
-    {
-        $this->session->removeElement($session);
-    }
-
-    /**
-     * Get session
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getSession()
-    {
-        return $this->session;
     }
 
     /**

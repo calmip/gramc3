@@ -189,16 +189,16 @@
                 <th colspan="2">Prévisionnel<br><em class="light petit">(sans compter les projets entreprises)</em></th>
             </tr>
             <tr>
-                <th>Heures pour une année</th>
+                <th title="renseignées lors de l'initialisation de la session">Heures pour une année</th>
                 <td>{{ heures_par_an|number_format(0, ',', '&nbsp;')|raw }}</td>
             </tr>
             <tr>
-                <th>Heures déjà attribuées<br>(y compris rallonges et pénalités)</th>
+                <th title="y compris rallonges et pénalités">Heures déjà attribuées</th>
                 <td id="stats_attribuees">{{ total.attrHeuresP|number_format(0, ',', '&nbsp;')|raw }}</td>
             </tr>
             {% if noconso==false %}
             <tr>
-                <th>Heures récupérables</th>
+                <th title="en appliquant les pénalités">Heures récupérables</th>
                 <td id="stats_recuperables">
                     {% if isRecupPrintemps or isRecupAutomne %}
                         {{ total.recupHeuresP|number_format(0, ',', '&nbsp;')|raw }}
@@ -212,16 +212,16 @@
                 <td>{{ (total.sess.consoHeuresCPU+total.sess.consoHeuresGPU+total.fil.consoHeuresCPU+total.fil.consoHeuresGPU)|number_format(0, ',', '&nbsp;')|raw }}</td>
             </tr>
             <tr>
-                <th>Heures attribuables</th>
-                <td id="stats_attribuables" title="h_par_an/2 - (h_attribuees - h_consommees)">
+                <th title="calcul: (1 - z/365) * h_par_an - (h_attribuées - h_consommées)">Heures attribuables</th>
+                <td id="stats_attribuables">
                     {# Pertinent seulement à la fin Juin ! #}
                     {% if isRecupPrintemps %}
-                        {% set attribuables = heures_par_an/2 - (total.attrHeuresP-total.consoHeuresP) %}
-                        {% if attribuables>0 %}
-                            {{ attribuables|number_format(0, ',', '&nbsp;')|raw }}
+                        {% if attribuables >= 0 %}
+                            <span>{{ attribuables|number_format(0, ',', '&nbsp;')|raw }}</span>
                         {% else %}
-                            0
+                            <span class="attention">{{ attribuables|number_format(0, ',', '&nbsp;')|raw }}</span>
                         {% endif %}
+                        
                     {% else %}
                             N/A
                     {% endif %}
@@ -409,7 +409,7 @@
                 {{prj_array.attrib }}
             </td>
             {% if noconso==false %}
-            <td >
+            <td class="quota">
                 {{prj_array.q }}
             </td>
             <td >
@@ -427,53 +427,51 @@
            {# Je mets systématiquement deux boutons pour appliquer/récupérer, mais l'un des deux est caché  #}
            {# Ainsi le javascript pourra plus aisément contrôler tout ça                                    #}
            {% if isRecupPrintemps %}
-                {# Pas de pénalités sur les projets tests ! #}
-                {% if projet.id starts with 'P' %}
-                    <td class="recuperable">
-                        {% if prj_array.penal_a==0 %}{{prj_array.recuperable}}{% else %}0{% endif %}</td>
-                    <td>
-                        {% if prj_array.penal_a==0 %}{% set invisible_recup="" %} {% set invisible_norecup="invisible" %} {% endif %}
-                        {% if prj_array.penal_a >0 %}{% set invisible_recup="invisible" %} {% set invisible_norecup="" %} {% endif %}
-                        {% if prj_array.penal_a>0 or prj_array.recuperable>0 %}
-                            <a href="{{ path('penal_version', { 'id': prj_array.va.idversion, 'penal' : prj_array.recuperable }) }}" class="bouton_penalite {{invisible_recup}}" title="Appliquer la pénalité" >
-                                {{icones.recup(20,20)}}
-                            </a>
-                            <a href="{{ path('penal_version', { 'id': prj_array.va.idversion, 'penal' : -prj_array.recuperable }) }}" class="bouton_penalite {{invisible_norecup}}" title="Supprimer la pénalité" >
-                                {{icones.norecup(20,20)}}
-                            </a>
-                        {% else %}
-                            &nbsp;
-                        {% endif %}
-                    </td>
-                {% else %}
-                    <td >&nbsp;</td><td >&nbsp;</td>
-                {% endif %}
+                <td class="recuperable">
+                    {% if prj_array.penal_a==0 %}{{prj_array.recuperable}}{% else %}0{% endif %}</td>
+                <td>
+                    {% set p = 0 %}
+                    {% if prj_array.penal_a==0 %}
+                        {% set invisible_recup="" %}
+                        {% set invisible_norecup="invisible" %}
+                        {% set p = prj_array.recuperable%}
+                    {% endif %}
+                     {% if prj_array.penal_a > 0 %}
+                        {% set invisible_recup="invisible" %}
+                        {% set invisible_norecup="" %}
+                        {% set p = prj_array.penal_a %}
+                    {% endif %}
+                    {% if p > 0 %}
+                        {% set urlp = path('penal_version', { 'id': prj_array.va.idversion, 'penal' : p }) %}
+                        {% set urlr = path('penal_version', { 'id': prj_array.va.idversion, 'penal' : -p }) %}
+                        {#{{ urlp}}{{urlr}}#}
+                        <a href="{{urlp}}" class="bouton_penalite {{invisible_recup}}" title="Appliquer la pénalité" >{{icones.recup(20,20)}}</a>
+                        <a href="{{urlr}}" class="bouton_penalite {{invisible_norecup}}" title="Annuler la pénalité" >{{icones.norecup(20,20)}}</a>
+                    {% else %}
+                        &nbsp;
+                    {% endif %}
+                </td>
             {% endif %}
             {% if isRecupAutomne %}
-                {# Pas de pénalités sur les projets tests ! #}
-                {% if not projet.isProjetTest %}
-                    <td> {{ prj_array.attrete }}</td>
-                    <td> {{ prj_array.consoete}} </td>
-                    <td class="recuperable">
-                        {% if prj_array.penal_b==0 %}{{prj_array.recuperable}}{% else %}0{% endif %}</td>
-                    <td>
-                        {% if prj_array.penal_b==0 %}{% set invisible_recup="" %} {% set invisible_norecup="invisible" %} {% endif %}
-                        {% if prj_array.penal_b >0 %}{% set invisible_recup="invisible" %} {% set invisible_norecup="" %} {% endif %}
-                        {% if prj_array.penal_b >0 or prj_array.recuperable>0 %}
-                            <a href="{{ path('penal_version', { 'id': prj_array.vb.idversion, 'penal' : prj_array.recuperable }) }}" class="bouton_penalite {{invisible_recup}}" title="Appliquer la pénalité" >
-                                {{icones.recup(20,20)}}
-                            </a>
-                            <a href="{{ path('penal_version', { 'id': prj_array.vb.idversion, 'penal' : -prj_array.recuperable }) }}" class="bouton_penalite {{invisible_norecup}}" title="Supprimer la pénalité" >
-                                {{icones.norecup(20,20)}}
-                            </a>
-                        {% else %}
-                            &nbsp;
-                        {% endif %}
+                <td> {{ prj_array.attrete }}</td>
+                <td> {{ prj_array.consoete}} </td>
+                <td class="recuperable">
+                    {% if prj_array.penal_b==0 %}{{prj_array.recuperable}}{% else %}0{% endif %}</td>
+                <td>
+                    {% if prj_array.penal_b==0 %}{% set invisible_recup="" %} {% set invisible_norecup="invisible" %} {% endif %}
+                    {% if prj_array.penal_b >0 %}{% set invisible_recup="invisible" %} {% set invisible_norecup="" %} {% endif %}
+                    {% if prj_array.penal_b >0 or prj_array.recuperable>0 %}
+                        <a href="{{ path('penal_version', { 'id': prj_array.vb.idversion, 'penal' : prj_array.recuperable }) }}" class="bouton_penalite {{invisible_recup}}" title="Appliquer la pénalité" >
+                            {{icones.recup(20,20)}}
+                        </a>
+                        <a href="{{ path('penal_version', { 'id': prj_array.vb.idversion, 'penal' : -prj_array.recuperable }) }}" class="bouton_penalite {{invisible_norecup}}" title="Supprimer la pénalité" >
+                            {{icones.norecup(20,20)}}
+                        </a>
+                    {% else %}
+                        &nbsp;
+                    {% endif %}
 
-                    </td>
-                {% else %}
-                    <td >&nbsp;</td><td >&nbsp;</td><td >&nbsp;</td><td >&nbsp;</td>
-                {% endif %}
+                </td>
             {% endif %}
         {% endif %}
         </tr>

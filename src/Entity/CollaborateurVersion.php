@@ -97,7 +97,7 @@ class CollaborateurVersion
     /**
      * @var \App\Entity\Version
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Version")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Version", inversedBy="collaborateurVersion")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="id_version", referencedColumnName="id_version", onDelete="CASCADE")
      * })
@@ -117,7 +117,7 @@ class CollaborateurVersion
     /**
      * @var \App\Entity\Etablissement
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Etablissement")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Etablissement",inversedBy="collaborateurVersion")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="id_coll_etab", referencedColumnName="id_etab")
      * })
@@ -127,7 +127,7 @@ class CollaborateurVersion
     /**
      * @var \App\Entity\Individu
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Individu")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Individu", inversedBy="collaborateurVersion")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="id_collaborateur", referencedColumnName="id_individu")
      * })
