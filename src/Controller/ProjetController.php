@@ -759,8 +759,8 @@ class ProjetController extends AbstractController
      * @Route("/donnees", name="projet_donnees", methods={"GET","POST"})
      * Method({"GET","POST"})
      * @Security("is_granted('ROLE_OBS')")
+     * 
      */
-
     public function donneesAction(Request $request): Response
     {
         $ss    = $this->ss;

@@ -131,7 +131,7 @@ class Individu implements UserInterface, EquatableInterface, PasswordAuthenticat
     private $president = false;
 
     /**
-     * @var \App\Entity\Projet
+     * @var \App\Entity\Statut
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Statut", inversedBy="individu")
      * @ORM\JoinColumns({
@@ -325,7 +325,6 @@ class Individu implements UserInterface, EquatableInterface, PasswordAuthenticat
     {
         $this->thematique = new \Doctrine\Common\Collections\ArrayCollection();
         $this->rattachement = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->session = new \Doctrine\Common\Collections\ArrayCollection();
         $this->sso = new \Doctrine\Common\Collections\ArrayCollection();
         $this->collaborateurVersion = new \Doctrine\Common\Collections\ArrayCollection();
         $this->expertise = new \Doctrine\Common\Collections\ArrayCollection();
