@@ -749,14 +749,14 @@ class Version implements Demande
 
 
     /**
-     * @var \Doctrine\Common\Collections\Collection
+     * @var \App\Entity\Projet
      *
      * @ORM\OneToOne(targetEntity="\App\Entity\Projet", mappedBy="versionDerniere", cascade={"persist"} )
      */
     private $versionDerniere;
 
     /**
-     * @var \Doctrine\Common\Collections\Collection
+     * @var \App\Entity\Projet
      *
      * @ORM\OneToMany(targetEntity="\App\Entity\Projet", mappedBy="versionActive", cascade={"persist"} )
      */
@@ -780,8 +780,6 @@ class Version implements Demande
         $this->collaborateurVersion = new \Doctrine\Common\Collections\ArrayCollection();
         $this->rallonge             = new \Doctrine\Common\Collections\ArrayCollection();
         $this->expertise            = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->versionDerniere      = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->versionActive        = new \Doctrine\Common\Collections\ArrayCollection();
         $this->etatVersion          = Etat::EDITION_DEMANDE;
     }
 

@@ -131,7 +131,7 @@ class Individu implements UserInterface, EquatableInterface, PasswordAuthenticat
     private $president = false;
 
     /**
-     * @var \App\Entity\Projet
+     * @var \App\Entity\Statut
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Statut", inversedBy="individu")
      * @ORM\JoinColumns({
