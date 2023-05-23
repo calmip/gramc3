@@ -3162,12 +3162,7 @@ class Version implements Demande
      */
     public function getLabo()
     {
-        foreach ($this->getCollaborateurVersion() as $item) {
-            if ($item->getResponsable() == true) {
-                return $item->getLabo();
-            }
-        }
-        return null;
+        return $this->getPrjLLabo();
     }
 
 //    public function hasRapportActivite()

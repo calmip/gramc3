@@ -1,0 +1,50 @@
+@startuml
+
+title =Les workflows utilisés par gramc3\nLe code se trouve dans src/GramcServices/Workflow\nSeules les classes *Workflow sont déclarées comme SERVICES
+
+package workflows <<Frame>> {
+
+    class Workflow {
+        # addState(stateConstant, transitionArray)
+        + bool execute(signal, object)
+    }
+    class Transition {
+        {abstract} + bool execute(object)
+    }
+    class State {
+        - stateIdentifier
+        + bool execute(signal, object)
+    }
+    class ProjetWorkflow {
+        
+    }
+    class VersionWorkflow {
+        
+    }
+    class VersionTransition {
+        
+    }
+    class RallongeWorkflow {
+        
+    }
+    class SessionTransition {
+        
+    }
+    
+    Workflow "1" --o "1..s" State
+    State "1" --o "1..t" Transition
+    ProjetWorkflow --> Workflow
+    ProjetTransition --> Transition
+    SessionWorkflow --> Workflow
+    SessionTransition --> Transition
+    VersionWorkflow --> Workflow
+    VersionTransition --> Transition
+    RallongeWorkflow --> Workflow
+    RallongeTransition --> Transition
+    NoTransition --> Transition
+
+    
+note left of Workflow: Workflow::__construct crée les objets State à partir des états possibles (int)\nWorkflow::__construct crée aussi les objets Transition à partir des signaux associés aux objets (int)\nWorkflow::execute appelle State::execute
+note bottom of State: State::execute identifie la transition à partir du signal (int)\nState::execute appelle transition::execute
+}
+@enduml
