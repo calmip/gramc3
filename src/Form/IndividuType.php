@@ -180,7 +180,7 @@ class IndividuType extends AbstractType
                     'submit',
                     SubmitType::class,
                     [
-                    'label' => 'Valider',
+                    'label' => 'Enregistrer',
                     'attr'  =>  ['style' => 'width:10em'],
                     ]
                 );

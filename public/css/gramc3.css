@@ -294,7 +294,7 @@ div.flash.erreur{
     margin: auto;
 }
 
-#s_eppn .checkbox {
+#s_eppn .checkbox, #a_eppn input {
     margin-left:2em;
 }
 #s_eppn .row {
@@ -303,7 +303,7 @@ div.flash.erreur{
 #s_eppn label {
     font-weight: bold;
 }
-#s_eppn #sso_submit, #eppn #sso_reset,#eppn #form_submit, #form_reset {
+#a_eppn #sso_submit, #a_eppn #sso_reset,#s_eppn #form_submit, #s_eppn #form_reset {
     margin: 1ex 0;
 }
 
@@ -441,8 +441,7 @@ table#profil_horiz tr td.suppr {
 }
 
 /* ========== TOUS LES FORMULAIRES ========== */
-/* form_data pas utilisé ! */
-#form_data{
+#form_data_AJETER_CAR_PEU_UTILISE{
     border-radius: 11px;
     background: white;
     border: 1px solid var(--third-color);
@@ -570,6 +569,7 @@ select:hover{
 nav{
     width: 90%;
     margin: auto;
+    display: flex;
 }
 
 nav ul{
@@ -629,6 +629,13 @@ nav li:hover a .fill{
 
 nav li svg{
     margin-right: 10px;
+}
+
+/* barre de boutons en bas ou en haut de page */
+.barre {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* ===== EN VOIR + OU - ===== */
