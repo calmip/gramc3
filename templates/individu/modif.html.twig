@@ -1,4 +1,5 @@
 {% extends 'default/base.html.twig' %}
+{% import "default/macros.html.twig" as gramcmacros %} 
 
 {% form_theme formInd with ['form_table_layout.html.twig', _self] %}
 
@@ -18,7 +19,7 @@
 
 {% block _appbundle_individu_submit_widget %}
 {{ block('submit_widget') }}
-<button type="reset" id="individu_reset" style="width:10em">Effacer</button>
+<button type="reset" id="individu_reset" style="width:10em">Annuler</button>
 {% endblock %}
 
 {% block _appbundle_individu_labo_widget %}
@@ -34,11 +35,13 @@
     {% else %}
         {% set ajout=false %}
     {% endif %}
+
+    {{ gramcmacros.menu(menu) }}
     
     <h2>{% if ajout %}Ajouter {% else %} Modifier {% endif %} un utilisateur</h2>
     <p class="centrage"><em>Veuillez s'il vous plait renseigner tous les champs</em></p>
 
-    <div id="profil">
+    <div id="profil" class="inputrond submitdyn">
     {{ form_start(formInd) }}
     <fieldset>{{ form_widget(formInd) }}</fieldset>
     {{ form_end(formInd) }}
@@ -53,13 +56,18 @@
             {% if (individu.eppn | length != 0) %}
         
                 {% if formEppn != null %}
-                <h2>Supprimer un eppn</h2>
-                <p class="centrage"><em>Décochez les identifiants que vous souhaitez supprimer</em></p>
-                
-                {% form_theme formEppn 'foundation_5_layout.html.twig' %}
-                {{ form_start(formEppn) }}
-                <fieldset>{{ form_widget(formEppn) }}</fieldset>
-                {{ form_end(formEppn) }}
+
+                    <h2>Supprimer un eppn</h2>
+                    
+                    <p class="centrage"><em>Décochez les identifiants que vous souhaitez supprimer</em></p>
+    
+                    <div class="inputrond submitdyn">
+                        {% form_theme formEppn 'foundation_5_layout.html.twig' %}
+                        {{ form_start(formEppn) }}
+                        <fieldset>{{ form_widget(formEppn) }}</fieldset>
+                        {{ form_end(formEppn) }}
+                    </div>
+
                 {% endif %}
             {% else %}
                 <p class="centrage"><em>Cet utilisateur n'a pas d'eppn, il ne peut pas se connecter à gramc</em></p>
@@ -68,19 +76,25 @@
     {% endif %}
 
     {% if formSso != null %}
-    <h2>Ajouter un eppn</h2>
-
-    <div id="a_eppn">
-        {% form_theme formEppn 'foundation_5_layout.html.twig' %}
-        {{ form_start(formSso) }}
-        <fieldset>{{ form_widget(formSso)}}</fieldset>
-        {{ form_end(formSso) }}
-    </div>
-
-    <h2>...ou envoyer une invitation</h2>
-
-    <a class="lien_actif" href="{{ path('invitation', { 'id': individu.id }) }}"
-    title="Envoyer une invitation à {{individu.prenom}} {{individu.nom}}">Inviter {{individu.prenom}} {{individu.nom}}</a>
+        <h2>Ajouter un eppn</h2>
     
+        <div id="a_eppn" class="inputrond submitdyn">
+            {% form_theme formEppn 'foundation_5_layout.html.twig' %}
+            {{ form_start(formSso) }}
+            <fieldset>{{ form_widget(formSso)}}</fieldset>
+            {{ form_end(formSso) }}
+        </div>
+    
+        <h2>...ou envoyer une invitation</h2>
+    
+        <nav class="barre">
+            <ul>
+                <li>
+                    <a class="lien_actif" href="{{ path('invitation', { 'id': individu.id }) }}"
+                    title="Envoyer une invitation à {{individu.prenom}} {{individu.nom}}">Inviter {{individu.prenom}} {{individu.nom}}</a>
+    
+                </li>
+            </ul>
+        </nav>
     {% endif %}
 {% endblock %}

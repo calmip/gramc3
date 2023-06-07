@@ -45,6 +45,7 @@ use App\GramcServices\ServiceJournal;
 use App\GramcServices\ServiceExperts\ServiceExperts;
 use App\GramcServices\ServiceInvitations;
 use App\GramcServices\ServiceIndividus;
+use App\GramcServices\ServiceMenus;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
@@ -82,6 +83,7 @@ class IndividuController extends AbstractController
         private ServiceIndividus $sid,
         private ServiceExperts $se,
         private ServiceJournal $sj,
+        private ServiceMenus $sm,
         private ServiceInvitations $si,
         private FormFactoryInterface $ff,
         private TokenStorageInterface $tok,
@@ -410,6 +412,7 @@ class IndividuController extends AbstractController
     public function modifyAction(Request $request, Individu $individu): Response
     {
         $em = $this->em;
+        $sm = $this->sm;
         $repos = $em->getRepository(Individu::class);
         
         $formInd = $this->createForm('App\Form\IndividuType', $individu);
@@ -445,6 +448,9 @@ class IndividuController extends AbstractController
             return $this->redirectToRoute('individu_modify', [ 'id' => $individu->getId() ]);
         }
 
+        $menu = [];
+        $menu[] = $sm->gererIndividu();
+        
         // Supprimer un EPPN
         $ssos = $individu->getSso();
         $ssos_old = clone $ssos;
@@ -462,7 +468,7 @@ class IndividuController extends AbstractController
                 'choice_value' => function ($t) { return $t; },
                 ]
             )
-            ->add('submit', SubmitType::class, ['label' => 'modifier' ])
+            ->add('submit', SubmitType::class, ['label' => 'Enregistrer' ])
             ->add('reset', ResetType::class, ['label' => 'Annuler' ])
             ->getForm();
 
@@ -484,6 +490,7 @@ class IndividuController extends AbstractController
         return $this->render(
             'individu/modif.html.twig',
             [
+            'menu' => $menu,
             'individu' => $individu,
             'formInd' => $formInd->createView(),
             'formEppn' => $formEppn->createView(),
@@ -557,7 +564,7 @@ class IndividuController extends AbstractController
         $sso->setIndividu($individu);
         $formSso = $this->createForm('App\Form\SsoType', $sso, ['widget_individu' => false]);
         $formSso
-            ->add('submit', SubmitType::class, ['label' => 'nouvel EPPN' ])
+            ->add('submit', SubmitType::class, ['label' => 'Enregistrer' ])
             ->add('reset', ResetType::class, ['label' => 'Annuler' ]);
 
         $formSso->handleRequest($request);
@@ -871,8 +878,8 @@ class IndividuController extends AbstractController
                 'class' => Rattachement::class,
                 ]
             )
-            ->add('submit', SubmitType::class, ['label' => 'modifier' ])
-            ->add('reset', ResetType::class, ['label' => 'reset' ])
+            ->add('submit', SubmitType::class, ['label' => 'Enregistrer' ])
+            ->add('reset', ResetType::class, ['label' => 'Annuler' ])
             ->getForm();
 
         $form->handleRequest($request);
