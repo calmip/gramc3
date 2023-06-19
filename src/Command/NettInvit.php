@@ -21,24 +21,27 @@
  *            Nicolas Renon - Université Paul Sabatier - CALMIP
  **/
 
-// src/Command/NettCompta.php
+// src/Command/Rgpd.php
 
 /***************************
  *
- * 6 Avril 2022 - On vient d'ajouter le champ TypeVersion sur l'entité Version 
+ * Nettoyage dans les invitation
+ *
+ * Cette commande permet de SUPPRIMER les INVITATIONS EXPIREES
+ * A executer tous les jours dans un cron
+ *
+ * UTILISATION:
+ *
+ *      bin/console app:nettinvit
  *
  **************************************************/
 
 namespace App\Command;
 
 use App\GramcServices\GramcDate;
-use App\GramcServices\ServiceProjets;
-use App\GramcServices\ServiceVersions;
 use App\GramcServices\ServiceJournal;
 
-use App\Entity\Projet;
-use App\Entity\Version;
-use App\Utils\Etat;
+use App\Entity\Invitation;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -47,24 +50,24 @@ use Symfony\Component\Console\Input\InputArgument;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-// the name of the command (the part after "bin/console")
-#[AsCommand( name: 'app:inittypeversion', )]
-class InitTypeVersion extends Command
+class NettInvit extends Command
 {
+    // the name of the command (the part after "bin/console")
+    protected static $defaultName = 'app:nettinvit';
 
-    public function __construct(private ServiceJournal $sj, private EntityManagerInterface $em)
+    public function __construct(private $invit_duree, private GramcDate $grdt, private ServiceJournal $sj, private EntityManagerInterface $em)
     {
         // best practices recommend to call the parent constructor first and
         // then set your own properties. That wouldn't work in this case
         // because configure() needs the properties set in this constructor
+
         parent::__construct();
     }
 
     protected function configure()
     {
-        $this->setDescription('Initialiser le type de chaque version à partir du type de son projet');
-        $this->setHelp('');
-        $this->addArgument('year', InputArgument::REQUIRED, "On considère les version de cette année");
+        $this->setDescription('Nettoyer les invitations: suppression des invitations expirées');
+        $this->setHelp('suppression des invitations expirées');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -73,34 +76,38 @@ class InitTypeVersion extends Command
         // of the command.
 
         // return this if there was no problem running the command
-        $em = $this->em;
+
+        $grdt = $this->grdt;
         $sj = $this->sj;
+        $em = $this->em;
 
-        $annee = intval($input->getArgument('year'));
-        
-        $versions = $em->getRepository(Version::class)->findAll();
+        $invit_duree = $this->invit_duree;
+        $duree = new \DateInterval($invit_duree);
+        $now = $grdt;
 
+        $invitations = $em->getRepository(Invitation::class)->findAll();
         $i = 0;
-        foreach ($versions as $v)
+        $j = 0;
+        foreach ( $invitations as $inv)
         {
-            // On ne s'intéresse pas aux années trop anciennes
-            if ($v -> getAnneeSession() != $annee) continue;
-            $etat = $v->getEtatVersion();
-            
-            $p = $v -> getProjet();
-            $v->SetTypeVersion($p->getTypeProjet());
-            $em->persist($v);
-            $em->flush();   // Il faut faire le flush au fur et à mesure sinon ça coince à la fin
-            
-            if ($i % 100 == 0)
+            $j += 1;
+            $expiration = clone $inv->getCreationStamp();
+            $expiration->add($duree);
+            //$output->writeln("now ".$now->format('Y-m-d')." expiration ".$expiration->format('Y-m-d'));
+            if ($now > $expiration)
             {
-                $output->writeln("=================================");
+                $i += 1;
+                //$output->writeln("Suppression de l'$inv" );
+                $em->remove($inv);
             }
-            $output->writeln("Version $v - type " . $v->getTypeVersion());
-            $i++;
         }
-        $sj->infoMessage("Type de version mis à jour pour $i versions");
-        $output->writeln("Type de version mis à jour pour $i versions");
+        //$output->writeln("Suppression de $i invitations" );
+        if ($j != 0)
+        {
+            $em->flush();
+            $sj->infoMessage("Suppression de $i/$j invitations");
+        }
+
         return 0;
     }
 }

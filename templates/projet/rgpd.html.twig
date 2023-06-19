@@ -6,11 +6,28 @@
 
 <section>
     <div class="information attention">
-        <h2>En ligne de commande !</h2>
+        <h2>Nettoyage pour conformité à la base de données</h2>
             <p>Cette fonction doit être exécutée en ligne de commande:<br>
-                Pour supprimer les données des projets terminés il y a 1 an ou plus<br>
-                <tt>bin/console rgpd 10</tt> <br>
-                <strong>Faites d'abord une sauvegarde de la base de données et du répertoire data !</strong>
+                Pour supprimer les données des projets terminés il y a 5 ans ou plus:<br>
+                <tt>bin/console rgpd 5</tt> <br>
+            </p>
+            <p>Cela supprimera:
+            <ul>
+                <li>Toutes les données des projets (y compris versions, rallonges, ...)</li>
+                <li>Les documents joints (rapports d'activité, images, etc)</li>
+                <li>Les utilisateurs non administrateurs et qui ne sont plus associés à aucun projet ni à aucune expertise</li>
+            </ul>
+            </p>
+            <p><strong>Faites d'abord une sauvegarde de la base de données et du répertoire data !</strong></p>
+    </div>
+    <div class="information attention">
+        <h2>Nettoyage de la consommation</h2>
+            <p>Cette fonction doit être exécutée en ligne de commande:<br>
+                Pour supprimer 90% des données de consommation sur une année. Permet d'alléger la taille de la base de données,
+                au détriment de la précision des données de consommation (un jour sur 10 est conservé).<br>
+                <strong>ATTENTION</strong> - Vérifiez qu'il n'y a plus rien à facturer...<br>
+                <tt>bin/console nettconso 2022</tt>
+                <p><strong>Faites d'abord une sauvegarde de la base de données !</strong></p>
             </p>
     </div>
 </section>
