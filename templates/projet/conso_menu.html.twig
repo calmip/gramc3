@@ -1,31 +1,31 @@
 {% import "default/icone.html.twig" as icones %}
 
 {% for t in types %}
-	{% if t=='group' %}
-		<h2>{{ titres[t] }}</h2>
-		<ul>
-		{% for k,r in ressources_conso_group %}
-			<li>
-				<div class="conso" alt="Consommation - {{loginname}} - {{annee}} - {{r.nom}}" data-href="{{ absolute_url(path('projet_conso_ressource', { 'id': projet.idProjet, 'loginname': loginname, 'ress_id' : k, 'utype': t, 'annee' : annee }))}}" > 
-	                 {{ icones.consommation }}
-				</div>
-				{{ projet }} ({{ annee }}) - {{ r.nom }}
-	        </li>
-		{% endfor %}
-		</ul>
-	{% endif %}
-	{% if t=='user' and loginname != 'nologin' %}
-		<h2>{{ titres[t] }}</h2>
-		<ul>
-		{% for k,r in ressources_conso_user %}
-			<li>
-				<div class="conso" alt="Consommation - {{loginname}} - {{annee}} - {{r.nom}}" data-href="{{ absolute_url(path('projet_conso_ressource', { 'id': projet.idProjet, 'loginname': loginname, 'ress_id' : k, 'utype': t, 'annee' : annee }))}}" > 
-	                 {{ icones.consommation }}
-				</div>
-				{{ loginname }} ({{ annee }}) - {{ r.nom }}
-	        </li>
-		{% endfor %}
-		</ul>
-	{% endif %}
+    {% if t=='group' %}
+        <h2>{{ titres[t] }}</h2>
+        <ul>
+        {% for k,r in ressources_conso_group %}
+            <li>
+                <div class="conso" alt="Consommation - {{projet.idProjet}} - {{annee}} - {{r.nom}}" data-href="{{ absolute_url(path('projet_conso_ressource', { 'id': projet.idProjet, 'loginname': loginname, 'ress_id' : k, 'utype': t, 'annee' : annee }))}}" > 
+                     {{ icones.consommation }}
+                </div>
+                {{ projet }} ({{ annee }}) - {{ r.nom }}
+            </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+    {% if t=='user' and loginname != 'nologin' %}
+        <h2>{{ titres[t] }}</h2>
+        <ul>
+        {% for k,r in ressources_conso_user %}
+            <li>
+                <div class="conso" alt="Consommation - {{loginname}} - {{annee}} - {{r.nom}}" data-href="{{ absolute_url(path('projet_conso_ressource', { 'id': projet.idProjet, 'loginname': loginname, 'ress_id' : k, 'utype': t, 'annee' : annee }))}}" > 
+                     {{ icones.consommation }}
+                </div>
+                {{ loginname }} ({{ annee }}) - {{ r.nom }}
+            </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
 {% endfor %}
 
