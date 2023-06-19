@@ -80,6 +80,18 @@ class Invitation
      */
     private $invited;
 
+    public function __toString()
+    {
+        $rvl = "invitation du ";
+        $rvl .= $this->getCreationStamp()->format('Y-m-d');
+        $rvl .= " de ";
+        $rvl .= $this->getInviting();
+        $rvl .= " pour ";
+        $rvl .= $this->getInvited();
+        return $rvl;
+    }
+
+
     /**
      * Get idInvitation
      *

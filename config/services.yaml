@@ -171,3 +171,7 @@ services:
 
     App\Command\InitTypeVersion:
         tags: ["console.command"]
+
+    App\Command\NettInvit:
+        arguments: ["%invit_duree%"]
+        tags: ["console.command"]
