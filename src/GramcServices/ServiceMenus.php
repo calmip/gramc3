@@ -1494,7 +1494,7 @@ class ServiceMenus
     public function nettoyerRgpd(int $priorite=self::HPRIO):array
     {
         $menu['name']            = 'rgpd';
-        $menu['lien']            = "Nettoyage pour conformité au RGPD";
+        $menu['lien']            = "Nettoyage des données";
         $menu['commentaire']     = "Vous ne pouvez pas supprimer les projets ou les utilisateurs anciens";
         $menu['ok']              = false;
         $menu['raison']          = "Vous n'êtes pas un administrateur";
@@ -1502,7 +1502,7 @@ class ServiceMenus
 
         if ($this->ac->isGranted('ROLE_ADMIN')) {
             $menu['ok']          = true;
-            $menu['commentaire'] = "Suppresion des anciens projets et des utilisateurs orphelins";
+            $menu['commentaire'] = "Suppression des anciens projets et des utilisateurs orphelins";
         }
 
         $this->__prio($menu, $priorite);
