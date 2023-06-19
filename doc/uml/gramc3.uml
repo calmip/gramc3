@@ -63,8 +63,10 @@ class CollaborateurVersion {
     - string labo
     - string statut
     - string etablissement
+    - string loginname
     - bool login
     - bool clogin
+    - bool deleted
 }
 
 class Expertise {
