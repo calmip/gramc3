@@ -1,0 +1,32 @@
+{% extends 'default/base.html.twig' %}
+{% import "default/macros.html.twig" as gramcmacros %}
+{% import "default/icone.html.twig" as icones %}
+
+{% block body %}
+
+<h2>Vos clés publiques ssh</h2>
+
+    {{ gramcmacros.menu(menu) }}
+
+    {% if clessh is empty %}
+        <div class = "information attention"><p><em>Soit vous n'avez pas encore téléversé de clé ssh, soit elles ont été révoquées</em></p></div>
+    {% else %}
+        <table>
+            <tr><th>&nbsp;</th><th>Nom</th><th>Clé publique</th><th>Etat</th></tr>
+            {% for k in clessh %}
+                <tr>
+                    <td><a class="suppression" href="{{ path('supprimer_clessh',{'id' : k.id }) }}" title="Supprimer">
+                    {{ icones.supprimer() }}</a>
+                    </td>
+                    <td>{{k.nom}}</td>
+                    <td><tt>{{ gramcmacros.tronquer_chaine_2(k.pub)}}</tt></td>
+                    <td>{% if k.rvk %} <span title="Problème de sécurité, La clé a été révoquée">{{ icones.attention }}</span> {% else %} {{icones.valide}} {% endif %}</td>
+                    </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+    
+    </section>
+
+{% endblock %}
+

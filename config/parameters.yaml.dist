@@ -13,8 +13,12 @@ parameters:
     mesoc_attrib: 'https://www.calmip.univ-toulouse.fr/spip.php?article19'
     mesoc_merci: 'https://www.calmip.univ-toulouse.fr/spip.php?article337'
     mesoc_formation: 'https://www.calmip.univ-toulouse.fr/spip.php?rubrique15'
-    
     mesoc_address: 'CALMIP - Espace Clément Ader - 3 rue Caroline Aigle - 31400 TOULOUSE'
+
+    # Types de cles ssh autorises
+    clessh_algos:
+       - RSA-2048
+       - ED25519-256
 
     # Si false, on n'affiche pas la case login dans l'écran collaborateurs
     # La gestion des mots de passe est elle aussi désactivée

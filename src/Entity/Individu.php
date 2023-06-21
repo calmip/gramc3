@@ -199,7 +199,12 @@ class Individu implements UserInterface, EquatableInterface, PasswordAuthenticat
      */
     private $sso;
 
-
+    /**
+     * @var \Doctrine\Common\Collections\Collection
+     *
+     * @ORM\OneToMany(targetEntity="\App\Entity\Clessh", mappedBy="individu")
+     */
+    private $clessh;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -327,6 +332,7 @@ class Individu implements UserInterface, EquatableInterface, PasswordAuthenticat
         $this->rattachement = new \Doctrine\Common\Collections\ArrayCollection();
         $this->sso = new \Doctrine\Common\Collections\ArrayCollection();
         $this->collaborateurVersion = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->clessh = new \Doctrine\Common\Collections\ArrayCollection();
         $this->expertise = new \Doctrine\Common\Collections\ArrayCollection();
         $this->journal = new \Doctrine\Common\Collections\ArrayCollection();
     }
@@ -758,7 +764,44 @@ class Individu implements UserInterface, EquatableInterface, PasswordAuthenticat
         return $this->sso;
     }
 
+    /**
+     * Add clessh
+     *
+     * @param \App\Entity\Clessh $clessh
+     *
+     * @return Individu
+     */
+    public function addClessh(\App\Entity\Clessh $clessh): self
+    {
+        if (! $this->clessh->contains($clessh))
+        {
+            $this->clessh[] = $clessh;
+        }
+        return $this;
+    }
 
+    /**
+     * Remove clessh
+     *
+     * @param \App\Entity\Clessh $clessh
+     *
+     * @return Individu
+     */
+    public function removeClessh(\App\Entity\Clessh $clessh): self
+    {
+        $this->clessh->removeElement($clessh);
+        return $this;
+    }
+
+    /**
+     * Get clessh
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getClessh()
+    {
+        return $this->clessh;
+    }
 
     /**
      * Add collaborateurVersion

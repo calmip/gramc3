@@ -1,0 +1,34 @@
+{% extends 'default/base.html.twig' %}
+
+{% block body %}
+<section>
+<h2>Ajouter une clé ssh</h2>
+    {% import "default/macros.html.twig" as gramcmacros %}
+    {{ gramcmacros.menu(menu) }}
+    <div class="information ok">
+        <p>Veuillez faire un copier-coller depuis votre fichier de clé publique ssh</p>
+        <p>Algorithmes autorisés: 
+           <tt><strong>{% for a in clessh_algos %}{{a}} {%endfor%}</strong></tt>
+       </p>
+    </div>
+
+    {{ form_start(form) }}
+    <table>
+        <tr>
+            <th style="width:25%">{{ form_label(form.nom) }}</th>
+            <td>{{ form_widget(form.nom) }}</td>
+        </tr>
+        <tr>
+            <th>{{ form_label(form.pub) }}</th>
+            <td>{{ form_widget(form.pub) }}</td>
+        </tr>
+        <tr>
+            <th></th>
+            <td class="inputrond submitdyn">{{ form_widget(form.submit) }}{{ form_widget(form.reset) }}</td>
+        </tr>    
+    </table>
+    {{ form_end(form) }}
+
+</section>
+
+{% endblock body %}

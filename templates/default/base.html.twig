@@ -110,14 +110,17 @@
 
                 {% if is_granted('IS_AUTHENTICATED_FULLY') %}
                     <div>
-                    {% if is_granted('IS_IMPERSONATOR') %}
-                        <p> SUDO par {{ app.token.originalToken.user }}</p>
-                    {% endif %}
-                    {% if app.debug %}
-                        <p>Connecté en tant que : <a href="{{ path('profil') }}" class="nom_profil">{{ app.user.prenom }} {{ app.user.nom }} ({{ app.user.id}})</a></p>
-                    {% else %}
-                        <p>Connecté en tant que : <a href="{{ path('profil') }}" class="nom_profil">{{ app.user.prenom }} {{ app.user.nom }} ({{ app.user.id}})</a></p>
-                    {% endif %}
+                        {% if is_granted('IS_IMPERSONATOR') %}
+                            <p> SUDO par {{ app.token.originalToken.user }}</p>
+                        {% endif %}
+                        <p>
+                        {% if app.debug %}
+                            Connecté en tant que : <a href="{{ path('profil') }}" class="nom_profil">{{ app.user.prenom }} {{ app.user.nom }} ({{ app.user.id}})</a>
+                        {% else %}
+                            Connecté en tant que : <a href="{{ path('profil') }}" class="nom_profil">{{ app.user.prenom }} {{ app.user.nom }} ({{ app.user.id}})</a>
+                        {% endif %}
+                        <span title="Gérer vos clés ssh"><a href="{{ path('gerer_clessh') }}">{{ icones.trousseau(40,40)}}</a></span>
+                        </p>
                     </div>
 
                     <a href=" {{ path('deconnexion') }}" class="deconnexion_profil">Déconnexion</a>

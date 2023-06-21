@@ -220,6 +220,10 @@
 {% if chaine|length > longueur %}<span title="{{ chaine }}">{{ chaine|slice(0,longueur) }}...</span>{% else %}{{ chaine }}{% endif %}
 {% endmacro %}
 
+{% macro tronquer_chaine_2(chaine,longueur=30) %}
+{% if chaine|length > longueur %}<span title="{{ chaine }}">{{ chaine|slice(0,longueur) }} ... {{chaine|slice(-longueur,longueur) }}</span>{% else %}{{ chaine }}{% endif %}
+{% endmacro %}
+
 {% macro parse_libelle_acro(libelle) %}
 {{ libelle|split(' - ')|first }}
 {% endmacro %}

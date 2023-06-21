@@ -139,6 +139,10 @@ services:
         arguments: [ "%max_page_nb%" ]
         tags: ["validator.constraint_validator" ]
 
+    App\Validator\Constraints\ClesshValidator:
+        arguments: [ "%clessh_algos%" ]
+        tags: ["validator.constraint_validator" ]
+
     App\Security\GramcAuthenticator:
         arguments:
             $knl_debug: '%kernel.debug%'
