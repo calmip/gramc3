@@ -1,0 +1,26 @@
+{% extends 'default/base.html.twig' %}
+{% import "default/icone.html.twig" as icones %}
+
+{% block body %}
+    <h1>Clé ssh associée à l'utilisateur {{user.loginname }}</h1>
+
+    {% if clessh|length > 0 %}
+        <div id="choix_cle_ssh">
+            {{ form_start(form) }}
+                 {{ form_widget(form.cgu) }} <strong>j'ai lu et approuvé les <a href="{{asset(mesoc_cgu)}}" target="_blank">Conditions Générales d'Utilisation de {{ mesoc }}</a> </strong><br>
+                {% form_theme form 'foundation_5_layout.html.twig' %}
+                {{ form_widget(form.clessh) }}
+                <span class="inputrond submitdyn" >
+                    {{ form_widget(form.reset) }}
+                    {{ form_widget(form.submit) }}
+                </span>
+            {{ form_end(form) }}
+        </div>
+
+    {% else %}
+        <div class="information attention">
+            <p class="centrage"><em>Vous n'avez pas encore téléversé de clé ssh !</em></p>
+            <p class="centrage"><a href="{{ path('gerer_clessh') }}">{{ icones.clessh }}<strong>Téléverser mes clés ssh</strong></a></p>
+        </div>
+    {% endif %}
+{% endblock %}

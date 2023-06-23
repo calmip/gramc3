@@ -73,7 +73,7 @@ class Clessh
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="User", mappedBy="clessh")
+     * @ORM\OneToMany(targetEntity="CollaborateurVersion", mappedBy="clessh")
      */
     private $user;
 
@@ -146,14 +146,24 @@ class Clessh
         return $this->individu;
     }
 
+    // NOTE - Dans le modèle de données de gramc-meso user est VRAIMENT un User
+    //        Ici, pour changer le moins de choses possibles, les champs cgu, clessh, deply sont
+    //        dans CollaborateurVersion ET PAS dans User
+    //        Mais... OUI C'EST UNE VERRUE !
+    //        addUser ajoute un CollaborateurVersion je sais c'est très mal.
+    //        Voir la NOTE dans CollaborateurVersion
+    //        Il faudra CHANGER CELA ASAP !!!
+    //        Emmanuel
+    //
+    
     /**
      * Add user
      *
-     * @param \App\Entity\User $user
+     * @param \App\Entity\CollaborateurVersion $user
      *
      * @return clessh
      */
-    public function adduser(\App\Entity\User $user): self
+    public function adduser(\App\Entity\CollaborateurVersion $user): self
     {
         if ( ! $this->user->contains($user))
         {
@@ -169,7 +179,7 @@ class Clessh
      *
      * @return clessh
      */
-    public function removeUser(\App\Entity\User $user): self
+    public function removeUser(\App\Entity\CollaborateurVersion $user): self
     {
         $this->user->removeElement($user);
         return $this;

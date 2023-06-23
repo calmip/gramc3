@@ -24,10 +24,21 @@
 
 namespace App\Form;
 
+use App\Entity\Clessh;
+
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\ResetType;
+
+
+// NOTE - Pour attribuer une clé ssh à un CollaborateurVersion
+//        L'interface graphique ne permet PAS de faire d'AUTRES MODIFS sur CollaborateurVersion
+//        PROVISOIRE - Voir les notes dans Entity/CollaborateurVersion et Clessh
 class CollaborateurVersionType extends AbstractType
 {
     /**
@@ -35,7 +46,28 @@ class CollaborateurVersionType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $builder->add('responsable')->add('login')->add('statut')->add('version')->add('labo')->add('etab')->add('collaborateur');
+        $builder->add(
+                    'clessh',
+                    EntityType::class,
+                    [
+                        'label' => 'Choisissez une clé ssh: ',
+                        'required' => true,
+                        'multiple' => false,
+                        'expanded' => true,
+                        'class' => clessh::class,
+                        'choices' =>  $options['clessh']
+                    ]
+                )
+                ->add(
+                    'cgu',
+                    CheckBoxType::class,
+                    [
+                        'required'  =>  false,
+                        'label'     => '',
+                    ]
+                )
+                ->add('submit', SubmitType::class, ['label' => 'modifier' ])
+                ->add('reset', ResetType::class, ['label' => 'reset' ]);
     }
 
     /**
@@ -44,7 +76,8 @@ class CollaborateurVersionType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults(array(
-            'data_class' => 'App\Entity\CollaborateurVersion'
+            'data_class' => 'App\Entity\CollaborateurVersion',
+            'clessh' => []
         ));
     }
 
@@ -53,6 +86,6 @@ class CollaborateurVersionType extends AbstractType
      */
     public function getBlockPrefix(): string
     {
-        return 'appbundle_collaborateurversion';
+        return 'collaborateurversion';
     }
 }

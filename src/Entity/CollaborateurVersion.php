@@ -134,6 +134,40 @@ class CollaborateurVersion
      */
     private $collaborateur;
 
+    // NOTE - Les TROIS CHAMPS SUIVANTS sont ajoutés en JUIN 2023 pour le déploiement de clés ssh
+    // TODO - Utiliser le modèle de données de gramc-meso, c-à-d:
+    //        1/ Avoir des entités Serveur et Ressource, même s'il n'y a qu'un serveur et une ressource
+    //        2/ Faire passer plusieurs champs de CollaborateurVersion vers User
+    //        Voir la NOTE dans Clessh L149
+    //
+    
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="cgu", type="boolean")
+     */
+    private $CGU = false;
+
+    /**
+     * 
+     * @var \App\Entity\Clessh
+     *
+     * ORM\Column(name="id_clessh", type="integer", nullable=true)
+     * @ORM\ManyToOne(targetEntity="App\Entity\Clessh",inversedBy="user")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="id_clessh", referencedColumnName="id")
+     * })
+     * 
+     */
+    private $clessh;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="deply", type="boolean")
+     */
+    private $deply = false;
+
     public function __toString()
     {
         $output = '{';
@@ -432,4 +466,74 @@ class CollaborateurVersion
     {
         return $this->collaborateur;
     }
+
+        /**
+     * Set CGU
+     *
+     * @param boolean $CGU
+     *
+     * @return User
+     */
+    public function setCGU(bool $CGU): self
+    {
+        $this->CGU = $CGU;
+        return $this;
+    }
+
+    /**
+     * Get CGU
+     *
+     * @return boolean
+     */
+    public function getCGU(): bool
+    {
+        return $this->CGU;
+    }
+
+    /**
+     * Set Clessh
+     *
+     * @param string \App\Entity\Clessh $clessh
+     *
+     * @return User
+     */
+    public function setClessh(?\App\Entity\Clessh $clessh): self
+    {
+        $this->clessh = $clessh;
+        return $this;
+    }
+
+    /**
+     * Get clessh
+     *
+     * @return \App\Entity\Clessh
+     */
+    public function getClessh(): ?\App\Entity\Clessh
+    {
+        return $this->clessh;
+    }
+
+    /**
+     * Set deply
+     *
+     * @param boolean $deply
+     *
+     * @return User
+     */
+    public function setDeply(bool $deply): self
+    {
+        $this->deply = $deply;
+        return $this;
+    }
+
+    /**
+     * Get deply
+     *
+     * @return boolean
+     */
+    public function getDeply(): bool
+    {
+        return $this->deply;
+    }
+
 }

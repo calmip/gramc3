@@ -2342,3 +2342,14 @@ img.dfct {
     margin-bottom: 1em;
     margin-left: 2em;
 }
+
+/*================= CHOIX DE CLES SSH ================= */
+#choix_cle_ssh {
+    width: 50%;
+    margin: 1em auto;
+    /*border: black solid 1px;*/
+}
+#choix_cle_ssh .radio {
+    margin: 1em;
+    /*border: black solid 1px;*/
+}

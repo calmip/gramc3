@@ -195,7 +195,8 @@ class ProjetSpecController extends AbstractController
                 'meta_etat' => $sp->getMetaEtat($projet),
                 'login'     => $login,
                 'passwd'    => $passwd,
-                'pwd_expir' => $pwd_expir
+                'pwd_expir' => $pwd_expir,
+                'cv'        => $cv,
             ];
         }
 
@@ -257,7 +258,8 @@ class ProjetSpecController extends AbstractController
                 'meta_etat' => $sp->getMetaEtat($projet),
                 'login'     => $login,
                 'passwd'    => $passwd,
-                'pwd_expir' => $pwd_expir
+                'pwd_expir' => $pwd_expir,
+                'cv'        => $cv,
                 ];
         }
 

@@ -25,6 +25,9 @@
 namespace App\Controller;
 
 use App\Entity\CollaborateurVersion;
+use App\Entity\Clessh;
+use App\Form\CollaborateurVersionType;
+
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -37,7 +40,7 @@ use Doctrine\ORM\EntityManagerInterface;
  * Collaborateurversion controller.
  *
  * @Security("is_granted('ROLE_ADMIN')")
- * @Route("collaborateurversion")
+ * @Route("/cv")
  */
 class CollaborateurVersionController extends AbstractController
 {
@@ -46,122 +49,68 @@ class CollaborateurVersionController extends AbstractController
     ) {}
 
     /**
-     * Lists all collaborateurVersion entities.
+     * Modification par le demandeur de la clé ssh liée à ce cv
      *
-     * @Route("/", name="collaborateurversion_index", methods={"GET"})
-     * Method("GET")
+     * NOTE - Recupere de gramc-meso, mais s'appliquait alors au user
+     *        D'où le name et le nom du paramètre
+     *        Voir les notes de Clessh et CollaborateurVersion
+     * NOTE - Le demandeur ne peut PAS CHANGER AUTRE CHOSE
+     *
+     * @Route("/{id}/modif", name="cv_modif", methods={"GET","POST"})
+     * @Route("/{id}/modif", name="user_modif", methods={"GET","POST"})
+     * @Security("is_granted('ROLE_DEMANDEUR')")
      */
-    public function indexAction(): Response
+    public function modifAction(Request $request, CollaborateurVersion $user): Response
     {
         $em = $this->em;
-
-        $collaborateurVersions = $em->getRepository(CollaborateurVersion::class)->findAll();
-
-        return $this->render('collaborateurversion/index.html.twig', array(
-            'collaborateurVersions' => $collaborateurVersions,
-        ));
-    }
-
-    /**
-     * Creates a new collaborateurVersion entity.
-     *
-     * @Route("/new", name="collaborateurversion_new", methods={"GET", "POST"})
-     * Method({"GET", "POST"})
-     */
-    public function newAction(Request $request): Response
-    {
-        $collaborateurVersion = new Collaborateurversion();
-        $form = $this->createForm('App\Form\CollaborateurVersionType', $collaborateurVersion);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->em;
-            $em->persist($collaborateurVersion);
-            $em->flush($collaborateurVersion);
-
-            return $this->redirectToRoute('collaborateurversion_show', array('id' => $collaborateurVersion->getId()));
+        
+        if ($user == null)
+        {
+            $sj->throwException(__METHOD__ . ":" . __LINE__ . " ERREUR INTERNE: User null");
         }
 
-        return $this->render('collaborateurversion/new.html.twig', array(
-            'collaborateurVersion' => $collaborateurVersion,
+        $individu = $user->getCollaborateur();
+        $clessh = $em->getRepository(Clessh::class)->findBy(['individu' => $individu, 'rvk' => false]);
+
+        $old_clessh = $user->getClessh();
+        $form = $this->createForm(CollaborateurVersionType::class, $user, ['clessh' => $clessh] );
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid())
+        {
+            if ($form->getData()->getCgu() == false)
+            {
+                $request->getSession()->getFlashbag()->add("flash erreur","Vous devez accepter les CGU");
+            }
+            else
+            {
+                // Si on a changé de cle ssh, remettre à false le flag de déploiement
+                $new_clessh = $form->getData()->getClessh();
+                if ($old_clessh != null)
+                {
+                    if ($new_clessh != null && $old_clessh->getId() != $new_clessh->getId())
+                    {
+                        $user->setDeply(false);
+                    }
+                }
+                $em->flush();
+                return $this->redirectToRoute('projet_accueil');
+            }
+        }
+
+        // TODO - Traitement d'erreur si serveur est null
+        //$serveur_nom = $user->getServeur()->getNom();
+        //$serveur_cgu = $user->getServeur()->getCguUrl();
+        //if ($serveur_cgu === null) $serveur_cgu = "";
+        $serveur_nom = 'olympe';
+        $serveur_cgu = "";
+        
+        return $this->render('collaborateurversion/modif.html.twig', array(
+            'user' => $user,
+            'clessh' => $clessh,
             'form' => $form->createView(),
+            'serveur_cgu' => $serveur_cgu,
+            'serveur_nom' => $serveur_nom
         ));
-    }
-
-    /**
-     * Finds and displays a collaborateurVersion entity.
-     *
-     * @Route("/{id}", name="collaborateurversion_show", methods={"GET"})
-     * Method("GET")
-     */
-    public function showAction(CollaborateurVersion $collaborateurVersion): Response
-    {
-        $deleteForm = $this->createDeleteForm($collaborateurVersion);
-
-        return $this->render('collaborateurversion/show.html.twig', array(
-            'collaborateurVersion' => $collaborateurVersion,
-            'delete_form' => $deleteForm->createView(),
-        ));
-    }
-
-    /**
-     * Displays a form to edit an existing collaborateurVersion entity.
-     *
-     * @Route("/{id}/edit", name="collaborateurversion_edit", methods={"GET","POST"})
-     * Method({"GET", "POST"})
-     */
-    public function editAction(Request $request, CollaborateurVersion $collaborateurVersion): Response
-    {
-        $deleteForm = $this->createDeleteForm($collaborateurVersion);
-        $editForm = $this->createForm('App\Form\CollaborateurVersionType', $collaborateurVersion);
-        $editForm->handleRequest($request);
-
-        if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->em->flush();
-
-            return $this->redirectToRoute('collaborateurversion_edit', array('id' => $collaborateurVersion->getId()));
-        }
-
-        return $this->render('collaborateurversion/edit.html.twig', array(
-            'collaborateurVersion' => $collaborateurVersion,
-            'edit_form' => $editForm->createView(),
-            'delete_form' => $deleteForm->createView(),
-        ));
-    }
-
-    /**
-     * Deletes a collaborateurVersion entity.
-     *
-     * @Route("/{id}", name="collaborateurversion_delete", methods={"DELETE"})
-     * Method("DELETE")
-     */
-    public function deleteAction(Request $request, CollaborateurVersion $collaborateurVersion): Response
-    {
-        $form = $this->createDeleteForm($collaborateurVersion);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->em;
-            $em->remove($collaborateurVersion);
-            $em->flush($collaborateurVersion);
-        }
-
-        return $this->redirectToRoute('collaborateurversion_index');
-    }
-
-    /**
-     * Creates a form to delete a collaborateurVersion entity.
-     *
-     * @param CollaborateurVersion $collaborateurVersion The collaborateurVersion entity
-     *
-     * @return \Symfony\Component\Form\Form The form
-     */
-    private function createDeleteForm(CollaborateurVersion $collaborateurVersion): Response
-    {
-        return $this->createFormBuilder()
-            ->setAction($this->generateUrl('collaborateurversion_delete', array('id' => $collaborateurVersion->getId())))
-            ->setMethod('DELETE')
-            ->getForm()
-        ;
     }
 }
