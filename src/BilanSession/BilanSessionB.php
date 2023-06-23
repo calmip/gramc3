@@ -209,7 +209,10 @@ class BilanSessionB extends BilanSession
                 '"'. $version->getPrjRattachement() .'"',
                 '"'.$version->getResponsable() .'"',
                 '"'.$version->getLabo().'"',
-                ($version->getResponsable()->getExpert()) ? '*******' : $version->getExpert(),
+                /* manu - 23-06-23 -> Suppression de cette fonctionnalité, les experts n'ont pas accès à ce fichier
+                 * Mais on la laisse dans le controleur projet_session_csv (écran des projets par session)
+                  ($version->getResponsable()->getExpert()) ? '*******' : $version->getExpert(), */
+                $version->getExpert(),
                 $dem_heures_A,
                 $attr_heures_A,
                 $attr_heures_rallonge_A,
@@ -254,7 +257,7 @@ class BilanSessionB extends BilanSession
         // dernière ligne = les totaux
         $ligne  =
             [
-            'TOTAL','','','','',
+            'TOTAL','','','','','',
             $totaux["dem_heures_A"],
             $totaux["attr_heures_A"],
             $totaux["attr_heures_rallonge_A"],

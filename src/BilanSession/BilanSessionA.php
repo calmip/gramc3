@@ -240,7 +240,10 @@ class BilanSessionA extends BilanSession
                 '"'.$version->getResponsable() .'"',
                 '"'.$version->getLabo().'"',
                 ($sp->hasRapport($projet, $annee_conso) == true) ? 'OUI' : 'NON',
-                ($version->getResponsable()->getExpert()) ? '*******' : $version->getExpert(),
+                /* manu - 23-06-23 -> Suppression de cette fonctionnalité, les experts n'ont pas accès à ce fichier
+                 * Mais on la laisse dans le controleur projet_session_csv (écran des projets par session)
+                  ($version->getResponsable()->getExpert()) ? '*******' : $version->getExpert(), */
+                $version->getExpert(),
                 $dem_heures_prec,
                 $dem_heures_rallonge,
                 $attr_heures_rallonge,
@@ -287,7 +290,7 @@ class BilanSessionA extends BilanSession
         // dernière ligne = les totaux
         $ligne  =
             [
-            'TOTAL','','','','','',
+            'TOTAL','','','','','','',
             $totaux["dem_heures_prec"],
             $totaux["dem_rall_heures_prec"],
             $totaux["attr_rall_heures_prec"],
