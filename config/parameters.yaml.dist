@@ -69,6 +69,9 @@ parameters:
     #             Unité = Mo
     max_size_doc: 10
     
+    # suppression de la fonctionnalité de téléversement de sa clé ssh
+    noclessh: false
+
     # Suppression de toutes les fonctionnalités liées à la consommation
     noconso: false
     

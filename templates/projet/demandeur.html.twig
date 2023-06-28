@@ -36,7 +36,8 @@
                     {% if item.passwd != null %}
                         &nbsp;&nbsp;<img id="bouton_{{item.projet}}" class="bouton_poussoir cadenas" src="{{ asset('icones/cadenas.png') }}" alt="Donnez-moi mon mot de passe" title="Donnez-moi mon mot de passe" /></a> {% endif %}
                     {% endif %}
-                    {% if item.cv.clessh != null %}
+                    {% if noclessh == false %}
+                        {% if item.cv.clessh != null %}
                             <tt>/ {{ item.cv.clessh.nom }}</tt>
                             {% if not item.cv.deply and not item.cv.clessh.rvk %}
                                 <span title="Compte non encore créé ou clé non déployée (il suffit d'attendre)">{{ icones.attention(20,20) }}</span>
@@ -48,6 +49,7 @@
                         {% else %}
                             <span title="Vous pouvez choisir une clé ssh pour vous connecter"><a href="{{ path('user_modif', { 'id': item.cv.id }) }}">{{ icones.clessh(20,20) }}</a></span>
                         {% endif %}
+                    {% endif %}
                 {% endif %}
             </td>
         

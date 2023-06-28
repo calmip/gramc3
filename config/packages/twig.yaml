@@ -24,6 +24,7 @@ twig:
        noconso: '%noconso%'
        norattachement: '%norattachement%'
        nodata: '%nodata%'
+       noclessh: '%noclessh%'
        noedition_expertise: '%noedition_expertise%'
        heures_ete: '%heures_ete%'
        prj_prefix: '%prj_prefix%'

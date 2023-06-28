@@ -114,12 +114,14 @@
                             <p> SUDO par {{ app.token.originalToken.user }}</p>
                         {% endif %}
                         <p>
-                        {% if app.debug %}
-                            Connecté en tant que : <a href="{{ path('profil') }}" class="nom_profil">{{ app.user.prenom }} {{ app.user.nom }} ({{ app.user.id}})</a>
-                        {% else %}
-                            Connecté en tant que : <a href="{{ path('profil') }}" class="nom_profil">{{ app.user.prenom }} {{ app.user.nom }} ({{ app.user.id}})</a>
-                        {% endif %}
-                        <span title="Gérer vos clés ssh"><a href="{{ path('gerer_clessh') }}">{{ icones.trousseau(40,40)}}</a></span>
+                            {% if app.debug %}
+                                Connecté en tant que : <a href="{{ path('profil') }}" class="nom_profil">{{ app.user.prenom }} {{ app.user.nom }} ({{ app.user.id}})</a>
+                            {% else %}
+                                Connecté en tant que : <a href="{{ path('profil') }}" class="nom_profil">{{ app.user.prenom }} {{ app.user.nom }} ({{ app.user.id}})</a>
+                            {% endif %}
+                            {% if noclessh == false %}
+                                <span title="Gérer vos clés ssh"><a href="{{ path('gerer_clessh') }}">{{ icones.trousseau(40,40)}}</a></span>
+                            {% endif %}
                         </p>
                     </div>
 

@@ -1338,6 +1338,10 @@ class AdminuxController extends AbstractController
         $raw_content = $request->getContent();
         $sj = $this->sj;
         //$su = $this->su;
+
+        if ($this->getParameter('noclessh')==true) {
+            throw new AccessDeniedException("Forbidden because of parameter noclessh");
+        }
         
         if ($raw_content === '' || $raw_content === '{}')
         {
@@ -1424,6 +1428,10 @@ class AdminuxController extends AbstractController
         $em = $this->em;
         $sj = $this->sj;
         //$su = $this->su;
+
+        if ($this->getParameter('noclessh')==true) {
+            throw new AccessDeniedException("Forbidden because of parameter noclessh");
+        }
 
         $content  = json_decode($request->getContent(), true);
         if ($content === null) {
@@ -1544,6 +1552,10 @@ class AdminuxController extends AbstractController
     {
         $em = $this->em;
         $sj = $this->sj;
+
+        if ($this->getParameter('noclessh')==true) {
+            throw new AccessDeniedException("Forbidden because of parameter noclessh");
+        }
 
         $content  = json_decode($request->getContent(), true);
         if ($content === null) {
