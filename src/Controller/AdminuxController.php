@@ -45,6 +45,7 @@ use App\Entity\Individu;
 use App\Entity\CollaborateurVersion;
 use App\Entity\User;
 use App\Entity\Compta;
+use App\Entity\Clessh;
 
 use App\GramcServices\ServiceNotifications;
 use App\GramcServices\ServiceJournal;
@@ -1314,4 +1315,281 @@ class AdminuxController extends AbstractController
         $sj -> infoMessage(__METHOD__ . " OK");
         return new Response(json_encode($rusers));
     }
+
+    /**
+     * get clessh
+     *
+     * @Route("/clessh/get", name="get_cles", methods={"POST"})
+     * @Security("is_granted('ROLE_ADMIN')")
+     *
+     * Exemples de données POST (fmt json):
+     *             '' -> toutes les clés
+     *             ou
+     *             '{ "rvk" : true }' -> Les clés qui ont été révoquées
+     *             ou
+     *             '{ "rvk" : false }' -> Les clés qui ne sont PAS révoquées
+     *
+     */
+    // curl -s --netrc -H "Content-Type: application/json" -X POST -d '{}' https://.../adminux/clessh/get
+
+    public function clesshGetAction(Request $request): Response
+    {
+        $em = $this->em;
+        $raw_content = $request->getContent();
+        $sj = $this->sj;
+        //$su = $this->su;
+        
+        if ($raw_content === '' || $raw_content === '{}')
+        {
+            $content = null;
+        }
+        else
+        {
+            $content  = json_decode($request->getContent(), true);
+        }
+        
+        if ($content === null) {
+            $rvk = 0;
+        }
+        else
+        {
+            if (isset($content['rvk']))
+            {
+                $rvk = $content['rvk'] ? 1:-1;
+            }
+            else
+            {
+                $rvk = 0;
+            }
+        }
+
+        //
+        // Construire le tableau $clessh:
+        //      [ 'idCle' => 1, 'nom' => 'toto', 'pub' => 'rsa...', 'rvk' => false, 'users' => [ ['loginname' => 'toto', 'dply' => true] ]
+        //
+
+        $clessh = $em->getRepository(Clessh::class)->findall();
+        $reponse = [];
+        foreach ($clessh as $c)
+        {
+            $r_c = [];
+            $r_c['idCle'] = $c->getId();
+            $r_c['nom'] = $c->getNom();
+            $r_c['pub'] = $c->getPub();
+            $r_c['rvk'] = $c->getrvk();
+
+            if ( $rvk === 1 && $r_c['rvk'] === false) continue;
+            if ( $rvk === -1 && $r_c['rvk'] === true) continue;
+            $r_c['idindividu'] = $c->getIndividu()->getIdIndividu();
+            $r_c['empreinte'] = $c->getEmp();
+
+            $users = $c->getUser();
+            $r_users = [];
+            // TODO - Les user sont en fait des CollaborateurVersion !
+            foreach ($users as $u)
+            {
+                $r_u = [];
+                //$individu = $u->getIndividu();
+                $individu = $u->getCollaborateur();
+                if ($individu === null) continue; // oups ne devrait jamais arriver !
+                $r_u['individu'] = $individu->getPrenom() . " " . $individu->getNom();
+                $r_u['idIndividu'] = $individu->getIdIndividu();
+                $r_u['mail'] = $individu->getMail();
+                $r_u['loginname'] = $u->getLoginname();
+                $r_u['deploy'] = $u->getDeply();
+                $r_u['projet'] = $u->getVersion()->getProjet()->getIdProjet();
+                $r_users[] = $r_u;
+            }
+            $r_c['users'] = $r_users;
+            $reponse[] = $r_c;
+        }
+        $sj -> infoMessage(__METHOD__ . " OK");
+
+        return new Response(json_encode($reponse));
+    }
+
+    /**
+     * Déploie une clé ssh pour un utilisateur
+     *
+     * @Route("/clessh/deployer", name="deployer", methods={"POST"})
+     * @Security("is_granted('ROLE_ADMIN')")
+     *
+     * Positionne à true le flag deploy du user, ce qui signifie que la clé ssh associée est déployée
+     *
+     */
+
+    // curl --netrc -X POST -d '{ "loginname": "toto@TURPAN", "idIndividu": "6543", "projet": "P1234" }' https://.../adminux/clessh/deployer
+    public function setdeplyAction(Request $request, LoggerInterface $lg): Response
+    {
+        $em = $this->em;
+        $sj = $this->sj;
+        //$su = $this->su;
+
+        $content  = json_decode($request->getContent(), true);
+        if ($content === null) {
+            $sj->errorMessage(__METHOD__ . ':' . __FILE__ . " - Pas de données");
+            return new Response(json_encode(['KO' => 'Pas de données']));
+        }
+        if (empty($content['loginname'])) {
+            $sj->errorMessage(__METHOD__ . ':' . __FILE__ . " - Pas de nom de login");
+            return new Response(json_encode(['KO' => 'Pas de nom de login']));
+        } else {
+            $loginname = $content['loginname'];
+        }
+        if (empty($content['projet'])) {
+            $sj->errorMessage(__METHOD__ . ':' . __FILE__ . " - Pas de projet");
+            return new Response(json_encode(['KO' => 'Pas de projet']));
+        } else {
+            $idProjet = $content['projet'];
+        }
+        if (empty($content['idIndividu'])) {
+            $sj->errorMessage(__METHOD__ . ':' . __FILE__ . " - Pas de idIndividu");
+            return new Response(json_encode(['KO' => 'Pas de idIndividu']));
+        } else {
+            $idIndividu = $content['idIndividu'];
+        }
+
+        $error = [];
+        $projet      = $em->getRepository(Projet::class)->find($idProjet);
+        if ($projet === null) {
+            $error[]    =   'No Projet ' . $idProjet;
+        }
+
+        $individu = $em->getRepository(Individu::class)->find($idIndividu);
+        if ($individu === null) {
+            $error[]    =   'No idIndividu ' . $idIndividu;
+        }
+
+        try
+        {
+            //$loginname_p = $su -> parseLoginname($loginname);
+            $loginname_p = [ 'loginname' => $loginname, 'serveur' => '' ];
+        }
+        catch (\Exception $e)
+        {
+            $error[] = "$loginname doit être de la forme 'alice@SERVEUR";
+            $loginname_p = [];
+            $loginname_p['serveur'] = '';
+        }
+        // Pas d'entité serveur dans gramc3 !
+        //$serveur = $em->getRepository(Serveur::class)->findOneBy( ["nom" => $loginname_p['serveur']]);
+        //if ($serveur === null)
+        //{
+        //   $error[] = 'No serveur ' . $loginname_p['serveur'];
+        //}
+
+        // On vérifie que le user connecté est bien autorisé à agir sur ce serveur
+        //if ($serveur != null && ! $this->checkUser($serveur))
+        //{
+        //   $error[] = 'ACCES INTERDIT A ' . $loginname_p['serveur']; 
+        //}
+
+        if ($error != []) {
+            $sj->errorMessage(__METHOD__ . ':' . __FILE__ . " - " . print_r($error, true));
+            return new Response(json_encode(['KO' => $error ]));
+        }
+
+        $versions = $projet->getVersion();
+        $i=0;
+        foreach ($versions as $version) {
+            // $version->getIdVersion()."\n";
+            if ($version->getEtatVersion() === Etat::ACTIF             ||
+                $version->getEtatVersion() === Etat::ACTIF_TEST        ||
+                $version->getEtatVersion() === Etat::NOUVELLE_VERSION_DEMANDEE ||
+                $version->getEtatVersion() === Etat::EN_ATTENTE
+              )
+              {
+              foreach ($version->getCollaborateurVersion() as $cv)
+              {
+                  $collaborateur  =  $cv->getCollaborateur() ;
+                  if ($collaborateur != null && $collaborateur->isEqualTo($individu)) {
+                      //$user = $em->getRepository(User::class)->findOneByLoginname($loginname);
+                      //if ($user === null)
+                      //{
+                      //    $msg = "L'utilisateur $loginname n'existe pas";
+                      //    $sj->errorMessage(__METHOD__ . ':' . __FILE__ . " - $msg");
+                      //    return new Response(json_encode(['KO' => $msg]));
+                      //}
+                      //$user->setDeply(true);
+                      $cv->setDeply(true);
+                      Functions::sauvegarder($cv,$em,$lg);
+                      
+                      $i += 1;
+                      break; // Sortir de la boucle sur les cv
+                  }
+               }
+            }
+        }
+        if ($i > 0 ) {
+            $sj -> infoMessage(__METHOD__ . "$i versions modifiées");
+            return new Response(json_encode(['OK' => "$i versions modifiees"]));
+        } else {
+            $sj->errorMessage(__METHOD__ . ':' . __FILE__ . " - Mauvais projet ou mauvais idIndividu !");
+            return new Response(json_encode(['KO' => 'Mauvais projet ou mauvais idIndividu !' ]));
+        }
+    }
+
+    /**
+     * Révoque une clé ssh 
+     *
+     * @Route("/clessh/revoquer", name="revoquer", methods={"POST"})
+     * @Security("is_granted('ROLE_ADMIN')")
+     *
+     * Positionne à true le flag rvk de la clé, ce qui signifie que la clé ssh est révoquée
+     *
+     */
+
+    // curl --netrc -X POST -d '{ "idIndividu": "6543", "idCle": "55" }' https://.../adminux/clessh/revoquer
+    public function setrvkAction(Request $request, LoggerInterface $lg): Response
+    {
+        $em = $this->em;
+        $sj = $this->sj;
+
+        $content  = json_decode($request->getContent(), true);
+        if ($content === null) {
+            $sj->errorMessage(__METHOD__ . ':' . __FILE__ . " - Pas de données");
+            return new Response(json_encode(['KO' => 'Pas de données']));
+        }
+        if (empty($content['idCle'])) {
+            $sj->errorMessage(__METHOD__ . ':' . __FILE__ . " - Pas de idCle");
+            return new Response(json_encode(['KO' => 'Pas de clé']));
+        } else {
+            $idCle = $content['idCle'];
+        }
+        if (empty($content['idIndividu'])) {
+            $sj->errorMessage(__METHOD__ . ':' . __FILE__ . " - Pas de idIndividu");
+            return new Response(json_encode(['KO' => 'Pas de idIndividu']));
+        } else {
+            $idIndividu = $content['idIndividu'];
+        }
+
+        $error = [];
+
+        $individu = $em->getRepository(Individu::class)->find($idIndividu);
+        if ($individu === null) {
+            $error[] = 'No idIndividu ' . $idIndividu;
+        }
+
+        $cle = $em->getRepository(Clessh::class)->find($idCle);
+        if ($cle === null) {
+            $error[] = 'No Cle ' . $idCle;
+        }
+        else
+        {
+            if ($cle->getIndividu()==null || $cle->getIndividu()->getIdIndividu() != $idIndividu)
+            {
+                $error[] = "La clé $idCle n'appartient pas à l'individu $idIndividu";
+            }
+        }
+
+        if ($error != []) {
+            $sj->errorMessage(__METHOD__ . ':' . __FILE__ . " - " . print_r($error, true));
+            return new Response(json_encode(['KO' => $error ]));
+        }
+
+        $cle->setRvk(true);
+        Functions::sauvegarder($cle,$em,$lg);
+        return new Response(json_encode(['OK' => "clé $idCle révoquée"]));
+    }
+
 }
