@@ -67,6 +67,15 @@ class CollaborateurVersion {
     - bool login
     - bool clogin
     - bool deleted
+    - bool CGU
+    - string clessh
+    - bool dply
+}
+
+class Clessh {
+    - string pub
+    - string emp
+    - bool rvk
 }
 
 class Expertise {
@@ -92,6 +101,8 @@ Version "1" o-- "0..n" CollaborateurVersion
 Expertise "0..n" o-- "1" Individu
 Expertise "0..n" o-- "1" Version
 
+Clessh "0..n" -- "1" Individu
+Clessh "1" -- "0..n" CollaborateurVersion
 
 class Invitation {
     - string clef
